@@ -6,6 +6,7 @@ A TypeScript CLI tool that statically analyzes TypeScript and TSX repositories u
 
 - Node.js >= 18
 - npm
+- Vitest (installed as devDependency for tests)
 
 ## Install
 
@@ -176,6 +177,8 @@ src/
 | `dev` | `tsx src/cli.ts` | Run directly from TypeScript |
 | `build` | `tsc -p tsconfig.json` | Compile to JavaScript in `dist/` |
 | `start` | `node dist/cli.js` | Run the compiled build |
+| `test` | `vitest run` | Run tests once |
+| `test:watch` | `vitest` | Run tests in watch mode |
 
 ## License
 

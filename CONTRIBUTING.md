@@ -74,13 +74,38 @@ src/
 - **JSDoc** on all exported functions with `@param` and `@returns`
 - **No inline comments** that just narrate what the code does
 
+## Testing
+
+### Running Tests
+
+```bash
+npm test              # Run all tests once
+npm run test:watch    # Watch mode
+```
+
+### Test Conventions
+
+- **Location**: Unit tests live next to the code they test as `*.test.ts` in `src/__tests__/` (e.g. `src/__tests__/math.test.ts` for `src/utils/math.ts`).
+- **Structure**: Use `describe` for the module/function and `it` for specific cases. Include normal, edge, and complex cases where applicable.
+- **Determinism**: All tests must be deterministic. Avoid `Date.now()`, random values, or environment-dependent logic without mocking.
+
+### Snapshot Tests
+
+Snapshot tests capture the full `analyzeRepo()` output for a fixture repo to ensure JSON structure stability.
+
+- **Fixture**: `src/__tests__/fixtures/sample-repo/` — a minimal TypeScript repo (no `.git`).
+- **Update snapshots**: Run `npx vitest run --update` when the report schema or extractors intentionally change.
+- **Volatile fields**: The snapshot test normalizes `repoPath` and handles `git`/`duplication` so snapshots remain machine-independent.
+- **Workflow**: If a change intentionally alters the report structure, update the snapshot and commit it with the code change. CI fails on snapshot mismatch to catch accidental regressions.
+
 ## Pull Request Workflow
 
 1. Create a feature branch from `main`: `git checkout -b feature/your-feature`
 2. Implement the feature with JSDoc and schema updates
-3. Run `npm run dev -- /path/to/repo` and verify output
-4. Commit with a descriptive message referencing the issue number
-5. Push and open a PR against `main`
+3. Run `npm test` and `npm run dev -- /path/to/repo` to verify output
+4. If the report schema changed, run `npx vitest run --update` to refresh snapshots
+5. Commit with a descriptive message referencing the issue number
+6. Push and open a PR against `main`
 
 ## Commit Message Format
 
