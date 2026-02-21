@@ -12,6 +12,7 @@ import path from "node:path";
 import { discoverSourceFiles } from "../collect/fileDiscovery.js";
 import { profileRepo } from "../collect/loc.js";
 import { detectDuplication } from "../collect/duplication.js";
+import { extractGitMetrics } from "../collect/gitMetrics.js";
 import { parseTypeScript } from "../parsing/tsParser.js";
 import { countFunctions } from "../extract/functionCount.js";
 import { extractFunctionMetrics } from "../extract/functionMetrics.js";
@@ -100,6 +101,7 @@ export async function analyzeRepo(repoPath: string) {
 
   const complexitySummary = summarizeComplexity(allComplexities);
   const duplication = await detectDuplication(repoPath);
+  const git = await extractGitMetrics(repoPath);
 
   return {
     repoPath,
@@ -112,6 +114,7 @@ export async function analyzeRepo(repoPath: string) {
     complexity: complexitySummary,
     smells: totalSmells,
     duplication,
+    git,
     perFile,
   };
 }
