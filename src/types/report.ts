@@ -93,3 +93,32 @@ export interface SmellCounts {
   emptyCatchBlocks: number;
   consoleLogs: number;
 }
+
+/** Per-file metrics entry in the report. */
+export interface PerFileEntry {
+  file: string;
+  functions: number;
+  functionsByType: Record<string, number>;
+  functionMetrics: FunctionDetail[];
+  complexity: FunctionComplexity[];
+}
+
+/**
+ * Complete repository analysis report.
+ *
+ * Each section is nullable so the report degrades gracefully if a
+ * module fails or is not applicable (e.g., git metrics on a non-git repo).
+ */
+export interface RepoReport {
+  repoPath: string;
+  filesAnalyzed: number;
+  profile: RepoProfile;
+  totals: { functions: number };
+  functionMetricsSummary: FunctionMetricsSummary;
+  complexity: ComplexitySummary;
+  smells: SmellCounts;
+  duplication: DuplicationMetrics | null;
+  git: GitMetrics | null;
+  framework: FrameworkInfo | null;
+  perFile: PerFileEntry[];
+}

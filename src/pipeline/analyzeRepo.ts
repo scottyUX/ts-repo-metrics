@@ -22,11 +22,12 @@ import { detectSmells } from "../extract/smells.js";
 import { LONG_FUNCTION_THRESHOLD } from "../utils/constants.js";
 import { median } from "../utils/math.js";
 import type {
+  RepoReport,
   FunctionDetail,
   FunctionMetricsSummary,
   FunctionComplexity,
-  ComplexitySummary,
   SmellCounts,
+  PerFileEntry,
 } from "../types/report.js";
 
 function flavorForFile(filePath: string): "ts" | "tsx" {
@@ -39,7 +40,7 @@ function flavorForFile(filePath: string): "ts" | "tsx" {
  * @param repoPath - Absolute path to the repository root.
  * @returns A JSON-serializable report with profile, totals, and per-file data.
  */
-export async function analyzeRepo(repoPath: string) {
+export async function analyzeRepo(repoPath: string): Promise<RepoReport> {
   const profile = await profileRepo(repoPath);
   const files = await discoverSourceFiles(repoPath);
 
@@ -53,13 +54,7 @@ export async function analyzeRepo(repoPath: string) {
     emptyCatchBlocks: 0,
     consoleLogs: 0,
   };
-  const perFile: Array<{
-    file: string;
-    functions: number;
-    functionsByType: Record<string, number>;
-    functionMetrics: FunctionDetail[];
-    complexity: FunctionComplexity[];
-  }> = [];
+  const perFile: PerFileEntry[] = [];
 
   for (const filePath of files) {
     const code = await readFile(filePath, "utf8");
