@@ -62,6 +62,15 @@ export interface ComplexitySummary {
   highComplexityFunctions: number;
 }
 
+/** Git history metrics derived from commit log analysis. */
+export interface GitMetrics {
+  totalCommits: number;
+  medianCommitSize: number;
+  avgLinesPerCommit: number;
+  largeCommitRatio: number;
+  commitsPerWeek: number;
+}
+
 /** Code duplication metrics from jscpd analysis. */
 export interface DuplicationMetrics {
   percentage: number;
