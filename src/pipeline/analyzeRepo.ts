@@ -13,6 +13,10 @@ import { discoverSourceFiles } from "../collect/fileDiscovery.js";
 import { profileRepo } from "../collect/loc.js";
 import { parseTypeScript } from "../parsing/tsParser.js";
 import { countFunctions } from "../extract/functionCount.js";
+import { extractFunctionMetrics } from "../extract/functionMetrics.js";
+import { LONG_FUNCTION_THRESHOLD } from "../utils/constants.js";
+import { median } from "../utils/math.js";
+import type { FunctionDetail, FunctionMetricsSummary } from "../types/report.js";
 
 function flavorForFile(filePath: string): "ts" | "tsx" {
   return filePath.endsWith(".tsx") ? "tsx" : "ts";
@@ -29,20 +33,43 @@ export async function analyzeRepo(repoPath: string) {
   const files = await discoverSourceFiles(repoPath);
 
   let totalFunctions = 0;
-  const perFile: Array<{ file: string; functions: number; functionsByType: Record<string, number> }> = [];
+  const allFunctionDetails: FunctionDetail[] = [];
+  const perFile: Array<{
+    file: string;
+    functions: number;
+    functionsByType: Record<string, number>;
+    functionMetrics: FunctionDetail[];
+  }> = [];
 
   for (const filePath of files) {
     const code = await readFile(filePath, "utf8");
     const tree = parseTypeScript(code, flavorForFile(filePath));
     const fnCount = countFunctions(tree.rootNode);
+    const fnMetrics = extractFunctionMetrics(tree.rootNode);
 
     totalFunctions += fnCount.total;
+    allFunctionDetails.push(...fnMetrics.functions);
     perFile.push({
       file: path.relative(repoPath, filePath),
       functions: fnCount.total,
       functionsByType: fnCount.byType,
+      functionMetrics: fnMetrics.functions,
     });
   }
+
+  const lengths = allFunctionDetails.map((f) => f.lines).sort((a, b) => a - b);
+
+  const functionMetricsSummary: FunctionMetricsSummary = {
+    totalFunctions,
+    averageLength: totalFunctions > 0
+      ? Math.round((lengths.reduce((a, b) => a + b, 0) / totalFunctions) * 10) / 10
+      : 0,
+    medianLength: median(lengths),
+    maxNestingDepth: allFunctionDetails.reduce((max, f) => Math.max(max, f.maxNestingDepth), 0),
+    longFunctionPercentage: totalFunctions > 0
+      ? Math.round((allFunctionDetails.filter((f) => f.lines > LONG_FUNCTION_THRESHOLD).length / totalFunctions) * 1000) / 10
+      : 0,
+  };
 
   return {
     repoPath,
@@ -51,6 +78,7 @@ export async function analyzeRepo(repoPath: string) {
     totals: {
       functions: totalFunctions,
     },
+    functionMetricsSummary,
     perFile,
   };
 }

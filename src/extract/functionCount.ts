@@ -7,20 +7,10 @@
  */
 
 import type { SyntaxNode } from "tree-sitter";
+import { FUNCTION_NODE_TYPES } from "../utils/constants.js";
+import type { FunctionCounts } from "../types/report.js";
 
-const FUNCTION_NODE_TYPES = new Set([
-  "function_declaration",
-  "generator_function_declaration",
-  "method_definition",
-  "arrow_function",
-  "function",
-  "generator_function",
-]);
-
-export interface FunctionCounts {
-  total: number;
-  byType: Record<string, number>;
-}
+export type { FunctionCounts } from "../types/report.js";
 
 export function countFunctions(root: SyntaxNode): FunctionCounts {
   let total = 0;

@@ -1,6 +1,6 @@
 # ts-repo-metrics
 
-A TypeScript CLI tool that statically analyzes TypeScript and TSX repositories using [Tree-sitter](https://tree-sitter.github.io/tree-sitter/), producing a JSON report with repository profiling (LOC and file type breakdown), function counts, and per-file breakdowns by function type.
+A TypeScript CLI tool that statically analyzes TypeScript and TSX repositories using [Tree-sitter](https://tree-sitter.github.io/tree-sitter/), producing a JSON report with repository profiling (LOC and file type breakdown), function counts, per-function structural metrics (line length, nesting depth, parameter count), and per-file breakdowns.
 
 ## Prerequisites
 
@@ -41,18 +41,31 @@ npm run dev -- /absolute/path/to/target/repo
   "totals": {
     "functions": 7
   },
+  "functionMetricsSummary": {
+    "totalFunctions": 7,
+    "averageLength": 8.6,
+    "medianLength": 7,
+    "maxNestingDepth": 1,
+    "longFunctionPercentage": 0
+  },
   "perFile": [
     {
       "file": "src/cli.ts",
       "functions": 2,
       "functionsByType": {
         "function_declaration": 1,
-        "arrow_function": 1,
-        "method_definition": 0,
-        "generator_function_declaration": 0,
-        "function": 0,
-        "generator_function": 0
-      }
+        "arrow_function": 1
+      },
+      "functionMetrics": [
+        {
+          "name": "main",
+          "type": "function_declaration",
+          "startLine": 13,
+          "lines": 9,
+          "maxNestingDepth": 1,
+          "parameterCount": 0
+        }
+      ]
     }
   ]
 }
@@ -69,7 +82,8 @@ src/
 ├── parsing/
 │   └── tsParser.ts             # Tree-sitter wrapper (TS & TSX grammars)
 ├── extract/
-│   └── functionCount.ts        # Counts functions by AST node type
+│   ├── functionCount.ts        # Counts functions by AST node type
+│   └── functionMetrics.ts      # Per-function line count, nesting depth, params
 └── pipeline/
     └── analyzeRepo.ts          # Orchestrates profile → discovery → parse → extract
 ```
@@ -87,8 +101,10 @@ src/
 1. **Profile** — Counts files by type (`.ts`, `.tsx`, test) and computes LOC breakdowns (total, source, test) before any parsing begins.
 2. **Discover** — `fast-glob` finds all `.ts` and `.tsx` files, ignoring `node_modules`, `dist`, `build`, `.next`, and other non-source directories.
 3. **Parse** — Each file is parsed into a concrete syntax tree using Tree-sitter with the appropriate grammar (TypeScript or TSX).
-4. **Extract** — An iterative depth-first traversal counts function-like AST nodes: `function_declaration`, `arrow_function`, `method_definition`, `function`, `generator_function_declaration`, and `generator_function`.
-5. **Report** — Results are aggregated into a JSON report with profile, totals, and per-file breakdowns.
+4. **Extract** — Extractors run on each parsed tree:
+   - **Function count** — counts function-like AST nodes by type.
+   - **Function metrics** — computes line count, max nesting depth, and parameter count per function.
+5. **Report** — Results are aggregated into a JSON report with profile, function metrics summary, totals, and per-file breakdowns.
 
 ## License
 
