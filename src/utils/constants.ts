@@ -58,6 +58,12 @@ export const LONG_FUNCTION_THRESHOLD = 50;
 /** Functions with cyclomatic complexity above this are "high complexity". */
 export const HIGH_COMPLEXITY_THRESHOLD = 10;
 
+/** Functions nested deeper than this level are flagged as a "deep nesting" smell. */
+export const DEEP_NESTING_THRESHOLD = 4;
+
+/** Functions with more parameters than this are flagged as "long parameter list". */
+export const LONG_PARAM_LIST_THRESHOLD = 4;
+
 /**
  * Tree-sitter node types that add one branch point to cyclomatic complexity.
  * Logical operators (`&&`, `||`) are handled separately via binary_expression inspection.
