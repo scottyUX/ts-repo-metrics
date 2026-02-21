@@ -94,6 +94,12 @@ export interface SmellCounts {
   consoleLogs: number;
 }
 
+/** Test coverage proxy derived from LOC ratios. */
+export interface TestCoverageProxy {
+  ratio: number;
+  classification: "low" | "moderate" | "high";
+}
+
 /** Per-file metrics entry in the report. */
 export interface PerFileEntry {
   file: string;
@@ -117,6 +123,7 @@ export interface RepoReport {
   functionMetricsSummary: FunctionMetricsSummary;
   complexity: ComplexitySummary;
   smells: SmellCounts;
+  testCoverageProxy: TestCoverageProxy;
   duplication: DuplicationMetrics | null;
   git: GitMetrics | null;
   framework: FrameworkInfo | null;
