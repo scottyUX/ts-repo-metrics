@@ -1,6 +1,6 @@
 # ts-repo-metrics
 
-A TypeScript CLI tool that statically analyzes TypeScript and TSX repositories using [Tree-sitter](https://tree-sitter.github.io/tree-sitter/), producing a JSON report with repository profiling (LOC and file type breakdown), function counts, per-function structural metrics (line length, nesting depth, parameter count), and per-file breakdowns.
+A TypeScript CLI tool that statically analyzes TypeScript and TSX repositories using [Tree-sitter](https://tree-sitter.github.io/tree-sitter/), producing a comprehensive JSON report covering repository profiling, function metrics, cyclomatic complexity, code smells, duplication, git history, framework detection, maintainability index, and test coverage proxy.
 
 ## Prerequisites
 
@@ -17,94 +17,164 @@ npm install
 
 ## Usage
 
-Point the CLI at any local TypeScript/React/Next.js repo:
+### Single Repository
 
 ```bash
 npm run dev -- /absolute/path/to/target/repo
 ```
 
-### Example output
+### Batch Mode
+
+Analyze every sub-directory under a parent folder that contains a `package.json`:
+
+```bash
+npm run dev -- batch /path/to/repos-folder --output ./reports --csv
+```
+
+| Flag | Description |
+|------|-------------|
+| `--output <dir>` | Directory for individual JSON reports (default: `<parent>/reports`) |
+| `--csv` | Also produce a `summary.csv` with one row per repo |
+
+### Example Output (single repo)
 
 ```json
 {
   "repoPath": "/path/to/repo",
-  "filesAnalyzed": 5,
+  "filesAnalyzed": 19,
   "profile": {
-    "totalFiles": 5,
-    "tsFiles": 5,
+    "totalFiles": 19,
+    "tsFiles": 19,
     "tsxFiles": 0,
     "testFiles": 0,
-    "totalLOC": 120,
-    "sourceLOC": 120,
+    "totalLOC": 1535,
+    "sourceLOC": 1535,
     "testLOC": 0
   },
   "totals": {
-    "functions": 7
+    "functions": 56
   },
   "functionMetricsSummary": {
-    "totalFunctions": 7,
-    "averageLength": 8.6,
-    "medianLength": 7,
-    "maxNestingDepth": 1,
-    "longFunctionPercentage": 0
+    "totalFunctions": 56,
+    "averageLength": 15.8,
+    "medianLength": 8.5,
+    "maxNestingDepth": 6,
+    "longFunctionPercentage": 7.1
   },
-  "perFile": [
-    {
-      "file": "src/cli.ts",
-      "functions": 2,
-      "functionsByType": {
-        "function_declaration": 1,
-        "arrow_function": 1
-      },
-      "functionMetrics": [
-        {
-          "name": "main",
-          "type": "function_declaration",
-          "startLine": 13,
-          "lines": 9,
-          "maxNestingDepth": 1,
-          "parameterCount": 0
-        }
-      ]
-    }
-  ]
+  "complexity": {
+    "average": 3.7,
+    "max": 14,
+    "highComplexityFunctions": 2
+  },
+  "smells": {
+    "longFunctions": 4,
+    "deepNesting": 2,
+    "longParameterLists": 0,
+    "emptyCatchBlocks": 0,
+    "consoleLogs": 11
+  },
+  "maintainability": {
+    "score": 68.9,
+    "classification": "high"
+  },
+  "testCoverageProxy": {
+    "ratio": 0,
+    "classification": "low"
+  },
+  "duplication": {
+    "percentage": 4.8,
+    "duplicateLines": 2120,
+    "cloneClusters": 63
+  },
+  "git": {
+    "totalCommits": 25,
+    "medianCommitSize": 179,
+    "avgLinesPerCommit": 301.8,
+    "largeCommitRatio": 14.3,
+    "commitsPerWeek": 1.9
+  },
+  "framework": {
+    "type": "Node",
+    "hasReact": false,
+    "hasBackend": false
+  },
+  "perFile": [ ... ]
 }
 ```
 
-## Project structure
+## Metrics at a Glance
+
+| Section | Source | Description |
+|---------|--------|-------------|
+| `profile` | LOC counting | File counts, LOC (total/source/test) |
+| `functionMetricsSummary` | AST | Avg/median function length, max nesting, long function % |
+| `complexity` | AST | Cyclomatic complexity (avg, max, high-complexity count) |
+| `smells` | AST | Long functions, deep nesting, long params, empty catches, console logs |
+| `maintainability` | Composite | Maintainability Index (0–100) from LOC + complexity + function length |
+| `testCoverageProxy` | LOC | testLOC / sourceLOC ratio and classification |
+| `duplication` | jscpd | Duplicate percentage, lines, clone clusters |
+| `git` | simple-git | Commit count, sizes, frequency, large commit ratio |
+| `framework` | package.json | React, Next.js, Express, NestJS, Fastify, or Node |
+
+## Project Structure
 
 ```
 src/
-├── cli.ts                      # CLI entrypoint
+├── cli.ts                          # CLI entrypoint (single + batch)
+├── batch/
+│   └── batchAnalyze.ts             # Multi-repo batch analysis
 ├── collect/
-│   ├── fileDiscovery.ts        # Finds .ts/.tsx files via fast-glob
-│   └── loc.ts                  # Repository profiling (LOC + file type breakdown)
+│   ├── fileDiscovery.ts            # Finds .ts/.tsx files via fast-glob
+│   ├── loc.ts                      # Repository profiling (LOC + file types)
+│   ├── duplication.ts              # jscpd code duplication detection
+│   ├── gitMetrics.ts               # Git history metrics via simple-git
+│   └── frameworkDetection.ts       # Framework detection from package.json
 ├── parsing/
-│   └── tsParser.ts             # Tree-sitter wrapper (TS & TSX grammars)
+│   └── tsParser.ts                 # Tree-sitter wrapper (TS & TSX grammars)
 ├── extract/
-│   ├── functionCount.ts        # Counts functions by AST node type
-│   └── functionMetrics.ts      # Per-function line count, nesting depth, params
-└── pipeline/
-    └── analyzeRepo.ts          # Orchestrates profile → discovery → parse → extract
+│   ├── functionCount.ts            # Counts functions by AST node type
+│   ├── functionMetrics.ts          # Per-function line count, nesting, params
+│   ├── complexity.ts               # Cyclomatic complexity per function
+│   ├── smells.ts                   # Structural code smell detectors
+│   ├── testCoverageProxy.ts        # Test LOC / source LOC ratio
+│   └── maintainabilityIndex.ts     # Composite MI score
+├── pipeline/
+│   └── analyzeRepo.ts              # Orchestrates the full analysis pipeline
+├── types/
+│   └── report.ts                   # Shared TypeScript interfaces (RepoReport)
+└── utils/
+    ├── constants.ts                # Shared constants and thresholds
+    ├── math.ts                     # Numeric utilities (median)
+    └── text.ts                     # Text utilities (line counting)
 ```
+
+## How It Works
+
+1. **Profile** — Counts files by type and computes LOC breakdowns before parsing.
+2. **Discover** — `fast-glob` finds all `.ts`/`.tsx` files, ignoring non-source directories.
+3. **Parse** — Each file is parsed into a CST using Tree-sitter (TypeScript or TSX grammar).
+4. **Extract** — Multiple extractors run on each parsed tree:
+   - Function count and type breakdown
+   - Per-function metrics (length, nesting depth, parameter count)
+   - Cyclomatic complexity per function
+   - Code smell detection (5 detectors)
+5. **Collect** — Non-AST modules gather duplication (jscpd), git history (simple-git), and framework info (package.json).
+6. **Aggregate** — Pipeline combines all results into a typed `RepoReport`, computes composite metrics (maintainability index, test coverage proxy).
+7. **Report** — JSON output to stdout (single mode) or individual files + optional CSV (batch mode).
+
+## Documentation
+
+- [Architecture overview](docs/ARCHITECTURE.md)
+- [Full JSON schema reference](docs/SCHEMA.md)
+- [Contributing guide](CONTRIBUTING.md)
 
 ## Scripts
 
 | Script | Command | Description |
 |--------|---------|-------------|
-| `dev` | `tsx src/cli.ts` | Run directly from TypeScript (no build step) |
+| `dev` | `tsx src/cli.ts` | Run directly from TypeScript |
 | `build` | `tsc -p tsconfig.json` | Compile to JavaScript in `dist/` |
 | `start` | `node dist/cli.js` | Run the compiled build |
-
-## How it works
-
-1. **Profile** — Counts files by type (`.ts`, `.tsx`, test) and computes LOC breakdowns (total, source, test) before any parsing begins.
-2. **Discover** — `fast-glob` finds all `.ts` and `.tsx` files, ignoring `node_modules`, `dist`, `build`, `.next`, and other non-source directories.
-3. **Parse** — Each file is parsed into a concrete syntax tree using Tree-sitter with the appropriate grammar (TypeScript or TSX).
-4. **Extract** — Extractors run on each parsed tree:
-   - **Function count** — counts function-like AST nodes by type.
-   - **Function metrics** — computes line count, max nesting depth, and parameter count per function.
-5. **Report** — Results are aggregated into a JSON report with profile, function metrics summary, totals, and per-file breakdowns.
 
 ## License
 
