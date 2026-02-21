@@ -54,3 +54,22 @@ export const NESTING_NODE_TYPES = new Set([
 
 /** Functions exceeding this many lines are classified as "long". */
 export const LONG_FUNCTION_THRESHOLD = 50;
+
+/** Functions with cyclomatic complexity above this are "high complexity". */
+export const HIGH_COMPLEXITY_THRESHOLD = 10;
+
+/**
+ * Tree-sitter node types that add one branch point to cyclomatic complexity.
+ * Logical operators (`&&`, `||`) are handled separately via binary_expression inspection.
+ */
+export const COMPLEXITY_BRANCH_TYPES = new Set([
+  "if_statement",
+  "else_clause",
+  "for_statement",
+  "for_in_statement",
+  "while_statement",
+  "do_statement",
+  "switch_case",
+  "catch_clause",
+  "ternary_expression",
+]);

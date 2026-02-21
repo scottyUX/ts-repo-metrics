@@ -46,3 +46,18 @@ export interface FunctionMetricsResult {
   functions: FunctionDetail[];
   summary: FunctionMetricsSummary;
 }
+
+/** Cyclomatic complexity for a single function. */
+export interface FunctionComplexity {
+  name: string;
+  type: string;
+  startLine: number;
+  complexity: number;
+}
+
+/** Repo-level cyclomatic complexity summary. */
+export interface ComplexitySummary {
+  average: number;
+  max: number;
+  highComplexityFunctions: number;
+}

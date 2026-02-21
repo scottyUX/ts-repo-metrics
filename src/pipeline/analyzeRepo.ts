@@ -14,9 +14,15 @@ import { profileRepo } from "../collect/loc.js";
 import { parseTypeScript } from "../parsing/tsParser.js";
 import { countFunctions } from "../extract/functionCount.js";
 import { extractFunctionMetrics } from "../extract/functionMetrics.js";
+import { computeComplexity, summarizeComplexity } from "../extract/complexity.js";
 import { LONG_FUNCTION_THRESHOLD } from "../utils/constants.js";
 import { median } from "../utils/math.js";
-import type { FunctionDetail, FunctionMetricsSummary } from "../types/report.js";
+import type {
+  FunctionDetail,
+  FunctionMetricsSummary,
+  FunctionComplexity,
+  ComplexitySummary,
+} from "../types/report.js";
 
 function flavorForFile(filePath: string): "ts" | "tsx" {
   return filePath.endsWith(".tsx") ? "tsx" : "ts";
@@ -34,11 +40,13 @@ export async function analyzeRepo(repoPath: string) {
 
   let totalFunctions = 0;
   const allFunctionDetails: FunctionDetail[] = [];
+  const allComplexities: FunctionComplexity[] = [];
   const perFile: Array<{
     file: string;
     functions: number;
     functionsByType: Record<string, number>;
     functionMetrics: FunctionDetail[];
+    complexity: FunctionComplexity[];
   }> = [];
 
   for (const filePath of files) {
@@ -46,14 +54,17 @@ export async function analyzeRepo(repoPath: string) {
     const tree = parseTypeScript(code, flavorForFile(filePath));
     const fnCount = countFunctions(tree.rootNode);
     const fnMetrics = extractFunctionMetrics(tree.rootNode);
+    const fileComplexity = computeComplexity(tree.rootNode);
 
     totalFunctions += fnCount.total;
     allFunctionDetails.push(...fnMetrics.functions);
+    allComplexities.push(...fileComplexity);
     perFile.push({
       file: path.relative(repoPath, filePath),
       functions: fnCount.total,
       functionsByType: fnCount.byType,
       functionMetrics: fnMetrics.functions,
+      complexity: fileComplexity,
     });
   }
 
@@ -71,6 +82,8 @@ export async function analyzeRepo(repoPath: string) {
       : 0,
   };
 
+  const complexitySummary = summarizeComplexity(allComplexities);
+
   return {
     repoPath,
     filesAnalyzed: files.length,
@@ -79,6 +92,7 @@ export async function analyzeRepo(repoPath: string) {
       functions: totalFunctions,
     },
     functionMetricsSummary,
+    complexity: complexitySummary,
     perFile,
   };
 }
