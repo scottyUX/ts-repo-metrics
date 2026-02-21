@@ -55,7 +55,7 @@ CLI (src/cli.ts)
 | `src/extract/` | AST-based extractors (function count, metrics, complexity, smells, test coverage proxy, maintainability index) |
 | `src/batch/` | Batch analysis over multiple repos |
 | `src/types/` | Shared TypeScript interfaces for the report |
-| `src/utils/` | Shared constants, math utilities, text utilities |
+| `src/utils/` | Shared constants, math utilities, text utilities, AST walker |
 
 ## Adding a New Extractor
 
@@ -64,6 +64,15 @@ CLI (src/cli.ts)
 3. **Add constants/thresholds** to `src/utils/constants.ts`.
 4. **Integrate** in `src/pipeline/analyzeRepo.ts` — call the extractor and add the result to the return object.
 5. **Update docs** — `docs/SCHEMA.md` field reference, `README.md` example output.
+
+## AST Walker
+
+All AST-based extractors use the shared `walkTree()` utility from `src/utils/astWalker.ts`. This ensures:
+
+- Consistent traversal order (reverse document order for compatibility)
+- Support for enter/leave callbacks
+- Skip-children via `return SKIP` from `enter`
+- Reduced duplication across complexity, functionMetrics, smells, and functionCount
 
 ## Shared Code Rules
 

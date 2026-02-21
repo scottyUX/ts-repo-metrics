@@ -18,6 +18,7 @@ import {
   COMPLEXITY_BRANCH_TYPES,
   HIGH_COMPLEXITY_THRESHOLD,
 } from "../utils/constants.js";
+import { walkTree } from "../utils/astWalker.js";
 import type { FunctionComplexity, ComplexitySummary } from "../types/report.js";
 
 export type { FunctionComplexity, ComplexitySummary } from "../types/report.js";
@@ -82,25 +83,19 @@ function getFunctionName(node: SyntaxNode): string {
 export function computeComplexity(root: SyntaxNode): FunctionComplexity[] {
   const results: FunctionComplexity[] = [];
 
-  const stack: SyntaxNode[] = [root];
-  while (stack.length) {
-    const node = stack.pop()!;
-
-    if (FUNCTION_NODE_TYPES.has(node.type)) {
-      const complexity = 1 + countBranches(node);
-      results.push({
-        name: getFunctionName(node),
-        type: node.type,
-        startLine: node.startPosition.row + 1,
-        complexity,
-      });
-    }
-
-    for (let i = 0; i < node.namedChildCount; i++) {
-      const child = node.namedChild(i);
-      if (child) stack.push(child);
-    }
-  }
+  walkTree(root, {
+    enter(node) {
+      if (FUNCTION_NODE_TYPES.has(node.type)) {
+        const complexity = 1 + countBranches(node);
+        results.push({
+          name: getFunctionName(node),
+          type: node.type,
+          startLine: node.startPosition.row + 1,
+          complexity,
+        });
+      }
+    },
+  });
 
   return results;
 }

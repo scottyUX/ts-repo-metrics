@@ -20,6 +20,7 @@ import {
   DEEP_NESTING_THRESHOLD,
   LONG_PARAM_LIST_THRESHOLD,
 } from "../utils/constants.js";
+import { walkTree } from "../utils/astWalker.js";
 import type { SmellCounts } from "../types/report.js";
 
 export type { SmellCounts } from "../types/report.js";
@@ -32,18 +33,14 @@ export type { SmellCounts } from "../types/report.js";
  */
 export function detectLongFunctions(root: SyntaxNode): number {
   let count = 0;
-  const stack: SyntaxNode[] = [root];
-  while (stack.length) {
-    const node = stack.pop()!;
-    if (FUNCTION_NODE_TYPES.has(node.type)) {
-      const lines = node.endPosition.row - node.startPosition.row + 1;
-      if (lines > LONG_FUNCTION_THRESHOLD) count++;
-    }
-    for (let i = 0; i < node.namedChildCount; i++) {
-      const child = node.namedChild(i);
-      if (child) stack.push(child);
-    }
-  }
+  walkTree(root, {
+    enter(node) {
+      if (FUNCTION_NODE_TYPES.has(node.type)) {
+        const lines = node.endPosition.row - node.startPosition.row + 1;
+        if (lines > LONG_FUNCTION_THRESHOLD) count++;
+      }
+    },
+  });
   return count;
 }
 
@@ -53,33 +50,28 @@ export function detectLongFunctions(root: SyntaxNode): number {
  * @param root - Root node of a Tree-sitter syntax tree.
  * @returns Number of functions with nesting deeper than DEEP_NESTING_THRESHOLD.
  */
+function maxNestingDepth(node: SyntaxNode, depth: number): number {
+  const d = NESTING_NODE_TYPES.has(node.type) ? depth + 1 : depth;
+  let max = d;
+  for (let i = 0; i < node.namedChildCount; i++) {
+    const child = node.namedChild(i);
+    if (child) {
+      const cm = maxNestingDepth(child, d);
+      if (cm > max) max = cm;
+    }
+  }
+  return max;
+}
+
 export function detectDeepNesting(root: SyntaxNode): number {
   let count = 0;
-
-  function maxNesting(node: SyntaxNode, depth: number): number {
-    const d = NESTING_NODE_TYPES.has(node.type) ? depth + 1 : depth;
-    let max = d;
-    for (let i = 0; i < node.namedChildCount; i++) {
-      const child = node.namedChild(i);
-      if (child) {
-        const cm = maxNesting(child, d);
-        if (cm > max) max = cm;
+  walkTree(root, {
+    enter(node) {
+      if (FUNCTION_NODE_TYPES.has(node.type)) {
+        if (maxNestingDepth(node, 0) > DEEP_NESTING_THRESHOLD) count++;
       }
-    }
-    return max;
-  }
-
-  const stack: SyntaxNode[] = [root];
-  while (stack.length) {
-    const node = stack.pop()!;
-    if (FUNCTION_NODE_TYPES.has(node.type)) {
-      if (maxNesting(node, 0) > DEEP_NESTING_THRESHOLD) count++;
-    }
-    for (let i = 0; i < node.namedChildCount; i++) {
-      const child = node.namedChild(i);
-      if (child) stack.push(child);
-    }
-  }
+    },
+  });
   return count;
 }
 
@@ -91,33 +83,29 @@ export function detectDeepNesting(root: SyntaxNode): number {
  */
 export function detectLongParameterLists(root: SyntaxNode): number {
   let count = 0;
-  const stack: SyntaxNode[] = [root];
-  while (stack.length) {
-    const node = stack.pop()!;
-    if (FUNCTION_NODE_TYPES.has(node.type)) {
-      const params = node.childForFieldName("parameters");
-      if (params) {
-        let pCount = 0;
-        for (let i = 0; i < params.namedChildCount; i++) {
-          const child = params.namedChild(i);
-          if (
-            child &&
-            (child.type === "required_parameter" ||
-              child.type === "optional_parameter" ||
-              child.type === "rest_parameter" ||
-              child.type === "identifier")
-          ) {
-            pCount++;
+  walkTree(root, {
+    enter(node) {
+      if (FUNCTION_NODE_TYPES.has(node.type)) {
+        const params = node.childForFieldName("parameters");
+        if (params) {
+          let pCount = 0;
+          for (let i = 0; i < params.namedChildCount; i++) {
+            const child = params.namedChild(i);
+            if (
+              child &&
+              (child.type === "required_parameter" ||
+                child.type === "optional_parameter" ||
+                child.type === "rest_parameter" ||
+                child.type === "identifier")
+            ) {
+              pCount++;
+            }
           }
+          if (pCount > LONG_PARAM_LIST_THRESHOLD) count++;
         }
-        if (pCount > LONG_PARAM_LIST_THRESHOLD) count++;
       }
-    }
-    for (let i = 0; i < node.namedChildCount; i++) {
-      const child = node.namedChild(i);
-      if (child) stack.push(child);
-    }
-  }
+    },
+  });
   return count;
 }
 
@@ -129,18 +117,14 @@ export function detectLongParameterLists(root: SyntaxNode): number {
  */
 export function detectEmptyCatchBlocks(root: SyntaxNode): number {
   let count = 0;
-  const stack: SyntaxNode[] = [root];
-  while (stack.length) {
-    const node = stack.pop()!;
-    if (node.type === "catch_clause") {
-      const body = node.childForFieldName("body");
-      if (body && body.namedChildCount === 0) count++;
-    }
-    for (let i = 0; i < node.namedChildCount; i++) {
-      const child = node.namedChild(i);
-      if (child) stack.push(child);
-    }
-  }
+  walkTree(root, {
+    enter(node) {
+      if (node.type === "catch_clause") {
+        const body = node.childForFieldName("body");
+        if (body && body.namedChildCount === 0) count++;
+      }
+    },
+  });
   return count;
 }
 
@@ -150,32 +134,29 @@ export function detectEmptyCatchBlocks(root: SyntaxNode): number {
  * @param root - Root node of a Tree-sitter syntax tree.
  * @returns Number of console logging calls found.
  */
+const CONSOLE_METHODS = new Set(["log", "warn", "error"]);
+
 export function detectConsoleLogs(root: SyntaxNode): number {
-  const CONSOLE_METHODS = new Set(["log", "warn", "error"]);
   let count = 0;
-  const stack: SyntaxNode[] = [root];
-  while (stack.length) {
-    const node = stack.pop()!;
-    if (node.type === "call_expression") {
-      const fn = node.childForFieldName("function");
-      if (fn?.type === "member_expression") {
-        const obj = fn.childForFieldName("object");
-        const prop = fn.childForFieldName("property");
-        if (
-          obj?.type === "identifier" &&
-          obj.text === "console" &&
-          prop &&
-          CONSOLE_METHODS.has(prop.text)
-        ) {
-          count++;
+  walkTree(root, {
+    enter(node) {
+      if (node.type === "call_expression") {
+        const fn = node.childForFieldName("function");
+        if (fn?.type === "member_expression") {
+          const obj = fn.childForFieldName("object");
+          const prop = fn.childForFieldName("property");
+          if (
+            obj?.type === "identifier" &&
+            obj.text === "console" &&
+            prop &&
+            CONSOLE_METHODS.has(prop.text)
+          ) {
+            count++;
+          }
         }
       }
-    }
-    for (let i = 0; i < node.namedChildCount; i++) {
-      const child = node.namedChild(i);
-      if (child) stack.push(child);
-    }
-  }
+    },
+  });
   return count;
 }
 
