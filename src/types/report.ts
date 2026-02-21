@@ -94,6 +94,12 @@ export interface SmellCounts {
   consoleLogs: number;
 }
 
+/** Maintainability Index score and classification. */
+export interface MaintainabilityResult {
+  score: number;
+  classification: "low" | "moderate" | "high";
+}
+
 /** Test coverage proxy derived from LOC ratios. */
 export interface TestCoverageProxy {
   ratio: number;
@@ -123,6 +129,7 @@ export interface RepoReport {
   functionMetricsSummary: FunctionMetricsSummary;
   complexity: ComplexitySummary;
   smells: SmellCounts;
+  maintainability: MaintainabilityResult;
   testCoverageProxy: TestCoverageProxy;
   duplication: DuplicationMetrics | null;
   git: GitMetrics | null;

@@ -20,6 +20,7 @@ import { extractFunctionMetrics } from "../extract/functionMetrics.js";
 import { computeComplexity, summarizeComplexity } from "../extract/complexity.js";
 import { detectSmells } from "../extract/smells.js";
 import { computeTestCoverageProxy } from "../extract/testCoverageProxy.js";
+import { computeMaintainabilityIndex } from "../extract/maintainabilityIndex.js";
 import { LONG_FUNCTION_THRESHOLD } from "../utils/constants.js";
 import { median } from "../utils/math.js";
 import type {
@@ -97,6 +98,11 @@ export async function analyzeRepo(repoPath: string): Promise<RepoReport> {
   };
 
   const complexitySummary = summarizeComplexity(allComplexities);
+  const maintainability = computeMaintainabilityIndex(
+    complexitySummary.average,
+    profile.totalLOC,
+    functionMetricsSummary.averageLength,
+  );
   const testCoverageProxy = computeTestCoverageProxy(profile);
   const duplication = await detectDuplication(repoPath);
   const git = await extractGitMetrics(repoPath);
@@ -112,6 +118,7 @@ export async function analyzeRepo(repoPath: string): Promise<RepoReport> {
     functionMetricsSummary,
     complexity: complexitySummary,
     smells: totalSmells,
+    maintainability,
     testCoverageProxy,
     duplication,
     git,
