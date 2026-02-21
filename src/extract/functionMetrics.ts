@@ -2,57 +2,28 @@
  * Function-level structural metrics extractor.
  *
  * For every function-like AST node in a file, computes line count, maximum
- * nesting depth, and parameter count. Also produces a repo-level summary
+ * nesting depth, and parameter count. Also produces a file-level summary
  * with averages, medians, maximums, and percentages.
  */
 
 import type { SyntaxNode } from "tree-sitter";
+import {
+  FUNCTION_NODE_TYPES,
+  NESTING_NODE_TYPES,
+  LONG_FUNCTION_THRESHOLD,
+} from "../utils/constants.js";
+import { median } from "../utils/math.js";
+import type {
+  FunctionDetail,
+  FunctionMetricsSummary,
+  FunctionMetricsResult,
+} from "../types/report.js";
 
-const FUNCTION_NODE_TYPES = new Set([
-  "function_declaration",
-  "generator_function_declaration",
-  "method_definition",
-  "arrow_function",
-  "function",
-  "generator_function",
-]);
-
-const NESTING_NODE_TYPES = new Set([
-  "if_statement",
-  "for_statement",
-  "for_in_statement",
-  "while_statement",
-  "do_statement",
-  "switch_statement",
-  "try_statement",
-]);
-
-const LONG_FUNCTION_THRESHOLD = 50;
-
-/** Metrics for a single function. */
-export interface FunctionDetail {
-  name: string;
-  type: string;
-  startLine: number;
-  lines: number;
-  maxNestingDepth: number;
-  parameterCount: number;
-}
-
-/** Aggregated function metrics for an entire repository. */
-export interface FunctionMetricsSummary {
-  totalFunctions: number;
-  averageLength: number;
-  medianLength: number;
-  maxNestingDepth: number;
-  longFunctionPercentage: number;
-}
-
-/** Combined result: per-function details and repo-level summary. */
-export interface FunctionMetricsResult {
-  functions: FunctionDetail[];
-  summary: FunctionMetricsSummary;
-}
+export type {
+  FunctionDetail,
+  FunctionMetricsSummary,
+  FunctionMetricsResult,
+} from "../types/report.js";
 
 /**
  * Derive a human-readable name for a function node.
@@ -121,20 +92,6 @@ function maxNesting(node: SyntaxNode, currentDepth: number): number {
     }
   }
   return max;
-}
-
-/**
- * Compute the median of a sorted numeric array.
- *
- * @param sorted - Array of numbers in ascending order.
- * @returns The median value, or 0 for an empty array.
- */
-function median(sorted: number[]): number {
-  if (sorted.length === 0) return 0;
-  const mid = Math.floor(sorted.length / 2);
-  return sorted.length % 2 === 0
-    ? (sorted[mid - 1]! + sorted[mid]!) / 2
-    : sorted[mid]!;
 }
 
 /**

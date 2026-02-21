@@ -1,0 +1,47 @@
+---
+description: Enforce shared placement of reusable utilities, constants, and types
+globs: src/**/*.ts
+alwaysApply: false
+---
+
+# Shared Code Organization
+
+Reusable utilities, constants, and types must NOT live in individual feature files. Place them in the designated shared locations:
+
+| Kind | Location | Example |
+|------|----------|---------|
+| Constants (patterns, thresholds, regexes) | `src/utils/constants.ts` | `SOURCE_PATTERNS`, `IGNORE_PATTERNS`, `TEST_FILE_RE` |
+| Utility functions (pure helpers) | `src/utils/<topic>.ts` | `countLines()` in `src/utils/text.ts` |
+| Shared interfaces / types | `src/types/report.ts` | `RepoProfile`, `FunctionDetail` |
+
+## Rules
+
+1. **Before adding a constant, type, or helper to a feature file**, check whether it already exists in `src/utils/` or `src/types/`. If it does, import it.
+2. **If a value is used by more than one module** (or is likely to be), define it in the shared location from the start — not inline.
+3. **Feature-specific private helpers** that are only used inside one file may remain local. Mark them with a leading underscore or keep them unexported.
+4. **Re-exports for convenience** are allowed (e.g., `src/types/report.ts` re-exporting from an extractor), but the canonical definition should live in the shared file.
+
+## Examples
+
+```typescript
+// ❌ BAD — reusable constant defined in a feature file
+// src/extract/functionMetrics.ts
+const FUNCTION_NODE_TYPES = new Set(["function_declaration", ...]);
+
+// ✅ GOOD — shared constant imported from utils
+// src/utils/constants.ts
+export const FUNCTION_NODE_TYPES = new Set(["function_declaration", ...]);
+
+// src/extract/functionMetrics.ts
+import { FUNCTION_NODE_TYPES } from "../utils/constants.js";
+```
+
+```typescript
+// ❌ BAD — interface defined in a feature module that others need
+// src/collect/loc.ts
+export interface RepoProfile { ... }
+
+// ✅ GOOD — interface in shared types
+// src/types/report.ts
+export interface RepoProfile { ... }
+```

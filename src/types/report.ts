@@ -16,9 +16,33 @@ export interface RepoProfile {
   testLOC: number;
 }
 
-/** Re-export function metric types from the extractor for convenience. */
-export type {
-  FunctionDetail,
-  FunctionMetricsSummary,
-  FunctionMetricsResult,
-} from "../extract/functionMetrics.js";
+/** Count of function-like AST nodes, with a per-type breakdown. */
+export interface FunctionCounts {
+  total: number;
+  byType: Record<string, number>;
+}
+
+/** Metrics for a single function. */
+export interface FunctionDetail {
+  name: string;
+  type: string;
+  startLine: number;
+  lines: number;
+  maxNestingDepth: number;
+  parameterCount: number;
+}
+
+/** Aggregated function metrics for an entire repository. */
+export interface FunctionMetricsSummary {
+  totalFunctions: number;
+  averageLength: number;
+  medianLength: number;
+  maxNestingDepth: number;
+  longFunctionPercentage: number;
+}
+
+/** Combined result: per-function details and file-level summary. */
+export interface FunctionMetricsResult {
+  functions: FunctionDetail[];
+  summary: FunctionMetricsSummary;
+}

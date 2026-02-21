@@ -14,7 +14,9 @@ import { profileRepo } from "../collect/loc.js";
 import { parseTypeScript } from "../parsing/tsParser.js";
 import { countFunctions } from "../extract/functionCount.js";
 import { extractFunctionMetrics } from "../extract/functionMetrics.js";
-import type { FunctionDetail, FunctionMetricsSummary } from "../extract/functionMetrics.js";
+import { LONG_FUNCTION_THRESHOLD } from "../utils/constants.js";
+import { median } from "../utils/math.js";
+import type { FunctionDetail, FunctionMetricsSummary } from "../types/report.js";
 
 function flavorForFile(filePath: string): "ts" | "tsx" {
   return filePath.endsWith(".tsx") ? "tsx" : "ts";
@@ -56,20 +58,16 @@ export async function analyzeRepo(repoPath: string) {
   }
 
   const lengths = allFunctionDetails.map((f) => f.lines).sort((a, b) => a - b);
-  const medianLength = lengths.length === 0 ? 0
-    : lengths.length % 2 === 0
-      ? (lengths[lengths.length / 2 - 1]! + lengths[lengths.length / 2]!) / 2
-      : lengths[Math.floor(lengths.length / 2)]!;
 
   const functionMetricsSummary: FunctionMetricsSummary = {
     totalFunctions,
     averageLength: totalFunctions > 0
       ? Math.round((lengths.reduce((a, b) => a + b, 0) / totalFunctions) * 10) / 10
       : 0,
-    medianLength,
+    medianLength: median(lengths),
     maxNestingDepth: allFunctionDetails.reduce((max, f) => Math.max(max, f.maxNestingDepth), 0),
     longFunctionPercentage: totalFunctions > 0
-      ? Math.round((allFunctionDetails.filter((f) => f.lines > 50).length / totalFunctions) * 1000) / 10
+      ? Math.round((allFunctionDetails.filter((f) => f.lines > LONG_FUNCTION_THRESHOLD).length / totalFunctions) * 1000) / 10
       : 0,
   };
 
