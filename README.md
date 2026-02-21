@@ -167,6 +167,7 @@ src/
 - [Architecture overview](docs/ARCHITECTURE.md)
 - [Full JSON schema reference](docs/SCHEMA.md)
 - [Contributing guide](CONTRIBUTING.md)
+- [Sprint planning](docs/planning/) — roadmap and epic specifications
 
 ## Scripts
 
