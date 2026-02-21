@@ -15,3 +15,10 @@ export interface RepoProfile {
   sourceLOC: number;
   testLOC: number;
 }
+
+/** Re-export function metric types from the extractor for convenience. */
+export type {
+  FunctionDetail,
+  FunctionMetricsSummary,
+  FunctionMetricsResult,
+} from "../extract/functionMetrics.js";
