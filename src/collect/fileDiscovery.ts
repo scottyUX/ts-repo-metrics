@@ -7,22 +7,18 @@
  */
 
 import fg from "fast-glob";
+import { SOURCE_PATTERNS, IGNORE_PATTERNS } from "../utils/constants.js";
 
+/**
+ * Discover all TypeScript and TSX source files in a repository.
+ *
+ * @param repoPath - Absolute path to the repository root.
+ * @returns Array of absolute file paths.
+ */
 export async function discoverSourceFiles(repoPath: string) {
-  const patterns = ["**/*.ts", "**/*.tsx"];
-  const ignore = [
-    "**/node_modules/**",
-    "**/dist/**",
-    "**/build/**",
-    "**/.next/**",
-    "**/out/**",
-    "**/coverage/**",
-    "**/.git/**",
-  ];
-
-  return fg(patterns, {
+  return fg(SOURCE_PATTERNS, {
     cwd: repoPath,
     absolute: true,
-    ignore,
+    ignore: IGNORE_PATTERNS,
   });
 }
