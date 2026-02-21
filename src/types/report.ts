@@ -62,6 +62,13 @@ export interface ComplexitySummary {
   highComplexityFunctions: number;
 }
 
+/** Code duplication metrics from jscpd analysis. */
+export interface DuplicationMetrics {
+  percentage: number;
+  duplicateLines: number;
+  cloneClusters: number;
+}
+
 /** Aggregated code smell counts across the repository. */
 export interface SmellCounts {
   longFunctions: number;
