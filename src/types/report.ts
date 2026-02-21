@@ -62,6 +62,13 @@ export interface ComplexitySummary {
   highComplexityFunctions: number;
 }
 
+/** Detected framework and runtime classification. */
+export interface FrameworkInfo {
+  type: string;
+  hasReact: boolean;
+  hasBackend: boolean;
+}
+
 /** Git history metrics derived from commit log analysis. */
 export interface GitMetrics {
   totalCommits: number;
