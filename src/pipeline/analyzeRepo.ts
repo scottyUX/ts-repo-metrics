@@ -15,6 +15,7 @@ import { parseTypeScript } from "../parsing/tsParser.js";
 import { countFunctions } from "../extract/functionCount.js";
 import { extractFunctionMetrics } from "../extract/functionMetrics.js";
 import { computeComplexity, summarizeComplexity } from "../extract/complexity.js";
+import { detectSmells } from "../extract/smells.js";
 import { LONG_FUNCTION_THRESHOLD } from "../utils/constants.js";
 import { median } from "../utils/math.js";
 import type {
@@ -22,6 +23,7 @@ import type {
   FunctionMetricsSummary,
   FunctionComplexity,
   ComplexitySummary,
+  SmellCounts,
 } from "../types/report.js";
 
 function flavorForFile(filePath: string): "ts" | "tsx" {
@@ -41,6 +43,13 @@ export async function analyzeRepo(repoPath: string) {
   let totalFunctions = 0;
   const allFunctionDetails: FunctionDetail[] = [];
   const allComplexities: FunctionComplexity[] = [];
+  const totalSmells: SmellCounts = {
+    longFunctions: 0,
+    deepNesting: 0,
+    longParameterLists: 0,
+    emptyCatchBlocks: 0,
+    consoleLogs: 0,
+  };
   const perFile: Array<{
     file: string;
     functions: number;
@@ -55,10 +64,16 @@ export async function analyzeRepo(repoPath: string) {
     const fnCount = countFunctions(tree.rootNode);
     const fnMetrics = extractFunctionMetrics(tree.rootNode);
     const fileComplexity = computeComplexity(tree.rootNode);
+    const fileSmells = detectSmells(tree.rootNode);
 
     totalFunctions += fnCount.total;
     allFunctionDetails.push(...fnMetrics.functions);
     allComplexities.push(...fileComplexity);
+
+    for (const key of Object.keys(totalSmells) as (keyof SmellCounts)[]) {
+      totalSmells[key] += fileSmells[key];
+    }
+
     perFile.push({
       file: path.relative(repoPath, filePath),
       functions: fnCount.total,
@@ -93,6 +108,7 @@ export async function analyzeRepo(repoPath: string) {
     },
     functionMetricsSummary,
     complexity: complexitySummary,
+    smells: totalSmells,
     perFile,
   };
 }

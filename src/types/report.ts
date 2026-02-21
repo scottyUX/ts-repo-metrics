@@ -61,3 +61,12 @@ export interface ComplexitySummary {
   max: number;
   highComplexityFunctions: number;
 }
+
+/** Aggregated code smell counts across the repository. */
+export interface SmellCounts {
+  longFunctions: number;
+  deepNesting: number;
+  longParameterLists: number;
+  emptyCatchBlocks: number;
+  consoleLogs: number;
+}
