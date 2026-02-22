@@ -13,8 +13,12 @@ npm install
 ### Running Locally
 
 ```bash
-# Single repo analysis
-npm run dev -- /path/to/repo
+# Single repo (local path)
+npm run dev -- analyze /path/to/repo
+npm run dev -- /path/to/repo   # legacy shorthand
+
+# Single repo (GitHub URL)
+npm run dev -- analyze https://github.com/user/repo [--no-cache]
 
 # Batch mode
 npm run dev -- batch /path/to/repos --output ./reports --csv

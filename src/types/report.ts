@@ -78,11 +78,72 @@ export interface GitMetrics {
   commitsPerWeek: number;
 }
 
+/** D1: Extended commit size distribution. */
+export interface CommitStats {
+  medianCommitSize: number;
+  p90CommitSize: number;
+  pctOver500Loc: number;
+  pctOver1000Loc: number;
+}
+
+/** D2: Commit burst detection (≥3 commits in 30 min). */
+export interface BurstStats {
+  burstCount: number;
+  burstRatio: number;
+}
+
+/** D3: Temporal irregularity of commits. */
+export interface EntropyStats {
+  stdDevTimeBetweenCommits: number;
+}
+
+/** D4: Top files by churn. */
+export interface ChurnHotspot {
+  file: string;
+  modifications: number;
+  linesChanged: number;
+}
+
+/** D4: Churn hotspots output. */
+export interface ChurnStats {
+  topByModifications: ChurnHotspot[];
+  topByLinesChanged: ChurnHotspot[];
+}
+
+/** D5: Test coupling metrics. */
+export interface TestCouplingStats {
+  pctCommitsTouchingTests: number;
+  testToFeatureCommitRatio: number;
+}
+
+/** D6: Refactor commit rate. */
+export interface RefactorBehaviorStats {
+  refactorCommitRatio: number;
+}
+
+/** Epic D: Combined git metrics V2. */
+export interface GitMetricsV2 {
+  commitStats: CommitStats;
+  burstStats: BurstStats;
+  entropy: EntropyStats;
+  churn: ChurnStats;
+  refactorBehavior: RefactorBehaviorStats;
+  testCoupling: TestCouplingStats;
+}
+
 /** Code duplication metrics from jscpd analysis. */
 export interface DuplicationMetrics {
   percentage: number;
   duplicateLines: number;
   cloneClusters: number;
+}
+
+/** Source origin metadata (local path or cloned GitHub URL). */
+export interface SourceInfo {
+  type: "local" | "git";
+  url: string;
+  commit: string;
+  branch: string;
 }
 
 /** Aggregated code smell counts across the repository. */
@@ -123,6 +184,7 @@ export interface PerFileEntry {
  */
 export interface RepoReport {
   repoPath: string;
+  source: SourceInfo;
   filesAnalyzed: number;
   profile: RepoProfile;
   totals: { functions: number };
@@ -133,6 +195,7 @@ export interface RepoReport {
   testCoverageProxy: TestCoverageProxy;
   duplication: DuplicationMetrics | null;
   git: GitMetrics | null;
+  gitMetricsV2: GitMetricsV2 | null;
   framework: FrameworkInfo | null;
   perFile: PerFileEntry[];
 }

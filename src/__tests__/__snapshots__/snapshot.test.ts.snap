@@ -22,6 +22,7 @@ exports[`analyzeRepo snapshot > produces stable report structure for fixture rep
     "totalFunctions": 4,
   },
   "git": null,
+  "gitMetricsV2": null,
   "maintainability": {
     "classification": "high",
     "score": 87.5,
@@ -132,6 +133,12 @@ exports[`analyzeRepo snapshot > produces stable report structure for fixture rep
     "emptyCatchBlocks": 0,
     "longFunctions": 0,
     "longParameterLists": 0,
+  },
+  "source": {
+    "branch": "<branch>",
+    "commit": "<commit>",
+    "type": "local",
+    "url": "",
   },
   "testCoverageProxy": {
     "classification": "low",

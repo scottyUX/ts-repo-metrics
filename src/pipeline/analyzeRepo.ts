@@ -13,6 +13,7 @@ import { discoverSourceFiles } from "../collect/fileDiscovery.js";
 import { profileRepo } from "../collect/loc.js";
 import { detectDuplication } from "../collect/duplication.js";
 import { extractGitMetrics } from "../collect/gitMetrics.js";
+import { extractGitMetricsV2 } from "../collect/gitMetricsV2.js";
 import { detectFramework } from "../collect/frameworkDetection.js";
 import { parseTypeScript } from "../parsing/tsParser.js";
 import { countFunctions } from "../extract/functionCount.js";
@@ -23,6 +24,7 @@ import { computeTestCoverageProxy } from "../extract/testCoverageProxy.js";
 import { computeMaintainabilityIndex } from "../extract/maintainabilityIndex.js";
 import { LONG_FUNCTION_THRESHOLD } from "../utils/constants.js";
 import { median } from "../utils/math.js";
+import { getSourceMetadata } from "../collect/repoMetadata.js";
 import type {
   RepoReport,
   FunctionDetail,
@@ -30,19 +32,32 @@ import type {
   FunctionComplexity,
   SmellCounts,
   PerFileEntry,
+  SourceInfo,
 } from "../types/report.js";
 
 function flavorForFile(filePath: string): "ts" | "tsx" {
   return filePath.endsWith(".tsx") ? "tsx" : "ts";
 }
 
+export interface AnalyzeOptions {
+  /** Pre-computed source metadata. If omitted, computed from repo path. */
+  source?: SourceInfo;
+}
+
 /**
  * Run the full analysis pipeline on a repository.
  *
  * @param repoPath - Absolute path to the repository root.
+ * @param options - Optional source metadata (for cloned repos).
  * @returns A JSON-serializable report with profile, totals, and per-file data.
  */
-export async function analyzeRepo(repoPath: string): Promise<RepoReport> {
+export async function analyzeRepo(
+  repoPath: string,
+  options?: AnalyzeOptions,
+): Promise<RepoReport> {
+  const source =
+    options?.source ??
+    (await getSourceMetadata(repoPath, "local", ""));
   const profile = await profileRepo(repoPath);
   const files = await discoverSourceFiles(repoPath);
 
@@ -59,8 +74,22 @@ export async function analyzeRepo(repoPath: string): Promise<RepoReport> {
   const perFile: PerFileEntry[] = [];
 
   for (const filePath of files) {
-    const code = await readFile(filePath, "utf8");
-    const tree = parseTypeScript(code, flavorForFile(filePath));
+    let code: string;
+    try {
+      code = await readFile(filePath, "utf8");
+    } catch {
+      console.error(`Skipping ${path.relative(repoPath, filePath)}: could not read file`);
+      continue;
+    }
+
+    let tree;
+    try {
+      tree = parseTypeScript(code, flavorForFile(filePath));
+    } catch (err) {
+      console.error(`Skipping ${path.relative(repoPath, filePath)}: parse error`, err instanceof Error ? err.message : err);
+      continue;
+    }
+
     const fnCount = countFunctions(tree.rootNode);
     const fnMetrics = extractFunctionMetrics(tree.rootNode);
     const fileComplexity = computeComplexity(tree.rootNode);
@@ -106,10 +135,12 @@ export async function analyzeRepo(repoPath: string): Promise<RepoReport> {
   const testCoverageProxy = computeTestCoverageProxy(profile);
   const duplication = await detectDuplication(repoPath);
   const git = await extractGitMetrics(repoPath);
+  const gitMetricsV2 = await extractGitMetricsV2(repoPath);
   const framework = await detectFramework(repoPath);
 
   return {
     repoPath,
+    source,
     filesAnalyzed: files.length,
     profile,
     totals: {
@@ -122,6 +153,7 @@ export async function analyzeRepo(repoPath: string): Promise<RepoReport> {
     testCoverageProxy,
     duplication,
     git,
+    gitMetricsV2,
     framework,
     perFile,
   };

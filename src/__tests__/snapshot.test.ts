@@ -17,13 +17,20 @@ const FIXTURE_PATH = path.resolve(__dirname, "fixtures", "sample-repo");
 /**
  * Normalize volatile fields that vary across machines or runs.
  * - repoPath: absolute path differs per environment
+ * - source: commit/branch vary by git state
  * - git: history-dependent (fixture may inherit parent .git); exclude from snapshot
- * - duplication: kept as-is (deterministic for small fixture)
  */
 function normalizeForSnapshot(report: RepoReport): unknown {
   const normalized = JSON.parse(JSON.stringify(report)) as RepoReport;
   normalized.repoPath = "<repoPath>";
+  normalized.source = {
+    type: report.source.type,
+    url: report.source.url,
+    commit: "<commit>",
+    branch: "<branch>",
+  };
   normalized.git = null;
+  normalized.gitMetricsV2 = null;
   return normalized;
 }
 

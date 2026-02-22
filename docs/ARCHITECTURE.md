@@ -11,6 +11,14 @@ CLI (src/cli.ts)
  └─ Batch mode:   batchAnalyze(opts) → JSON per repo + optional CSV
 ```
 
+## GitHub URL Support
+
+Single-mode accepts `https://github.com/owner/repo` URLs. The CLI:
+1. Validates URL format (`parseGitHubUrl`)
+2. Clones to `.cache/ts-repo-metrics/<owner-repo>` (full clone, no shallow)
+3. Reuses cached clone unless `--no-cache`
+4. Reports `source.type: "git"` with url, commit, branch
+
 ## Data Flow
 
 ```

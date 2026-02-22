@@ -1,6 +1,6 @@
 # ts-repo-metrics
 
-A TypeScript CLI tool that statically analyzes TypeScript and TSX repositories using [Tree-sitter](https://tree-sitter.github.io/tree-sitter/), producing a comprehensive JSON report covering repository profiling, function metrics, cyclomatic complexity, code smells, duplication, git history, framework detection, maintainability index, and test coverage proxy.
+A TypeScript CLI tool that statically analyzes TypeScript and TSX repositories using [Tree-sitter](https://tree-sitter.github.io/tree-sitter/), producing a comprehensive JSON report covering repository profiling, function metrics, cyclomatic complexity, code smells, duplication, git history, extended git metrics (Epic D: commit size distribution, bursts, entropy, churn hotspots, test coupling, refactor rate), framework detection, maintainability index, and test coverage proxy.
 
 ## Prerequisites
 
@@ -20,9 +20,22 @@ npm install
 
 ### Single Repository
 
+Local path (or legacy: path as first arg):
+
 ```bash
-npm run dev -- /absolute/path/to/target/repo
+npm run dev -- analyze /absolute/path/to/target/repo
+npm run dev -- /path/to/repo   # legacy shorthand
 ```
+
+GitHub public repo URL (clones into `.cache/ts-repo-metrics/`):
+
+```bash
+npm run dev -- analyze https://github.com/user/repo [--no-cache]
+```
+
+| Flag | Description |
+|------|-------------|
+| `--no-cache` | Force a fresh clone instead of reusing cached clone |
 
 ### Batch Mode
 
@@ -42,6 +55,12 @@ npm run dev -- batch /path/to/repos-folder --output ./reports --csv
 ```json
 {
   "repoPath": "/path/to/repo",
+  "source": {
+    "type": "local",
+    "url": "",
+    "commit": "abc123",
+    "branch": "main"
+  },
   "filesAnalyzed": 19,
   "profile": {
     "totalFiles": 19,
@@ -128,7 +147,9 @@ src/
 │   ├── fileDiscovery.ts            # Finds .ts/.tsx files via fast-glob
 │   ├── loc.ts                      # Repository profiling (LOC + file types)
 │   ├── duplication.ts              # jscpd code duplication detection
+│   ├── gitClone.ts                 # Clone GitHub repos with cache
 │   ├── gitMetrics.ts               # Git history metrics via simple-git
+│   ├── repoMetadata.ts             # Source metadata (commit, branch)
 │   └── frameworkDetection.ts       # Framework detection from package.json
 ├── parsing/
 │   └── tsParser.ts                 # Tree-sitter wrapper (TS & TSX grammars)
@@ -145,6 +166,7 @@ src/
 │   └── report.ts                   # Shared TypeScript interfaces (RepoReport)
 └── utils/
     ├── constants.ts                # Shared constants and thresholds
+    ├── githubUrl.ts                # GitHub URL parsing and validation
     ├── math.ts                     # Numeric utilities (median)
     └── text.ts                     # Text utilities (line counting)
 ```
