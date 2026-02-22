@@ -62,6 +62,18 @@ npm run dev -- batch /path/to/repos-folder --output ./reports --csv
     "branch": "main"
   },
   "filesAnalyzed": 19,
+  "filesSkipped": 0,
+  "analyzer_version": "1.0.0",
+  "analysis_timestamp": "2025-02-22T12:00:00.000Z",
+  "distributions": {
+    "p50_function_length": 12,
+    "p75_function_length": 24,
+    "p90_function_length": 45,
+    "p50_complexity": 1,
+    "p75_complexity": 3,
+    "p90_complexity": 6,
+    "percent_high_complexity_in_top_10_percent_files": 85.2
+  },
   "profile": {
     "totalFiles": 19,
     "tsFiles": 19,
@@ -127,6 +139,7 @@ npm run dev -- batch /path/to/repos-folder --output ./reports --csv
 | Section | Source | Description |
 |---------|--------|-------------|
 | `profile` | LOC counting | File counts, LOC (total/source/test) |
+| `distributions` | `extract/distributions` | Tail risk: p50/p75/p90 for function length & complexity, concentration |
 | `functionMetricsSummary` | AST | Avg/median function length, max nesting, long function % |
 | `complexity` | AST | Cyclomatic complexity (avg, max, high-complexity count) |
 | `smells` | AST | Long functions, deep nesting, long params, empty catches, console logs |
@@ -135,6 +148,16 @@ npm run dev -- batch /path/to/repos-folder --output ./reports --csv
 | `duplication` | jscpd | Duplicate percentage, lines, clone clusters |
 | `git` | simple-git | Commit count, sizes, frequency, large commit ratio |
 | `framework` | package.json | React, Next.js, Express, NestJS, Fastify, or Node |
+
+## Dashboard
+
+A Next.js dashboard app in `apps/dashboard/` provides a web UI:
+
+- Analyze public GitHub repos from URL
+- RQ-driven results (RQ1 Behavioral Shift, RQ2 Verification & Engagement, RQ3 Quality Outcomes)
+- Dataset tab: metadata, feature vector, data dictionary, export
+
+Run with `npm run dashboard` (starts `next dev` in `apps/dashboard/`).
 
 ## Project Structure
 
@@ -199,6 +222,7 @@ src/
 | `dev` | `tsx src/cli.ts` | Run directly from TypeScript |
 | `build` | `tsc -p tsconfig.json` | Compile to JavaScript in `dist/` |
 | `start` | `node dist/cli.js` | Run the compiled build |
+| `dashboard` | `cd apps/dashboard && npm run dev` | Start Next.js dashboard |
 | `test` | `vitest run` | Run tests once |
 | `test:watch` | `vitest` | Run tests in watch mode |
 

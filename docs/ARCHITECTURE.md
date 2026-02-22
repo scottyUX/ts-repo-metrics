@@ -38,7 +38,7 @@ Single-mode accepts `https://github.com/owner/repo` URLs. The CLI:
    ┌──────────┐  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐
    │ collect/ │  │ parsing/ │ │ extract/ │ │ extract/ │ │ extract/ │
    │ loc.ts   │  │ tsParser │ │ fnCount  │ │ complex. │ │ smells   │
-   │ fileDis. │  │          │ │ fnMetric │ │          │ │ testCov  │
+   │ fileDis. │  │          │ │ fnMetric │ │ distrib. │ │ testCov  │
    │ dup.ts   │  │          │ │ maintIdx │ │          │ │          │
    │ git.ts   │  │          │ │          │ │          │ │          │
    │ fwDetect │  │          │ │          │ │          │ │          │
@@ -72,6 +72,14 @@ Single-mode accepts `https://github.com/owner/repo` URLs. The CLI:
 3. **Add constants/thresholds** to `src/utils/constants.ts`.
 4. **Integrate** in `src/pipeline/analyzeRepo.ts` — call the extractor and add the result to the return object.
 5. **Update docs** — `docs/SCHEMA.md` field reference, `README.md` example output.
+
+## Distribution Metrics (`extract/distributions.ts`)
+
+Computes tail-risk indicators for research:
+- **Percentiles**: p50/p75/p90 for function length and cyclomatic complexity
+- **Concentration**: `percent_high_complexity_in_top_10_percent_files` — what fraction of high-complexity functions (>10) reside in the top 10% of files by total complexity
+
+Used by the dashboard's RQ3 Quality Outcomes tab and Dataset feature vector.
 
 ## AST Walker
 
