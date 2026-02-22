@@ -12,7 +12,11 @@ import { randomUUID } from "node:crypto";
 import { resultsStore } from "@/lib/resultsStore";
 
 function parseGitHubUrl(url: string): { owner: string; repo: string } | null {
-  const m = url.match(
+  const trimmed = url.trim();
+  const full = trimmed.startsWith("http")
+    ? trimmed
+    : `https://github.com/${trimmed}`;
+  const m = full.match(
     /(?:https?:\/\/)?(?:www\.)?github\.com\/([a-zA-Z0-9_.-]+)\/([a-zA-Z0-9_.-]+)/
   );
   if (!m) return null;
@@ -20,8 +24,10 @@ function parseGitHubUrl(url: string): { owner: string; repo: string } | null {
 }
 
 function isValidGitHubUrl(input: string): boolean {
+  const trimmed = input.trim();
+  if (/^[a-zA-Z0-9_.-]+\/[a-zA-Z0-9_.-]+$/.test(trimmed)) return true;
   return /^(?:https?:\/\/)?(?:www\.)?github\.com\/[a-zA-Z0-9_.-]+\/[a-zA-Z0-9_.-]+/.test(
-    input.trim()
+    trimmed
   );
 }
 
@@ -44,8 +50,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const normalizedUrl = url.startsWith("http")
-      ? url
+    const normalizedUrl =
+      url.startsWith("http") ?
+        url
+      : url.includes("/") && !url.includes("github.com")
+        ? `https://github.com/${url}`
       : `https://${url}`;
 
     const repoRoot = path.join(process.cwd(), "..", "..");

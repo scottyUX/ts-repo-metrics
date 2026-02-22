@@ -2,10 +2,21 @@
 
 exports[`analyzeRepo snapshot > produces stable report structure for fixture repo 1`] = `
 {
+  "analysis_timestamp": "<timestamp>",
+  "analyzer_version": "1.0.0",
   "complexity": {
     "average": 1.3,
     "highComplexityFunctions": 0,
     "max": 2,
+  },
+  "distributions": {
+    "p50_complexity": 1,
+    "p50_function_length": 3,
+    "p75_complexity": 2,
+    "p75_function_length": 4,
+    "p90_complexity": 2,
+    "p90_function_length": 4,
+    "percent_high_complexity_in_top_10_percent_files": 0,
   },
   "duplication": {
     "cloneClusters": 0,

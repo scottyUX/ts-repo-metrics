@@ -176,6 +176,17 @@ export interface PerFileEntry {
   complexity: FunctionComplexity[];
 }
 
+/** Distribution percentiles for function length and complexity (tail risk indicators). */
+export interface DistributionMetrics {
+  p50_function_length: number;
+  p75_function_length: number;
+  p90_function_length: number;
+  p50_complexity: number;
+  p75_complexity: number;
+  p90_complexity: number;
+  percent_high_complexity_in_top_10_percent_files: number;
+}
+
 /**
  * Complete repository analysis report.
  *
@@ -186,6 +197,14 @@ export interface RepoReport {
   repoPath: string;
   source: SourceInfo;
   filesAnalyzed: number;
+  /** Files skipped due to read or parse errors. */
+  filesSkipped?: number;
+  /** Analyzer package version (e.g. from package.json). */
+  analyzer_version?: string;
+  /** ISO 8601 timestamp when analysis ran. */
+  analysis_timestamp?: string;
+  /** Distribution percentiles (p50/p75/p90) and concentration metric. */
+  distributions?: DistributionMetrics;
   profile: RepoProfile;
   totals: { functions: number };
   functionMetricsSummary: FunctionMetricsSummary;

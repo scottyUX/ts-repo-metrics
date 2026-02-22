@@ -1,12 +1,14 @@
 /**
  * Results page: displays analysis result for a given resultId.
- * Fetches from /api/results/[id]. Placeholder for full dashboard (Story 2.x).
+ * Fetches from /api/results/[id]. Renders ResultsDashboard with KPIs, hotspots, file table.
  */
 
 import { Metadata } from "next";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { ResultsDashboard } from "@/components/results/ResultsDashboard";
+import type { RepoReport } from "@/lib/reportTypes";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -28,7 +30,7 @@ async function getBaseUrl(): Promise<string> {
 export default async function ResultsPage({ params }: PageProps) {
   const { id } = await params;
 
-  let data: unknown = null;
+  let data: RepoReport | null = null;
   let error: string | null = null;
 
   try {
@@ -37,7 +39,7 @@ export default async function ResultsPage({ params }: PageProps) {
       cache: "no-store",
     });
     if (res.ok) {
-      data = await res.json();
+      data = (await res.json()) as RepoReport;
     } else {
       const body = await res.json();
       error = body.error ?? "Not found";
@@ -58,26 +60,11 @@ export default async function ResultsPage({ params }: PageProps) {
     );
   }
 
-  const report = data as { repoPath?: string; source?: { commit?: string; url?: string } };
-  const commit = report?.source?.commit?.slice(0, 7) ?? "—";
+  if (!data) return null;
 
   return (
-    <div className="mx-auto max-w-4xl space-y-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Analysis Results</h1>
-          <p className="text-muted-foreground text-sm">
-            Commit: {commit}
-          </p>
-        </div>
-        <Button asChild variant="outline">
-          <Link href="/">New Analysis</Link>
-        </Button>
-      </div>
-
-      <pre className="overflow-auto rounded-lg border bg-muted/50 p-4 text-sm">
-        {JSON.stringify(data, null, 2)}
-      </pre>
+    <div className="w-full max-w-6xl">
+      <ResultsDashboard report={data} resultId={id} />
     </div>
   );
 }

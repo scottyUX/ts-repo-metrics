@@ -22,6 +22,7 @@ import { computeComplexity, summarizeComplexity } from "../extract/complexity.js
 import { detectSmells } from "../extract/smells.js";
 import { computeTestCoverageProxy } from "../extract/testCoverageProxy.js";
 import { computeMaintainabilityIndex } from "../extract/maintainabilityIndex.js";
+import { computeDistributions } from "../extract/distributions.js";
 import { LONG_FUNCTION_THRESHOLD } from "../utils/constants.js";
 import { median } from "../utils/math.js";
 import { getSourceMetadata } from "../collect/repoMetadata.js";
@@ -72,6 +73,7 @@ export async function analyzeRepo(
     consoleLogs: 0,
   };
   const perFile: PerFileEntry[] = [];
+  let filesSkipped = 0;
 
   for (const filePath of files) {
     let code: string;
@@ -79,6 +81,7 @@ export async function analyzeRepo(
       code = await readFile(filePath, "utf8");
     } catch {
       console.error(`Skipping ${path.relative(repoPath, filePath)}: could not read file`);
+      filesSkipped++;
       continue;
     }
 
@@ -87,6 +90,7 @@ export async function analyzeRepo(
       tree = parseTypeScript(code, flavorForFile(filePath));
     } catch (err) {
       console.error(`Skipping ${path.relative(repoPath, filePath)}: parse error`, err instanceof Error ? err.message : err);
+      filesSkipped++;
       continue;
     }
 
@@ -127,6 +131,11 @@ export async function analyzeRepo(
   };
 
   const complexitySummary = summarizeComplexity(allComplexities);
+  const distributions = computeDistributions(
+    allFunctionDetails,
+    allComplexities,
+    perFile,
+  );
   const maintainability = computeMaintainabilityIndex(
     complexitySummary.average,
     profile.totalLOC,
@@ -138,10 +147,23 @@ export async function analyzeRepo(
   const gitMetricsV2 = await extractGitMetricsV2(repoPath);
   const framework = await detectFramework(repoPath);
 
+  let analyzer_version: string | undefined;
+  try {
+    const pkgPath = path.join(process.cwd(), "package.json");
+    const pkg = JSON.parse(await readFile(pkgPath, "utf8")) as { version?: string };
+    analyzer_version = pkg.version;
+  } catch {
+    // ignore
+  }
+
   return {
     repoPath,
     source,
-    filesAnalyzed: files.length,
+    filesAnalyzed: perFile.length,
+    filesSkipped: filesSkipped > 0 ? filesSkipped : undefined,
+    analyzer_version,
+    analysis_timestamp: new Date().toISOString(),
+    distributions,
     profile,
     totals: {
       functions: totalFunctions,

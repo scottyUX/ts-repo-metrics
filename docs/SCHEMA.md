@@ -8,7 +8,11 @@ This document describes the complete JSON report produced by `ts-repo-metrics`.
 |-------|------|----------|-------------|
 | `repoPath` | `string` | no | Absolute path to the analyzed repository |
 | `source` | `SourceInfo` | no | Origin metadata (local path vs cloned GitHub URL) |
-| `filesAnalyzed` | `number` | no | Total `.ts`/`.tsx` files parsed |
+| `filesAnalyzed` | `number` | no | Total `.ts`/`.tsx` files successfully parsed |
+| `filesSkipped` | `number` | **yes** | Files skipped due to read or parse errors |
+| `analyzer_version` | `string` | **yes** | Analyzer package version (from package.json) |
+| `analysis_timestamp` | `string` | **yes** | ISO 8601 timestamp when analysis ran |
+| `distributions` | `DistributionMetrics` | **yes** | Tail risk indicators (p50/p75/p90, concentration) |
 | `profile` | `RepoProfile` | no | File counts and LOC breakdown |
 | `totals` | `object` | no | Aggregate metrics |
 | `totals.functions` | `number` | no | Total function-like nodes |
@@ -22,6 +26,20 @@ This document describes the complete JSON report produced by `ts-repo-metrics`.
 | `gitMetricsV2` | `GitMetricsV2` | **yes** | Extended git metrics (Epic D; null for non-git repos) |
 | `framework` | `FrameworkInfo` | **yes** | Detected framework (null if no package.json) |
 | `perFile` | `PerFileEntry[]` | no | Per-file metrics |
+
+## `distributions` — Distribution Metrics (optional)
+
+Tail risk indicators for research. Percentiles computed across all functions.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `p50_function_length` | `number` | 50th percentile function length (LOC) |
+| `p75_function_length` | `number` | 75th percentile function length (LOC) |
+| `p90_function_length` | `number` | 90th percentile function length (LOC) |
+| `p50_complexity` | `number` | 50th percentile cyclomatic complexity |
+| `p75_complexity` | `number` | 75th percentile cyclomatic complexity |
+| `p90_complexity` | `number` | 90th percentile cyclomatic complexity |
+| `percent_high_complexity_in_top_10_percent_files` | `number` | % of high-complexity functions in the top 10% of files by total complexity |
 
 ## `source` — Source Metadata
 
