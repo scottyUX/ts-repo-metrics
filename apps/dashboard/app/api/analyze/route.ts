@@ -33,6 +33,17 @@ function isValidGitHubUrl(input: string): boolean {
 
 export async function POST(request: NextRequest) {
   try {
+    if (process.env.VERCEL) {
+      return NextResponse.json(
+        {
+          error:
+            "Analysis is not available in this deployment. The CLI requires the full monorepo. Run locally: npm run dashboard",
+          status: "unavailable",
+        },
+        { status: 503 }
+      );
+    }
+
     const body = await request.json();
     const url = (body?.url ?? "").toString().trim();
 

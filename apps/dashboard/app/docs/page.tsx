@@ -1,13 +1,15 @@
+import DocsContent from "@/components/docs/DocsContent";
+
 export const metadata = {
   title: "Docs | Repo Metrics",
-  description: "Documentation for Repo Metrics",
+  description:
+    "Technical documentation: overview, architecture, metrics, data pipeline, reproducibility.",
 };
 
 export default function DocsPage() {
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
-      <h1 className="text-2xl font-bold">Docs</h1>
-      <p className="text-muted-foreground">Documentation coming soon.</p>
+    <div className="container py-8">
+      <DocsContent />
     </div>
   );
 }

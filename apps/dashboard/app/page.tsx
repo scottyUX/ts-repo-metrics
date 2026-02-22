@@ -55,18 +55,18 @@ export default function HomePage() {
       {/* Pill */}
       <div className="flex justify-center">
         <span className="inline-flex items-center rounded-full border border-border bg-background px-3 py-1 text-xs text-muted-foreground">
-          Free for public repos · No signup
+          Static analysis for TypeScript repositories
         </span>
       </div>
 
       {/* Headline */}
       <div className="space-y-4 text-center">
         <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
-          Analyze any repo like you wrote it
+          Analyze public TypeScript repositories
         </h1>
         <p className="text-lg text-muted-foreground max-w-xl mx-auto">
-          Paste a GitHub URL. Get quality scores, complexity hotspots, and code
-          metrics.
+          Enter a GitHub URL to run cyclomatic complexity, function metrics,
+          maintainability, and git behavior analysis.
         </p>
       </div>
 
