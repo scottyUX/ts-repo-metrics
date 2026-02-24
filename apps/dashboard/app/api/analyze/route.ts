@@ -6,10 +6,12 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import path from "node:path";
-import { spawn } from "node:child_process";
+import os from "node:os";
 import { randomUUID } from "node:crypto";
-import { resultsStore } from "@/lib/resultsStore";
+import { getSupabase } from "@/lib/supabase/server";
+import { analyzeFromGitHubUrl } from "@repo-metrics/engine";
+
+export const runtime = "nodejs";
 
 function parseGitHubUrl(url: string): { owner: string; repo: string } | null {
   const trimmed = url.trim();
@@ -33,17 +35,6 @@ function isValidGitHubUrl(input: string): boolean {
 
 export async function POST(request: NextRequest) {
   try {
-    if (process.env.VERCEL) {
-      return NextResponse.json(
-        {
-          error:
-            "Analysis is not available in this deployment. The CLI requires the full monorepo. Run locally: npm run dashboard",
-          status: "unavailable",
-        },
-        { status: 503 }
-      );
-    }
-
     const body = await request.json();
     const url = (body?.url ?? "").toString().trim();
 
@@ -66,51 +57,39 @@ export async function POST(request: NextRequest) {
         url
       : url.includes("/") && !url.includes("github.com")
         ? `https://github.com/${url}`
-      : `https://${url}`;
+        : `https://${url}`;
 
-    const repoRoot = path.join(process.cwd(), "..", "..");
-    const cliPath = path.join(repoRoot, "src", "cli.ts");
-
-    const result = await new Promise<string>((resolve, reject) => {
-      const proc = spawn("npx", ["tsx", cliPath, "analyze", normalizedUrl], {
-        cwd: repoRoot,
-        stdio: ["ignore", "pipe", "pipe"],
-      });
-
-      let stdout = "";
-      let stderr = "";
-
-      proc.stdout?.on("data", (c) => (stdout += c.toString()));
-      proc.stderr?.on("data", (c) => (stderr += c.toString()));
-
-      proc.on("close", (code) => {
-        if (code !== 0) {
-          reject(new Error(stderr || `Process exited with code ${code}`));
-          return;
-        }
-        resolve(stdout);
-      });
-
-      proc.on("error", reject);
+    const cacheDir = process.env.VERCEL ? os.tmpdir() : process.cwd();
+    const report = await analyzeFromGitHubUrl(normalizedUrl, {
+      useCache: true,
+      cacheDir,
     });
 
-    let report: unknown;
-    try {
-      report = JSON.parse(result);
-    } catch {
+    const parsed = parseGitHubUrl(normalizedUrl);
+    const commitSha = report.source?.commit ?? null;
+    const resultId =
+      parsed
+        ? `${parsed.owner}-${parsed.repo}-${(commitSha ?? randomUUID()).slice(0, 12)}`
+        : randomUUID();
+
+    const row = {
+      result_id: resultId,
+      repo_url: normalizedUrl,
+      commit_sha: commitSha,
+      report_json: report as object,
+    };
+
+    const { error } = await getSupabase()
+      .from("analyses")
+      .upsert(row, { onConflict: "result_id" });
+
+    if (error) {
+      console.error("Supabase upsert failed:", error);
       return NextResponse.json(
-        { error: "Analysis succeeded but produced invalid JSON." },
+        { error: "Failed to save result.", status: "failed" },
         { status: 500 }
       );
     }
-
-    const parsed = parseGitHubUrl(normalizedUrl);
-    const resultId =
-      parsed && typeof report === "object" && report !== null && "source" in report
-        ? `${parsed.owner}-${parsed.repo}-${(report as { source?: { commit?: string } }).source?.commit?.slice(0, 7) ?? randomUUID().slice(0, 7)}`
-        : randomUUID();
-
-    resultsStore.set(resultId, report);
 
     return NextResponse.json({
       status: "done",
@@ -126,4 +105,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-

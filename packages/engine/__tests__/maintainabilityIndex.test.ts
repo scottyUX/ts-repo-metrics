@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { computeMaintainabilityIndex } from "../extract/maintainabilityIndex.js";
+import { computeMaintainabilityIndex } from "../src/extract/maintainabilityIndex.js";
 
 describe("computeMaintainabilityIndex", () => {
   it("returns high classification for good metrics", () => {

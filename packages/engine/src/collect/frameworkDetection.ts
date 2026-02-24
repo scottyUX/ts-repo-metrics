@@ -54,7 +54,7 @@ export async function detectFramework(
     const hasBackend = hasExpress || hasNest || hasFastify || hasNext;
 
     let type = "Node";
-    if (hasNext) type = "Next.js";
+    if (hasNext) type = "Next";
     else if (hasNest) type = "NestJS";
     else if (hasFastify) type = "Fastify";
     else if (hasExpress) type = "Express";

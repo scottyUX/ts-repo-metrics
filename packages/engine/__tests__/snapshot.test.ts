@@ -8,8 +8,8 @@
 import { describe, it, expect } from "vitest";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { analyzeRepo } from "../pipeline/analyzeRepo.js";
-import type { RepoReport } from "../types/report.js";
+import { analyzeRepo } from "../src/pipeline/analyzeRepo.js";
+import type { RepoReport } from "../src/types/report.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const FIXTURE_PATH = path.resolve(__dirname, "fixtures", "sample-repo");

@@ -5,8 +5,8 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { parseTypeScript } from "../parsing/tsParser.js";
-import { extractFunctionMetrics } from "../extract/functionMetrics.js";
+import { parseTypeScript } from "../src/parsing/tsParser.js";
+import { extractFunctionMetrics } from "../src/extract/functionMetrics.js";
 
 describe("extractFunctionMetrics", () => {
   it("returns empty functions for empty program", () => {

@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { computeTestCoverageProxy } from "../extract/testCoverageProxy.js";
+import { computeTestCoverageProxy } from "../src/extract/testCoverageProxy.js";
 
 describe("computeTestCoverageProxy", () => {
   it("returns low when sourceLOC is 0", () => {

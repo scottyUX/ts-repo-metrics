@@ -4,8 +4,8 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { parseTypeScript } from "../parsing/tsParser.js";
-import { countFunctions } from "../extract/functionCount.js";
+import { parseTypeScript } from "../src/parsing/tsParser.js";
+import { countFunctions } from "../src/extract/functionCount.js";
 
 describe("countFunctions", () => {
   it("returns 0 for empty program", () => {

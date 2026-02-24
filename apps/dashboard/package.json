@@ -4,11 +4,14 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "npm run build:engine && next build",
+    "build:engine": "cd ../.. && cd packages/engine && npm run build",
     "start": "next start",
     "lint": "eslint"
   },
   "dependencies": {
+    "@repo-metrics/engine": "file:../../packages/engine",
+    "@supabase/supabase-js": "^2.47.0",
     "@radix-ui/react-tabs": "^1.1.13",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

@@ -66,11 +66,11 @@ async function parseLogWithNumstat(repoPath: string): Promise<ParsedCommit[]> {
     for (const line of numstatLines) {
       const parts = line.split("\t");
       if (parts.length < 3) continue;
-      const add = parseInt(parts[0], 10) || 0;
-      const del = parseInt(parts[1], 10) || 0;
-      const path = parts[2]!;
-      if (path === "-" || !path.trim()) continue;
-      files.push({ path, add, del });
+      const add = parseInt(parts[0] ?? "0", 10) || 0;
+      const del = parseInt(parts[1] ?? "0", 10) || 0;
+      const filePath = parts[2] ?? "";
+      if (filePath === "-" || !filePath.trim()) continue;
+      files.push({ path: filePath, add, del });
       totalLines += add + del;
     }
 

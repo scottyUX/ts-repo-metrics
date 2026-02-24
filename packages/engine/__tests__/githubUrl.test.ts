@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { parseGitHubUrl, isGitHubUrl } from "../utils/githubUrl.js";
+import { parseGitHubUrl, isGitHubUrl } from "../src/utils/githubUrl.js";
 
 describe("parseGitHubUrl", () => {
   it("parses valid https URL", () => {

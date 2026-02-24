@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { median } from "../utils/math.js";
+import { median } from "../src/utils/math.js";
 
 describe("median", () => {
   it("returns 0 for empty array", () => {

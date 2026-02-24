@@ -5,8 +5,8 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { parseTypeScript } from "../parsing/tsParser.js";
-import { computeComplexity, summarizeComplexity } from "../extract/complexity.js";
+import { parseTypeScript } from "../src/parsing/tsParser.js";
+import { computeComplexity, summarizeComplexity } from "../src/extract/complexity.js";
 
 describe("computeComplexity", () => {
   it("returns complexity 1 for function with no branches", () => {

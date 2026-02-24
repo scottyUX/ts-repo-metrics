@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { parseTypeScript } from "../parsing/tsParser.js";
+import { parseTypeScript } from "../src/parsing/tsParser.js";
 import {
   detectEmptyCatchBlocks,
   detectConsoleLogs,
@@ -13,7 +13,7 @@ import {
   detectLongFunctions,
   detectDeepNesting,
   detectSmells,
-} from "../extract/smells.js";
+} from "../src/extract/smells.js";
 
 describe("detectEmptyCatchBlocks", () => {
   it("returns 0 when no catch blocks", () => {

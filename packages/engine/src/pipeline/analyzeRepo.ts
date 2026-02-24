@@ -9,6 +9,7 @@
 
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { discoverSourceFiles } from "../collect/fileDiscovery.js";
 import { profileRepo } from "../collect/loc.js";
 import { detectDuplication } from "../collect/duplication.js";
@@ -149,7 +150,9 @@ export async function analyzeRepo(
 
   let analyzer_version: string | undefined;
   try {
-    const pkgPath = path.join(process.cwd(), "package.json");
+    const __dirname = path.dirname(fileURLToPath(import.meta.url));
+    const packageRoot = path.join(__dirname, "..", "..");
+    const pkgPath = path.join(packageRoot, "package.json");
     const pkg = JSON.parse(await readFile(pkgPath, "utf8")) as { version?: string };
     analyzer_version = pkg.version;
   } catch {

@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { extractGitMetricsV2 } from "../collect/gitMetricsV2.js";
+import { extractGitMetricsV2 } from "../src/collect/gitMetricsV2.js";
 
 const mockRaw = vi.fn();
 const mockCheckIsRepo = vi.fn();

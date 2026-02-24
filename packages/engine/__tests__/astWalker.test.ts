@@ -4,8 +4,8 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { parseTypeScript } from "../parsing/tsParser.js";
-import { walkTree, SKIP } from "../utils/astWalker.js";
+import { parseTypeScript } from "../src/parsing/tsParser.js";
+import { walkTree, SKIP } from "../src/utils/astWalker.js";
 
 describe("walkTree", () => {
   it("calls enter before leave for each node", () => {

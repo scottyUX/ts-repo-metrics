@@ -4,8 +4,8 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { computeDistributions } from "../extract/distributions.js";
-import type { FunctionDetail, FunctionComplexity, PerFileEntry } from "../types/report.js";
+import { computeDistributions } from "../src/extract/distributions.js";
+import type { FunctionDetail, FunctionComplexity, PerFileEntry } from "../src/types/report.js";
 
 describe("computeDistributions", () => {
   it("returns zeros for empty inputs", () => {
