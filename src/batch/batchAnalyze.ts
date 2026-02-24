@@ -8,8 +8,7 @@
 
 import { readdir, stat, mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { analyzeRepo } from "../pipeline/analyzeRepo.js";
-import type { RepoReport } from "../types/report.js";
+import { analyzeRepo, type RepoReport } from "@repo-metrics/engine";
 
 /**
  * Check whether a directory looks like a valid repo (has package.json).

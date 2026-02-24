@@ -1,0 +1,162 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`analyzeRepo snapshot > produces stable report structure for fixture repo 1`] = `
+{
+  "analysis_timestamp": "<timestamp>",
+  "analyzer_version": "0.0.0",
+  "complexity": {
+    "average": 1.3,
+    "highComplexityFunctions": 0,
+    "max": 2,
+  },
+  "distributions": {
+    "p50_complexity": 1,
+    "p50_function_length": 3,
+    "p75_complexity": 2,
+    "p75_function_length": 4,
+    "p90_complexity": 2,
+    "p90_function_length": 4,
+    "percent_high_complexity_in_top_10_percent_files": 0,
+  },
+  "duplication": {
+    "cloneClusters": 0,
+    "duplicateLines": 0,
+    "percentage": 0,
+  },
+  "filesAnalyzed": 2,
+  "framework": null,
+  "functionMetricsSummary": {
+    "averageLength": 3.3,
+    "longFunctionPercentage": 0,
+    "maxNestingDepth": 1,
+    "medianLength": 3,
+    "totalFunctions": 4,
+  },
+  "git": null,
+  "gitMetricsV2": null,
+  "maintainability": {
+    "classification": "high",
+    "score": 87.5,
+  },
+  "perFile": [
+    {
+      "complexity": [
+        {
+          "complexity": 1,
+          "name": "add",
+          "startLine": 9,
+          "type": "function_declaration",
+        },
+        {
+          "complexity": 1,
+          "name": "greet",
+          "startLine": 5,
+          "type": "function_declaration",
+        },
+      ],
+      "file": "index.ts",
+      "functionMetrics": [
+        {
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "name": "add",
+          "parameterCount": 2,
+          "startLine": 9,
+          "type": "function_declaration",
+        },
+        {
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "name": "greet",
+          "parameterCount": 1,
+          "startLine": 5,
+          "type": "function_declaration",
+        },
+      ],
+      "functions": 2,
+      "functionsByType": {
+        "arrow_function": 0,
+        "function": 0,
+        "function_declaration": 2,
+        "generator_function": 0,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+      },
+    },
+    {
+      "complexity": [
+        {
+          "complexity": 1,
+          "name": "isEven",
+          "startLine": 10,
+          "type": "function_declaration",
+        },
+        {
+          "complexity": 2,
+          "name": "capitalize",
+          "startLine": 5,
+          "type": "function_declaration",
+        },
+      ],
+      "file": "utils.ts",
+      "functionMetrics": [
+        {
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "name": "isEven",
+          "parameterCount": 1,
+          "startLine": 10,
+          "type": "function_declaration",
+        },
+        {
+          "lines": 4,
+          "maxNestingDepth": 1,
+          "name": "capitalize",
+          "parameterCount": 1,
+          "startLine": 5,
+          "type": "function_declaration",
+        },
+      ],
+      "functions": 2,
+      "functionsByType": {
+        "arrow_function": 0,
+        "function": 0,
+        "function_declaration": 2,
+        "generator_function": 0,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+      },
+    },
+  ],
+  "profile": {
+    "sourceLOC": 23,
+    "testFiles": 0,
+    "testLOC": 0,
+    "totalFiles": 2,
+    "totalLOC": 23,
+    "tsFiles": 2,
+    "tsxFiles": 0,
+  },
+  "repoPath": "<repoPath>",
+  "smells": {
+    "consoleLogs": 0,
+    "deepNesting": 0,
+    "emptyCatchBlocks": 0,
+    "longFunctions": 0,
+    "longParameterLists": 0,
+  },
+  "source": {
+    "branch": "<branch>",
+    "commit": "<commit>",
+    "type": "local",
+    "url": "",
+  },
+  "testCoverageProxy": {
+    "classification": "low",
+    "ratio": 0,
+  },
+  "totals": {
+    "functions": 4,
+  },
+}
+`;
