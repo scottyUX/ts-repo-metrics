@@ -1,0 +1,42 @@
+---
+description: How to deploy the Next.js dashboard to Vercel
+globs: apps/dashboard/**/*
+alwaysApply: false
+---
+
+# Dashboard Deployment (Vercel)
+
+Use this rule when deploying the repo-metrics dashboard to Vercel.
+
+## Prerequisites
+
+- **Vercel CLI**: `npx vercel` or `vercel` (logged in).
+- **Project linked**: Root Directory set to `apps/dashboard` in the Vercel project settings.
+- **Include source files outside of Root Directory**: Enabled (so the build can access `packages/engine`).
+
+Full details: [apps/dashboard/VERCEL_DEPLOY.md](apps/dashboard/VERCEL_DEPLOY.md).
+
+## Steps
+
+1. **From repo root** (`repo-metrics/`), ensure dependencies are installed:
+   - `npm install`
+   - Optionally `cd apps/dashboard && npm install` so the engine is linked.
+
+2. **Deploy**:
+   ```bash
+   npx vercel --prod
+   ```
+   (Or `vercel --prod` if the CLI is installed globally.)
+
+3. **Confirm build**: The build runs the dashboard’s `npm run build`, which runs `build:engine` (builds `packages/engine` to `dist/`) then `next build`. No extra steps required.
+
+4. **Verify**: After deploy, open the deployment URL and run an Analyze request (e.g. a small public GitHub repo) to confirm the in-process engine path works.
+
+## Build order
+
+Dashboard `npm run build` already runs:
+
+1. `build:engine` — `cd ../.. && cd packages/engine && npm run build`
+2. `next build`
+
+Do not change the build command to skip the engine build; the API route depends on `@repo-metrics/engine` (built `dist/`).

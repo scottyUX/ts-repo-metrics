@@ -10,7 +10,7 @@ This document describes the complete JSON report produced by `ts-repo-metrics`.
 | `source` | `SourceInfo` | no | Origin metadata (local path vs cloned GitHub URL) |
 | `filesAnalyzed` | `number` | no | Total `.ts`/`.tsx` files successfully parsed |
 | `filesSkipped` | `number` | **yes** | Files skipped due to read or parse errors |
-| `analyzer_version` | `string` | **yes** | Analyzer package version (from package.json) |
+| `analyzer_version` | `string` | **yes** | Analyzer package version (from `packages/engine/package.json` when run via the engine — CLI or dashboard) |
 | `analysis_timestamp` | `string` | **yes** | ISO 8601 timestamp when analysis ran |
 | `distributions` | `DistributionMetrics` | **yes** | Tail risk indicators (p50/p75/p90, concentration) |
 | `profile` | `RepoProfile` | no | File counts and LOC breakdown |

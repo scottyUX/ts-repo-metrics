@@ -52,6 +52,8 @@ npm run dev -- batch /path/to/repos-folder --output ./reports --csv
 
 ### Example Output (single repo)
 
+When run via the engine (CLI or dashboard), `analyzer_version` is the engine package version (e.g. `0.0.0`).
+
 ```json
 {
   "repoPath": "/path/to/repo",
@@ -63,7 +65,7 @@ npm run dev -- batch /path/to/repos-folder --output ./reports --csv
   },
   "filesAnalyzed": 19,
   "filesSkipped": 0,
-  "analyzer_version": "1.0.0",
+  "analyzer_version": "0.0.0",
   "analysis_timestamp": "2025-02-22T12:00:00.000Z",
   "distributions": {
     "p50_function_length": 12,
@@ -161,37 +163,26 @@ Run with `npm run dashboard` (starts `next dev` in `apps/dashboard/`).
 
 ## Project Structure
 
+Analysis logic lives in a single **engine** package. The CLI and the dashboard both consume `@repo-metrics/engine`; no subprocess or tsx.
+
 ```
-src/
-├── cli.ts                          # CLI entrypoint (single + batch)
-├── batch/
-│   └── batchAnalyze.ts             # Multi-repo batch analysis
-├── collect/
-│   ├── fileDiscovery.ts            # Finds .ts/.tsx files via fast-glob
-│   ├── loc.ts                      # Repository profiling (LOC + file types)
-│   ├── duplication.ts              # jscpd code duplication detection
-│   ├── gitClone.ts                 # Clone GitHub repos with cache
-│   ├── gitMetrics.ts               # Git history metrics via simple-git
-│   ├── repoMetadata.ts             # Source metadata (commit, branch)
-│   └── frameworkDetection.ts       # Framework detection from package.json
-├── parsing/
-│   └── tsParser.ts                 # Tree-sitter wrapper (TS & TSX grammars)
-├── extract/
-│   ├── functionCount.ts            # Counts functions by AST node type
-│   ├── functionMetrics.ts          # Per-function line count, nesting, params
-│   ├── complexity.ts               # Cyclomatic complexity per function
-│   ├── smells.ts                   # Structural code smell detectors
-│   ├── testCoverageProxy.ts        # Test LOC / source LOC ratio
-│   └── maintainabilityIndex.ts     # Composite MI score
-├── pipeline/
-│   └── analyzeRepo.ts              # Orchestrates the full analysis pipeline
-├── types/
-│   └── report.ts                   # Shared TypeScript interfaces (RepoReport)
-└── utils/
-    ├── constants.ts                # Shared constants and thresholds
-    ├── githubUrl.ts                # GitHub URL parsing and validation
-    ├── math.ts                     # Numeric utilities (median)
-    └── text.ts                     # Text utilities (line counting)
+repo-metrics/
+├── src/
+│   ├── cli.ts                      # CLI entrypoint (single + batch)
+│   └── batch/
+│       └── batchAnalyze.ts         # Multi-repo batch analysis
+├── packages/
+│   └── engine/                     # @repo-metrics/engine (builds to dist/)
+│       ├── src/
+│       │   ├── pipeline/           # analyzeRepo, analyzeFromGitHubUrl
+│       │   ├── collect/            # fileDiscovery, loc, duplication, gitClone, gitMetrics, repoMetadata, frameworkDetection
+│       │   ├── parsing/            # tsParser (Tree-sitter)
+│       │   ├── extract/           # functionCount, functionMetrics, complexity, smells, testCoverageProxy, maintainabilityIndex, distributions
+│       │   ├── types/              # report.ts (RepoReport, etc.)
+│       │   └── utils/              # constants, githubUrl, math, text, astWalker
+│       └── __tests__/              # Engine test suite (+ fixtures)
+└── apps/
+    └── dashboard/                  # Next.js app; /api/analyze imports engine
 ```
 
 ## How It Works
@@ -219,11 +210,12 @@ src/
 
 | Script | Command | Description |
 |--------|---------|-------------|
-| `dev` | `tsx src/cli.ts` | Run directly from TypeScript |
-| `build` | `tsc -p tsconfig.json` | Compile to JavaScript in `dist/` |
-| `start` | `node dist/cli.js` | Run the compiled build |
+| `dev` | `tsx src/cli.ts` | Run CLI from TypeScript |
+| `build` | `tsc -p tsconfig.json` | Compile root CLI to `dist/` |
+| `start` | `node dist/cli.js` | Run the compiled CLI |
 | `dashboard` | `cd apps/dashboard && npm run dev` | Start Next.js dashboard |
-| `test` | `vitest run` | Run tests once |
+| `dashboard:build` | Build engine then Next | Build `packages/engine` then `apps/dashboard` (for production/Vercel) |
+| `test` | `vitest run` | Run engine test suite (`packages/engine/__tests__/`) |
 | `test:watch` | `vitest` | Run tests in watch mode |
 
 ## License

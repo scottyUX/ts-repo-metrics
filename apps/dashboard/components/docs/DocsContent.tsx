@@ -121,6 +121,25 @@ function ArchitectureTab() {
     <div className="space-y-6">
       <Card>
         <CardHeader>
+          <CardTitle>Entry Points</CardTitle>
+          <CardDescription>One engine, two consumers</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3 text-sm">
+          <p className="text-muted-foreground">
+            The analysis logic lives in a single engine package (<code className="rounded bg-muted px-1 py-0.5">packages/engine</code>, builds to <code className="rounded bg-muted px-1 py-0.5">dist/</code>). Two entry points consume it:
+          </p>
+          <ul className="list-inside list-disc space-y-1 text-muted-foreground">
+            <li><strong>CLI</strong> (<code className="rounded bg-muted px-1 py-0.5">src/cli.ts</code>) — parses args and calls the engine for single or batch analysis.</li>
+            <li><strong>Dashboard API</strong> (<code className="rounded bg-muted px-1 py-0.5">/api/analyze</code>) — validates the URL and calls the engine in-process (no subprocess or tsx).</li>
+          </ul>
+          <p className="text-muted-foreground">
+            The dashboard runs analysis in-process with a writable cache (e.g. <code className="rounded bg-muted px-1 py-0.5">os.tmpdir()</code> on Vercel).
+          </p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
           <CardTitle>System Layers</CardTitle>
           <CardDescription>Internal architecture</CardDescription>
         </CardHeader>
@@ -249,7 +268,7 @@ function PipelineTab() {
         <CardContent className="space-y-6 text-sm">
           <section>
             <h3 className="mb-2 font-semibold">Step 1: Repository Snapshot</h3>
-            <p className="text-muted-foreground">A specific commit SHA is analyzed. The repo is cloned (or cached) and checked out at that commit.</p>
+            <p className="text-muted-foreground">A specific commit SHA is analyzed. The repo is cloned (or cached) and checked out at that commit. The dashboard triggers this pipeline in-process via the engine (no subprocess).</p>
           </section>
           <section>
             <h3 className="mb-2 font-semibold">Step 2: Static Extraction</h3>
