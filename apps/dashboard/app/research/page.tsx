@@ -1,7 +1,6 @@
 /**
- * Research page: Methods section in formal academic style.
- * Study design, measurement framework, variable construction,
- * statistical modeling, and reproducibility.
+ * Research page: Framework, questions, and methodology.
+ * Study context, RQ operationalization, conceptual model, data sources, and status.
  */
 
 import {
@@ -11,328 +10,258 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { MathBlock } from "@/components/research/MathBlock";
 
 export const metadata = {
   title: "Research | Repo Metrics",
   description:
-    "Methods: study context, measurement framework, statistical modeling, reproducibility",
+    "Research framework: study context, RQ operationalization, conceptual model, data sources, and analytical strategy",
 };
 
 export default function ResearchPage() {
   return (
     <div className="mx-auto max-w-3xl space-y-10">
       <header>
-        <h1 className="text-2xl font-bold">2 Methods</h1>
+        <h1 className="text-2xl font-bold">Research Framework</h1>
         <p className="mt-1 text-muted-foreground">
-          Study design, repository-based measurement, variable construction,
-          and statistical modeling strategy.
+          Study context, research questions, conceptual model, and analytical strategy.
         </p>
       </header>
 
       <section>
-        <h2 className="mb-4 text-xl font-semibold">2.1 Study Context and Participants</h2>
+        <h2 className="mb-4 text-xl font-semibold">Research Context</h2>
         <Card>
           <CardContent className="pt-6 text-sm leading-relaxed text-muted-foreground">
             <p className="mb-3">
-              CSE 115 is an upper-division undergraduate software engineering course in which
-              students work in teams of approximately five to complete a semester-long project
-              following iterative milestones (planning, design, implementation, testing,
-              deployment). Across offerings, course structure, milestone sequencing, grading
-              rubrics, and repository requirements have remained consistent.
+              The rapid integration of generative AI tools into software development raises
+              foundational questions about how engineering behavior changes in educational
+              environments.
             </p>
-            <p className="mb-3">We analyze two balanced cohorts:</p>
-            <ul className="list-inside list-disc space-y-1">
-              <li>
-                <strong>Pre-AI cohort (2015–2020):</strong> 30 teams (~150 students)
-              </li>
-              <li>
-                <strong>AI-era cohort (2025):</strong> 30 teams (~150 students) with access to
-                generative AI tools
-              </li>
-            </ul>
-            <p className="mt-3">
-              AI usage in the 2025 offering was permitted but not required. Students completed
-              a post-project survey capturing AI usage intensity, verification behaviors, cognitive
-              engagement, and perceived ownership. Survey responses were anonymized and aggregated
-              at the team level.
-            </p>
-            <p className="mt-3">
-              The unit of analysis for repository-based modeling is the <strong>team repository</strong>.
-              Each repository corresponds to a single observational unit.
-            </p>
-          </CardContent>
-        </Card>
-      </section>
-
-      <section>
-        <h2 className="mb-4 text-xl font-semibold">2.2 Study Design</h2>
-        <Card>
-          <CardContent className="pt-6 text-sm leading-relaxed text-muted-foreground">
             <p className="mb-3">
-              We employ a quasi-experimental matched cohort design combined with within-cohort
-              behavioral modeling.
+              This system supports a longitudinal study examining how AI availability corresponds
+              with observable repository-level software engineering behaviors.
             </p>
-            <p className="mb-3">The study consists of two complementary analyses:</p>
-            <ol className="list-inside list-decimal space-y-2">
-              <li>
-                <strong>Between-cohort comparison (Pre-AI vs AI-era)</strong> — Examines whether
-                observable repository indicators differ across cohorts.
-              </li>
-              <li>
-                <strong>Within-cohort modeling (AI-era only)</strong> — Examines how variation in
-                AI usage intensity and engagement relates to repository-based verification and
-                quality outcomes.
-              </li>
-            </ol>
-            <p className="mt-3">
-              The design does not attempt to randomly assign AI exposure. Instead, it leverages
-              consistent course structure across offerings to approximate matched conditions
-              while recognizing potential temporal confounds.
+            <p className="mb-3">
+              The unit of analysis is the <strong>team repository</strong>.
+            </p>
+            <p>
+              Each repository analysis produces a structured feature vector persisted in Supabase
+              for statistical modeling.
             </p>
           </CardContent>
         </Card>
       </section>
 
       <section>
-        <h2 className="mb-4 text-xl font-semibold">2.3 Repository-Based Measurement Framework</h2>
-        <Card>
-          <CardContent className="pt-6 text-sm leading-relaxed text-muted-foreground">
-            <p className="mb-3">Repository-derived measures are organized around five constructs:</p>
-            <ol className="list-inside list-decimal space-y-1">
-              <li>Commit and Workflow Practices</li>
-              <li>Verification Discipline</li>
-              <li>Project Quality</li>
-              <li>Collaboration and Social Coding</li>
-              <li>AI Interaction Signals</li>
-            </ol>
-            <p className="mt-3">
-              Metrics are extracted at a fixed commit snapshot using a deterministic analysis
-              engine. For distribution-sensitive measures (e.g., complexity), both mean and
-              upper-percentile statistics (e.g., 90th percentile) are computed to capture tail risk.
-            </p>
-            <p className="mt-3">
-              All continuous variables are standardized prior to modeling unless otherwise specified.
-            </p>
-          </CardContent>
-        </Card>
-      </section>
-
-      <section>
-        <h2 className="mb-4 text-xl font-semibold">2.4 Variable Construction</h2>
+        <h2 className="mb-4 text-xl font-semibold">Research Questions</h2>
 
         <Card className="mb-4">
           <CardHeader>
-            <CardTitle className="text-base">2.4.1 Behavioral Predictors (RQ1)</CardTitle>
-            <CardDescription>Indicators derived from Git history</CardDescription>
+            <CardTitle className="text-base">RQ1 — Behavioral Shift</CardTitle>
+            <CardDescription>Observable workflow behaviors</CardDescription>
           </CardHeader>
           <CardContent className="text-sm text-muted-foreground">
+            <p className="mb-3">
+              How does access to generative AI tools correspond with observable software
+              engineering behaviors in student team projects?
+            </p>
+            <p className="mb-2 font-medium">Operationalization:</p>
             <ul className="list-inside list-disc space-y-1">
               <li>Commits per week</li>
-              <li>Median commit size</li>
-              <li>Large commit rate (≥ 500 LOC)</li>
+              <li>Burst ratio</li>
+              <li>Active commit days</li>
+              <li>Median inter-commit interval</li>
               <li>Commit message informativeness</li>
-              <li>Churn concentration indicators</li>
             </ul>
             <p className="mt-3">
-              These variables operationalize observable workflow structure and serve as predictors
-              in modeling structural outcomes.
+              When full git history is unavailable, API-derived workflow metrics are used.
+              Ingestion mode is recorded to distinguish: <code className="rounded bg-muted px-1 py-0.5">local</code>{" "}
+              (full git history) and <code className="rounded bg-muted px-1 py-0.5">api</code>{" "}
+              (GitHub API proxy metrics).
             </p>
           </CardContent>
         </Card>
 
         <Card className="mb-4">
           <CardHeader>
-            <CardTitle className="text-base">2.4.2 Verification Moderators (RQ2)</CardTitle>
-            <CardDescription>Verification Discipline operationalization</CardDescription>
+            <CardTitle className="text-base">RQ2 — Verification &amp; Engagement</CardTitle>
+            <CardDescription>Verification effort and cognitive engagement</CardDescription>
           </CardHeader>
           <CardContent className="text-sm text-muted-foreground">
+            <p className="mb-3">
+              Within AI-using teams, how do verification efforts and cognitive engagement
+              patterns relate to repository indicators of quality and stability?
+            </p>
+            <p className="mb-2 font-medium">Repository-based verification signals:</p>
             <ul className="list-inside list-disc space-y-1">
               <li>Test density</li>
-              <li>Test-touch commit rate</li>
-              <li>Test lag</li>
-              <li>Refactor commit rate</li>
-              <li>Error-handling anti-pattern counts</li>
+              <li>Error-handling anti-patterns</li>
+              <li>Long method frequency</li>
+              <li>Smell counts</li>
+              <li>Structural risk exposure</li>
             </ul>
             <p className="mt-3">
-              These variables function as potential moderators in interaction models examining
-              whether verification effort mitigates structural risk.
+              These are correlated with survey-based engagement measures.
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="mb-4">
           <CardHeader>
-            <CardTitle className="text-base">2.4.3 Quality Outcomes (RQ3)</CardTitle>
-            <CardDescription>Structural and maintainability outcomes</CardDescription>
+            <CardTitle className="text-base">RQ3 — Project Quality Outcomes</CardTitle>
+            <CardDescription>Structural complexity and maintainability</CardDescription>
           </CardHeader>
           <CardContent className="text-sm text-muted-foreground">
-            <ul className="list-inside list-disc space-y-1">
-              <li>Mean cyclomatic complexity</li>
-              <li>90th percentile cyclomatic complexity</li>
-              <li>Long method count (≥ 50 LOC)</li>
-              <li>Duplication rate</li>
-              <li>Maintainability index</li>
-              <li>Code smell counts</li>
-              <li>Module size distribution</li>
-            </ul>
-            <p className="mt-3">
-              Upper-percentile metrics are emphasized to capture high-risk concentration rather
-              than relying solely on averages.
-            </p>
-          </CardContent>
-        </Card>
-      </section>
-
-      <section>
-        <h2 className="mb-4 text-xl font-semibold">2.5 Statistical Modeling Strategy</h2>
-
-        <Card className="mb-4">
-          <CardHeader>
-            <CardTitle className="text-base">2.5.1 Between-Cohort Comparisons</CardTitle>
-            <CardDescription>Evaluating RQ3</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4 text-sm text-muted-foreground">
-            <p>
-              To evaluate RQ3, we compare pre-AI and AI-era cohorts using:
-            </p>
-            <ul className="list-inside list-disc space-y-1">
-              <li>Independent-samples <em>t</em>-tests for normally distributed variables</li>
-              <li>Mann–Whitney <em>U</em> tests for non-normal distributions</li>
-              <li>Effect sizes (Cohen&apos;s <em>d</em> or rank-biserial correlation)</li>
-            </ul>
-            <p>Multiple comparison correction (Benjamini–Hochberg) is applied where appropriate.</p>
-            <p>Primary outcome variables include: 90th percentile complexity, long method count,
-              duplication rate, maintainability index.</p>
-          </CardContent>
-        </Card>
-
-        <Card className="mb-4">
-          <CardHeader>
-            <CardTitle className="text-base">2.5.2 Regression Modeling of Behavioral Predictors</CardTitle>
-            <CardDescription>Evaluating RQ1</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4 text-sm text-muted-foreground">
-            <p>
-              To evaluate RQ1, we estimate linear regression models of the form:
-            </p>
-            <MathBlock>
-              {`Y_i = \\beta_0 + \\beta_1 \\text{AI}_i + \\beta_2 \\text{Behavior}_i + \\epsilon_i`}
-            </MathBlock>
-            <p>Where:</p>
-            <ul className="list-inside list-disc space-y-1">
-              <li><em>Y</em><sub>i</sub> is a quality outcome metric for team <em>i</em></li>
-              <li>AI<sub>i</sub> is a cohort indicator (0 = pre-AI, 1 = AI-era)</li>
-              <li>Behavior<sub>i</sub> represents workflow metrics (e.g., large commit rate)</li>
-              <li>ε<sub>i</sub> is the error term</li>
-            </ul>
-            <p>
-              Robust standard errors are used to account for heteroskedasticity.
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="mb-4">
-          <CardHeader>
-            <CardTitle className="text-base">2.5.3 Moderation Analysis (Verification × Risk)</CardTitle>
-            <CardDescription>Evaluating RQ2</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4 text-sm text-muted-foreground">
-            <p>
-              To evaluate RQ2, we test whether Verification Discipline moderates the relationship
-              between AI usage and structural risk:
-            </p>
-            <MathBlock>
-              {`Y_i = \\beta_0 + \\beta_1 \\text{AI}_i + \\beta_2 \\text{Verification}_i + \\beta_3 (\\text{AI}_i \\times \\text{Verification}_i) + \\epsilon_i`}
-            </MathBlock>
-            <p>Where:</p>
-            <ul className="list-inside list-disc space-y-1">
-              <li><em>Y</em><sub>i</sub> is a structural outcome (e.g., 90th percentile complexity)</li>
-              <li>Verification<sub>i</sub> is a composite or standardized verification index</li>
-              <li>The interaction term tests moderation</li>
-            </ul>
-            <p>
-              A significant interaction term (β<sub>3</sub>) indicates that verification effort
-              influences how AI exposure relates to structural outcomes.
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="mb-4">
-          <CardHeader>
-            <CardTitle className="text-base">2.5.4 Within-Cohort Modeling (AI-Era Only)</CardTitle>
-            <CardDescription>AI-era specific analysis</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4 text-sm text-muted-foreground">
-            <p>Within the AI-era cohort, we estimate:</p>
-            <MathBlock>
-              {`Y_i = \\beta_0 + \\beta_1 \\text{AIUsageIntensity}_i + \\beta_2 \\text{Verification}_i + \\beta_3 \\text{Engagement}_i + \\epsilon_i`}
-            </MathBlock>
-            <p>Where:</p>
-            <ul className="list-inside list-disc space-y-1">
-              <li>AIUsageIntensity is derived from survey measures</li>
-              <li>Engagement is a composite cognitive engagement score</li>
-              <li>Verification is repository-derived</li>
-            </ul>
-            <p>
-              This model evaluates whether higher AI usage predicts structural differences, and
-              whether engagement and verification mitigate potential risk.
-            </p>
-          </CardContent>
-        </Card>
-      </section>
-
-      <section>
-        <h2 className="mb-4 text-xl font-semibold">2.6 Distributional and Tail-Risk Analysis</h2>
-        <Card>
-          <CardContent className="pt-6 text-sm text-muted-foreground">
             <p className="mb-3">
-              Because structural risk often concentrates in upper-percentile values, we:
+              Do projects developed with AI access exhibit differences in structural
+              complexity, maintainability, and code quality?
             </p>
+            <p className="mb-2 font-medium">Operationalization:</p>
             <ul className="list-inside list-disc space-y-1">
-              <li>Report 90th percentile metrics alongside means</li>
-              <li>Compute concentration ratios (e.g., proportion of high-complexity functions in top 10% of files)</li>
-              <li>Compare distribution shapes using kernel density estimates</li>
+              <li>Mean and 90th percentile cyclomatic complexity</li>
+              <li>Long function count</li>
+              <li>Duplication percentage</li>
+              <li>Maintainability index</li>
+              <li>Structural risk index</li>
             </ul>
             <p className="mt-3">
-              This approach avoids masking extreme risk patterns through averaging.
+              Upper-percentile metrics are emphasized to capture tail risk.
             </p>
           </CardContent>
         </Card>
       </section>
 
       <section>
-        <h2 className="mb-4 text-xl font-semibold">2.7 Sensitivity and Robustness Checks</h2>
+        <h2 className="mb-4 text-xl font-semibold">Conceptual Model</h2>
         <Card>
-          <CardContent className="pt-6 text-sm text-muted-foreground">
-            <p className="mb-3">We perform:</p>
-            <ul className="list-inside list-disc space-y-1">
-              <li>Threshold sensitivity analysis (e.g., complexity ≥ 8 vs ≥ 10)</li>
-              <li>Winsorization of extreme values</li>
-              <li>Re-estimation excluding outlier repositories</li>
-              <li>Alternative operationalizations of large commits</li>
-            </ul>
-            <p className="mt-3">
-              These analyses ensure conclusions are not artifacts of arbitrary thresholds.
+          <CardContent className="pt-6 text-sm">
+            <div className="flex flex-col items-center gap-2 font-medium sm:flex-row sm:justify-center sm:gap-4">
+              <span className="rounded-md border bg-muted/50 px-4 py-2 text-center">
+                Behavioral Predictors (RQ1)
+              </span>
+              <span className="text-muted-foreground">↓</span>
+              <span className="rounded-md border bg-muted/50 px-4 py-2 text-center">
+                Verification Moderators (RQ2)
+              </span>
+              <span className="text-muted-foreground">↓</span>
+              <span className="rounded-md border bg-muted/50 px-4 py-2 text-center">
+                Structural Outcomes (RQ3)
+              </span>
+            </div>
+            <p className="mt-4 text-muted-foreground">
+              This framework enables modeling whether AI-associated workflow changes correspond
+              with measurable shifts in structural quality.
             </p>
           </CardContent>
         </Card>
       </section>
 
       <section>
-        <h2 className="mb-4 text-xl font-semibold">2.8 Reproducibility and Determinism</h2>
+        <h2 className="mb-4 text-xl font-semibold">Data Sources</h2>
         <Card>
           <CardContent className="pt-6 text-sm text-muted-foreground">
-            <p className="mb-3">All repository metrics are derived from fixed commit snapshots. Each analysis records:</p>
-            <ul className="list-inside list-disc space-y-1">
-              <li>Repository URL</li>
+            <p className="mb-3">The study integrates:</p>
+            <ol className="list-inside list-decimal space-y-1">
+              <li>Repository Mining (this system)</li>
+              <li>Post-project student surveys</li>
+              <li>Course milestone structure</li>
+              <li>Cohort comparison (pre-AI vs AI-era)</li>
+            </ol>
+            <p className="mt-4">Each analysis result is persisted in Supabase and includes:</p>
+            <ul className="mt-2 list-inside list-disc space-y-1">
               <li>Commit SHA</li>
-              <li>Analysis timestamp</li>
-              <li>Analyzer version</li>
+              <li>Ingestion mode</li>
+              <li>Timestamp</li>
+              <li>Engine version</li>
+              <li>Full feature vector</li>
+            </ul>
+          </CardContent>
+        </Card>
+      </section>
+
+      <section>
+        <h2 className="mb-4 text-xl font-semibold">Ingestion Modes &amp; Research Implications</h2>
+
+        <Card className="mb-4">
+          <CardHeader>
+            <CardTitle className="text-base">Local Mode</CardTitle>
+            <CardDescription>Full git clone with .git history</CardDescription>
+          </CardHeader>
+          <CardContent className="text-sm text-muted-foreground">
+            <p className="mb-2">Provides:</p>
+            <ul className="list-inside list-disc space-y-1">
+              <li>Diff-level metrics</li>
+              <li>Commit churn</li>
+              <li>Test-touch commit ratio</li>
+            </ul>
+            <p className="mt-3">Used for high-fidelity research dataset generation.</p>
+          </CardContent>
+        </Card>
+
+        <Card className="mb-4">
+          <CardHeader>
+            <CardTitle className="text-base">API Mode</CardTitle>
+            <CardDescription>Zipball + GitHub API</CardDescription>
+          </CardHeader>
+          <CardContent className="text-sm text-muted-foreground">
+            <p className="mb-2">Provides:</p>
+            <ul className="list-inside list-disc space-y-1">
+              <li>Commit cadence</li>
+              <li>Burstiness</li>
+              <li>Activity density</li>
             </ul>
             <p className="mt-3">
-              Given a repository and commit SHA, metric extraction is deterministic. This makes
-              the system research-safe and auditable.
+              Does not include diff-level churn. This mode ensures serverless compatibility
+              while preserving RQ1 signals.
+            </p>
+          </CardContent>
+        </Card>
+      </section>
+
+      <section>
+        <h2 className="mb-4 text-xl font-semibold">Analytical Strategy</h2>
+        <Card>
+          <CardContent className="pt-6 text-sm text-muted-foreground">
+            <p className="mb-3">Planned analyses include:</p>
+            <ul className="list-inside list-disc space-y-1">
+              <li>Between-cohort comparison (pre-AI vs AI-era)</li>
+              <li>Within-cohort regression modeling</li>
+              <li>Moderation analysis (Verification × Risk)</li>
+              <li>Distributional tail-risk analysis (p90 metrics)</li>
+              <li>Feature export for statistical modeling</li>
+            </ul>
+          </CardContent>
+        </Card>
+      </section>
+
+      <section>
+        <h2 className="mb-4 text-xl font-semibold">Contributions</h2>
+        <Card>
+          <CardContent className="pt-6 text-sm text-muted-foreground">
+            <p className="mb-3">This work aims to:</p>
+            <ul className="list-inside list-disc space-y-1">
+              <li>Identify measurable behavioral shifts in AI-assisted development</li>
+              <li>Clarify relationships between verification effort and structural risk</li>
+              <li>Provide a reproducible repository-based research instrument</li>
+              <li>Inform software engineering curriculum design in AI-integrated contexts</li>
+            </ul>
+          </CardContent>
+        </Card>
+      </section>
+
+      <section>
+        <h2 className="mb-4 text-xl font-semibold">Current Status</h2>
+        <Card>
+          <CardContent className="pt-6 text-sm text-muted-foreground">
+            <ul className="list-inside list-disc space-y-1">
+              <li>Engine refactor complete</li>
+              <li>Supabase persistence implemented</li>
+              <li>GitHub API fallback for workflow metrics implemented</li>
+              <li>Dashboard aligned to RQ1–RQ3 constructs</li>
+              <li>Ingestion modes recorded for reproducibility</li>
+            </ul>
+            <p className="mt-4">
+              The system now functions as a durable research infrastructure rather than a
+              transient analysis tool.
             </p>
           </CardContent>
         </Card>

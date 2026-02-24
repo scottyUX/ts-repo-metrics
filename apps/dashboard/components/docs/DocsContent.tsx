@@ -8,27 +8,63 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { MermaidDiagram } from "./MermaidDiagram";
 
 const DOC_TABS = [
   { id: "overview", label: "Overview" },
-  { id: "architecture", label: "Architecture" },
-  { id: "metrics", label: "Metrics & Definitions" },
-  { id: "pipeline", label: "Data Pipeline" },
+  { id: "architecture", label: "System Architecture" },
+  { id: "git-metrics", label: "Git Metrics Strategy" },
+  { id: "metrics", label: "Metrics Categories" },
   { id: "reproducibility", label: "Reproducibility" },
+  { id: "limitations", label: "Known Limitations" },
+  { id: "roadmap", label: "Roadmap" },
 ] as const;
+
+const ARCHITECTURE_DIAGRAM = `flowchart TB
+    subgraph engine [Analysis Engine]
+        AST[AST Parsing]
+        Metrics[Function Metrics]
+        Git[Workflow Metrics]
+        Dup[Duplication]
+    end
+    subgraph dash [Dashboard]
+        API[API Route]
+        UI[Render Metrics]
+    end
+    subgraph persist [Supabase]
+        DB[(analyses)]
+    end
+    URL[GitHub URL] --> API
+    API --> engine
+    engine --> API
+    API --> DB
+    DB --> UI`;
+
+const GIT_METRICS_DIAGRAM = `flowchart TD
+    Start[GitHub URL] --> TryClone[Try git clone]
+    TryClone -->|success| Local[git.mode = local]
+    TryClone -->|git unavailable| Zipball[Download zipball]
+    Zipball --> Analyze[analyzeRepo]
+    Analyze --> GitNull[git: null]
+    GitNull --> API[extractGitMetricsApi]
+    API -->|success| ApiMode[git.mode = api]
+    API -->|fail| NoneMode[git.mode = none]
+    Local --> Done[Report ready]
+    ApiMode --> Done
+    NoneMode --> Done`;
 
 export default function DocsContent() {
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Docs</h1>
+        <h1 className="text-2xl font-bold">Documentation</h1>
         <p className="mt-1 text-muted-foreground">
-          Technical documentation for the repository mining engine. Clarity over volume.
+          Technical documentation for the Repo Metrics Dashboard. Clarity over volume.
         </p>
       </div>
 
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="mb-4 grid w-full grid-cols-2 sm:grid-cols-5">
+        <TabsList className="mb-4 grid w-full grid-cols-2 gap-1 sm:grid-cols-4 lg:grid-cols-7">
           {DOC_TABS.map(({ id, label }) => (
             <TabsTrigger key={id} value={id} className="text-xs sm:text-sm">
               {label}
@@ -42,14 +78,20 @@ export default function DocsContent() {
         <TabsContent value="architecture">
           <ArchitectureTab />
         </TabsContent>
+        <TabsContent value="git-metrics">
+          <GitMetricsTab />
+        </TabsContent>
         <TabsContent value="metrics">
           <MetricsTab />
         </TabsContent>
-        <TabsContent value="pipeline">
-          <PipelineTab />
-        </TabsContent>
         <TabsContent value="reproducibility">
           <ReproducibilityTab />
+        </TabsContent>
+        <TabsContent value="limitations">
+          <LimitationsTab />
+        </TabsContent>
+        <TabsContent value="roadmap">
+          <RoadmapTab />
         </TabsContent>
       </Tabs>
     </div>
@@ -61,22 +103,28 @@ function OverviewTab() {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>What This System Is</CardTitle>
+          <CardTitle>Overview</CardTitle>
           <CardDescription>Purpose and scope</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3 text-sm">
           <p>
-            <code className="rounded bg-muted px-1.5 py-0.5">ts-repo-metrics</code> is a
-            repository mining engine designed to extract structured software engineering
-            signals from Git-based student team projects.
+            <strong>Repo Metrics Dashboard</strong> is a repository analysis system designed
+            to extract structured software engineering signals from Git-based student team
+            projects.
           </p>
-          <p>The system transforms a repository into:</p>
+          <p>The system transforms a public GitHub repository into:</p>
           <ul className="list-inside list-disc space-y-1 text-muted-foreground">
             <li>Workflow behavior metrics</li>
             <li>Verification discipline indicators</li>
             <li>Structural quality measurements</li>
-            <li>A reproducible feature vector suitable for research analysis</li>
+            <li>A reproducible feature vector</li>
+            <li>A durable, queryable research record</li>
           </ul>
+          <p className="text-muted-foreground">
+            Each analysis result is persisted in Supabase and can be retrieved by{" "}
+            <code className="rounded bg-muted px-1.5 py-0.5">result_id</code>, ensuring
+            reproducibility across serverless deployments.
+          </p>
         </CardContent>
       </Card>
 
@@ -121,66 +169,151 @@ function ArchitectureTab() {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Entry Points</CardTitle>
-          <CardDescription>One engine, two consumers</CardDescription>
+          <CardTitle>System Architecture</CardTitle>
+          <CardDescription>Three layers</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-3 text-sm">
-          <p className="text-muted-foreground">
-            The analysis logic lives in a single engine package (<code className="rounded bg-muted px-1 py-0.5">packages/engine</code>, builds to <code className="rounded bg-muted px-1 py-0.5">dist/</code>). Two entry points consume it:
-          </p>
-          <ul className="list-inside list-disc space-y-1 text-muted-foreground">
-            <li><strong>CLI</strong> (<code className="rounded bg-muted px-1 py-0.5">src/cli.ts</code>) — parses args and calls the engine for single or batch analysis.</li>
-            <li><strong>Dashboard API</strong> (<code className="rounded bg-muted px-1 py-0.5">/api/analyze</code>) — validates the URL and calls the engine in-process (no subprocess or tsx).</li>
-          </ul>
-          <p className="text-muted-foreground">
-            The dashboard runs analysis in-process with a writable cache (e.g. <code className="rounded bg-muted px-1 py-0.5">os.tmpdir()</code> on Vercel).
-          </p>
+        <CardContent className="space-y-6 text-sm">
+          <MermaidDiagram code={ARCHITECTURE_DIAGRAM} className="my-4" />
+
+          <section>
+            <h3 className="mb-2 font-semibold">1. Analysis Engine (packages/engine)</h3>
+            <p className="mb-2 text-muted-foreground">
+              A reusable TypeScript engine responsible for:
+            </p>
+            <ul className="list-inside list-disc space-y-1 text-muted-foreground">
+              <li>Static code analysis (Tree-sitter)</li>
+              <li>Function metrics, cyclomatic complexity</li>
+              <li>Code smell detection</li>
+              <li>Duplication detection (jscpd)</li>
+              <li>Maintainability index</li>
+              <li>Workflow metrics (local git or GitHub API)</li>
+            </ul>
+            <p className="mt-2 text-muted-foreground">
+              The engine supports two ingestion modes, recorded in <code className="rounded bg-muted px-1 py-0.5">git.mode</code>:
+            </p>
+            <div className="mt-2 overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b">
+                    <th className="py-2 text-left font-medium">Mode</th>
+                    <th className="py-2 text-left font-medium">Description</th>
+                  </tr>
+                </thead>
+                <tbody className="text-muted-foreground">
+                  <tr className="border-b">
+                    <td className="py-2"><code>local</code></td>
+                    <td className="py-2">Full git clone with .git directory</td>
+                  </tr>
+                  <tr className="border-b">
+                    <td className="py-2"><code>api</code></td>
+                    <td className="py-2">Zipball + GitHub API fallback (no git CLI required)</td>
+                  </tr>
+                  <tr className="border-b">
+                    <td className="py-2"><code>none</code></td>
+                    <td className="py-2">Git history unavailable</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section>
+            <h3 className="mb-2 font-semibold">2. Dashboard (Next.js + Vercel)</h3>
+            <ul className="list-inside list-disc space-y-1 text-muted-foreground">
+              <li>Accepts a public GitHub URL</li>
+              <li>Runs analysis via server-side API route</li>
+              <li>Persists results in Supabase</li>
+              <li>Renders metrics grouped by research constructs</li>
+            </ul>
+            <p className="mt-2 text-muted-foreground">
+              Runtime: <strong>Node.js</strong> (serverless-compatible)
+            </p>
+          </section>
+
+          <section>
+            <h3 className="mb-2 font-semibold">3. Persistence Layer (Supabase)</h3>
+            <p className="mb-2 text-muted-foreground">
+              All analysis results are stored in Supabase. Table: <code className="rounded bg-muted px-1 py-0.5">analyses</code>
+            </p>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b">
+                    <th className="py-2 text-left font-medium">Column</th>
+                    <th className="py-2 text-left font-medium">Description</th>
+                  </tr>
+                </thead>
+                <tbody className="text-muted-foreground">
+                  <tr className="border-b"><td className="py-2">id</td><td className="py-2">UUID primary key</td></tr>
+                  <tr className="border-b"><td className="py-2">result_id</td><td className="py-2">URL-safe identifier</td></tr>
+                  <tr className="border-b"><td className="py-2">repo_url</td><td className="py-2">Repository URL</td></tr>
+                  <tr className="border-b"><td className="py-2">commit_sha</td><td className="py-2">Commit analyzed</td></tr>
+                  <tr className="border-b"><td className="py-2">analyzed_at</td><td className="py-2">Timestamp</td></tr>
+                  <tr className="border-b"><td className="py-2">report_json</td><td className="py-2">Full RepoReport JSON</td></tr>
+                  <tr className="border-b"><td className="py-2">summary_json</td><td className="py-2">Aggregated metrics for UI</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p className="mt-2 text-muted-foreground">
+              Provides cross-instance durability, shareable result URLs, and dataset export capability.
+            </p>
+          </section>
         </CardContent>
       </Card>
+    </div>
+  );
+}
 
+function GitMetricsTab() {
+  return (
+    <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>System Layers</CardTitle>
-          <CardDescription>Internal architecture</CardDescription>
+          <CardTitle>Git Metrics Strategy</CardTitle>
+          <CardDescription>Problem and solution</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6 text-sm">
           <section>
-            <h3 className="mb-2 font-semibold">1. Repository Ingestion Layer</h3>
-            <ul className="list-inside list-disc space-y-1 text-muted-foreground">
-              <li>Clones public GitHub repositories</li>
-              <li>Resolves commit SHA</li>
-              <li>Filters relevant source files (.ts, .tsx)</li>
-              <li>Handles parse errors safely (files skipped, not failure)</li>
+            <h3 className="mb-2 font-semibold">Problem</h3>
+            <p className="text-muted-foreground">
+              Vercel does not provide a <code className="rounded bg-muted px-1 py-0.5">git</code> binary.
+              When full clone fails, the engine falls back to zipball download. Zipballs do not
+              contain <code className="rounded bg-muted px-1 py-0.5">.git</code>, so local git
+              metrics are unavailable.
+            </p>
+          </section>
+
+          <section>
+            <h3 className="mb-2 font-semibold">Solution</h3>
+            <p className="mb-4 text-muted-foreground">
+              A GitHub API-based fallback was implemented. When git CLI is unavailable:
+            </p>
+            <MermaidDiagram code={GIT_METRICS_DIAGRAM} className="my-4" />
+            <ul className="mt-4 list-inside list-disc space-y-1 text-muted-foreground">
+              <li>Commit history is fetched via GitHub REST API</li>
+              <li>Workflow metrics are derived from timestamps and commit messages</li>
+              <li><code className="rounded bg-muted px-1 py-0.5">git.mode = "api"</code></li>
             </ul>
           </section>
+
           <section>
-            <h3 className="mb-2 font-semibold">2. Static Analysis Engine</h3>
+            <h3 className="mb-2 font-semibold">API-derived metrics</h3>
             <ul className="list-inside list-disc space-y-1 text-muted-foreground">
-              <li>AST parsing via Tree-sitter</li>
-              <li>Per-function metric extraction: cyclomatic complexity, function length, nesting depth, parameter count</li>
-              <li>Code smell detection</li>
-              <li>Duplication detection (jscpd)</li>
-              <li>Maintainability index computation</li>
+              <li>Total commits (last 90 days)</li>
+              <li>Commits per week</li>
+              <li>Active commit days</li>
+              <li>Median inter-commit interval</li>
+              <li>Burst ratio</li>
+              <li>Median commit message length</li>
             </ul>
           </section>
+
           <section>
-            <h3 className="mb-2 font-semibold">3. Git Mining Engine</h3>
+            <h3 className="mb-2 font-semibold">Modes</h3>
             <ul className="list-inside list-disc space-y-1 text-muted-foreground">
-              <li>Commit count and frequency</li>
-              <li>Commit size distribution (median, p90)</li>
-              <li>Large commit ratio (≥500 LOC)</li>
-              <li>Churn statistics (top files by modifications, lines changed)</li>
-              <li>Burst detection, entropy, refactor commit rate, test-touch rate</li>
-            </ul>
-          </section>
-          <section>
-            <h3 className="mb-2 font-semibold">4. Feature Engineering Layer</h3>
-            <ul className="list-inside list-disc space-y-1 text-muted-foreground">
-              <li>Aggregation of per-file and per-function metrics</li>
-              <li>Percentile calculations (p50, p75, p90)</li>
-              <li>Concentration metrics (e.g., high-complexity in top 10% of files)</li>
-              <li>Verification ratios</li>
-              <li>Dataset-ready feature vector</li>
+              <li><strong>Local:</strong> Full git history; <code className="rounded bg-muted px-1 py-0.5">git.mode = "local"</code></li>
+              <li><strong>API:</strong> Fallback when git unavailable</li>
+              <li><strong>None:</strong> <code className="rounded bg-muted px-1 py-0.5">git.mode = "none"</code> — UI displays metrics as unavailable (not zero)</li>
             </ul>
           </section>
         </CardContent>
@@ -194,42 +327,31 @@ function MetricsTab() {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Verification Discipline</CardTitle>
-          <CardDescription>RQ2 construct</CardDescription>
+          <CardTitle>Commit & Workflow Practices</CardTitle>
+          <CardDescription>RQ1 construct</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4 text-sm">
-          <div>
-            <h4 className="mb-1 font-medium">Test Density</h4>
-            <p className="text-muted-foreground">Formula: LOC<sub>tests</sub> / (LOC<sub>source</sub> + 1)</p>
-          </div>
-          <div>
-            <h4 className="mb-1 font-medium">Test-Touch Commit Rate</h4>
-            <p className="text-muted-foreground">Proportion of commits modifying test files.</p>
-          </div>
-          <div>
-            <h4 className="mb-1 font-medium">Refactor Commit Rate</h4>
-            <p className="text-muted-foreground">Commits with refactor/cleanup/restructure/rename in message ÷ total commits.</p>
-          </div>
-          <div>
-            <h4 className="mb-1 font-medium">Error-Handling Anti-Patterns</h4>
-            <p className="text-muted-foreground">Empty catch blocks; suppressed exceptions. Reported as smell counts.</p>
-          </div>
+        <CardContent className="space-y-2 text-sm text-muted-foreground">
+          <ul className="list-inside list-disc space-y-1">
+            <li>Commits per week</li>
+            <li>Burst ratio</li>
+            <li>Activity concentration</li>
+            <li>Commit message informativeness</li>
+            <li>Git ingestion mode</li>
+          </ul>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle>Commit & Workflow Practices</CardTitle>
-          <CardDescription>RQ1 construct</CardDescription>
+          <CardTitle>Verification Discipline</CardTitle>
+          <CardDescription>RQ2 construct</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4 text-sm">
-          <ul className="list-inside list-disc space-y-1 text-muted-foreground">
-            <li><strong>Total Commits</strong> — Count in analyzed history</li>
-            <li><strong>Commits per Week</strong> — Last 13 weeks</li>
-            <li><strong>Median Commit Size</strong> — Lines changed per commit</li>
-            <li><strong>Large Commit Rate</strong> — % commits &gt; 500 LOC</li>
-            <li><strong>Burst Ratio</strong> — % of commits in bursts (≥3 in 30 min)</li>
-            <li><strong>Commit Entropy</strong> — Std dev of time between commits (ms)</li>
+        <CardContent className="space-y-2 text-sm text-muted-foreground">
+          <ul className="list-inside list-disc space-y-1">
+            <li>Test density</li>
+            <li>Error-handling smells</li>
+            <li>Refactor patterns (local git only)</li>
+            <li>Test-touch commit ratio (local git only)</li>
           </ul>
         </CardContent>
       </Card>
@@ -239,53 +361,34 @@ function MetricsTab() {
           <CardTitle>Project Quality</CardTitle>
           <CardDescription>RQ3 construct</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4 text-sm">
-          <ul className="list-inside list-disc space-y-1 text-muted-foreground">
-            <li><strong>Mean Cyclomatic Complexity</strong> — Across all functions</li>
-            <li><strong>90th Percentile Complexity</strong> — Tail risk</li>
-            <li><strong>Long Method Count</strong> — Functions ≥ 50 LOC</li>
-            <li><strong>Function Length Distribution</strong> — p50, p75, p90</li>
-            <li><strong>Nesting Depth</strong> — Max nesting level</li>
-            <li><strong>Duplication Rate</strong> — jscpd percentage</li>
-            <li><strong>Maintainability Index</strong> — Composite (0–100)</li>
-            <li><strong>Code Smell Breakdown</strong> — Long functions, deep nesting, long params, empty catches, console.logs</li>
-            <li><strong>Concentration</strong> — % high-complexity functions in top 10% of files by complexity</li>
+        <CardContent className="space-y-2 text-sm text-muted-foreground">
+          <ul className="list-inside list-disc space-y-1">
+            <li>Cyclomatic complexity (mean + p90)</li>
+            <li>Long function count</li>
+            <li>Nesting depth</li>
+            <li>Duplication %</li>
+            <li>Maintainability index</li>
           </ul>
         </CardContent>
       </Card>
-    </div>
-  );
-}
 
-function PipelineTab() {
-  return (
-    <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Data Pipeline</CardTitle>
-          <CardDescription>End-to-end flow</CardDescription>
+          <CardTitle>Structural Risk Index</CardTitle>
+          <CardDescription>Composite metric</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6 text-sm">
-          <section>
-            <h3 className="mb-2 font-semibold">Step 1: Repository Snapshot</h3>
-            <p className="text-muted-foreground">A specific commit SHA is analyzed. The repo is cloned (or cached) and checked out at that commit. The dashboard triggers this pipeline in-process via the engine (no subprocess).</p>
-          </section>
-          <section>
-            <h3 className="mb-2 font-semibold">Step 2: Static Extraction</h3>
-            <p className="text-muted-foreground">Source files parsed with Tree-sitter. Per-function metrics (length, complexity, nesting, params) and smells extracted.</p>
-          </section>
-          <section>
-            <h3 className="mb-2 font-semibold">Step 3: Git Mining</h3>
-            <p className="text-muted-foreground">Commit history analyzed for count, size, frequency, bursts, churn, refactor rate, test-touch rate.</p>
-          </section>
-          <section>
-            <h3 className="mb-2 font-semibold">Step 4: Feature Aggregation</h3>
-            <p className="text-muted-foreground">Metrics transformed into a structured dataset row (feature vector). Percentiles and concentration computed.</p>
-          </section>
-          <section>
-            <h3 className="mb-2 font-semibold">Step 5: Dashboard Rendering</h3>
-            <p className="text-muted-foreground">Results grouped by RQ and construct. Dataset tab exposes raw feature vector and metadata for inspection.</p>
-          </section>
+        <CardContent className="text-sm text-muted-foreground">
+          Based on: high-complexity functions, long methods, duplication concentration.
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Verification Index</CardTitle>
+          <CardDescription>Composite metric</CardDescription>
+        </CardHeader>
+        <CardContent className="text-sm text-muted-foreground">
+          Based on: test presence, smell reduction, structural hygiene indicators.
         </CardContent>
       </Card>
     </div>
@@ -304,12 +407,13 @@ function ReproducibilityTab() {
           <ul className="list-inside list-disc space-y-1 text-muted-foreground">
             <li>Repository URL</li>
             <li>Commit SHA</li>
-            <li>Branch</li>
-            <li>Analysis timestamp (ISO 8601)</li>
             <li>Analyzer version</li>
-            <li>Files analyzed</li>
-            <li>Files skipped</li>
+            <li>Ingestion mode</li>
+            <li>Timestamp</li>
           </ul>
+          <p className="mt-2 text-muted-foreground">
+            Given a commit SHA and engine version, results are deterministic.
+          </p>
         </CardContent>
       </Card>
 
@@ -325,18 +429,47 @@ function ReproducibilityTab() {
           <p><strong>Deep nesting:</strong> ≥ 4 levels</p>
         </CardContent>
       </Card>
+    </div>
+  );
+}
 
+function LimitationsTab() {
+  return (
+    <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Determinism</CardTitle>
-          <CardDescription>Research credibility</CardDescription>
+          <CardTitle>Known Limitations</CardTitle>
+          <CardDescription>What to be aware of</CardDescription>
         </CardHeader>
-        <CardContent className="text-sm text-muted-foreground">
-          <p>
-            All results are deterministic for a given commit. Re-running analysis on the same
-            repository at the same commit yields identical output. This makes the system
-            research-safe and auditable.
-          </p>
+        <CardContent className="space-y-3 text-sm">
+          <ul className="list-inside list-disc space-y-1 text-muted-foreground">
+            <li>API-based git metrics do not include diff-level churn.</li>
+            <li>Large repositories may be constrained by serverless limits.</li>
+            <li>Duplication detection depends on jscpd execution environment.</li>
+            <li>Full git history metrics require local/worker execution.</li>
+          </ul>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+function RoadmapTab() {
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Roadmap</CardTitle>
+          <CardDescription>Planned enhancements</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3 text-sm">
+          <ul className="list-inside list-disc space-y-1 text-muted-foreground">
+            <li>Background job processing for large repositories</li>
+            <li>CSV dataset export</li>
+            <li>PR and issue-based collaboration metrics</li>
+            <li>Enhanced verification modeling</li>
+            <li>Longitudinal cohort comparison tools</li>
+          </ul>
         </CardContent>
       </Card>
     </div>
