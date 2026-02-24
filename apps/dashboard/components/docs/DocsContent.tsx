@@ -64,9 +64,9 @@ export default function DocsContent() {
       </div>
 
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="mb-4 grid w-full grid-cols-2 gap-1 sm:grid-cols-4 lg:grid-cols-7">
+        <TabsList className="mb-4 flex w-full flex-wrap justify-start gap-1 rounded-lg p-1">
           {DOC_TABS.map(({ id, label }) => (
-            <TabsTrigger key={id} value={id} className="text-xs sm:text-sm">
+            <TabsTrigger key={id} value={id} className="shrink-0 text-xs sm:text-sm">
               {label}
             </TabsTrigger>
           ))}
