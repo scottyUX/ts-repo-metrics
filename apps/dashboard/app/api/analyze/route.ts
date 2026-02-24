@@ -67,10 +67,19 @@ export async function POST(request: NextRequest) {
 
     const parsed = parseGitHubUrl(normalizedUrl);
     const commitSha = report.source?.commit ?? null;
-    const resultId =
-      parsed
-        ? `${parsed.owner}-${parsed.repo}-${(commitSha ?? randomUUID()).slice(0, 12)}`
-        : randomUUID();
+    
+    // Generate resultId: owner-repo-commitSha (or UUID if no commit)
+    let resultId: string;
+    if (parsed) {
+      const suffix = commitSha 
+        ? commitSha.slice(0, 12) 
+        : randomUUID().replace(/-/g, "").slice(0, 12); // Remove dashes from UUID
+      resultId = `${parsed.owner}-${parsed.repo}-${suffix}`;
+    } else {
+      resultId = randomUUID();
+    }
+
+    console.log("[analyze] Generated resultId:", resultId, "commitSha:", commitSha);
 
     const row = {
       result_id: resultId,
