@@ -76,6 +76,18 @@ export interface GitMetrics {
   avgLinesPerCommit: number;
   largeCommitRatio: number;
   commitsPerWeek: number;
+  /** Source of metrics: "local" (git CLI), "api" (GitHub REST API), "none" (unavailable). */
+  mode?: "local" | "api" | "none";
+  /** True when git CLI failed and API fallback also failed. */
+  unavailable?: boolean;
+  /** Unique commit dates in last 90 days (API mode only). */
+  activeDaysLast90Days?: number;
+  /** Median inter-commit interval in hours (API mode only). */
+  medianInterCommitHours?: number;
+  /** % commits within 1 hour of previous (API mode only). */
+  burstRatio?: number;
+  /** Median length of commit message (API mode only). */
+  medianCommitMessageLength?: number;
 }
 
 /** D1: Extended commit size distribution. */

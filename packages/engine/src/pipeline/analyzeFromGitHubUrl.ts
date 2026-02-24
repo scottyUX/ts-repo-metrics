@@ -7,6 +7,7 @@
 import { parseGitHubUrl } from "../utils/githubUrl.js";
 import { cloneOrUseCache } from "../collect/gitClone.js";
 import { downloadZipball, getSourceFromGitHubApi } from "../collect/downloadZipball.js";
+import { extractGitMetricsApi } from "../collect/gitMetricsApi.js";
 import { getSourceMetadata } from "../collect/repoMetadata.js";
 import { analyzeRepo } from "./analyzeRepo.js";
 import type { RepoReport } from "../types/report.js";
@@ -57,12 +58,14 @@ export async function analyzeFromGitHubUrl(
 
   let repoPath: string;
   let source: { type: "local" | "git"; url: string; commit: string; branch: string };
+  let usedZipball = false;
 
   try {
     repoPath = await cloneOrUseCache(parsed, useCache, cacheDir);
     source = await getSourceMetadata(repoPath, "git", parsed.url);
   } catch (err) {
     if (isGitUnavailable(err)) {
+      usedZipball = true;
       repoPath = await downloadZipball(parsed, cacheDir, useCache);
       source = await getSourceFromGitHubApi(parsed);
     } else {
@@ -70,5 +73,26 @@ export async function analyzeFromGitHubUrl(
     }
   }
 
-  return analyzeRepo(repoPath, { source });
+  const report = await analyzeRepo(repoPath, { source });
+
+  if (usedZipball) {
+    try {
+      report.git = await extractGitMetricsApi(
+        parsed,
+        process.env.GITHUB_TOKEN,
+      );
+    } catch {
+      report.git = {
+        mode: "none",
+        unavailable: true,
+        totalCommits: 0,
+        medianCommitSize: 0,
+        avgLinesPerCommit: 0,
+        largeCommitRatio: 0,
+        commitsPerWeek: 0,
+      };
+    }
+  }
+
+  return report;
 }

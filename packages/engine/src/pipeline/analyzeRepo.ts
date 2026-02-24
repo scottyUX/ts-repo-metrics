@@ -145,6 +145,7 @@ export async function analyzeRepo(
   const testCoverageProxy = computeTestCoverageProxy(profile);
   const duplication = await detectDuplication(repoPath);
   const git = await extractGitMetrics(repoPath);
+  if (git) git.mode = "local";
   const gitMetricsV2 = await extractGitMetricsV2(repoPath);
   const framework = await detectFramework(repoPath);
 
