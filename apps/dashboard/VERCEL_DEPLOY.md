@@ -22,6 +22,10 @@ The dashboard’s `npm run build` does steps 2 and 3 via `build:engine` then `ne
 - The analyze API route uses `export const runtime = "nodejs"` and `analyzeFromGitHubUrl(url, { useCache: true, cacheDir: os.tmpdir() })` so the clone cache is writable on Vercel.
 - Native modules (`tree-sitter`, `tree-sitter-typescript`) are listed in `serverExternalPackages` in `next.config.ts` so they are not bundled.
 
+## Environment variables
+
+- **`GITHUB_TOKEN`** (optional): When the git binary is unavailable (Vercel), the engine falls back to zipball download. Git metrics are then fetched from the GitHub REST API. Setting `GITHUB_TOKEN` raises rate limits and allows access to private repos if the token has repo scope. Without it, unauthenticated API requests are used (subject to 60 req/hr).
+
 ## Deploy from repo root
 
 ```bash

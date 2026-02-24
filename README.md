@@ -148,7 +148,7 @@ When run via the engine (CLI or dashboard), `analyzer_version` is the engine pac
 | `maintainability` | Composite | Maintainability Index (0–100) from LOC + complexity + function length |
 | `testCoverageProxy` | LOC | testLOC / sourceLOC ratio and classification |
 | `duplication` | jscpd | Duplicate percentage, lines, clone clusters |
-| `git` | simple-git | Commit count, sizes, frequency, large commit ratio |
+| `git` | simple-git or GitHub API (fallback) | Commit count, sizes, frequency, large commit ratio. On Vercel (no git CLI), metrics come from the GitHub REST API when `GITHUB_TOKEN` is set. |
 | `framework` | package.json | React, Next.js, Express, NestJS, Fastify, or Node |
 
 ## Dashboard
@@ -159,7 +159,7 @@ A Next.js dashboard app in `apps/dashboard/` provides a web UI:
 - RQ-driven results (RQ1 Behavioral Shift, RQ2 Verification & Engagement, RQ3 Quality Outcomes)
 - Dataset tab: metadata, feature vector, data dictionary, export
 
-Run with `npm run dashboard` (starts `next dev` in `apps/dashboard/`).
+Run with `npm run dashboard` (starts `next dev` in `apps/dashboard/`). For Vercel deployment, set `GITHUB_TOKEN` to enable API-derived git metrics when the git CLI is unavailable.
 
 ## Project Structure
 
@@ -175,7 +175,7 @@ repo-metrics/
 │   └── engine/                     # @repo-metrics/engine (builds to dist/)
 │       ├── src/
 │       │   ├── pipeline/           # analyzeRepo, analyzeFromGitHubUrl
-│       │   ├── collect/            # fileDiscovery, loc, duplication, gitClone, gitMetrics, repoMetadata, frameworkDetection
+│       │   ├── collect/            # fileDiscovery, loc, duplication, gitClone, gitMetrics, gitMetricsApi, repoMetadata, frameworkDetection
 │       │   ├── parsing/            # tsParser (Tree-sitter)
 │       │   ├── extract/           # functionCount, functionMetrics, complexity, smells, testCoverageProxy, maintainabilityIndex, distributions
 │       │   ├── types/              # report.ts (RepoReport, etc.)

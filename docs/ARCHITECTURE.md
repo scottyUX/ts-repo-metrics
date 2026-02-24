@@ -42,6 +42,10 @@ The analysis logic lives in a single **engine** package. The **CLI** and the **d
 - **Engine** provides `analyzeFromGitHubUrl(url, { useCache?, cacheDir? })`: normalizes URL, parses with `parseGitHubUrl`, clones via `cloneOrUseCache(parsed, useCache, cacheDir)`, then `getSourceMetadata` + `analyzeRepo`.
 - **CLI** and **API** use this; no subprocess or tsx.
 
+### Zipball and API fallback (Vercel)
+
+When `cloneOrUseCache` fails because the git binary is unavailable (e.g. on Vercel), the engine calls `downloadZipball` instead. The extracted path has no `.git` directory, so `extractGitMetrics` and `extractGitMetricsV2` return null. `analyzeFromGitHubUrl` then calls `extractGitMetricsApi(parsed, GITHUB_TOKEN)` to populate `report.git` from the GitHub REST API. API-derived metrics are proxies (commit metadata only; no diff stats such as lines changed).
+
 ## Data Flow (Engine Internals)
 
 ```
@@ -58,6 +62,7 @@ The analysis logic lives in a single **engine** package. The **CLI** and the **d
 │ fileDis.,│ │          │   │ fnMetric │   │ distrib. │   │ testCov,  │
 │ dup,     │ │          │   │ maintIdx │   │          │   │          │
 │ git,     │ │          │   │          │   │          │   │          │
+│ gitMetApi│ │          │   │          │   │          │   │          │
 │ gitClone,│ │          │   │          │   │          │   │          │
 │ fwDetect │ │          │   │          │   │          │   │          │
 └──────────┘ └──────────┘   └──────────┘   └──────────┘   └──────────┘
@@ -74,6 +79,7 @@ The analysis logic lives in a single **engine** package. The **CLI** and the **d
 |----------|---------|
 | `packages/engine` | Pure analysis: pipeline, collect, parsing, extract, types, utils. Builds to `dist/`. Consumed by CLI and dashboard. |
 | `packages/engine/src/index.ts` | Exports `analyzeRepo`, `analyzeFromGitHubUrl`, `getSourceMetadata`, `parseGitHubUrl`, and key types. |
+| `packages/engine/src/collect/gitMetricsApi.ts` | GitHub REST API fallback for git metrics when git CLI unavailable (Vercel zipball mode). |
 | `src/cli.ts` | CLI entrypoint — imports from `@repo-metrics/engine`; routes single (URL vs path) and batch. |
 | `src/batch/` | Batch analysis over multiple repos; imports `analyzeRepo` and `RepoReport` from the engine. |
 

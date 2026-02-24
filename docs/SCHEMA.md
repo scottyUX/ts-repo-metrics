@@ -118,15 +118,33 @@ Returns `null` if jscpd fails or is unavailable.
 
 ## `git` — Git History (nullable)
 
-Returns `null` for non-git repos or shallow clones.
+Returns `null` for non-git repos or shallow clones. When the git CLI is unavailable (e.g. Vercel zipball mode), metrics may come from the GitHub REST API fallback instead of local git.
+
+### Data source: `mode`
+
+| Value | Source |
+|-------|--------|
+| `"local"` | Git CLI (simple-git) |
+| `"api"` | GitHub REST API (serverless fallback) |
+| `"none"` | Neither available (with `unavailable: true`) |
+
+### Fields
 
 | Field | Type | Description |
 |-------|------|-------------|
 | `totalCommits` | `number` | Total commits in history |
-| `medianCommitSize` | `number` | Median lines changed per commit |
-| `avgLinesPerCommit` | `number` | Mean lines changed per commit |
-| `largeCommitRatio` | `number` | % of commits > 500 lines changed |
+| `medianCommitSize` | `number` | Median lines changed per commit (0 in API mode) |
+| `avgLinesPerCommit` | `number` | Mean lines changed per commit (0 in API mode) |
+| `largeCommitRatio` | `number` | % of commits > 500 lines changed (0 in API mode) |
 | `commitsPerWeek` | `number` | Commits per week (last 13 weeks) |
+| `mode` | `string` | `"local"` (git CLI), `"api"` (GitHub API), or `"none"` |
+| `unavailable` | `boolean` | True when both git CLI and API fallback failed |
+| `activeDaysLast90Days` | `number` | Unique commit dates in last 90 days (API mode) |
+| `medianInterCommitHours` | `number` | Median gap between commits in hours (API mode) |
+| `burstRatio` | `number` | % commits within 1 hour of previous (API mode) |
+| `medianCommitMessageLength` | `number` | Median commit message length (API mode) |
+
+In API mode, `medianCommitSize`, `avgLinesPerCommit`, and `largeCommitRatio` are 0 because the list-commits API does not return diff stats.
 
 ## `gitMetricsV2` — Extended Git Metrics (nullable)
 
