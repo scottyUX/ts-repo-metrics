@@ -1,6 +1,7 @@
 /**
  * GET /api/results/[id]
  * Returns a persisted analysis result by ID from Supabase.
+ * Includes retry logic to handle race conditions (Supabase replication delay).
  * @see Story 4.2
  */
 
@@ -18,16 +19,37 @@ export async function GET(
   try {
     const supabase = getSupabase();
     
-    // First try exact match
-    let { data, error } = await supabase
-      .from("analyses")
-      .select("report_json, result_id")
-      .eq("result_id", trimmedId)
-      .single();
+    // Retry logic to handle race condition (Supabase replication delay)
+    const maxRetries = 3;
+    const retryDelay = 500; // ms
+    let data = null;
+    let error = null;
 
-    // If not found, try with partial match (for incomplete IDs)
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      const result = await supabase
+        .from("analyses")
+        .select("report_json, result_id")
+        .eq("result_id", trimmedId)
+        .single();
+      
+      data = result.data;
+      error = result.error;
+
+      if (data && !error) {
+        console.log(`[results] Found on attempt ${attempt}`);
+        return NextResponse.json(data.report_json);
+      }
+
+      // If not found and not last attempt, wait and retry
+      if (attempt < maxRetries) {
+        console.log(`[results] Not found on attempt ${attempt}, retrying in ${retryDelay * attempt}ms...`);
+        await new Promise(resolve => setTimeout(resolve, retryDelay * attempt));
+      }
+    }
+
+    // If still not found after retries, try partial match (for incomplete IDs)
     if (error || !data) {
-      console.log("[results] Exact match failed, trying partial match");
+      console.log("[results] Exact match failed after retries, trying partial match");
       const { data: partialData, error: partialError } = await supabase
         .from("analyses")
         .select("report_json, result_id")
@@ -42,6 +64,7 @@ export async function GET(
       }
     }
 
+    // Final error handling
     if (error) {
       console.error("[results] Supabase error:", error.message, error.code, error.details);
       // Debug: list all available IDs
