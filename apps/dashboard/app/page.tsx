@@ -2,6 +2,7 @@
 
 /**
  * Landing page: paste GitHub repo URL to analyze.
+ * Auto-deployment test: Git integration verified.
  */
 
 import { useState, useCallback } from "react";
