@@ -27,7 +27,7 @@
     "openai": "^6.34.0",
     "radix-ui": "^1.4.3",
     "react": "19.2.3",
-    "react-dom": "19.2.3",
+    "react-dom": "19.2.6",
     "recharts": "^3.8.0",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.5.0"
