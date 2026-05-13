@@ -19,7 +19,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "adm-zip": "^0.5.16",
+    "adm-zip": "^0.5.17",
     "fast-glob": "^3.3.3",
     "jscpd": "^4.0.8",
     "simple-git": "^3.31.1",
