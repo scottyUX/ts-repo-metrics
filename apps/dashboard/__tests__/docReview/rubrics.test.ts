@@ -4,8 +4,8 @@ import { RUBRICS } from "../../lib/docReview/rubrics";
 describe("RUBRICS", () => {
   it("defines frozen keys for each structured doc type", () => {
     expect(RUBRICS.release_plan.keys).toHaveLength(10);
-    expect(RUBRICS.sprint_plan.keys).toHaveLength(12);
-    expect(RUBRICS.sprint_report.keys).toHaveLength(13);
+    expect(RUBRICS.sprint_plan.keys).toHaveLength(17);
+    expect(RUBRICS.sprint_report.keys).toHaveLength(14);
     expect(RUBRICS.test_plan.keys).toHaveLength(9);
   });
 

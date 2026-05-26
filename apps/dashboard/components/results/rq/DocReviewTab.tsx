@@ -58,6 +58,7 @@ function ChecklistBreakdown({ review }: { review: DocumentReview }) {
   );
 }
 
+
 function ClassificationRow({ doc }: { doc: ClassifiedDoc }) {
   return (
     <tr className="border-b border-border/60 last:border-0">
@@ -116,6 +117,13 @@ function ReviewCard({
 
         {!isUnknown && !review ? (
           <p className="text-muted-foreground">No review result stored for this file.</p>
+        ) : null}
+
+        {review?.structured?.userStoryCount != null ? (
+          <p className="text-sm">
+            <span className="font-medium">User stories: </span>
+            {review.structured.userStoryCount}
+          </p>
         ) : null}
 
         {review && !review.error ? <ChecklistBreakdown review={review} /> : null}
@@ -316,41 +324,25 @@ export function DocReviewTab({ resultId, report }: DocReviewTabProps) {
             </Card>
           ) : null}
 
-          {(docReview.discovery.skippedImages?.length ?? 0) > 0 ? (
+          {docReview.classifications.length > 0 ? (
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium">Document reviews</h3>
+              {docReview.classifications.map((c) => (
+                <ReviewCard key={c.path} doc={c} review={docReview.reviews[c.path]} />
+              ))}
+            </div>
+          ) : stats.skippedImages > 0 && stats.discovered === 0 ? (
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">Skipped image files</CardTitle>
-                <CardDescription>
-                  Only markdown and PDF are reviewed. Export release plans and code standards as
-                  .md or .pdf if you want rubric feedback.
-                </CardDescription>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Minus className="size-4 text-muted-foreground" aria-hidden />
+                  Documentation present as images only
+                </CardTitle>
               </CardHeader>
-              <CardContent>
-                <ul className="space-y-1 font-mono text-xs text-muted-foreground">
-                  {docReview.discovery.skippedImages!.map((path) => (
-                    <li key={path}>{path}</li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-          ) : null}
-
-          {docReview.consistency.warnings.length > 0 ? (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Consistency checks</CardTitle>
-                <CardDescription>
-                  Deterministic checks across classified documents and repo metadata.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2 text-sm">
-                  {docReview.consistency.warnings.map((w) => (
-                    <li key={`${w.code}-${w.message}`} className="text-muted-foreground">
-                      <span className="font-medium text-foreground">{w.code}:</span> {w.message}
-                    </li>
-                  ))}
-                </ul>
+              <CardContent className="text-sm text-muted-foreground">
+                This repo has files under documentation folders, but they are images rather than
+                markdown or PDF. Consistency checks may flag missing release plans or code
+                standards until those are available in a reviewable format.
               </CardContent>
             </Card>
           ) : null}
@@ -403,25 +395,41 @@ export function DocReviewTab({ resultId, report }: DocReviewTabProps) {
             </Card>
           )}
 
-          {docReview.classifications.length > 0 ? (
-            <div className="space-y-4">
-              <h3 className="text-sm font-medium">Document reviews</h3>
-              {docReview.classifications.map((c) => (
-                <ReviewCard key={c.path} doc={c} review={docReview.reviews[c.path]} />
-              ))}
-            </div>
-          ) : stats.skippedImages > 0 && stats.discovered === 0 ? (
+          {docReview.consistency.warnings.length > 0 ? (
             <Card>
               <CardHeader>
-                <CardTitle className="text-base flex items-center gap-2">
-                  <Minus className="size-4 text-muted-foreground" aria-hidden />
-                  Documentation present as images only
-                </CardTitle>
+                <CardTitle className="text-base">Consistency checks</CardTitle>
+                <CardDescription>
+                  Deterministic checks across classified documents and repo metadata.
+                </CardDescription>
               </CardHeader>
-              <CardContent className="text-sm text-muted-foreground">
-                This repo has files under documentation folders, but they are images rather than
-                markdown or PDF. Consistency checks may flag missing release plans or code
-                standards until those are available in a reviewable format.
+              <CardContent>
+                <ul className="space-y-2 text-sm">
+                  {docReview.consistency.warnings.map((w) => (
+                    <li key={`${w.code}-${w.message}`} className="text-muted-foreground">
+                      <span className="font-medium text-foreground">{w.code}:</span> {w.message}
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          ) : null}
+
+          {(docReview.discovery.skippedImages?.length ?? 0) > 0 ? (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Skipped image files</CardTitle>
+                <CardDescription>
+                  Only markdown and PDF are reviewed. Export release plans and code standards as
+                  .md or .pdf if you want rubric feedback.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-1 font-mono text-xs text-muted-foreground">
+                  {docReview.discovery.skippedImages!.map((path) => (
+                    <li key={path}>{path}</li>
+                  ))}
+                </ul>
               </CardContent>
             </Card>
           ) : null}

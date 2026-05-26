@@ -48,6 +48,7 @@ export interface ClassifiedDoc {
 export interface StructuredReviewPayload {
   checklist: Record<string, boolean>;
   coach: string;
+  userStoryCount?: number | null;
 }
 
 export interface HolisticReviewPayload {

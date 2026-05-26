@@ -91,7 +91,6 @@ export async function runDocReview(opts: {
     discovery.docsPool,
     discovery.repoWide,
     openai,
-    signal,
   );
   classifyMs = Date.now() - classifyStart;
 

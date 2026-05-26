@@ -92,6 +92,10 @@ export const REVIEWER_TOOLS: ChatCompletionTool[] = [
           strengths: { type: "string" },
           improvements: { type: "string" },
           coach: { type: "string" },
+          user_story_count: {
+            type: "number",
+            description: "Total number of user stories found in the document. Only populate for sprint_plan documents.",
+          },
         },
       },
     },
@@ -242,9 +246,13 @@ export async function reviewDoc(
             };
           }
           if (normalized.kind === "structured") {
+            const userStoryCount =
+              typeof args.user_story_count === "number"
+                ? args.user_story_count
+                : null;
             return {
               ...base,
-              structured: normalized.payload,
+              structured: { ...normalized.payload, userStoryCount },
               reviewMs: Date.now() - start,
             };
           }

@@ -1,14 +1,6 @@
 /** Docs-folder path prefixes (case-insensitive). */
 export const DOCS_POOL_PREFIXES = [
-  "docs/",
-  "doc/",
   "documentation/",
-  "documents/",
-  "project-docs/",
-  "team-docs/",
-  "reports/",
-  "deliverables/",
-  "artifacts/",
 ] as const;
 
 export const MAX_DOC_FILES = 40;
@@ -34,8 +26,7 @@ export function pathDepth(path: string): number {
 }
 
 export function isDocExtension(path: string): boolean {
-  const lower = path.toLowerCase();
-  return lower.endsWith(".md") || lower.endsWith(".pdf");
+  return path.toLowerCase().endsWith(".md");
 }
 
 /** Image types sometimes used for release plans / code standards (not reviewable yet). */

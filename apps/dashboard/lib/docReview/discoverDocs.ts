@@ -1,12 +1,9 @@
 import type { DiscoveryResult, DiscoveredFile } from "./types";
 import {
-  DOCS_POOL_PREFIXES,
   MAX_DOC_FILES,
   MAX_PATH_DEPTH,
   SKIP_DIR_NAMES,
   isDocExtension,
-  isDocsPoolPath,
-  isSkippedImageExtension,
   pathDepth,
 } from "./constants";
 
@@ -82,16 +79,15 @@ export async function discoverDocs(
     if (pathInSkippedDir(item.path)) continue;
     if (pathDepth(item.path) > MAX_PATH_DEPTH) continue;
 
-    if (isDocsPoolPath(item.path) && isSkippedImageExtension(item.path)) {
-      skippedImages.push(item.path);
-      continue;
-    }
+    // Only look in the documentation/ folder (case-insensitive)
+    const normalizedPath = item.path.replace(/\\/g, "/").toLowerCase();
+    if (!normalizedPath.startsWith("documentation/")) continue;
 
     if (!isDocExtension(item.path)) continue;
 
     candidates.push({
       path: item.path,
-      pool: isDocsPoolPath(item.path) ? "docs" : "repoWide",
+      pool: "docs",
       size: item.size,
     });
   }
@@ -105,29 +101,18 @@ export async function discoverDocs(
     );
   }
 
-  if (skippedImages.length > 0) {
-    const preview = skippedImages.slice(0, 5).join(", ");
-    const extra =
-      skippedImages.length > 5 ? ` (+${skippedImages.length - 5} more)` : "";
-    warnings.push(
-      `Skipped ${skippedImages.length} image file(s) in documentation folders (only .md and .pdf are reviewed): ${preview}${extra}. ` +
-        "If release plans or code standards are PNG/JPG exports, re-export as markdown or PDF.",
-    );
-  }
+  const docsPool = files.map((f) => f.path);
+  const repoWide: string[] = [];
 
-  const docsPool = files.filter((f) => f.pool === "docs").map((f) => f.path);
-  const repoWide = files.filter((f) => f.pool === "repoWide").map((f) => f.path);
-
-  const found =
-    docsPool.length > 0 ||
-    DOCS_POOL_PREFIXES.some((prefix) =>
-      candidates.some((f) =>
-        f.path.toLowerCase().startsWith(prefix.replace(/\/$/, "")),
-      ),
-    );
+  // folder_found: true if any file in the tree starts with documentation/
+  const folder_found = tree.tree.some(
+    (item) =>
+      item.type === "blob" &&
+      item.path.replace(/\\/g, "/").toLowerCase().startsWith("documentation/"),
+  );
 
   return {
-    found: found || files.length > 0,
+    found: folder_found,
     docsPool,
     repoWide,
     files,
@@ -136,4 +121,3 @@ export async function discoverDocs(
   };
 }
 
-export { DOCS_POOL_PREFIXES };
