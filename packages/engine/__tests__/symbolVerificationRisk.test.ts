@@ -23,6 +23,17 @@ describe("pairedTestPathCandidates", () => {
     const c = pairedTestPathCandidates("app/Bar.tsx");
     expect(c[0]).toBe("app/Bar.test.tsx");
   });
+
+  it("uses js extension for js sources", () => {
+    const c = pairedTestPathCandidates("src/foo.js");
+    expect(c[0]).toBe("src/foo.test.js");
+    expect(c[1]).toBe("src/foo.spec.js");
+  });
+
+  it("uses jsx extension for jsx sources", () => {
+    const c = pairedTestPathCandidates("components/Hello.jsx");
+    expect(c[0]).toBe("components/Hello.test.jsx");
+  });
 });
 
 describe("symbolReferencedInSource", () => {

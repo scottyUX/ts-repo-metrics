@@ -6,8 +6,13 @@
 /*  File discovery                                                     */
 /* ------------------------------------------------------------------ */
 
-/** Glob patterns for TypeScript and TSX source files. */
-export const SOURCE_PATTERNS = ["**/*.ts", "**/*.tsx"];
+/** Glob patterns for analyzable source files (TS/TSX/JS/JSX). */
+export const SOURCE_PATTERNS = [
+  "**/*.ts",
+  "**/*.tsx",
+  "**/*.js",
+  "**/*.jsx",
+];
 
 /** Directories to exclude from all file discovery and analysis. */
 export const IGNORE_PATTERNS = [
@@ -20,8 +25,21 @@ export const IGNORE_PATTERNS = [
   "**/.git/**",
 ];
 
-/** Matches test files by convention: `*.test.ts`, `*.spec.ts`, `*.test.tsx`, `*.spec.tsx`. */
-export const TEST_FILE_RE = /\.(test|spec)\.(ts|tsx)$/;
+/** Matches test files by convention: `*.test.ts`, `*.spec.jsx`, etc. */
+export const TEST_FILE_RE = /\.(test|spec)\.(ts|tsx|js|jsx)$/;
+
+/** True when the path is a JSX-bearing extension (`.tsx` or `.jsx`). */
+export function isJsxPath(filePath: string): boolean {
+  return filePath.endsWith(".tsx") || filePath.endsWith(".jsx");
+}
+
+/** Tree-sitter flavor for a discovered source file path. */
+export function sourceFlavorForPath(filePath: string): "ts" | "tsx" | "js" | "jsx" {
+  if (filePath.endsWith(".tsx")) return "tsx";
+  if (filePath.endsWith(".jsx")) return "jsx";
+  if (filePath.endsWith(".js")) return "js";
+  return "ts";
+}
 
 /* ------------------------------------------------------------------ */
 /*  AST node classification                                            */

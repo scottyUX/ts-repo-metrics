@@ -45,12 +45,12 @@ export function ReactComponentsCoreSignalsSection({ reactMetrics }: ReactCompone
 
   const descTsx = (() => {
     if (tsx <= 0) {
-      return "No .tsx files were counted—confirm paths and that the React metrics pass ran.";
+      return "No .tsx or .jsx files were counted—confirm paths and that the React metrics pass ran.";
     }
     if (tTsx === "strong") {
-      return `${formatInt(tsx)} TSX files parsed: broad UI surface; watch Additional signals for depth and hooks.`;
+      return `${formatInt(tsx)} TSX/JSX files parsed: broad UI surface; watch Additional signals for depth and hooks.`;
     }
-    return `${formatInt(tsx)} TSX files in scope—enough for signals; expand includes if UI lives elsewhere.`;
+    return `${formatInt(tsx)} TSX/JSX files in scope—enough for signals; expand includes if UI lives elsewhere.`;
   })();
 
   const descComps = (() => {

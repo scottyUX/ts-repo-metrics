@@ -16,10 +16,10 @@ import type { RepoProfile } from "../types/report.js";
 export type { RepoProfile } from "../types/report.js";
 
 /**
- * Profile a repository's TypeScript / TSX source files.
+ * Profile a repository's analyzable source files (TS/TSX/JS/JSX).
  *
- * Discovers all `.ts` and `.tsx` files (excluding common non-source dirs),
- * classifies each as source or test, and counts lines of code.
+ * Discovers source files (excluding common non-source dirs), classifies each
+ * as source or test, and counts lines of code.
  *
  * @param repoPath - Absolute path to the repository root.
  * @returns A {@link RepoProfile} with file counts and LOC breakdowns.
@@ -33,6 +33,8 @@ export async function profileRepo(repoPath: string): Promise<RepoProfile> {
 
   let tsFiles = 0;
   let tsxFiles = 0;
+  let jsFiles = 0;
+  let jsxFiles = 0;
   let testFiles = 0;
   let totalLOC = 0;
   let sourceLOC = 0;
@@ -42,9 +44,10 @@ export async function profileRepo(repoPath: string): Promise<RepoProfile> {
     const content = await readFile(filePath, "utf8");
     const lines = countLines(content);
     const isTest = TEST_FILE_RE.test(filePath);
-    const isTsx = filePath.endsWith(".tsx");
 
-    if (isTsx) tsxFiles++;
+    if (filePath.endsWith(".tsx")) tsxFiles++;
+    else if (filePath.endsWith(".jsx")) jsxFiles++;
+    else if (filePath.endsWith(".js")) jsFiles++;
     else tsFiles++;
 
     if (isTest) {
@@ -61,6 +64,8 @@ export async function profileRepo(repoPath: string): Promise<RepoProfile> {
     totalFiles: files.length,
     tsFiles,
     tsxFiles,
+    jsFiles,
+    jsxFiles,
     testFiles,
     totalLOC,
     sourceLOC,

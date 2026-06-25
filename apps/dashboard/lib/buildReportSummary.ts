@@ -16,7 +16,7 @@ export function buildReportSummary(report: RepoReport): string {
   // ── Profile ──────────────────────────────────────────────────────────────
   const p = report.profile;
   lines.push(
-    `FILES: ${p.totalFiles} total | ${p.tsFiles} .ts | ${p.tsxFiles} .tsx | ${p.testFiles} test`,
+    `FILES: ${p.totalFiles} total | ${p.tsFiles} .ts | ${p.tsxFiles} .tsx | ${p.jsFiles ?? 0} .js | ${p.jsxFiles ?? 0} .jsx | ${p.testFiles} test`,
   );
   lines.push(
     `LINES: ${p.totalLOC} total LOC | ${p.sourceLOC} source | ${p.testLOC} test`,

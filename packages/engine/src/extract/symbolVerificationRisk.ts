@@ -22,7 +22,7 @@ const MIN_SYMBOL_NAME_LEN = 3;
 /** First existing path wins (colocated tests preferred). */
 export function pairedTestPathCandidates(relSource: string): string[] {
   const dir = path.dirname(relSource);
-  const ext = relSource.endsWith(".tsx") ? "tsx" : "ts";
+  const ext = path.extname(relSource).slice(1);
   const base = path.basename(relSource, path.extname(relSource));
   const norm = (p: string) => p.replace(/\\/g, "/");
   const sameDir = [

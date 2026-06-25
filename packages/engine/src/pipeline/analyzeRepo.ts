@@ -16,7 +16,7 @@ import { computeWeightedRedundancy } from "../collect/weightedRedundancy.js";
 import { extractGitMetrics } from "../collect/gitMetrics.js";
 import { extractGitHistoryBundle } from "../collect/gitMetricsV2.js";
 import { detectFramework } from "../collect/frameworkDetection.js";
-import { parseTypeScript } from "../parsing/tsParser.js";
+import { parseSource } from "../parsing/sourceParser.js";
 import { countFunctions } from "../extract/functionCount.js";
 import { extractFunctionMetrics } from "../extract/functionMetrics.js";
 import { summarizeComplexity } from "../extract/complexity.js";
@@ -30,7 +30,7 @@ import {
 } from "../extract/react/extractReactMetrics.js";
 import { extractSilentFailures } from "../extract/silentFailures.js";
 import { computeSymbolVerificationRisks } from "../extract/symbolVerificationRisk.js";
-import { LONG_FUNCTION_THRESHOLD } from "../utils/constants.js";
+import { LONG_FUNCTION_THRESHOLD, isJsxPath, sourceFlavorForPath } from "../utils/constants.js";
 import { median } from "../utils/math.js";
 import { getSourceMetadata } from "../collect/repoMetadata.js";
 import type {
@@ -46,8 +46,8 @@ import type {
   SilentFailureEvent,
 } from "../types/report.js";
 
-function flavorForFile(filePath: string): "ts" | "tsx" {
-  return filePath.endsWith(".tsx") ? "tsx" : "ts";
+function flavorForFile(filePath: string) {
+  return sourceFlavorForPath(filePath);
 }
 
 export interface AnalyzeOptions {
@@ -100,7 +100,7 @@ export async function analyzeRepo(
 
     let tree;
     try {
-      tree = parseTypeScript(code, flavorForFile(filePath));
+      tree = parseSource(code, flavorForFile(filePath));
     } catch (err) {
       console.error(`Skipping ${path.relative(repoPath, filePath)}: parse error`, err instanceof Error ? err.message : err);
       filesSkipped++;
@@ -138,7 +138,7 @@ export async function analyzeRepo(
       complexity: fileComplexity,
     });
 
-    if (flavorForFile(filePath) === "tsx") {
+    if (isJsxPath(filePath)) {
       silentFailureEvents.push(
         ...extractSilentFailures(tree.rootNode, relFile),
       );

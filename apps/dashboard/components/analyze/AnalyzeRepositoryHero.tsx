@@ -136,7 +136,7 @@ export function AnalyzeRepositoryHero({ compact }: AnalyzeRepositoryHeroProps) {
     >
       <div className="flex justify-center">
         <span className="inline-flex items-center rounded-full border border-border bg-background px-3 py-1 text-xs text-muted-foreground">
-          Static analysis for TypeScript, Python, and more
+          Static analysis for TypeScript, JavaScript, and more
         </span>
       </div>
 

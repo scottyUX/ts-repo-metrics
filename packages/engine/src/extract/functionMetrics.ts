@@ -12,6 +12,7 @@ import {
   NESTING_NODE_TYPES,
   LONG_FUNCTION_THRESHOLD,
   FERREIRA_COMPONENT_SLOC_THRESHOLD,
+  isJsxPath,
 } from "../utils/constants.js";
 import { SKIP, walkTree } from "../utils/astWalker.js";
 import { median } from "../utils/math.js";
@@ -122,7 +123,7 @@ function computeIsReactComponent(
   relativeFilePath: string | undefined,
   name: string,
 ): boolean {
-  if (!relativeFilePath?.endsWith(".tsx")) return false;
+  if (!relativeFilePath || !isJsxPath(relativeFilePath)) return false;
   return isPascalCaseComponentName(name) || functionBodyContainsJsx(fnNode);
 }
 

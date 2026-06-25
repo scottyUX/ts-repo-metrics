@@ -1,7 +1,7 @@
 /**
  * File discovery module.
  *
- * Recursively finds all .ts and .tsx source files within a given repository
+ * Recursively finds all .ts, .tsx, .js, and .jsx source files within a given repository
  * path using fast-glob. Common non-source directories (node_modules, dist,
  * build, .next, coverage, etc.) are excluded automatically.
  */
@@ -10,7 +10,7 @@ import fg from "fast-glob";
 import { SOURCE_PATTERNS, IGNORE_PATTERNS } from "../utils/constants.js";
 
 /**
- * Discover all TypeScript and TSX source files in a repository.
+ * Discover all TypeScript, TSX, JavaScript, and JSX source files in a repository.
  *
  * @param repoPath - Absolute path to the repository root.
  * @returns Array of absolute file paths.

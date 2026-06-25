@@ -1,6 +1,7 @@
 import type { RepoReport } from "./reportTypes";
 
-/** True when the analyzed repo includes .tsx files (React/TSX metrics apply). */
+/** True when the analyzed repo includes .tsx or .jsx files (React metrics apply). */
 export function hasReactUiScope(report: RepoReport): boolean {
-  return (report.profile?.tsxFiles ?? 0) > 0;
+  const p = report.profile;
+  return (p?.tsxFiles ?? 0) + (p?.jsxFiles ?? 0) > 0;
 }

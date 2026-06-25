@@ -44,7 +44,8 @@ src/
 │   ├── gitMetrics.ts
 │   ├── gitMetricsApi.ts
 │   └── frameworkDetection.ts
-├── parsing/tsParser.ts             # Tree-sitter wrapper
+├── parsing/sourceParser.ts           # Tree-sitter wrapper (TS/TSX/JS/JSX)
+│   └── tsParser.ts                   # Re-exports (deprecated alias)
 ├── extract/                        # AST-based extractors
 │   ├── functionCount.ts
 │   ├── functionMetrics.ts

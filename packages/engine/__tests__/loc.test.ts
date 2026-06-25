@@ -17,6 +17,8 @@ describe("profileRepo", () => {
     const result = await profileRepo(FIXTURE_PATH);
     expect(result.totalFiles).toBe(5);
     expect(result.tsFiles).toBe(5);
+    expect(result.jsFiles).toBe(0);
+    expect(result.jsxFiles).toBe(0);
   });
 
   it("counts empty file as 0 lines", async () => {
