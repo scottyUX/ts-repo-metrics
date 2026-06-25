@@ -221,7 +221,7 @@ A: Focus on clarity, fast feedback, and minimal friction (e.g., paste URL → ge
 
 ## 5. Existing Work & Design Direction
 
-- **Existing screens:** The full app is live at `https://repo-metrics-dashboard.vercel.app`. All 5 tabs, the repos hub, and the URL hero exist and are functional. Designer should review these before opening Figma.
+- **Existing screens:** The full app is live at `https://ts-repo-metrics-production.up.railway.app` (staging: `https://ts-repo-metrics-development.up.railway.app`). All 5 tabs, the repos hub, and the URL hero exist and are functional. Designer should review these before opening Figma.
 - **Brand / UCSC guidelines:** None enforced yet. Current theme uses Geist (Vercel), Tailwind dark/light, neutral palette. Designer has freedom to apply UCSC brand.
 - **Feel:** Leans modern tech product (dot-grid bg, shadcn/ui components). The student audience suggests keeping it approachable and actionable rather than dense/academic.
 - **References:** The `/repos` hub is inspired by the GitHub profile page layout. Tab results are inspired by code-quality dashboards (SonarQube-style traffic lights). Additional references: Greptile, CodeRabbit.

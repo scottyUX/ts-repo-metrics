@@ -5,6 +5,7 @@ Supabase `public.analyses` table export for SIP dataset work (SIP-1.3).
 | File | Description |
 |------|-------------|
 | `analyses_rows.csv` | Row-level analysis records: `result_id`, `repo_url`, `commit_sha`, `course_id`, `team_name`, `github_login`, `report_json`, `ai_usage_csv`, etc. |
+| `analyses_rows_YYYYMMDD.csv` | Dated checkpoint exports (e.g. pre–dev-env backup) |
 
 **Source:** Exported from Supabase and placed here for student cohort auditing without requiring live database credentials.
 

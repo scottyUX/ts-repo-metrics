@@ -33,6 +33,7 @@ Track instructor delivery in issue **SIP-1.0** (Kickoff packet).
 ## 5. Access
 
 - [ ] GitHub: invite all SIP students to `scottyUX/ts-repo-metrics` and [Project 3 — AI Driven SWE Research](https://github.com/users/scottyUX/projects/3)
+- [ ] Branching: students PR to **`dev`**; staging at https://ts-repo-metrics-development.up.railway.app — see [`docs/BRANCHING.md`](../docs/BRANCHING.md)
 - [ ] Supabase: read-only credentials or export dump for Obj 3 audit (optional if lists are pre-verified)
 - [ ] Confirm students can run `npm test` and Python 3 locally
 

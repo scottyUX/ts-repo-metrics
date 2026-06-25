@@ -51,7 +51,28 @@ See [Railway: Using variables at build time](https://docs.railway.com/guides/doc
    - **Redirect URLs:** add **`https://<your-host>/auth/callback`**. Keep your existing **`http://localhost:*`** entries if you still develop locally; production and local can share one Supabase project.
 3. **GitHub OAuth App:** callback remains Supabase’s `https://<project-ref>.supabase.co/auth/v1/callback` (unchanged).
 
-See [`apps/dashboard/VERCEL_DEPLOY.md`](apps/dashboard/VERCEL_DEPLOY.md) for the full OAuth checklist.
+See [`apps/dashboard/VERCEL_DEPLOY.md`](apps/dashboard/VERCEL_DEPLOY.md) for the full OAuth checklist (legacy Vercel notes).
+
+## Environments (dev + production)
+
+| Railway environment | Git branch | Public URL |
+|---------------------|------------|------------|
+| **production** | `main` | https://ts-repo-metrics-production.up.railway.app |
+| **development** | `dev` | https://ts-repo-metrics-development.up.railway.app |
+
+Both services share one Supabase project. Set **`APP_ORIGIN`** per environment (no trailing slash):
+
+- Production: `https://ts-repo-metrics-production.up.railway.app`
+- Development: `https://ts-repo-metrics-development.up.railway.app`
+
+All other secrets (`NEXT_PUBLIC_SUPABASE_*`, `SUPABASE_SERVICE_ROLE_KEY`, `GITHUB_OAUTH_ENCRYPTION_KEY`, etc.) are the same values in both environments.
+
+**Supabase redirect URLs** must include both:
+
+- `https://ts-repo-metrics-production.up.railway.app/auth/callback`
+- `https://ts-repo-metrics-development.up.railway.app/auth/callback`
+
+Keep **Site URL** on the production Railway origin. See [`docs/BRANCHING.md`](docs/BRANCHING.md) for the student PR workflow.
 
 ## Railway service setup (checklist)
 

@@ -1,5 +1,7 @@
 # Deploying the Dashboard to Vercel
 
+> **Legacy / archived.** Production and staging run on **Railway** — see [RAILWAY_DEPLOY.md](../../RAILWAY_DEPLOY.md) and [docs/BRANCHING.md](../../docs/BRANCHING.md). The Vercel Git integration is disconnected from `main`; do not deploy here unless intentionally reviving this path.
+
 The **Analyze** feature runs in-process: the API route imports `@repo-metrics/engine` and calls `analyzeFromGitHubUrl()`. No CLI spawn or tsx.
 
 ## Vercel project settings

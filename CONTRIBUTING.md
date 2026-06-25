@@ -106,12 +106,15 @@ Snapshot tests capture the full `analyzeRepo()` output for a fixture repo to ens
 
 ## Pull Request Workflow
 
-1. Create a feature branch from `main`: `git checkout -b feature/your-feature`
+1. Create a feature branch from `dev`: `git checkout dev && git pull && git checkout -b feature/your-feature`
 2. Implement the feature with JSDoc and schema updates
 3. Run `npm test` and `npm run dev -- /path/to/repo` to verify output
 4. If the report schema changed, run `npx vitest run --update` to refresh snapshots
 5. Commit with a descriptive message referencing the issue number
-6. Push and open a PR against `main`
+6. Push and open a PR against **`dev`** (get one approving review; CI must pass)
+7. Production releases: instructor merges **`dev` → `main`** after staging is verified
+
+See [`docs/BRANCHING.md`](docs/BRANCHING.md) for staging/production URLs and deployment flow.
 
 ## Commit Message Format
 
