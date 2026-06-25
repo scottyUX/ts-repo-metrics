@@ -8,7 +8,7 @@ import { writeReportToSessionStorage } from "@/lib/reportLocalCache";
 import type { RepoReport } from "@/lib/reportTypes";
 
 export type RunAnalyzeResult =
-  | { ok: true; resultId: string }
+  | { ok: true; resultId: string; analysisSkipped?: { message: string } }
   | { ok: false; error: string };
 
 export type AnalyzeRequestBody =
@@ -70,7 +70,13 @@ export async function runAnalyzeFromUrl(
     if (data.report) {
       writeReportToSessionStorage(resultId, data.report);
     }
-    return { ok: true, resultId };
+    return {
+      ok: true,
+      resultId,
+      ...(data.report?.analysisSkipped
+        ? { analysisSkipped: { message: data.report.analysisSkipped.message } }
+        : {}),
+    };
   } catch {
     return { ok: false, error: "Analysis failed. Please try again." };
   }

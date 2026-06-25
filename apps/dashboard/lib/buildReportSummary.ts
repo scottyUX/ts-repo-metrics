@@ -13,6 +13,10 @@ export function buildReportSummary(report: RepoReport): string {
   const commit = report.source?.commit?.slice(0, 7) ?? "unknown";
   lines.push(`REPO: ${repoUrl} (commit: ${commit})`);
 
+  if (report.analysisSkipped) {
+    lines.push(`ANALYSIS SKIPPED: ${report.analysisSkipped.message}`);
+  }
+
   // ── Profile ──────────────────────────────────────────────────────────────
   const p = report.profile;
   lines.push(

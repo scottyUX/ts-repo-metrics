@@ -255,7 +255,11 @@ export default function CourseAnalyzePage() {
         if (body.report) {
           writeReportToSessionStorage(rid, body.report);
         }
-        toast.success("Analysis complete");
+        if (body.report?.analysisSkipped) {
+          toast.warning(body.report.analysisSkipped.message);
+        } else {
+          toast.success("Analysis complete");
+        }
         router.push(`/r/${encodeURIComponent(rid)}`);
       } finally {
         setAnalyzingFullName(null);

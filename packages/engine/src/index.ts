@@ -13,6 +13,7 @@ export type {
   RepoReport,
   SourceInfo,
   RepoProfile,
+  UnsupportedFrameworkInfo,
   FunctionDetail,
   FunctionMetricsSummary,
   HalsteadMetrics,

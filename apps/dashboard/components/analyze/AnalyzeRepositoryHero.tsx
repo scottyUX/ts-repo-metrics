@@ -101,7 +101,11 @@ export function AnalyzeRepositoryHero({ compact }: AnalyzeRepositoryHeroProps) {
           toast.error(result.error);
           return;
         }
-        toast.success("Analysis complete");
+        if (result.analysisSkipped) {
+          toast.warning(result.analysisSkipped.message);
+        } else {
+          toast.success("Analysis complete");
+        }
         router.push(`/r/${encodeURIComponent(result.resultId)}`);
       } catch {
         setError("Analysis failed. Please try again.");
@@ -136,7 +140,7 @@ export function AnalyzeRepositoryHero({ compact }: AnalyzeRepositoryHeroProps) {
     >
       <div className="flex justify-center">
         <span className="inline-flex items-center rounded-full border border-border bg-background px-3 py-1 text-xs text-muted-foreground">
-          Static analysis for TypeScript, JavaScript, Python, and more
+          Static analysis for TypeScript, JavaScript, and Python (Flask/FastAPI-style)
         </span>
       </div>
 

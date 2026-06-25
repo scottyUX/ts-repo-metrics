@@ -10,6 +10,7 @@ This document describes the complete JSON report produced by `ts-repo-metrics` (
 | `source` | `SourceInfo` | no | Origin metadata (local path vs cloned GitHub URL) |
 | `filesAnalyzed` | `number` | no | Total `.ts`/`.tsx`/`.js`/`.jsx`/`.py` files successfully parsed |
 | `filesSkipped` | `number` | **yes** | Files skipped due to read or parse errors |
+| `analysisSkipped` | `UnsupportedFrameworkInfo` | **yes** | Present when static analysis was skipped (web2py or Django) |
 | `analyzer_version` | `string` | **yes** | Analyzer package version (from `packages/engine/package.json` when run via the engine — CLI or dashboard) |
 | `analysis_timestamp` | `string` | **yes** | ISO 8601 timestamp when analysis ran |
 | `distributions` | `DistributionMetrics` | **yes** | Tail risk indicators (p50/p75/p90, concentration) |
@@ -51,6 +52,17 @@ Tail risk indicators for research. Percentiles computed across all functions.
 | `url` | `string` | Clone URL for `type: "git"`, empty for `type: "local"` |
 | `commit` | `string` | HEAD commit SHA |
 | `branch` | `string` | Current branch name |
+
+## `analysisSkipped` — Unsupported Python framework
+
+Present when the repository layout indicates **web2py** or **Django**. Static AST analysis is skipped; git metrics may still be populated.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | `"web2py"` \| `"django"` | Detected unsupported framework |
+| `message` | `string` | User-facing explanation |
+
+Detection rules: **web2py** when `web2py/gluon`, `web2py/applications`, or root `web2py.py` exists; **Django** when root `manage.py` exists and `django` appears in `requirements.txt`, `requirements/*.txt`, or `pyproject.toml`.
 
 ## `profile` — Repository Profiling
 

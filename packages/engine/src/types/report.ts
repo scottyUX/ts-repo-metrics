@@ -118,6 +118,12 @@ export interface FrameworkInfo {
   hasBackend: boolean;
 }
 
+/** Set when static analysis is skipped for an unsupported Python web framework. */
+export interface UnsupportedFrameworkInfo {
+  id: "web2py" | "django";
+  message: string;
+}
+
 /** Git history metrics derived from commit log analysis. */
 export interface GitMetrics {
   totalCommits: number;
@@ -402,6 +408,8 @@ export interface RepoReport {
   filesAnalyzed: number;
   /** Files skipped due to read or parse errors. */
   filesSkipped?: number;
+  /** Present when static analysis was skipped (web2py or Django). */
+  analysisSkipped?: UnsupportedFrameworkInfo;
   /** Analyzer package version (e.g. from package.json). */
   analyzer_version?: string;
   /** ISO 8601 timestamp when analysis ran. */

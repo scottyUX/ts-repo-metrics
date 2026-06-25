@@ -16,6 +16,7 @@ import { computeWeightedRedundancy } from "../collect/weightedRedundancy.js";
 import { extractGitMetrics } from "../collect/gitMetrics.js";
 import { extractGitHistoryBundle } from "../collect/gitMetricsV2.js";
 import { detectFramework } from "../collect/frameworkDetection.js";
+import { detectUnsupportedPythonFramework } from "../collect/pythonFrameworkDetection.js";
 import { parseSource } from "../parsing/sourceParser.js";
 import { countFunctions } from "../extract/functionCount.js";
 import { extractFunctionMetrics } from "../extract/functionMetrics.js";
@@ -36,6 +37,7 @@ import { median } from "../utils/math.js";
 import { getSourceMetadata } from "../collect/repoMetadata.js";
 import type {
   RepoReport,
+  RepoProfile,
   FunctionDetail,
   FunctionMetricsSummary,
   FunctionComplexity,
@@ -45,6 +47,7 @@ import type {
   ReactComponentMetrics,
   Phase3Metrics,
   SilentFailureEvent,
+  UnsupportedFrameworkInfo,
 } from "../types/report.js";
 
 function flavorForFile(filePath: string) {
@@ -54,6 +57,99 @@ function flavorForFile(filePath: string) {
 export interface AnalyzeOptions {
   /** Pre-computed source metadata. If omitted, computed from repo path. */
   source?: SourceInfo;
+}
+
+const EMPTY_PROFILE: RepoProfile = {
+  totalFiles: 0,
+  tsFiles: 0,
+  tsxFiles: 0,
+  jsFiles: 0,
+  jsxFiles: 0,
+  pyFiles: 0,
+  testFiles: 0,
+  totalLOC: 0,
+  sourceLOC: 0,
+  testLOC: 0,
+};
+
+const EMPTY_SMELLS: SmellCounts = {
+  longFunctions: 0,
+  deepNesting: 0,
+  longParameterLists: 0,
+  emptyCatchBlocks: 0,
+  consoleLogs: 0,
+};
+
+async function readAnalyzerVersion(): Promise<string | undefined> {
+  try {
+    const __dirname = path.dirname(fileURLToPath(import.meta.url));
+    const packageRoot = path.join(__dirname, "..", "..");
+    const pkgPath = path.join(packageRoot, "package.json");
+    const pkg = JSON.parse(await readFile(pkgPath, "utf8")) as { version?: string };
+    return pkg.version;
+  } catch {
+    return undefined;
+  }
+}
+
+async function buildSkippedFrameworkReport(
+  repoPath: string,
+  source: SourceInfo,
+  analysisSkipped: UnsupportedFrameworkInfo,
+): Promise<RepoReport> {
+  const git = await extractGitMetrics(repoPath);
+  const gitBundle = await extractGitHistoryBundle(repoPath);
+  const gitMetricsV2 = gitBundle?.gitMetricsV2 ?? null;
+  const contributors = gitBundle?.contributors;
+  const framework = await detectFramework(repoPath);
+  const analyzer_version = await readAnalyzerVersion();
+  const functionMetricsSummary: FunctionMetricsSummary = {
+    totalFunctions: 0,
+    averageLength: 0,
+    medianLength: 0,
+    maxNestingDepth: 0,
+    longFunctionPercentage: 0,
+  };
+  const complexitySummary = summarizeComplexity([]);
+  const maintainability = computeMaintainabilityIndex(0, 0, 0);
+  const testCoverageProxy = computeTestCoverageProxy(EMPTY_PROFILE);
+  const distributions = computeDistributions([], [], []);
+  const phase3: Phase3Metrics = {
+    sfd: 0,
+    mcr: null,
+    srs: 0,
+    silentFailureEvents: [],
+    srsWeightedNumerator: 0,
+    srsExactWeightedLines: 0,
+    srsNearWeightedLines: 0,
+    monolithicComponentCount: 0,
+    reactComponentCount: 0,
+  };
+
+  return {
+    repoPath,
+    source,
+    filesAnalyzed: 0,
+    analysisSkipped,
+    analyzer_version,
+    analysis_timestamp: new Date().toISOString(),
+    distributions,
+    profile: EMPTY_PROFILE,
+    totals: { functions: 0 },
+    functionMetricsSummary,
+    complexity: complexitySummary,
+    smells: EMPTY_SMELLS,
+    maintainability,
+    testCoverageProxy,
+    duplication: null,
+    git,
+    gitMetricsV2,
+    ...(contributors && contributors.length > 0 ? { contributors } : {}),
+    framework,
+    perFile: [],
+    phase3,
+    symbolVerificationRisks: [],
+  };
 }
 
 /**
@@ -70,6 +166,12 @@ export async function analyzeRepo(
   const source =
     options?.source ??
     (await getSourceMetadata(repoPath, "local", ""));
+
+  const unsupportedFramework = await detectUnsupportedPythonFramework(repoPath);
+  if (unsupportedFramework) {
+    return buildSkippedFrameworkReport(repoPath, source, unsupportedFramework);
+  }
+
   const profile = await profileRepo(repoPath);
   const files = await discoverSourceFiles(repoPath);
 
@@ -222,16 +324,7 @@ export async function analyzeRepo(
   const contributors = gitBundle?.contributors;
   const framework = await detectFramework(repoPath);
 
-  let analyzer_version: string | undefined;
-  try {
-    const __dirname = path.dirname(fileURLToPath(import.meta.url));
-    const packageRoot = path.join(__dirname, "..", "..");
-    const pkgPath = path.join(packageRoot, "package.json");
-    const pkg = JSON.parse(await readFile(pkgPath, "utf8")) as { version?: string };
-    analyzer_version = pkg.version;
-  } catch {
-    // ignore
-  }
+  const analyzer_version = await readAnalyzerVersion();
 
   const reactMetrics =
     tsxFilesAnalyzed > 0

@@ -20,6 +20,13 @@ import {
 import { batchAnalyze } from "./batch/batchAnalyze.js";
 
 async function emitReport(report: unknown, outputPath?: string): Promise<void> {
+  const skipped = report && typeof report === "object" && "analysisSkipped" in report
+    ? (report as { analysisSkipped?: { message?: string } }).analysisSkipped
+    : undefined;
+  if (skipped?.message) {
+    console.error(skipped.message);
+  }
+
   const json = JSON.stringify(report, null, 2);
   if (!outputPath) {
     console.log(json);

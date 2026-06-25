@@ -164,6 +164,10 @@ export interface RepoReport {
   source: { type: string; url: string; commit: string; branch: string };
   filesAnalyzed: number;
   filesSkipped?: number;
+  analysisSkipped?: {
+    id: "web2py" | "django";
+    message: string;
+  };
   analyzer_version?: string;
   analysis_timestamp?: string;
   distributions?: DistributionMetrics;

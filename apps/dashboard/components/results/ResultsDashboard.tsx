@@ -135,6 +135,23 @@ export function ResultsDashboard({ report, resultId }: ResultsDashboardProps) {
             </span>
           </div>
         ) : null}
+        {report.analysisSkipped ? (
+          <div
+            role="status"
+            className="rounded-lg border border-amber-200 bg-amber-50/80 px-4 py-3 text-sm dark:border-amber-900 dark:bg-amber-950/40"
+          >
+            <p className="font-medium text-amber-950 dark:text-amber-100">
+              Static analysis not available
+            </p>
+            <p className="mt-1 text-amber-900 dark:text-amber-200">
+              {report.analysisSkipped.message}
+            </p>
+            <p className="mt-2 text-amber-800 dark:text-amber-300">
+              Commit history and GitHub metadata below may still be useful. Code quality and testing
+              tabs reflect no parsed source files.
+            </p>
+          </div>
+        ) : null}
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold">Analysis Results</h1>
