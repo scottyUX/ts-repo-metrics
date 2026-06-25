@@ -1,3 +1,4 @@
+Content, Quality, and Report
 ## Cohort summary
 
 | Metric | Value |
@@ -25,7 +26,7 @@ Source: `data/analyses_rows.csv`.
 
 Across 26 uploads with AI logs in `data/analyses_rows.csv`.
 
-There are 2 problematic uplaods, and 1 small issue worth flagging: 
+There are 2 problematic uploads, and 1 small issue worth flagging: 
 1. Bloi-Dev — s-achawro/CWTCG (2026-05-29)
     * Effectively broken — only 3 events in a single session:
         - 2 duplicate user_prompt rows
