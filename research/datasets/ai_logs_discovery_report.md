@@ -1,4 +1,4 @@
-Content, Quality, and Report
+# Content, Quality, and Report
 ## Cohort summary
 
 | Metric | Value |
