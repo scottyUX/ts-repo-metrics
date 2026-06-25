@@ -8,7 +8,7 @@
 
 import { simpleGit } from "simple-git";
 import { median, percentile } from "../utils/math.js";
-import { TEST_FILE_RE } from "../utils/constants.js";
+import { isTestFilePath } from "../utils/constants.js";
 import type {
   GitMetricsV2,
   CommitStats,
@@ -327,7 +327,7 @@ function computeTestCoupling(commits: ParsedCommit[]): TestCouplingStats {
   let featureCommits = 0;
 
   for (const c of commits) {
-    const touchesTest = c.files.some((f) => TEST_FILE_RE.test(f.path));
+    const touchesTest = c.files.some((f) => isTestFilePath(f.path));
     if (touchesTest) testCommits++;
     else featureCommits++;
   }
@@ -397,7 +397,7 @@ export function buildContributorActivityFromParsedCommits(
         linesDeleted += f.del;
         const churn = f.add + f.del;
         const rel = f.path.replace(/\\/g, "/");
-        if (TEST_FILE_RE.test(rel)) {
+        if (isTestFilePath(rel)) {
           testLineChurn += churn;
           testPathsDistinct.add(rel);
         } else {

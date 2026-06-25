@@ -19,6 +19,7 @@ describe("profileRepo", () => {
     expect(result.tsFiles).toBe(5);
     expect(result.jsFiles).toBe(0);
     expect(result.jsxFiles).toBe(0);
+    expect(result.pyFiles).toBe(0);
   });
 
   it("counts empty file as 0 lines", async () => {

@@ -12,6 +12,7 @@ export interface RepoProfile {
   tsxFiles: number;
   jsFiles: number;
   jsxFiles: number;
+  pyFiles: number;
   testFiles: number;
   totalLOC: number;
   sourceLOC: number;

@@ -59,7 +59,7 @@ export async function detectDuplication(
   try {
     await execFileAsync(jscpdBin, [
       repoPath,
-      "--format", "typescript,tsx,javascript,jsx",
+      "--format", "typescript,tsx,javascript,jsx,python",
       "--reporters", "json",
       "--output", outputDir,
       "--ignore", "node_modules,dist,build,.next,out,coverage",

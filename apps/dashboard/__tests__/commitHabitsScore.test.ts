@@ -13,6 +13,7 @@ function minimalReport(over: Partial<RepoReport> = {}): RepoReport {
       tsxFiles: 0,
       jsFiles: 0,
       jsxFiles: 0,
+      pyFiles: 0,
       testFiles: 0,
       totalLOC: 100,
       sourceLOC: 100,

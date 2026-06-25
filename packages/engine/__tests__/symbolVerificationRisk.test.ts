@@ -34,6 +34,13 @@ describe("pairedTestPathCandidates", () => {
     const c = pairedTestPathCandidates("components/Hello.jsx");
     expect(c[0]).toBe("components/Hello.test.jsx");
   });
+
+  it("uses pytest conventions for py sources", () => {
+    const c = pairedTestPathCandidates("pkg/utils.py");
+    expect(c[0]).toBe("pkg/test_utils.py");
+    expect(c[1]).toBe("pkg/utils_test.py");
+    expect(c).toContain("pkg/tests/test_utils.py");
+  });
 });
 
 describe("symbolReferencedInSource", () => {

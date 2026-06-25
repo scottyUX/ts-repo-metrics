@@ -9,7 +9,7 @@
 
 import { readFile } from "node:fs/promises";
 import fg from "fast-glob";
-import { SOURCE_PATTERNS, IGNORE_PATTERNS, TEST_FILE_RE } from "../utils/constants.js";
+import { SOURCE_PATTERNS, IGNORE_PATTERNS, isTestFilePath } from "../utils/constants.js";
 import { countLines } from "../utils/text.js";
 import type { RepoProfile } from "../types/report.js";
 
@@ -35,6 +35,7 @@ export async function profileRepo(repoPath: string): Promise<RepoProfile> {
   let tsxFiles = 0;
   let jsFiles = 0;
   let jsxFiles = 0;
+  let pyFiles = 0;
   let testFiles = 0;
   let totalLOC = 0;
   let sourceLOC = 0;
@@ -43,11 +44,12 @@ export async function profileRepo(repoPath: string): Promise<RepoProfile> {
   for (const filePath of files) {
     const content = await readFile(filePath, "utf8");
     const lines = countLines(content);
-    const isTest = TEST_FILE_RE.test(filePath);
+    const isTest = isTestFilePath(filePath);
 
     if (filePath.endsWith(".tsx")) tsxFiles++;
     else if (filePath.endsWith(".jsx")) jsxFiles++;
     else if (filePath.endsWith(".js")) jsFiles++;
+    else if (filePath.endsWith(".py")) pyFiles++;
     else tsFiles++;
 
     if (isTest) {
@@ -66,6 +68,7 @@ export async function profileRepo(repoPath: string): Promise<RepoProfile> {
     tsxFiles,
     jsFiles,
     jsxFiles,
+    pyFiles,
     testFiles,
     totalLOC,
     sourceLOC,

@@ -110,7 +110,7 @@ export const DATA_DICTIONARY: Record<string, DataDictionaryEntry> = {
     interpretation: "Test code size.",
   },
   files_analyzed: {
-    definition: "Total .ts, .tsx, .js, and .jsx files successfully parsed.",
+    definition: "Total .ts, .tsx, .js, .jsx, and .py files successfully parsed.",
     unit: "count",
     resultsConstruct: "commit-habits",
     interpretation: "Scope of analysis.",

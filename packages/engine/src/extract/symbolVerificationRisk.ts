@@ -5,7 +5,7 @@
 
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { TEST_FILE_RE } from "../utils/constants.js";
+import { isTestFilePath } from "../utils/constants.js";
 import type {
   PerFileEntry,
   SymbolVerificationRisk,
@@ -25,6 +25,17 @@ export function pairedTestPathCandidates(relSource: string): string[] {
   const ext = path.extname(relSource).slice(1);
   const base = path.basename(relSource, path.extname(relSource));
   const norm = (p: string) => p.replace(/\\/g, "/");
+
+  if (ext === "py") {
+    return [
+      norm(path.join(dir, `test_${base}.py`)),
+      norm(path.join(dir, `${base}_test.py`)),
+      norm(path.join(dir, "tests", `test_${base}.py`)),
+      norm(path.join(dir, `${base}.test.py`)),
+      norm(path.join(dir, `${base}.spec.py`)),
+    ];
+  }
+
   const sameDir = [
     norm(path.join(dir, `${base}.test.${ext}`)),
     norm(path.join(dir, `${base}.spec.${ext}`)),
@@ -81,7 +92,7 @@ export async function computeSymbolVerificationRisks(
   const rows: SymbolVerificationRisk[] = [];
 
   for (const pf of perFile) {
-    if (TEST_FILE_RE.test(pf.file)) continue;
+    if (isTestFilePath(pf.file)) continue;
 
     const candidates = pairedTestPathCandidates(pf.file);
     const found = await readFirstExisting(repoPath, candidates);

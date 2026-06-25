@@ -7,8 +7,9 @@
 import Parser from "tree-sitter";
 import tsLang from "tree-sitter-typescript";
 import jsLang from "tree-sitter-javascript";
+import pyLang from "tree-sitter-python";
 
-export type SourceFlavor = "ts" | "tsx" | "js" | "jsx";
+export type SourceFlavor = "ts" | "tsx" | "js" | "jsx" | "py";
 
 export type TsFlavor = "ts" | "tsx";
 
@@ -30,6 +31,9 @@ export function parseSource(code: string, flavor: SourceFlavor) {
       break;
     case "js":
       parser.setLanguage(jsLang);
+      break;
+    case "py":
+      parser.setLanguage(pyLang);
       break;
   }
   return parser.parse(code);

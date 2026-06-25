@@ -6,12 +6,13 @@
 /*  File discovery                                                     */
 /* ------------------------------------------------------------------ */
 
-/** Glob patterns for analyzable source files (TS/TSX/JS/JSX). */
+/** Glob patterns for analyzable source files (TS/TSX/JS/JSX/Python). */
 export const SOURCE_PATTERNS = [
   "**/*.ts",
   "**/*.tsx",
   "**/*.js",
   "**/*.jsx",
+  "**/*.py",
 ];
 
 /** Directories to exclude from all file discovery and analysis. */
@@ -33,11 +34,20 @@ export function isJsxPath(filePath: string): boolean {
   return filePath.endsWith(".tsx") || filePath.endsWith(".jsx");
 }
 
+/** Matches pytest/unittest-style Python test modules. */
+export const PYTHON_TEST_FILE_RE = /(?:^|[/\\])(?:test_.+|.+_test)\.py$/i;
+
+/** True when the path matches any supported test-file naming convention. */
+export function isTestFilePath(filePath: string): boolean {
+  return TEST_FILE_RE.test(filePath) || PYTHON_TEST_FILE_RE.test(filePath);
+}
+
 /** Tree-sitter flavor for a discovered source file path. */
-export function sourceFlavorForPath(filePath: string): "ts" | "tsx" | "js" | "jsx" {
+export function sourceFlavorForPath(filePath: string): "ts" | "tsx" | "js" | "jsx" | "py" {
   if (filePath.endsWith(".tsx")) return "tsx";
   if (filePath.endsWith(".jsx")) return "jsx";
   if (filePath.endsWith(".js")) return "js";
+  if (filePath.endsWith(".py")) return "py";
   return "ts";
 }
 

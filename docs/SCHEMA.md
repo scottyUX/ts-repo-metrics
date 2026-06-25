@@ -8,7 +8,7 @@ This document describes the complete JSON report produced by `ts-repo-metrics` (
 |-------|------|----------|-------------|
 | `repoPath` | `string` | no | Absolute path to the analyzed repository |
 | `source` | `SourceInfo` | no | Origin metadata (local path vs cloned GitHub URL) |
-| `filesAnalyzed` | `number` | no | Total `.ts`/`.tsx`/`.js`/`.jsx` files successfully parsed |
+| `filesAnalyzed` | `number` | no | Total `.ts`/`.tsx`/`.js`/`.jsx`/`.py` files successfully parsed |
 | `filesSkipped` | `number` | **yes** | Files skipped due to read or parse errors |
 | `analyzer_version` | `string` | **yes** | Analyzer package version (from `packages/engine/package.json` when run via the engine — CLI or dashboard) |
 | `analysis_timestamp` | `string` | **yes** | ISO 8601 timestamp when analysis ran |
@@ -61,7 +61,8 @@ Tail risk indicators for research. Percentiles computed across all functions.
 | `tsxFiles` | `number` | Count of `.tsx` files |
 | `jsFiles` | `number` | Count of `.js` files |
 | `jsxFiles` | `number` | Count of `.jsx` files |
-| `testFiles` | `number` | Files matching `*.test.ts`, `*.spec.js`, etc. |
+| `pyFiles` | `number` | Count of `.py` files |
+| `testFiles` | `number` | Files matching `*.test.ts`, `*.spec.js`, `test_*.py`, etc. |
 | `totalLOC` | `number` | Total lines of code across all files |
 | `sourceLOC` | `number` | Lines of code in non-test files |
 | `testLOC` | `number` | Lines of code in test files |

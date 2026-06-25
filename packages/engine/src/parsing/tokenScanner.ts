@@ -1,11 +1,13 @@
 /**
  * Halstead-style operator/operand collection from a function subtree.
- * Skips nested function bodies. Maps Tree-sitter TS/TSX nodes to stable keys.
  */
 
 import type { SyntaxNode } from "tree-sitter";
-import { FUNCTION_NODE_TYPES } from "../utils/constants.js";
 import { SKIP, walkTree } from "../utils/astWalker.js";
+import {
+  ECMASCRIPT_PROFILE,
+  type LanguageProfile,
+} from "../utils/languageProfile.js";
 
 export interface HalsteadAtomLists {
   operators: string[];
@@ -35,12 +37,17 @@ const CONTROL_OP: Record<string, string> = {
   delete_expression: "expr:delete",
   import_statement: "mod:import",
   export_statement: "mod:export",
+  elif_clause: "ctrl:elif",
+  except_clause: "ctrl:except",
+  with_statement: "ctrl:with",
+  conditional_expression: "ctrl:conditional",
+  raise_statement: "stmt:raise",
 };
 
-/**
- * Collect Halstead operator/operand atoms for one function node.
- */
-export function collectHalsteadAtoms(fnNode: SyntaxNode): HalsteadAtomLists {
+export function collectHalsteadAtoms(
+  fnNode: SyntaxNode,
+  profile: LanguageProfile = ECMASCRIPT_PROFILE,
+): HalsteadAtomLists {
   const operators: string[] = [];
   const operands: string[] = [];
 
@@ -53,17 +60,43 @@ export function collectHalsteadAtoms(fnNode: SyntaxNode): HalsteadAtomLists {
 
   walkTree(fnNode, {
     enter(node) {
-      if (node !== fnNode && FUNCTION_NODE_TYPES.has(node.type)) {
+      if (node !== fnNode && profile.functionNodeTypes.has(node.type)) {
         return SKIP;
       }
 
-      if (node.type === "arrow_function") {
+      if (profile.language === "ecmascript" && node.type === "arrow_function") {
         addOp("op:=>");
       }
 
       const ctrl = CONTROL_OP[node.type];
       if (ctrl) {
         addOp(ctrl);
+      }
+
+      if (profile.language === "python") {
+        switch (node.type) {
+          case "boolean_operator":
+            addOp(`op:${node.text.includes("and") ? "and" : "or"}`);
+            break;
+          case "identifier":
+            addOperand(`id:${node.text}`);
+            break;
+          case "integer":
+          case "float":
+            addOperand(`lit:${node.type}`);
+            break;
+          case "true":
+          case "false":
+          case "none":
+            addOperand(`lit:${node.type}`);
+            break;
+          case "string":
+            addOperand("lit:string");
+            break;
+          default:
+            break;
+        }
+        return undefined;
       }
 
       switch (node.type) {

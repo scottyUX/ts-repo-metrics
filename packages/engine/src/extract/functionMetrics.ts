@@ -8,12 +8,14 @@
 
 import type { SyntaxNode } from "tree-sitter";
 import {
-  FUNCTION_NODE_TYPES,
-  NESTING_NODE_TYPES,
   LONG_FUNCTION_THRESHOLD,
   FERREIRA_COMPONENT_SLOC_THRESHOLD,
   isJsxPath,
 } from "../utils/constants.js";
+import {
+  ECMASCRIPT_PROFILE,
+  type LanguageProfile,
+} from "../utils/languageProfile.js";
 import { SKIP, walkTree } from "../utils/astWalker.js";
 import { median } from "../utils/math.js";
 import { countCyclomaticBranchPoints } from "./complexity.js";
@@ -35,6 +37,7 @@ export type {
 export interface ExtractFunctionMetricsOptions {
   /** Relative path like `src/App.tsx` — used for `isReactComponent` when `.tsx`. */
   relativeFilePath?: string;
+  profile?: LanguageProfile;
 }
 
 /**
@@ -57,18 +60,29 @@ function getFunctionName(node: SyntaxNode): string {
   return "(anonymous)";
 }
 
-function countParameters(node: SyntaxNode): number {
+function countParameters(node: SyntaxNode, profile: LanguageProfile): number {
   const params = node.childForFieldName("parameters");
   if (!params) return 0;
   let count = 0;
   for (let i = 0; i < params.namedChildCount; i++) {
     const child = params.namedChild(i);
-    if (
-      child &&
-      (child.type === "required_parameter" ||
-        child.type === "optional_parameter" ||
-        child.type === "rest_parameter" ||
-        child.type === "identifier")
+    if (!child) continue;
+    if (profile.language === "python") {
+      if (
+        child.type === "identifier" ||
+        child.type === "default_parameter" ||
+        child.type === "typed_parameter" ||
+        child.type === "typed_default_parameter" ||
+        child.type === "list_splat_pattern" ||
+        child.type === "dictionary_splat_pattern"
+      ) {
+        count++;
+      }
+    } else if (
+      child.type === "required_parameter" ||
+      child.type === "optional_parameter" ||
+      child.type === "rest_parameter" ||
+      child.type === "identifier"
     ) {
       count++;
     }
@@ -76,8 +90,12 @@ function countParameters(node: SyntaxNode): number {
   return count;
 }
 
-function maxNesting(node: SyntaxNode, currentDepth: number): number {
-  const depth = NESTING_NODE_TYPES.has(node.type)
+function maxNesting(
+  node: SyntaxNode,
+  currentDepth: number,
+  profile: LanguageProfile,
+): number {
+  const depth = profile.nestingNodeTypes.has(node.type)
     ? currentDepth + 1
     : currentDepth;
 
@@ -85,19 +103,22 @@ function maxNesting(node: SyntaxNode, currentDepth: number): number {
   for (let i = 0; i < node.namedChildCount; i++) {
     const child = node.namedChild(i);
     if (child) {
-      const childMax = maxNesting(child, depth);
+      const childMax = maxNesting(child, depth, profile);
       if (childMax > max) max = childMax;
     }
   }
   return max;
 }
 
-/** True if function subtree contains JSX (TSX), excluding nested functions. */
-function functionBodyContainsJsx(fnNode: SyntaxNode): boolean {
+/** True if function subtree contains JSX (TSX/JSX), excluding nested functions. */
+function functionBodyContainsJsx(
+  fnNode: SyntaxNode,
+  profile: LanguageProfile,
+): boolean {
   let found = false;
   walkTree(fnNode, {
     enter(node) {
-      if (node !== fnNode && FUNCTION_NODE_TYPES.has(node.type)) {
+      if (node !== fnNode && profile.functionNodeTypes.has(node.type)) {
         return SKIP;
       }
       if (
@@ -122,9 +143,11 @@ function computeIsReactComponent(
   fnNode: SyntaxNode,
   relativeFilePath: string | undefined,
   name: string,
+  profile: LanguageProfile,
 ): boolean {
+  if (profile.language !== "ecmascript") return false;
   if (!relativeFilePath || !isJsxPath(relativeFilePath)) return false;
-  return isPascalCaseComponentName(name) || functionBodyContainsJsx(fnNode);
+  return isPascalCaseComponentName(name) || functionBodyContainsJsx(fnNode, profile);
 }
 
 /**
@@ -135,17 +158,18 @@ export function extractFunctionMetrics(
   options?: ExtractFunctionMetricsOptions,
 ): FunctionMetricsResult {
   const relativeFilePath = options?.relativeFilePath;
+  const profile = options?.profile ?? ECMASCRIPT_PROFILE;
   const functions: FunctionDetail[] = [];
 
   walkTree(root, {
     enter(node) {
-      if (FUNCTION_NODE_TYPES.has(node.type)) {
+      if (profile.functionNodeTypes.has(node.type)) {
         const lines = node.endPosition.row - node.startPosition.row + 1;
         const name = getFunctionName(node);
-        const branches = countCyclomaticBranchPoints(node);
+        const branches = countCyclomaticBranchPoints(node, profile);
         const cyclomaticComplexity = 1 + branches;
-        const halstead = computeHalsteadForFunction(node);
-        const cognitiveComplexity = computeCognitiveComplexity(node);
+        const halstead = computeHalsteadForFunction(node, profile);
+        const cognitiveComplexity = computeCognitiveComplexity(node, profile);
         const maintainabilityIndexGradAiRaw = calculateMIGradAiRaw(
           halstead.volume,
           cyclomaticComplexity,
@@ -159,6 +183,7 @@ export function extractFunctionMetrics(
           node,
           relativeFilePath,
           name,
+          profile,
         );
         const isMonolithic =
           isReactComponent && lines > FERREIRA_COMPONENT_SLOC_THRESHOLD;
@@ -168,8 +193,8 @@ export function extractFunctionMetrics(
           type: node.type,
           startLine: node.startPosition.row + 1,
           lines,
-          maxNestingDepth: maxNesting(node, 0),
-          parameterCount: countParameters(node),
+          maxNestingDepth: maxNesting(node, 0, profile),
+          parameterCount: countParameters(node, profile),
           cyclomaticComplexity,
           halstead,
           cognitiveComplexity,

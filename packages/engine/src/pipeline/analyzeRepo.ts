@@ -31,6 +31,7 @@ import {
 import { extractSilentFailures } from "../extract/silentFailures.js";
 import { computeSymbolVerificationRisks } from "../extract/symbolVerificationRisk.js";
 import { LONG_FUNCTION_THRESHOLD, isJsxPath, sourceFlavorForPath } from "../utils/constants.js";
+import { languageProfileForPath } from "../utils/languageProfile.js";
 import { median } from "../utils/math.js";
 import { getSourceMetadata } from "../collect/repoMetadata.js";
 import type {
@@ -107,10 +108,12 @@ export async function analyzeRepo(
       continue;
     }
 
-    const fnCount = countFunctions(tree.rootNode);
+    const langProfile = languageProfileForPath(filePath);
+    const fnCount = countFunctions(tree.rootNode, langProfile);
     const relFile = path.relative(repoPath, filePath);
     const fnMetrics = extractFunctionMetrics(tree.rootNode, {
       relativeFilePath: relFile,
+      profile: langProfile,
     });
     const fileComplexity: FunctionComplexity[] = fnMetrics.functions.map(
       (f) => ({
@@ -120,7 +123,7 @@ export async function analyzeRepo(
         complexity: f.cyclomaticComplexity,
       }),
     );
-    const fileSmells = detectSmells(tree.rootNode);
+    const fileSmells = detectSmells(tree.rootNode, langProfile);
 
     totalFunctions += fnCount.total;
     allFunctionDetails.push(...fnMetrics.functions);

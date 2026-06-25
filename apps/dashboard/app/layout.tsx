@@ -20,7 +20,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Repo Metrics Dashboard",
   description:
-    "Analyze GitHub repositories — TypeScript, JavaScript, and more — with code and git metrics",
+    "Analyze GitHub repositories — TypeScript, JavaScript, Python, and more — with code and git metrics",
 };
 
 export default function RootLayout({

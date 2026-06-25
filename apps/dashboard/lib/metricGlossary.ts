@@ -3,7 +3,7 @@
  */
 
 export const KPI_DEFINITIONS: Record<string, string> = {
-  filesAnalyzed: "Total .ts, .tsx, .js, and .jsx files parsed and analyzed.",
+  filesAnalyzed: "Total .ts, .tsx, .js, .jsx, and .py files parsed and analyzed.",
   totalFunctions: "Count of function-like AST nodes (functions, methods, arrow functions).",
   avgFunctionLength: "Mean line count across all functions.",
   maxFunctionLength: "Longest function by line count in the repo.",

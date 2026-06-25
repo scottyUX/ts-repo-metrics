@@ -4,6 +4,7 @@
 
 import type { HalsteadMetrics } from "../types/report.js";
 import { collectHalsteadAtoms, type HalsteadAtomLists } from "../parsing/tokenScanner.js";
+import type { LanguageProfile } from "../utils/languageProfile.js";
 import type { SyntaxNode } from "tree-sitter";
 
 export type { HalsteadMetrics } from "../types/report.js";
@@ -48,6 +49,9 @@ export function halsteadFromAtoms(atoms: HalsteadAtomLists): HalsteadMetrics {
 /**
  * Compute Halstead metrics for a function AST subtree.
  */
-export function computeHalsteadForFunction(fnNode: SyntaxNode): HalsteadMetrics {
-  return halsteadFromAtoms(collectHalsteadAtoms(fnNode));
+export function computeHalsteadForFunction(
+  fnNode: SyntaxNode,
+  profile?: LanguageProfile,
+): HalsteadMetrics {
+  return halsteadFromAtoms(collectHalsteadAtoms(fnNode, profile));
 }
