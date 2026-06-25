@@ -102,16 +102,3 @@ Three-item AUM composites at each SDLC stage (N = 62). Paper benchmark: α ≈ .
 - **Maintenance:** α = 0.875 — similar to paper (within range, high end).
 
 All six stages meet or exceed the paper's acceptable exploratory threshold; four fall within the reported range, and Testing/Deployment sit slightly above the paper's upper bound.
-
-## Spring 2026 vs. paper — plain English summary
-Sample: We analyzed 62 CSE115A-C students (Spring 2026). All 62 had scores at every SDLC phase. The paper used complete-case subsamples of 48 (AUM) and 35 (AU) because some students skipped later phases.
-
-Main result (AUM — AI usage maturity): Phases differ a lot.
-Both studies find a strong stage effect (paper: χ²(5) ≈ 66, p < .001; Spring 2026: χ²(5) ≈ 58, p < .001). The exact χ² does not need to match — the conclusion is the same. Post-hoc tests support a two-cluster pattern: Planning, Design, and Implementation score higher than Deployment (and often Maintenance). Early/middle phases show more mature AI use than later ones.
-
-Secondary result (AU — usage frequency): Different from the paper.
-The paper found no significant differences across phases for how often students use AI (p = .41). In Spring 2026, usage frequency does vary by phase (p < .001). So in this cohort, both how well and how often students use AI change across the lifecycle; the paper emphasized maturity differences while holding frequency roughly flat.
-
-Takeaway: The paper’s core claim replicates — AI usage maturity varies strongly by SDLC phase. Spring 2026 confirms that with a slightly lower but still highly significant χ². The main nuance is that usage frequency also varies in this class, which the paper’s complete-case subsample did not show.
-
-
