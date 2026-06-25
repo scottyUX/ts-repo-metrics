@@ -44,3 +44,5 @@ Staging and production Railway both use the **same** Supabase project. Rows writ
 - **`main`**: PR required, instructor merge only.
 
 See also [`CONTRIBUTING.md`](../CONTRIBUTING.md) and [`RAILWAY_DEPLOY.md`](../RAILWAY_DEPLOY.md).
+
+Instructor-only dashboard steps (Supabase redirect URL, Vercel disconnect, CI push): [`scripts/SETUP_DEV_ENV.md`](../scripts/SETUP_DEV_ENV.md).
