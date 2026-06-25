@@ -17,6 +17,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { createUserSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { isBrowserSupabaseConfigured } from "@/lib/supabase/browserConfigured";
+import {
+  buildOAuthCallbackUrl,
+  getOAuthRedirectOrigin,
+  stashOAuthNextPath,
+} from "@/lib/oauthRedirectOrigin";
 
 const EXAMPLE_GITHUB_REPO = "https://github.com/scottyUX/ts-repo-metrics";
 
@@ -64,12 +69,12 @@ export function AnalyzeRepositoryHero({ compact }: AnalyzeRepositoryHeroProps) {
     setSigningIn(true);
     try {
       const supabase = createUserSupabaseBrowserClient();
-      const origin = window.location.origin;
-      const next = encodeURIComponent(signInHrefPath);
+      const origin = getOAuthRedirectOrigin();
+      stashOAuthNextPath(signInHrefPath);
       await supabase.auth.signInWithOAuth({
         provider: "github",
         options: {
-          redirectTo: `${origin}/auth/callback?next=${next}`,
+          redirectTo: buildOAuthCallbackUrl(origin),
           scopes: "read:user user:email repo",
         },
       });

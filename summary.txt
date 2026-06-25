@@ -1,0 +1,7 @@
+=== Claude Code Trace Analysis (0 files) ===
+
+📊 AGGREGATE STATISTICS:
+  • Total files analyzed: 0
+  • Total tools called: 0
+  • Tool use: Unable to calculate (insufficient timing data)
+  • Total user prompts: 0

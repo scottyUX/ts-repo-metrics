@@ -6,7 +6,7 @@ analysis record so the metrics reload with the result page.
 
 The primary student workflow is now:
 
-1. choose `Claude Code`, `Codex`, or `Gemini` in the AI Usage tab
+1. choose `Claude Code`, `Codex`, `Gemini`, or `Cursor` in the AI Usage tab
 2. copy the generated prompt
 3. run it in that same coding-agent project so the agent can infer `--filter`
 4. upload the resulting CSV
@@ -84,7 +84,7 @@ This is separate from `POST /api/analyze`; it uses dedicated AI Usage persistenc
 
 1. Open a **results** view that includes the AI Usage tab (the page renders
    [`AIMaturityTab`](../apps/dashboard/components/results/rq/AIMaturityTab.tsx)).
-2. Choose the platform prompt for `Claude Code`, `Codex`, or `Gemini`.
+2. Choose the platform prompt for `Claude Code`, `Codex`, `Gemini`, or `Cursor`.
 3. Copy the prompt and run it in the same coding-agent project.
 4. Upload the generated CSV on the AI Usage tab.
 5. Review any warnings about missing optional columns.
@@ -101,3 +101,131 @@ This is separate from `POST /api/analyze`; it uses dedicated AI Usage persistenc
 - There is **no demo data** in the current tab.
 - The tab no longer accepts **JSON** or **JSONL** uploads.
 - The old **AUM score** and stage-aware display are no longer part of the live student UI.
+
+## Cursor
+
+Cursor stores conversation logs as JSONL files in its workspace storage folder. The path differs by OS:
+
+| OS | Default log path |
+|----|-----------------|
+| Mac | `~/Library/Application Support/Cursor/User/workspaceStorage/` |
+| Linux | `~/.config/Cursor/User/workspaceStorage/` |
+| Windows | `%APPDATA%\Cursor\User\workspaceStorage\` |
+
+The `agent_stats` export command for Cursor logs:
+
+**Mac:**
+```bash
+./ai_usage_stats.py \
+  --roots "$HOME/Library/Application Support/Cursor/User/workspaceStorage/**/*.jsonl" \
+  --filter your-repo-slug \
+  --tokens --messages \
+  --csv "$HOME/Desktop/ai_usage_trace.csv"
+```
+
+**Linux:**
+```bash
+./ai_usage_stats.py \
+  --roots "$HOME/.config/Cursor/User/workspaceStorage/**/*.jsonl" \
+  --filter your-repo-slug \
+  --tokens --messages \
+  --csv "$HOME/Desktop/ai_usage_trace.csv"
+```
+
+**Windows (PowerShell):**
+```powershell
+python ai_usage_stats.py `
+  --roots "$env:APPDATA\Cursor\User\workspaceStorage\**\*.jsonl" `
+  --filter your-repo-slug `
+  --tokens --messages `
+  --csv "$env:USERPROFILE\Desktop\ai_usage_trace.csv"
+```
+
+> The exported CSV must set `coding_agent = cursor`.
+
+## Claude Code
+
+Claude Code stores conversation logs as JSONL files under `~/.claude/projects/`. The path is the same on Mac and Linux; Windows differs:
+
+| OS | Default log path |
+|----|-----------------|
+| Mac / Linux | `~/.claude/projects/` |
+| Windows | `%USERPROFILE%\.claude\projects\` |
+
+The `agent_stats` export command for Claude Code logs:
+
+**Mac / Linux:**
+```bash
+./ai_usage_stats.py \
+  --roots "$HOME/.claude/projects/**/*.jsonl" \
+  --filter your-repo-slug \
+  --tokens --messages \
+  --csv "$HOME/Desktop/ai_usage_trace.csv"
+```
+
+**Windows (PowerShell):**
+```powershell
+python ai_usage_stats.py `
+  --roots "$env:USERPROFILE\.claude\projects\**\*.jsonl" `
+  --filter your-repo-slug `
+  --tokens --messages `
+  --csv "$env:USERPROFILE\Desktop\ai_usage_trace.csv"
+```
+
+## Codex
+
+Codex stores conversation logs as JSONL files under `~/.codex/sessions/`. The path is the same on Mac and Linux; Windows differs:
+
+| OS | Default log path |
+|----|-----------------|
+| Mac / Linux | `~/.codex/sessions/` |
+| Windows | `%USERPROFILE%\.codex\sessions\` |
+
+The `agent_stats` export command for Codex logs:
+
+**Mac / Linux:**
+```bash
+./ai_usage_stats.py \
+  --roots "$HOME/.codex/sessions/**/rollout-*.jsonl" \
+  --filter your-repo-slug \
+  --tokens --messages \
+  --csv "$HOME/Desktop/ai_usage_trace.csv"
+```
+
+**Windows (PowerShell):**
+```powershell
+python ai_usage_stats.py `
+  --roots "$env:USERPROFILE\.codex\sessions\**\rollout-*.jsonl" `
+  --filter your-repo-slug `
+  --tokens --messages `
+  --csv "$env:USERPROFILE\Desktop\ai_usage_trace.csv"
+```
+
+## Gemini
+
+Gemini stores conversation logs as JSON files under `~/.gemini/tmp/`. The path is the same on Mac and Linux; Windows differs:
+
+| OS | Default log path |
+|----|-----------------|
+| Mac / Linux | `~/.gemini/tmp/` |
+| Windows | `%USERPROFILE%\.gemini\tmp\` |
+
+The `agent_stats` export command for Gemini logs:
+
+**Mac / Linux:**
+```bash
+./ai_usage_stats.py \
+  --roots "$HOME/.gemini/tmp/**/session-*.json" \
+  --filter your-repo-slug \
+  --tokens --messages \
+  --csv "$HOME/Desktop/ai_usage_trace.csv"
+```
+
+**Windows (PowerShell):**
+```powershell
+python ai_usage_stats.py `
+  --roots "$env:USERPROFILE\.gemini\tmp\**\session-*.json" `
+  --filter your-repo-slug `
+  --tokens --messages `
+  --csv "$env:USERPROFILE\Desktop\ai_usage_trace.csv"
+```

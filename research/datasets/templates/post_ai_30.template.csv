@@ -1,2 +1,2 @@
-result_id,owner,repo,repo_url,course_id,team_name,commit_sha
-owner-repo-abc12345,example-org,example-repo,https://github.com/example-org/example-repo,CSE115A-Summer26,Team Alpha,abc123def456
+owner,team_name,commit_sha,analysis_timestamp,repo,course_id,result_id,repo_url
+example-org,Team Alpha,abc123def456abc123def456abc123def456abc1,2026-06-03 03:20:25.271143+00,example-repo,CSE115A-Summer26,example-org-example-repo-abc12345,https://github.com/example-org/example-repo

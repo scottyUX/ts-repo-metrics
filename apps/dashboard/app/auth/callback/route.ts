@@ -5,6 +5,10 @@ import {
   encryptGitHubAccessToken,
   isGitHubTokenEncryptionConfigured,
 } from "@/lib/githubTokenCrypto";
+import {
+  clearOAuthNextCookieHeader,
+  readOAuthNextPathFromCookie,
+} from "@/lib/oauthRedirectOrigin";
 import { getSupabase, isSupabaseConfigured } from "@/lib/supabase/server";
 import {
   supabaseAnonKeyNode,
@@ -12,21 +16,31 @@ import {
 } from "@/lib/supabase/projectEnv";
 import { getPublicOriginFromRequest } from "@/lib/publicOrigin";
 
+function redirectWithClearedNextCookie(origin: string, path: string): NextResponse {
+  const response = NextResponse.redirect(`${origin}${path}`);
+  response.headers.append("Set-Cookie", clearOAuthNextCookieHeader());
+  return response;
+}
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const origin = getPublicOriginFromRequest(request);
   const code = searchParams.get("code");
-  const nextPath = searchParams.get("next") ?? "/";
+  const cookieHeader = request.headers.get("cookie");
+  const nextPath =
+    searchParams.get("next") ??
+    readOAuthNextPathFromCookie(cookieHeader);
 
   if (!code) {
-    return NextResponse.redirect(`${origin}${nextPath}`);
+    return redirectWithClearedNextCookie(origin, nextPath);
   }
 
   const url = supabaseProjectUrlNode();
   const anonKey = supabaseAnonKeyNode();
   if (!url || !anonKey) {
-    return NextResponse.redirect(
-      `${origin}${nextPath}?auth_error=missing_supabase`,
+    return redirectWithClearedNextCookie(
+      origin,
+      `${nextPath}?auth_error=missing_supabase`,
     );
   }
 
@@ -52,7 +66,10 @@ export async function GET(request: Request) {
 
   const { data, error } = await supabase.auth.exchangeCodeForSession(code);
   if (error || !data.session) {
-    return NextResponse.redirect(`${origin}${nextPath}?auth_error=exchange`);
+    return redirectWithClearedNextCookie(
+      origin,
+      `${nextPath}?auth_error=exchange`,
+    );
   }
 
   const providerToken = data.session.provider_token;
@@ -82,5 +99,5 @@ export async function GET(request: Request) {
     );
   }
 
-  return NextResponse.redirect(`${origin}${nextPath}`);
+  return redirectWithClearedNextCookie(origin, nextPath);
 }

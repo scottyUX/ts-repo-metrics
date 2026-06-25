@@ -23,6 +23,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { createUserSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { isBrowserSupabaseConfigured } from "@/lib/supabase/browserConfigured";
+import {
+  buildOAuthCallbackUrl,
+  getOAuthRedirectOrigin,
+  stashOAuthNextPath,
+} from "@/lib/oauthRedirectOrigin";
 import { cn } from "@/lib/utils";
 
 const GITHUB_REPO = "https://github.com/scottyUX/ts-repo-metrics";
@@ -220,11 +225,12 @@ export function HeaderNavClient() {
   async function signIn() {
     if (!isBrowserSupabaseConfigured()) return;
     const supabase = createUserSupabaseBrowserClient();
-    const origin = window.location.origin;
+    const origin = getOAuthRedirectOrigin();
+    stashOAuthNextPath("/repos");
     await supabase.auth.signInWithOAuth({
       provider: "github",
       options: {
-        redirectTo: `${origin}/auth/callback?next=/repos`,
+        redirectTo: buildOAuthCallbackUrl(origin),
         scopes: "read:user user:email repo",
       },
     });
