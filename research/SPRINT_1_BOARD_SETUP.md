@@ -14,7 +14,6 @@ Add these issues from `scottyUX/ts-repo-metrics`:
 | [#115](https://github.com/scottyUX/ts-repo-metrics/issues/115) | SIP-1.3 Dataset cohorts |
 | [#116](https://github.com/scottyUX/ts-repo-metrics/issues/116) | SIP-1.4 Cursor telemetry |
 | [#117](https://github.com/scottyUX/ts-repo-metrics/issues/117) | SIP-1.5 PM / Scrum |
-| [#119](https://github.com/scottyUX/ts-repo-metrics/issues/119) | SIP-1.6 Antigravity AI usage stats + dashboard prompt |
 
 **How:** Project 3 → **Add item** → search issue number or title.
 
@@ -49,19 +48,8 @@ Fill GitHub assignees on each issue:
 | #115 | Student C — Dataset | _TBD_ |
 | #116 | Student D — Cursor | _TBD_ |
 | #117 | Student E — PM | _TBD_ |
-| #119 | Student — Antigravity parser (agent_stats + dashboard) | _TBD_ |
 
 PM (#117) also supports #113 baseline verification.
-
-## Verify agent-stats clone (EOD Day 2)
-
-`agent_stats/` is **not** in the ts-repo-metrics GitHub repo. Every student must clone it separately. Share at kickoff: [research/AGENT_STATS_SETUP.md](AGENT_STATS_SETUP.md)
-
-PM checks each student has:
-
-```bash
-test -f agent_stats/ai_usage_stats.py && echo OK
-```
 
 ## Pin Discussion
 
@@ -72,5 +60,5 @@ Pin [Discussion #111 — Sprint 1 Architecture](https://github.com/scottyUX/ts-r
 ```bash
 gh auth refresh -s project
 gh project item-add 3 --owner scottyUX --url https://github.com/scottyUX/ts-repo-metrics/issues/113
-# repeat for 112–117, 119
+# repeat for 112–117
 ```

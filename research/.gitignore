@@ -1,12 +1,10 @@
 # Raw and generated research data (not committed)
-# Paths are relative to research/ (this .gitignore file location).
-survey/data/raw/
-survey/data/processed/
-survey/outputs/*
-!survey/outputs/replication_report.md
-datasets/post_ai_30.csv
-datasets/pre_ai_baseline.csv
-datasets/samples/
+research/survey/data/raw/
+research/survey/data/processed/
+research/survey/outputs/
+research/datasets/post_ai_30.csv
+research/datasets/pre_ai_baseline.csv
+research/datasets/samples/
 *.pyc
 __pycache__/
 .venv/

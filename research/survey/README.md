@@ -1,42 +1,29 @@
-# Survey replication (SIP Sprint 1 — Objective 2)
+# Survey replication pipeline (SIP Sprint 1 — Objective 2)
 
 Reproduce paper statistics (Friedman, Pearson, Cronbach's α) for the new Qualtrics cohort.
 
-## Analysis repo (separate clone)
+## Layout
 
-The Python pipeline lives in **[AUM Survey Analytics](https://github.com/scottyUX/aum-survey-analytics)** — not in this repo (same pattern as [`agent_stats`](../AGENT_STATS_SETUP.md)).
-
-```bash
-git clone https://github.com/scottyUX/aum-survey-analytics.git
-cd aum-survey-analytics
-python3 -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-chmod +x run_all.sh
-./run_all.sh /path/to/qualtrics_export.csv
+```
+research/survey/
+├── README.md                 # this file
+├── requirements.txt          # added by Student B in Sprint 1
+├── data/
+│   ├── raw/                  # gitignored — instructor Qualtrics export
+│   └── processed/            # gitignored — cleaned responses
+├── outputs/                  # gitignored — replication_report.md, tables
+├── clean_qualtrics.py
+├── stats_reliability.py
+├── stats_friedman.py
+├── stats_correlations.py
+└── run_all.sh                # one-command reproducibility
 ```
 
-## What to keep in this repo (`ts-repo-metrics`)
+## Getting started
 
-| Path | Purpose |
-|------|---------|
-| `research/survey/data/raw/` | Gitignored — place instructor Qualtrics export here for local work (optional; can also pass path directly to `run_all.sh`) |
-| `research/survey/outputs/` | Gitignored row-level outputs; commit **`replication_report.md`** when done (SIP-1.2 task 6) |
-
-## Pipeline scripts (in `aum-survey-analytics`)
-
-| Script | Purpose |
-|--------|---------|
-| `clean_survey_phase1.py` | Clean Qualtrics export → `data/cleaned_survey.csv` |
-| `build_analysis_dataset.py` | Likert → constructs → `data/analysis_dataset.csv` |
-| `survey_phase3_analysis.py` | Descriptives, Pearson correlations, figures |
-| `stats_reliability.py` | Cronbach's α per stage → `data/aum_reliability.csv` |
-| `stats_inference.py` | Friedman + Wilcoxon → `data/friedman_results.csv`, `data/wilcoxon_aum_posthoc.csv` |
-| `generate_survey_dashboard.py` | Regenerate `index.html` |
-| `run_all.sh` | One-command full pipeline |
-
-## Story tracker
-
-Follow GitHub issue **SIP-1.2** ([#114](https://github.com/scottyUX/ts-repo-metrics/issues/114)).
+1. Wait for instructor kickoff packet (see [`../KICKOFF_CHECKLIST.md`](../KICKOFF_CHECKLIST.md)).
+2. Place de-identified export in `data/raw/`.
+3. Follow story **SIP-1.2** on GitHub for task checklist.
 
 ## Column reference
 

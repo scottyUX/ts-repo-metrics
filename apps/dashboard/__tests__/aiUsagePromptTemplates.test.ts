@@ -4,7 +4,6 @@ import {
   AGENT_STATS_REPO_URL,
   AGENT_STATS_DESKTOP_DIR,
   AI_USAGE_DESKTOP_CSV_PATH,
-  AI_USAGE_DESKTOP_CSV_PATH_WIN,
   AI_USAGE_PROMPT_PLATFORMS,
   buildAiUsagePrompt,
   getAiUsagePromptPlatform,
@@ -16,7 +15,6 @@ describe("aiUsagePromptTemplates", () => {
       "claude",
       "codex",
       "gemini",
-      "cursor",
     ]);
   });
 
@@ -33,35 +31,11 @@ describe("aiUsagePromptTemplates", () => {
     expect(prompt).toContain("--csv");
   });
 
-  it("includes the Mac roots glob and Windows roots glob for each platform", () => {
+  it("uses the correct roots glob for each supported platform", () => {
     for (const platform of AI_USAGE_PROMPT_PLATFORMS) {
       const prompt = buildAiUsagePrompt(platform.id);
       expect(getAiUsagePromptPlatform(platform.id).label).toBe(platform.label);
       expect(prompt).toContain(`--roots "${platform.rootsGlob}"`);
-      expect(prompt).toContain(`--roots "${platform.rootsGlobWindows}"`);
-      expect(prompt).toContain(AI_USAGE_DESKTOP_CSV_PATH_WIN);
-    }
-  });
-
-  it("includes Linux roots glob for Cursor (differs from Mac)", () => {
-    const prompt = buildAiUsagePrompt("cursor");
-    const cursorConfig = getAiUsagePromptPlatform("cursor");
-    expect(cursorConfig.rootsGlobLinux).toBeDefined();
-    expect(prompt).toContain(`--roots "${cursorConfig.rootsGlobLinux}"`);
-  });
-
-  it("includes coding_agent guidance for Cursor", () => {
-    const prompt = buildAiUsagePrompt("cursor");
-    expect(prompt).toContain("coding_agent = cursor");
-    expect(prompt).toContain("workspaceStorage");
-  });
-
-  it("groups Mac and Linux together for platforms where the path is the same", () => {
-    for (const platform of AI_USAGE_PROMPT_PLATFORMS) {
-      if (platform.id === "cursor") continue;
-      const prompt = buildAiUsagePrompt(platform.id);
-      expect(prompt).toContain("Mac / Linux:");
-      expect(prompt).not.toContain("Mac:\n");
     }
   });
 });

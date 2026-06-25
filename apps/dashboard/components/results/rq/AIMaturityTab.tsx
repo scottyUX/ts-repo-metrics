@@ -395,39 +395,6 @@ function AgentStatsExportInsight() {
                     </a>
                   </Button>
                 </div>
-
-                {platform.tools && (
-                  <div className="space-y-2 border-t border-border/40 pt-3">
-                    <p className="text-xs font-medium text-muted-foreground">
-                      Common tool names in your Cursor CSV:
-                    </p>
-                    {(["exploration", "generation", "verification"] as const).map((bucket) => {
-                      const bucketTools = platform.tools!.filter((t) => t.bucket === bucket);
-                      if (bucketTools.length === 0) return null;
-                      const label =
-                        bucket === "exploration"
-                          ? "Exploration"
-                          : bucket === "generation"
-                          ? "Generation"
-                          : "Verification";
-                      return (
-                        <div key={bucket} className="flex flex-wrap items-center gap-1.5">
-                          <span className="w-20 shrink-0 text-xs text-muted-foreground">
-                            {label}
-                          </span>
-                          {bucketTools.map((tool) => (
-                            <code
-                              key={tool.name}
-                              className="rounded bg-muted px-1.5 py-0.5 text-xs text-foreground"
-                            >
-                              {tool.name}
-                            </code>
-                          ))}
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
               </div>
             </TabsContent>
           );

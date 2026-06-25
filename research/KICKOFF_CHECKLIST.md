@@ -10,7 +10,6 @@ Track instructor delivery in issue **SIP-1.0** (Kickoff packet).
 - [ ] Data dictionary / codebook: AU, AUM, TAM items per SDLC stage (Planning → Maintenance)
 - [ ] Notes on missingness rules and expected **N** after cleaning (paper baseline **N = 85**)
 - [ ] Delivery: shared drive link **or** place file at `research/survey/data/raw/` (gitignored) and notify PM in Discussion
-- [ ] Students clone analysis pipeline: [`scottyUX/aum-survey-analytics`](https://github.com/scottyUX/aum-survey-analytics) (see [`research/survey/README.md`](survey/README.md))
 
 ## 2. Pre-AI repo list (Objective 3)
 
@@ -28,23 +27,13 @@ Track instructor delivery in issue **SIP-1.0** (Kickoff packet).
 
 - [ ] Sanitized Cursor JSONL sample (no PII)
 - [ ] Document macOS log path(s) students should support
-- [ ] Sample committed at [`data/samples/cursor/sample-session.jsonl`](../data/samples/cursor/sample-session.jsonl) (synthetic, no PII)
+- [ ] Place sample at `research/fixtures/cursor/` when ready (or shared drive link for kickoff)
 
 ## 5. Access
 
 - [ ] GitHub: invite all SIP students to `scottyUX/ts-repo-metrics` and [Project 3 — AI Driven SWE Research](https://github.com/users/scottyUX/projects/3)
 - [ ] Supabase: read-only credentials or export dump for Obj 3 audit (optional if lists are pre-verified)
 - [ ] Confirm students can run `npm test` and Python 3 locally
-
-## 6. External repos (not inside ts-repo-metrics)
-
-**AUM Survey Analytics** — survey replication pipeline for Objective 2. Clone: [`scottyUX/aum-survey-analytics`](https://github.com/scottyUX/aum-survey-analytics). Setup: [`research/survey/README.md`](survey/README.md)
-
-**agent_stats** — Cursor log analysis for Objective 4. Share this doc at kickoff: [`research/AGENT_STATS_SETUP.md`](AGENT_STATS_SETUP.md)
-
-- [ ] Walk through the clone commands in the first 10 minutes of kickoff
-- [ ] PM verifies every student has `agent_stats/ai_usage_stats.py` by EOD Day 2
-- [ ] Pinned commit for Sprint 1: `a2a051d0991e` on `scottyUX/agent_stats`
 
 ## Replication targets (Objective 2 reference)
 

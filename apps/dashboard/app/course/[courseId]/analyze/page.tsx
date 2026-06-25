@@ -18,11 +18,6 @@ import { writeReportToSessionStorage } from "@/lib/reportLocalCache";
 import type { RepoReport } from "@/lib/reportTypes";
 import { createUserSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { isBrowserSupabaseConfigured } from "@/lib/supabase/browserConfigured";
-import {
-  buildOAuthCallbackUrl,
-  getOAuthRedirectOrigin,
-  stashOAuthNextPath,
-} from "@/lib/oauthRedirectOrigin";
 
 type DashboardProfile = {
   login: string;
@@ -186,12 +181,11 @@ export default function CourseAnalyzePage() {
     setSigningIn(true);
     try {
       const supabase = createUserSupabaseBrowserClient();
-      const origin = getOAuthRedirectOrigin();
-      stashOAuthNextPath(oauthNextPath);
+      const origin = window.location.origin;
       await supabase.auth.signInWithOAuth({
         provider: "github",
         options: {
-          redirectTo: buildOAuthCallbackUrl(origin),
+          redirectTo: `${origin}/auth/callback?next=${encodeURIComponent(oauthNextPath)}`,
           scopes: "read:user user:email repo",
         },
       });
