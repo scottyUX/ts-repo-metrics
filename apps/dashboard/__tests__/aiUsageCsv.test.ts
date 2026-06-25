@@ -85,3 +85,63 @@ describe("aiUsageCsv", () => {
     expect(result.data.behavioralDiagnostic.key).toBe("low-exploration");
   });
 });
+
+const cursorCsv = `timestamp,event_type,coding_agent,tool_name,execution_time,working_dir,session_id,message_text,input_tokens,output_tokens,cache_creation_tokens,cache_read_tokens,model
+2026-05-20T10:00:00.000Z,user_prompt,cursor,,,/repo,c1,"Add a helloWorld helper and run the tests.",,,,,claude-3-5-sonnet-20241022
+2026-05-20T10:00:01.000Z,tool_call,cursor,Read,0.2,/repo,c1,,,,,,claude-3-5-sonnet-20241022
+2026-05-20T10:00:02.000Z,tool_call,cursor,Grep,0.1,/repo,c1,,,,,,claude-3-5-sonnet-20241022
+2026-05-20T10:00:03.000Z,tool_call,cursor,StrReplace,0.3,/repo,c1,,,,,,claude-3-5-sonnet-20241022
+2026-05-20T10:00:04.000Z,tool_call,cursor,Shell,0.6,/repo,c1,,,,,,claude-3-5-sonnet-20241022
+2026-05-20T10:00:05.000Z,tool_call,cursor,Task,1.2,/repo,c1,,,,,,claude-3-5-sonnet-20241022
+2026-05-20T10:00:06.000Z,assistant_response,cursor,,0.0,/repo,c1,,1100,250,80,400,claude-3-5-sonnet-20241022
+2026-05-21T09:00:00.000Z,user_prompt,cursor,,,/repo,c2,"Update the README.",,,,,claude-3-5-sonnet-20241022
+2026-05-21T09:00:01.000Z,tool_call,cursor,Read,0.1,/repo,c2,,,,,,claude-3-5-sonnet-20241022
+2026-05-21T09:00:02.000Z,tool_call,cursor,StrReplace,0.2,/repo,c2,,,,,,claude-3-5-sonnet-20241022
+2026-05-21T09:00:03.000Z,assistant_response,cursor,,0.0,/repo,c2,,600,120,40,200,claude-3-5-sonnet-20241022`;
+
+describe("Cursor CSV", () => {
+  it("parses without column errors", () => {
+    const result = analyzeAiUsageCsv(cursorCsv);
+    expect(result.ok).toBe(true);
+    if (!result.ok) throw new Error(result.error);
+    expect(result.warnings).toEqual([]);
+  });
+
+  it("correctly buckets Cursor exploration tools", () => {
+    const result = analyzeAiUsageCsv(cursorCsv);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const toolMix = result.data.toolMix;
+    const read = toolMix.find((t) => t.name === "Read");
+    const grep = toolMix.find((t) => t.name === "Grep");
+    expect(read?.bucket).toBe("exploration");
+    expect(grep?.bucket).toBe("exploration");
+  });
+
+  it("correctly buckets StrReplace as generation", () => {
+    const result = analyzeAiUsageCsv(cursorCsv);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const strReplace = result.data.toolMix.find((t) => t.name === "StrReplace");
+    expect(strReplace?.bucket).toBe("generation");
+  });
+
+  it("correctly buckets Shell and Task as verification", () => {
+    const result = analyzeAiUsageCsv(cursorCsv);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const shell = result.data.toolMix.find((t) => t.name === "Shell");
+    const task = result.data.toolMix.find((t) => t.name === "Task");
+    expect(shell?.bucket).toBe("verification");
+    expect(task?.bucket).toBe("verification");
+  });
+
+  it("counts prompts, tool calls, and sessions correctly", () => {
+    const result = analyzeAiUsageCsv(cursorCsv);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.data.totalPrompts).toBe(2);
+    expect(result.data.totalToolCalls).toBe(7);
+    expect(result.data.totalSessions).toBe(2);
+  });
+});

@@ -860,7 +860,7 @@ export function AIMaturityTab({ resultId }: { resultId: string }) {
                     </div>
                     {WEEKDAY_LETTERS.map((letter, dayIndex) => (
                       <div
-                        key={letter}
+                        key={dayIndex}
                         className={cn("flex items-center", HEATMAP_GAP)}
                       >
                         <div className={cn(HEATMAP_LABEL_COL, "select-none")}>

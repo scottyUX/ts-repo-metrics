@@ -33,7 +33,7 @@ const GENERATION_TOOLS = new Set(
 );
 
 const VERIFICATION_TOOLS = new Set(
-  ["bash", "shell", "runterminalcmd", "run_terminal_cmd", "terminal"],
+  ["bash", "shell", "runterminalcmd", "run_terminal_cmd", "terminal", "task"],
 );
 
 export type BehavioralBucketKey =
