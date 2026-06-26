@@ -1,0 +1,18 @@
+timestamp,event_type,coding_agent,tool_name,execution_time,working_dir,session_id,message_text,input_tokens,output_tokens,cache_creation_tokens,cache_read_tokens,model
+2026-05-12T14:00:00.000Z,user_prompt,cursor,,,/home/student/my-project,cursor-session-001,Find and fix the authentication bug in the login flow,,,,,
+2026-05-12T14:00:03.000Z,tool_call,cursor,Read,,/home/student/my-project,cursor-session-001,,,,,,
+2026-05-12T14:00:06.000Z,tool_call,cursor,Grep,,,cursor-session-001,,,,,,
+2026-05-12T14:00:09.000Z,tool_call,cursor,Read,,,cursor-session-001,,,,,,
+2026-05-12T14:00:15.000Z,tool_call,cursor,Edit,,,cursor-session-001,,,,,,
+2026-05-12T14:00:18.000Z,tool_call,cursor,Bash,,,cursor-session-001,,,,,,
+2026-05-12T14:00:28.000Z,assistant_response,cursor,,,,cursor-session-001,,2100,480,,,claude-3-5-sonnet-20241022
+2026-05-12T14:01:00.000Z,user_prompt,cursor,,,/home/student/my-project,cursor-session-001,Can you also add error handling for expired tokens?,,,,,
+2026-05-12T14:01:02.000Z,tool_call,cursor,Read,,,cursor-session-001,,,,,,
+2026-05-12T14:01:05.000Z,tool_call,cursor,Edit,,,cursor-session-001,,,,,,
+2026-05-12T14:01:12.000Z,assistant_response,cursor,,,,cursor-session-001,,1800,220,,,claude-3-5-sonnet-20241022
+2026-05-18T09:20:00.000Z,user_prompt,cursor,,,/home/student/my-project,cursor-session-002,fix login,,,,,
+2026-05-18T09:20:04.000Z,tool_call,cursor,codebase_search,,,cursor-session-002,,,,,,
+2026-05-18T09:20:08.000Z,tool_call,cursor,Edit,,,cursor-session-002,,,,,,
+2026-05-18T09:20:11.000Z,tool_call,cursor,Glob,,,cursor-session-002,,,,,,
+2026-05-18T09:20:14.000Z,tool_call,cursor,Edit,,,cursor-session-002,,,,,,
+2026-05-18T09:20:18.000Z,assistant_response,cursor,,,,cursor-session-002,,950,180,,,claude-3-5-sonnet-20241022

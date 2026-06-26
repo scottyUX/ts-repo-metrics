@@ -12,26 +12,54 @@ interface AiUsagePromptPlatformConfig {
   rootsGlob: string;
 }
 
-export const AI_USAGE_PROMPT_PLATFORMS: readonly AiUsagePromptPlatformConfig[] = [
-  {
-    id: "claude",
-    label: "Claude Code",
-    shortLabel: "Claude",
-    rootsGlob: "$HOME/.claude/projects/**/*.jsonl",
-  },
-  {
-    id: "codex",
-    label: "Codex",
-    shortLabel: "Codex",
-    rootsGlob: "$HOME/.codex/sessions/**/rollout-*.jsonl",
-  },
-  {
-    id: "gemini",
-    label: "Gemini",
-    shortLabel: "Gemini",
-    rootsGlob: "$HOME/.gemini/tmp/**/session-*.json",
-  },
-] as const;
+export const AI_USAGE_PROMPT_PLATFORMS: readonly AiUsagePromptPlatformConfig[] =
+  [
+    {
+      id: "claude",
+      label: "Claude Code",
+      shortLabel: "Claude",
+      rootsGlob: "$HOME/.claude/projects/**/*.jsonl",
+      rootsGlobWindows: "$env:USERPROFILE\\.claude\\projects\\**\\*.jsonl",
+    },
+    {
+      id: "codex",
+      label: "Codex",
+      shortLabel: "Codex",
+      rootsGlob: "$HOME/.codex/sessions/**/rollout-*.jsonl",
+      rootsGlobWindows:
+        "$env:USERPROFILE\\.codex\\sessions\\**\\rollout-*.jsonl",
+    },
+    {
+      id: "gemini",
+      label: "Gemini",
+      shortLabel: "Gemini",
+      rootsGlob: "$HOME/.gemini/tmp/**/session-*.json",
+      rootsGlobWindows: "$env:USERPROFILE\\.gemini\\tmp\\**\\session-*.json",
+    },
+    {
+      id: "cursor",
+      label: "Cursor",
+      shortLabel: "Cursor",
+      rootsGlob:
+        "$HOME/.cursor/projects/*/agent-transcripts/*/*.jsonl",
+      rootsGlobWindows:
+        "$env:USERPROFILE\\.cursor\\projects\\*\\agent-transcripts\\*\\*.jsonl",
+      codingAgent: "cursor",
+      tools: [
+        { name: "Read",           bucket: "exploration"  },
+        { name: "Glob",           bucket: "exploration"  },
+        { name: "Grep",           bucket: "exploration"  },
+        { name: "SemanticSearch", bucket: "exploration"  },
+        { name: "WebSearch",      bucket: "exploration"  },
+        { name: "WebFetch",       bucket: "exploration"  },
+        { name: "Write",          bucket: "generation"   },
+        { name: "StrReplace",     bucket: "generation"   },
+        { name: "EditNotebook",   bucket: "generation"   },
+        { name: "Shell",          bucket: "verification" },
+        { name: "Task",           bucket: "verification" },
+      ],
+    },
+  ] as const;
 
 export function getAiUsagePromptPlatform(
   platform: AiUsagePromptPlatform,
@@ -45,6 +73,49 @@ export function getAiUsagePromptPlatform(
 
 export function buildAiUsagePrompt(platform: AiUsagePromptPlatform): string {
   const config = getAiUsagePromptPlatform(platform);
+  const linuxGlob = config.rootsGlobLinux ?? config.rootsGlob;
+  const macLinuxSame = linuxGlob === config.rootsGlob;
+
+  const platformGuidance = config.codingAgent
+    ? [
+        "Cursor logs are JSONL files under the --roots path below.",
+        "",
+      ]
+    : [];
+
+  const step3Lines = macLinuxSame
+    ? [
+        "3. Run the command for your OS:",
+        "   Mac / Linux:",
+        `     ./ai_usage_stats.py --roots "${config.rootsGlob}" --filter "<INFERRED_OR_CONFIRMED_FILTER>" --tokens --messages --csv "${AI_USAGE_DESKTOP_CSV_PATH}"`,
+        "   Windows (PowerShell):",
+        `     python ai_usage_stats.py --roots "${config.rootsGlobWindows}" --filter "<INFERRED_OR_CONFIRMED_FILTER>" --tokens --messages --csv "${AI_USAGE_DESKTOP_CSV_PATH_WIN}"`,
+      ]
+    : [
+        "3. Run the command for your OS:",
+        "   Mac:",
+        `     ./ai_usage_stats.py --roots "${config.rootsGlob}" --filter "<INFERRED_OR_CONFIRMED_FILTER>" --tokens --messages --csv "${AI_USAGE_DESKTOP_CSV_PATH}"`,
+        "   Linux:",
+        `     ./ai_usage_stats.py --roots "${linuxGlob}" --filter "<INFERRED_OR_CONFIRMED_FILTER>" --tokens --messages --csv "${AI_USAGE_DESKTOP_CSV_PATH}"`,
+        "   Windows (PowerShell):",
+        `     python ai_usage_stats.py --roots "${config.rootsGlobWindows}" --filter "<INFERRED_OR_CONFIRMED_FILTER>" --tokens --messages --csv "${AI_USAGE_DESKTOP_CSV_PATH_WIN}"`,
+      ];
+
+  const step4Lines = macLinuxSame
+    ? [
+        "4. If the script is not executable or Python is not resolved on Mac / Linux, retry with:",
+        `   python3 ai_usage_stats.py --roots "${config.rootsGlob}" --filter "<INFERRED_OR_CONFIRMED_FILTER>" --tokens --messages --csv "${AI_USAGE_DESKTOP_CSV_PATH}"`,
+        "   Windows (PowerShell): the step 3 command already uses python — no retry needed.",
+      ]
+    : [
+        "4. If the script is not executable or Python is not resolved on Mac or Linux, retry with:",
+        "   Mac:",
+        `     python3 ai_usage_stats.py --roots "${config.rootsGlob}" --filter "<INFERRED_OR_CONFIRMED_FILTER>" --tokens --messages --csv "${AI_USAGE_DESKTOP_CSV_PATH}"`,
+        "   Linux:",
+        `     python3 ai_usage_stats.py --roots "${linuxGlob}" --filter "<INFERRED_OR_CONFIRMED_FILTER>" --tokens --messages --csv "${AI_USAGE_DESKTOP_CSV_PATH}"`,
+        "   Windows (PowerShell): the step 3 command already uses python — no retry needed.",
+      ];
+
   return [
     "Use your terminal tools to help me generate my AI usage CSV. Do not modify my project files.",
     "",

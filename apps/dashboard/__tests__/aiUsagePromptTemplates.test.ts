@@ -36,6 +36,30 @@ describe("aiUsagePromptTemplates", () => {
       const prompt = buildAiUsagePrompt(platform.id);
       expect(getAiUsagePromptPlatform(platform.id).label).toBe(platform.label);
       expect(prompt).toContain(`--roots "${platform.rootsGlob}"`);
+      expect(prompt).toContain(`--roots "${platform.rootsGlobWindows}"`);
+      expect(prompt).toContain(AI_USAGE_DESKTOP_CSV_PATH_WIN);
+    }
+  });
+
+  it("uses the same roots glob for Mac and Linux for Cursor (agent-transcripts path)", () => {
+    const cursorConfig = getAiUsagePromptPlatform("cursor");
+    expect(cursorConfig.rootsGlobLinux).toBeUndefined();
+    expect(cursorConfig.rootsGlob).toContain(".cursor/projects");
+    expect(cursorConfig.rootsGlob).toContain("agent-transcripts");
+  });
+
+  it("includes coding_agent guidance for Cursor", () => {
+    const prompt = buildAiUsagePrompt("cursor");
+    expect(prompt).toContain(".cursor/projects");
+    expect(prompt).toContain("agent-transcripts");
+    expect(prompt).toContain("Cursor logs are JSONL files");
+  });
+
+  it("groups Mac and Linux together for all platforms including Cursor", () => {
+    for (const platform of AI_USAGE_PROMPT_PLATFORMS) {
+      const prompt = buildAiUsagePrompt(platform.id);
+      expect(prompt).toContain("Mac / Linux:");
+      expect(prompt).not.toContain("Mac:\n");
     }
   });
 });
