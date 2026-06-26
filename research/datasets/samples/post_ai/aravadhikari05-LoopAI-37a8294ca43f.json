@@ -1,0 +1,81 @@
+{
+  "git": null,
+  "phase3": {
+    "mcr": null,
+    "sfd": 0,
+    "srs": 0,
+    "reactComponentCount": 0,
+    "silentFailureEvents": [],
+    "srsNearWeightedLines": 0,
+    "srsWeightedNumerator": 0,
+    "srsExactWeightedLines": 0,
+    "monolithicComponentCount": 0
+  },
+  "smells": {
+    "consoleLogs": 0,
+    "deepNesting": 0,
+    "longFunctions": 0,
+    "emptyCatchBlocks": 0,
+    "longParameterLists": 0
+  },
+  "source": {
+    "url": "https://github.com/aravadhikari05/LoopAI",
+    "type": "git",
+    "branch": "",
+    "commit": ""
+  },
+  "totals": {
+    "functions": 0
+  },
+  "perFile": [],
+  "profile": {
+    "testLOC": 0,
+    "tsFiles": 0,
+    "totalLOC": 0,
+    "tsxFiles": 0,
+    "sourceLOC": 0,
+    "testFiles": 0,
+    "totalFiles": 0
+  },
+  "repoPath": "/tmp/repo-metrics-git-cache/u/d0b941b9-9e09-4896-898a-91940e2b00e8/.cache/ts-repo-metrics/aravadhikari05-LoopAI",
+  "framework": null,
+  "complexity": {
+    "max": 0,
+    "average": 0,
+    "highComplexityFunctions": 0
+  },
+  "_submission": {
+    "course_id": "CSE115A-Spring26",
+    "team_name": "loop-ai",
+    "github_login": "ashwinsm10"
+  },
+  "duplication": null,
+  "gitMetricsV2": null,
+  "distributions": {
+    "p50_complexity": 0,
+    "p75_complexity": 0,
+    "p90_complexity": 0,
+    "p50_function_length": 0,
+    "p75_function_length": 0,
+    "p90_function_length": 0,
+    "percent_high_complexity_in_top_10_percent_files": 0
+  },
+  "filesAnalyzed": 0,
+  "maintainability": {
+    "score": 100,
+    "classification": "high"
+  },
+  "testCoverageProxy": {
+    "ratio": 0,
+    "classification": "low"
+  },
+  "analysis_timestamp": "2026-06-07T02:10:06.311Z",
+  "functionMetricsSummary": {
+    "medianLength": 0,
+    "averageLength": 0,
+    "totalFunctions": 0,
+    "maxNestingDepth": 0,
+    "longFunctionPercentage": 0
+  },
+  "symbolVerificationRisks": []
+}
