@@ -6,7 +6,7 @@ survey/outputs/*
 !survey/outputs/replication_report.md
 datasets/post_ai_30.csv
 datasets/pre_ai_baseline.csv
-datasets/samples/
+
 *.pyc
 __pycache__/
 .venv/

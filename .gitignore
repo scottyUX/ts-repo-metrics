@@ -7,4 +7,4 @@ backups/
 .env.*
 !.env.example
 !apps/dashboard/.env.local.sample
-research/datasets/manifest_sprint1.csv
+
