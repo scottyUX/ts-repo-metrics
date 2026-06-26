@@ -1,0 +1,10 @@
+---
+description: "Enforces strict type safety guidelines across all script files"
+globs: ["**/*.ts"]
+alwaysApply: false
+---
+# TypeScript Structural Specifications
+- You must NEVER use the `any` or `unknown` types when declaring metrics variables.
+- Every function signature must explicitly declare its parameter types and return type.
+- Declare dedicated `interface` or `type` structures for any complex data structures returned by scanners.
+- If a type declaration is missing, the verification check fails.
