@@ -53,11 +53,9 @@ export const AI_USAGE_PROMPT_PLATFORMS: readonly AiUsagePromptPlatformConfig[] =
       label: "Cursor",
       shortLabel: "Cursor",
       rootsGlob:
-        "$HOME/Library/Application Support/Cursor/User/workspaceStorage/**/*.jsonl",
-      rootsGlobLinux:
-        "$HOME/.config/Cursor/User/workspaceStorage/**/*.jsonl",
+        "$HOME/.cursor/projects/*/agent-transcripts/*/*.jsonl",
       rootsGlobWindows:
-        "$env:APPDATA\\Cursor\\User\\workspaceStorage\\**\\*.jsonl",
+        "$env:USERPROFILE\\.cursor\\projects\\*\\agent-transcripts\\*\\*.jsonl",
       codingAgent: "cursor",
       tools: [
         { name: "Read",           bucket: "exploration"  },
@@ -92,7 +90,6 @@ export function buildAiUsagePrompt(platform: AiUsagePromptPlatform): string {
 
   const platformGuidance = config.codingAgent
     ? [
-        `The exported CSV must use coding_agent = ${config.codingAgent}.`,
         "Cursor logs are JSONL files under the --roots path below.",
         "",
       ]
