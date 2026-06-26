@@ -1,4 +1,12 @@
-# Content, Quality, and Report
+# SIP-1.7 — AI Usage Logs Discovery Report
+
+## Executive summary
+
+- **26 AI usage log uploads** are present in `data/analyses_rows.csv` (22.8% of 114 analysis rows), spanning **140,732 events** and **606 unique sessions** (event dates 2026-03-02 → 2026-06-11).
+- Logs follow the **`ai_usage_trace.csv` contract** (`timestamp`, `event_type`, `session_id`, `tool_name` + optional message/token columns); agents are mostly **Claude Code (21 uploads)** and **Codex CLI (5 uploads)**.
+- **Prompt text is partial**: 47.2% of `user_prompt` rows have non-empty `message_text`; six uploads have zero prompt text (five Codex, one Claude).
+- **Biggest gap is course tagging** — 69% of AI-log uploads lack `CSE115A-Spring26`; second is the **77% of analysis rows with no AI log at all**.
+- **Recommended next step**: define a “clean cohort” (exclude 2 broken/corrupt uploads), prioritize course-tagged repos with full `--messages` and `--tokens` exports, and refresh `analyses_rows.csv` on a schedule so inventory stays current.
 ## Cohort summary
 
 | Metric | Value |
@@ -39,7 +47,7 @@ There are 2 problematic uploads, and 1 small issue worth flagging:
     * That row has no valid timestamp, event_type, or session_id (matches the 1 invalid timestamp in the whole dataset). The other 31 rows parse fine, but the upload is still very small and looks like an incomplete Codex trace plus a manual note appended.    
 3. (small issue) HariRaghavan1 — MasonD-007/ks_MCPS (2026-06-07)
 Only 15 events, 1 session, 1 user prompt — schema-valid and has tokens, but likely a truncated export, not representative usage.
-- investigate: 5 codex uploads have no assistant_response events (Blo-Dev, s-achawro, sebavilla14, sang-w00, InterviewPal) - that's normal for codex_cli exports, not a parse failure
+- investigate: 5 codex uploads have no assistant_response events (Blo-Dev, s-achawro, sebavila14, sang-w00, InterviewPal) - that's normal for codex_cli exports, not a parse failure
 - many uploads are missing message_text or tokens, the analyzer warns but they still work
 
 ## User prompt text (`message_text`)
@@ -245,3 +253,11 @@ All five are `codex_cli`: Bloi-Dev, s-achawro, sebavila14, sang-w00, YangYangCha
 | 4 | Bloi-Dev / s-achawro/CWTCG | no messages, no tokens | BROKEN; has course; superseded |
 | 5 | s-achawro / s-achawro/CWTCG (Codex) | no messages, no tokens | Has course; superseded by Claude upload |
 | 6 | HariRaghavan1 / MasonD-007/ks_MCPS | no messages only | SUSPECT (15 events); has course + tokens |
+
+## Open questions for the team
+
+1. **Clean cohort definition** — Should analysis exclude Bloi-Dev (broken) and InterviewPal (corrupt) by default, or keep them flagged in a separate QA bucket?
+2. **Export refresh cadence** — How often will we re-export `analyses_rows.csv`, and who regenerates `ai_logs_inventory.csv` when new uploads arrive?
+3. **Codex token gap** — All five token-less uploads are Codex CLI; do we require Claude-only logs for token-efficiency research, or invest in Codex `--tokens` export support?
+4. **Course tag enforcement** — Can the dashboard submission flow require `course_id` so the 69% untagged AI-log gap shrinks without manual backfill?
+5. **Duplicate uploads** — For repos with multiple uploads (e.g. `scottyUX/ts-repo-metrics` ×4), do we pick latest, largest, or best-completeness row per repo for cohort studies?
