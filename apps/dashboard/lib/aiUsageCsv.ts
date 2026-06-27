@@ -76,6 +76,11 @@ export interface ActiveDay {
   promptCount: number;
 }
 
+export type TokenUnavailableReason =
+  | "missing_columns"
+  | "cursor_no_usage"
+  | "no_data_in_export";
+
 export interface AiUsageData {
   totalPrompts: number;
   totalSessions: number;
@@ -98,6 +103,7 @@ export interface AiUsageData {
   avgPromptsPerDay: number;
   busiestDay: string | null;
   hasTokenData: boolean;
+  tokenUnavailableReason?: TokenUnavailableReason;
   totalInputTokens: number;
   totalOutputTokens: number;
   totalCacheReadTokens: number;
@@ -354,9 +360,6 @@ export function analyzeAiUsageCsv(text: string): AnalyzeAiUsageCsvResult {
   const hasMessageColumn = headers.includes("message_text");
   const warnings: string[] = [];
 
-  if (!hasTokenColumns) {
-    warnings.push("Token metrics unavailable. Re-export with --tokens to unlock token efficiency.");
-  }
   if (!hasMessageColumn) {
     warnings.push("Prompt quality metrics unavailable. Re-export with --messages to unlock prompt-quality cards.");
   }
@@ -560,6 +563,31 @@ export function analyzeAiUsageCsv(text: string): AnalyzeAiUsageCsvResult {
       ? Math.round((globalReadAfterWrite / globalWriteFollowed) * 1000) / 1000
       : 0;
 
+  const agents = new Set(
+    rows.map((r) => r.coding_agent?.trim()).filter(Boolean),
+  );
+  const isCursorExport = agents.size === 1 && agents.has("cursor");
+
+  let tokenUnavailableReason: TokenUnavailableReason | undefined;
+  if (!hasTokenColumns) {
+    tokenUnavailableReason = "missing_columns";
+    warnings.push(
+      "Token metrics unavailable. Re-export with --tokens to unlock token efficiency.",
+    );
+  } else if (!hasAnyTokenData) {
+    if (isCursorExport) {
+      tokenUnavailableReason = "cursor_no_usage";
+      warnings.push(
+        "Token efficiency is not available for Cursor agent-transcript exports. Cursor logs do not include usage data.",
+      );
+    } else {
+      tokenUnavailableReason = "no_data_in_export";
+      warnings.push(
+        "Token metrics unavailable. Re-export with --tokens to unlock token efficiency.",
+      );
+    }
+  }
+
   const allActiveDays = Array.from(dayPromptMap.entries())
     .sort(([left], [right]) => left.localeCompare(right))
     .map(([date, promptCount]) => ({ date, promptCount }));
@@ -645,6 +673,7 @@ export function analyzeAiUsageCsv(text: string): AnalyzeAiUsageCsvResult {
     avgPromptsPerDay,
     busiestDay,
     hasTokenData: hasAnyTokenData,
+    tokenUnavailableReason,
     totalInputTokens,
     totalOutputTokens,
     totalCacheReadTokens,

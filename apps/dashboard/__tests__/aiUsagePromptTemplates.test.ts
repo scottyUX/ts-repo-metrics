@@ -57,6 +57,14 @@ describe("aiUsagePromptTemplates", () => {
     expect(prompt).toContain("Cursor logs are JSONL files");
   });
 
+  it("includes the token-unavailable note for Cursor", () => {
+    const prompt = buildAiUsagePrompt("cursor");
+    expect(prompt).toContain(
+      "Token efficiency metrics are not available for Cursor exports",
+    );
+    expect(prompt).toContain("agent-transcript logs do not include usage data");
+  });
+
   it("groups Mac and Linux together for all platforms including Cursor", () => {
     for (const platform of AI_USAGE_PROMPT_PLATFORMS) {
       const prompt = buildAiUsagePrompt(platform.id);
