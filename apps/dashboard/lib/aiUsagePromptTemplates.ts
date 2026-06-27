@@ -91,6 +91,7 @@ export function buildAiUsagePrompt(platform: AiUsagePromptPlatform): string {
   const platformGuidance = config.codingAgent
     ? [
         "Cursor logs are JSONL files under the --roots path below.",
+        "Token efficiency metrics are not available for Cursor exports — agent-transcript logs do not include usage data. Prompt quality and activity metrics will still populate after upload.",
         "",
       ]
     : [];

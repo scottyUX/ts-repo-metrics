@@ -144,4 +144,33 @@ describe("Cursor CSV", () => {
     expect(result.data.totalToolCalls).toBe(7);
     expect(result.data.totalSessions).toBe(2);
   });
+
+  it("still reports token data when synthetic assistant_response rows include tokens", () => {
+    const result = analyzeAiUsageCsv(cursorCsv);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.data.hasTokenData).toBe(true);
+    expect(result.data.tokenUnavailableReason).toBeUndefined();
+  });
+});
+
+const cursorCsvRealistic = `timestamp,event_type,coding_agent,tool_name,execution_time,working_dir,session_id,message_text,input_tokens,output_tokens,cache_creation_tokens,cache_read_tokens,model
+2026-05-20T10:00:00.000Z,user_prompt,cursor,,,/repo,c1,"Hello",,,,,claude-3-5-sonnet-20241022
+2026-05-20T10:00:01.000Z,tool_call,cursor,Read,0.2,/repo,c1,,,,,,claude-3-5-sonnet-20241022
+2026-05-20T10:00:02.000Z,assistant_response,cursor,,0.0,/repo,c1,,,,,,claude-3-5-sonnet-20241022`;
+
+describe("realistic Cursor CSV (empty token columns)", () => {
+  it("detects cursor_no_usage instead of advising --tokens re-export", () => {
+    const result = analyzeAiUsageCsv(cursorCsvRealistic);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    expect(result.data.hasTokenData).toBe(false);
+    expect(result.data.tokenUnavailableReason).toBe("cursor_no_usage");
+    expect(result.warnings).toHaveLength(1);
+    expect(result.warnings[0]).toContain("Cursor");
+    expect(result.warnings[0]).not.toContain("Re-export with --tokens");
+    expect(result.data.hasMessageData).toBe(true);
+    expect(result.data.totalPrompts).toBe(1);
+  });
 });

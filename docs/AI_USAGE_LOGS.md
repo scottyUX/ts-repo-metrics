@@ -104,29 +104,19 @@ This is separate from `POST /api/analyze`; it uses dedicated AI Usage persistenc
 
 ## Cursor
 
-Cursor stores conversation logs as JSONL files in its workspace storage folder. The path differs by OS:
+Cursor stores agent conversation logs as JSONL files under each project's agent-transcripts folder. The path differs by OS:
 
 | OS | Default log path |
 |----|-----------------|
-| Mac | `~/Library/Application Support/Cursor/User/workspaceStorage/` |
-| Linux | `~/.config/Cursor/User/workspaceStorage/` |
-| Windows | `%APPDATA%\Cursor\User\workspaceStorage\` |
+| Mac / Linux | `~/.cursor/projects/*/agent-transcripts/*/*.jsonl` |
+| Windows | `%USERPROFILE%\.cursor\projects\*\agent-transcripts\*\*.jsonl` |
 
 The `agent_stats` export command for Cursor logs:
 
-**Mac:**
+**Mac / Linux:**
 ```bash
 ./ai_usage_stats.py \
-  --roots "$HOME/Library/Application Support/Cursor/User/workspaceStorage/**/*.jsonl" \
-  --filter your-repo-slug \
-  --tokens --messages \
-  --csv "$HOME/Desktop/ai_usage_trace.csv"
-```
-
-**Linux:**
-```bash
-./ai_usage_stats.py \
-  --roots "$HOME/.config/Cursor/User/workspaceStorage/**/*.jsonl" \
+  --roots "$HOME/.cursor/projects/*/agent-transcripts/*/*.jsonl" \
   --filter your-repo-slug \
   --tokens --messages \
   --csv "$HOME/Desktop/ai_usage_trace.csv"
@@ -135,13 +125,13 @@ The `agent_stats` export command for Cursor logs:
 **Windows (PowerShell):**
 ```powershell
 python ai_usage_stats.py `
-  --roots "$env:APPDATA\Cursor\User\workspaceStorage\**\*.jsonl" `
+  --roots "$env:USERPROFILE\.cursor\projects\*\agent-transcripts\*\*.jsonl" `
   --filter your-repo-slug `
   --tokens --messages `
   --csv "$env:USERPROFILE\Desktop\ai_usage_trace.csv"
 ```
 
-> The exported CSV must set `coding_agent = cursor`.
+> The exported CSV must set `coding_agent = cursor`. Token columns are expected to be empty — Cursor agent-transcript logs do not include usage data. Prompt quality and activity metrics still populate after upload.
 
 ## Claude Code
 
