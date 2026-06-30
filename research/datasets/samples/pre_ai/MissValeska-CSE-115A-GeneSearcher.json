@@ -6,56 +6,59 @@
     "commit": "b92ede3c5fdc8810470c25b6a2e324ef17f3a195",
     "branch": "main"
   },
-  "filesAnalyzed": 0,
+  "filesAnalyzed": 16,
   "analyzer_version": "0.0.0",
-  "analysis_timestamp": "2026-06-24T22:59:58.571Z",
+  "analysis_timestamp": "2026-06-30T22:39:41.635Z",
   "distributions": {
-    "p50_function_length": 0,
-    "p75_function_length": 0,
-    "p90_function_length": 0,
-    "p50_complexity": 0,
-    "p75_complexity": 0,
-    "p90_complexity": 0,
-    "percent_high_complexity_in_top_10_percent_files": 0
+    "p50_function_length": 5,
+    "p75_function_length": 10,
+    "p90_function_length": 20,
+    "p50_complexity": 1,
+    "p75_complexity": 1,
+    "p90_complexity": 3,
+    "percent_high_complexity_in_top_10_percent_files": 100
   },
   "profile": {
-    "totalFiles": 0,
+    "totalFiles": 16,
     "tsFiles": 0,
     "tsxFiles": 0,
-    "testFiles": 0,
-    "totalLOC": 0,
-    "sourceLOC": 0,
-    "testLOC": 0
+    "jsFiles": 0,
+    "jsxFiles": 0,
+    "pyFiles": 16,
+    "testFiles": 6,
+    "totalLOC": 1096,
+    "sourceLOC": 810,
+    "testLOC": 286
   },
   "totals": {
-    "functions": 0
+    "functions": 85
   },
   "functionMetricsSummary": {
-    "totalFunctions": 0,
-    "averageLength": 0,
-    "medianLength": 0,
-    "maxNestingDepth": 0,
-    "longFunctionPercentage": 0
+    "totalFunctions": 85,
+    "averageLength": 8.5,
+    "medianLength": 5,
+    "maxNestingDepth": 6,
+    "longFunctionPercentage": 1.2
   },
   "complexity": {
-    "average": 0,
-    "max": 0,
-    "highComplexityFunctions": 0
+    "average": 1.6,
+    "max": 11,
+    "highComplexityFunctions": 1
   },
   "smells": {
-    "longFunctions": 0,
-    "deepNesting": 0,
+    "longFunctions": 1,
+    "deepNesting": 1,
     "longParameterLists": 0,
-    "emptyCatchBlocks": 0,
-    "consoleLogs": 0
+    "emptyCatchBlocks": 3,
+    "consoleLogs": 34
   },
   "maintainability": {
-    "score": 100,
+    "score": 77.4,
     "classification": "high"
   },
   "testCoverageProxy": {
-    "ratio": 0,
-    "classification": "low"
+    "ratio": 0.35,
+    "classification": "high"
   },
   "duplication": null,
   "git": {
@@ -190,8 +193,8 @@
       "refactorCommitRatio": 0
     },
     "testCoupling": {
-      "pctCommitsTouchingTests": 0,
-      "testToFeatureCommitRatio": 0
+      "pctCommitsTouchingTests": 10.1,
+      "testToFeatureCommitRatio": 0.11
     },
     "commitCalendar": {
       "grid": [
@@ -639,10 +642,10 @@
       "commitCount": 98,
       "linesAdded": 639790,
       "linesDeleted": 864,
-      "testLineChurn": 0,
-      "sourceLineChurn": 640654,
-      "testFilesTouched": 0,
-      "sourceFilesTouched": 66,
+      "testLineChurn": 132,
+      "sourceLineChurn": 640522,
+      "testFilesTouched": 1,
+      "sourceFilesTouched": 65,
       "sourcePathsTouchedList": [
         ".gitignore",
         "AncestryAnd23andMeRSIDs.txt => Data Files/AncestryAnd23andMeRSIDs.txt",
@@ -706,7 +709,6 @@
         "Screenshots/ScreenShot7.PNG",
         "Screenshots/ScreenShot8.PNG",
         "Sprint.1. Report .docx => Project Documents/Sprint.1. Report .docx",
-        "test_Genesearcher_Model.py",
         "Testing/Testing-Charles.md",
         "Testing/Testing-Charles.pdf",
         "user_data_parser.py"
@@ -832,8 +834,8 @@
         ]
       },
       "testCoupling": {
-        "pctCommitsTouchingTests": 0,
-        "testToFeatureCommitRatio": 0
+        "pctCommitsTouchingTests": 1,
+        "testToFeatureCommitRatio": 0.01
       },
       "refactorBehavior": {
         "refactorCommitRatio": 0
@@ -1284,10 +1286,10 @@
       "commitCount": 17,
       "linesAdded": 453,
       "linesDeleted": 216,
-      "testLineChurn": 0,
-      "sourceLineChurn": 669,
-      "testFilesTouched": 0,
-      "sourceFilesTouched": 31,
+      "testLineChurn": 31,
+      "sourceLineChurn": 638,
+      "testFilesTouched": 1,
+      "sourceFilesTouched": 30,
       "sourcePathsTouchedList": [
         "app_utils.py",
         "app.py",
@@ -1317,7 +1319,6 @@
         "Screenshots/ScreenShot6.png",
         "Screenshots/ScreenShot7.PNG",
         "Screenshots/ScreenShot8.PNG",
-        "test_GUI.py",
         "Testing/System and Unit Test Report.pdf",
         "Testing/Testing-Anthony.md"
       ],
@@ -1442,8 +1443,8 @@
         ]
       },
       "testCoupling": {
-        "pctCommitsTouchingTests": 0,
-        "testToFeatureCommitRatio": 0
+        "pctCommitsTouchingTests": 5.9,
+        "testToFeatureCommitRatio": 0.06
       },
       "refactorBehavior": {
         "refactorCommitRatio": 0
@@ -1894,10 +1895,10 @@
       "commitCount": 13,
       "linesAdded": 6577,
       "linesDeleted": 54,
-      "testLineChurn": 0,
-      "sourceLineChurn": 6631,
-      "testFilesTouched": 0,
-      "sourceFilesTouched": 21,
+      "testLineChurn": 291,
+      "sourceLineChurn": 6340,
+      "testFilesTouched": 6,
+      "sourceFilesTouched": 15,
       "sourcePathsTouchedList": [
         "23andmeSample.txt",
         "condensed_data_log_v3.json",
@@ -1910,15 +1911,9 @@
         "FirebaseInterface.py",
         "GeneSearcherProcessData.py",
         "getrsidlist.py",
-        "opensnp_parser_test.py",
         "opensnp_parser.py",
         "snp_list.txt",
-        "test_data_collector.py",
-        "test_GeneSearcherProcessData.py",
-        "test_opensnp_parser.py",
-        "test_user_data_parser.py",
         "Testing/Testing-Konstantin.md",
-        "user_data_parser_test.py",
         "wrongformat.txt"
       ],
       "commitStats": {
@@ -2042,8 +2037,8 @@
         ]
       },
       "testCoupling": {
-        "pctCommitsTouchingTests": 0,
-        "testToFeatureCommitRatio": 0
+        "pctCommitsTouchingTests": 76.9,
+        "testToFeatureCommitRatio": 3.33
       },
       "refactorBehavior": {
         "refactorCommitRatio": 0
@@ -3028,14 +3023,12 @@
       "commitCount": 3,
       "linesAdded": 0,
       "linesDeleted": 33,
-      "testLineChurn": 0,
-      "sourceLineChurn": 33,
-      "testFilesTouched": 0,
-      "sourceFilesTouched": 3,
+      "testLineChurn": 33,
+      "sourceLineChurn": 0,
+      "testFilesTouched": 2,
+      "sourceFilesTouched": 1,
       "sourcePathsTouchedList": [
-        "opensnp_parser_test.py",
-        "Sprint.1. Report .docx",
-        "user_data_parser_test.py"
+        "Sprint.1. Report .docx"
       ],
       "commitStats": {
         "medianCommitSize": 9,
@@ -3088,8 +3081,8 @@
         ]
       },
       "testCoupling": {
-        "pctCommitsTouchingTests": 0,
-        "testToFeatureCommitRatio": 0
+        "pctCommitsTouchingTests": 66.7,
+        "testToFeatureCommitRatio": 2
       },
       "refactorBehavior": {
         "refactorCommitRatio": 0
@@ -4025,7 +4018,2663 @@
     }
   ],
   "framework": null,
-  "perFile": [],
+  "perFile": [
+    {
+      "file": "controller.py",
+      "functions": 5,
+      "functionsByType": {
+        "function_definition": 5,
+        "lambda": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "export_report",
+          "type": "function_definition",
+          "startLine": 34,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 6,
+            "N1": 0,
+            "N2": 9,
+            "volume": 23.265,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 136.608,
+          "maintainabilityIndexGradAiNorm": 79.888,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "generate_report",
+          "type": "function_definition",
+          "startLine": 23,
+          "lines": 10,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 9,
+            "N1": 0,
+            "N2": 16,
+            "volume": 50.719,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 113.051,
+          "maintainabilityIndexGradAiNorm": 66.112,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "input_data_file",
+          "type": "function_definition",
+          "startLine": 20,
+          "lines": 2,
+          "maxNestingDepth": 0,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 5,
+            "N1": 0,
+            "N2": 7,
+            "volume": 16.253,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 145.042,
+          "maintainabilityIndexGradAiNorm": 84.82,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "load_data_set",
+          "type": "function_definition",
+          "startLine": 14,
+          "lines": 5,
+          "maxNestingDepth": 1,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 2,
+            "n2": 7,
+            "N1": 2,
+            "N2": 13,
+            "volume": 47.549,
+            "difficulty": 1.857,
+            "effort": 88.305
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 124.386,
+          "maintainabilityIndexGradAiNorm": 72.74,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "__init__",
+          "type": "function_definition",
+          "startLine": 7,
+          "lines": 6,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 11,
+            "N1": 0,
+            "N2": 21,
+            "volume": 72.648,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 119.458,
+          "maintainabilityIndexGradAiNorm": 69.858,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "export_report",
+          "type": "function_definition",
+          "startLine": 34,
+          "complexity": 1
+        },
+        {
+          "name": "generate_report",
+          "type": "function_definition",
+          "startLine": 23,
+          "complexity": 1
+        },
+        {
+          "name": "input_data_file",
+          "type": "function_definition",
+          "startLine": 20,
+          "complexity": 1
+        },
+        {
+          "name": "load_data_set",
+          "type": "function_definition",
+          "startLine": 14,
+          "complexity": 2
+        },
+        {
+          "name": "__init__",
+          "type": "function_definition",
+          "startLine": 7,
+          "complexity": 1
+        }
+      ]
+    },
+    {
+      "file": "data_collector.py",
+      "functions": 6,
+      "functionsByType": {
+        "function_definition": 6,
+        "lambda": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "get_snp_list",
+          "type": "function_definition",
+          "startLine": 42,
+          "lines": 10,
+          "maxNestingDepth": 2,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 3,
+            "n2": 10,
+            "N1": 3,
+            "N2": 21,
+            "volume": 88.811,
+            "difficulty": 3.15,
+            "effort": 279.753
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 109.908,
+          "maintainabilityIndexGradAiNorm": 64.274,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "print",
+          "type": "function_definition",
+          "startLine": 37,
+          "lines": 4,
+          "maxNestingDepth": 1,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 1,
+            "n2": 5,
+            "N1": 1,
+            "N2": 13,
+            "volume": 36.189,
+            "difficulty": 1.3,
+            "effort": 47.046
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 129.421,
+          "maintainabilityIndexGradAiNorm": 75.685,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "write",
+          "type": "function_definition",
+          "startLine": 29,
+          "lines": 7,
+          "maxNestingDepth": 1,
+          "parameterCount": 3,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 11,
+            "N1": 2,
+            "N2": 22,
+            "volume": 86.039,
+            "difficulty": 1,
+            "effort": 86.039
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 116.081,
+          "maintainabilityIndexGradAiNorm": 67.884,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "load",
+          "type": "function_definition",
+          "startLine": 23,
+          "lines": 4,
+          "maxNestingDepth": 1,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 7,
+            "N1": 1,
+            "N2": 11,
+            "volume": 36,
+            "difficulty": 0.786,
+            "effort": 28.286
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 129.678,
+          "maintainabilityIndexGradAiNorm": 75.835,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "update_bulk",
+          "type": "function_definition",
+          "startLine": 15,
+          "lines": 6,
+          "maxNestingDepth": 2,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 3,
+          "halstead": {
+            "n1": 2,
+            "n2": 13,
+            "N1": 2,
+            "N2": 24,
+            "volume": 101.579,
+            "difficulty": 1.846,
+            "effort": 187.531
+          },
+          "cognitiveComplexity": 3,
+          "maintainabilityIndexGradAiRaw": 117.255,
+          "maintainabilityIndexGradAiNorm": 68.57,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "__init__",
+          "type": "function_definition",
+          "startLine": 6,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 5,
+            "N1": 0,
+            "N2": 7,
+            "volume": 16.253,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 138.473,
+          "maintainabilityIndexGradAiNorm": 80.978,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "get_snp_list",
+          "type": "function_definition",
+          "startLine": 42,
+          "complexity": 2
+        },
+        {
+          "name": "print",
+          "type": "function_definition",
+          "startLine": 37,
+          "complexity": 2
+        },
+        {
+          "name": "write",
+          "type": "function_definition",
+          "startLine": 29,
+          "complexity": 1
+        },
+        {
+          "name": "load",
+          "type": "function_definition",
+          "startLine": 23,
+          "complexity": 1
+        },
+        {
+          "name": "update_bulk",
+          "type": "function_definition",
+          "startLine": 15,
+          "complexity": 3
+        },
+        {
+          "name": "__init__",
+          "type": "function_definition",
+          "startLine": 6,
+          "complexity": 1
+        }
+      ]
+    },
+    {
+      "file": "data_scrubber.py",
+      "functions": 3,
+      "functionsByType": {
+        "function_definition": 3,
+        "lambda": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "write_data_set",
+          "type": "function_definition",
+          "startLine": 31,
+          "lines": 3,
+          "maxNestingDepth": 1,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 8,
+            "N1": 1,
+            "N2": 11,
+            "volume": 38.039,
+            "difficulty": 0.688,
+            "effort": 26.152
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 134.052,
+          "maintainabilityIndexGradAiNorm": 78.393,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "clean_data_set",
+          "type": "function_definition",
+          "startLine": 9,
+          "lines": 21,
+          "maxNestingDepth": 3,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 6,
+          "halstead": {
+            "n1": 5,
+            "n2": 14,
+            "N1": 8,
+            "N2": 43,
+            "volume": 216.644,
+            "difficulty": 7.679,
+            "effort": 1663.519
+          },
+          "cognitiveComplexity": 10,
+          "maintainabilityIndexGradAiRaw": 92.332,
+          "maintainabilityIndexGradAiNorm": 53.995,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "load_data_set",
+          "type": "function_definition",
+          "startLine": 3,
+          "lines": 5,
+          "maxNestingDepth": 1,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 8,
+            "N1": 2,
+            "N2": 12,
+            "volume": 46.507,
+            "difficulty": 1.5,
+            "effort": 69.76
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 124.731,
+          "maintainabilityIndexGradAiNorm": 72.942,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "write_data_set",
+          "type": "function_definition",
+          "startLine": 31,
+          "complexity": 1
+        },
+        {
+          "name": "clean_data_set",
+          "type": "function_definition",
+          "startLine": 9,
+          "complexity": 6
+        },
+        {
+          "name": "load_data_set",
+          "type": "function_definition",
+          "startLine": 3,
+          "complexity": 1
+        }
+      ]
+    },
+    {
+      "file": "GeneSearcherProcessData.py",
+      "functions": 3,
+      "functionsByType": {
+        "function_definition": 3,
+        "lambda": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "process_user_data",
+          "type": "function_definition",
+          "startLine": 35,
+          "lines": 26,
+          "maxNestingDepth": 4,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 5,
+          "halstead": {
+            "n1": 3,
+            "n2": 13,
+            "N1": 5,
+            "N2": 44,
+            "volume": 196,
+            "difficulty": 5.077,
+            "effort": 995.077
+          },
+          "cognitiveComplexity": 10,
+          "maintainabilityIndexGradAiRaw": 89.623,
+          "maintainabilityIndexGradAiNorm": 52.411,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "match_genotype",
+          "type": "function_definition",
+          "startLine": 27,
+          "lines": 7,
+          "maxNestingDepth": 2,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 3,
+          "halstead": {
+            "n1": 3,
+            "n2": 7,
+            "N1": 4,
+            "N2": 13,
+            "volume": 56.473,
+            "difficulty": 2.786,
+            "effort": 157.317
+          },
+          "cognitiveComplexity": 3,
+          "maintainabilityIndexGradAiRaw": 117.811,
+          "maintainabilityIndexGradAiNorm": 68.895,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "complement",
+          "type": "function_definition",
+          "startLine": 6,
+          "lines": 15,
+          "maxNestingDepth": 2,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 4,
+          "halstead": {
+            "n1": 5,
+            "n2": 7,
+            "N1": 14,
+            "N2": 60,
+            "volume": 265.287,
+            "difficulty": 21.429,
+            "effort": 5684.726
+          },
+          "cognitiveComplexity": 5,
+          "maintainabilityIndexGradAiRaw": 97.189,
+          "maintainabilityIndexGradAiNorm": 56.836,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "process_user_data",
+          "type": "function_definition",
+          "startLine": 35,
+          "complexity": 5
+        },
+        {
+          "name": "match_genotype",
+          "type": "function_definition",
+          "startLine": 27,
+          "complexity": 3
+        },
+        {
+          "name": "complement",
+          "type": "function_definition",
+          "startLine": 6,
+          "complexity": 4
+        }
+      ]
+    },
+    {
+      "file": "getrsidlist.py",
+      "functions": 1,
+      "functionsByType": {
+        "function_definition": 1,
+        "lambda": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "get_snp_list",
+          "type": "function_definition",
+          "startLine": 10,
+          "lines": 10,
+          "maxNestingDepth": 2,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 3,
+            "n2": 10,
+            "N1": 3,
+            "N2": 21,
+            "volume": 88.811,
+            "difficulty": 3.15,
+            "effort": 279.753
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 109.908,
+          "maintainabilityIndexGradAiNorm": 64.274,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "get_snp_list",
+          "type": "function_definition",
+          "startLine": 10,
+          "complexity": 2
+        }
+      ]
+    },
+    {
+      "file": "gui.py",
+      "functions": 15,
+      "functionsByType": {
+        "function_definition": 10,
+        "lambda": 5
+      },
+      "functionMetrics": [
+        {
+          "name": "__init__",
+          "type": "function_definition",
+          "startLine": 182,
+          "lines": 7,
+          "maxNestingDepth": 0,
+          "parameterCount": 3,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 12,
+            "N1": 0,
+            "N2": 23,
+            "volume": 82.454,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 116.303,
+          "maintainabilityIndexGradAiNorm": 68.013,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "find",
+          "type": "function_definition",
+          "startLine": 138,
+          "lines": 40,
+          "maxNestingDepth": 3,
+          "parameterCount": 3,
+          "cyclomaticComplexity": 7,
+          "halstead": {
+            "n1": 3,
+            "n2": 22,
+            "N1": 7,
+            "N2": 73,
+            "volume": 371.508,
+            "difficulty": 4.977,
+            "effort": 1849.099
+          },
+          "cognitiveComplexity": 12,
+          "maintainabilityIndexGradAiRaw": 78.859,
+          "maintainabilityIndexGradAiNorm": 46.116,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "update_report",
+          "type": "function_definition",
+          "startLine": 114,
+          "lines": 23,
+          "maxNestingDepth": 1,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 1,
+            "n2": 20,
+            "N1": 1,
+            "N2": 52,
+            "volume": 232.793,
+            "difficulty": 1.3,
+            "effort": 302.631
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 91.404,
+          "maintainabilityIndexGradAiNorm": 53.453,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "__init__",
+          "type": "function_definition",
+          "startLine": 75,
+          "lines": 37,
+          "maxNestingDepth": 0,
+          "parameterCount": 3,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 47,
+            "N1": 0,
+            "N2": 148,
+            "volume": 822.079,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 77.372,
+          "maintainabilityIndexGradAiNorm": 45.247,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "lambda",
+          "startLine": 92,
+          "lines": 1,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 1,
+            "N1": 0,
+            "N2": 1,
+            "volume": 0,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 170.77,
+          "maintainabilityIndexGradAiNorm": 99.865,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "lambda",
+          "startLine": 88,
+          "lines": 1,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 4,
+            "N1": 0,
+            "N2": 6,
+            "volume": 12,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 157.848,
+          "maintainabilityIndexGradAiNorm": 92.309,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "lambda",
+          "startLine": 86,
+          "lines": 1,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 5,
+            "N1": 0,
+            "N2": 7,
+            "volume": 16.253,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 156.271,
+          "maintainabilityIndexGradAiNorm": 91.387,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "__init__",
+          "type": "function_definition",
+          "startLine": 66,
+          "lines": 7,
+          "maxNestingDepth": 0,
+          "parameterCount": 3,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 24,
+            "N1": 0,
+            "N2": 41,
+            "volume": 187.983,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 112.017,
+          "maintainabilityIndexGradAiNorm": 65.507,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "lambda",
+          "startLine": 68,
+          "lines": 1,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 1,
+            "N1": 0,
+            "N2": 1,
+            "volume": 0,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 170.77,
+          "maintainabilityIndexGradAiNorm": 99.865,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "__init__",
+          "type": "function_definition",
+          "startLine": 57,
+          "lines": 7,
+          "maxNestingDepth": 0,
+          "parameterCount": 3,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 22,
+            "N1": 0,
+            "N2": 39,
+            "volume": 173.918,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 112.422,
+          "maintainabilityIndexGradAiNorm": 65.744,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "lambda",
+          "startLine": 59,
+          "lines": 1,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 2,
+            "N1": 0,
+            "N2": 2,
+            "volume": 2,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 167.166,
+          "maintainabilityIndexGradAiNorm": 97.758,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "display_report",
+          "type": "function_definition",
+          "startLine": 52,
+          "lines": 2,
+          "maxNestingDepth": 0,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 5,
+            "N1": 0,
+            "N2": 7,
+            "volume": 16.253,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 145.042,
+          "maintainabilityIndexGradAiNorm": 84.82,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "o_log",
+          "type": "function_definition",
+          "startLine": 38,
+          "lines": 13,
+          "maxNestingDepth": 0,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 22,
+            "N1": 0,
+            "N2": 30,
+            "volume": 133.783,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 103.757,
+          "maintainabilityIndexGradAiNorm": 60.677,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "initUI",
+          "type": "function_definition",
+          "startLine": 18,
+          "lines": 19,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 34,
+            "N1": 0,
+            "N2": 92,
+            "volume": 468.047,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 91.098,
+          "maintainabilityIndexGradAiNorm": 53.274,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "__init__",
+          "type": "function_definition",
+          "startLine": 8,
+          "lines": 9,
+          "maxNestingDepth": 0,
+          "parameterCount": 3,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 11,
+            "N1": 0,
+            "N2": 24,
+            "volume": 83.026,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 112.195,
+          "maintainabilityIndexGradAiNorm": 65.611,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "__init__",
+          "type": "function_definition",
+          "startLine": 182,
+          "complexity": 1
+        },
+        {
+          "name": "find",
+          "type": "function_definition",
+          "startLine": 138,
+          "complexity": 7
+        },
+        {
+          "name": "update_report",
+          "type": "function_definition",
+          "startLine": 114,
+          "complexity": 2
+        },
+        {
+          "name": "__init__",
+          "type": "function_definition",
+          "startLine": 75,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "lambda",
+          "startLine": 92,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "lambda",
+          "startLine": 88,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "lambda",
+          "startLine": 86,
+          "complexity": 1
+        },
+        {
+          "name": "__init__",
+          "type": "function_definition",
+          "startLine": 66,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "lambda",
+          "startLine": 68,
+          "complexity": 1
+        },
+        {
+          "name": "__init__",
+          "type": "function_definition",
+          "startLine": 57,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "lambda",
+          "startLine": 59,
+          "complexity": 1
+        },
+        {
+          "name": "display_report",
+          "type": "function_definition",
+          "startLine": 52,
+          "complexity": 1
+        },
+        {
+          "name": "o_log",
+          "type": "function_definition",
+          "startLine": 38,
+          "complexity": 1
+        },
+        {
+          "name": "initUI",
+          "type": "function_definition",
+          "startLine": 18,
+          "complexity": 1
+        },
+        {
+          "name": "__init__",
+          "type": "function_definition",
+          "startLine": 8,
+          "complexity": 1
+        }
+      ]
+    },
+    {
+      "file": "main.py",
+      "functions": 0,
+      "functionsByType": {
+        "function_definition": 0,
+        "lambda": 0
+      },
+      "functionMetrics": [],
+      "complexity": []
+    },
+    {
+      "file": "model.py",
+      "functions": 15,
+      "functionsByType": {
+        "function_definition": 15,
+        "lambda": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "user_report_to_csv",
+          "type": "function_definition",
+          "startLine": 69,
+          "lines": 5,
+          "maxNestingDepth": 2,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 2,
+            "n2": 11,
+            "N1": 2,
+            "N2": 25,
+            "volume": 99.912,
+            "difficulty": 2.273,
+            "effort": 227.072
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 120.525,
+          "maintainabilityIndexGradAiNorm": 70.482,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "user_report_to_json",
+          "type": "function_definition",
+          "startLine": 64,
+          "lines": 4,
+          "maxNestingDepth": 1,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 10,
+            "N1": 1,
+            "N2": 14,
+            "volume": 51.891,
+            "difficulty": 0.7,
+            "effort": 36.324
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 127.776,
+          "maintainabilityIndexGradAiNorm": 74.723,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "generate_report",
+          "type": "function_definition",
+          "startLine": 56,
+          "lines": 4,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 7,
+            "N1": 1,
+            "N2": 14,
+            "volume": 45,
+            "difficulty": 1,
+            "effort": 45
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 128.517,
+          "maintainabilityIndexGradAiNorm": 75.156,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "load_data_set_from_server",
+          "type": "function_definition",
+          "startLine": 51,
+          "lines": 4,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 11,
+            "N1": 0,
+            "N2": 14,
+            "volume": 48.432,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 128.135,
+          "maintainabilityIndexGradAiNorm": 74.933,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "load_data_set_from_file",
+          "type": "function_definition",
+          "startLine": 47,
+          "lines": 3,
+          "maxNestingDepth": 1,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 8,
+            "N1": 1,
+            "N2": 11,
+            "volume": 38.039,
+            "difficulty": 0.688,
+            "effort": 26.152
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 134.052,
+          "maintainabilityIndexGradAiNorm": 78.393,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "load_user_data",
+          "type": "function_definition",
+          "startLine": 43,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 7,
+            "N1": 0,
+            "N2": 11,
+            "volume": 30.881,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 135.136,
+          "maintainabilityIndexGradAiNorm": 79.027,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "get_input_file",
+          "type": "function_definition",
+          "startLine": 37,
+          "lines": 2,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 3,
+            "N1": 1,
+            "N2": 4,
+            "volume": 10,
+            "difficulty": 0.667,
+            "effort": 6.667
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 147.568,
+          "maintainabilityIndexGradAiNorm": 86.297,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "get_report",
+          "type": "function_definition",
+          "startLine": 34,
+          "lines": 2,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 3,
+            "N1": 1,
+            "N2": 4,
+            "volume": 10,
+            "difficulty": 0.667,
+            "effort": 6.667
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 147.568,
+          "maintainabilityIndexGradAiNorm": 86.297,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "get_data_set",
+          "type": "function_definition",
+          "startLine": 31,
+          "lines": 2,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 3,
+            "N1": 1,
+            "N2": 4,
+            "volume": 10,
+            "difficulty": 0.667,
+            "effort": 6.667
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 147.568,
+          "maintainabilityIndexGradAiNorm": 86.297,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "get_user_data",
+          "type": "function_definition",
+          "startLine": 28,
+          "lines": 2,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 3,
+            "N1": 1,
+            "N2": 4,
+            "volume": 10,
+            "difficulty": 0.667,
+            "effort": 6.667
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 147.568,
+          "maintainabilityIndexGradAiNorm": 86.297,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "set_input_file",
+          "type": "function_definition",
+          "startLine": 25,
+          "lines": 2,
+          "maxNestingDepth": 0,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 4,
+            "N1": 0,
+            "N2": 6,
+            "volume": 12,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 146.62,
+          "maintainabilityIndexGradAiNorm": 85.743,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "set_report",
+          "type": "function_definition",
+          "startLine": 22,
+          "lines": 2,
+          "maxNestingDepth": 0,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 4,
+            "N1": 0,
+            "N2": 6,
+            "volume": 12,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 146.62,
+          "maintainabilityIndexGradAiNorm": 85.743,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "set_data_set",
+          "type": "function_definition",
+          "startLine": 19,
+          "lines": 2,
+          "maxNestingDepth": 0,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 4,
+            "N1": 0,
+            "N2": 6,
+            "volume": 12,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 146.62,
+          "maintainabilityIndexGradAiNorm": 85.743,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "set_user_data",
+          "type": "function_definition",
+          "startLine": 16,
+          "lines": 2,
+          "maxNestingDepth": 0,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 4,
+            "N1": 0,
+            "N2": 6,
+            "volume": 12,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 146.62,
+          "maintainabilityIndexGradAiNorm": 85.743,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "__init__",
+          "type": "function_definition",
+          "startLine": 6,
+          "lines": 6,
+          "maxNestingDepth": 0,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 9,
+            "N1": 0,
+            "N2": 18,
+            "volume": 57.059,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 120.714,
+          "maintainabilityIndexGradAiNorm": 70.593,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "user_report_to_csv",
+          "type": "function_definition",
+          "startLine": 69,
+          "complexity": 2
+        },
+        {
+          "name": "user_report_to_json",
+          "type": "function_definition",
+          "startLine": 64,
+          "complexity": 1
+        },
+        {
+          "name": "generate_report",
+          "type": "function_definition",
+          "startLine": 56,
+          "complexity": 1
+        },
+        {
+          "name": "load_data_set_from_server",
+          "type": "function_definition",
+          "startLine": 51,
+          "complexity": 1
+        },
+        {
+          "name": "load_data_set_from_file",
+          "type": "function_definition",
+          "startLine": 47,
+          "complexity": 1
+        },
+        {
+          "name": "load_user_data",
+          "type": "function_definition",
+          "startLine": 43,
+          "complexity": 1
+        },
+        {
+          "name": "get_input_file",
+          "type": "function_definition",
+          "startLine": 37,
+          "complexity": 1
+        },
+        {
+          "name": "get_report",
+          "type": "function_definition",
+          "startLine": 34,
+          "complexity": 1
+        },
+        {
+          "name": "get_data_set",
+          "type": "function_definition",
+          "startLine": 31,
+          "complexity": 1
+        },
+        {
+          "name": "get_user_data",
+          "type": "function_definition",
+          "startLine": 28,
+          "complexity": 1
+        },
+        {
+          "name": "set_input_file",
+          "type": "function_definition",
+          "startLine": 25,
+          "complexity": 1
+        },
+        {
+          "name": "set_report",
+          "type": "function_definition",
+          "startLine": 22,
+          "complexity": 1
+        },
+        {
+          "name": "set_data_set",
+          "type": "function_definition",
+          "startLine": 19,
+          "complexity": 1
+        },
+        {
+          "name": "set_user_data",
+          "type": "function_definition",
+          "startLine": 16,
+          "complexity": 1
+        },
+        {
+          "name": "__init__",
+          "type": "function_definition",
+          "startLine": 6,
+          "complexity": 1
+        }
+      ]
+    },
+    {
+      "file": "opensnp_parser.py",
+      "functions": 8,
+      "functionsByType": {
+        "function_definition": 8,
+        "lambda": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "match_genotype",
+          "type": "function_definition",
+          "startLine": 198,
+          "lines": 7,
+          "maxNestingDepth": 2,
+          "parameterCount": 3,
+          "cyclomaticComplexity": 3,
+          "halstead": {
+            "n1": 3,
+            "n2": 9,
+            "N1": 4,
+            "N2": 15,
+            "volume": 68.114,
+            "difficulty": 2.5,
+            "effort": 170.286
+          },
+          "cognitiveComplexity": 3,
+          "maintainabilityIndexGradAiRaw": 116.836,
+          "maintainabilityIndexGradAiNorm": 68.325,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "complement",
+          "type": "function_definition",
+          "startLine": 171,
+          "lines": 21,
+          "maxNestingDepth": 2,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 4,
+          "halstead": {
+            "n1": 5,
+            "n2": 7,
+            "N1": 14,
+            "N2": 60,
+            "volume": 265.287,
+            "difficulty": 21.429,
+            "effort": 5684.726
+          },
+          "cognitiveComplexity": 5,
+          "maintainabilityIndexGradAiRaw": 91.739,
+          "maintainabilityIndexGradAiNorm": 53.649,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "fetch_bulk_RSID_info",
+          "type": "function_definition",
+          "startLine": 150,
+          "lines": 17,
+          "maxNestingDepth": 1,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 3,
+          "halstead": {
+            "n1": 2,
+            "n2": 21,
+            "N1": 3,
+            "N2": 36,
+            "volume": 176.419,
+            "difficulty": 1.714,
+            "effort": 302.432
+          },
+          "cognitiveComplexity": 2,
+          "maintainabilityIndexGradAiRaw": 97.513,
+          "maintainabilityIndexGradAiNorm": 57.025,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "fetch_bulk_worker",
+          "type": "function_definition",
+          "startLine": 76,
+          "lines": 68,
+          "maxNestingDepth": 6,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 11,
+          "halstead": {
+            "n1": 7,
+            "n2": 39,
+            "N1": 15,
+            "N2": 133,
+            "volume": 817.487,
+            "difficulty": 11.936,
+            "effort": 9757.443
+          },
+          "cognitiveComplexity": 50,
+          "maintainabilityIndexGradAiRaw": 65.242,
+          "maintainabilityIndexGradAiNorm": 38.153,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "fetch_RSID_info",
+          "type": "function_definition",
+          "startLine": 54,
+          "lines": 14,
+          "maxNestingDepth": 0,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 19,
+            "N1": 1,
+            "N2": 37,
+            "volume": 164.233,
+            "difficulty": 0.974,
+            "effort": 159.911
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 101.491,
+          "maintainabilityIndexGradAiNorm": 59.351,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "compute_weight_of_evidence",
+          "type": "function_definition",
+          "startLine": 43,
+          "lines": 7,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 10,
+            "N1": 1,
+            "N2": 29,
+            "volume": 103.783,
+            "difficulty": 1.45,
+            "effort": 150.485
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 115.106,
+          "maintainabilityIndexGradAiNorm": 67.313,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "extract_traits",
+          "type": "function_definition",
+          "startLine": 30,
+          "lines": 5,
+          "maxNestingDepth": 1,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 2,
+            "n2": 7,
+            "N1": 2,
+            "N2": 20,
+            "volume": 69.738,
+            "difficulty": 2.857,
+            "effort": 199.252
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 122.394,
+          "maintainabilityIndexGradAiNorm": 71.575,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "__init__",
+          "type": "function_definition",
+          "startLine": 17,
+          "lines": 10,
+          "maxNestingDepth": 0,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 15,
+            "N1": 0,
+            "N2": 23,
+            "volume": 89.858,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 110.077,
+          "maintainabilityIndexGradAiNorm": 64.373,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "match_genotype",
+          "type": "function_definition",
+          "startLine": 198,
+          "complexity": 3
+        },
+        {
+          "name": "complement",
+          "type": "function_definition",
+          "startLine": 171,
+          "complexity": 4
+        },
+        {
+          "name": "fetch_bulk_RSID_info",
+          "type": "function_definition",
+          "startLine": 150,
+          "complexity": 3
+        },
+        {
+          "name": "fetch_bulk_worker",
+          "type": "function_definition",
+          "startLine": 76,
+          "complexity": 11
+        },
+        {
+          "name": "fetch_RSID_info",
+          "type": "function_definition",
+          "startLine": 54,
+          "complexity": 1
+        },
+        {
+          "name": "compute_weight_of_evidence",
+          "type": "function_definition",
+          "startLine": 43,
+          "complexity": 1
+        },
+        {
+          "name": "extract_traits",
+          "type": "function_definition",
+          "startLine": 30,
+          "complexity": 2
+        },
+        {
+          "name": "__init__",
+          "type": "function_definition",
+          "startLine": 17,
+          "complexity": 1
+        }
+      ]
+    },
+    {
+      "file": "test_data_collector.py",
+      "functions": 3,
+      "functionsByType": {
+        "function_definition": 3,
+        "lambda": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "test_load",
+          "type": "function_definition",
+          "startLine": 31,
+          "lines": 7,
+          "maxNestingDepth": 1,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 12,
+            "N1": 1,
+            "N2": 19,
+            "volume": 74.009,
+            "difficulty": 0.792,
+            "effort": 58.59
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 116.864,
+          "maintainabilityIndexGradAiNorm": 68.342,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "test_get_snp_list",
+          "type": "function_definition",
+          "startLine": 25,
+          "lines": 4,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 8,
+            "N1": 0,
+            "N2": 17,
+            "volume": 51,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 127.867,
+          "maintainabilityIndexGradAiNorm": 74.776,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "test_update_bulk",
+          "type": "function_definition",
+          "startLine": 6,
+          "lines": 16,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 13,
+            "N1": 0,
+            "N2": 47,
+            "volume": 173.921,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 99.029,
+          "maintainabilityIndexGradAiNorm": 57.912,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "test_load",
+          "type": "function_definition",
+          "startLine": 31,
+          "complexity": 1
+        },
+        {
+          "name": "test_get_snp_list",
+          "type": "function_definition",
+          "startLine": 25,
+          "complexity": 1
+        },
+        {
+          "name": "test_update_bulk",
+          "type": "function_definition",
+          "startLine": 6,
+          "complexity": 1
+        }
+      ]
+    },
+    {
+      "file": "test_GeneSearcherProcessData.py",
+      "functions": 2,
+      "functionsByType": {
+        "function_definition": 2,
+        "lambda": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "test_process_user_data_server",
+          "type": "function_definition",
+          "startLine": 19,
+          "lines": 6,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 12,
+            "N1": 0,
+            "N2": 1000,
+            "volume": 3584.963,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 99.184,
+          "maintainabilityIndexGradAiNorm": 58.002,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "test_process_user_data_locally",
+          "type": "function_definition",
+          "startLine": 11,
+          "lines": 6,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 12,
+            "N1": 0,
+            "N2": 1001,
+            "volume": 3588.547,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 99.179,
+          "maintainabilityIndexGradAiNorm": 57.999,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "test_process_user_data_server",
+          "type": "function_definition",
+          "startLine": 19,
+          "complexity": 1
+        },
+        {
+          "name": "test_process_user_data_locally",
+          "type": "function_definition",
+          "startLine": 11,
+          "complexity": 1
+        }
+      ]
+    },
+    {
+      "file": "test_Genesearcher_Model.py",
+      "functions": 15,
+      "functionsByType": {
+        "function_definition": 15,
+        "lambda": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "test_report_to_csv",
+          "type": "function_definition",
+          "startLine": 128,
+          "lines": 2,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 2,
+            "N1": 0,
+            "N2": 2,
+            "volume": 2,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 155.937,
+          "maintainabilityIndexGradAiNorm": 91.191,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "test_report_to_json",
+          "type": "function_definition",
+          "startLine": 120,
+          "lines": 6,
+          "maxNestingDepth": 1,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 12,
+            "N1": 1,
+            "N2": 21,
+            "volume": 81.41,
+            "difficulty": 0.875,
+            "effort": 71.233
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 118.866,
+          "maintainabilityIndexGradAiNorm": 69.512,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "setUp",
+          "type": "function_definition",
+          "startLine": 113,
+          "lines": 6,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 8,
+            "N1": 0,
+            "N2": 23,
+            "volume": 69,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 119.726,
+          "maintainabilityIndexGradAiNorm": 70.015,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "test_generate_report",
+          "type": "function_definition",
+          "startLine": 91,
+          "lines": 20,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 13,
+            "N1": 0,
+            "N2": 87,
+            "volume": 321.938,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 92.212,
+          "maintainabilityIndexGradAiNorm": 53.925,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "test_load_data_set_from_server",
+          "type": "function_definition",
+          "startLine": 85,
+          "lines": 5,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 8,
+            "N1": 0,
+            "N2": 13,
+            "volume": 39,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 125.647,
+          "maintainabilityIndexGradAiNorm": 73.478,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "test_load_data_set_from_file",
+          "type": "function_definition",
+          "startLine": 75,
+          "lines": 9,
+          "maxNestingDepth": 1,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 16,
+            "N1": 1,
+            "N2": 37,
+            "volume": 155.324,
+            "difficulty": 1.156,
+            "effort": 179.593
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 108.938,
+          "maintainabilityIndexGradAiNorm": 63.706,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "test_load_user_data_with_header",
+          "type": "function_definition",
+          "startLine": 61,
+          "lines": 13,
+          "maxNestingDepth": 1,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 15,
+            "N1": 1,
+            "N2": 39,
+            "volume": 160,
+            "difficulty": 1.3,
+            "effort": 208
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 102.827,
+          "maintainabilityIndexGradAiNorm": 60.133,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "test_load_user_data_no_header",
+          "type": "function_definition",
+          "startLine": 48,
+          "lines": 12,
+          "maxNestingDepth": 1,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 17,
+            "N1": 1,
+            "N2": 41,
+            "volume": 175.137,
+            "difficulty": 1.206,
+            "effort": 211.194
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 103.654,
+          "maintainabilityIndexGradAiNorm": 60.616,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "setUp",
+          "type": "function_definition",
+          "startLine": 45,
+          "lines": 2,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 4,
+            "N1": 0,
+            "N2": 6,
+            "volume": 12,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 146.62,
+          "maintainabilityIndexGradAiNorm": 85.743,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "test_input_file",
+          "type": "function_definition",
+          "startLine": 39,
+          "lines": 4,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 8,
+            "N1": 0,
+            "N2": 15,
+            "volume": 45,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 128.517,
+          "maintainabilityIndexGradAiNorm": 75.156,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "test_set_report",
+          "type": "function_definition",
+          "startLine": 32,
+          "lines": 5,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 9,
+            "N1": 0,
+            "N2": 22,
+            "volume": 69.738,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 122.624,
+          "maintainabilityIndexGradAiNorm": 71.71,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "test_set_report_empty",
+          "type": "function_definition",
+          "startLine": 27,
+          "lines": 4,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 8,
+            "N1": 0,
+            "N2": 14,
+            "volume": 42,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 128.876,
+          "maintainabilityIndexGradAiNorm": 75.366,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "test_set_data_set",
+          "type": "function_definition",
+          "startLine": 20,
+          "lines": 6,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 9,
+            "N1": 0,
+            "N2": 24,
+            "volume": 76.078,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 119.218,
+          "maintainabilityIndexGradAiNorm": 69.718,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "test_set_user_data",
+          "type": "function_definition",
+          "startLine": 14,
+          "lines": 5,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 9,
+            "N1": 0,
+            "N2": 22,
+            "volume": 69.738,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 122.624,
+          "maintainabilityIndexGradAiNorm": 71.71,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "setUp",
+          "type": "function_definition",
+          "startLine": 11,
+          "lines": 2,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 4,
+            "N1": 0,
+            "N2": 6,
+            "volume": 12,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 146.62,
+          "maintainabilityIndexGradAiNorm": 85.743,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "test_report_to_csv",
+          "type": "function_definition",
+          "startLine": 128,
+          "complexity": 1
+        },
+        {
+          "name": "test_report_to_json",
+          "type": "function_definition",
+          "startLine": 120,
+          "complexity": 1
+        },
+        {
+          "name": "setUp",
+          "type": "function_definition",
+          "startLine": 113,
+          "complexity": 1
+        },
+        {
+          "name": "test_generate_report",
+          "type": "function_definition",
+          "startLine": 91,
+          "complexity": 1
+        },
+        {
+          "name": "test_load_data_set_from_server",
+          "type": "function_definition",
+          "startLine": 85,
+          "complexity": 1
+        },
+        {
+          "name": "test_load_data_set_from_file",
+          "type": "function_definition",
+          "startLine": 75,
+          "complexity": 1
+        },
+        {
+          "name": "test_load_user_data_with_header",
+          "type": "function_definition",
+          "startLine": 61,
+          "complexity": 1
+        },
+        {
+          "name": "test_load_user_data_no_header",
+          "type": "function_definition",
+          "startLine": 48,
+          "complexity": 1
+        },
+        {
+          "name": "setUp",
+          "type": "function_definition",
+          "startLine": 45,
+          "complexity": 1
+        },
+        {
+          "name": "test_input_file",
+          "type": "function_definition",
+          "startLine": 39,
+          "complexity": 1
+        },
+        {
+          "name": "test_set_report",
+          "type": "function_definition",
+          "startLine": 32,
+          "complexity": 1
+        },
+        {
+          "name": "test_set_report_empty",
+          "type": "function_definition",
+          "startLine": 27,
+          "complexity": 1
+        },
+        {
+          "name": "test_set_data_set",
+          "type": "function_definition",
+          "startLine": 20,
+          "complexity": 1
+        },
+        {
+          "name": "test_set_user_data",
+          "type": "function_definition",
+          "startLine": 14,
+          "complexity": 1
+        },
+        {
+          "name": "setUp",
+          "type": "function_definition",
+          "startLine": 11,
+          "complexity": 1
+        }
+      ]
+    },
+    {
+      "file": "test_GUI.py",
+      "functions": 3,
+      "functionsByType": {
+        "function_definition": 3,
+        "lambda": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "test_existence",
+          "type": "function_definition",
+          "startLine": 19,
+          "lines": 10,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 19,
+            "N1": 0,
+            "N2": 61,
+            "volume": 259.124,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 104.57,
+          "maintainabilityIndexGradAiNorm": 61.152,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "tearDown",
+          "type": "function_definition",
+          "startLine": 13,
+          "lines": 4,
+          "maxNestingDepth": 1,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 1,
+            "n2": 5,
+            "N1": 1,
+            "N2": 9,
+            "volume": 25.85,
+            "difficulty": 0.9,
+            "effort": 23.265
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 131.17,
+          "maintainabilityIndexGradAiNorm": 76.708,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "setUp",
+          "type": "function_definition",
+          "startLine": 9,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 6,
+            "N1": 0,
+            "N2": 8,
+            "volume": 20.68,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 137.221,
+          "maintainabilityIndexGradAiNorm": 80.246,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "test_existence",
+          "type": "function_definition",
+          "startLine": 19,
+          "complexity": 1
+        },
+        {
+          "name": "tearDown",
+          "type": "function_definition",
+          "startLine": 13,
+          "complexity": 2
+        },
+        {
+          "name": "setUp",
+          "type": "function_definition",
+          "startLine": 9,
+          "complexity": 1
+        }
+      ]
+    },
+    {
+      "file": "test_opensnp_parser.py",
+      "functions": 2,
+      "functionsByType": {
+        "function_definition": 2,
+        "lambda": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "test_fetch_bulk_worker",
+          "type": "function_definition",
+          "startLine": 12,
+          "lines": 7,
+          "maxNestingDepth": 1,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 1,
+            "n2": 11,
+            "N1": 1,
+            "N2": 23,
+            "volume": 86.039,
+            "difficulty": 1.045,
+            "effort": 89.95
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 115.851,
+          "maintainabilityIndexGradAiNorm": 67.749,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "test_rsid_fetch_RSID",
+          "type": "function_definition",
+          "startLine": 7,
+          "lines": 4,
+          "maxNestingDepth": 1,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 8,
+            "N1": 1,
+            "N2": 10,
+            "volume": 34.869,
+            "difficulty": 0.625,
+            "effort": 21.793
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 129.844,
+          "maintainabilityIndexGradAiNorm": 75.932,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "test_fetch_bulk_worker",
+          "type": "function_definition",
+          "startLine": 12,
+          "complexity": 2
+        },
+        {
+          "name": "test_rsid_fetch_RSID",
+          "type": "function_definition",
+          "startLine": 7,
+          "complexity": 1
+        }
+      ]
+    },
+    {
+      "file": "test_user_data_parser.py",
+      "functions": 3,
+      "functionsByType": {
+        "function_definition": 3,
+        "lambda": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "test_file_format",
+          "type": "function_definition",
+          "startLine": 27,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 6,
+            "N1": 0,
+            "N2": 7,
+            "volume": 18.095,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 137.915,
+          "maintainabilityIndexGradAiNorm": 80.652,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "test_type",
+          "type": "function_definition",
+          "startLine": 22,
+          "lines": 4,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 18,
+            "N1": 0,
+            "N2": 19,
+            "volume": 79.229,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 125.576,
+          "maintainabilityIndexGradAiNorm": 73.436,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "test_properly_formated_file",
+          "type": "function_definition",
+          "startLine": 7,
+          "lines": 14,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 6,
+            "N1": 0,
+            "N2": 44,
+            "volume": 113.738,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 103.401,
+          "maintainabilityIndexGradAiNorm": 60.468,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "test_file_format",
+          "type": "function_definition",
+          "startLine": 27,
+          "complexity": 1
+        },
+        {
+          "name": "test_type",
+          "type": "function_definition",
+          "startLine": 22,
+          "complexity": 1
+        },
+        {
+          "name": "test_properly_formated_file",
+          "type": "function_definition",
+          "startLine": 7,
+          "complexity": 1
+        }
+      ]
+    },
+    {
+      "file": "user_data_parser.py",
+      "functions": 1,
+      "functionsByType": {
+        "function_definition": 1,
+        "lambda": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "parse_user_data",
+          "type": "function_definition",
+          "startLine": 8,
+          "lines": 21,
+          "maxNestingDepth": 3,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 4,
+          "halstead": {
+            "n1": 5,
+            "n2": 15,
+            "N1": 6,
+            "N2": 29,
+            "volume": 151.267,
+            "difficulty": 4.833,
+            "effort": 731.126
+          },
+          "cognitiveComplexity": 5,
+          "maintainabilityIndexGradAiRaw": 94.66,
+          "maintainabilityIndexGradAiNorm": 55.357,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "parse_user_data",
+          "type": "function_definition",
+          "startLine": 8,
+          "complexity": 4
+        }
+      ]
+    }
+  ],
   "phase3": {
     "sfd": 0,
     "mcr": null,
@@ -4037,7 +6686,504 @@
     "monolithicComponentCount": 0,
     "reactComponentCount": 0
   },
-  "symbolVerificationRisks": [],
+  "symbolVerificationRisks": [
+    {
+      "file": "opensnp_parser.py",
+      "name": "fetch_bulk_worker",
+      "startLine": 76,
+      "cyclomaticComplexity": 11,
+      "verificationScore": 0.3,
+      "evidence": "paired_file_only",
+      "pairedTestPath": "test_opensnp_parser.py",
+      "riskScore": 7.7
+    },
+    {
+      "file": "data_scrubber.py",
+      "name": "clean_data_set",
+      "startLine": 9,
+      "cyclomaticComplexity": 6,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 6
+    },
+    {
+      "file": "gui.py",
+      "name": "find",
+      "startLine": 138,
+      "cyclomaticComplexity": 7,
+      "verificationScore": 0.3,
+      "evidence": "paired_file_only",
+      "pairedTestPath": "test_gui.py",
+      "riskScore": 4.9
+    },
+    {
+      "file": "GeneSearcherProcessData.py",
+      "name": "complement",
+      "startLine": 6,
+      "cyclomaticComplexity": 4,
+      "verificationScore": 0.3,
+      "evidence": "paired_file_only",
+      "pairedTestPath": "test_GeneSearcherProcessData.py",
+      "riskScore": 2.8
+    },
+    {
+      "file": "opensnp_parser.py",
+      "name": "complement",
+      "startLine": 171,
+      "cyclomaticComplexity": 4,
+      "verificationScore": 0.3,
+      "evidence": "paired_file_only",
+      "pairedTestPath": "test_opensnp_parser.py",
+      "riskScore": 2.8
+    },
+    {
+      "file": "GeneSearcherProcessData.py",
+      "name": "match_genotype",
+      "startLine": 27,
+      "cyclomaticComplexity": 3,
+      "verificationScore": 0.3,
+      "evidence": "paired_file_only",
+      "pairedTestPath": "test_GeneSearcherProcessData.py",
+      "riskScore": 2.1
+    },
+    {
+      "file": "opensnp_parser.py",
+      "name": "match_genotype",
+      "startLine": 198,
+      "cyclomaticComplexity": 3,
+      "verificationScore": 0.3,
+      "evidence": "paired_file_only",
+      "pairedTestPath": "test_opensnp_parser.py",
+      "riskScore": 2.1
+    },
+    {
+      "file": "controller.py",
+      "name": "load_data_set",
+      "startLine": 14,
+      "cyclomaticComplexity": 2,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 2
+    },
+    {
+      "file": "getrsidlist.py",
+      "name": "get_snp_list",
+      "startLine": 10,
+      "cyclomaticComplexity": 2,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 2
+    },
+    {
+      "file": "model.py",
+      "name": "user_report_to_csv",
+      "startLine": 69,
+      "cyclomaticComplexity": 2,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 2
+    },
+    {
+      "file": "data_collector.py",
+      "name": "print",
+      "startLine": 37,
+      "cyclomaticComplexity": 2,
+      "verificationScore": 0.3,
+      "evidence": "paired_file_only",
+      "pairedTestPath": "test_data_collector.py",
+      "riskScore": 1.4
+    },
+    {
+      "file": "gui.py",
+      "name": "update_report",
+      "startLine": 114,
+      "cyclomaticComplexity": 2,
+      "verificationScore": 0.3,
+      "evidence": "paired_file_only",
+      "pairedTestPath": "test_gui.py",
+      "riskScore": 1.4
+    },
+    {
+      "file": "opensnp_parser.py",
+      "name": "extract_traits",
+      "startLine": 30,
+      "cyclomaticComplexity": 2,
+      "verificationScore": 0.3,
+      "evidence": "paired_file_only",
+      "pairedTestPath": "test_opensnp_parser.py",
+      "riskScore": 1.4
+    },
+    {
+      "file": "controller.py",
+      "name": "export_report",
+      "startLine": 34,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "controller.py",
+      "name": "generate_report",
+      "startLine": 23,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "controller.py",
+      "name": "input_data_file",
+      "startLine": 20,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "controller.py",
+      "name": "__init__",
+      "startLine": 7,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "data_scrubber.py",
+      "name": "write_data_set",
+      "startLine": 31,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "data_scrubber.py",
+      "name": "load_data_set",
+      "startLine": 3,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "model.py",
+      "name": "user_report_to_json",
+      "startLine": 64,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "model.py",
+      "name": "generate_report",
+      "startLine": 56,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "model.py",
+      "name": "load_data_set_from_server",
+      "startLine": 51,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "model.py",
+      "name": "load_data_set_from_file",
+      "startLine": 47,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "model.py",
+      "name": "load_user_data",
+      "startLine": 43,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "model.py",
+      "name": "get_input_file",
+      "startLine": 37,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "model.py",
+      "name": "get_report",
+      "startLine": 34,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "model.py",
+      "name": "get_data_set",
+      "startLine": 31,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "model.py",
+      "name": "get_user_data",
+      "startLine": 28,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "model.py",
+      "name": "set_input_file",
+      "startLine": 25,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "model.py",
+      "name": "set_report",
+      "startLine": 22,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "model.py",
+      "name": "set_data_set",
+      "startLine": 19,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "model.py",
+      "name": "set_user_data",
+      "startLine": 16,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "model.py",
+      "name": "__init__",
+      "startLine": 6,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "data_collector.py",
+      "name": "write",
+      "startLine": 29,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0.3,
+      "evidence": "paired_file_only",
+      "pairedTestPath": "test_data_collector.py",
+      "riskScore": 0.7
+    },
+    {
+      "file": "data_collector.py",
+      "name": "__init__",
+      "startLine": 6,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0.3,
+      "evidence": "paired_file_only",
+      "pairedTestPath": "test_data_collector.py",
+      "riskScore": 0.7
+    },
+    {
+      "file": "gui.py",
+      "name": "__init__",
+      "startLine": 182,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0.3,
+      "evidence": "paired_file_only",
+      "pairedTestPath": "test_gui.py",
+      "riskScore": 0.7
+    },
+    {
+      "file": "gui.py",
+      "name": "__init__",
+      "startLine": 75,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0.3,
+      "evidence": "paired_file_only",
+      "pairedTestPath": "test_gui.py",
+      "riskScore": 0.7
+    },
+    {
+      "file": "gui.py",
+      "name": "__init__",
+      "startLine": 66,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0.3,
+      "evidence": "paired_file_only",
+      "pairedTestPath": "test_gui.py",
+      "riskScore": 0.7
+    },
+    {
+      "file": "gui.py",
+      "name": "__init__",
+      "startLine": 57,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0.3,
+      "evidence": "paired_file_only",
+      "pairedTestPath": "test_gui.py",
+      "riskScore": 0.7
+    },
+    {
+      "file": "gui.py",
+      "name": "display_report",
+      "startLine": 52,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0.3,
+      "evidence": "paired_file_only",
+      "pairedTestPath": "test_gui.py",
+      "riskScore": 0.7
+    },
+    {
+      "file": "gui.py",
+      "name": "o_log",
+      "startLine": 38,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0.3,
+      "evidence": "paired_file_only",
+      "pairedTestPath": "test_gui.py",
+      "riskScore": 0.7
+    },
+    {
+      "file": "gui.py",
+      "name": "initUI",
+      "startLine": 18,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0.3,
+      "evidence": "paired_file_only",
+      "pairedTestPath": "test_gui.py",
+      "riskScore": 0.7
+    },
+    {
+      "file": "gui.py",
+      "name": "__init__",
+      "startLine": 8,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0.3,
+      "evidence": "paired_file_only",
+      "pairedTestPath": "test_gui.py",
+      "riskScore": 0.7
+    },
+    {
+      "file": "opensnp_parser.py",
+      "name": "compute_weight_of_evidence",
+      "startLine": 43,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0.3,
+      "evidence": "paired_file_only",
+      "pairedTestPath": "test_opensnp_parser.py",
+      "riskScore": 0.7
+    },
+    {
+      "file": "opensnp_parser.py",
+      "name": "__init__",
+      "startLine": 17,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0.3,
+      "evidence": "paired_file_only",
+      "pairedTestPath": "test_opensnp_parser.py",
+      "riskScore": 0.7
+    },
+    {
+      "file": "GeneSearcherProcessData.py",
+      "name": "process_user_data",
+      "startLine": 35,
+      "cyclomaticComplexity": 5,
+      "verificationScore": 1,
+      "evidence": "referenced_in_test",
+      "pairedTestPath": "test_GeneSearcherProcessData.py",
+      "riskScore": 0
+    },
+    {
+      "file": "user_data_parser.py",
+      "name": "parse_user_data",
+      "startLine": 8,
+      "cyclomaticComplexity": 4,
+      "verificationScore": 1,
+      "evidence": "referenced_in_test",
+      "pairedTestPath": "test_user_data_parser.py",
+      "riskScore": 0
+    },
+    {
+      "file": "data_collector.py",
+      "name": "update_bulk",
+      "startLine": 15,
+      "cyclomaticComplexity": 3,
+      "verificationScore": 1,
+      "evidence": "referenced_in_test",
+      "pairedTestPath": "test_data_collector.py",
+      "riskScore": 0
+    },
+    {
+      "file": "opensnp_parser.py",
+      "name": "fetch_bulk_RSID_info",
+      "startLine": 150,
+      "cyclomaticComplexity": 3,
+      "verificationScore": 1,
+      "evidence": "referenced_in_test",
+      "pairedTestPath": "test_opensnp_parser.py",
+      "riskScore": 0
+    },
+    {
+      "file": "data_collector.py",
+      "name": "get_snp_list",
+      "startLine": 42,
+      "cyclomaticComplexity": 2,
+      "verificationScore": 1,
+      "evidence": "referenced_in_test",
+      "pairedTestPath": "test_data_collector.py",
+      "riskScore": 0
+    },
+    {
+      "file": "data_collector.py",
+      "name": "load",
+      "startLine": 23,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 1,
+      "evidence": "referenced_in_test",
+      "pairedTestPath": "test_data_collector.py",
+      "riskScore": 0
+    },
+    {
+      "file": "opensnp_parser.py",
+      "name": "fetch_RSID_info",
+      "startLine": 54,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 1,
+      "evidence": "referenced_in_test",
+      "pairedTestPath": "test_opensnp_parser.py",
+      "riskScore": 0
+    }
+  ],
   "github": {
     "description": null,
     "topics": [],

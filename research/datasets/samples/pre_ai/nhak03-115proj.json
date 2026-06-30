@@ -6,51 +6,54 @@
     "commit": "cb410d2327f78d84f4f6dcf37aa05345a83c1d5c",
     "branch": "main"
   },
-  "filesAnalyzed": 0,
+  "filesAnalyzed": 26,
   "analyzer_version": "0.0.0",
-  "analysis_timestamp": "2026-06-24T23:00:11.121Z",
+  "analysis_timestamp": "2026-06-30T22:39:42.330Z",
   "distributions": {
-    "p50_function_length": 0,
-    "p75_function_length": 0,
-    "p90_function_length": 0,
-    "p50_complexity": 0,
-    "p75_complexity": 0,
-    "p90_complexity": 0,
-    "percent_high_complexity_in_top_10_percent_files": 0
+    "p50_function_length": 10,
+    "p75_function_length": 32,
+    "p90_function_length": 57,
+    "p50_complexity": 1,
+    "p75_complexity": 3,
+    "p90_complexity": 5,
+    "percent_high_complexity_in_top_10_percent_files": 100
   },
   "profile": {
-    "totalFiles": 0,
+    "totalFiles": 26,
     "tsFiles": 0,
     "tsxFiles": 0,
-    "testFiles": 0,
-    "totalLOC": 0,
-    "sourceLOC": 0,
-    "testLOC": 0
+    "jsFiles": 23,
+    "jsxFiles": 3,
+    "pyFiles": 0,
+    "testFiles": 1,
+    "totalLOC": 1698,
+    "sourceLOC": 1690,
+    "testLOC": 8
   },
   "totals": {
-    "functions": 0
+    "functions": 101
   },
   "functionMetricsSummary": {
-    "totalFunctions": 0,
-    "averageLength": 0,
-    "medianLength": 0,
-    "maxNestingDepth": 0,
-    "longFunctionPercentage": 0
+    "totalFunctions": 101,
+    "averageLength": 21.5,
+    "medianLength": 10,
+    "maxNestingDepth": 4,
+    "longFunctionPercentage": 12.9
   },
   "complexity": {
-    "average": 0,
-    "max": 0,
-    "highComplexityFunctions": 0
+    "average": 2.2,
+    "max": 11,
+    "highComplexityFunctions": 1
   },
   "smells": {
-    "longFunctions": 0,
+    "longFunctions": 13,
     "deepNesting": 0,
     "longParameterLists": 0,
     "emptyCatchBlocks": 0,
-    "consoleLogs": 0
+    "consoleLogs": 57
   },
   "maintainability": {
-    "score": 100,
+    "score": 67.5,
     "classification": "high"
   },
   "testCoverageProxy": {
@@ -190,8 +193,8 @@
       "refactorCommitRatio": 0
     },
     "testCoupling": {
-      "pctCommitsTouchingTests": 0,
-      "testToFeatureCommitRatio": 0
+      "pctCommitsTouchingTests": 0.9,
+      "testToFeatureCommitRatio": 0.01
     },
     "commitCalendar": {
       "grid": [
@@ -639,10 +642,10 @@
       "commitCount": 69,
       "linesAdded": 249434,
       "linesDeleted": 245114,
-      "testLineChurn": 0,
-      "sourceLineChurn": 494548,
-      "testFilesTouched": 0,
-      "sourceFilesTouched": 797,
+      "testLineChurn": 8,
+      "sourceLineChurn": 494540,
+      "testFilesTouched": 1,
+      "sourceFilesTouched": 796,
       "sourcePathsTouchedList": [
         "my-react-app/.gitignore",
         "my-react-app/{ => backend}/server.js",
@@ -681,7 +684,6 @@
         "my-react-app/src/AddData.js",
         "my-react-app/src/App.css",
         "my-react-app/src/App.js",
-        "my-react-app/src/App.test.js",
         "my-react-app/src/components/{ => auth}/AuthDetails.jsx",
         "my-react-app/src/components/auth/AuthDetails.jsx",
         "my-react-app/src/components/auth/SignIn.jsx",
@@ -1563,8 +1565,8 @@
         ]
       },
       "testCoupling": {
-        "pctCommitsTouchingTests": 0,
-        "testToFeatureCommitRatio": 0
+        "pctCommitsTouchingTests": 1.4,
+        "testToFeatureCommitRatio": 0.01
       },
       "refactorBehavior": {
         "refactorCommitRatio": 0
@@ -24402,19 +24404,3917 @@
     }
   ],
   "framework": null,
-  "perFile": [],
+  "perFile": [
+    {
+      "file": "my-react-app\\src\\App.js",
+      "functions": 1,
+      "functionsByType": {
+        "function_declaration": 1,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 0,
+        "function": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "App",
+          "type": "function_declaration",
+          "startLine": 15,
+          "lines": 24,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 11,
+            "N1": 1,
+            "N2": 31,
+            "volume": 114.719,
+            "difficulty": 1.409,
+            "effort": 161.649
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 94.625,
+          "maintainabilityIndexGradAiNorm": 55.336,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "App",
+          "type": "function_declaration",
+          "startLine": 15,
+          "complexity": 1
+        }
+      ]
+    },
+    {
+      "file": "my-react-app\\src\\App.test.js",
+      "functions": 1,
+      "functionsByType": {
+        "function_declaration": 0,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 1,
+        "function": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 4,
+          "lines": 5,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 6,
+            "N1": 3,
+            "N2": 7,
+            "volume": 30,
+            "difficulty": 1.167,
+            "effort": 35
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 127.011,
+          "maintainabilityIndexGradAiNorm": 74.275,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 4,
+          "complexity": 1
+        }
+      ]
+    },
+    {
+      "file": "my-react-app\\src\\firebase.js",
+      "functions": 0,
+      "functionsByType": {
+        "function_declaration": 0,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 0,
+        "function": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [],
+      "complexity": []
+    },
+    {
+      "file": "my-react-app\\src\\index.js",
+      "functions": 0,
+      "functionsByType": {
+        "function_declaration": 0,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 0,
+        "function": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [],
+      "complexity": []
+    },
+    {
+      "file": "my-react-app\\src\\reportWebVitals.js",
+      "functions": 2,
+      "functionsByType": {
+        "function_declaration": 0,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 2,
+        "function": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "reportWebVitals",
+          "type": "arrow_function",
+          "startLine": 1,
+          "lines": 11,
+          "maxNestingDepth": 1,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 3,
+          "halstead": {
+            "n1": 5,
+            "n2": 3,
+            "N1": 5,
+            "N2": 6,
+            "volume": 33,
+            "difficulty": 5,
+            "effort": 165
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 113.282,
+          "maintainabilityIndexGradAiNorm": 66.247,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 3,
+          "lines": 7,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 6,
+            "N1": 1,
+            "N2": 10,
+            "volume": 30.881,
+            "difficulty": 0.833,
+            "effort": 25.734
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 121.41,
+          "maintainabilityIndexGradAiNorm": 71,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "reportWebVitals",
+          "type": "arrow_function",
+          "startLine": 1,
+          "complexity": 3
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 3,
+          "complexity": 1
+        }
+      ]
+    },
+    {
+      "file": "my-react-app\\src\\setupTests.js",
+      "functions": 0,
+      "functionsByType": {
+        "function_declaration": 0,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 0,
+        "function": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [],
+      "complexity": []
+    },
+    {
+      "file": "my-react-app\\backend\\server.js",
+      "functions": 13,
+      "functionsByType": {
+        "function_declaration": 3,
+        "generator_function_declaration": 0,
+        "method_definition": 1,
+        "arrow_function": 9,
+        "function": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 300,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 3,
+            "N1": 2,
+            "N2": 5,
+            "volume": 16.253,
+            "difficulty": 1.667,
+            "effort": 27.089
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 138.473,
+          "maintainabilityIndexGradAiNorm": 80.978,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 242,
+          "lines": 55,
+          "maxNestingDepth": 4,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 7,
+          "halstead": {
+            "n1": 9,
+            "n2": 23,
+            "N1": 31,
+            "N2": 82,
+            "volume": 565,
+            "difficulty": 16.043,
+            "effort": 9064.565
+          },
+          "cognitiveComplexity": 7,
+          "maintainabilityIndexGradAiRaw": 71.52,
+          "maintainabilityIndexGradAiNorm": 41.825,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 206,
+          "lines": 35,
+          "maxNestingDepth": 2,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 4,
+          "halstead": {
+            "n1": 10,
+            "n2": 23,
+            "N1": 24,
+            "N2": 58,
+            "volume": 413.64,
+            "difficulty": 12.609,
+            "effort": 5215.465
+          },
+          "cognitiveComplexity": 2,
+          "maintainabilityIndexGradAiRaw": 81.153,
+          "maintainabilityIndexGradAiNorm": 47.458,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 194,
+          "lines": 11,
+          "maxNestingDepth": 0,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 3,
+            "n2": 11,
+            "N1": 5,
+            "N2": 16,
+            "volume": 79.954,
+            "difficulty": 2.182,
+            "effort": 174.446
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 109.141,
+          "maintainabilityIndexGradAiNorm": 63.825,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 199,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 3,
+            "n2": 2,
+            "N1": 5,
+            "N2": 4,
+            "volume": 20.897,
+            "difficulty": 3,
+            "effort": 62.692
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 137.167,
+          "maintainabilityIndexGradAiNorm": 80.215,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 145,
+          "lines": 48,
+          "maxNestingDepth": 4,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 10,
+          "halstead": {
+            "n1": 9,
+            "n2": 19,
+            "N1": 53,
+            "N2": 87,
+            "volume": 673.03,
+            "difficulty": 20.605,
+            "effort": 13867.954
+          },
+          "cognitiveComplexity": 17,
+          "maintainabilityIndexGradAiRaw": 72.125,
+          "maintainabilityIndexGradAiNorm": 42.178,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "getAllClubPosts",
+          "type": "function_declaration",
+          "startLine": 103,
+          "lines": 37,
+          "maxNestingDepth": 2,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 3,
+          "halstead": {
+            "n1": 8,
+            "n2": 25,
+            "N1": 26,
+            "N2": 76,
+            "volume": 514.528,
+            "difficulty": 12.16,
+            "effort": 6256.663
+          },
+          "cognitiveComplexity": 3,
+          "maintainabilityIndexGradAiRaw": 79.348,
+          "maintainabilityIndexGradAiNorm": 46.402,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 129,
+          "lines": 4,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 3,
+            "n2": 3,
+            "N1": 5,
+            "N2": 6,
+            "volume": 28.435,
+            "difficulty": 3,
+            "effort": 85.304
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 130.904,
+          "maintainabilityIndexGradAiNorm": 76.552,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "getPostsForFollowedClubs",
+          "type": "function_declaration",
+          "startLine": 56,
+          "lines": 46,
+          "maxNestingDepth": 2,
+          "parameterCount": 3,
+          "cyclomaticComplexity": 6,
+          "halstead": {
+            "n1": 9,
+            "n2": 25,
+            "N1": 39,
+            "N2": 93,
+            "volume": 671.545,
+            "difficulty": 16.74,
+            "effort": 11241.665
+          },
+          "cognitiveComplexity": 8,
+          "maintainabilityIndexGradAiRaw": 73.746,
+          "maintainabilityIndexGradAiNorm": 43.126,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 62,
+          "lines": 8,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 4,
+            "N1": 3,
+            "N2": 6,
+            "volume": 23.265,
+            "difficulty": 1.5,
+            "effort": 34.897
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 120.719,
+          "maintainabilityIndexGradAiNorm": 70.596,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "getLatestPostsFromClubs",
+          "type": "function_declaration",
+          "startLine": 21,
+          "lines": 34,
+          "maxNestingDepth": 2,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 3,
+          "halstead": {
+            "n1": 8,
+            "n2": 15,
+            "N1": 17,
+            "N2": 38,
+            "volume": 248.796,
+            "difficulty": 10.133,
+            "effort": 2521.132
+          },
+          "cognitiveComplexity": 3,
+          "maintainabilityIndexGradAiRaw": 84.496,
+          "maintainabilityIndexGradAiNorm": 49.413,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 25,
+          "lines": 8,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 4,
+            "N1": 3,
+            "N2": 6,
+            "volume": 23.265,
+            "difficulty": 1.5,
+            "effort": 34.897
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 120.719,
+          "maintainabilityIndexGradAiNorm": 70.596,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "constructor",
+          "type": "method_definition",
+          "startLine": 13,
+          "lines": 4,
+          "maxNestingDepth": 0,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 3,
+            "N1": 2,
+            "N2": 6,
+            "volume": 16,
+            "difficulty": 1,
+            "effort": 16
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 133.895,
+          "maintainabilityIndexGradAiNorm": 78.301,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 300,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 242,
+          "complexity": 7
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 206,
+          "complexity": 4
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 194,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 199,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 145,
+          "complexity": 10
+        },
+        {
+          "name": "getAllClubPosts",
+          "type": "function_declaration",
+          "startLine": 103,
+          "complexity": 3
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 129,
+          "complexity": 1
+        },
+        {
+          "name": "getPostsForFollowedClubs",
+          "type": "function_declaration",
+          "startLine": 56,
+          "complexity": 6
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 62,
+          "complexity": 1
+        },
+        {
+          "name": "getLatestPostsFromClubs",
+          "type": "function_declaration",
+          "startLine": 21,
+          "complexity": 3
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 25,
+          "complexity": 1
+        },
+        {
+          "name": "constructor",
+          "type": "method_definition",
+          "startLine": 13,
+          "complexity": 1
+        }
+      ]
+    },
+    {
+      "file": "my-react-app\\src\\components\\Modal.js",
+      "functions": 1,
+      "functionsByType": {
+        "function_declaration": 0,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 1,
+        "function": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "Modal",
+          "type": "arrow_function",
+          "startLine": 6,
+          "lines": 10,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 5,
+            "N1": 2,
+            "N2": 12,
+            "volume": 39.303,
+            "difficulty": 2.4,
+            "effort": 94.327
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 114.377,
+          "maintainabilityIndexGradAiNorm": 66.887,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "Modal",
+          "type": "arrow_function",
+          "startLine": 6,
+          "complexity": 1
+        }
+      ]
+    },
+    {
+      "file": "my-react-app\\src\\pages\\Discover.js",
+      "functions": 1,
+      "functionsByType": {
+        "function_declaration": 1,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 0,
+        "function": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "Discover",
+          "type": "function_declaration",
+          "startLine": 15,
+          "lines": 15,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 5,
+          "halstead": {
+            "n1": 4,
+            "n2": 8,
+            "N1": 9,
+            "N2": 19,
+            "volume": 100.379,
+            "difficulty": 4.75,
+            "effort": 476.8
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 102.013,
+          "maintainabilityIndexGradAiNorm": 59.657,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "Discover",
+          "type": "function_declaration",
+          "startLine": 15,
+          "complexity": 5
+        }
+      ]
+    },
+    {
+      "file": "my-react-app\\src\\pages\\FirestoreService.js",
+      "functions": 6,
+      "functionsByType": {
+        "function_declaration": 0,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 6,
+        "function": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "getClubDoc",
+          "type": "arrow_function",
+          "startLine": 29,
+          "lines": 8,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 6,
+            "n2": 12,
+            "N1": 9,
+            "N2": 25,
+            "volume": 141.777,
+            "difficulty": 6.25,
+            "effort": 886.109
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 111.321,
+          "maintainabilityIndexGradAiNorm": 65.1,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "updateDocKVPair",
+          "type": "arrow_function",
+          "startLine": 22,
+          "lines": 6,
+          "maxNestingDepth": 0,
+          "parameterCount": 3,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 4,
+            "n2": 10,
+            "N1": 4,
+            "N2": 22,
+            "volume": 98.991,
+            "difficulty": 4.4,
+            "effort": 435.561
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 117.849,
+          "maintainabilityIndexGradAiNorm": 68.918,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "deleteFollowedClub",
+          "type": "arrow_function",
+          "startLine": 16,
+          "lines": 5,
+          "maxNestingDepth": 0,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 3,
+            "n2": 8,
+            "N1": 3,
+            "N2": 16,
+            "volume": 65.729,
+            "difficulty": 3,
+            "effort": 197.188
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 122.932,
+          "maintainabilityIndexGradAiNorm": 71.89,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "setFollowedClub",
+          "type": "arrow_function",
+          "startLine": 10,
+          "lines": 5,
+          "maxNestingDepth": 0,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 3,
+            "n2": 7,
+            "N1": 3,
+            "N2": 15,
+            "volume": 59.795,
+            "difficulty": 3.214,
+            "effort": 192.197
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 123.424,
+          "maintainabilityIndexGradAiNorm": 72.178,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "getFollowedClubs",
+          "type": "arrow_function",
+          "startLine": 4,
+          "lines": 5,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 4,
+            "n2": 7,
+            "N1": 5,
+            "N2": 13,
+            "volume": 62.27,
+            "difficulty": 3.714,
+            "effort": 231.288
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 123.213,
+          "maintainabilityIndexGradAiNorm": 72.054,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 7,
+          "lines": 1,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 3,
+            "n2": 1,
+            "N1": 4,
+            "N2": 3,
+            "volume": 14,
+            "difficulty": 4.5,
+            "effort": 63
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 157.047,
+          "maintainabilityIndexGradAiNorm": 91.84,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "getClubDoc",
+          "type": "arrow_function",
+          "startLine": 29,
+          "complexity": 1
+        },
+        {
+          "name": "updateDocKVPair",
+          "type": "arrow_function",
+          "startLine": 22,
+          "complexity": 1
+        },
+        {
+          "name": "deleteFollowedClub",
+          "type": "arrow_function",
+          "startLine": 16,
+          "complexity": 1
+        },
+        {
+          "name": "setFollowedClub",
+          "type": "arrow_function",
+          "startLine": 10,
+          "complexity": 1
+        },
+        {
+          "name": "getFollowedClubs",
+          "type": "arrow_function",
+          "startLine": 4,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 7,
+          "complexity": 1
+        }
+      ]
+    },
+    {
+      "file": "my-react-app\\src\\pages\\Following.js",
+      "functions": 3,
+      "functionsByType": {
+        "function_declaration": 1,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 2,
+        "function": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "Following",
+          "type": "function_declaration",
+          "startLine": 7,
+          "lines": 57,
+          "maxNestingDepth": 3,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 2,
+            "n2": 15,
+            "N1": 2,
+            "N2": 27,
+            "volume": 118.536,
+            "difficulty": 1.8,
+            "effort": 213.366
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 80.211,
+          "maintainabilityIndexGradAiNorm": 46.907,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 12,
+          "lines": 36,
+          "maxNestingDepth": 3,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 1,
+            "N1": 1,
+            "N2": 2,
+            "volume": 3,
+            "difficulty": 1,
+            "effort": 3
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 107.004,
+          "maintainabilityIndexGradAiNorm": 62.575,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "fetchPosts",
+          "type": "arrow_function",
+          "startLine": 13,
+          "lines": 32,
+          "maxNestingDepth": 3,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 6,
+          "halstead": {
+            "n1": 8,
+            "n2": 15,
+            "N1": 26,
+            "N2": 45,
+            "volume": 321.173,
+            "difficulty": 12,
+            "effort": 3854.075
+          },
+          "cognitiveComplexity": 9,
+          "maintainabilityIndexGradAiRaw": 83.461,
+          "maintainabilityIndexGradAiNorm": 48.808,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "Following",
+          "type": "function_declaration",
+          "startLine": 7,
+          "complexity": 2
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 12,
+          "complexity": 1
+        },
+        {
+          "name": "fetchPosts",
+          "type": "arrow_function",
+          "startLine": 13,
+          "complexity": 6
+        }
+      ]
+    },
+    {
+      "file": "my-react-app\\src\\pages\\Profile.js",
+      "functions": 6,
+      "functionsByType": {
+        "function_declaration": 0,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 6,
+        "function": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "Profile",
+          "type": "arrow_function",
+          "startLine": 9,
+          "lines": 64,
+          "maxNestingDepth": 1,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 5,
+          "halstead": {
+            "n1": 7,
+            "n2": 20,
+            "N1": 11,
+            "N2": 46,
+            "volume": 271.029,
+            "difficulty": 8.05,
+            "effort": 2181.78
+          },
+          "cognitiveComplexity": 4,
+          "maintainabilityIndexGradAiRaw": 73.345,
+          "maintainabilityIndexGradAiNorm": 42.892,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 57,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 2,
+            "N1": 3,
+            "N2": 5,
+            "volume": 16,
+            "difficulty": 2.5,
+            "effort": 40
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 138.555,
+          "maintainabilityIndexGradAiNorm": 81.026,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "loadFollowedClubs",
+          "type": "arrow_function",
+          "startLine": 30,
+          "lines": 11,
+          "maxNestingDepth": 1,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 5,
+            "n2": 10,
+            "N1": 5,
+            "N2": 18,
+            "volume": 89.858,
+            "difficulty": 4.5,
+            "effort": 404.363
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 108.303,
+          "maintainabilityIndexGradAiNorm": 63.335,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 15,
+          "lines": 14,
+          "maxNestingDepth": 1,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 3,
+            "N1": 2,
+            "N2": 3,
+            "volume": 11.61,
+            "difficulty": 1,
+            "effort": 11.61
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 115.268,
+          "maintainabilityIndexGradAiNorm": 67.408,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 27,
+          "lines": 1,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 1,
+            "N1": 1,
+            "N2": 1,
+            "volume": 2,
+            "difficulty": 0.5,
+            "effort": 1
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 167.166,
+          "maintainabilityIndexGradAiNorm": 97.758,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 16,
+          "lines": 10,
+          "maxNestingDepth": 1,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 3,
+          "halstead": {
+            "n1": 4,
+            "n2": 7,
+            "N1": 4,
+            "N2": 11,
+            "volume": 51.891,
+            "difficulty": 3.143,
+            "effort": 163.087
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 112.473,
+          "maintainabilityIndexGradAiNorm": 65.774,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "Profile",
+          "type": "arrow_function",
+          "startLine": 9,
+          "complexity": 5
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 57,
+          "complexity": 1
+        },
+        {
+          "name": "loadFollowedClubs",
+          "type": "arrow_function",
+          "startLine": 30,
+          "complexity": 2
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 15,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 27,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 16,
+          "complexity": 3
+        }
+      ]
+    },
+    {
+      "file": "my-react-app\\src\\pages\\WhatsNew.js",
+      "functions": 3,
+      "functionsByType": {
+        "function_declaration": 1,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 2,
+        "function": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "WhatsNew",
+          "type": "function_declaration",
+          "startLine": 5,
+          "lines": 39,
+          "maxNestingDepth": 2,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 9,
+            "N1": 1,
+            "N2": 14,
+            "volume": 49.829,
+            "difficulty": 0.778,
+            "effort": 38.756
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 91.096,
+          "maintainabilityIndexGradAiNorm": 53.273,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 8,
+          "lines": 26,
+          "maxNestingDepth": 2,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 1,
+            "N1": 1,
+            "N2": 2,
+            "volume": 3,
+            "difficulty": 1,
+            "effort": 3
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 112.276,
+          "maintainabilityIndexGradAiNorm": 65.658,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "fetchPosts",
+          "type": "arrow_function",
+          "startLine": 9,
+          "lines": 22,
+          "maxNestingDepth": 2,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 4,
+          "halstead": {
+            "n1": 6,
+            "n2": 9,
+            "N1": 15,
+            "N2": 31,
+            "volume": 179.717,
+            "difficulty": 10.333,
+            "effort": 1857.075
+          },
+          "cognitiveComplexity": 3,
+          "maintainabilityIndexGradAiRaw": 93.01,
+          "maintainabilityIndexGradAiNorm": 54.392,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "WhatsNew",
+          "type": "function_declaration",
+          "startLine": 5,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 8,
+          "complexity": 1
+        },
+        {
+          "name": "fetchPosts",
+          "type": "arrow_function",
+          "startLine": 9,
+          "complexity": 4
+        }
+      ]
+    },
+    {
+      "file": "my-react-app\\src\\components\\ClubEditableTextBox\\ClubEditableTextBox.js",
+      "functions": 6,
+      "functionsByType": {
+        "function_declaration": 1,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 5,
+        "function": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "ClubEditableTextBox",
+          "type": "function_declaration",
+          "startLine": 4,
+          "lines": 65,
+          "maxNestingDepth": 2,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 5,
+          "halstead": {
+            "n1": 3,
+            "n2": 24,
+            "N1": 7,
+            "N2": 63,
+            "volume": 332.842,
+            "difficulty": 3.938,
+            "effort": 1310.566
+          },
+          "cognitiveComplexity": 3,
+          "maintainabilityIndexGradAiRaw": 72.025,
+          "maintainabilityIndexGradAiNorm": 42.12,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "handleCancel",
+          "type": "arrow_function",
+          "startLine": 32,
+          "lines": 4,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 4,
+            "N1": 1,
+            "N2": 4,
+            "volume": 11.61,
+            "difficulty": 0.5,
+            "effort": 5.805
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 135.562,
+          "maintainabilityIndexGradAiNorm": 79.276,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "handleChange",
+          "type": "arrow_function",
+          "startLine": 28,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 2,
+            "N1": 3,
+            "N2": 3,
+            "volume": 12,
+            "difficulty": 1.5,
+            "effort": 18
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 140.051,
+          "maintainabilityIndexGradAiNorm": 81.901,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "handleSubmit",
+          "type": "arrow_function",
+          "startLine": 19,
+          "lines": 8,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 3,
+            "n2": 11,
+            "N1": 3,
+            "N2": 17,
+            "volume": 76.147,
+            "difficulty": 2.318,
+            "effort": 176.523
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 114.553,
+          "maintainabilityIndexGradAiNorm": 66.99,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "handleEditClick",
+          "type": "arrow_function",
+          "startLine": 15,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 2,
+            "N1": 1,
+            "N2": 2,
+            "volume": 4.755,
+            "difficulty": 0.5,
+            "effort": 2.377
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 144.865,
+          "maintainabilityIndexGradAiNorm": 84.716,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 9,
+          "lines": 5,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 4,
+            "N1": 1,
+            "N2": 4,
+            "volume": 11.61,
+            "difficulty": 0.5,
+            "effort": 5.805
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 131.947,
+          "maintainabilityIndexGradAiNorm": 77.162,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "ClubEditableTextBox",
+          "type": "function_declaration",
+          "startLine": 4,
+          "complexity": 5
+        },
+        {
+          "name": "handleCancel",
+          "type": "arrow_function",
+          "startLine": 32,
+          "complexity": 1
+        },
+        {
+          "name": "handleChange",
+          "type": "arrow_function",
+          "startLine": 28,
+          "complexity": 1
+        },
+        {
+          "name": "handleSubmit",
+          "type": "arrow_function",
+          "startLine": 19,
+          "complexity": 1
+        },
+        {
+          "name": "handleEditClick",
+          "type": "arrow_function",
+          "startLine": 15,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 9,
+          "complexity": 1
+        }
+      ]
+    },
+    {
+      "file": "my-react-app\\src\\components\\createPost\\createPost.js",
+      "functions": 6,
+      "functionsByType": {
+        "function_declaration": 0,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 6,
+        "function": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "CreatePost",
+          "type": "arrow_function",
+          "startLine": 10,
+          "lines": 141,
+          "maxNestingDepth": 3,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 17,
+            "N1": 2,
+            "N2": 25,
+            "volume": 114.694,
+            "difficulty": 1.471,
+            "effort": 168.668
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 65.94,
+          "maintainabilityIndexGradAiNorm": 38.561,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 79,
+          "lines": 68,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 3,
+          "halstead": {
+            "n1": 3,
+            "n2": 14,
+            "N1": 3,
+            "N2": 63,
+            "volume": 269.773,
+            "difficulty": 6.75,
+            "effort": 1820.965
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 72.847,
+          "maintainabilityIndexGradAiNorm": 42.601,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 143,
+          "lines": 1,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 1,
+            "N1": 1,
+            "N2": 1,
+            "volume": 2,
+            "difficulty": 0.5,
+            "effort": 1
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 167.166,
+          "maintainabilityIndexGradAiNorm": 97.758,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 129,
+          "lines": 1,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 2,
+            "N1": 3,
+            "N2": 3,
+            "volume": 12,
+            "difficulty": 1.5,
+            "effort": 18
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 157.848,
+          "maintainabilityIndexGradAiNorm": 92.309,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 118,
+          "lines": 1,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 2,
+            "N1": 3,
+            "N2": 3,
+            "volume": 12,
+            "difficulty": 1.5,
+            "effort": 18
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 157.848,
+          "maintainabilityIndexGradAiNorm": 92.309,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "handleSubmit",
+          "type": "arrow_function",
+          "startLine": 24,
+          "lines": 47,
+          "maxNestingDepth": 3,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 8,
+          "halstead": {
+            "n1": 10,
+            "n2": 18,
+            "N1": 27,
+            "N2": 49,
+            "volume": 365.359,
+            "difficulty": 13.611,
+            "effort": 4972.942
+          },
+          "cognitiveComplexity": 7,
+          "maintainabilityIndexGradAiRaw": 76.103,
+          "maintainabilityIndexGradAiNorm": 44.505,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "CreatePost",
+          "type": "arrow_function",
+          "startLine": 10,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 79,
+          "complexity": 3
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 143,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 129,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 118,
+          "complexity": 1
+        },
+        {
+          "name": "handleSubmit",
+          "type": "arrow_function",
+          "startLine": 24,
+          "complexity": 8
+        }
+      ]
+    },
+    {
+      "file": "my-react-app\\src\\components\\createClubButton\\createClubButton.js",
+      "functions": 6,
+      "functionsByType": {
+        "function_declaration": 0,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 6,
+        "function": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "CreateClubButton",
+          "type": "arrow_function",
+          "startLine": 10,
+          "lines": 123,
+          "maxNestingDepth": 3,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 19,
+            "N1": 2,
+            "N2": 29,
+            "volume": 136.162,
+            "difficulty": 1.526,
+            "effort": 207.826
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 67.261,
+          "maintainabilityIndexGradAiNorm": 39.334,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 83,
+          "lines": 46,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 3,
+          "halstead": {
+            "n1": 3,
+            "n2": 14,
+            "N1": 3,
+            "N2": 65,
+            "volume": 277.947,
+            "difficulty": 6.964,
+            "effort": 1935.706
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 79.023,
+          "maintainabilityIndexGradAiNorm": 46.212,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 125,
+          "lines": 1,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 1,
+            "N1": 1,
+            "N2": 1,
+            "volume": 2,
+            "difficulty": 0.5,
+            "effort": 1
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 167.166,
+          "maintainabilityIndexGradAiNorm": 97.758,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 114,
+          "lines": 1,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 2,
+            "N1": 3,
+            "N2": 3,
+            "volume": 12,
+            "difficulty": 1.5,
+            "effort": 18
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 157.848,
+          "maintainabilityIndexGradAiNorm": 92.309,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 105,
+          "lines": 1,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 2,
+            "N1": 3,
+            "N2": 3,
+            "volume": 12,
+            "difficulty": 1.5,
+            "effort": 18
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 157.848,
+          "maintainabilityIndexGradAiNorm": 92.309,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "handleSubmit",
+          "type": "arrow_function",
+          "startLine": 19,
+          "lines": 56,
+          "maxNestingDepth": 3,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 9,
+          "halstead": {
+            "n1": 12,
+            "n2": 20,
+            "N1": 36,
+            "N2": 68,
+            "volume": 520,
+            "difficulty": 20.4,
+            "effort": 10608
+          },
+          "cognitiveComplexity": 7,
+          "maintainabilityIndexGradAiRaw": 71.199,
+          "maintainabilityIndexGradAiNorm": 41.637,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "CreateClubButton",
+          "type": "arrow_function",
+          "startLine": 10,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 83,
+          "complexity": 3
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 125,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 114,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 105,
+          "complexity": 1
+        },
+        {
+          "name": "handleSubmit",
+          "type": "arrow_function",
+          "startLine": 19,
+          "complexity": 9
+        }
+      ]
+    },
+    {
+      "file": "my-react-app\\src\\components\\FollowButton\\FollowButton.js",
+      "functions": 6,
+      "functionsByType": {
+        "function_declaration": 3,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 3,
+        "function": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "FollowButton",
+          "type": "function_declaration",
+          "startLine": 10,
+          "lines": 67,
+          "maxNestingDepth": 4,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 10,
+            "N1": 1,
+            "N2": 17,
+            "volume": 62.27,
+            "difficulty": 0.85,
+            "effort": 52.929
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 81.17,
+          "maintainabilityIndexGradAiNorm": 47.468,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 56,
+          "lines": 14,
+          "maxNestingDepth": 1,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 3,
+            "n2": 5,
+            "N1": 3,
+            "N2": 6,
+            "volume": 27,
+            "difficulty": 1.8,
+            "effort": 48.6
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 110.879,
+          "maintainabilityIndexGradAiNorm": 64.842,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 68,
+          "lines": 1,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 1,
+            "N1": 1,
+            "N2": 1,
+            "volume": 2,
+            "difficulty": 0.5,
+            "effort": 1
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 167.166,
+          "maintainabilityIndexGradAiNorm": 97.758,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 58,
+          "lines": 9,
+          "maxNestingDepth": 1,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 3,
+          "halstead": {
+            "n1": 4,
+            "n2": 4,
+            "N1": 4,
+            "N2": 7,
+            "volume": 33,
+            "difficulty": 3.5,
+            "effort": 115.5
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 116.533,
+          "maintainabilityIndexGradAiNorm": 68.148,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "handleFollowClick",
+          "type": "function_declaration",
+          "startLine": 39,
+          "lines": 16,
+          "maxNestingDepth": 2,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 5,
+          "halstead": {
+            "n1": 5,
+            "n2": 9,
+            "N1": 8,
+            "N2": 21,
+            "volume": 110.413,
+            "difficulty": 5.833,
+            "effort": 644.078
+          },
+          "cognitiveComplexity": 4,
+          "maintainabilityIndexGradAiRaw": 100.472,
+          "maintainabilityIndexGradAiNorm": 58.756,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "loadFollowedClubs",
+          "type": "function_declaration",
+          "startLine": 17,
+          "lines": 20,
+          "maxNestingDepth": 4,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 6,
+          "halstead": {
+            "n1": 12,
+            "n2": 11,
+            "N1": 18,
+            "N2": 28,
+            "volume": 208.084,
+            "difficulty": 15.273,
+            "effort": 3178.008
+          },
+          "cognitiveComplexity": 8,
+          "maintainabilityIndexGradAiRaw": 93.332,
+          "maintainabilityIndexGradAiNorm": 54.58,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "FollowButton",
+          "type": "function_declaration",
+          "startLine": 10,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 56,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 68,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 58,
+          "complexity": 3
+        },
+        {
+          "name": "handleFollowClick",
+          "type": "function_declaration",
+          "startLine": 39,
+          "complexity": 5
+        },
+        {
+          "name": "loadFollowedClubs",
+          "type": "function_declaration",
+          "startLine": 17,
+          "complexity": 6
+        }
+      ]
+    },
+    {
+      "file": "my-react-app\\src\\components\\auth\\AuthDetails.jsx",
+      "functions": 4,
+      "functionsByType": {
+        "function_declaration": 0,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 4,
+        "function": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "AuthDetails",
+          "type": "arrow_function",
+          "startLine": 6,
+          "lines": 26,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 3,
+            "n2": 6,
+            "N1": 3,
+            "N2": 11,
+            "volume": 44.379,
+            "difficulty": 2.75,
+            "effort": 122.042
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 98.036,
+          "maintainabilityIndexGradAiNorm": 57.331,
+          "isReactComponent": true,
+          "isMonolithic": false
+        },
+        {
+          "name": "usersignOut",
+          "type": "arrow_function",
+          "startLine": 23,
+          "lines": 5,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 2,
+            "N1": 3,
+            "N2": 2,
+            "volume": 10,
+            "difficulty": 1,
+            "effort": 10
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 132.724,
+          "maintainabilityIndexGradAiNorm": 77.616,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 26,
+          "lines": 1,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 2,
+            "N1": 2,
+            "N2": 3,
+            "volume": 10,
+            "difficulty": 1.5,
+            "effort": 15
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 158.797,
+          "maintainabilityIndexGradAiNorm": 92.864,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 24,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 2,
+            "N1": 2,
+            "N2": 3,
+            "volume": 10,
+            "difficulty": 1.5,
+            "effort": 15
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 140.999,
+          "maintainabilityIndexGradAiNorm": 82.456,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "AuthDetails",
+          "type": "arrow_function",
+          "startLine": 6,
+          "complexity": 2
+        },
+        {
+          "name": "usersignOut",
+          "type": "arrow_function",
+          "startLine": 23,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 26,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 24,
+          "complexity": 1
+        }
+      ]
+    },
+    {
+      "file": "my-react-app\\src\\components\\auth\\SignIn.jsx",
+      "functions": 6,
+      "functionsByType": {
+        "function_declaration": 0,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 6,
+        "function": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "SignIn",
+          "type": "arrow_function",
+          "startLine": 5,
+          "lines": 36,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 12,
+            "N1": 2,
+            "N2": 36,
+            "volume": 144.679,
+            "difficulty": 3,
+            "effort": 434.038
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 86.85,
+          "maintainabilityIndexGradAiNorm": 50.789,
+          "isReactComponent": true,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 33,
+          "lines": 1,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 2,
+            "N1": 3,
+            "N2": 3,
+            "volume": 12,
+            "difficulty": 1.5,
+            "effort": 18
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 157.848,
+          "maintainabilityIndexGradAiNorm": 92.309,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 27,
+          "lines": 1,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 2,
+            "N1": 3,
+            "N2": 3,
+            "volume": 12,
+            "difficulty": 1.5,
+            "effort": 18
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 157.848,
+          "maintainabilityIndexGradAiNorm": 92.309,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "signIn",
+          "type": "arrow_function",
+          "startLine": 9,
+          "lines": 10,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 5,
+            "N1": 4,
+            "N2": 6,
+            "volume": 28.074,
+            "difficulty": 1.2,
+            "effort": 33.688
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 116.127,
+          "maintainabilityIndexGradAiNorm": 67.911,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 15,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 2,
+            "N1": 2,
+            "N2": 3,
+            "volume": 10,
+            "difficulty": 1.5,
+            "effort": 15
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 140.999,
+          "maintainabilityIndexGradAiNorm": 82.456,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 12,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 2,
+            "N1": 2,
+            "N2": 3,
+            "volume": 10,
+            "difficulty": 1.5,
+            "effort": 15
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 140.999,
+          "maintainabilityIndexGradAiNorm": 82.456,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "SignIn",
+          "type": "arrow_function",
+          "startLine": 5,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 33,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 27,
+          "complexity": 1
+        },
+        {
+          "name": "signIn",
+          "type": "arrow_function",
+          "startLine": 9,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 15,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 12,
+          "complexity": 1
+        }
+      ]
+    },
+    {
+      "file": "my-react-app\\src\\components\\auth\\SignUp.jsx",
+      "functions": 6,
+      "functionsByType": {
+        "function_declaration": 0,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 6,
+        "function": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "SignUp",
+          "type": "arrow_function",
+          "startLine": 5,
+          "lines": 36,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 12,
+            "N1": 2,
+            "N2": 36,
+            "volume": 144.679,
+            "difficulty": 3,
+            "effort": 434.038
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 86.85,
+          "maintainabilityIndexGradAiNorm": 50.789,
+          "isReactComponent": true,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 33,
+          "lines": 1,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 2,
+            "N1": 3,
+            "N2": 3,
+            "volume": 12,
+            "difficulty": 1.5,
+            "effort": 18
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 157.848,
+          "maintainabilityIndexGradAiNorm": 92.309,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 27,
+          "lines": 1,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 2,
+            "N1": 3,
+            "N2": 3,
+            "volume": 12,
+            "difficulty": 1.5,
+            "effort": 18
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 157.848,
+          "maintainabilityIndexGradAiNorm": 92.309,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "signUp",
+          "type": "arrow_function",
+          "startLine": 9,
+          "lines": 10,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 5,
+            "N1": 4,
+            "N2": 6,
+            "volume": 28.074,
+            "difficulty": 1.2,
+            "effort": 33.688
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 116.127,
+          "maintainabilityIndexGradAiNorm": 67.911,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 15,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 2,
+            "N1": 2,
+            "N2": 3,
+            "volume": 10,
+            "difficulty": 1.5,
+            "effort": 15
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 140.999,
+          "maintainabilityIndexGradAiNorm": 82.456,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 12,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 2,
+            "N1": 2,
+            "N2": 3,
+            "volume": 10,
+            "difficulty": 1.5,
+            "effort": 15
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 140.999,
+          "maintainabilityIndexGradAiNorm": 82.456,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "SignUp",
+          "type": "arrow_function",
+          "startLine": 5,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 33,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 27,
+          "complexity": 1
+        },
+        {
+          "name": "signUp",
+          "type": "arrow_function",
+          "startLine": 9,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 15,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 12,
+          "complexity": 1
+        }
+      ]
+    },
+    {
+      "file": "my-react-app\\src\\components\\auth\\useAuthState.js",
+      "functions": 7,
+      "functionsByType": {
+        "function_declaration": 0,
+        "generator_function_declaration": 0,
+        "method_definition": 2,
+        "arrow_function": 5,
+        "function": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "useAuthState",
+          "type": "arrow_function",
+          "startLine": 81,
+          "lines": 30,
+          "maxNestingDepth": 1,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 5,
+            "N1": 2,
+            "N2": 6,
+            "volume": 22.459,
+            "difficulty": 1.2,
+            "effort": 26.951
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 99.49,
+          "maintainabilityIndexGradAiNorm": 58.181,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 85,
+          "lines": 23,
+          "maxNestingDepth": 1,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 3,
+            "N1": 2,
+            "N2": 4,
+            "volume": 13.932,
+            "difficulty": 1.333,
+            "effort": 18.575
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 106.277,
+          "maintainabilityIndexGradAiNorm": 62.15,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 86,
+          "lines": 18,
+          "maxNestingDepth": 1,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 3,
+          "halstead": {
+            "n1": 7,
+            "n2": 11,
+            "N1": 14,
+            "N2": 26,
+            "volume": 166.797,
+            "difficulty": 8.273,
+            "effort": 1379.866
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 96.879,
+          "maintainabilityIndexGradAiNorm": 56.654,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "getClubStatus",
+          "type": "arrow_function",
+          "startLine": 57,
+          "lines": 23,
+          "maxNestingDepth": 1,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 3,
+          "halstead": {
+            "n1": 9,
+            "n2": 19,
+            "N1": 18,
+            "N2": 43,
+            "volume": 293.249,
+            "difficulty": 10.184,
+            "effort": 2986.506
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 89.974,
+          "maintainabilityIndexGradAiNorm": 52.616,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "getUserStatus",
+          "type": "arrow_function",
+          "startLine": 28,
+          "lines": 28,
+          "maxNestingDepth": 1,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 3,
+          "halstead": {
+            "n1": 6,
+            "n2": 16,
+            "N1": 11,
+            "N2": 40,
+            "volume": 227.431,
+            "difficulty": 7.5,
+            "effort": 1705.733
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 88.109,
+          "maintainabilityIndexGradAiNorm": 51.526,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "constructor",
+          "type": "method_definition",
+          "startLine": 21,
+          "lines": 5,
+          "maxNestingDepth": 0,
+          "parameterCount": 3,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 4,
+            "N1": 3,
+            "N2": 9,
+            "volume": 27.863,
+            "difficulty": 1.125,
+            "effort": 31.346
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 127.395,
+          "maintainabilityIndexGradAiNorm": 74.5,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "constructor",
+          "type": "method_definition",
+          "startLine": 8,
+          "lines": 10,
+          "maxNestingDepth": 0,
+          "parameterCount": 4,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 5,
+            "N1": 4,
+            "N2": 12,
+            "volume": 41.359,
+            "difficulty": 1.2,
+            "effort": 49.631
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 114.112,
+          "maintainabilityIndexGradAiNorm": 66.732,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "useAuthState",
+          "type": "arrow_function",
+          "startLine": 81,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 85,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 86,
+          "complexity": 3
+        },
+        {
+          "name": "getClubStatus",
+          "type": "arrow_function",
+          "startLine": 57,
+          "complexity": 3
+        },
+        {
+          "name": "getUserStatus",
+          "type": "arrow_function",
+          "startLine": 28,
+          "complexity": 3
+        },
+        {
+          "name": "constructor",
+          "type": "method_definition",
+          "startLine": 21,
+          "complexity": 1
+        },
+        {
+          "name": "constructor",
+          "type": "method_definition",
+          "startLine": 8,
+          "complexity": 1
+        }
+      ]
+    },
+    {
+      "file": "my-react-app\\src\\components\\Header\\Header.js",
+      "functions": 3,
+      "functionsByType": {
+        "function_declaration": 0,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 3,
+        "function": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "Header",
+          "type": "arrow_function",
+          "startLine": 17,
+          "lines": 49,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 5,
+          "halstead": {
+            "n1": 5,
+            "n2": 27,
+            "N1": 7,
+            "N2": 86,
+            "volume": 465,
+            "difficulty": 7.963,
+            "effort": 3702.778
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 74.864,
+          "maintainabilityIndexGradAiNorm": 43.78,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "handleCloseModal",
+          "type": "arrow_function",
+          "startLine": 22,
+          "lines": 1,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 2,
+            "N1": 1,
+            "N2": 2,
+            "volume": 4.755,
+            "difficulty": 0.5,
+            "effort": 2.377
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 162.662,
+          "maintainabilityIndexGradAiNorm": 95.124,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "handleOpenModal",
+          "type": "arrow_function",
+          "startLine": 21,
+          "lines": 1,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 2,
+            "N1": 1,
+            "N2": 2,
+            "volume": 4.755,
+            "difficulty": 0.5,
+            "effort": 2.377
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 162.662,
+          "maintainabilityIndexGradAiNorm": 95.124,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "Header",
+          "type": "arrow_function",
+          "startLine": 17,
+          "complexity": 5
+        },
+        {
+          "name": "handleCloseModal",
+          "type": "arrow_function",
+          "startLine": 22,
+          "complexity": 1
+        },
+        {
+          "name": "handleOpenModal",
+          "type": "arrow_function",
+          "startLine": 21,
+          "complexity": 1
+        }
+      ]
+    },
+    {
+      "file": "my-react-app\\src\\pages\\ClubPage\\ClubPage.js",
+      "functions": 5,
+      "functionsByType": {
+        "function_declaration": 1,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 4,
+        "function": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "ClubPage",
+          "type": "function_declaration",
+          "startLine": 21,
+          "lines": 150,
+          "maxNestingDepth": 3,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 9,
+          "halstead": {
+            "n1": 5,
+            "n2": 55,
+            "N1": 12,
+            "N2": 176,
+            "volume": 1110.495,
+            "difficulty": 8,
+            "effort": 8883.963
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 51.292,
+          "maintainabilityIndexGradAiNorm": 29.995,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 40,
+          "lines": 61,
+          "maxNestingDepth": 3,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 1,
+            "N1": 1,
+            "N2": 2,
+            "volume": 3,
+            "difficulty": 1,
+            "effort": 3
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 98.461,
+          "maintainabilityIndexGradAiNorm": 57.58,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "fetchPosts",
+          "type": "arrow_function",
+          "startLine": 41,
+          "lines": 57,
+          "maxNestingDepth": 3,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 11,
+          "halstead": {
+            "n1": 11,
+            "n2": 24,
+            "N1": 43,
+            "N2": 70,
+            "volume": 579.609,
+            "difficulty": 16.042,
+            "effort": 9297.894
+          },
+          "cognitiveComplexity": 13,
+          "maintainabilityIndexGradAiRaw": 69.888,
+          "maintainabilityIndexGradAiNorm": 40.87,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "handleCloseModal",
+          "type": "arrow_function",
+          "startLine": 35,
+          "lines": 1,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 2,
+            "N1": 1,
+            "N2": 2,
+            "volume": 4.755,
+            "difficulty": 0.5,
+            "effort": 2.377
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 162.662,
+          "maintainabilityIndexGradAiNorm": 95.124,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "handleOpenModal",
+          "type": "arrow_function",
+          "startLine": 34,
+          "lines": 1,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 2,
+            "N1": 1,
+            "N2": 2,
+            "volume": 4.755,
+            "difficulty": 0.5,
+            "effort": 2.377
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 162.662,
+          "maintainabilityIndexGradAiNorm": 95.124,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "ClubPage",
+          "type": "function_declaration",
+          "startLine": 21,
+          "complexity": 9
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 40,
+          "complexity": 1
+        },
+        {
+          "name": "fetchPosts",
+          "type": "arrow_function",
+          "startLine": 41,
+          "complexity": 11
+        },
+        {
+          "name": "handleCloseModal",
+          "type": "arrow_function",
+          "startLine": 35,
+          "complexity": 1
+        },
+        {
+          "name": "handleOpenModal",
+          "type": "arrow_function",
+          "startLine": 34,
+          "complexity": 1
+        }
+      ]
+    },
+    {
+      "file": "my-react-app\\src\\components\\PostStream\\PostStream.js",
+      "functions": 2,
+      "functionsByType": {
+        "function_declaration": 1,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 1,
+        "function": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "PostStream",
+          "type": "function_declaration",
+          "startLine": 3,
+          "lines": 13,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 3,
+            "n2": 4,
+            "N1": 3,
+            "N2": 7,
+            "volume": 28.074,
+            "difficulty": 2.625,
+            "effort": 73.693
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 111.647,
+          "maintainabilityIndexGradAiNorm": 65.291,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 7,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 2,
+            "N1": 2,
+            "N2": 3,
+            "volume": 10,
+            "difficulty": 1.5,
+            "effort": 15
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 140.999,
+          "maintainabilityIndexGradAiNorm": 82.456,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "PostStream",
+          "type": "function_declaration",
+          "startLine": 3,
+          "complexity": 2
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 7,
+          "complexity": 1
+        }
+      ]
+    },
+    {
+      "file": "my-react-app\\src\\components\\Post\\Post.js",
+      "functions": 1,
+      "functionsByType": {
+        "function_declaration": 1,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 0,
+        "function": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "Post",
+          "type": "function_declaration",
+          "startLine": 6,
+          "lines": 12,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 4,
+            "n2": 7,
+            "N1": 10,
+            "N2": 35,
+            "volume": 155.674,
+            "difficulty": 10,
+            "effort": 1556.744
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 104.036,
+          "maintainabilityIndexGradAiNorm": 60.84,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "Post",
+          "type": "function_declaration",
+          "startLine": 6,
+          "complexity": 2
+        }
+      ]
+    },
+    {
+      "file": "my-react-app\\src\\components\\search\\SearchBar.js",
+      "functions": 6,
+      "functionsByType": {
+        "function_declaration": 0,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 6,
+        "function": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "SearchBar",
+          "type": "arrow_function",
+          "startLine": 4,
+          "lines": 72,
+          "maxNestingDepth": 2,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 3,
+            "n2": 16,
+            "N1": 4,
+            "N2": 39,
+            "volume": 182.661,
+            "difficulty": 3.656,
+            "effort": 667.854
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 74.408,
+          "maintainabilityIndexGradAiNorm": 43.513,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 64,
+          "lines": 6,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 6,
+            "N1": 6,
+            "N2": 32,
+            "volume": 114,
+            "difficulty": 5.333,
+            "effort": 608
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 117.115,
+          "maintainabilityIndexGradAiNorm": 68.488,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 40,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 3,
+            "n2": 2,
+            "N1": 10,
+            "N2": 5,
+            "volume": 34.829,
+            "difficulty": 3.75,
+            "effort": 130.608
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 134.28,
+          "maintainabilityIndexGradAiNorm": 78.526,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "handleChange",
+          "type": "arrow_function",
+          "startLine": 35,
+          "lines": 4,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 2,
+            "N1": 4,
+            "N2": 4,
+            "volume": 16,
+            "difficulty": 2,
+            "effort": 32
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 133.895,
+          "maintainabilityIndexGradAiNorm": 78.301,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 9,
+          "lines": 25,
+          "maxNestingDepth": 2,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 1,
+            "N1": 1,
+            "N2": 2,
+            "volume": 3,
+            "difficulty": 1,
+            "effort": 3
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 112.911,
+          "maintainabilityIndexGradAiNorm": 66.03,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "fetchClubs",
+          "type": "arrow_function",
+          "startLine": 10,
+          "lines": 21,
+          "maxNestingDepth": 2,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 4,
+          "halstead": {
+            "n1": 6,
+            "n2": 7,
+            "N1": 14,
+            "N2": 27,
+            "volume": 151.718,
+            "difficulty": 11.571,
+            "effort": 1755.594
+          },
+          "cognitiveComplexity": 3,
+          "maintainabilityIndexGradAiRaw": 94.644,
+          "maintainabilityIndexGradAiNorm": 55.347,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "SearchBar",
+          "type": "arrow_function",
+          "startLine": 4,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 64,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 40,
+          "complexity": 2
+        },
+        {
+          "name": "handleChange",
+          "type": "arrow_function",
+          "startLine": 35,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 9,
+          "complexity": 1
+        },
+        {
+          "name": "fetchClubs",
+          "type": "arrow_function",
+          "startLine": 10,
+          "complexity": 4
+        }
+      ]
+    }
+  ],
+  "reactMetrics": {
+    "components": [
+      {
+        "name": "AuthDetails",
+        "file": "my-react-app\\src\\components\\auth\\AuthDetails.jsx",
+        "startLine": 6,
+        "lines": 26,
+        "hookCount": 1,
+        "hooksPerSloc": 0.038,
+        "ferreiraLackOfCohesion": false,
+        "maxJsxDepth": 2,
+        "tampereJsxDepthExceeded": false,
+        "propDrillingEdges": 0,
+        "hookSafety": {
+          "conditionalHookCalls": 0,
+          "asyncUseEffect": 0,
+          "missingOrInvalidDepsArray": 0,
+          "nonPrimitiveDepRisk": 0
+        }
+      },
+      {
+        "name": "SignIn",
+        "file": "my-react-app\\src\\components\\auth\\SignIn.jsx",
+        "startLine": 5,
+        "lines": 36,
+        "hookCount": 2,
+        "hooksPerSloc": 0.056,
+        "ferreiraLackOfCohesion": false,
+        "maxJsxDepth": 3,
+        "tampereJsxDepthExceeded": false,
+        "propDrillingEdges": 0,
+        "hookSafety": {
+          "conditionalHookCalls": 0,
+          "asyncUseEffect": 0,
+          "missingOrInvalidDepsArray": 0,
+          "nonPrimitiveDepRisk": 0
+        }
+      },
+      {
+        "name": "SignUp",
+        "file": "my-react-app\\src\\components\\auth\\SignUp.jsx",
+        "startLine": 5,
+        "lines": 36,
+        "hookCount": 2,
+        "hooksPerSloc": 0.056,
+        "ferreiraLackOfCohesion": false,
+        "maxJsxDepth": 3,
+        "tampereJsxDepthExceeded": false,
+        "propDrillingEdges": 0,
+        "hookSafety": {
+          "conditionalHookCalls": 0,
+          "asyncUseEffect": 0,
+          "missingOrInvalidDepsArray": 0,
+          "nonPrimitiveDepRisk": 0
+        }
+      }
+    ],
+    "summary": {
+      "tsxFilesAnalyzed": 3,
+      "componentsAnalyzed": 3,
+      "ferreiraLackOfCohesionCount": 0,
+      "tampereJsxDepthExceededCount": 0,
+      "totalPropDrillingEdges": 0,
+      "totalConditionalHookCalls": 0,
+      "totalAsyncUseEffect": 0,
+      "totalMissingOrInvalidDepsArray": 0,
+      "totalNonPrimitiveDepRisk": 0,
+      "maxJsxDepthRepo": 3
+    }
+  },
   "phase3": {
     "sfd": 0,
-    "mcr": null,
+    "mcr": 0,
     "srs": 0,
     "silentFailureEvents": [],
     "srsWeightedNumerator": 0,
     "srsExactWeightedLines": 0,
     "srsNearWeightedLines": 0,
     "monolithicComponentCount": 0,
-    "reactComponentCount": 0
+    "reactComponentCount": 3
   },
-  "symbolVerificationRisks": [],
+  "symbolVerificationRisks": [
+    {
+      "file": "my-react-app\\src\\pages\\ClubPage\\ClubPage.js",
+      "name": "fetchPosts",
+      "startLine": 41,
+      "cyclomaticComplexity": 11,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 11
+    },
+    {
+      "file": "my-react-app\\src\\components\\createClubButton\\createClubButton.js",
+      "name": "handleSubmit",
+      "startLine": 19,
+      "cyclomaticComplexity": 9,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 9
+    },
+    {
+      "file": "my-react-app\\src\\pages\\ClubPage\\ClubPage.js",
+      "name": "ClubPage",
+      "startLine": 21,
+      "cyclomaticComplexity": 9,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 9
+    },
+    {
+      "file": "my-react-app\\src\\components\\createPost\\createPost.js",
+      "name": "handleSubmit",
+      "startLine": 24,
+      "cyclomaticComplexity": 8,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 8
+    },
+    {
+      "file": "my-react-app\\backend\\server.js",
+      "name": "getPostsForFollowedClubs",
+      "startLine": 56,
+      "cyclomaticComplexity": 6,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 6
+    },
+    {
+      "file": "my-react-app\\src\\pages\\Following.js",
+      "name": "fetchPosts",
+      "startLine": 13,
+      "cyclomaticComplexity": 6,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 6
+    },
+    {
+      "file": "my-react-app\\src\\components\\FollowButton\\FollowButton.js",
+      "name": "loadFollowedClubs",
+      "startLine": 17,
+      "cyclomaticComplexity": 6,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 6
+    },
+    {
+      "file": "my-react-app\\src\\pages\\Discover.js",
+      "name": "Discover",
+      "startLine": 15,
+      "cyclomaticComplexity": 5,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 5
+    },
+    {
+      "file": "my-react-app\\src\\pages\\Profile.js",
+      "name": "Profile",
+      "startLine": 9,
+      "cyclomaticComplexity": 5,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 5
+    },
+    {
+      "file": "my-react-app\\src\\components\\ClubEditableTextBox\\ClubEditableTextBox.js",
+      "name": "ClubEditableTextBox",
+      "startLine": 4,
+      "cyclomaticComplexity": 5,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 5
+    },
+    {
+      "file": "my-react-app\\src\\components\\FollowButton\\FollowButton.js",
+      "name": "handleFollowClick",
+      "startLine": 39,
+      "cyclomaticComplexity": 5,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 5
+    },
+    {
+      "file": "my-react-app\\src\\components\\Header\\Header.js",
+      "name": "Header",
+      "startLine": 17,
+      "cyclomaticComplexity": 5,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 5
+    },
+    {
+      "file": "my-react-app\\src\\pages\\WhatsNew.js",
+      "name": "fetchPosts",
+      "startLine": 9,
+      "cyclomaticComplexity": 4,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 4
+    },
+    {
+      "file": "my-react-app\\src\\components\\search\\SearchBar.js",
+      "name": "fetchClubs",
+      "startLine": 10,
+      "cyclomaticComplexity": 4,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 4
+    },
+    {
+      "file": "my-react-app\\src\\reportWebVitals.js",
+      "name": "reportWebVitals",
+      "startLine": 1,
+      "cyclomaticComplexity": 3,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 3
+    },
+    {
+      "file": "my-react-app\\backend\\server.js",
+      "name": "getAllClubPosts",
+      "startLine": 103,
+      "cyclomaticComplexity": 3,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 3
+    },
+    {
+      "file": "my-react-app\\backend\\server.js",
+      "name": "getLatestPostsFromClubs",
+      "startLine": 21,
+      "cyclomaticComplexity": 3,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 3
+    },
+    {
+      "file": "my-react-app\\src\\components\\auth\\useAuthState.js",
+      "name": "getClubStatus",
+      "startLine": 57,
+      "cyclomaticComplexity": 3,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 3
+    },
+    {
+      "file": "my-react-app\\src\\components\\auth\\useAuthState.js",
+      "name": "getUserStatus",
+      "startLine": 28,
+      "cyclomaticComplexity": 3,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 3
+    },
+    {
+      "file": "my-react-app\\src\\pages\\Following.js",
+      "name": "Following",
+      "startLine": 7,
+      "cyclomaticComplexity": 2,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 2
+    },
+    {
+      "file": "my-react-app\\src\\pages\\Profile.js",
+      "name": "loadFollowedClubs",
+      "startLine": 30,
+      "cyclomaticComplexity": 2,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 2
+    },
+    {
+      "file": "my-react-app\\src\\components\\auth\\AuthDetails.jsx",
+      "name": "AuthDetails",
+      "startLine": 6,
+      "cyclomaticComplexity": 2,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 2
+    },
+    {
+      "file": "my-react-app\\src\\components\\PostStream\\PostStream.js",
+      "name": "PostStream",
+      "startLine": 3,
+      "cyclomaticComplexity": 2,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 2
+    },
+    {
+      "file": "my-react-app\\src\\components\\Post\\Post.js",
+      "name": "Post",
+      "startLine": 6,
+      "cyclomaticComplexity": 2,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 2
+    },
+    {
+      "file": "my-react-app\\backend\\server.js",
+      "name": "constructor",
+      "startLine": 13,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "my-react-app\\src\\components\\Modal.js",
+      "name": "Modal",
+      "startLine": 6,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "my-react-app\\src\\pages\\FirestoreService.js",
+      "name": "getClubDoc",
+      "startLine": 29,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "my-react-app\\src\\pages\\FirestoreService.js",
+      "name": "updateDocKVPair",
+      "startLine": 22,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "my-react-app\\src\\pages\\FirestoreService.js",
+      "name": "deleteFollowedClub",
+      "startLine": 16,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "my-react-app\\src\\pages\\FirestoreService.js",
+      "name": "setFollowedClub",
+      "startLine": 10,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "my-react-app\\src\\pages\\FirestoreService.js",
+      "name": "getFollowedClubs",
+      "startLine": 4,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "my-react-app\\src\\pages\\WhatsNew.js",
+      "name": "WhatsNew",
+      "startLine": 5,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "my-react-app\\src\\components\\ClubEditableTextBox\\ClubEditableTextBox.js",
+      "name": "handleCancel",
+      "startLine": 32,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "my-react-app\\src\\components\\ClubEditableTextBox\\ClubEditableTextBox.js",
+      "name": "handleChange",
+      "startLine": 28,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "my-react-app\\src\\components\\ClubEditableTextBox\\ClubEditableTextBox.js",
+      "name": "handleSubmit",
+      "startLine": 19,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "my-react-app\\src\\components\\ClubEditableTextBox\\ClubEditableTextBox.js",
+      "name": "handleEditClick",
+      "startLine": 15,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "my-react-app\\src\\components\\createPost\\createPost.js",
+      "name": "CreatePost",
+      "startLine": 10,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "my-react-app\\src\\components\\createClubButton\\createClubButton.js",
+      "name": "CreateClubButton",
+      "startLine": 10,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "my-react-app\\src\\components\\FollowButton\\FollowButton.js",
+      "name": "FollowButton",
+      "startLine": 10,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "my-react-app\\src\\components\\auth\\AuthDetails.jsx",
+      "name": "usersignOut",
+      "startLine": 23,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "my-react-app\\src\\components\\auth\\SignIn.jsx",
+      "name": "SignIn",
+      "startLine": 5,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "my-react-app\\src\\components\\auth\\SignIn.jsx",
+      "name": "signIn",
+      "startLine": 9,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "my-react-app\\src\\components\\auth\\SignUp.jsx",
+      "name": "SignUp",
+      "startLine": 5,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "my-react-app\\src\\components\\auth\\SignUp.jsx",
+      "name": "signUp",
+      "startLine": 9,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "my-react-app\\src\\components\\auth\\useAuthState.js",
+      "name": "useAuthState",
+      "startLine": 81,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "my-react-app\\src\\components\\auth\\useAuthState.js",
+      "name": "constructor",
+      "startLine": 21,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "my-react-app\\src\\components\\auth\\useAuthState.js",
+      "name": "constructor",
+      "startLine": 8,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "my-react-app\\src\\components\\Header\\Header.js",
+      "name": "handleCloseModal",
+      "startLine": 22,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "my-react-app\\src\\components\\Header\\Header.js",
+      "name": "handleOpenModal",
+      "startLine": 21,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "my-react-app\\src\\pages\\ClubPage\\ClubPage.js",
+      "name": "handleCloseModal",
+      "startLine": 35,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "my-react-app\\src\\pages\\ClubPage\\ClubPage.js",
+      "name": "handleOpenModal",
+      "startLine": 34,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "my-react-app\\src\\components\\search\\SearchBar.js",
+      "name": "SearchBar",
+      "startLine": 4,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "my-react-app\\src\\components\\search\\SearchBar.js",
+      "name": "handleChange",
+      "startLine": 35,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "my-react-app\\src\\App.js",
+      "name": "App",
+      "startLine": 15,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 1,
+      "evidence": "referenced_in_test",
+      "pairedTestPath": "my-react-app/src/App.test.js",
+      "riskScore": 0
+    }
+  ],
   "github": {
     "description": "SlimeLine web app for CSE 115a",
     "topics": [],
