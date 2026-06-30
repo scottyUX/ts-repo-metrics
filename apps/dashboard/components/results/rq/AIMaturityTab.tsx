@@ -259,6 +259,15 @@ function UploadZone({
     reader.readAsText(file);
   };
 
+  const handleDragOver = (event: React.DragEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (!disabled) {
+      event.dataTransfer.dropEffect = "copy";
+      setDragging(true);
+    }
+  };
+
   return (
     <div
       className={cn(
@@ -271,13 +280,16 @@ function UploadZone({
       onClick={() => {
         if (!disabled) inputRef.current?.click();
       }}
-      onDragOver={(event) => {
-        event.preventDefault();
-        if (!disabled) setDragging(true);
+      onDragEnter={handleDragOver}
+      onDragOver={handleDragOver}
+      onDragLeave={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+          setDragging(false);
+        }
       }}
-      onDragLeave={() => setDragging(false)}
       onDrop={(event) => {
         event.preventDefault();
+        event.stopPropagation();
         setDragging(false);
         if (disabled) return;
         const file = event.dataTransfer.files[0];
@@ -294,14 +306,16 @@ function UploadZone({
           if (file) void handleFile(file);
         }}
       />
-      <p className="text-sm font-semibold">Upload `ai_usage_trace.csv`</p>
-      <p className="mx-auto mt-2 max-w-2xl text-xs leading-relaxed text-muted-foreground">
-        Use the copied platform prompt above to generate the CSV on your Desktop, then upload it
-        here. If you run `agent_stats` manually, include `--messages --tokens --csv`
-        {" "}
-        <code className="rounded bg-muted px-1 py-0.5">{AI_USAGE_DESKTOP_CSV_PATH}</code>
-        . The CSV is parsed locally, then saved on this analysis so it reloads with the result.
-      </p>
+      <div className="pointer-events-none">
+        <p className="text-sm font-semibold">Upload `ai_usage_trace.csv`</p>
+        <p className="mx-auto mt-2 max-w-2xl text-xs leading-relaxed text-muted-foreground">
+          Use the copied platform prompt above to generate the CSV on your Desktop, then upload it
+          here. If you run `agent_stats` manually, include `--messages --tokens --csv`
+          {" "}
+          <code className="rounded bg-muted px-1 py-0.5">{AI_USAGE_DESKTOP_CSV_PATH}</code>
+          . The CSV is parsed locally, then saved on this analysis so it reloads with the result.
+        </p>
+      </div>
     </div>
   );
 }
