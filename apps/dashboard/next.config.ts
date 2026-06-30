@@ -37,6 +37,8 @@ const nextConfig: NextConfig = {
     "adm-zip",
     "tree-sitter",
     "tree-sitter-typescript",
+    "tree-sitter-javascript",
+    "tree-sitter-python",
   ],
 };
 
