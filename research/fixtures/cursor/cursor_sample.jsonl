@@ -1,0 +1,18 @@
+{"role":"user","message":{"content":[{"type":"text","text":"Find and fix the authentication bug in the login flow"}]}}
+{"role":"assistant","message":{"content":[{"type":"text","text":"I'll read the login file first."},{"type":"tool_use","name":"read_file","input":{"path":"src/auth/login.ts","working_directory":"/home/student/my-project"}}]}}
+{"role":"assistant","message":{"content":[{"type":"text","text":"Searching for validateToken."},{"type":"tool_use","name":"grep_search","input":{"pattern":"validateToken","path":"src/"}}]}}
+{"role":"assistant","message":{"content":[{"type":"text","text":"Reading token file."},{"type":"tool_use","name":"read_file","input":{"path":"src/auth/token.ts"}}]}}
+{"role":"assistant","message":{"content":[{"type":"text","text":"Fixing the bug."},{"type":"tool_use","name":"edit_file","input":{"path":"src/auth/token.ts"}}]}}
+{"role":"assistant","message":{"content":[{"type":"text","text":"Running tests."},{"type":"tool_use","name":"run_terminal_cmd","input":{"command":"npm test src/auth","working_directory":"/home/student/my-project"}}]}}
+{"role":"assistant","message":{"content":[{"type":"text","text":"Found and fixed the authentication bug. The token validation was missing an expiry check. All tests pass now."}]}}
+{"role":"user","message":{"content":[{"type":"text","text":"Can you also add error handling for expired tokens?"}]}}
+{"role":"assistant","message":{"content":[{"type":"text","text":"Reading token.ts again."},{"type":"tool_use","name":"read_file","input":{"path":"src/auth/token.ts"}}]}}
+{"role":"assistant","message":{"content":[{"type":"text","text":"Adding error handling."},{"type":"tool_use","name":"edit_file","input":{"path":"src/auth/token.ts"}}]}}
+{"role":"assistant","message":{"content":[{"type":"text","text":"Added a TokenExpiredError class and updated validateToken to throw it when tokens are past their expiry date."}]}}
+THIS LINE IS INTENTIONALLY MALFORMED AND SHOULD BE SKIPPED BY THE PARSER
+{"role":"user","message":{"content":[{"type":"text","text":"fix login"}]}}
+{"role":"assistant","message":{"content":[{"type":"tool_use","name":"codebase_search","input":{"query":"login function"}}]}}
+{"role":"assistant","message":{"content":[{"type":"tool_use","name":"edit_file","input":{"path":"src/auth/login.ts"}}]}}
+{"role":"assistant","message":{"content":[{"type":"tool_use","name":"list_dir","input":{"path":"src/auth/"}}]}}
+{"role":"assistant","message":{"content":[{"type":"tool_use","name":"edit_file","input":{"path":"src/auth/login.ts"}}]}}
+{"role":"assistant","message":{"content":[{"type":"text","text":"Fixed the login function."}]}}

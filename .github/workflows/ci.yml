@@ -1,0 +1,24 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [dev, main]
+  push:
+    branches: [dev, main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            apps/dashboard/package-lock.json
+      - run: npm ci
+      - run: npm ci --prefix apps/dashboard
+      - run: npm run build --prefix packages/engine
+      - run: npm test

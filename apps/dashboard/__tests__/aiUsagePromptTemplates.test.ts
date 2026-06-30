@@ -43,22 +43,30 @@ describe("aiUsagePromptTemplates", () => {
     }
   });
 
-  it("includes Linux roots glob for Cursor (differs from Mac)", () => {
-    const prompt = buildAiUsagePrompt("cursor");
+  it("uses the same roots glob for Mac and Linux for Cursor (agent-transcripts path)", () => {
     const cursorConfig = getAiUsagePromptPlatform("cursor");
-    expect(cursorConfig.rootsGlobLinux).toBeDefined();
-    expect(prompt).toContain(`--roots "${cursorConfig.rootsGlobLinux}"`);
+    expect(cursorConfig.rootsGlobLinux).toBeUndefined();
+    expect(cursorConfig.rootsGlob).toContain(".cursor/projects");
+    expect(cursorConfig.rootsGlob).toContain("agent-transcripts");
   });
 
   it("includes coding_agent guidance for Cursor", () => {
     const prompt = buildAiUsagePrompt("cursor");
-    expect(prompt).toContain("coding_agent = cursor");
-    expect(prompt).toContain("workspaceStorage");
+    expect(prompt).toContain(".cursor/projects");
+    expect(prompt).toContain("agent-transcripts");
+    expect(prompt).toContain("Cursor logs are JSONL files");
   });
 
-  it("groups Mac and Linux together for platforms where the path is the same", () => {
+  it("includes the token-unavailable note for Cursor", () => {
+    const prompt = buildAiUsagePrompt("cursor");
+    expect(prompt).toContain(
+      "Token efficiency metrics are not available for Cursor exports",
+    );
+    expect(prompt).toContain("agent-transcript logs do not include usage data");
+  });
+
+  it("groups Mac and Linux together for all platforms including Cursor", () => {
     for (const platform of AI_USAGE_PROMPT_PLATFORMS) {
-      if (platform.id === "cursor") continue;
       const prompt = buildAiUsagePrompt(platform.id);
       expect(prompt).toContain("Mac / Linux:");
       expect(prompt).not.toContain("Mac:\n");

@@ -7,3 +7,4 @@ backups/
 .env.*
 !.env.example
 !apps/dashboard/.env.local.sample
+
