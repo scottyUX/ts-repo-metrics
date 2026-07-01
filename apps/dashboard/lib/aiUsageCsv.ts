@@ -571,20 +571,21 @@ export function analyzeAiUsageCsv(text: string): AnalyzeAiUsageCsvResult {
   let tokenUnavailableReason: TokenUnavailableReason | undefined;
   if (!hasTokenColumns) {
     tokenUnavailableReason = "missing_columns";
-    warnings.push(
-      "Token metrics unavailable. Re-export with --tokens to unlock token efficiency.",
-    );
+    // SIP-2.3.1 (temporary): suppress token warnings so the tab does not look broken.
+    // warnings.push(
+    //   "Token metrics unavailable. Re-export with --tokens to unlock token efficiency.",
+    // );
   } else if (!hasAnyTokenData) {
     if (isCursorExport) {
       tokenUnavailableReason = "cursor_no_usage";
-      warnings.push(
-        "Token efficiency is not available for Cursor agent-transcript exports. Cursor logs do not include usage data.",
-      );
+      // warnings.push(
+      //   "Token efficiency is not available for Cursor agent-transcript exports. Cursor logs do not include usage data.",
+      // );
     } else {
       tokenUnavailableReason = "no_data_in_export";
-      warnings.push(
-        "Token metrics unavailable. Re-export with --tokens to unlock token efficiency.",
-      );
+      // warnings.push(
+      //   "Token metrics unavailable. Re-export with --tokens to unlock token efficiency.",
+      // );
     }
   }
 
