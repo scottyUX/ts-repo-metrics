@@ -1,0 +1,33 @@
+cohort,owner,repo,repo_url,analysis_source,result_id,commit_sha,course_id,team_name,analyzed_at,status
+pre_ai,raeeka98,MarinePlastics-MobileApp,https://github.com/raeeka98/MarinePlastics-MobileApp,local_run,,,,,,ok
+pre_ai,nkalscheuer,mavericks,https://github.com/nkalscheuer/mavericks,local_run,,,,,,ok
+pre_ai,alrivero,MAT3D,https://github.com/alrivero/MAT3D,local_run,,,,,,ok
+pre_ai,MissValeska,CSE-115A-GeneSearcher,https://github.com/MissValeska/CSE-115A-GeneSearcher,local_run,,,,,,ok
+pre_ai,nhak03,115proj,https://github.com/nhak03/115proj,local_run,,,,,,ok
+pre_ai,CSE115aStock,StockCSE115A,https://github.com/CSE115aStock/StockCSE115A,local_run,,,,,,ok
+pre_ai,blukat29,cmps115,https://github.com/blukat29/cmps115,local_run,,,,,,ok
+pre_ai,divark,tsrassistant,https://github.com/divark/tsrassistant,local_run,,,,,,ok
+pre_ai,moelattma,Clubster,https://github.com/moelattma/Clubster,local_run,,,,,,ok
+pre_ai,Strict-Evaluation,editthis,https://github.com/Strict-Evaluation/editthis,local_run,,,,,,ok
+pre_ai,kmirijan,PickUp,https://github.com/kmirijan/PickUp,local_run,,,,,,ok
+pre_ai,matt-ngo,CSE-115A,https://github.com/matt-ngo/CSE-115A,local_run,,,,,,ok
+pre_ai,dcalta,CMPS115Winter2018---Job-Application-Organizer,https://github.com/dcalta/CMPS115Winter2018---Job-Application-Organizer,local_run,,,,,,ok
+pre_ai,Ragneroke,cmps115Project,https://github.com/Ragneroke/cmps115Project,local_run,,,,,,ok
+pre_ai,Cstew12,cse115A,https://github.com/Cstew12/cse115A,local_run,,,,,,ok
+pre_ai,cnoda1397,CSE115-Slug-Pantry,https://github.com/cnoda1397/CSE115-Slug-Pantry,local_run,,,,,,ok
+post_ai,microfaults,manteion-go,https://github.com/microfaults/manteion-go,supabase,microfaults-manteion-go-4bf04b8021f4,4bf04b8021f48c06609ed8b4c7ddb43fafa904ef,,,2026-06-12 18:40:37.90296+00,gap
+post_ai,microfaults,manteion-ui,https://github.com/microfaults/manteion-ui,supabase,microfaults-manteion-ui-4c71d6c27ea3,4c71d6c27ea3ee29d0226da28317787c2f020588,CSE115C-Spring26,Microfaults,2026-06-11 21:05:11.189132+00,ok
+post_ai,apagadua,shoe_shopper,https://github.com/apagadua/shoe_shopper,supabase,apagadua-shoe_shopper-5c57708e54cf,5c57708e54cf6010d7f1f8108b94d737229325d1,CSE115A-Spring26,shoe_shopper,2026-06-11 01:15:57.408788+00,ok
+post_ai,Brinqa-CRQ-2026,VulnContext-Desktop,https://github.com/Brinqa-CRQ-2026/VulnContext-Desktop,supabase,Brinqa-CRQ-2026-VulnContext-Desktop-0d8922d004a2,0d8922d004a21649151fe9c0abefb446076a3722,,,2026-06-09 07:45:36.312915+00,gap
+post_ai,Colin-Posat,SlugFound,https://github.com/Colin-Posat/SlugFound,supabase,Colin-Posat-SlugFound-c8556ef8e1d1,c8556ef8e1d1e661c57f1deebc6e20706a323740,,,2026-06-09 01:04:30.787363+00,gap
+post_ai,Aicnev04,PriceYourPlaylist,https://github.com/Aicnev04/PriceYourPlaylist,supabase,Aicnev04-PriceYourPlaylist-c17a5b9a1526,c17a5b9a1526b0120266382c846703468a40d0fa,,,2026-06-08 23:40:41.943562+00,gap
+post_ai,MikeyZv,SlugMarket,https://github.com/MikeyZv/SlugMarket,supabase,MikeyZv-SlugMarket-966d4fc8a424,966d4fc8a424a58a342186a248bf297d4af5a0f2,,,2026-06-08 21:22:30.088329+00,gap
+post_ai,Alaurosa,vision-studio,https://github.com/Alaurosa/vision-studio,supabase,Alaurosa-vision-studio-5333bd89081f,5333bd89081fbfd3ae7b92ff5fd0ce4faac570fb,CSE115A-Spring26,Vision Studio,2026-06-08 20:23:56.823793+00,ok
+post_ai,Nxver-GitHub,Nodegent,https://github.com/Nxver-GitHub/Nodegent,supabase,Nxver-GitHub-Nodegent-2cbe9d9e3a3d,2cbe9d9e3a3d13e39a9d63c302ef9ad7dc598ae9,,,2026-06-08 17:18:13.69989+00,gap
+post_ai,ismilesen,circuit-simulation,https://github.com/ismilesen/circuit-simulation,supabase,ismilesen-circuit-simulation-cde2ea57fd9f,cde2ea57fd9f445a71942b29e83eca73a099f72c,,,2026-06-07 22:22:00.372986+00,gap
+post_ai,dareumHJ,sluggym,https://github.com/dareumHJ/sluggym,supabase,dareumHJ-sluggym-28594b29ae3f,28594b29ae3ff036ce377ded27430287d72c1619,,,2026-06-05 18:16:17.912239+00,gap
+post_ai,sbelambe,UCSC-Financial-Purchase-Prediction,https://github.com/sbelambe/UCSC-Financial-Purchase-Prediction,supabase,sbelambe-UCSC-Financial-Purchase-Prediction-4d30585a3921,4d30585a39212842b1bb692689ec1c3d0e507fff,CSE115A-Spring26,SlugSmart,2026-06-04 00:50:13.245355+00,ok
+post_ai,Medulus,Medulus.github.io,https://github.com/Medulus/Medulus.github.io,supabase,Medulus-Medulus.github.io-ac9680d7d06c,ac9680d7d06ceaf328a1800c8c0a285037805526,,,2026-06-03 19:31:56.728757+00,gap
+post_ai,dvdthr5,ArrowBerry,https://github.com/dvdthr5/ArrowBerry,supabase,dvdthr5-ArrowBerry-90d41d6c45d8,90d41d6c45d8f2748cd5f8ac2d83581258c0492b,,,2026-06-03 19:27:39.286272+00,gap
+post_ai,MandoBug,InterviewPal,https://github.com/MandoBug/InterviewPal,supabase,MandoBug-InterviewPal-becb21a5bcb0,becb21a5bcb00e0602736b7f4be90c779bff3f4a,CSE115A-Spring26,interview pal,2026-05-29 20:12:00.069847+00,ok
+post_ai,nryee2005,routematch,https://github.com/nryee2005/routematch,supabase,nryee2005-routematch-98256bbf28db,98256bbf28db0b7299348d0767ee55efb3cc4edd,,,2026-05-28 17:10:45.657478+00,gap
