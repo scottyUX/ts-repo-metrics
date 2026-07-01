@@ -79,8 +79,9 @@ describe("aiUsageCsv", () => {
     const result = analyzeAiUsageCsv(csvWithoutOptionalColumns);
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.warnings).toHaveLength(2);
+    expect(result.warnings).toHaveLength(1);
     expect(result.data.hasTokenData).toBe(false);
+    expect(result.data.tokenUnavailableReason).toBe("missing_columns");
     expect(result.data.hasMessageData).toBe(false);
     expect(result.data.behavioralDiagnostic.key).toBe("low-exploration");
   });
@@ -160,16 +161,14 @@ const cursorCsvRealistic = `timestamp,event_type,coding_agent,tool_name,executio
 2026-05-20T10:00:02.000Z,assistant_response,cursor,,0.0,/repo,c1,,,,,,claude-3-5-sonnet-20241022`;
 
 describe("realistic Cursor CSV (empty token columns)", () => {
-  it("detects cursor_no_usage instead of advising --tokens re-export", () => {
+  it("detects cursor_no_usage without surfacing token warnings", () => {
     const result = analyzeAiUsageCsv(cursorCsvRealistic);
     expect(result.ok).toBe(true);
     if (!result.ok) return;
 
     expect(result.data.hasTokenData).toBe(false);
     expect(result.data.tokenUnavailableReason).toBe("cursor_no_usage");
-    expect(result.warnings).toHaveLength(1);
-    expect(result.warnings[0]).toContain("Cursor");
-    expect(result.warnings[0]).not.toContain("Re-export with --tokens");
+    expect(result.warnings).toHaveLength(0);
     expect(result.data.hasMessageData).toBe(true);
     expect(result.data.totalPrompts).toBe(1);
   });
