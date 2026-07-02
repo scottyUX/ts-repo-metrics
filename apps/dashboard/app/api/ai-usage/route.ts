@@ -1,13 +1,13 @@
 /**
  * POST /api/ai-usage
- * Persists a raw AI usage CSV upload for an existing analysis result.
+ * Persists the current user's AI usage CSV for an existing analysis result.
+ * Writes to ai_usage_csvs (result_id, user_id) so each user's upload is isolated.
  */
 
 export const runtime = "nodejs";
 
 import { NextRequest, NextResponse } from "next/server";
 import {
-  getSupabase,
   isDevReportMemoryFallback,
   isSupabaseConfigured,
 } from "@/lib/supabase/server";
@@ -19,16 +19,15 @@ import { ANALYZE_SIGN_IN_REQUIRED_MESSAGE } from "@/lib/analyzeConstants";
 import { devStoreAiUsageCsv } from "@/lib/devAiUsageStore";
 
 const AI_USAGE_MIGRATION_HINT =
-  "Add ai_usage_csv column: run supabase/migrations/20260526120000_analyses_ai_usage_csv.sql in the Supabase SQL Editor.";
+  "Run supabase/migrations/20260702000000_ai_usage_csvs_per_user.sql in the Supabase SQL Editor.";
 
-function aiUsageUpdateLooksLikeStaleSchema(error: {
+function aiUsageCsvsTableMissing(error: {
   message?: string;
   code?: string | null;
-  details?: string | null;
-  hint?: string | null;
 }): boolean {
-  const blob = `${error.message ?? ""} ${error.details ?? ""} ${error.hint ?? ""}`;
-  return error.code === "PGRST204" || /\bai_usage_csv\b/i.test(blob);
+  return (
+    error.code === "42P01" || /\bai_usage_csvs\b/i.test(error.message ?? "")
+  );
 }
 
 export async function POST(request: NextRequest) {
@@ -53,12 +52,14 @@ export async function POST(request: NextRequest) {
 
     const resultId =
       typeof body.resultId === "string" ? body.resultId.trim() : "";
-    const csvText =
-      typeof body.csvText === "string" ? body.csvText : "";
+    const csvText = typeof body.csvText === "string" ? body.csvText : "";
 
     if (!resultId) {
       return NextResponse.json(
-        { error: "Missing resultId. Provide { resultId: string, csvText: string }." },
+        {
+          error:
+            "Missing resultId. Provide { resultId: string, csvText: string }.",
+        },
         { status: 400 },
       );
     }
@@ -86,9 +87,11 @@ export async function POST(request: NextRequest) {
     }
 
     if (isSupabaseConfigured()) {
+      // Verify the analysis exists and is readable by this user (RLS allows
+      // null-owner rows and own rows).
       const { data: row, error: selectError } = await userSb
         .from("analyses")
-        .select("result_id, user_id")
+        .select("result_id")
         .eq("result_id", resultId)
         .maybeSingle();
 
@@ -99,20 +102,20 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      if (row.user_id && row.user_id !== user.id) {
-        return NextResponse.json({ error: "Forbidden." }, { status: 403 });
-      }
+      // Upsert into the per-user table. RLS enforces user_id = auth.uid().
+      const { error: upsertError } = await userSb
+        .from("ai_usage_csvs")
+        .upsert(
+          { result_id: resultId, user_id: user.id, csv_text: csvText },
+          { onConflict: "result_id,user_id" },
+        );
 
-      const { error: updateError } = await getSupabase()
-        .from("analyses")
-        .update({ ai_usage_csv: csvText })
-        .eq("result_id", resultId);
-
-      if (updateError) {
-        if (aiUsageUpdateLooksLikeStaleSchema(updateError)) {
+      if (upsertError) {
+        if (aiUsageCsvsTableMissing(upsertError)) {
           return NextResponse.json(
             {
-              error: "Could not save AI usage CSV: database is missing ai_usage_csv.",
+              error:
+                "Could not save AI usage CSV: database is missing ai_usage_csvs table.",
               code: "analyses_schema_mismatch",
               hint: AI_USAGE_MIGRATION_HINT,
             },
