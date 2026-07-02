@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const getUser = vi.fn();
+const resolveAnalysisRow = vi.fn();
 
 // Table-aware Supabase mock — each call to from() returns a chainable object
 // whose terminal promise resolves to whatever tableResults[table] holds.
@@ -38,6 +39,11 @@ vi.mock("@/lib/analyzeConstants", () => ({
   ANALYZE_SIGN_IN_REQUIRED_MESSAGE: "Please sign in.",
 }));
 
+vi.mock("@/lib/resolveAnalysisRow", () => ({
+  resolveAnalysisRow: (...args: unknown[]) => resolveAnalysisRow(...args),
+}));
+
+const CANONICAL_ID = "owner-repo-abc123456789";
 const CSV =
   "timestamp,event_type,session_id,tool_name\n2026-05-20T10:00:00.000Z,user_prompt,s1,\n";
 
@@ -105,9 +111,14 @@ describe("ai usage routes — Supabase mode", () => {
     vi.resetModules();
     getUser.mockReset();
     fromFn.mockClear();
+    resolveAnalysisRow.mockReset();
     Object.keys(tableResults).forEach((k) => delete tableResults[k]);
 
     getUser.mockResolvedValue({ data: { user: { id: "user-1" } } });
+    resolveAnalysisRow.mockResolvedValue({
+      ok: true,
+      resultId: CANONICAL_ID,
+    });
 
     const { isDevReportMemoryFallback, isSupabaseConfigured } = await import(
       "@/lib/supabase/server"
@@ -116,8 +127,7 @@ describe("ai usage routes — Supabase mode", () => {
     vi.mocked(isSupabaseConfigured).mockReturnValue(true);
   });
 
-  it("upserts into ai_usage_csvs and returns 200", async () => {
-    tableResults["analyses"] = { data: { result_id: "owner-repo-abc" }, error: null };
+  it("upserts into ai_usage_csvs and returns canonical resultId", async () => {
     tableResults["ai_usage_csvs"] = { error: null };
 
     const { POST } = await import("../app/api/ai-usage/route");
@@ -125,20 +135,25 @@ describe("ai usage routes — Supabase mode", () => {
     const res = await POST(
       new NextRequest("http://localhost/api/ai-usage", {
         method: "POST",
-        body: JSON.stringify({ resultId: "owner-repo-abc", csvText: CSV }),
+        body: JSON.stringify({
+          resultId: "owner-repo-abc12345",
+          csvText: CSV,
+        }),
         headers: { "Content-Type": "application/json" },
       }),
     );
     expect(res.status).toBe(200);
-    await expect(res.json()).resolves.toMatchObject({ resultId: "owner-repo-abc" });
+    await expect(res.json()).resolves.toMatchObject({
+      resultId: CANONICAL_ID,
+    });
 
-    // Must write to ai_usage_csvs (the per-user table), not via an UPDATE on analyses
     const tables = fromFn.mock.calls.map(([table]: [string]) => table);
     expect(tables).toContain("ai_usage_csvs");
+    expect(resolveAnalysisRow).toHaveBeenCalled();
   });
 
   it("returns 404 when analysis does not exist", async () => {
-    tableResults["analyses"] = { data: null, error: { message: "not found", code: "PGRST116" } };
+    resolveAnalysisRow.mockResolvedValue({ ok: false, code: "not_found" });
 
     const { POST } = await import("../app/api/ai-usage/route");
 
@@ -149,10 +164,23 @@ describe("ai usage routes — Supabase mode", () => {
         headers: { "Content-Type": "application/json" },
       }),
     );
-    // No analysis row → POST succeeds (FK will reject at DB level); or we still get 200 because
-    // the route no longer pre-checks existence and relies on the FK. Either way, no 403/forbidden.
-    // The important thing: no user_id cross-contamination.
-    expect([200, 404, 500]).toContain(res.status);
+    expect(res.status).toBe(404);
+    await expect(res.json()).resolves.toMatchObject({
+      error: "Analysis not found for this result.",
+      code: "not_found",
+    });
+  });
+
+  it("GET returns 404 when analysis cannot be resolved", async () => {
+    resolveAnalysisRow.mockResolvedValue({ ok: false, code: "not_found" });
+
+    const { GET } = await import("../app/api/results/[id]/ai-usage/route");
+
+    const res = await GET(
+      new NextRequest("http://localhost/api/results/owner-repo-abc/ai-usage"),
+      { params: Promise.resolve({ id: "owner-repo-abc" }) },
+    );
+    expect(res.status).toBe(404);
   });
 
   it("GET returns 404 when no row for this user in ai_usage_csvs", async () => {
@@ -178,7 +206,7 @@ describe("ai usage routes — Supabase mode", () => {
     );
     expect(res.status).toBe(200);
     await expect(res.json()).resolves.toEqual({
-      resultId: "owner-repo-abc",
+      resultId: CANONICAL_ID,
       csvText: CSV,
     });
   });

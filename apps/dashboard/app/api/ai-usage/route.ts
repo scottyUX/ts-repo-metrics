@@ -17,6 +17,7 @@ import {
 } from "@/lib/supabase/server-user";
 import { ANALYZE_SIGN_IN_REQUIRED_MESSAGE } from "@/lib/analyzeConstants";
 import { devStoreAiUsageCsv } from "@/lib/devAiUsageStore";
+import { resolveAnalysisRow } from "@/lib/resolveAnalysisRow";
 
 const AI_USAGE_MIGRATION_HINT =
   "Run supabase/migrations/20260702000000_ai_usage_csvs_per_user.sql in the Supabase SQL Editor.";
@@ -86,27 +87,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (isSupabaseConfigured()) {
-      // Verify the analysis exists and is readable by this user (RLS allows
-      // null-owner rows and own rows).
-      const { data: row, error: selectError } = await userSb
-        .from("analyses")
-        .select("result_id")
-        .eq("result_id", resultId)
-        .maybeSingle();
+    let savedResultId = resultId;
 
-      if (selectError || !row) {
+    if (isSupabaseConfigured()) {
+      const resolved = await resolveAnalysisRow(resultId, userSb);
+      if (!resolved.ok) {
         return NextResponse.json(
           { error: "Analysis not found for this result.", code: "not_found" },
           { status: 404 },
         );
       }
 
+      savedResultId = resolved.resultId;
+
       // Upsert into the per-user table. RLS enforces user_id = auth.uid().
       const { error: upsertError } = await userSb
         .from("ai_usage_csvs")
         .upsert(
-          { result_id: resultId, user_id: user.id, csv_text: csvText },
+          { result_id: savedResultId, user_id: user.id, csv_text: csvText },
           { onConflict: "result_id,user_id" },
         );
 
@@ -136,7 +134,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    return NextResponse.json({ resultId, csvText });
+    return NextResponse.json({ resultId: savedResultId, csvText });
   } catch (err) {
     console.error("[ai-usage]", err instanceof Error ? err.message : err);
     const message =
