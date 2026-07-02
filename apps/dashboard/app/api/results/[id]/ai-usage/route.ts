@@ -1,6 +1,7 @@
 /**
  * GET /api/results/[id]/ai-usage
- * Returns persisted AI usage CSV for an analysis.
+ * Returns the current user's persisted AI usage CSV for an analysis.
+ * Reads from ai_usage_csvs (result_id, user_id) so each user's upload is isolated.
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -43,15 +44,16 @@ export async function GET(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  // RLS on ai_usage_csvs enforces user_id = auth.uid(); no manual filter needed.
   const { data, error } = await userSb
-    .from("analyses")
-    .select("ai_usage_csv")
+    .from("ai_usage_csvs")
+    .select("csv_text")
     .eq("result_id", resultId)
     .maybeSingle();
 
-  if (error || !data?.ai_usage_csv) {
+  if (error || !data?.csv_text) {
     return NextResponse.json({ error: "AI usage not found" }, { status: 404 });
   }
 
-  return NextResponse.json({ resultId, csvText: data.ai_usage_csv as string });
+  return NextResponse.json({ resultId, csvText: data.csv_text as string });
 }
