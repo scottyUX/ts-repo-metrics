@@ -8,3 +8,5 @@ backups/
 !.env.example
 !apps/dashboard/.env.local.sample
 
+research/datasets/raw_reports/
+
