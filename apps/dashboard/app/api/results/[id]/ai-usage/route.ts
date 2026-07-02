@@ -14,6 +14,7 @@ import {
   isUserSupabaseConfigured,
 } from "@/lib/supabase/server-user";
 import { devGetAiUsageCsv } from "@/lib/devAiUsageStore";
+import { resolveAnalysisRow } from "@/lib/resolveAnalysisRow";
 
 export async function GET(
   _request: NextRequest,
@@ -44,16 +45,24 @@ export async function GET(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const resolved = await resolveAnalysisRow(resultId, userSb);
+  if (!resolved.ok) {
+    return NextResponse.json({ error: "AI usage not found" }, { status: 404 });
+  }
+
   // RLS on ai_usage_csvs enforces user_id = auth.uid(); no manual filter needed.
   const { data, error } = await userSb
     .from("ai_usage_csvs")
     .select("csv_text")
-    .eq("result_id", resultId)
+    .eq("result_id", resolved.resultId)
     .maybeSingle();
 
   if (error || !data?.csv_text) {
     return NextResponse.json({ error: "AI usage not found" }, { status: 404 });
   }
 
-  return NextResponse.json({ resultId, csvText: data.csv_text as string });
+  return NextResponse.json({
+    resultId: resolved.resultId,
+    csvText: data.csv_text as string,
+  });
 }
