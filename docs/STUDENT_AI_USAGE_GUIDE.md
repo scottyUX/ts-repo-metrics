@@ -1,15 +1,18 @@
 # Student guide: AI Usage tab
 
-This guide walks you through the **AI Usage** tab on the ts-repo-metrics dashboard. Use it to see how you work with your coding agent (Cursor, Claude Code, Codex, or Gemini)—not as a grade, but as a mirror for your habits.
+This guide walks you through the **AI Usage** tab on the ts-repo-metrics dashboard. Use it to see how you work with your coding agent—not as a grade, but as a mirror for your habits.
+
+There is a **dedicated assignment on Canvas** where you will submit your reflection. Complete the steps below first, then go to Canvas to submit.
 
 **What you will do:**
 
 1. Sign in with GitHub
-2. Analyze your project repository
+2. Analyze your course project repository
 3. Open the **AI Usage** tab
-4. Copy the platform prompt and run it in your coding-agent project
+4. Copy the platform prompt and run it **inside your course project**
 5. Upload the generated CSV
-6. Read your metrics
+6. Read your metrics and write your reflection
+7. Submit to Canvas
 
 For technical details (CSV columns, manual export commands, persistence), see [AI_USAGE_LOGS.md](./AI_USAGE_LOGS.md).
 
@@ -20,8 +23,10 @@ For technical details (CSV columns, manual export commands, persistence), see [A
 You need:
 
 - A **GitHub account** with access to the repository you want to analyze
-- A **coding agent** you have actually used on that project (Cursor, Claude Code, Codex, or Gemini)
+- A **coding agent desktop application** you have actually used on that project — Claude Code (desktop app), Codex CLI, or Gemini CLI. The coding agent **must be a desktop application**, not a browser-based tool.
 - **Python 3** on your machine (the copied prompt uses it to run the export script)
+
+> **Note for Cursor users:** Token usage metrics (input/output tokens, cache hit rate) are not currently working for Cursor. You can still upload a trace file and see activity and workflow metrics, but token efficiency data will be unavailable.
 
 The AI Usage tab only works **after** you have run a repository analysis and are viewing the results page.
 
@@ -29,40 +34,33 @@ The AI Usage tab only works **after** you have run a repository analysis and are
 
 ## Step 1: Sign in with GitHub
 
-1. Open the dashboard (your instructor’s course link, or the hosted app home page).
-2. Click **Sign in with GitHub**.
-3. Approve the GitHub permissions when prompted.
+### Course link (required for CSE 115A)
 
-You must be signed in to analyze a repository and to save your AI usage CSV. If you are not signed in, you will see **“Sign in required”** when you try to analyze.
+Your instructor will give you a **course analyze link** such as:
 
-### Course submissions
+```
+/course/CSE115A-Summer26/analyze
+```
 
-If your instructor gave you a **course analyze link** (for example `/course/CSE115A-Summer26/analyze`):
+Using this link creates a folder in the research database for **Summer CSE 115a**, grouping your team's submission with the rest of the cohort. Always use the course link—do not analyze from the general home page.
 
-1. Click **Get started**
-2. Enter your **team name** (for example `Team Rocket`)
-3. Click **Continue**
-4. Sign in with GitHub
-5. Pick your team’s repository from the list
+1. Click the course link your instructor provided.
+2. Click **Get started**.
+3. Enter your **team name** (for example `Team Rocket`).
+4. Click **Continue**.
+5. Sign in with GitHub and approve the permissions when prompted.
+6. Pick your team's repository from the list.
 
-The results page may show a research notice: *“This analysis is not used to grade individual students.”*
+The results page may show a research notice: *"This analysis is not used to grade individual students."*
 
 ---
 
 ## Step 2: Analyze your repository
 
-### From the home page
+After signing in through the course link:
 
-1. Paste your GitHub repository URL into the input field.
-2. Click **Go** (the button shows **Analyzing…** while the scan runs).
-3. When analysis finishes, you are taken to your **results page** (`/r/...`).
-
-**Tip:** You can click **Try sample repo** to explore the dashboard with a demo repository first.
-
-### From My Repos
-
-1. After signing in, click **Or open My Repos**.
-2. Find your repository in the list.
+1. Click **Or open My Repos**.
+2. Find your team's course project repository in the list.
 3. Click **Click to analyze**.
 
 Wait until you see **Analysis complete**. The results page has several tabs across the top (Commit Habits, Testing, Code Quality, and others).
@@ -78,52 +76,36 @@ On the results page:
 
 You will see:
 
-- A short intro: *“Use it as a mirror for habits, not a grade.”*
-- Four platform choices: **Claude Code**, **Codex**, **Gemini**, and **Cursor**
+- A short intro endind in *"Use it as a mirror for habits, not a grade."*
+- Platform choices: **Claude Code**, **Codex**, **Gemini**, and **Cursor**
 - An upload area for your CSV (empty until you complete the steps below)
 
 There is **no demo data** on this tab—you need to generate and upload your own trace file.
 
 ---
 
-## Step 4: Copy the prompt and run it in your project
+## Step 4: Copy the prompt and run it in your course project
 
 This is the most important step. The dashboard gives you a ready-made prompt so your coding agent can export your session logs.
 
-### 4a. Pick your platform
+**Important:** You must open your coding agent **inside the same repository you just analyzed**—your course project. Running the prompt outside the project will export the wrong session data.
 
-Click the sub-tab for the agent you use:
-
-| If you use… | Click |
-|-------------|-------|
-| Cursor | **Cursor** |
-| Claude Code | **Claude Code** |
-| OpenAI Codex | **Codex** |
-| Google Gemini | **Gemini** |
-
-### 4b. Copy the prompt
-
-1. Read the instructions under your platform tab.
-2. Click **Copy Cursor prompt** (or **Copy Claude prompt**, **Copy Codex prompt**, **Copy Gemini prompt**).
-3. You should see confirmation: *“{Platform} prompt copied”*.
-
-### 4c. Run the prompt in the **same project** you analyzed
-
-1. Open your coding agent **in the repository you just analyzed** (the same repo URL you submitted).
-2. Paste the copied prompt into a new chat.
-3. Let the agent run. It will:
+1. Click the sub-tab for the agent you use (Claude Code, Codex, Gemini, or Cursor).
+2. Click the **Copy prompt** button (for example **Copy Claude prompt**).
+3. Open your coding agent **desktop application** with your course project open.
+4. Paste the copied prompt into a new chat.
+5. Let the agent run. It will:
    - Infer the correct `--filter` for your repo (or ask you if unclear)
-   - Clone or update the [agent_stats](https://github.com/scottyUX/agent_stats) tool on your Desktop
+   - Clone or update the [agent_stats](https://github.com/scottyUX/agent_stats) tool
    - Run the export with `--messages` and `--tokens`
    - Save **`ai_usage_trace.csv`** to your **Desktop**
 
-4. When the agent finishes, confirm you have a file at:
+6. When the agent finishes, confirm you have a file at:
    - **Mac / Linux:** `~/Desktop/ai_usage_trace.csv`
    - **Windows:** `%USERPROFILE%\Desktop\ai_usage_trace.csv`
 
 **Important:**
 
-- Run the prompt **inside the same coding-agent project** as the analyzed repo so the `--filter` matches your work.
 - The agent may ask for permission to run shell or network commands—approve once so it can finish.
 - The prompt does **not** modify your project files; it only exports logs.
 
@@ -146,20 +128,11 @@ What happens next:
 2. Metrics appear on the tab immediately.
 3. The raw CSV is **saved on your analysis** so it reloads the next time you open this results page.
 
-Status messages you might see:
-
-| Message | Meaning |
-|---------|---------|
-| *Looking for a previously uploaded CSV…* | Checking if you already uploaded one for this analysis |
-| *Saving ai_usage_trace.csv on this analysis…* | Upload in progress |
-| *ai_usage_trace.csv saved for this analysis.* | Success—your data is stored |
-| *Saved AI Usage CSV loaded for this analysis.* | You returned to a results page that already had a CSV |
-
 If you see warnings about missing columns, re-run the export with `--messages` and `--tokens` (the copied prompt includes both).
 
 ---
 
-## Step 6: Read your data
+## Step 6: Read your data and write your reflection
 
 After upload, the tab shows six sections. Each metric card has a **?** button—click it for what the number means, why it matters, and how to improve.
 
@@ -189,7 +162,7 @@ How detailed your prompts tend to be.
 
 ### Activity snapshot
 
-A **40-day heatmap** (like GitHub’s contribution graph) showing days you used the agent.
+A **40-day heatmap** (like GitHub's contribution graph) showing days you used the agent.
 
 - Darker cells = more prompts that day
 - Summary: active days, prompts per day, busiest day
@@ -203,7 +176,7 @@ How your agent time splits between reading, writing, and verifying.
 - **Generation** — write, edit, apply patches
 - **Verification / execution** — run terminal commands, tests, tasks
 
-Also includes a **workflow diagnostic** (for example “Balanced workflow” or “Low verification”) and a **raw tool breakdown** by category.
+Also includes a **workflow diagnostic** (for example "Balanced workflow" or "Low verification") and a **raw tool breakdown** by category.
 
 ### Session behavior
 
@@ -224,19 +197,20 @@ Whether you read code back after the agent writes.
 
 ---
 
-## Quick checklist
+## Writing your reflection
 
-Use this before you tell your instructor you are done:
+Your Canvas assignment asks you to write **1–2 paragraphs** about your metrics. For each of the three tabs below, write **3 sentences** covering: (1) whether you understood the metric and what it showed about your work, (2) how you would change your coding-agent behavior based on what you saw, and (3) what additional metrics you think would give a more complete picture.
 
-- [ ] Signed in with GitHub
-- [ ] Repository analyzed; on the results page
-- [ ] **AI Usage** tab open
-- [ ] Correct platform selected (Cursor / Claude Code / Codex / Gemini)
-- [ ] Prompt copied and run **in the same repo** you analyzed
-- [ ] `ai_usage_trace.csv` on your Desktop
-- [ ] CSV uploaded on the AI Usage tab
-- [ ] Metrics visible (no empty-state message)
-- [ ] Clicked **?** on at least one metric you want to discuss or improve
+---
+
+## Step 7: Submit to Canvas
+
+Once your metrics are visible and you have written your reflection:
+
+1. Open the **dedicated AI Usage assignment** on Canvas.
+2. Paste or type your reflection paragraphs directly into the submission text box.
+3. Include a **screenshot** of your AI Usage tab showing your metrics (the activity heatmap and at least one other section).
+4. Submit.
 
 ---
 
@@ -246,18 +220,20 @@ Use this before you tell your instructor you are done:
 |---------|-------------|
 | **Sign in required** | Sign in with GitHub before analyzing or uploading |
 | **Tab is empty after upload** | Make sure the file is named `ai_usage_trace.csv` and is valid CSV from `agent_stats` |
-| **Token metrics show “—”** | Re-export with `--tokens` (the copied prompt already includes this) |
+| **Token metrics show "—"** | Re-export with `--tokens` (the copied prompt already includes this); Cursor token data is not yet supported |
 | **Prompt quality metrics missing** | Re-export with `--messages` |
 | **Agent could not find logs** | Confirm you used that platform on this repo; log paths differ by OS (see [AI_USAGE_LOGS.md](./AI_USAGE_LOGS.md)) |
-| **Wrong repo in the trace** | Re-run the prompt in the **same** project you analyzed; check the `--filter` value |
+| **Wrong repo in the trace** | Re-run the prompt **inside** the course project you analyzed; check the `--filter` value |
 | **CSV saved but metrics look wrong** | Upload again after a fresh export; old sessions from other repos may be included if `--filter` was wrong |
 
 ---
 
-## Privacy and research notes
+## Privacy
 
-- Your CSV is tied to your **analysis record** (`result_id`), not posted publicly.
-- Course analyses may include `course_id` and `team_name` for research joins.
+- **Your student identifier is never stored in plain text.** The `agent_stats` script hashes it with SHA-256 to create a stable pseudonym. Researchers can identify your submissions across analyses without ever seeing your email.
+- **Filtering keeps your data scoped.** The `--filter` flag (set automatically by the copied prompt) limits the export to sessions that touched your course project directory, so sessions from other projects are not included.
+- **Local parsing.** Your CSV is parsed in your browser. The file contents are only sent to the server to be stored on your own analysis record (`result_id`), not to any third-party analytics service.
+- **Course analyses** include `course_id` and `team_name` for research joins, but individual student work is not publicly visible.
 - The tab is designed for **self-reflection**—use the **?** help text to interpret numbers and set your own improvement goals.
 
 ---
