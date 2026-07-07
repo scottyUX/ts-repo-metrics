@@ -132,42 +132,31 @@ export async function GET(
       }
     }
 
-    // Final error handling
+    // Exact + prefix lookups failed — nothing left to return.
     if (error) {
       console.error("[results] Supabase error:", error.message, error.code, error.details);
-      if (isDev) {
-        const { data: all } = await supabase
-          .from("analyses")
-          .select("result_id")
-          .limit(10);
-        if (isDev) {
-          console.log(
-            "[results] Available result_ids:",
-            all?.map((r) => r.result_id),
-          );
-        }
-        return NextResponse.json(
-          {
-            error: "Result not found",
-            debug: { searched: trimmedId, available: all?.map((r) => r.result_id) },
-          },
-          { status: 404 },
-        );
-      }
-      return NextResponse.json({ error: "Result not found" }, { status: 404 });
-    }
-
-    if (!data) {
-      if (isDev) {
-        console.log("[results] No row found for id:", trimmedId);
-      }
-      return NextResponse.json({ error: "Result not found" }, { status: 404 });
+    } else if (isDev) {
+      console.log("[results] No row found for id:", trimmedId);
     }
 
     if (isDev) {
-      console.log("[results] Found report for id:", trimmedId);
+      const { data: all } = await supabase
+        .from("analyses")
+        .select("result_id")
+        .limit(10);
+      console.log(
+        "[results] Available result_ids:",
+        all?.map((r) => r.result_id),
+      );
+      return NextResponse.json(
+        {
+          error: "Result not found",
+          debug: { searched: trimmedId, available: all?.map((r) => r.result_id) },
+        },
+        { status: 404 },
+      );
     }
-    return NextResponse.json(data.report_json);
+    return NextResponse.json({ error: "Result not found" }, { status: 404 });
   } catch (err) {
     console.error("[results] Exception:", err);
     const body: { error: string; details?: string } = {
