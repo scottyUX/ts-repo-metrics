@@ -12,6 +12,7 @@ import { NextRequest, NextResponse } from "next/server";
 import path from "node:path";
 import os from "node:os";
 import { randomUUID } from "node:crypto";
+import { buildAnalysisResultId } from "@/lib/buildAnalysisResultId";
 import {
   getSupabase,
   isSupabaseConfigured,
@@ -216,12 +217,14 @@ export async function POST(request: NextRequest) {
 
     let resultId: string;
     if (parsed) {
-      const suffix = commitSha
-        ? commitSha.slice(0, 12)
-        : randomUUID().replace(/-/g, "").slice(0, 12);
-      resultId = `${parsed.owner}-${parsed.repo}-${suffix}`;
+      resultId = buildAnalysisResultId({
+        userId: authUser.id,
+        owner: parsed.owner,
+        repo: parsed.repo,
+        commitSha,
+      });
     } else {
-      resultId = randomUUID();
+      resultId = `${authUser.id}-${randomUUID()}`;
     }
 
     const submissionPayload = {
