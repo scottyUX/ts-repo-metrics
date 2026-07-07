@@ -6,12 +6,20 @@ import {
   resolveAnalysisRow,
 } from "../lib/resolveAnalysisRow";
 
+const USER_ID = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee";
+
 function makeSupabaseMock(handlers: {
-  exact?: { data: { result_id: string } | null; error?: unknown };
+  exact?: Record<string, { data: { result_id: string } | null; error?: unknown }>;
   prefix?: { data: { result_id: string } | null; error?: unknown };
+  userId?: string | null;
 }) {
-  const eq = vi.fn(() => ({
-    maybeSingle: vi.fn(async () => handlers.exact ?? { data: null, error: null }),
+  const eq = vi.fn((column: string, value: string) => ({
+    maybeSingle: vi.fn(async () => {
+      if (column !== "result_id") {
+        return { data: null, error: null };
+      }
+      return handlers.exact?.[value] ?? { data: null, error: null };
+    }),
   }));
   const like = vi.fn(() => ({
     order: vi.fn(() => ({
@@ -24,7 +32,14 @@ function makeSupabaseMock(handlers: {
   }));
   const select = vi.fn(() => ({ eq, like }));
   const from = vi.fn(() => ({ select }));
-  return { from, eq, like, select };
+  const auth = {
+    getUser: vi.fn(async () => ({
+      data: {
+        user: handlers.userId ? { id: handlers.userId } : null,
+      },
+    })),
+  };
+  return { from, eq, like, select, auth };
 }
 
 describe("resolveAnalysisRow", () => {
@@ -38,7 +53,11 @@ describe("resolveAnalysisRow", () => {
 
   it("returns exact match on first attempt", async () => {
     const sb = makeSupabaseMock({
-      exact: { data: { result_id: "owner-repo-abc123456789" } },
+      exact: {
+        "owner-repo-abc123456789": {
+          data: { result_id: "owner-repo-abc123456789" },
+        },
+      },
     });
 
     const result = await resolveAnalysisRow(
@@ -54,12 +73,33 @@ describe("resolveAnalysisRow", () => {
     expect(sb.like).not.toHaveBeenCalled();
   });
 
+  it("falls back to user-scoped id for legacy urls", async () => {
+    const legacyId = "owner-repo-abc123456789";
+    const scopedId = `${USER_ID}-${legacyId}`;
+    const sb = makeSupabaseMock({
+      userId: USER_ID,
+      exact: {
+        [legacyId]: { data: null, error: null },
+        [scopedId]: { data: { result_id: scopedId } },
+      },
+    });
+
+    const result = await resolveAnalysisRow(legacyId, sb as never);
+
+    expect(result).toEqual({ ok: true, resultId: scopedId });
+    expect(sb.eq).toHaveBeenCalledWith("result_id", legacyId);
+    expect(sb.eq).toHaveBeenCalledWith("result_id", scopedId);
+  });
+
   it("falls back to prefix match when exact match fails", async () => {
     const prefixId = "owner-repo-abc123456789";
     const shortPrefix = prefixId.slice(0, MIN_PARTIAL_RESULT_ID_LENGTH);
 
     const sb = makeSupabaseMock({
-      exact: { data: null, error: null },
+      exact: {
+        [prefixId]: { data: null, error: null },
+        [`${USER_ID}-${prefixId}`]: { data: null, error: null },
+      },
       prefix: { data: { result_id: prefixId } },
     });
 
@@ -76,7 +116,10 @@ describe("resolveAnalysisRow", () => {
 
   it("skips prefix match for short ids", async () => {
     const sb = makeSupabaseMock({
-      exact: { data: null, error: null },
+      exact: {
+        "short-id": { data: null, error: null },
+        [`${USER_ID}-short-id`]: { data: null, error: null },
+      },
     });
 
     const promise = resolveAnalysisRow("short-id", sb as never);
@@ -91,7 +134,10 @@ describe("resolveAnalysisRow", () => {
 
   it("returns not_found when no row matches", async () => {
     const sb = makeSupabaseMock({
-      exact: { data: null, error: null },
+      exact: {
+        "owner-repo-abc123456789": { data: null, error: null },
+        [`${USER_ID}-owner-repo-abc123456789`]: { data: null, error: null },
+      },
       prefix: { data: null, error: null },
     });
 

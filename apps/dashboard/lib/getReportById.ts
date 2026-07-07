@@ -12,11 +12,29 @@ import {
   createUserSupabaseServerClient,
   isUserSupabaseConfigured,
 } from "@/lib/supabase/server-user";
+import { analysisResultIdLookupIds } from "@/lib/buildAnalysisResultId";
 import { devGetReport } from "@/lib/devReportStore";
 import type { RepoReport } from "@/lib/reportTypes";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 500;
+
+async function fetchReportJsonByExactId(
+  supabase: SupabaseClient,
+  candidateId: string,
+): Promise<RepoReport | null> {
+  const { data, error } = await supabase
+    .from("analyses")
+    .select("report_json")
+    .eq("result_id", candidateId)
+    .single();
+
+  if (data && !error) {
+    return data.report_json as RepoReport;
+  }
+  return null;
+}
 
 export async function getReportById(id: string): Promise<{
   data: RepoReport | null;
@@ -37,15 +55,17 @@ export async function getReportById(id: string): Promise<{
       ? await createUserSupabaseServerClient()
       : getSupabase();
 
-    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
-      const { data, error } = await supabase
-        .from("analyses")
-        .select("report_json")
-        .eq("result_id", trimmedId)
-        .single();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    const lookupIds = analysisResultIdLookupIds(user?.id ?? null, trimmedId);
 
-      if (data && !error) {
-        return { data: data.report_json as RepoReport, error: null };
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+      for (const candidateId of lookupIds) {
+        const report = await fetchReportJsonByExactId(supabase, candidateId);
+        if (report) {
+          return { data: report, error: null };
+        }
       }
 
       if (attempt < MAX_RETRIES) {
