@@ -17,7 +17,10 @@ import {
 } from "@/lib/supabase/server-user";
 import { ANALYZE_SIGN_IN_REQUIRED_MESSAGE } from "@/lib/analyzeConstants";
 import { devStoreAiUsageCsv } from "@/lib/devAiUsageStore";
+import { userScopedResultId } from "@/lib/buildAnalysisResultId";
 import { resolveAnalysisRow } from "@/lib/resolveAnalysisRow";
+
+const AI_USAGE_RESOLVE_OPTIONS = { preferUserScope: true } as const;
 
 const AI_USAGE_MIGRATION_HINT =
   "Run supabase/migrations/20260702000000_ai_usage_csvs_per_user.sql in the Supabase SQL Editor.";
@@ -90,7 +93,11 @@ export async function POST(request: NextRequest) {
     let savedResultId = resultId;
 
     if (isSupabaseConfigured()) {
-      const resolved = await resolveAnalysisRow(resultId, userSb);
+      const resolved = await resolveAnalysisRow(
+        resultId,
+        userSb,
+        AI_USAGE_RESOLVE_OPTIONS,
+      );
       if (!resolved.ok) {
         return NextResponse.json(
           { error: "Analysis not found for this result.", code: "not_found" },
@@ -126,7 +133,9 @@ export async function POST(request: NextRequest) {
         );
       }
     } else if (isDevReportMemoryFallback()) {
-      devStoreAiUsageCsv(resultId, csvText);
+      const scopedResultId = userScopedResultId(user.id, resultId);
+      devStoreAiUsageCsv(user.id, scopedResultId, csvText);
+      savedResultId = scopedResultId;
     } else {
       return NextResponse.json(
         { error: "Storage is not configured." },
