@@ -91,6 +91,26 @@ describe("resolveAnalysisRow", () => {
     expect(sb.eq).toHaveBeenCalledWith("result_id", scopedId);
   });
 
+  it("prefers user-scoped id when both legacy and scoped rows exist", async () => {
+    const legacyId = "owner-repo-abc123456789";
+    const scopedId = `${USER_ID}-${legacyId}`;
+    const sb = makeSupabaseMock({
+      userId: USER_ID,
+      exact: {
+        [scopedId]: { data: { result_id: scopedId } },
+        [legacyId]: { data: { result_id: legacyId } },
+      },
+    });
+
+    const result = await resolveAnalysisRow(legacyId, sb as never, {
+      preferUserScope: true,
+    });
+
+    expect(result).toEqual({ ok: true, resultId: scopedId });
+    expect(sb.eq).toHaveBeenCalledWith("result_id", scopedId);
+    expect(sb.eq).not.toHaveBeenCalledWith("result_id", legacyId);
+  });
+
   it("falls back to prefix match when exact match fails", async () => {
     const prefixId = "owner-repo-abc123456789";
     const shortPrefix = prefixId.slice(0, MIN_PARTIAL_RESULT_ID_LENGTH);

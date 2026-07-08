@@ -4,7 +4,10 @@
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { analysisResultIdLookupIds } from "@/lib/buildAnalysisResultId";
+import {
+  type AnalysisResultIdLookupOptions,
+  analysisResultIdLookupIds,
+} from "@/lib/buildAnalysisResultId";
 
 export const ANALYSIS_ROW_MAX_RETRIES = 3;
 export const ANALYSIS_ROW_RETRY_DELAY_MS = 500;
@@ -33,6 +36,7 @@ async function fetchExactResultId(
 export async function resolveAnalysisRow(
   requestedId: string,
   supabase: SupabaseClient,
+  options?: AnalysisResultIdLookupOptions,
 ): Promise<ResolveAnalysisRowResult> {
   const trimmedId = requestedId.trim();
   if (!trimmedId) {
@@ -42,7 +46,11 @@ export async function resolveAnalysisRow(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  const lookupIds = analysisResultIdLookupIds(user?.id ?? null, trimmedId);
+  const lookupIds = analysisResultIdLookupIds(
+    user?.id ?? null,
+    trimmedId,
+    options,
+  );
 
   for (let attempt = 1; attempt <= ANALYSIS_ROW_MAX_RETRIES; attempt++) {
     for (const candidateId of lookupIds) {
@@ -60,16 +68,25 @@ export async function resolveAnalysisRow(
   }
 
   if (trimmedId.length >= MIN_PARTIAL_RESULT_ID_LENGTH) {
-    const { data, error } = await supabase
-      .from("analyses")
-      .select("result_id")
-      .like("result_id", `${trimmedId}%`)
-      .order("analyzed_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
+    const prefixCandidates =
+      options?.preferUserScope && user?.id
+        ? !trimmedId.startsWith(`${user.id}-`)
+          ? [`${user.id}-${trimmedId}`, trimmedId]
+          : [trimmedId]
+        : [trimmedId];
 
-    if (data?.result_id && !error) {
-      return { ok: true, resultId: data.result_id };
+    for (const prefix of prefixCandidates) {
+      const { data, error } = await supabase
+        .from("analyses")
+        .select("result_id")
+        .like("result_id", `${prefix}%`)
+        .order("analyzed_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (data?.result_id && !error) {
+        return { ok: true, resultId: data.result_id };
+      }
     }
   }
 

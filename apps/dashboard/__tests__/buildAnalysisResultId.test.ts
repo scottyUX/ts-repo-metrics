@@ -63,4 +63,12 @@ describe("analysisResultIdLookupIds", () => {
   it("returns empty array for blank ids", () => {
     expect(analysisResultIdLookupIds(USER_A, "  ")).toEqual([]);
   });
+
+  it("prefers user-scoped id before legacy id when requested", () => {
+    expect(
+      analysisResultIdLookupIds(USER_A, "owner-repo-abc123", {
+        preferUserScope: true,
+      }),
+    ).toEqual([`${USER_A}-owner-repo-abc123`, "owner-repo-abc123"]);
+  });
 });
