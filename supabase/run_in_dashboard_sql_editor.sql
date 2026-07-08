@@ -53,3 +53,7 @@ alter table public.analyses
 
 comment on column public.analyses.doc_review_json is
   'Documentation review agent output (classifications, reviews, consistency). Nullable.';
+
+-- Per-user analyses (SIP 2.3.4): allow multiple users on same repo+commit.
+alter table public.analyses
+  drop constraint if exists analyses_repo_commit_unique;
