@@ -16,9 +16,27 @@ export type NextAnalysisVersionResult = {
 };
 
 /**
+ * Read-side: highest numeric version from query rows, ignoring nulls.
+ * Does not decide the next version — pass the result into nextAnalysisVersion.
+ */
+export function maxAnalysisVersion(
+  rows: ReadonlyArray<{ version: number | null | undefined }>,
+): number | null {
+  let max: number | null = null;
+  for (const row of rows) {
+    if (row.version == null) continue;
+    const n = Number(row.version);
+    if (!Number.isFinite(n)) continue;
+    if (max == null || n > max) max = n;
+  }
+  return max;
+}
+
+/**
  * Decide the analyses.version for a new save.
  * Same commit as latest → keep that version; otherwise max+1 (or 1).
  * Null commit on either side is treated as changed (bump).
+ * Does not call maxAnalysisVersion — callers supply maxVersion.
  */
 export function nextAnalysisVersion({
   latestCommit,

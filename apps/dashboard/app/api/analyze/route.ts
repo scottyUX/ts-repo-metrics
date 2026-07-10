@@ -12,7 +12,10 @@ import { NextRequest, NextResponse } from "next/server";
 import path from "node:path";
 import os from "node:os";
 import { randomUUID } from "node:crypto";
-import { nextAnalysisVersion } from "@/lib/analysisVersion";
+import {
+  maxAnalysisVersion,
+  nextAnalysisVersion,
+} from "@/lib/analysisVersion";
 import { buildAnalysisResultId } from "@/lib/buildAnalysisResultId";
 import {
   getSupabase,
@@ -280,15 +283,15 @@ export async function POST(request: NextRequest) {
           .select("version")
           .eq("user_id", userId)
           .eq("repo_url", normalizedUrl)
-          .order("version", { ascending: false })
+          .not("version", "is", null)
+          .order("version", { ascending: false, nullsFirst: false })
           .limit(1);
 
         if (maxError) {
           console.error("[analyze] Supabase max version lookup failed:", maxError);
         }
 
-        const maxVersion =
-          maxRows?.[0]?.version != null ? Number(maxRows[0].version) : null;
+        const maxVersion = maxAnalysisVersion(maxRows ?? []);
         const decided = nextAnalysisVersion({
           latestCommit: latestRow?.commit_sha ?? null,
           latestVersion:

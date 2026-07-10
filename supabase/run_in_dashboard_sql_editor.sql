@@ -83,3 +83,50 @@ where a.result_id = ranked.result_id
 
 create index if not exists analyses_user_repo_version_idx
   on public.analyses (user_id, repo_url, version desc);
+
+-- Repair: renumber all versions chronologically (fixes NULL / duplicate-1 rows).
+-- Preflight: select count(*) from public.analyses where analyzed_at is null;
+with ranked_all as (
+  select
+    result_id,
+    row_number() over (
+      partition by user_id, repo_url
+      order by analyzed_at asc nulls last, result_id asc
+    ) as rn
+  from public.analyses
+)
+update public.analyses a
+set version = ranked_all.rn
+from ranked_all
+where a.result_id = ranked_all.result_id;
+
+-- Canonicalize repo_url (.git vs bare) then renumber versions again.
+update public.analyses
+set repo_url = regexp_replace(
+  regexp_replace(
+    regexp_replace(repo_url, '/+$', ''),
+    '\.git$',
+    '',
+    'i'
+  ),
+  '^(https?://)www\.(github\.com)',
+  '\1\2',
+  'i'
+)
+where repo_url ~* '\.git/?$'
+   or repo_url ~ '/$'
+   or repo_url ~* '://www\.github\.com';
+
+with ranked_canonical as (
+  select
+    result_id,
+    row_number() over (
+      partition by user_id, repo_url
+      order by analyzed_at asc nulls last, result_id asc
+    ) as rn
+  from public.analyses
+)
+update public.analyses a
+set version = ranked_canonical.rn
+from ranked_canonical
+where a.result_id = ranked_canonical.result_id;

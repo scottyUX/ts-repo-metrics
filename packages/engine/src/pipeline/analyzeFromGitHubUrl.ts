@@ -26,11 +26,21 @@ export interface AnalyzeFromGitHubUrlOptions {
 
 function normalizeGitHubUrl(input: string): string {
   const trimmed = input.trim();
+  // Prefer engine parse so .git / trailing slash collapse to canonical URL.
+  const early = parseGitHubUrl(
+    trimmed.startsWith("http://") || trimmed.startsWith("https://")
+      ? trimmed.replace(/^http:\/\//i, "https://").replace(/^(https:\/\/)www\./i, "$1")
+      : trimmed.includes("/") && !trimmed.includes("github.com")
+        ? `https://github.com/${trimmed}`
+        : `https://${trimmed.replace(/^www\./i, "")}`,
+  );
+  if (early) return early.url;
+
   if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
-    return trimmed;
+    return trimmed.replace(/\/+$/, "").replace(/\.git$/i, "");
   }
   if (trimmed.includes("/") && !trimmed.includes("github.com")) {
-    return `https://github.com/${trimmed}`;
+    return `https://github.com/${trimmed.replace(/\.git$/i, "")}`;
   }
   return `https://${trimmed}`;
 }

@@ -41,4 +41,10 @@ describe("normalizeGitHubUrl", () => {
   it("prefixes github.com path without scheme", () => {
     expect(normalizeGitHubUrl("github.com/x/y")).toBe("https://github.com/x/y");
   });
+
+  it("strips .git, trailing slash, and www", () => {
+    expect(normalizeGitHubUrl("https://www.github.com/a/b.git/")).toBe(
+      "https://github.com/a/b",
+    );
+  });
 });

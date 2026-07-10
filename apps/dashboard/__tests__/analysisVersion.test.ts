@@ -1,5 +1,27 @@
 import { describe, expect, it } from "vitest";
-import { nextAnalysisVersion } from "../lib/analysisVersion";
+import {
+  maxAnalysisVersion,
+  nextAnalysisVersion,
+} from "../lib/analysisVersion";
+
+describe("maxAnalysisVersion", () => {
+  it("ignores nulls and returns the highest numeric version", () => {
+    expect(
+      maxAnalysisVersion([{ version: null }, { version: 1 }, { version: 2 }]),
+    ).toBe(2);
+  });
+
+  it("returns null for empty or all-null rows", () => {
+    expect(maxAnalysisVersion([])).toBeNull();
+    expect(
+      maxAnalysisVersion([{ version: null }, { version: undefined }]),
+    ).toBeNull();
+  });
+
+  it("returns a single version when only one is present", () => {
+    expect(maxAnalysisVersion([{ version: 1 }])).toBe(1);
+  });
+});
 
 describe("nextAnalysisVersion", () => {
   it("returns version 1 when there is no prior analysis", () => {

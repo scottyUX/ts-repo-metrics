@@ -44,4 +44,22 @@ describe("normalizeGitHubUrl", () => {
   it("prefixes owner/repo with github.com", () => {
     expect(normalizeGitHubUrl("foo/bar")).toBe("https://github.com/foo/bar");
   });
+
+  it("strips .git suffix", () => {
+    expect(normalizeGitHubUrl("https://github.com/foo/bar.git")).toBe(
+      "https://github.com/foo/bar",
+    );
+  });
+
+  it("strips trailing slash and www", () => {
+    expect(normalizeGitHubUrl("https://www.github.com/foo/bar/")).toBe(
+      "https://github.com/foo/bar",
+    );
+  });
+
+  it("collapses .git and bare URL to the same canonical form", () => {
+    expect(normalizeGitHubUrl("https://github.com/JoshuaC-coder/repometricstest.git")).toBe(
+      normalizeGitHubUrl("https://github.com/JoshuaC-coder/repometricstest"),
+    );
+  });
 });
