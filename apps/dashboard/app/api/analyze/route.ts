@@ -12,6 +12,10 @@ import { NextRequest, NextResponse } from "next/server";
 import path from "node:path";
 import os from "node:os";
 import { randomUUID } from "node:crypto";
+import {
+  maxAnalysisVersion,
+  nextAnalysisVersion,
+} from "@/lib/analysisVersion";
 import { buildAnalysisResultId } from "@/lib/buildAnalysisResultId";
 import {
   getSupabase,
@@ -54,6 +58,8 @@ function analysesUpsertLooksLikeStaleSchema(error: {
     /\bteam_name\b/i.test(blob) ||
     /\bgithub_login\b/i.test(blob) ||
     /\bdoc_review_json\b/i.test(blob) ||
+    (/\bversion\b/i.test(blob) &&
+      (/\banalyses\b/i.test(blob) || error.code === "PGRST204")) ||
     (/\banalyses\b/.test(lowered) &&
       /\bcolumn\b/.test(lowered) &&
       /\b(find|exist|unknown|undefined)\b/.test(lowered))
@@ -61,7 +67,7 @@ function analysesUpsertLooksLikeStaleSchema(error: {
 }
 
 const ANALYSES_MIGRATION_HINT =
-  "Add columns on public.analyses: run supabase/migrations/20260522000000_analyses_course_metadata.sql in the Supabase SQL Editor (or the full snippet in supabase/run_in_dashboard_sql_editor.sql).";
+  "Add columns on public.analyses: run supabase/migrations/20260522000000_analyses_course_metadata.sql and supabase/migrations/20260709120000_analyses_version.sql in the Supabase SQL Editor (or the full snippet in supabase/run_in_dashboard_sql_editor.sql).";
 
 const ANALYSES_REPO_COMMIT_UNIQUE_HINT =
   "Run supabase/migrations/20260707120000_drop_analyses_repo_commit_unique.sql in the Supabase SQL Editor (or the full snippet in supabase/run_in_dashboard_sql_editor.sql).";
@@ -254,6 +260,65 @@ export async function POST(request: NextRequest) {
     }
 
     if (isSupabaseConfigured()) {
+      let version = 1;
+      let sameCommit = false;
+
+      if (userId) {
+        const sb = getSupabase();
+        const { data: latestRow, error: latestError } = await sb
+          .from("analyses")
+          .select("result_id, commit_sha, version")
+          .eq("user_id", userId)
+          .eq("repo_url", normalizedUrl)
+          .order("analyzed_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (latestError) {
+          console.error("[analyze] Supabase latest analysis lookup failed:", latestError);
+        }
+
+        const { data: maxRows, error: maxError } = await sb
+          .from("analyses")
+          .select("version")
+          .eq("user_id", userId)
+          .eq("repo_url", normalizedUrl)
+          .not("version", "is", null)
+          .order("version", { ascending: false, nullsFirst: false })
+          .limit(1);
+
+        if (maxError) {
+          console.error("[analyze] Supabase max version lookup failed:", maxError);
+        }
+
+        const maxVersion = maxAnalysisVersion(maxRows ?? []);
+        const decided = nextAnalysisVersion({
+          latestCommit: latestRow?.commit_sha ?? null,
+          latestVersion:
+            latestRow?.version != null ? Number(latestRow.version) : null,
+          maxVersion,
+          newCommit: commitSha,
+        });
+        version = decided.version;
+        sameCommit = decided.sameCommit;
+
+        // Replace legacy rows for this user+repo+commit (old result_id format),
+        // but never delete the canonical row we are about to upsert.
+        if (sameCommit && commitSha) {
+          const { error: deleteError } = await sb
+            .from("analyses")
+            .delete()
+            .eq("user_id", userId)
+            .eq("repo_url", normalizedUrl)
+            .eq("commit_sha", commitSha)
+            .neq("result_id", resultId);
+
+          if (deleteError) {
+            console.error("[analyze] Supabase delete legacy row failed:", deleteError);
+          }
+        }
+      }
+
       const row = {
         result_id: resultId,
         repo_url: normalizedUrl,
@@ -263,21 +328,8 @@ export async function POST(request: NextRequest) {
         course_id: courseIdVal,
         team_name: teamNameVal,
         github_login: githubLogin,
+        version,
       };
-
-      // Replace any legacy row for this user+repo+commit (old result_id format).
-      if (userId && commitSha) {
-        const { error: deleteError } = await getSupabase()
-          .from("analyses")
-          .delete()
-          .eq("user_id", userId)
-          .eq("repo_url", normalizedUrl)
-          .eq("commit_sha", commitSha);
-
-        if (deleteError) {
-          console.error("[analyze] Supabase delete legacy row failed:", deleteError);
-        }
-      }
 
       const { error } = await getSupabase()
         .from("analyses")

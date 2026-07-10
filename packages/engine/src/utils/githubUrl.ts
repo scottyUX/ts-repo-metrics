@@ -21,7 +21,8 @@ export interface ParsedGitHubUrl {
  * @returns Parsed URL with owner and repo, or null if invalid.
  */
 export function parseGitHubUrl(input: string): ParsedGitHubUrl | null {
-  const normalized = input.trim().replace(/\/+$/, "");
+  let normalized = input.trim();
+  while (normalized.endsWith("/")) normalized = normalized.slice(0, -1);
   const match = normalized.match(GITHUB_URL_RE);
   if (!match) return null;
   let [, owner, repo] = match;
