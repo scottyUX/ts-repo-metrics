@@ -1,7 +1,8 @@
 /**
  * POST /api/ai-usage
  * Persists the current user's AI usage CSV for an existing analysis result.
- * Writes to ai_usage_csvs (result_id, user_id) so each user's upload is isolated.
+ * Inserts a new row into ai_usage_csvs (result_id, user_id, version) for every
+ * upload rather than overwriting the last one, so prior versions are kept.
  */
 
 export const runtime = "nodejs";
@@ -19,7 +20,7 @@ import { ANALYZE_SIGN_IN_REQUIRED_MESSAGE } from "@/lib/analyzeConstants";
 import { devStoreAiUsageCsv } from "@/lib/devAiUsageStore";
 
 const AI_USAGE_MIGRATION_HINT =
-  "Run supabase/migrations/20260702000000_ai_usage_csvs_per_user.sql in the Supabase SQL Editor.";
+  "Run supabase/migrations/20260709000000_ai_usage_csvs_versioning.sql in the Supabase SQL Editor.";
 
 function aiUsageCsvsTableMissing(error: {
   message?: string;
@@ -102,16 +103,15 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // Upsert into the per-user table. RLS enforces user_id = auth.uid().
-      const { error: upsertError } = await userSb
+      // Insert a new version into the per-user table. RLS enforces
+      // user_id = auth.uid(); the DB trigger assigns the next version number
+      // for this (result_id, user_id) pair, so prior uploads are never lost.
+      const { error: insertError } = await userSb
         .from("ai_usage_csvs")
-        .upsert(
-          { result_id: resultId, user_id: user.id, csv_text: csvText },
-          { onConflict: "result_id,user_id" },
-        );
+        .insert({ result_id: resultId, user_id: user.id, csv_text: csvText });
 
-      if (upsertError) {
-        if (aiUsageCsvsTableMissing(upsertError)) {
+      if (insertError) {
+        if (aiUsageCsvsTableMissing(insertError)) {
           return NextResponse.json(
             {
               error:
