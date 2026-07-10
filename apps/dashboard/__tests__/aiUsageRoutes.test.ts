@@ -12,10 +12,16 @@ const tableResults: Record<
 
 function makeChain(table: string) {
   const terminal = () => Promise.resolve(tableResults[table] ?? { data: null, error: null });
-  const eq = vi.fn(() => ({ maybeSingle: terminal, eq: vi.fn(() => ({ maybeSingle: terminal })) }));
+  const limit = vi.fn(() => ({ maybeSingle: terminal }));
+  const order = vi.fn(() => ({ limit, maybeSingle: terminal }));
+  const eq = vi.fn(() => ({
+    maybeSingle: terminal,
+    order,
+    eq: vi.fn(() => ({ maybeSingle: terminal })),
+  }));
   const select = vi.fn(() => ({ eq, maybeSingle: terminal }));
-  const upsert = vi.fn(() => Promise.resolve(tableResults[table] ?? { error: null }));
-  return { select, upsert, eq };
+  const insert = vi.fn(() => Promise.resolve(tableResults[table] ?? { error: null }));
+  return { select, insert, eq };
 }
 
 const fromFn = vi.fn((table: string) => makeChain(table));
@@ -116,7 +122,7 @@ describe("ai usage routes — Supabase mode", () => {
     vi.mocked(isSupabaseConfigured).mockReturnValue(true);
   });
 
-  it("upserts into ai_usage_csvs and returns 200", async () => {
+  it("inserts a new version into ai_usage_csvs and returns 200", async () => {
     tableResults["analyses"] = { data: { result_id: "owner-repo-abc" }, error: null };
     tableResults["ai_usage_csvs"] = { error: null };
 
