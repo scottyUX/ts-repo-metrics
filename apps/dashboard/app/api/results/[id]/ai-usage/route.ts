@@ -1,7 +1,8 @@
 /**
  * GET /api/results/[id]/ai-usage
- * Returns the current user's persisted AI usage CSV for an analysis.
- * Reads from ai_usage_csvs (result_id, user_id) so each user's upload is isolated.
+ * Returns the current user's most recently uploaded AI usage CSV for an
+ * analysis. Reads from ai_usage_csvs (result_id, user_id, version) — every
+ * upload is kept as its own row, so this takes the highest version.
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -49,6 +50,8 @@ export async function GET(
     .from("ai_usage_csvs")
     .select("csv_text")
     .eq("result_id", resultId)
+    .order("version", { ascending: false })
+    .limit(1)
     .maybeSingle();
 
   if (error || !data?.csv_text) {
