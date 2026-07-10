@@ -7,6 +7,18 @@ const GITHUB_URL_RE =
   /^(?:https?:\/\/)?(?:www\.)?github\.com\/([a-zA-Z0-9_.-]+)\/([a-zA-Z0-9_.-]+)(?:\/)?(?:\.[a-zA-Z]+)?$/;
 const OWNER_REPO_RE = /^[a-zA-Z0-9_.-]+\/[a-zA-Z0-9_.-]+$/;
 
+function stripTrailingSlashes(value: string): string {
+  let out = value;
+  while (out.endsWith("/")) out = out.slice(0, -1);
+  return out;
+}
+
+function stripGitSuffix(value: string): string {
+  return value.length >= 4 && value.toLowerCase().endsWith(".git")
+    ? value.slice(0, -4)
+    : value;
+}
+
 export function isValidGitHubUrl(input: string): boolean {
   if (!input || typeof input !== "string") return false;
   const trimmed = input.trim();
@@ -21,26 +33,45 @@ export function isValidGitHubUrl(input: string): boolean {
  */
 export function normalizeGitHubUrl(input: string): string {
   const trimmed = input.trim();
-  const ownerRepo =
-    trimmed.match(
-      /^(?:https?:\/\/)?(?:www\.)?github\.com\/([a-zA-Z0-9_.-]+)\/([a-zA-Z0-9_.-]+?)(?:\.git)?\/?$/i,
-    ) ??
-    (OWNER_REPO_RE.test(trimmed)
-      ? trimmed.match(/^([a-zA-Z0-9_.-]+)\/([a-zA-Z0-9_.-]+?)(?:\.git)?$/i)
-      : null);
 
-  if (ownerRepo) {
-    const owner = ownerRepo[1]!;
-    const repo = ownerRepo[2]!.replace(/\.git$/i, "");
+  // Prefer URL parsing for absolute URLs so host checks are exact.
+  if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+    try {
+      const u = new URL(trimmed);
+      const host = u.hostname.toLowerCase();
+      if (host === "github.com" || host === "www.github.com") {
+        const parts = u.pathname.split("/").filter(Boolean);
+        if (parts.length >= 2) {
+          const owner = parts[0]!;
+          const repo = stripGitSuffix(parts[1]!);
+          if (
+            /^[a-zA-Z0-9_.-]+$/.test(owner) &&
+            /^[a-zA-Z0-9_.-]+$/.test(repo)
+          ) {
+            return `https://github.com/${owner}/${repo}`;
+          }
+        }
+      }
+    } catch {
+      // fall through
+    }
+  }
+
+  const ownerRepoMatch = trimmed.match(
+    /^(?:(?:https?:\/\/)?(?:www\.)?github\.com\/)?([a-zA-Z0-9_.-]+)\/([a-zA-Z0-9_.-]+)$/i,
+  );
+  if (ownerRepoMatch) {
+    const owner = ownerRepoMatch[1]!;
+    const repo = stripGitSuffix(ownerRepoMatch[2]!);
     return `https://github.com/${owner}/${repo}`;
   }
 
-  let fallback = trimmed.replace(/\/+$/, "").replace(/\.git$/i, "");
-  if (fallback.startsWith("http://") || fallback.startsWith("https://")) {
-    return fallback.replace(/^(https?:\/\/)www\./i, "$1");
-  }
+  const fallback = stripGitSuffix(stripTrailingSlashes(trimmed));
   if (OWNER_REPO_RE.test(fallback)) {
     return `https://github.com/${fallback}`;
   }
-  return `https://${fallback.replace(/^www\./i, "")}`;
+  if (fallback.startsWith("http://") || fallback.startsWith("https://")) {
+    return fallback;
+  }
+  return `https://${fallback}`;
 }

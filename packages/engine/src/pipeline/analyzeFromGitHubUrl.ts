@@ -24,25 +24,54 @@ export interface AnalyzeFromGitHubUrlOptions {
   githubToken?: string;
 }
 
+function stripTrailingSlashes(value: string): string {
+  let out = value;
+  while (out.endsWith("/")) out = out.slice(0, -1);
+  return out;
+}
+
+function stripGitSuffix(value: string): string {
+  return value.length >= 4 && value.toLowerCase().endsWith(".git")
+    ? value.slice(0, -4)
+    : value;
+}
+
+/**
+ * Canonical https://github.com/{owner}/{repo} for clone/API paths.
+ * Avoids substring host checks and polynomial trailing-slash regexes (CodeQL).
+ */
 function normalizeGitHubUrl(input: string): string {
   const trimmed = input.trim();
-  // Prefer engine parse so .git / trailing slash collapse to canonical URL.
-  const early = parseGitHubUrl(
-    trimmed.startsWith("http://") || trimmed.startsWith("https://")
-      ? trimmed.replace(/^http:\/\//i, "https://").replace(/^(https:\/\/)www\./i, "$1")
-      : trimmed.includes("/") && !trimmed.includes("github.com")
-        ? `https://github.com/${trimmed}`
-        : `https://${trimmed.replace(/^www\./i, "")}`,
-  );
-  if (early) return early.url;
+  let candidate = trimmed;
 
-  if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
-    return trimmed.replace(/\/+$/, "").replace(/\.git$/i, "");
+  if (trimmed.startsWith("http://")) {
+    candidate = `https://${trimmed.slice("http://".length)}`;
+  } else if (!trimmed.startsWith("https://")) {
+    const lower = trimmed.toLowerCase();
+    if (lower.startsWith("github.com/") || lower.startsWith("www.github.com/")) {
+      candidate = `https://${lower.startsWith("www.") ? trimmed.slice(4) : trimmed}`;
+    } else if (!trimmed.includes("://") && trimmed.includes("/")) {
+      // owner/repo shorthand (no scheme)
+      candidate = `https://github.com/${trimmed}`;
+    } else {
+      candidate = `https://${trimmed}`;
+    }
   }
-  if (trimmed.includes("/") && !trimmed.includes("github.com")) {
-    return `https://github.com/${trimmed.replace(/\.git$/i, "")}`;
+
+  try {
+    const u = new URL(candidate);
+    if (u.hostname.toLowerCase() === "www.github.com") {
+      u.hostname = "github.com";
+      candidate = u.toString();
+    }
+  } catch {
+    // keep candidate
   }
-  return `https://${trimmed}`;
+
+  const parsed = parseGitHubUrl(candidate);
+  if (parsed) return parsed.url;
+
+  return stripGitSuffix(stripTrailingSlashes(candidate));
 }
 
 function isGitUnavailable(err: unknown): boolean {
