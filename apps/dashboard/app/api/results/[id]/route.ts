@@ -16,11 +16,29 @@ import {
   isUserSupabaseConfigured,
 } from "@/lib/supabase/server-user";
 import { devGetReport } from "@/lib/devReportStore";
+import { analysisResultIdLookupIds } from "@/lib/buildAnalysisResultId";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 const isDev = process.env.NODE_ENV === "development";
 
-/** Avoid broad prefix scans on very short strings (IDs are owner-repo-commit, typically longer). */
+/** Avoid broad prefix scans on very short strings (IDs are user-owner-repo-commit, typically longer). */
 const MIN_PARTIAL_RESULT_ID_LENGTH = 20;
+
+async function fetchReportByExactId(
+  supabase: SupabaseClient,
+  candidateId: string,
+): Promise<{ report_json: unknown; result_id: string } | null> {
+  const { data, error } = await supabase
+    .from("analyses")
+    .select("report_json, result_id")
+    .eq("result_id", candidateId)
+    .single();
+
+  if (data && !error) {
+    return data;
+  }
+  return null;
+}
 
 export async function GET(
   _request: NextRequest,
@@ -47,28 +65,36 @@ export async function GET(
       ? await createUserSupabaseServerClient()
       : getSupabase();
 
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    const lookupIds = analysisResultIdLookupIds(user?.id ?? null, trimmedId);
+
     // Retry logic to handle race condition (Supabase replication delay)
     const maxRetries = 3;
     const retryDelay = 500; // ms
-    let data = null;
-    let error = null;
+    let data: { report_json: unknown; result_id: string } | null = null;
+    let error: { message: string; code?: string; details?: string } | null =
+      null;
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
-      const result = await supabase
-        .from("analyses")
-        .select("report_json, result_id")
-        .eq("result_id", trimmedId)
-        .single();
-      
-      data = result.data;
-      error = result.error;
+      for (const candidateId of lookupIds) {
+        const match = await fetchReportByExactId(supabase, candidateId);
+        if (match) {
+          data = match;
+          error = null;
+          break;
+        }
+      }
 
-      if (data && !error) {
+      if (data) {
         if (isDev) {
           console.log(`[results] Found on attempt ${attempt}`);
         }
         return NextResponse.json(data.report_json);
       }
+
+      error = { message: "Result not found" };
 
       // If not found and not last attempt, wait and retry
       if (attempt < maxRetries) {
@@ -106,42 +132,31 @@ export async function GET(
       }
     }
 
-    // Final error handling
+    // Exact + prefix lookups failed — nothing left to return.
     if (error) {
       console.error("[results] Supabase error:", error.message, error.code, error.details);
-      if (isDev) {
-        const { data: all } = await supabase
-          .from("analyses")
-          .select("result_id")
-          .limit(10);
-        if (isDev) {
-          console.log(
-            "[results] Available result_ids:",
-            all?.map((r) => r.result_id),
-          );
-        }
-        return NextResponse.json(
-          {
-            error: "Result not found",
-            debug: { searched: trimmedId, available: all?.map((r) => r.result_id) },
-          },
-          { status: 404 },
-        );
-      }
-      return NextResponse.json({ error: "Result not found" }, { status: 404 });
-    }
-
-    if (!data) {
-      if (isDev) {
-        console.log("[results] No row found for id:", trimmedId);
-      }
-      return NextResponse.json({ error: "Result not found" }, { status: 404 });
+    } else if (isDev) {
+      console.log("[results] No row found for id:", trimmedId);
     }
 
     if (isDev) {
-      console.log("[results] Found report for id:", trimmedId);
+      const { data: all } = await supabase
+        .from("analyses")
+        .select("result_id")
+        .limit(10);
+      console.log(
+        "[results] Available result_ids:",
+        all?.map((r) => r.result_id),
+      );
+      return NextResponse.json(
+        {
+          error: "Result not found",
+          debug: { searched: trimmedId, available: all?.map((r) => r.result_id) },
+        },
+        { status: 404 },
+      );
     }
-    return NextResponse.json(data.report_json);
+    return NextResponse.json({ error: "Result not found" }, { status: 404 });
   } catch (err) {
     console.error("[results] Exception:", err);
     const body: { error: string; details?: string } = {

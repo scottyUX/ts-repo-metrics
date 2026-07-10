@@ -18,6 +18,10 @@ import {
 } from "@/lib/supabase/server-user";
 import { ANALYZE_SIGN_IN_REQUIRED_MESSAGE } from "@/lib/analyzeConstants";
 import { devStoreAiUsageCsv } from "@/lib/devAiUsageStore";
+import { userScopedResultId } from "@/lib/buildAnalysisResultId";
+import { resolveAnalysisRow } from "@/lib/resolveAnalysisRow";
+
+const AI_USAGE_RESOLVE_OPTIONS = { preferUserScope: true } as const;
 
 const AI_USAGE_MIGRATION_HINT =
   "Run supabase/migrations/20260709000000_ai_usage_csvs_versioning.sql in the Supabase SQL Editor.";
@@ -87,28 +91,30 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (isSupabaseConfigured()) {
-      // Verify the analysis exists and is readable by this user (RLS allows
-      // null-owner rows and own rows).
-      const { data: row, error: selectError } = await userSb
-        .from("analyses")
-        .select("result_id")
-        .eq("result_id", resultId)
-        .maybeSingle();
+    let savedResultId = resultId;
 
-      if (selectError || !row) {
+    if (isSupabaseConfigured()) {
+      const resolved = await resolveAnalysisRow(
+        resultId,
+        userSb,
+        AI_USAGE_RESOLVE_OPTIONS,
+      );
+      if (!resolved.ok) {
         return NextResponse.json(
           { error: "Analysis not found for this result.", code: "not_found" },
           { status: 404 },
         );
       }
 
-      // Insert a new version into the per-user table. RLS enforces
-      // user_id = auth.uid(); the DB trigger assigns the next version number
-      // for this (result_id, user_id) pair, so prior uploads are never lost.
-      const { error: insertError } = await userSb
+      savedResultId = resolved.resultId;
+
+      // Upsert into the per-user table. RLS enforces user_id = auth.uid().
+      const { error: upsertError } = await userSb
         .from("ai_usage_csvs")
-        .insert({ result_id: resultId, user_id: user.id, csv_text: csvText });
+        .upsert(
+          { result_id: savedResultId, user_id: user.id, csv_text: csvText },
+          { onConflict: "result_id,user_id" },
+        );
 
       if (insertError) {
         if (aiUsageCsvsTableMissing(insertError)) {
@@ -128,7 +134,9 @@ export async function POST(request: NextRequest) {
         );
       }
     } else if (isDevReportMemoryFallback()) {
-      devStoreAiUsageCsv(resultId, csvText);
+      const scopedResultId = userScopedResultId(user.id, resultId);
+      devStoreAiUsageCsv(user.id, scopedResultId, csvText);
+      savedResultId = scopedResultId;
     } else {
       return NextResponse.json(
         { error: "Storage is not configured." },
@@ -136,7 +144,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    return NextResponse.json({ resultId, csvText });
+    return NextResponse.json({ resultId: savedResultId, csvText });
   } catch (err) {
     console.error("[ai-usage]", err instanceof Error ? err.message : err);
     const message =

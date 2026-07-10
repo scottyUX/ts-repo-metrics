@@ -4,6 +4,8 @@ This guide describes the current dashboard **AI Usage** tab. The tab now works f
 `ai_usage_trace.csv` export produced by `agent_stats`, then persists that raw CSV on the
 analysis record so the metrics reload with the result page.
 
+**For students:** see the step-by-step walkthrough in [STUDENT_AI_USAGE_GUIDE.md](./STUDENT_AI_USAGE_GUIDE.md) (sign in → analyze repo → AI Usage tab → copy prompt → upload CSV → read metrics).
+
 The primary student workflow is now:
 
 1. choose `Claude Code`, `Codex`, `Gemini`, or `Cursor` in the AI Usage tab

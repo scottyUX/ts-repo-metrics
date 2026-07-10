@@ -15,6 +15,10 @@ import {
   isUserSupabaseConfigured,
 } from "@/lib/supabase/server-user";
 import { devGetAiUsageCsv } from "@/lib/devAiUsageStore";
+import { userScopedResultId } from "@/lib/buildAnalysisResultId";
+import { resolveAnalysisRow } from "@/lib/resolveAnalysisRow";
+
+const AI_USAGE_RESOLVE_OPTIONS = { preferUserScope: true } as const;
 
 export async function GET(
   _request: NextRequest,
@@ -24,8 +28,29 @@ export async function GET(
   const resultId = id.trim();
 
   if (isDevReportMemoryFallback()) {
-    const cached = devGetAiUsageCsv(resultId);
-    if (cached) return NextResponse.json({ resultId, csvText: cached });
+    if (!isUserSupabaseConfigured()) {
+      return NextResponse.json(
+        { error: "Storage is not configured." },
+        { status: 503 },
+      );
+    }
+
+    const userSb = await createUserSupabaseServerClient();
+    const {
+      data: { user },
+    } = await userSb.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const scopedResultId = userScopedResultId(user.id, resultId);
+    const cached =
+      devGetAiUsageCsv(user.id, scopedResultId) ??
+      devGetAiUsageCsv(user.id, resultId);
+    if (cached) {
+      return NextResponse.json({ resultId: scopedResultId, csvText: cached });
+    }
     return NextResponse.json({ error: "AI usage not found" }, { status: 404 });
   }
 
@@ -45,18 +70,28 @@ export async function GET(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const resolved = await resolveAnalysisRow(
+    resultId,
+    userSb,
+    AI_USAGE_RESOLVE_OPTIONS,
+  );
+  if (!resolved.ok) {
+    return NextResponse.json({ error: "AI usage not found" }, { status: 404 });
+  }
+
   // RLS on ai_usage_csvs enforces user_id = auth.uid(); no manual filter needed.
   const { data, error } = await userSb
     .from("ai_usage_csvs")
     .select("csv_text")
-    .eq("result_id", resultId)
-    .order("version", { ascending: false })
-    .limit(1)
+    .eq("result_id", resolved.resultId)
     .maybeSingle();
 
   if (error || !data?.csv_text) {
     return NextResponse.json({ error: "AI usage not found" }, { status: 404 });
   }
 
-  return NextResponse.json({ resultId, csvText: data.csv_text as string });
+  return NextResponse.json({
+    resultId: resolved.resultId,
+    csvText: data.csv_text as string,
+  });
 }

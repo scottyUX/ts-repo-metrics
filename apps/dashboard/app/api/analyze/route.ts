@@ -12,6 +12,7 @@ import { NextRequest, NextResponse } from "next/server";
 import path from "node:path";
 import os from "node:os";
 import { randomUUID } from "node:crypto";
+import { buildAnalysisResultId } from "@/lib/buildAnalysisResultId";
 import {
   getSupabase,
   isSupabaseConfigured,
@@ -61,6 +62,21 @@ function analysesUpsertLooksLikeStaleSchema(error: {
 
 const ANALYSES_MIGRATION_HINT =
   "Add columns on public.analyses: run supabase/migrations/20260522000000_analyses_course_metadata.sql in the Supabase SQL Editor (or the full snippet in supabase/run_in_dashboard_sql_editor.sql).";
+
+const ANALYSES_REPO_COMMIT_UNIQUE_HINT =
+  "Run supabase/migrations/20260707120000_drop_analyses_repo_commit_unique.sql in the Supabase SQL Editor (or the full snippet in supabase/run_in_dashboard_sql_editor.sql).";
+
+function analysesUpsertLooksLikeRepoCommitUnique(error: {
+  message?: string;
+  code?: string | null;
+  details?: string | null;
+}): boolean {
+  const blob = `${error.message ?? ""} ${error.details ?? ""}`;
+  return (
+    error.code === "23505" &&
+    /\banalyses_repo_commit_unique\b/i.test(blob)
+  );
+}
 
 // ---------------------------------------------------------------------------
 // Course allow-list
@@ -216,12 +232,14 @@ export async function POST(request: NextRequest) {
 
     let resultId: string;
     if (parsed) {
-      const suffix = commitSha
-        ? commitSha.slice(0, 12)
-        : randomUUID().replace(/-/g, "").slice(0, 12);
-      resultId = `${parsed.owner}-${parsed.repo}-${suffix}`;
+      resultId = buildAnalysisResultId({
+        userId: authUser.id,
+        owner: parsed.owner,
+        repo: parsed.repo,
+        commitSha,
+      });
     } else {
-      resultId = randomUUID();
+      resultId = `${authUser.id}-${randomUUID()}`;
     }
 
     const submissionPayload = {
@@ -247,19 +265,40 @@ export async function POST(request: NextRequest) {
         github_login: githubLogin,
       };
 
+      // Replace any legacy row for this user+repo+commit (old result_id format).
+      if (userId && commitSha) {
+        const { error: deleteError } = await getSupabase()
+          .from("analyses")
+          .delete()
+          .eq("user_id", userId)
+          .eq("repo_url", normalizedUrl)
+          .eq("commit_sha", commitSha);
+
+        if (deleteError) {
+          console.error("[analyze] Supabase delete legacy row failed:", deleteError);
+        }
+      }
+
       const { error } = await getSupabase()
         .from("analyses")
         .upsert(row, { onConflict: "result_id" });
 
       if (error) {
         console.error("[analyze] Supabase upsert failed:", error);
+        const repoCommitUnique = analysesUpsertLooksLikeRepoCommitUnique(error);
         const schemaStale = analysesUpsertLooksLikeStaleSchema(error);
         const respBody: Record<string, unknown> = {
-          error: schemaStale
-            ? "Could not save the report: database is missing newer columns."
-            : "Failed to save result.",
+          error: repoCommitUnique
+            ? "Could not save the report: database still enforces one row per repo+commit for all users."
+            : schemaStale
+              ? "Could not save the report: database is missing newer columns."
+              : "Failed to save result.",
           status: "failed",
         };
+        if (repoCommitUnique) {
+          respBody.code = "analyses_repo_commit_unique";
+          respBody.hint = ANALYSES_REPO_COMMIT_UNIQUE_HINT;
+        }
         if (schemaStale) {
           respBody.code = "analyses_schema_mismatch";
           respBody.hint = ANALYSES_MIGRATION_HINT;
