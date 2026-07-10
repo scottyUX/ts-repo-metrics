@@ -177,7 +177,7 @@ describe("ai usage routes — Supabase mode", () => {
     vi.mocked(isSupabaseConfigured).mockReturnValue(true);
   });
 
-  it("upserts into ai_usage_csvs and returns canonical resultId", async () => {
+  it("inserts into ai_usage_csvs and returns canonical resultId", async () => {
     tableResults["ai_usage_csvs"] = { error: null };
 
     const { POST } = await import("../app/api/ai-usage/route");

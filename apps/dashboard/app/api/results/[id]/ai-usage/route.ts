@@ -80,10 +80,13 @@ export async function GET(
   }
 
   // RLS on ai_usage_csvs enforces user_id = auth.uid(); no manual filter needed.
+  // Order by version desc so maybeSingle returns the latest upload.
   const { data, error } = await userSb
     .from("ai_usage_csvs")
     .select("csv_text")
     .eq("result_id", resolved.resultId)
+    .order("version", { ascending: false })
+    .limit(1)
     .maybeSingle();
 
   if (error || !data?.csv_text) {

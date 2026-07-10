@@ -108,13 +108,16 @@ export async function POST(request: NextRequest) {
 
       savedResultId = resolved.resultId;
 
-      // Upsert into the per-user table. RLS enforces user_id = auth.uid().
-      const { error: upsertError } = await userSb
+      // Insert a new version into the per-user table. RLS enforces
+      // user_id = auth.uid(); the DB trigger assigns the next version number
+      // for this (result_id, user_id) pair, so prior uploads are never lost.
+      const { error: insertError } = await userSb
         .from("ai_usage_csvs")
-        .upsert(
-          { result_id: savedResultId, user_id: user.id, csv_text: csvText },
-          { onConflict: "result_id,user_id" },
-        );
+        .insert({
+          result_id: savedResultId,
+          user_id: user.id,
+          csv_text: csvText,
+        });
 
       if (insertError) {
         if (aiUsageCsvsTableMissing(insertError)) {
