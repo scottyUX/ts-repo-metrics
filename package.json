@@ -10,6 +10,8 @@
     "dashboard:build": "cd packages/engine && npm run build && cd ../.. && cd apps/dashboard && npm run build",
     "dev": "tsx src/cli.ts",
     "build": "tsc -p tsconfig.json",
+    "build:engine": "cd packages/engine && npm run build",
+    "postinstall": "npm run build:engine",
     "start": "node dist/cli.js",
     "test": "vitest run",
     "test:watch": "vitest"
