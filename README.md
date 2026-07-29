@@ -169,6 +169,24 @@ When the repo contains `.tsx` files, the report also includes **`reactMetrics`**
 | `phase3` | `extract/silentFailures`, `collect/weightedRedundancy`, `functionMetrics` | Optional pathology block: silent-failure density (TSX), monolithic component rate, weighted structural redundancy (jscpd) |
 | Per-function (in `perFile[].functionMetrics`) | `tokenScanner`, `halstead`, `cognitiveComplexity`, `utils/metrics` | Lexical / cognitive: Halstead volume, cyclomatic, cognitive complexity, GRAD-AI `MI_raw` / `MI_norm`, `isReactComponent` heuristic |
 
+### What counts as a function
+
+Every per-function metric is emitted for each node matching `FUNCTION_NODE_TYPES`
+(`packages/engine/src/utils/constants.ts`):
+
+`function_declaration`, `generator_function_declaration`, `method_definition`,
+`arrow_function`, `function`, `function_expression`, `generator_function`.
+
+`function_expression` is the node type tree-sitter-typescript 0.23 emits for
+`const x = function () {}`; older tree-sitter-javascript grammars emit `function`
+for the same construct, so both are listed. This matters for cross-corpus
+comparison: before `function_expression` was recognized, function expressions
+were absent from every metric **and** their bodies were counted into the
+enclosing function's complexity instead. Reports generated before that fix
+therefore undercount functions and overcount the complexity of their parents in
+any codebase using `function () {}` expressions. See
+[research/validation/findings.md](research/validation/findings.md) (D10).
+
 ## Dashboard
 
 A Next.js dashboard app in `apps/dashboard/` provides a web UI:
