@@ -187,6 +187,24 @@ therefore undercount functions and overcount the complexity of their parents in
 any codebase using `function () {}` expressions. See
 [research/validation/findings.md](research/validation/findings.md) (D10).
 
+### Failure modes: skipped files
+
+`filesSkipped` counts files that were discovered but never parsed, so their
+functions are absent from every metric in the report. Each one logs a named
+reason to stderr — a skip is never silent:
+
+| stderr reason | Meaning |
+|---------------|---------|
+| `could not read file` | The file could not be read from disk (permissions, broken symlink, disappeared mid-run) |
+| `file_too_large_for_parser (<n> chars)` | The source exceeded the Tree-sitter read buffer. Should be unreachable: the parser now sizes its buffer to the source. If you see this, report it — it means whole files are missing from the metrics |
+| `parse_error: <message>` | Tree-sitter rejected the source for some other reason |
+
+Historically a file at or above 32,768 characters failed with a bare
+`Invalid argument` and was counted as a generic skip, which silently removed
+9.3% of this repository's functions from every metric. `filesSkipped` should
+normally be `0`; a non-zero value means the report describes less code than the
+repository contains, so check the stderr log before comparing runs.
+
 ## Dashboard
 
 A Next.js dashboard app in `apps/dashboard/` provides a web UI:
