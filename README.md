@@ -200,9 +200,10 @@ reason to stderr — a skip is never silent:
 
 Historically a file at or above 32,768 characters failed with a bare
 `Invalid argument` and was counted as a generic skip, which silently removed
-9.3% of this repository's functions from every metric. `filesSkipped` should
-normally be `0`; a non-zero value means the report describes less code than the
-repository contains, so check the stderr log before comparing runs.
+9.3% of this repository's functions from every metric. `filesSkipped` is
+normally absent — the key is omitted entirely when nothing was skipped, so
+there is no `0` to read. If it is present at all, the report describes less code
+than the repository contains, so check the stderr log before comparing runs.
 
 ## Dashboard
 
