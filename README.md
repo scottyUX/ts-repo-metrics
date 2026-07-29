@@ -232,10 +232,12 @@ repo-metrics/
 |--------|---------|-------------|
 | `dev` | `tsx src/cli.ts` | Run CLI from TypeScript |
 | `build` | `tsc -p tsconfig.json` | Compile root CLI to `dist/` |
+| `build:engine` | `cd packages/engine && npm run build` | Compile `packages/engine` to `dist/` |
+| `postinstall` | `npm run build:engine` | Runs automatically after `npm install` so the engine is built and the CLI is immediately runnable |
 | `start` | `node dist/cli.js` | Run the compiled CLI |
 | `dashboard` | `cd apps/dashboard && npm run dev` | Start Next.js dashboard |
 | `dashboard:build` | Build engine then Next | Build `packages/engine` then `apps/dashboard` (for production/Vercel) |
-| `test` | `vitest run` | Run engine tests and dashboard threshold tests (`packages/engine/__tests__/`, `apps/dashboard/__tests__/`) |
+| `test` | `vitest run` | Run the full suite: engine tests and dashboard tests (`packages/engine/__tests__/`, `apps/dashboard/__tests__/`). Both are covered by a single root `npm install` — the workspace setup installs the dashboard's dependencies, which three of its test files need |
 | `test:watch` | `vitest` | Run tests in watch mode |
 
 ## License
