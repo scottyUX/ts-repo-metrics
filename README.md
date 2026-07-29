@@ -5,7 +5,7 @@ A TypeScript CLI tool that statically analyzes TypeScript, TSX, JavaScript, JSX,
 ## Prerequisites
 
 - Node.js >= 18
-- npm
+- npm >= 7 (workspace support)
 - Vitest (installed as devDependency for tests)
 
 ## Install
@@ -15,6 +15,13 @@ git clone https://github.com/scottyUX/ts-repo-metrics.git
 cd ts-repo-metrics
 npm install
 ```
+
+That single command is enough — no second build step. This repo is an npm
+workspace (`packages/engine`, `apps/dashboard`), so one root `npm install`
+installs every package's dependencies, and a root `postinstall` compiles
+`packages/engine` to `dist/`. The CLI and the dashboard both import
+`@repo-metrics/engine` from that build output, so skipping it would leave
+`npm run dev` failing with `MODULE_NOT_FOUND`.
 
 ## Usage
 
