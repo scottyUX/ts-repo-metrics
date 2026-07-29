@@ -158,6 +158,9 @@ When the repo contains `.tsx` files, the report also includes **`reactMetrics`**
 | `testCoverageProxy` | LOC | testLOC / sourceLOC ratio and classification |
 | `duplication` | jscpd | Duplicate percentage, lines, clone clusters |
 | `git` | simple-git or GitHub API (fallback) | Commit count, sizes, frequency, large commit ratio. On Vercel (no git CLI), metrics come from the GitHub REST API when `GITHUB_TOKEN` is set. |
+| `gitMetricsV2` | `collect/gitMetricsV2` | Epic D extended git metrics: `commitStats`, `burstStats`, `entropy`, `churn`, `refactorBehavior`, `testCoupling`, and `commitCalendar` when commit timestamps were available. `null` when no history was analyzed |
+| `commitCalendar` | `collect/gitMetricsV2` or GitHub API | Mon–Sun × week commit heatmap (`grid`, `columnWeekStarts`, `busiestWeekdayIndex`). Top-level copy is populated when history came from the GitHub API only; consumers should prefer `gitMetricsV2?.commitCalendar ?? commitCalendar` |
+| `contributors` | `collect/gitMetricsV2` | Per-contributor activity: commit count, lines added/deleted, test vs source churn and files touched, per-author `commitStats`. Present when history was analyzed (local git or API) |
 | `framework` | package.json | React, Next.js, Express, NestJS, Fastify, or Node |
 | `reactMetrics` | `extract/react` (TSX only) | React/TSX: components with JSX, hooks, nested JSX depth, Ferreira/Tampere-style flags, prop pass-through MVP, hook-safety heuristics |
 | `phase3` | `extract/silentFailures`, `collect/weightedRedundancy`, `functionMetrics` | Optional pathology block: silent-failure density (TSX), monolithic component rate, weighted structural redundancy (jscpd) |
