@@ -4,31 +4,51 @@ This document describes the complete JSON report produced by `ts-repo-metrics` (
 
 ## Top-level structure (`RepoReport`)
 
-| Field | Type | Nullable | Description |
-|-------|------|----------|-------------|
-| `repoPath` | `string` | no | Absolute path to the analyzed repository |
-| `source` | `SourceInfo` | no | Origin metadata (local path vs cloned GitHub URL) |
-| `filesAnalyzed` | `number` | no | Total `.ts`/`.tsx`/`.js`/`.jsx`/`.py` files successfully parsed |
-| `filesSkipped` | `number` | **yes** | Files skipped due to read or parse errors |
-| `analysisSkipped` | `UnsupportedFrameworkInfo` | **yes** | Present when static analysis was skipped (web2py or Django) |
-| `analyzer_version` | `string` | **yes** | Analyzer package version (from `packages/engine/package.json` when run via the engine — CLI or dashboard) |
-| `analysis_timestamp` | `string` | **yes** | ISO 8601 timestamp when analysis ran |
-| `distributions` | `DistributionMetrics` | **yes** | Tail risk indicators (p50/p75/p90, concentration) |
-| `profile` | `RepoProfile` | no | File counts and LOC breakdown |
-| `totals` | `object` | no | Aggregate metrics |
-| `totals.functions` | `number` | no | Total function-like nodes |
-| `functionMetricsSummary` | `FunctionMetricsSummary` | no | Repo-wide function structural metrics |
-| `complexity` | `ComplexitySummary` | no | Repo-wide cyclomatic complexity |
-| `smells` | `SmellCounts` | no | Aggregated code smell counts |
-| `maintainability` | `MaintainabilityResult` | no | Maintainability Index score |
-| `testCoverageProxy` | `TestCoverageProxy` | no | Test LOC / source LOC ratio |
-| `duplication` | `DuplicationMetrics` | **yes** | jscpd duplication analysis (null if jscpd fails) |
-| `git` | `GitMetrics` | **yes** | Commit history metrics (null for non-git repos) |
-| `gitMetricsV2` | `GitMetricsV2` | **yes** | Extended git metrics (Epic D; null for non-git repos) |
-| `framework` | `FrameworkInfo` | **yes** | Detected framework (null if no package.json) |
-| `perFile` | `PerFileEntry[]` | no | Per-file metrics |
-| `reactMetrics` | `ReactMetricsReport` | **yes** | RQ3 React/TSX static metrics (present when at least one `.tsx` file was analyzed) |
-| `phase3` | `Phase3Metrics` | **yes** | Phase 3 — silent failures (TSX), monolithic component rate, weighted jscpd redundancy |
+The authoritative definition is `RepoReport` in
+[`packages/engine/src/types/report.ts`](../packages/engine/src/types/report.ts).
+
+**Read the Presence column carefully.** Two different things are often called
+"nullable", and consumers have to handle them differently:
+
+| Presence | Meaning | How to test |
+|----------|---------|-------------|
+| `always` | Key is always in the JSON with a non-null value | direct access |
+| `nullable` | Key is **always in the JSON** but its value may be `null` | `report.x === null` |
+| `optional` | Key is **omitted from the JSON entirely** under the stated condition | `"x" in report` |
+
+`optional` is the one that bites: `JSON.stringify` drops `undefined`, so an
+absent key is indistinguishable from a key that was never computed. Every
+`optional` row below states the condition under which it disappears.
+
+| Field | Type | Presence | Produced by | Description |
+|-------|------|----------|-------------|-------------|
+| `repoPath` | `string` | always | `pipeline/analyzeRepo` | Absolute path to the analyzed repository |
+| `source` | `SourceInfo` | always | `collect/repoMetadata` | Origin metadata (local path vs cloned GitHub URL) |
+| `filesAnalyzed` | `number` | always | `collect/fileDiscovery` | Count of `.ts`/`.tsx`/`.js`/`.jsx`/`.py` files successfully parsed. Equals `perFile.length` |
+| `filesSkipped` | `number` | **optional** | `pipeline/analyzeRepo` | Files discovered but never parsed. **Omitted entirely when zero** — do not expect `0`. See [Skipped files](#filesskipped--skipped-files-optional) |
+| `analysisSkipped` | `UnsupportedFrameworkInfo` | **optional** | `collect/pythonFrameworkDetection` | Present **instead of** real metrics when the target is web2py or Django. Absent for every supported target. See [analysisSkipped](#analysisskipped--unsupported-python-framework) |
+| `analyzer_version` | `string` | optional | `pipeline/analyzeRepo` | Engine package version. Omitted if `packages/engine/package.json` could not be read |
+| `analysis_timestamp` | `string` | always | `pipeline/analyzeRepo` | ISO 8601 timestamp when analysis ran |
+| `distributions` | `DistributionMetrics` | always | `extract/distributions` | Tail risk indicators (p50/p75/p90, concentration). Optional in the type; emitted unconditionally by current builds |
+| `profile` | `RepoProfile` | always | `collect/loc` | File counts and LOC breakdown |
+| `totals` | `object` | always | `extract/functionCount` | Aggregate metrics |
+| `totals.functions` | `number` | always | `extract/functionCount` | Total function-like nodes. See [what counts as a function](../README.md#what-counts-as-a-function) |
+| `functionMetricsSummary` | `FunctionMetricsSummary` | always | `extract/functionMetrics` | Repo-wide function structural metrics |
+| `complexity` | `ComplexitySummary` | always | `extract/complexity` | Repo-wide cyclomatic complexity |
+| `smells` | `SmellCounts` | always | `extract/smells` | Aggregated code smell counts |
+| `maintainability` | `MaintainabilityResult` | always | `extract/maintainabilityIndex` | Coleman-style repo Maintainability Index |
+| `testCoverageProxy` | `TestCoverageProxy` | always | `extract/testCoverageProxy` | Test LOC / source LOC ratio |
+| `duplication` | `DuplicationMetrics` | **nullable** | `collect/duplication` (jscpd) | `null` when jscpd fails or is unavailable |
+| `git` | `GitMetrics` | **nullable** | `collect/gitMetrics` or `collect/gitMetricsApi` | `null` for non-git repos. See [git](#git--git-history-nullable) |
+| `gitMetricsV2` | `GitMetricsV2` | **nullable** | `collect/gitMetricsV2` | `null` when no local commit history was readable |
+| `commitCalendar` | `CommitCalendar` | **optional** | `collect/gitMetricsApi` | Top-level copy populated **only** on the GitHub-API path. See [commitCalendar](#commitcalendar--commit-heatmap-optional) |
+| `contributors` | `ContributorActivity[]` | **optional** | `collect/gitMetricsV2` or `collect/gitMetricsApi` | Omitted when no history was analyzed or the list is empty. See [contributors](#contributors--per-author-activity-optional) |
+| `github` | `GitHubRepositoryMeta` | **optional** | `collect/githubRepoMeta` | GitHub REST metadata. Absent for local-path analysis **and silently absent if the API call fails**. See [github](#github--github-repository-metadata-optional) |
+| `framework` | `FrameworkInfo` | **nullable** | `collect/frameworkDetection` | `null` if no `package.json` is found |
+| `perFile` | `PerFileEntry[]` | always | `pipeline/analyzeRepo` | Per-file metrics, one entry per successfully parsed file |
+| `reactMetrics` | `ReactMetricsReport` | **optional** | `extract/react` | Omitted unless at least one `.tsx`/`.jsx` file was parsed |
+| `phase3` | `Phase3Metrics` | always | `extract/silentFailures`, `collect/weightedRedundancy` | Optional in the type; emitted unconditionally by current builds |
+| `symbolVerificationRisks` | `SymbolVerificationRisk[]` | always | `extract/symbolVerificationRisk` | May be `[]`. Absent in reports cached before this field existed. See [symbolVerificationRisks](#symbolverificationrisks--complexity-vs-test-proximity) |
 
 ## `distributions` — Distribution Metrics (optional)
 
@@ -43,6 +63,36 @@ Tail risk indicators for research. Percentiles computed across all functions.
 | `p75_complexity` | `number` | 75th percentile cyclomatic complexity |
 | `p90_complexity` | `number` | 90th percentile cyclomatic complexity |
 | `percent_high_complexity_in_top_10_percent_files` | `number` | % of high-complexity functions in the top 10% of files by total complexity |
+
+## `filesSkipped` — Skipped files (optional)
+
+Produced by `pipeline/analyzeRepo`. **Omitted from the JSON when zero**, so
+`report.filesSkipped === undefined` is the healthy case and there is no `0` to
+read.
+
+A skipped file was discovered by `collect/fileDiscovery` but never parsed, so
+**every function in it is missing from every metric in this report** —
+`totals.functions`, `complexity`, `smells`, `distributions`, `phase3` and the
+per-function tables all describe less code than the repository contains. The
+count is not a diagnostic detail; it is a caveat on every other number.
+
+Each skipped file logs a named reason to **stderr**. The reason is not carried
+in the JSON, so a report consumed without its log cannot tell you *why*:
+
+| stderr reason | Condition |
+|---------------|-----------|
+| `could not read file` | `readFile` failed — permissions, broken symlink, or the file disappeared mid-run |
+| `file_too_large_for_parser (<n> chars)` | Tree-sitter rejected the source as too large for its read buffer. Should be unreachable: `parsing/sourceParser` sizes the buffer to the source. Treat any occurrence as a bug to report |
+| `parse_error: <message>` | Tree-sitter rejected the source for some other reason |
+
+Historically any file of 32,768 characters or more failed with a bare
+`Invalid argument` and was folded into this count with no named reason, which
+silently removed 9.3% of this repository's own functions from every metric.
+See [research/validation/findings.md](../research/validation/findings.md) (D9).
+
+When comparing two reports, check this field first: a non-zero value on one
+side and an absent field on the other means the two describe different amounts
+of code, regardless of what the metrics say.
 
 ## `source` — Source Metadata
 
