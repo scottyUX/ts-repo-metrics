@@ -84,6 +84,31 @@ function withCatch() {
     expect(result).toHaveLength(1);
     expect(result[0]!.complexity).toBe(4);
   });
+
+  it("does not count a bare else as a decision point (D1)", () => {
+    // McCabe counts decision points; a bare `else` has no predicate of its own,
+    // it is the fall-through of the `if` already counted.
+    const code = `function withElse(n: number) { if (n === 1) { return 1; } else { return 0; } }`;
+    const tree = parseTypeScript(code, "ts");
+    const result = computeComplexity(tree.rootNode);
+    expect(result).toHaveLength(1);
+    expect(result[0]!.complexity).toBe(2); // 1 base + 1 for the `if`
+  });
+
+  it("still counts each else-if condition as its own decision point (D1)", () => {
+    const code = `
+function elseIfChain(n: number) {
+  if (n === 1) { return 1; }
+  else if (n === 2) { return 2; }
+  else if (n === 3) { return 3; }
+  else { return 0; }
+}
+`;
+    const tree = parseTypeScript(code, "ts");
+    const result = computeComplexity(tree.rootNode);
+    expect(result).toHaveLength(1);
+    expect(result[0]!.complexity).toBe(4); // 1 base + 3 conditions
+  });
 });
 
 describe("summarizeComplexity", () => {
