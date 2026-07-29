@@ -18,37 +18,25 @@ npm install
 
 ## Usage
 
-### Single Repository
+To run the `ts-repo-metrics` analysis tool, ensure you have the latest changes and dependencies, then execute the `dev` script with your desired analysis command.
 
-Local path (or legacy: path as first arg):
-
-```bash
-npm run dev -- analyze /absolute/path/to/target/repo
-npm run dev -- /path/to/repo   # legacy shorthand
-```
-
-GitHub public repo URL (clones into `.cache/ts-repo-metrics/`):
-
-```bash
-npm run dev -- analyze https://github.com/user/repo [--no-cache]
-```
-
-| Flag | Description |
-|------|-------------|
-| `--no-cache` | Force a fresh clone instead of reusing cached clone |
-
-### Batch Mode
-
-Analyze every sub-directory under a parent folder that contains a `package.json`:
-
-```bash
-npm run dev -- batch /path/to/repos-folder --output ./reports --csv
-```
-
-| Flag | Description |
-|------|-------------|
-| `--output <dir>` | Directory for individual JSON reports (default: `<parent>/reports`) |
-| `--csv` | Also produce a `summary.csv` with one row per repo |
+1.  **Pull latest changes:**
+    ```bash
+    git pull origin main
+    ```
+2.  **Install dependencies (if needed):**
+    ```bash
+    npm install
+    ```
+3.  **Run analysis:**
+    ```bash
+    npm run dev -- analyze <local-path-to-repo>
+    ```
+    or
+    ```bash
+    npm run dev -- analyze https://github.com/user/repo
+    ```
+    The `dev` script will automatically build the necessary engine package before running the analysis.
 
 ### Example Output (single repo)
 
@@ -223,7 +211,8 @@ repo-metrics/
 
 | Script | Command | Description |
 |--------|---------|-------------|
-| `dev` | `tsx src/cli.ts` | Run CLI from TypeScript |
+| `build:engine` | `cd packages/engine && npm run build` | Builds the `@repo-metrics/engine` package |
+| `dev` | `npm run build:engine && tsx src/cli.ts` | Runs CLI from TypeScript after building the engine |
 | `build` | `tsc -p tsconfig.json` | Compile root CLI to `dist/` |
 | `start` | `node dist/cli.js` | Run the compiled CLI |
 | `dashboard` | `cd apps/dashboard && npm run dev` | Start Next.js dashboard |
