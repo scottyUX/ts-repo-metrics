@@ -238,6 +238,117 @@ Returns `null` for non-git repos or when no commit history is available. Epic D 
 | `testCoupling.pctCommitsTouchingTests` | `number` | % of commits touching test files |
 | `testCoupling.testToFeatureCommitRatio` | `number` | Ratio of test commits to feature commits |
 
+## `commitCalendar` — Commit heatmap (optional)
+
+Produced by `collect/gitMetricsApi`. Mon–Sun × week contribution grid.
+
+**The same data can appear in two places, and which one is populated depends on
+how history was read:**
+
+| Situation | Where the calendar is |
+|-----------|-----------------------|
+| Local `.git` available | `gitMetricsV2.commitCalendar` — top-level key **absent** |
+| GitHub API only (zipball mode, no local `.git`) | top-level `commitCalendar` — `gitMetricsV2` is usually `null` |
+| No history at all | Neither is populated |
+
+Consumers should therefore always read
+`gitMetricsV2?.commitCalendar ?? commitCalendar`. Reading the top-level key
+alone yields an empty heatmap for every locally analyzed repository, which
+looks like "this repo has no commits" rather than "you read the wrong key".
+
+### `CommitCalendar`
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `grid` | `number[][]` | 7 rows (Mon..Sun) × `columnWeekStarts.length` columns, oldest week first. Each cell is a commit count |
+| `columnWeekStarts` | `string[]` | ISO date (UTC) of the Monday beginning each column |
+| `busiestWeekdayIndex` | `number \| null` | `0` = Monday .. `6` = Sunday; the weekday with the most commits in the window. `null` when there were no commits to rank |
+
+## `contributors` — Per-author activity (optional)
+
+Produced by `collect/gitMetricsV2` on the local-git path, or overwritten by
+`collect/gitMetricsApi` in zipball mode. **Omitted when no history was analyzed
+or when the computed list is empty** — the key is only written when
+`contributors.length > 0`, so an absent key means "no attributable commits",
+not "no contributors field in this schema version".
+
+Each entry carries the same class of signals as `gitMetricsV2`, computed over
+only the commits attributed to one author identity. Authors are grouped by
+lowercased email when present, else by name, else bucketed as `"unknown"`, so
+one human committing under two emails appears as two entries.
+
+### `ContributorActivity`
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | `string` | Grouping key: lowercased author email, else name-based, else `"unknown"` |
+| `displayName` | `string` | Author name as recorded in the commits |
+| `authorEmail` | `string` | Author email as recorded in the commits |
+| `commitCount` | `number` | Commits attributed to this identity |
+| `linesAdded` | `number` | Σ added lines from `git log --numstat` |
+| `linesDeleted` | `number` | Σ deleted lines from `git log --numstat` |
+| `testLineChurn` | `number` | Σ(add+del) on paths matching the test convention. **Historical churn, not snapshot LOC** — not comparable to `profile.testLOC` |
+| `sourceLineChurn` | `number` | Σ(add+del) on non-test paths |
+| `testFilesTouched` | `number` | Distinct test paths touched |
+| `sourceFilesTouched` | `number` | Distinct non-test paths touched |
+| `sourcePathsTouchedList` | `string[]` (optional) | Distinct non-test paths touched, forward slashes, sorted. Lets the dashboard narrow symbol views to files seen in `git log --numstat` |
+| `commitStats` | `CommitStats` | Per-author size distribution (same shape as `gitMetricsV2.commitStats`) |
+| `burstStats` | `BurstStats` | Per-author burst detection |
+| `entropy` | `EntropyStats` | Per-author temporal irregularity |
+| `churn` | `ChurnStats` | Per-author churn hotspots |
+| `testCoupling` | `TestCouplingStats` | Per-author test coupling |
+| `refactorBehavior` | `RefactorBehaviorStats` | Per-author refactor commit rate |
+| `commitCalendar` | `CommitCalendar \| null` (optional) | Per-author Mon–Sun heatmap |
+| `commitsPerWeek` | `number` (optional) | Commits per week in the recent window, aligned with `git.commitsPerWeek` (last 13 weeks) |
+
+## `github` — GitHub repository metadata (optional)
+
+Produced by `collect/githubRepoMeta` via the GitHub REST API, and only from the
+`analyzeFromGitHubUrl` entry point.
+
+**This field is absent in two very different situations, and the report cannot
+distinguish them:**
+
+1. The target was a local path, so there is no GitHub repository to describe.
+2. The target *was* a GitHub URL but the API call failed — rate limit, missing
+   or invalid `GITHUB_TOKEN`, private repository, or network error. The
+   enrichment is wrapped in a `try`/`catch` that swallows the error, so nothing
+   is logged and no flag is set.
+
+Treat an absent `github` on a GitHub target as "unknown", never as "the
+repository has no stars/topics/languages". Zeroed counts and a populated
+`languages` array are the only evidence the fetch actually succeeded.
+
+### `GitHubRepositoryMeta`
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `description` | `string \| null` | Repository About text; `null` when the repo has none |
+| `topics` | `string[]` | GitHub topics |
+| `stargazersCount` | `number` | Stars |
+| `forksCount` | `number` | Forks |
+| `subscribersCount` | `number` | Users watching the repo |
+| `languages` | `GitHubLanguageShare[]` | Language breakdown by bytes |
+| `contributors` | `GitHubRepoContributor[]` | Contributors per the GitHub API — **not** the same as top-level `contributors`, which is derived from commit history. The two can disagree |
+
+### `GitHubLanguageShare`
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `language` | `string` | Language name as GitHub reports it |
+| `bytes` | `number` | Bytes attributed to this language |
+| `percentage` | `number` | 0–100 with one decimal, same spirit as GitHub's language bar |
+
+### `GitHubRepoContributor`
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `login` | `string` | GitHub username |
+| `avatarUrl` | `string` | Avatar image URL |
+| `htmlUrl` | `string` | Profile URL |
+| `contributions` | `number` | Commit count per the GitHub contributors API |
+| `name` | `string` (optional) | Display name from `GET /users/{login}`, when that lookup succeeded |
+
 ## `framework` — Framework Detection (nullable)
 
 Returns `null` if no `package.json` is found.
@@ -296,6 +407,64 @@ Repo-level `maintainability` (Coleman-style index from average complexity and LO
 | `type` | `string` | AST node type |
 | `startLine` | `number` | 1-based line number |
 | `complexity` | `number` | Cyclomatic complexity (>= 1) |
+
+## `symbolVerificationRisks` — Complexity vs test proximity
+
+Produced by `extract/symbolVerificationRisk`. Always emitted by current builds,
+though it may be `[]`; absent in reports cached before the field existed.
+
+One row per **named** function, pairing its cyclomatic complexity against
+**static evidence that it is exercised by tests**.
+
+This array is **not** one row per entry in `perFile[].functionMetrics`. Two
+classes of function are skipped outright, because a name is what the heuristic
+matches on:
+
+- anonymous functions (`name === "(anonymous)"`)
+- names shorter than 3 characters, which would match too much text by accident
+
+So `symbolVerificationRisks.length` is normally well below
+`totals.functions`, and the gap is largest in arrow-heavy or callback-heavy
+codebases. Do not compute a "percentage of verified functions" against
+`totals.functions` — the denominators are different populations.
+
+> **`verificationScore` is not code coverage.** It is a filename-pairing and
+> name-matching heuristic: it asks whether a conventionally named test file
+> exists and whether the symbol's name appears inside it. It never executes
+> anything and has no relationship to Istanbul, `c8`, or any runtime coverage
+> tool. A high score means "a test file mentions this name", which a test can
+> satisfy without asserting anything about the function. Do not report it as a
+> coverage figure.
+
+An empty array means either that no functions were found or that the pairing
+step found nothing to compare — it is not evidence that the repository is
+untested.
+
+### `SymbolVerificationRisk`
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `file` | `string` | Path relative to `repoPath` |
+| `name` | `string` | Function name. Never `"(anonymous)"` and never shorter than 3 characters — those rows are not emitted |
+| `startLine` | `number` | 1-based line number |
+| `cyclomaticComplexity` | `number` | Same value as the matching `FunctionDetail.cyclomaticComplexity` |
+| `verificationScore` | `number` | Strength of the static evidence. **Discrete, not continuous**: exactly `0`, `0.3`, or `1` — one per `evidence` value below |
+| `evidence` | `VerificationEvidence` | Which rule produced the score (see below) |
+| `pairedTestPath` | `string` (optional) | Matched test file, when a conventional pair exists. Absent when `evidence` is `"none"` |
+| `riskScore` | `number` | `min(cyclomaticComplexity, 50) × (1 − verificationScore)`, for sorting and heat maps. Complexity is capped at 50 so one enormous function cannot dominate the ranking |
+
+### `VerificationEvidence`
+
+| Value | `verificationScore` | Meaning |
+|-------|---------------------|---------|
+| `"referenced_in_test"` | `1` | A paired test file exists **and** the symbol's name appears in it as a whole word — strongest evidence |
+| `"paired_file_only"` | `0.3` | A conventionally named test file exists but does not mention this symbol |
+| `"none"` | `0` | No paired test file found |
+
+Because the score is one of three fixed values, `riskScore` is likewise
+quantised: for a given complexity it takes only three possible values
+(`cc × 1`, `cc × 0.7`, `cc × 0`). Treat it as an ordering key, not a continuous
+risk measure.
 
 ## `reactMetrics` — React / TSX (optional)
 
