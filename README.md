@@ -71,7 +71,6 @@ When run via the engine (CLI or dashboard), `analyzer_version` is the engine pac
     "branch": "main"
   },
   "filesAnalyzed": 19,
-  "filesSkipped": 0,
   "analyzer_version": "0.0.0",
   "analysis_timestamp": "2025-02-22T12:00:00.000Z",
   "distributions": {
