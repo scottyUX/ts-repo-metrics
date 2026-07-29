@@ -232,10 +232,10 @@ repo-metrics/
 │       ├── src/
 │       │   ├── pipeline/           # analyzeRepo, analyzeFromGitHubUrl
 │       │   ├── collect/            # fileDiscovery, loc, duplication, gitClone, weightedRedundancy, gitMetrics, gitMetricsApi, repoMetadata, frameworkDetection
-│       │   ├── parsing/            # tsParser, tokenScanner (Halstead atoms)
-│       │   ├── extract/           # functionCount, functionMetrics, complexity, halstead, cognitiveComplexity, smells, silentFailures, testCoverageProxy, maintainabilityIndex, distributions, react/
+│       │   ├── parsing/            # sourceParser (grammar selection), tokenScanner (Halstead atoms)
+│       │   ├── extract/           # functionCount, functionMetrics, complexity, halstead, cognitiveComplexity, smells, silentFailures, symbolVerificationRisk, testCoverageProxy, maintainabilityIndex, distributions, react/
 │       │   ├── types/              # report.ts (RepoReport, etc.)
-│       │   └── utils/              # constants, githubUrl, math, text, astWalker
+│       │   └── utils/              # constants, languageProfile, githubUrl, math, metrics, text, astWalker
 │       └── __tests__/              # Engine test suite (+ fixtures)
 └── apps/
     └── dashboard/                  # Next.js app; /api/analyze imports engine
@@ -244,8 +244,8 @@ repo-metrics/
 ## How It Works
 
 1. **Profile** — Counts files by type and computes LOC breakdowns before parsing.
-2. **Discover** — `fast-glob` finds all `.ts`/`.tsx` files, ignoring non-source directories.
-3. **Parse** — Each file is parsed into a CST using Tree-sitter (TypeScript or TSX grammar).
+2. **Discover** — `fast-glob` finds all `.ts`/`.tsx`/`.js`/`.jsx`/`.py` files, ignoring non-source directories (`node_modules`, `dist`, `build`, `.next`, `out`, `coverage`, `.git`) and dot-directories.
+3. **Parse** — Each file is parsed into a CST using Tree-sitter, selecting the grammar by extension (TypeScript, TSX, JavaScript, or Python). Files that fail to parse are skipped with a named reason — see [Failure modes](#failure-modes-skipped-files).
 4. **Extract** — Multiple extractors run on each parsed tree:
    - Function count and type breakdown
    - Per-function metrics (length, nesting depth, parameter count)
