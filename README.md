@@ -233,4 +233,4 @@ repo-metrics/
 
 ## License
 
-ISC
+MIT — see [LICENSE](LICENSE).
