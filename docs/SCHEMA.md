@@ -105,7 +105,30 @@ of code, regardless of what the metrics say.
 
 ## `analysisSkipped` — Unsupported Python framework
 
-Present when the repository layout indicates **web2py** or **Django**. Static AST analysis is skipped; git metrics may still be populated.
+Produced by `collect/pythonFrameworkDetection`. Present when the repository
+layout indicates **web2py** or **Django**. Static AST analysis is skipped.
+
+**This is the most dangerous field to ignore.** The report is structurally
+complete and every metric key is present, but the analysis never ran, so the
+values are zeros and defaults rather than measurements:
+
+| Field | Value in a skipped report |
+|-------|---------------------------|
+| `filesAnalyzed` | `0` |
+| `filesSkipped` | absent (nothing was attempted, so nothing was skipped) |
+| `profile`, `smells` | all-zero |
+| `totals.functions`, `functionMetricsSummary`, `complexity`, `distributions` | zeros |
+| `maintainability` | computed from zeros, so `score` is the formula's floor — **not** a real maintainability reading |
+| `perFile`, `symbolVerificationRisks` | `[]` |
+| `phase3` | present, all zeros, `mcr: null` |
+| `duplication` | `null` |
+| `reactMetrics` | absent |
+| `git`, `gitMetricsV2`, `contributors`, `framework` | **genuinely populated** — git history is still read |
+
+So a consumer that reads `complexity.average` without checking
+`analysisSkipped` sees `0` and cannot tell it apart from a real repository of
+trivially simple code. Check `"analysisSkipped" in report` before using any AST
+derived value; the git-derived sections remain trustworthy.
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -215,7 +238,13 @@ In API mode, `medianCommitSize`, `avgLinesPerCommit`, and `largeCommitRatio` are
 
 ## `gitMetricsV2` — Extended Git Metrics (nullable)
 
-Returns `null` for non-git repos or when no commit history is available. Epic D metrics.
+Produced by `collect/gitMetricsV2`. Returns `null` for non-git repos or when no
+commit history is available. Epic D metrics.
+
+Both `entropy` fields are `0` when the repository has **fewer than two
+commits**, because there are no inter-commit gaps to measure. A zero std dev
+there means "not enough data", not "perfectly regular commit rhythm" — check
+`git.totalCommits` before reading it as rhythm.
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -228,10 +257,23 @@ Returns `null` for non-git repos or when no commit history is available. Epic D 
 | `burstStats.burstCount` | `number` | Count of bursts (≥3 commits in 30 min) |
 | `burstStats.burstRatio` | `number` | % of commits that fall in a burst |
 | `entropy` | `EntropyStats` | D3: Temporal irregularity |
-| `entropy.stdDevTimeBetweenCommits` | `number` | Std dev of time between consecutive commits (ms) |
+| `entropy.stdDevTimeBetweenCommits` | `number` | Population std dev of gaps between consecutive commits (ms) |
+| `entropy.meanTimeBetweenCommits` | `number` | Mean of those gaps (ms) — typical time from one commit to the next. Read the std dev against this, not on its own |
 | `churn` | `ChurnStats` | D4: Top files by churn |
 | `churn.topByModifications` | `ChurnHotspot[]` | Top 10 files by modification count |
 | `churn.topByLinesChanged` | `ChurnHotspot[]` | Top 10 files by lines changed |
+| `commitCalendar` | `CommitCalendar \| null` (optional) | Mon–Sun heatmap; present when commit timestamps were available from local `git log`. See [commitCalendar](#commitcalendar--commit-heatmap-optional) for which of the two locations is populated |
+
+### `ChurnHotspot`
+
+Entries of both `churn.topByModifications` and `churn.topByLinesChanged`. The
+two lists cover the same files ranked differently, so a file can appear in both.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `file` | `string` | Path relative to repo root, forward slashes |
+| `modifications` | `number` | Number of commits that touched this file |
+| `linesChanged` | `number` | Σ(added+deleted) lines across those commits |
 | `refactorBehavior` | `RefactorBehaviorStats` | D6: Refactor commit rate |
 | `refactorBehavior.refactorCommitRatio` | `number` | % of commits with refactor/cleanup/restructure/rename |
 | `testCoupling` | `TestCouplingStats` | D5: Test coupling |
