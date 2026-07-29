@@ -1,5 +1,13 @@
 # Metric-validity evaluation: our engine vs three independent baselines
 
+> **Update:** Five of the defects below — D9, D1, D3 (and the D4 component
+> needed to hit its stated target), D5, and D10 — have since been fixed in
+> `packages/engine`. This document is preserved as written, describing the
+> engine as it stood at commit `1f250c1e` (see [`pre_fix_baseline/`](pre_fix_baseline/)
+> for the frozen outputs from that state). For the fixes and the before/after
+> numbers, see [`POST_FIX_COMPARISON.md`](POST_FIX_COMPARISON.md) and
+> [`post_fix/`](post_fix/). D2, D6, D7, and D8 remain open.
+
 Structural, cognitive and lexical complexity as computed by `packages/engine`,
 measured against one independent tool per family over 4,570 functions in five
 TypeScript repositories.
