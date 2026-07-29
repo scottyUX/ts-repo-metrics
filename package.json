@@ -20,6 +20,10 @@
   "author": "",
   "license": "MIT",
   "type": "commonjs",
+  "workspaces": [
+    "packages/engine",
+    "apps/dashboard"
+  ],
   "dependencies": {
     "@repo-metrics/engine": "file:packages/engine"
   },
