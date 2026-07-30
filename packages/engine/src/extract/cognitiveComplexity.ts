@@ -25,42 +25,73 @@ export function computeCognitiveComplexity(
 ): number {
   let score = 0;
 
-  function visit(node: SyntaxNode, controlDepth: number): void {
+  /**
+   * Sonar's spec keeps three things separate, which an earlier version of this
+   * function conflated:
+   *
+   *   B1  flat increment    +1 for `if`, `else if`, `else`, ternary, `switch`,
+   *                         loops, `catch`
+   *   B3  nesting increment +nesting, for `if`, ternary, `switch`, loops,
+   *                         `catch` — but NOT for `else if` and NOT for `else`
+   *   B2  nesting level     raised for the BODIES of all of the above,
+   *                         including `else if` and `else`
+   *
+   * `nesting` is the B2 level. `asElseIfLink` marks the `if_statement` that
+   * belongs to an `else if`: it still earns B1's flat +1, but takes no B3
+   * increment.
+   */
+  function visit(
+    node: SyntaxNode,
+    nesting: number,
+    asElseIfLink = false,
+  ): void {
     if (node !== fnNode && profile.functionNodeTypes.has(node.type)) {
       return;
     }
 
     if (profile.cognitiveControlTypes.has(node.type)) {
-      score += controlDepth + 1;
+      score += 1 + (asElseIfLink ? 0 : nesting);
+
       for (let i = 0; i < node.namedChildCount; i++) {
         const child = node.namedChild(i);
         if (!child) continue;
+
         if (child.type === "else_clause") {
-          // An `else` branch does not nest what it contains: `else if` is one
-          // more link in the same chain, not a level deeper inside the previous
-          // `if`. Visiting at the current depth (not controlDepth + 1) keeps
-          // every link in a chain worth the same as the first `if`, instead of
-          // the 1+2+3+4... escalation that made long chains grow quadratically.
-          if (isElseIfLink(child)) {
-            // The nested if_statement is itself a cognitiveControlType and will
-            // score its own +1 when visited below — do not double-count the
-            // `else if` as both an else_clause and an if_statement.
-            visit(child, controlDepth);
-          } else {
-            // A terminal, non-"else if" else has no nested if to carry its
-            // score, so — matching Sonar's spec, which gives `if`, `else if`,
-            // and `else` each a flat +1 — it scores here directly.
+          if (profile.language !== "ecmascript") {
+            // Python's chain shape differs (`elif_clause` is a sibling of the
+            // `if`, not an `if` nested inside an `else`) and there is no
+            // SonarJS baseline for Python in research/validation, so this path
+            // is left exactly as it was rather than changed unvalidated.
             score += 1;
-            visit(child, controlDepth);
+            visit(child, nesting);
+            continue;
+          }
+
+          const elseIfTarget = isElseIfLink(child) ? child.namedChild(0) : null;
+          if (elseIfTarget) {
+            // `else if`: descend straight to the inner `if` with `nesting`
+            // UNCHANGED. Its body then lands at nesting + 1 through the generic
+            // descent below — the same level as the leading `if`'s body,
+            // because a chain does not deepen as it extends. Passing nesting+1
+            // here instead puts the body one level too deep and over-scores an
+            // `if` written inside an `else if` body.
+            visit(elseIfTarget, nesting, true);
+          } else {
+            // Terminal `else`: B1's flat +1 and no B3 increment, but it does
+            // raise the nesting level for whatever it contains (B2).
+            score += 1;
+            visit(child, nesting + 1);
           }
           continue;
         }
-        visit(child, controlDepth + 1);
+
+        // B2: the body of this structure sits one level deeper.
+        visit(child, nesting + 1);
       }
       return;
     }
 
-    if (profile.jumpTypes.has(node.type) && controlDepth > 0) {
+    if (profile.jumpTypes.has(node.type) && nesting > 0) {
       // An unlabeled `break` ending a `switch` case or a loop is ordinary
       // control flow. Only a jump that names a label breaks the reader's model
       // of where control goes next, so only that one scores.
@@ -75,7 +106,7 @@ export function computeCognitiveComplexity(
 
     for (let i = 0; i < node.namedChildCount; i++) {
       const child = node.namedChild(i);
-      if (child) visit(child, controlDepth);
+      if (child) visit(child, nesting);
     }
   }
 
