@@ -1,3 +1,7 @@
 node_modules/
 .corpus/
 .work/
+.work_before/
+.work_after/
+.out_before/
+.out_after/
