@@ -1,3 +1,15 @@
+> # ⚠ SUPERSEDED — historical record of the 0.1.0 round
+>
+> Numbers here describe the intermediate state after D1/D3/D5/D9/D10, at
+> `analyzer_version` 0.1.0. Two further changes have landed since: **D7**
+> (Halstead operands keyed by literal value) and the **D4 replacement**
+> (cognitive complexity rebuilt on Sonar's B1/B2/B3 separation — D4's original
+> rule did not generalize). The jscpd `node_modules` exclusion (Bug 1) also
+> changed every duplication figure.
+>
+> **Current numbers: [`../../FINAL_NUMBERS.md`](../../FINAL_NUMBERS.md).**
+> Kept so the before/after story stays reconstructible.
+
 # Post-fix comparison: five defects fixed
 
 `research/validation/findings.md` documented ten divergence patterns between our

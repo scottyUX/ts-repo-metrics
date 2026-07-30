@@ -59,7 +59,7 @@ npm run dev -- batch /path/to/repos-folder --output ./reports --csv
 
 ### Example Output (single repo)
 
-When run via the engine (CLI or dashboard), `analyzer_version` is the engine package version (e.g. `0.0.0`).
+When run via the engine (CLI or dashboard), `analyzer_version` is the engine package version (e.g. `0.2.0`).
 
 ```json
 {
@@ -71,7 +71,7 @@ When run via the engine (CLI or dashboard), `analyzer_version` is the engine pac
     "branch": "main"
   },
   "filesAnalyzed": 19,
-  "analyzer_version": "0.0.0",
+  "analyzer_version": "0.2.0",
   "analysis_timestamp": "2025-02-22T12:00:00.000Z",
   "distributions": {
     "p50_function_length": 12,

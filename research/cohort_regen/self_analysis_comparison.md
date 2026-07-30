@@ -1,3 +1,11 @@
+> # ⚠ SUPERSEDED — generated under 0.1.0 (commit `0ff89a1`)
+>
+> Self-analysis figures here predate D7, the D4 replacement, and the jscpd
+> ignore-glob fix. Notably, the duplication figure it discusses as missing/
+> contaminated is now measured cleanly at **3.3%**.
+>
+> **Current numbers: [`../../FINAL_NUMBERS.md`](../../FINAL_NUMBERS.md).**
+
 # Step 2 — Self-analysis: pre-fix vs post-fix
 
 `ts-repo-metrics` analyzing itself, under the fixed build

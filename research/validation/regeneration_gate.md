@@ -1,3 +1,13 @@
+> # ✅ GATE SATISFIED — both blockers fixed, regeneration done
+>
+> Bug 1 (jscpd ignore globs) and Bug 2 (batch-mode silent skip) both landed, and
+> the single combined regeneration described below has been run under
+> `analyzer_version` 0.2.0.
+>
+> **Results: [`../../FINAL_NUMBERS.md`](../../FINAL_NUMBERS.md).**
+> This file is kept as the record of why regeneration was deferred and what the
+> gate required.
+
 # Regeneration gate check — 2026-07-29, at analyzer_version 0.2.0
 
 Regeneration of the self-analysis, the six-repo cohort, and Figure 3 was

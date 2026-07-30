@@ -1,3 +1,15 @@
+> # ⚠ SUPERSEDED — generated under 0.1.0 (commit `0ff89a1`)
+>
+> This documents the cohort regeneration at `analyzer_version` 0.1.0, before
+> D7, before the D4 replacement, and before the jscpd ignore-glob fix. The
+> jscpd behaviour it *flags as a bug* (self-analysis 42.18% duplication, or a
+> 243 s out-of-memory abort) has since been **fixed** — self-duplication is now
+> 3.3%, measured in 7.0 s.
+>
+> **Current numbers: [`../../FINAL_NUMBERS.md`](../../FINAL_NUMBERS.md)** and
+> [`cohort_table.md`](cohort_table.md). Kept as the record of how those two bugs
+> were found.
+
 # Cohort regeneration — findings
 
 All cohort and self-analysis numbers regenerated under the fixed build,
