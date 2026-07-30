@@ -83,20 +83,20 @@ export function collectHalsteadAtoms(
             break;
           case "integer":
           case "float":
-            // Same value-identity fix as the ECMAScript path below. NOTE: the
-            // Python path has no baseline in research/validation (escomplex is
-            // JS-only), so this is corrected for consistency with the same
-            // defect but is not empirically validated.
-            addOperand(`lit:num:${node.text}`);
+            addOperand(`lit:${node.type}`);
             break;
           case "true":
           case "false":
           case "none":
-            // Already value-distinct -- only three possible values.
             addOperand(`lit:${node.type}`);
             break;
+          // NOTE: Python literals deliberately still collapse by KIND, not by
+          // value — the same defect that was fixed on the ECMAScript path
+          // below. escomplex is JS-only, so there is no baseline to validate a
+          // Python change against, and Python is out of scope for this paper.
+          // Left unchanged on purpose; do not "fix" without a baseline.
           case "string":
-            addOperand(`lit:str:${node.text}`);
+            addOperand("lit:string");
             break;
           default:
             break;
