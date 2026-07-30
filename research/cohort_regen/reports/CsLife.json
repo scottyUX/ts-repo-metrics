@@ -1,0 +1,3882 @@
+{
+  "repoPath": "/private/tmp/claude-501/-Users-lunawang-Documents-GitHub-ts-repo-metrics/b7afc37b-53c1-476a-b6f7-4af7b64c3e8b/scratchpad/cohort/CsLife",
+  "source": {
+    "type": "local",
+    "url": "",
+    "commit": "42227097b4c79473bc0b06565efcf9e715c30358",
+    "branch": "HEAD"
+  },
+  "filesAnalyzed": 11,
+  "analyzer_version": "0.1.0",
+  "analysis_timestamp": "2026-07-30T02:18:47.228Z",
+  "distributions": {
+    "p50_function_length": 10,
+    "p75_function_length": 18,
+    "p90_function_length": 32,
+    "p50_complexity": 1,
+    "p75_complexity": 2,
+    "p90_complexity": 4,
+    "percent_high_complexity_in_top_10_percent_files": 0
+  },
+  "profile": {
+    "totalFiles": 11,
+    "tsFiles": 0,
+    "tsxFiles": 0,
+    "jsFiles": 11,
+    "jsxFiles": 0,
+    "pyFiles": 0,
+    "testFiles": 0,
+    "totalLOC": 2792,
+    "sourceLOC": 2792,
+    "testLOC": 0
+  },
+  "totals": {
+    "functions": 69
+  },
+  "functionMetricsSummary": {
+    "totalFunctions": 69,
+    "averageLength": 13.7,
+    "medianLength": 10,
+    "maxNestingDepth": 3,
+    "longFunctionPercentage": 1.4
+  },
+  "complexity": {
+    "average": 2,
+    "max": 9,
+    "highComplexityFunctions": 0
+  },
+  "smells": {
+    "longFunctions": 1,
+    "deepNesting": 0,
+    "longParameterLists": 4,
+    "emptyCatchBlocks": 0,
+    "consoleLogs": 11
+  },
+  "maintainability": {
+    "score": 72,
+    "classification": "high"
+  },
+  "testCoverageProxy": {
+    "ratio": 0,
+    "classification": "low"
+  },
+  "duplication": {
+    "percentage": 1.3,
+    "duplicateLines": 16,
+    "cloneClusters": 1
+  },
+  "git": {
+    "totalCommits": 1,
+    "medianCommitSize": 4730,
+    "avgLinesPerCommit": 4730,
+    "largeCommitRatio": 100,
+    "commitsPerWeek": 0.1
+  },
+  "gitMetricsV2": {
+    "commitStats": {
+      "medianCommitSize": 4730,
+      "p90CommitSize": 4730,
+      "pctOver500Loc": 100,
+      "pctOver1000Loc": 100
+    },
+    "burstStats": {
+      "burstCount": 0,
+      "burstRatio": 0
+    },
+    "entropy": {
+      "stdDevTimeBetweenCommits": 0,
+      "meanTimeBetweenCommits": 0
+    },
+    "churn": {
+      "topByModifications": [
+        {
+          "file": "Acceptance Criteria-CSLife.md",
+          "modifications": 1,
+          "linesChanged": 105
+        },
+        {
+          "file": "Character.js",
+          "modifications": 1,
+          "linesChanged": 83
+        },
+        {
+          "file": "CharacterSelect/CharacterSelect.css",
+          "modifications": 1,
+          "linesChanged": 124
+        },
+        {
+          "file": "CharacterSelect/CharacterSelect.html",
+          "modifications": 1,
+          "linesChanged": 37
+        },
+        {
+          "file": "CharacterSelect/CharacterSelect.js",
+          "modifications": 1,
+          "linesChanged": 55
+        },
+        {
+          "file": "CharacterSelect/avatar-images/female1.png",
+          "modifications": 1,
+          "linesChanged": 0
+        },
+        {
+          "file": "CharacterSelect/avatar-images/female2.png",
+          "modifications": 1,
+          "linesChanged": 0
+        },
+        {
+          "file": "CharacterSelect/avatar-images/male1.png",
+          "modifications": 1,
+          "linesChanged": 0
+        },
+        {
+          "file": "CharacterSelect/avatar-images/male2.png",
+          "modifications": 1,
+          "linesChanged": 0
+        },
+        {
+          "file": "DataStorage.js",
+          "modifications": 1,
+          "linesChanged": 33
+        }
+      ],
+      "topByLinesChanged": [
+        {
+          "file": "Mini-Games/Mini-Games.js",
+          "modifications": 1,
+          "linesChanged": 1537
+        },
+        {
+          "file": "Mini-Games/Mini-Games-Functionality.js",
+          "modifications": 1,
+          "linesChanged": 438
+        },
+        {
+          "file": "mainGame/mainGame.js",
+          "modifications": 1,
+          "linesChanged": 346
+        },
+        {
+          "file": "mainGame/mainGame.css",
+          "modifications": 1,
+          "linesChanged": 257
+        },
+        {
+          "file": "Mini-Games/Mini-Games.css",
+          "modifications": 1,
+          "linesChanged": 236
+        },
+        {
+          "file": "Mini-Games/Mini-Games.html",
+          "modifications": 1,
+          "linesChanged": 158
+        },
+        {
+          "file": "endgame/EndGame.css",
+          "modifications": 1,
+          "linesChanged": 143
+        },
+        {
+          "file": "CharacterSelect/CharacterSelect.css",
+          "modifications": 1,
+          "linesChanged": 124
+        },
+        {
+          "file": "Test Plan and Report-CSLife.md",
+          "modifications": 1,
+          "linesChanged": 120
+        },
+        {
+          "file": "SprintPlan3-CS Student Sim.md",
+          "modifications": 1,
+          "linesChanged": 117
+        }
+      ]
+    },
+    "refactorBehavior": {
+      "refactorCommitRatio": 0
+    },
+    "testCoupling": {
+      "pctCommitsTouchingTests": 0,
+      "testToFeatureCommitRatio": 0
+    },
+    "commitCalendar": {
+      "grid": [
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      ],
+      "columnWeekStarts": [
+        "2025-07-28",
+        "2025-08-04",
+        "2025-08-11",
+        "2025-08-18",
+        "2025-08-25",
+        "2025-09-01",
+        "2025-09-08",
+        "2025-09-15",
+        "2025-09-22",
+        "2025-09-29",
+        "2025-10-06",
+        "2025-10-13",
+        "2025-10-20",
+        "2025-10-27",
+        "2025-11-03",
+        "2025-11-10",
+        "2025-11-17",
+        "2025-11-24",
+        "2025-12-01",
+        "2025-12-08",
+        "2025-12-15",
+        "2025-12-22",
+        "2025-12-29",
+        "2026-01-05",
+        "2026-01-12",
+        "2026-01-19",
+        "2026-01-26",
+        "2026-02-02",
+        "2026-02-09",
+        "2026-02-16",
+        "2026-02-23",
+        "2026-03-02",
+        "2026-03-09",
+        "2026-03-16",
+        "2026-03-23",
+        "2026-03-30",
+        "2026-04-06",
+        "2026-04-13",
+        "2026-04-20",
+        "2026-04-27",
+        "2026-05-04",
+        "2026-05-11",
+        "2026-05-18",
+        "2026-05-25",
+        "2026-06-01",
+        "2026-06-08",
+        "2026-06-15",
+        "2026-06-22",
+        "2026-06-29",
+        "2026-07-06",
+        "2026-07-13",
+        "2026-07-20"
+      ],
+      "busiestWeekdayIndex": 0
+    }
+  },
+  "contributors": [
+    {
+      "id": "mnasirpo@ucsc.edu",
+      "displayName": "Chr0no9",
+      "authorEmail": "mnasirpo@ucsc.edu",
+      "commitCount": 1,
+      "linesAdded": 4730,
+      "linesDeleted": 0,
+      "testLineChurn": 0,
+      "sourceLineChurn": 4730,
+      "testFilesTouched": 0,
+      "sourceFilesTouched": 35,
+      "sourcePathsTouchedList": [
+        "Acceptance Criteria-CSLife.md",
+        "Character.js",
+        "CharacterSelect/avatar-images/female1.png",
+        "CharacterSelect/avatar-images/female2.png",
+        "CharacterSelect/avatar-images/male1.png",
+        "CharacterSelect/avatar-images/male2.png",
+        "CharacterSelect/CharacterSelect.css",
+        "CharacterSelect/CharacterSelect.html",
+        "CharacterSelect/CharacterSelect.js",
+        "DataStorage.js",
+        "Definition of Done-CS Student Sim.md",
+        "endgame/EndGame.css",
+        "endgame/EndGame.html",
+        "endgame/EndGame.js",
+        "endgame/EndGameDisplay.js",
+        "Events.js",
+        "Initial Presentation (CS Life).pptx.pdf",
+        "mainGame/mainGame.css",
+        "mainGame/mainGame.html",
+        "mainGame/mainGame.js",
+        "Mini-Games/Mini-Games-Functionality.js",
+        "Mini-Games/Mini-Games.css",
+        "Mini-Games/Mini-Games.html",
+        "Mini-Games/Mini-Games.js",
+        "Quarter.js",
+        "README.md",
+        "ReleasePlan-CS Student Sim.md",
+        "SprintPlan1-CS Student Sim.md",
+        "SprintPlan2-CS Student Sim.md",
+        "SprintPlan3-CS Student Sim.md",
+        "SprintPlan4-CS Student Sim.md",
+        "StartMenu/StartMenu.css",
+        "StartMenu/StartMenu.html",
+        "StartMenu/StartMenu.js",
+        "Test Plan and Report-CSLife.md"
+      ],
+      "commitStats": {
+        "medianCommitSize": 4730,
+        "p90CommitSize": 4730,
+        "pctOver500Loc": 100,
+        "pctOver1000Loc": 100
+      },
+      "burstStats": {
+        "burstCount": 0,
+        "burstRatio": 0
+      },
+      "entropy": {
+        "stdDevTimeBetweenCommits": 0,
+        "meanTimeBetweenCommits": 0
+      },
+      "churn": {
+        "topByModifications": [
+          {
+            "file": "Acceptance Criteria-CSLife.md",
+            "modifications": 1,
+            "linesChanged": 105
+          },
+          {
+            "file": "Character.js",
+            "modifications": 1,
+            "linesChanged": 83
+          },
+          {
+            "file": "CharacterSelect/CharacterSelect.css",
+            "modifications": 1,
+            "linesChanged": 124
+          },
+          {
+            "file": "CharacterSelect/CharacterSelect.html",
+            "modifications": 1,
+            "linesChanged": 37
+          },
+          {
+            "file": "CharacterSelect/CharacterSelect.js",
+            "modifications": 1,
+            "linesChanged": 55
+          },
+          {
+            "file": "CharacterSelect/avatar-images/female1.png",
+            "modifications": 1,
+            "linesChanged": 0
+          },
+          {
+            "file": "CharacterSelect/avatar-images/female2.png",
+            "modifications": 1,
+            "linesChanged": 0
+          },
+          {
+            "file": "CharacterSelect/avatar-images/male1.png",
+            "modifications": 1,
+            "linesChanged": 0
+          },
+          {
+            "file": "CharacterSelect/avatar-images/male2.png",
+            "modifications": 1,
+            "linesChanged": 0
+          },
+          {
+            "file": "DataStorage.js",
+            "modifications": 1,
+            "linesChanged": 33
+          }
+        ],
+        "topByLinesChanged": [
+          {
+            "file": "Mini-Games/Mini-Games.js",
+            "modifications": 1,
+            "linesChanged": 1537
+          },
+          {
+            "file": "Mini-Games/Mini-Games-Functionality.js",
+            "modifications": 1,
+            "linesChanged": 438
+          },
+          {
+            "file": "mainGame/mainGame.js",
+            "modifications": 1,
+            "linesChanged": 346
+          },
+          {
+            "file": "mainGame/mainGame.css",
+            "modifications": 1,
+            "linesChanged": 257
+          },
+          {
+            "file": "Mini-Games/Mini-Games.css",
+            "modifications": 1,
+            "linesChanged": 236
+          },
+          {
+            "file": "Mini-Games/Mini-Games.html",
+            "modifications": 1,
+            "linesChanged": 158
+          },
+          {
+            "file": "endgame/EndGame.css",
+            "modifications": 1,
+            "linesChanged": 143
+          },
+          {
+            "file": "CharacterSelect/CharacterSelect.css",
+            "modifications": 1,
+            "linesChanged": 124
+          },
+          {
+            "file": "Test Plan and Report-CSLife.md",
+            "modifications": 1,
+            "linesChanged": 120
+          },
+          {
+            "file": "SprintPlan3-CS Student Sim.md",
+            "modifications": 1,
+            "linesChanged": 117
+          }
+        ]
+      },
+      "testCoupling": {
+        "pctCommitsTouchingTests": 0,
+        "testToFeatureCommitRatio": 0
+      },
+      "refactorBehavior": {
+        "refactorCommitRatio": 0
+      },
+      "commitCalendar": {
+        "grid": [
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        ],
+        "columnWeekStarts": [
+          "2025-07-28",
+          "2025-08-04",
+          "2025-08-11",
+          "2025-08-18",
+          "2025-08-25",
+          "2025-09-01",
+          "2025-09-08",
+          "2025-09-15",
+          "2025-09-22",
+          "2025-09-29",
+          "2025-10-06",
+          "2025-10-13",
+          "2025-10-20",
+          "2025-10-27",
+          "2025-11-03",
+          "2025-11-10",
+          "2025-11-17",
+          "2025-11-24",
+          "2025-12-01",
+          "2025-12-08",
+          "2025-12-15",
+          "2025-12-22",
+          "2025-12-29",
+          "2026-01-05",
+          "2026-01-12",
+          "2026-01-19",
+          "2026-01-26",
+          "2026-02-02",
+          "2026-02-09",
+          "2026-02-16",
+          "2026-02-23",
+          "2026-03-02",
+          "2026-03-09",
+          "2026-03-16",
+          "2026-03-23",
+          "2026-03-30",
+          "2026-04-06",
+          "2026-04-13",
+          "2026-04-20",
+          "2026-04-27",
+          "2026-05-04",
+          "2026-05-11",
+          "2026-05-18",
+          "2026-05-25",
+          "2026-06-01",
+          "2026-06-08",
+          "2026-06-15",
+          "2026-06-22",
+          "2026-06-29",
+          "2026-07-06",
+          "2026-07-13",
+          "2026-07-20"
+        ],
+        "busiestWeekdayIndex": 0
+      },
+      "commitsPerWeek": 0.1
+    }
+  ],
+  "framework": null,
+  "perFile": [
+    {
+      "file": "Character.js",
+      "functions": 2,
+      "functionsByType": {
+        "function_declaration": 1,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 1,
+        "function": 0,
+        "function_expression": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "createPlayer",
+          "type": "function_declaration",
+          "startLine": 1,
+          "lines": 17,
+          "maxNestingDepth": 0,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 7,
+            "N1": 24,
+            "N2": 24,
+            "volume": 152.156,
+            "difficulty": 3.429,
+            "effort": 521.679
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 98.742,
+          "maintainabilityIndexGradAiNorm": 57.744,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 2,
+          "lines": 1,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 3,
+            "n2": 2,
+            "N1": 3,
+            "N2": 3,
+            "volume": 13.932,
+            "difficulty": 2.25,
+            "effort": 31.346
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 157.072,
+          "maintainabilityIndexGradAiNorm": 91.855,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "createPlayer",
+          "type": "function_declaration",
+          "startLine": 1,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 2,
+          "complexity": 1
+        }
+      ]
+    },
+    {
+      "file": "DataStorage.js",
+      "functions": 4,
+      "functionsByType": {
+        "function_declaration": 4,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 0,
+        "function": 0,
+        "function_expression": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "hasSaveData",
+          "type": "function_declaration",
+          "startLine": 25,
+          "lines": 9,
+          "maxNestingDepth": 1,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 4,
+            "n2": 7,
+            "N1": 5,
+            "N2": 8,
+            "volume": 44.973,
+            "difficulty": 2.286,
+            "effort": 102.795
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 115.153,
+          "maintainabilityIndexGradAiNorm": 67.341,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "deleteSave",
+          "type": "function_declaration",
+          "startLine": 20,
+          "lines": 4,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 5,
+            "N1": 2,
+            "N2": 6,
+            "volume": 20.68,
+            "difficulty": 0.6,
+            "effort": 12.408
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 132.56,
+          "maintainabilityIndexGradAiNorm": 77.52,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "loadGame",
+          "type": "function_declaration",
+          "startLine": 8,
+          "lines": 11,
+          "maxNestingDepth": 1,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 4,
+            "n2": 8,
+            "N1": 8,
+            "N2": 15,
+            "volume": 82.454,
+            "difficulty": 3.75,
+            "effort": 309.203
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 108.75,
+          "maintainabilityIndexGradAiNorm": 63.596,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "saveGame",
+          "type": "function_declaration",
+          "startLine": 3,
+          "lines": 4,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 7,
+            "N1": 3,
+            "N2": 9,
+            "volume": 36,
+            "difficulty": 0.643,
+            "effort": 23.143
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 129.678,
+          "maintainabilityIndexGradAiNorm": 75.835,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "hasSaveData",
+          "type": "function_declaration",
+          "startLine": 25,
+          "complexity": 2
+        },
+        {
+          "name": "deleteSave",
+          "type": "function_declaration",
+          "startLine": 20,
+          "complexity": 1
+        },
+        {
+          "name": "loadGame",
+          "type": "function_declaration",
+          "startLine": 8,
+          "complexity": 2
+        },
+        {
+          "name": "saveGame",
+          "type": "function_declaration",
+          "startLine": 3,
+          "complexity": 1
+        }
+      ]
+    },
+    {
+      "file": "Events.js",
+      "functions": 2,
+      "functionsByType": {
+        "function_declaration": 2,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 0,
+        "function": 0,
+        "function_expression": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "applyEventEffects",
+          "type": "function_declaration",
+          "startLine": 95,
+          "lines": 7,
+          "maxNestingDepth": 2,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 3,
+          "halstead": {
+            "n1": 4,
+            "n2": 5,
+            "N1": 6,
+            "N2": 12,
+            "volume": 57.059,
+            "difficulty": 4.8,
+            "effort": 273.882
+          },
+          "cognitiveComplexity": 3,
+          "maintainabilityIndexGradAiRaw": 117.757,
+          "maintainabilityIndexGradAiNorm": 68.864,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "getRandomEvent",
+          "type": "function_declaration",
+          "startLine": 90,
+          "lines": 4,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 4,
+            "n2": 4,
+            "N1": 6,
+            "N2": 7,
+            "volume": 39,
+            "difficulty": 3.5,
+            "effort": 136.5
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 129.262,
+          "maintainabilityIndexGradAiNorm": 75.592,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "applyEventEffects",
+          "type": "function_declaration",
+          "startLine": 95,
+          "complexity": 3
+        },
+        {
+          "name": "getRandomEvent",
+          "type": "function_declaration",
+          "startLine": 90,
+          "complexity": 1
+        }
+      ]
+    },
+    {
+      "file": "Quarter.js",
+      "functions": 3,
+      "functionsByType": {
+        "function_declaration": 3,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 0,
+        "function": 0,
+        "function_expression": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "NextQuarter",
+          "type": "function_declaration",
+          "startLine": 39,
+          "lines": 57,
+          "maxNestingDepth": 3,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 9,
+          "halstead": {
+            "n1": 6,
+            "n2": 8,
+            "N1": 38,
+            "N2": 41,
+            "volume": 300.781,
+            "difficulty": 15.375,
+            "effort": 4624.508
+          },
+          "cognitiveComplexity": 7,
+          "maintainabilityIndexGradAiRaw": 73.759,
+          "maintainabilityIndexGradAiNorm": 43.134,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "NextYear",
+          "type": "function_declaration",
+          "startLine": 27,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 2,
+            "N1": 2,
+            "N2": 3,
+            "volume": 10,
+            "difficulty": 1.5,
+            "effort": 15
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 140.999,
+          "maintainabilityIndexGradAiNorm": 82.456,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "LastQuarter",
+          "type": "function_declaration",
+          "startLine": 13,
+          "lines": 10,
+          "maxNestingDepth": 1,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 4,
+            "n2": 5,
+            "N1": 5,
+            "N2": 7,
+            "volume": 38.039,
+            "difficulty": 2.8,
+            "effort": 106.509
+          },
+          "cognitiveComplexity": 2,
+          "maintainabilityIndexGradAiRaw": 114.317,
+          "maintainabilityIndexGradAiNorm": 66.852,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "NextQuarter",
+          "type": "function_declaration",
+          "startLine": 39,
+          "complexity": 9
+        },
+        {
+          "name": "NextYear",
+          "type": "function_declaration",
+          "startLine": 27,
+          "complexity": 1
+        },
+        {
+          "name": "LastQuarter",
+          "type": "function_declaration",
+          "startLine": 13,
+          "complexity": 2
+        }
+      ]
+    },
+    {
+      "file": "CharacterSelect/CharacterSelect.js",
+      "functions": 5,
+      "functionsByType": {
+        "function_declaration": 2,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 3,
+        "function": 0,
+        "function_expression": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "startGame",
+          "type": "function_declaration",
+          "startLine": 23,
+          "lines": 20,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 13,
+            "N1": 12,
+            "N2": 34,
+            "volume": 175.138,
+            "difficulty": 1.308,
+            "effort": 229.027
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 95.378,
+          "maintainabilityIndexGradAiNorm": 55.777,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "init",
+          "type": "function_declaration",
+          "startLine": 6,
+          "lines": 16,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 6,
+            "N1": 4,
+            "N2": 14,
+            "volume": 50.532,
+            "difficulty": 1.167,
+            "effort": 58.954
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 105.457,
+          "maintainabilityIndexGradAiNorm": 61.671,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 13,
+          "lines": 8,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 2,
+            "N1": 2,
+            "N2": 4,
+            "volume": 12,
+            "difficulty": 2,
+            "effort": 24
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 124.162,
+          "maintainabilityIndexGradAiNorm": 72.609,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 14,
+          "lines": 6,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 4,
+            "N1": 6,
+            "N2": 6,
+            "volume": 31.02,
+            "difficulty": 1.5,
+            "effort": 46.529
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 123.883,
+          "maintainabilityIndexGradAiNorm": 72.446,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 15,
+          "lines": 1,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 2,
+            "N1": 3,
+            "N2": 4,
+            "volume": 14,
+            "difficulty": 2,
+            "effort": 28
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 157.047,
+          "maintainabilityIndexGradAiNorm": 91.84,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "startGame",
+          "type": "function_declaration",
+          "startLine": 23,
+          "complexity": 1
+        },
+        {
+          "name": "init",
+          "type": "function_declaration",
+          "startLine": 6,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 13,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 14,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 15,
+          "complexity": 1
+        }
+      ]
+    },
+    {
+      "file": "Mini-Games/Mini-Games-Functionality.js",
+      "functions": 21,
+      "functionsByType": {
+        "function_declaration": 15,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 6,
+        "function": 0,
+        "function_expression": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "progressToNextQuarter",
+          "type": "function_declaration",
+          "startLine": 382,
+          "lines": 31,
+          "maxNestingDepth": 1,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 3,
+          "halstead": {
+            "n1": 4,
+            "n2": 10,
+            "N1": 15,
+            "N2": 34,
+            "volume": 186.56,
+            "difficulty": 6.8,
+            "effort": 1268.611
+          },
+          "cognitiveComplexity": 2,
+          "maintainabilityIndexGradAiRaw": 87.49,
+          "maintainabilityIndexGradAiNorm": 51.164,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "finishAllMiniGames",
+          "type": "function_declaration",
+          "startLine": 372,
+          "lines": 9,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 7,
+            "N1": 4,
+            "N2": 16,
+            "volume": 60,
+            "difficulty": 1.143,
+            "effort": 68.571
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 113.884,
+          "maintainabilityIndexGradAiNorm": 66.599,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "completeCurrentMiniGame",
+          "type": "function_declaration",
+          "startLine": 366,
+          "lines": 5,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 3,
+            "N1": 1,
+            "N2": 3,
+            "volume": 8,
+            "difficulty": 0.5,
+            "effort": 4
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 133.884,
+          "maintainabilityIndexGradAiNorm": 78.295,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "checkSocialChoice",
+          "type": "function_declaration",
+          "startLine": 345,
+          "lines": 16,
+          "maxNestingDepth": 0,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 10,
+            "N1": 10,
+            "N2": 28,
+            "volume": 131.458,
+            "difficulty": 1.4,
+            "effort": 184.042
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 100.485,
+          "maintainabilityIndexGradAiNorm": 58.763,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 349,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 2,
+            "N1": 2,
+            "N2": 3,
+            "volume": 10,
+            "difficulty": 1.5,
+            "effort": 15
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 140.999,
+          "maintainabilityIndexGradAiNorm": 82.456,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "startSocialGame",
+          "type": "function_declaration",
+          "startLine": 293,
+          "lines": 48,
+          "maxNestingDepth": 1,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 3,
+          "halstead": {
+            "n1": 9,
+            "n2": 15,
+            "N1": 52,
+            "N2": 91,
+            "volume": 655.65,
+            "difficulty": 27.3,
+            "effort": 17899.235
+          },
+          "cognitiveComplexity": 2,
+          "maintainabilityIndexGradAiRaw": 73.871,
+          "maintainabilityIndexGradAiNorm": 43.199,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "SocialChoices",
+          "type": "function_declaration",
+          "startLine": 330,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 4,
+            "N1": 0,
+            "N2": 4,
+            "volume": 8,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 142.159,
+          "maintainabilityIndexGradAiNorm": 83.134,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "checkCodingAnswer",
+          "type": "function_declaration",
+          "startLine": 262,
+          "lines": 26,
+          "maxNestingDepth": 1,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 3,
+            "n2": 10,
+            "N1": 15,
+            "N2": 32,
+            "volume": 173.921,
+            "difficulty": 4.8,
+            "effort": 834.819
+          },
+          "cognitiveComplexity": 2,
+          "maintainabilityIndexGradAiRaw": 90.934,
+          "maintainabilityIndexGradAiNorm": 53.178,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 266,
+          "lines": 7,
+          "maxNestingDepth": 1,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 4,
+            "n2": 4,
+            "N1": 8,
+            "N2": 8,
+            "volume": 48,
+            "difficulty": 4,
+            "effort": 192
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 118.886,
+          "maintainabilityIndexGradAiNorm": 69.524,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "startCodingGame",
+          "type": "function_declaration",
+          "startLine": 225,
+          "lines": 33,
+          "maxNestingDepth": 1,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 6,
+            "n2": 12,
+            "N1": 33,
+            "N2": 62,
+            "volume": 396.143,
+            "difficulty": 15.5,
+            "effort": 6140.215
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 82.791,
+          "maintainabilityIndexGradAiNorm": 48.416,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "checkStudyAnswer",
+          "type": "function_declaration",
+          "startLine": 195,
+          "lines": 26,
+          "maxNestingDepth": 1,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 3,
+            "n2": 10,
+            "N1": 15,
+            "N2": 32,
+            "volume": 173.921,
+            "difficulty": 4.8,
+            "effort": 834.819
+          },
+          "cognitiveComplexity": 2,
+          "maintainabilityIndexGradAiRaw": 90.934,
+          "maintainabilityIndexGradAiNorm": 53.178,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 199,
+          "lines": 7,
+          "maxNestingDepth": 1,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 4,
+            "n2": 4,
+            "N1": 8,
+            "N2": 8,
+            "volume": 48,
+            "difficulty": 4,
+            "effort": 192
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 118.886,
+          "maintainabilityIndexGradAiNorm": 69.524,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "startStudyGame",
+          "type": "function_declaration",
+          "startLine": 159,
+          "lines": 32,
+          "maxNestingDepth": 1,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 6,
+            "n2": 12,
+            "N1": 33,
+            "N2": 62,
+            "volume": 396.143,
+            "difficulty": 15.5,
+            "effort": 6140.215
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 83.29,
+          "maintainabilityIndexGradAiNorm": 48.708,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "startCurrentMiniGame",
+          "type": "function_declaration",
+          "startLine": 121,
+          "lines": 32,
+          "maxNestingDepth": 3,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 6,
+          "halstead": {
+            "n1": 8,
+            "n2": 15,
+            "N1": 17,
+            "N2": 33,
+            "volume": 226.178,
+            "difficulty": 8.8,
+            "effort": 1990.367
+          },
+          "cognitiveComplexity": 5,
+          "maintainabilityIndexGradAiRaw": 85.284,
+          "maintainabilityIndexGradAiNorm": 49.874,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "renderMultipleChoiceGame",
+          "type": "function_declaration",
+          "startLine": 99,
+          "lines": 21,
+          "maxNestingDepth": 0,
+          "parameterCount": 4,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 9,
+            "N1": 8,
+            "N2": 17,
+            "volume": 86.486,
+            "difficulty": 1.889,
+            "effort": 163.362
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 98.257,
+          "maintainabilityIndexGradAiNorm": 57.46,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 102,
+          "lines": 12,
+          "maxNestingDepth": 0,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 3,
+            "n2": 5,
+            "N1": 8,
+            "N2": 18,
+            "volume": 78,
+            "difficulty": 5.4,
+            "effort": 421.2
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 107.86,
+          "maintainabilityIndexGradAiNorm": 63.076,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 108,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 4,
+            "N1": 1,
+            "N2": 4,
+            "volume": 11.61,
+            "difficulty": 0.5,
+            "effort": 5.805
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 140.223,
+          "maintainabilityIndexGradAiNorm": 82.002,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "updateProgress",
+          "type": "function_declaration",
+          "startLine": 95,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 6,
+            "N1": 2,
+            "N2": 10,
+            "volume": 36,
+            "difficulty": 1.667,
+            "effort": 60
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 134.338,
+          "maintainabilityIndexGradAiNorm": 78.56,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "hideAllScreens",
+          "type": "function_declaration",
+          "startLine": 88,
+          "lines": 6,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 6,
+            "N1": 8,
+            "N2": 13,
+            "volume": 58.954,
+            "difficulty": 1.083,
+            "effort": 63.867
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 120.544,
+          "maintainabilityIndexGradAiNorm": 70.494,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "applyEffects",
+          "type": "function_declaration",
+          "startLine": 48,
+          "lines": 35,
+          "maxNestingDepth": 1,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 9,
+          "halstead": {
+            "n1": 5,
+            "n2": 7,
+            "N1": 40,
+            "N2": 36,
+            "volume": 272.457,
+            "difficulty": 12.857,
+            "effort": 3503.021
+          },
+          "cognitiveComplexity": 8,
+          "maintainabilityIndexGradAiRaw": 82.174,
+          "maintainabilityIndexGradAiNorm": 48.055,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 17,
+          "lines": 4,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 3,
+          "halstead": {
+            "n1": 4,
+            "n2": 2,
+            "N1": 7,
+            "N2": 10,
+            "volume": 43.944,
+            "difficulty": 10,
+            "effort": 439.444
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 128.181,
+          "maintainabilityIndexGradAiNorm": 74.96,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "progressToNextQuarter",
+          "type": "function_declaration",
+          "startLine": 382,
+          "complexity": 3
+        },
+        {
+          "name": "finishAllMiniGames",
+          "type": "function_declaration",
+          "startLine": 372,
+          "complexity": 1
+        },
+        {
+          "name": "completeCurrentMiniGame",
+          "type": "function_declaration",
+          "startLine": 366,
+          "complexity": 1
+        },
+        {
+          "name": "checkSocialChoice",
+          "type": "function_declaration",
+          "startLine": 345,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 349,
+          "complexity": 1
+        },
+        {
+          "name": "startSocialGame",
+          "type": "function_declaration",
+          "startLine": 293,
+          "complexity": 3
+        },
+        {
+          "name": "SocialChoices",
+          "type": "function_declaration",
+          "startLine": 330,
+          "complexity": 1
+        },
+        {
+          "name": "checkCodingAnswer",
+          "type": "function_declaration",
+          "startLine": 262,
+          "complexity": 2
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 266,
+          "complexity": 2
+        },
+        {
+          "name": "startCodingGame",
+          "type": "function_declaration",
+          "startLine": 225,
+          "complexity": 2
+        },
+        {
+          "name": "checkStudyAnswer",
+          "type": "function_declaration",
+          "startLine": 195,
+          "complexity": 2
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 199,
+          "complexity": 2
+        },
+        {
+          "name": "startStudyGame",
+          "type": "function_declaration",
+          "startLine": 159,
+          "complexity": 2
+        },
+        {
+          "name": "startCurrentMiniGame",
+          "type": "function_declaration",
+          "startLine": 121,
+          "complexity": 6
+        },
+        {
+          "name": "renderMultipleChoiceGame",
+          "type": "function_declaration",
+          "startLine": 99,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 102,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 108,
+          "complexity": 1
+        },
+        {
+          "name": "updateProgress",
+          "type": "function_declaration",
+          "startLine": 95,
+          "complexity": 1
+        },
+        {
+          "name": "hideAllScreens",
+          "type": "function_declaration",
+          "startLine": 88,
+          "complexity": 1
+        },
+        {
+          "name": "applyEffects",
+          "type": "function_declaration",
+          "startLine": 48,
+          "complexity": 9
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 17,
+          "complexity": 3
+        }
+      ]
+    },
+    {
+      "file": "Mini-Games/Mini-Games.js",
+      "functions": 7,
+      "functionsByType": {
+        "function_declaration": 0,
+        "generator_function_declaration": 0,
+        "method_definition": 7,
+        "arrow_function": 0,
+        "function": 0,
+        "function_expression": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "ChoiceEffects",
+          "type": "method_definition",
+          "startLine": 119,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 3,
+            "n2": 2,
+            "N1": 3,
+            "N2": 3,
+            "volume": 13.932,
+            "difficulty": 2.25,
+            "effort": 31.346
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 139.275,
+          "maintainabilityIndexGradAiNorm": 81.447,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "constructor",
+          "type": "method_definition",
+          "startLine": 114,
+          "lines": 4,
+          "maxNestingDepth": 0,
+          "parameterCount": 5,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 9,
+            "N1": 1,
+            "N2": 17,
+            "volume": 59.795,
+            "difficulty": 0.944,
+            "effort": 56.473
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 127.039,
+          "maintainabilityIndexGradAiNorm": 74.292,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "constructor",
+          "type": "method_definition",
+          "startLine": 108,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 7,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 9,
+            "N1": 0,
+            "N2": 17,
+            "volume": 53.889,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 132.24,
+          "maintainabilityIndexGradAiNorm": 77.333,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "constructor",
+          "type": "method_definition",
+          "startLine": 102,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 7,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 9,
+            "N1": 0,
+            "N2": 17,
+            "volume": 53.889,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 132.24,
+          "maintainabilityIndexGradAiNorm": 77.333,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "AnswerResult",
+          "type": "method_definition",
+          "startLine": 82,
+          "lines": 17,
+          "maxNestingDepth": 1,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 4,
+            "n2": 4,
+            "N1": 6,
+            "N2": 12,
+            "volume": 54,
+            "difficulty": 6,
+            "effort": 324
+          },
+          "cognitiveComplexity": 2,
+          "maintainabilityIndexGradAiRaw": 103.899,
+          "maintainabilityIndexGradAiNorm": 60.76,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "CheckAnswer",
+          "type": "method_definition",
+          "startLine": 69,
+          "lines": 12,
+          "maxNestingDepth": 1,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 3,
+          "halstead": {
+            "n1": 5,
+            "n2": 5,
+            "N1": 9,
+            "N2": 9,
+            "volume": 59.795,
+            "difficulty": 4.5,
+            "effort": 269.076
+          },
+          "cognitiveComplexity": 2,
+          "maintainabilityIndexGradAiRaw": 108.782,
+          "maintainabilityIndexGradAiNorm": 63.615,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "constructor",
+          "type": "method_definition",
+          "startLine": 58,
+          "lines": 10,
+          "maxNestingDepth": 0,
+          "parameterCount": 8,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 9,
+            "N1": 8,
+            "N2": 24,
+            "volume": 106.302,
+            "difficulty": 1.333,
+            "effort": 141.736
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 109.203,
+          "maintainabilityIndexGradAiNorm": 63.861,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "ChoiceEffects",
+          "type": "method_definition",
+          "startLine": 119,
+          "complexity": 1
+        },
+        {
+          "name": "constructor",
+          "type": "method_definition",
+          "startLine": 114,
+          "complexity": 1
+        },
+        {
+          "name": "constructor",
+          "type": "method_definition",
+          "startLine": 108,
+          "complexity": 1
+        },
+        {
+          "name": "constructor",
+          "type": "method_definition",
+          "startLine": 102,
+          "complexity": 1
+        },
+        {
+          "name": "AnswerResult",
+          "type": "method_definition",
+          "startLine": 82,
+          "complexity": 2
+        },
+        {
+          "name": "CheckAnswer",
+          "type": "method_definition",
+          "startLine": 69,
+          "complexity": 3
+        },
+        {
+          "name": "constructor",
+          "type": "method_definition",
+          "startLine": 58,
+          "complexity": 1
+        }
+      ]
+    },
+    {
+      "file": "StartMenu/StartMenu.js",
+      "functions": 2,
+      "functionsByType": {
+        "function_declaration": 0,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 2,
+        "function": 0,
+        "function_expression": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 12,
+          "lines": 15,
+          "maxNestingDepth": 1,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 5,
+            "n2": 8,
+            "N1": 14,
+            "N2": 21,
+            "volume": 129.515,
+            "difficulty": 6.563,
+            "effort": 849.945
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 101.378,
+          "maintainabilityIndexGradAiNorm": 59.285,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 8,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 2,
+            "N1": 3,
+            "N2": 3,
+            "volume": 12,
+            "difficulty": 1.5,
+            "effort": 18
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 140.051,
+          "maintainabilityIndexGradAiNorm": 81.901,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 12,
+          "complexity": 2
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 8,
+          "complexity": 1
+        }
+      ]
+    },
+    {
+      "file": "endgame/EndGame.js",
+      "functions": 1,
+      "functionsByType": {
+        "function_declaration": 1,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 0,
+        "function": 0,
+        "function_expression": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "endCareers",
+          "type": "function_declaration",
+          "startLine": 51,
+          "lines": 9,
+          "maxNestingDepth": 2,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 5,
+          "halstead": {
+            "n1": 8,
+            "n2": 5,
+            "N1": 18,
+            "N2": 14,
+            "volume": 118.414,
+            "difficulty": 11.2,
+            "effort": 1326.238
+          },
+          "cognitiveComplexity": 3,
+          "maintainabilityIndexGradAiRaw": 109.429,
+          "maintainabilityIndexGradAiNorm": 63.994,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "endCareers",
+          "type": "function_declaration",
+          "startLine": 51,
+          "complexity": 5
+        }
+      ]
+    },
+    {
+      "file": "endgame/EndGameDisplay.js",
+      "functions": 0,
+      "functionsByType": {
+        "function_declaration": 0,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 0,
+        "function": 0,
+        "function_expression": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [],
+      "complexity": []
+    },
+    {
+      "file": "mainGame/mainGame.js",
+      "functions": 22,
+      "functionsByType": {
+        "function_declaration": 12,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 10,
+        "function": 0,
+        "function_expression": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 312,
+          "lines": 35,
+          "maxNestingDepth": 2,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 4,
+          "halstead": {
+            "n1": 7,
+            "n2": 12,
+            "N1": 26,
+            "N2": 48,
+            "volume": 314.347,
+            "difficulty": 14,
+            "effort": 4400.853
+          },
+          "cognitiveComplexity": 5,
+          "maintainabilityIndexGradAiRaw": 82.581,
+          "maintainabilityIndexGradAiNorm": 48.293,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "finishQuarter",
+          "type": "function_declaration",
+          "startLine": 286,
+          "lines": 19,
+          "maxNestingDepth": 1,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 4,
+            "n2": 13,
+            "N1": 12,
+            "N2": 26,
+            "volume": 155.324,
+            "difficulty": 4,
+            "effort": 621.294
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 96.603,
+          "maintainabilityIndexGradAiNorm": 56.493,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "finishEvents",
+          "type": "function_declaration",
+          "startLine": 278,
+          "lines": 7,
+          "maxNestingDepth": 1,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 4,
+            "n2": 3,
+            "N1": 4,
+            "N2": 3,
+            "volume": 19.651,
+            "difficulty": 2,
+            "effort": 39.303
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 123.53,
+          "maintainabilityIndexGradAiNorm": 72.24,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "startRandomEvent",
+          "type": "function_declaration",
+          "startLine": 248,
+          "lines": 29,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 7,
+            "N1": 15,
+            "N2": 25,
+            "volume": 120,
+            "difficulty": 1.786,
+            "effort": 214.286
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 91.325,
+          "maintainabilityIndexGradAiNorm": 53.406,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 259,
+          "lines": 15,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 5,
+            "N1": 6,
+            "N2": 12,
+            "volume": 50.532,
+            "difficulty": 2.4,
+            "effort": 121.278
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 106.502,
+          "maintainabilityIndexGradAiNorm": 62.282,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 263,
+          "lines": 8,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 8,
+            "N1": 6,
+            "N2": 11,
+            "volume": 56.473,
+            "difficulty": 1.375,
+            "effort": 77.65
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 116.107,
+          "maintainabilityIndexGradAiNorm": 67.899,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "finishMiniGames",
+          "type": "function_declaration",
+          "startLine": 240,
+          "lines": 7,
+          "maxNestingDepth": 1,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 4,
+            "n2": 3,
+            "N1": 4,
+            "N2": 3,
+            "volume": 19.651,
+            "difficulty": 2,
+            "effort": 39.303
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 123.53,
+          "maintainabilityIndexGradAiNorm": 72.24,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "startNextMiniGame",
+          "type": "function_declaration",
+          "startLine": 226,
+          "lines": 14,
+          "maxNestingDepth": 1,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 4,
+            "n2": 9,
+            "N1": 7,
+            "N2": 13,
+            "volume": 74.009,
+            "difficulty": 2.889,
+            "effort": 213.803
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 105.406,
+          "maintainabilityIndexGradAiNorm": 61.641,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "constructMiniGameQueue",
+          "type": "function_declaration",
+          "startLine": 208,
+          "lines": 17,
+          "maxNestingDepth": 1,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 4,
+          "halstead": {
+            "n1": 4,
+            "n2": 7,
+            "N1": 16,
+            "N2": 30,
+            "volume": 159.134,
+            "difficulty": 8.571,
+            "effort": 1364.004
+          },
+          "cognitiveComplexity": 3,
+          "maintainabilityIndexGradAiRaw": 97.819,
+          "maintainabilityIndexGradAiNorm": 57.204,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 191,
+          "lines": 12,
+          "maxNestingDepth": 1,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 2,
+            "N1": 2,
+            "N2": 4,
+            "volume": 12,
+            "difficulty": 2,
+            "effort": 24
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 117.593,
+          "maintainabilityIndexGradAiNorm": 68.768,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 192,
+          "lines": 10,
+          "maxNestingDepth": 1,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 6,
+            "n2": 6,
+            "N1": 8,
+            "N2": 10,
+            "volume": 64.529,
+            "difficulty": 5,
+            "effort": 322.647
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 111.569,
+          "maintainabilityIndexGradAiNorm": 65.245,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 170,
+          "lines": 20,
+          "maxNestingDepth": 1,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 2,
+            "N1": 2,
+            "N2": 4,
+            "volume": 12,
+            "difficulty": 2,
+            "effort": 24
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 109.318,
+          "maintainabilityIndexGradAiNorm": 63.929,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 171,
+          "lines": 18,
+          "maxNestingDepth": 1,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 6,
+          "halstead": {
+            "n1": 11,
+            "n2": 8,
+            "N1": 21,
+            "N2": 25,
+            "volume": 195.405,
+            "difficulty": 17.188,
+            "effort": 3358.518
+          },
+          "cognitiveComplexity": 2,
+          "maintainabilityIndexGradAiRaw": 95.366,
+          "maintainabilityIndexGradAiNorm": 55.77,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "updateAllocationDisplay",
+          "type": "function_declaration",
+          "startLine": 158,
+          "lines": 11,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 5,
+            "N1": 19,
+            "N2": 32,
+            "volume": 131.833,
+            "difficulty": 3.2,
+            "effort": 421.866
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 106.54,
+          "maintainabilityIndexGradAiNorm": 62.304,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "submitAllocation",
+          "type": "function_declaration",
+          "startLine": 135,
+          "lines": 22,
+          "maxNestingDepth": 1,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 4,
+            "n2": 12,
+            "N1": 17,
+            "N2": 35,
+            "volume": 208,
+            "difficulty": 5.833,
+            "effort": 1213.333
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 92.71,
+          "maintainabilityIndexGradAiNorm": 54.216,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "applyTimeAllocationEffects",
+          "type": "function_declaration",
+          "startLine": 104,
+          "lines": 31,
+          "maxNestingDepth": 1,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 5,
+          "halstead": {
+            "n1": 6,
+            "n2": 14,
+            "N1": 31,
+            "N2": 40,
+            "volume": 306.857,
+            "difficulty": 8.571,
+            "effort": 2630.202
+          },
+          "cognitiveComplexity": 4,
+          "maintainabilityIndexGradAiRaw": 84.442,
+          "maintainabilityIndexGradAiNorm": 49.381,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 92,
+          "lines": 5,
+          "maxNestingDepth": 1,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 4,
+            "n2": 3,
+            "N1": 6,
+            "N2": 6,
+            "volume": 33.688,
+            "difficulty": 4,
+            "effort": 134.753
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 126.178,
+          "maintainabilityIndexGradAiNorm": 73.788,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "timeAllocation",
+          "type": "function_declaration",
+          "startLine": 70,
+          "lines": 15,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 7,
+            "N1": 8,
+            "N2": 21,
+            "volume": 87,
+            "difficulty": 1.5,
+            "effort": 130.5
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 103.677,
+          "maintainabilityIndexGradAiNorm": 60.63,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "startQuarter",
+          "type": "function_declaration",
+          "startLine": 48,
+          "lines": 11,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 9,
+            "N1": 6,
+            "N2": 16,
+            "volume": 73.082,
+            "difficulty": 0.889,
+            "effort": 64.962
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 109.608,
+          "maintainabilityIndexGradAiNorm": 64.098,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "updateStats",
+          "type": "function_declaration",
+          "startLine": 40,
+          "lines": 5,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 5,
+            "N1": 7,
+            "N2": 18,
+            "volume": 64.624,
+            "difficulty": 1.8,
+            "effort": 116.323
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 123.02,
+          "maintainabilityIndexGradAiNorm": 71.942,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 36,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 2,
+            "N1": 3,
+            "N2": 3,
+            "volume": 12,
+            "difficulty": 1.5,
+            "effort": 18
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 140.051,
+          "maintainabilityIndexGradAiNorm": 81.901,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 21,
+          "lines": 14,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 4,
+            "N1": 33,
+            "N2": 73,
+            "volume": 274.006,
+            "difficulty": 18.25,
+            "effort": 5000.61
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 98.829,
+          "maintainabilityIndexGradAiNorm": 57.795,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 312,
+          "complexity": 4
+        },
+        {
+          "name": "finishQuarter",
+          "type": "function_declaration",
+          "startLine": 286,
+          "complexity": 2
+        },
+        {
+          "name": "finishEvents",
+          "type": "function_declaration",
+          "startLine": 278,
+          "complexity": 2
+        },
+        {
+          "name": "startRandomEvent",
+          "type": "function_declaration",
+          "startLine": 248,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 259,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 263,
+          "complexity": 1
+        },
+        {
+          "name": "finishMiniGames",
+          "type": "function_declaration",
+          "startLine": 240,
+          "complexity": 2
+        },
+        {
+          "name": "startNextMiniGame",
+          "type": "function_declaration",
+          "startLine": 226,
+          "complexity": 2
+        },
+        {
+          "name": "constructMiniGameQueue",
+          "type": "function_declaration",
+          "startLine": 208,
+          "complexity": 4
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 191,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 192,
+          "complexity": 2
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 170,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 171,
+          "complexity": 6
+        },
+        {
+          "name": "updateAllocationDisplay",
+          "type": "function_declaration",
+          "startLine": 158,
+          "complexity": 1
+        },
+        {
+          "name": "submitAllocation",
+          "type": "function_declaration",
+          "startLine": 135,
+          "complexity": 2
+        },
+        {
+          "name": "applyTimeAllocationEffects",
+          "type": "function_declaration",
+          "startLine": 104,
+          "complexity": 5
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 92,
+          "complexity": 2
+        },
+        {
+          "name": "timeAllocation",
+          "type": "function_declaration",
+          "startLine": 70,
+          "complexity": 1
+        },
+        {
+          "name": "startQuarter",
+          "type": "function_declaration",
+          "startLine": 48,
+          "complexity": 1
+        },
+        {
+          "name": "updateStats",
+          "type": "function_declaration",
+          "startLine": 40,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 36,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 21,
+          "complexity": 1
+        }
+      ]
+    }
+  ],
+  "phase3": {
+    "sfd": 0,
+    "mcr": null,
+    "srs": 6.08883,
+    "silentFailureEvents": [],
+    "srsWeightedNumerator": 17,
+    "srsExactWeightedLines": 17,
+    "srsNearWeightedLines": 0,
+    "monolithicComponentCount": 0,
+    "reactComponentCount": 0
+  },
+  "symbolVerificationRisks": [
+    {
+      "file": "Quarter.js",
+      "name": "NextQuarter",
+      "startLine": 39,
+      "cyclomaticComplexity": 9,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 9
+    },
+    {
+      "file": "Mini-Games/Mini-Games-Functionality.js",
+      "name": "applyEffects",
+      "startLine": 48,
+      "cyclomaticComplexity": 9,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 9
+    },
+    {
+      "file": "Mini-Games/Mini-Games-Functionality.js",
+      "name": "startCurrentMiniGame",
+      "startLine": 121,
+      "cyclomaticComplexity": 6,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 6
+    },
+    {
+      "file": "endgame/EndGame.js",
+      "name": "endCareers",
+      "startLine": 51,
+      "cyclomaticComplexity": 5,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 5
+    },
+    {
+      "file": "mainGame/mainGame.js",
+      "name": "applyTimeAllocationEffects",
+      "startLine": 104,
+      "cyclomaticComplexity": 5,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 5
+    },
+    {
+      "file": "mainGame/mainGame.js",
+      "name": "constructMiniGameQueue",
+      "startLine": 208,
+      "cyclomaticComplexity": 4,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 4
+    },
+    {
+      "file": "Events.js",
+      "name": "applyEventEffects",
+      "startLine": 95,
+      "cyclomaticComplexity": 3,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 3
+    },
+    {
+      "file": "Mini-Games/Mini-Games-Functionality.js",
+      "name": "progressToNextQuarter",
+      "startLine": 382,
+      "cyclomaticComplexity": 3,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 3
+    },
+    {
+      "file": "Mini-Games/Mini-Games-Functionality.js",
+      "name": "startSocialGame",
+      "startLine": 293,
+      "cyclomaticComplexity": 3,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 3
+    },
+    {
+      "file": "Mini-Games/Mini-Games.js",
+      "name": "CheckAnswer",
+      "startLine": 69,
+      "cyclomaticComplexity": 3,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 3
+    },
+    {
+      "file": "DataStorage.js",
+      "name": "hasSaveData",
+      "startLine": 25,
+      "cyclomaticComplexity": 2,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 2
+    },
+    {
+      "file": "DataStorage.js",
+      "name": "loadGame",
+      "startLine": 8,
+      "cyclomaticComplexity": 2,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 2
+    },
+    {
+      "file": "Quarter.js",
+      "name": "LastQuarter",
+      "startLine": 13,
+      "cyclomaticComplexity": 2,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 2
+    },
+    {
+      "file": "Mini-Games/Mini-Games-Functionality.js",
+      "name": "checkCodingAnswer",
+      "startLine": 262,
+      "cyclomaticComplexity": 2,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 2
+    },
+    {
+      "file": "Mini-Games/Mini-Games-Functionality.js",
+      "name": "startCodingGame",
+      "startLine": 225,
+      "cyclomaticComplexity": 2,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 2
+    },
+    {
+      "file": "Mini-Games/Mini-Games-Functionality.js",
+      "name": "checkStudyAnswer",
+      "startLine": 195,
+      "cyclomaticComplexity": 2,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 2
+    },
+    {
+      "file": "Mini-Games/Mini-Games-Functionality.js",
+      "name": "startStudyGame",
+      "startLine": 159,
+      "cyclomaticComplexity": 2,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 2
+    },
+    {
+      "file": "Mini-Games/Mini-Games.js",
+      "name": "AnswerResult",
+      "startLine": 82,
+      "cyclomaticComplexity": 2,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 2
+    },
+    {
+      "file": "mainGame/mainGame.js",
+      "name": "finishQuarter",
+      "startLine": 286,
+      "cyclomaticComplexity": 2,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 2
+    },
+    {
+      "file": "mainGame/mainGame.js",
+      "name": "finishEvents",
+      "startLine": 278,
+      "cyclomaticComplexity": 2,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 2
+    },
+    {
+      "file": "mainGame/mainGame.js",
+      "name": "finishMiniGames",
+      "startLine": 240,
+      "cyclomaticComplexity": 2,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 2
+    },
+    {
+      "file": "mainGame/mainGame.js",
+      "name": "startNextMiniGame",
+      "startLine": 226,
+      "cyclomaticComplexity": 2,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 2
+    },
+    {
+      "file": "mainGame/mainGame.js",
+      "name": "submitAllocation",
+      "startLine": 135,
+      "cyclomaticComplexity": 2,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 2
+    },
+    {
+      "file": "Character.js",
+      "name": "createPlayer",
+      "startLine": 1,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "DataStorage.js",
+      "name": "deleteSave",
+      "startLine": 20,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "DataStorage.js",
+      "name": "saveGame",
+      "startLine": 3,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "Events.js",
+      "name": "getRandomEvent",
+      "startLine": 90,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "Quarter.js",
+      "name": "NextYear",
+      "startLine": 27,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "CharacterSelect/CharacterSelect.js",
+      "name": "startGame",
+      "startLine": 23,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "CharacterSelect/CharacterSelect.js",
+      "name": "init",
+      "startLine": 6,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "Mini-Games/Mini-Games-Functionality.js",
+      "name": "finishAllMiniGames",
+      "startLine": 372,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "Mini-Games/Mini-Games-Functionality.js",
+      "name": "completeCurrentMiniGame",
+      "startLine": 366,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "Mini-Games/Mini-Games-Functionality.js",
+      "name": "checkSocialChoice",
+      "startLine": 345,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "Mini-Games/Mini-Games-Functionality.js",
+      "name": "SocialChoices",
+      "startLine": 330,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "Mini-Games/Mini-Games-Functionality.js",
+      "name": "renderMultipleChoiceGame",
+      "startLine": 99,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "Mini-Games/Mini-Games-Functionality.js",
+      "name": "updateProgress",
+      "startLine": 95,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "Mini-Games/Mini-Games-Functionality.js",
+      "name": "hideAllScreens",
+      "startLine": 88,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "Mini-Games/Mini-Games.js",
+      "name": "ChoiceEffects",
+      "startLine": 119,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "Mini-Games/Mini-Games.js",
+      "name": "constructor",
+      "startLine": 114,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "Mini-Games/Mini-Games.js",
+      "name": "constructor",
+      "startLine": 108,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "Mini-Games/Mini-Games.js",
+      "name": "constructor",
+      "startLine": 102,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "Mini-Games/Mini-Games.js",
+      "name": "constructor",
+      "startLine": 58,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "mainGame/mainGame.js",
+      "name": "startRandomEvent",
+      "startLine": 248,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "mainGame/mainGame.js",
+      "name": "updateAllocationDisplay",
+      "startLine": 158,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "mainGame/mainGame.js",
+      "name": "timeAllocation",
+      "startLine": 70,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "mainGame/mainGame.js",
+      "name": "startQuarter",
+      "startLine": 48,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "mainGame/mainGame.js",
+      "name": "updateStats",
+      "startLine": 40,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    }
+  ]
+}

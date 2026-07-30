@@ -84,10 +84,20 @@ redundancy".
 
 Cause, confirmed by running jscpd standalone with the engine's own arguments:
 
-- jscpd runs for **259 s** and exits **134** (SIGABRT — abort/OOM), producing no
-  report at all
+- jscpd runs for **243–259 s** and exits **134** (SIGABRT — Node out-of-memory),
+  producing no report at all
 - `collect/duplication.ts` caps it at a **60 s timeout** and returns `null` on any
   failure, so the crash surfaces as an absent metric with nothing logged
+
+The underlying reason is that jscpd's corpus is much larger than the analyzer's:
+its `--ignore node_modules,…` pattern does not match *nested* paths, so it walks
+`research/validation/node_modules/**`. A relative-path invocation that does
+complete scans **10,487 sources** for a repository with ~363 analyzable files, and
+reports **42.18 % duplication** — a figure dominated by third-party dependency
+code. The completing case is therefore worse than the failing one: it produces a
+plausible number that is not a measurement of this repository. Full detail,
+including the risk this poses to cohort repos analyzed after `npm install`, is in
+[findings.md](findings.md).
 
 This also explains the runtime figure. Of the 64.2 s wall clock, **~60 s is the
 jscpd timeout** and only ~4 s is analysis work — the pre-fix tree at `1f250c1`,
