@@ -8,7 +8,7 @@
   },
   "filesAnalyzed": 56,
   "analyzer_version": "0.2.0",
-  "analysis_timestamp": "2026-07-30T05:51:08.261Z",
+  "analysis_timestamp": "2026-07-30T14:20:34.679Z",
   "distributions": {
     "p50_function_length": 5,
     "p75_function_length": 14,
@@ -17873,6 +17873,16 @@
       "complexity": []
     },
     {
+      "file": "pipeline/adapters/__init__.py",
+      "functions": 0,
+      "functionsByType": {
+        "function_definition": 0,
+        "lambda": 0
+      },
+      "functionMetrics": [],
+      "complexity": []
+    },
+    {
       "file": "frontend/types/compare.ts",
       "functions": 0,
       "functionsByType": {
@@ -17928,16 +17938,6 @@
         "function": 0,
         "function_expression": 0,
         "generator_function": 0
-      },
-      "functionMetrics": [],
-      "complexity": []
-    },
-    {
-      "file": "pipeline/adapters/__init__.py",
-      "functions": 0,
-      "functionsByType": {
-        "function_definition": 0,
-        "lambda": 0
       },
       "functionMetrics": [],
       "complexity": []
@@ -18148,6 +18148,57 @@
           "name": "(anonymous)",
           "type": "lambda",
           "startLine": 22,
+          "complexity": 1
+        }
+      ]
+    },
+    {
+      "file": "pipeline/sources/__init__.py",
+      "functions": 0,
+      "functionsByType": {
+        "function_definition": 0,
+        "lambda": 0
+      },
+      "functionMetrics": [],
+      "complexity": []
+    },
+    {
+      "file": "pipeline/sources/socrata.py",
+      "functions": 1,
+      "functionsByType": {
+        "function_definition": 1,
+        "lambda": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "fetch_csv",
+          "type": "function_definition",
+          "startLine": 6,
+          "lines": 12,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 17,
+            "N1": 1,
+            "N2": 21,
+            "volume": 91.738,
+            "difficulty": 0.618,
+            "effort": 56.662
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 107.016,
+          "maintainabilityIndexGradAiNorm": 62.582,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "fetch_csv",
+          "type": "function_definition",
+          "startLine": 6,
           "complexity": 1
         }
       ]
@@ -18374,337 +18425,6 @@
           "type": "function_definition",
           "startLine": 21,
           "complexity": 2
-        }
-      ]
-    },
-    {
-      "file": "pipeline/sources/__init__.py",
-      "functions": 0,
-      "functionsByType": {
-        "function_definition": 0,
-        "lambda": 0
-      },
-      "functionMetrics": [],
-      "complexity": []
-    },
-    {
-      "file": "pipeline/sources/socrata.py",
-      "functions": 1,
-      "functionsByType": {
-        "function_definition": 1,
-        "lambda": 0
-      },
-      "functionMetrics": [
-        {
-          "name": "fetch_csv",
-          "type": "function_definition",
-          "startLine": 6,
-          "lines": 12,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 1,
-            "n2": 17,
-            "N1": 1,
-            "N2": 21,
-            "volume": 91.738,
-            "difficulty": 0.618,
-            "effort": 56.662
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 107.016,
-          "maintainabilityIndexGradAiNorm": 62.582,
-          "isReactComponent": false,
-          "isMonolithic": false
-        }
-      ],
-      "complexity": [
-        {
-          "name": "fetch_csv",
-          "type": "function_definition",
-          "startLine": 6,
-          "complexity": 1
-        }
-      ]
-    },
-    {
-      "file": "backend/alembic/versions/40c7e2a3a883_geography_dimension_table.py",
-      "functions": 2,
-      "functionsByType": {
-        "function_definition": 2,
-        "lambda": 0
-      },
-      "functionMetrics": [
-        {
-          "name": "downgrade",
-          "type": "function_definition",
-          "startLine": 40,
-          "lines": 2,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 0,
-            "n2": 5,
-            "N1": 0,
-            "N2": 5,
-            "volume": 11.61,
-            "difficulty": 0,
-            "effort": 0
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 146.791,
-          "maintainabilityIndexGradAiNorm": 85.843,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "upgrade",
-          "type": "function_definition",
-          "startLine": 20,
-          "lines": 19,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 0,
-            "n2": 5,
-            "N1": 0,
-            "N2": 11,
-            "volume": 25.541,
-            "difficulty": 0,
-            "effort": 0
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 106.221,
-          "maintainabilityIndexGradAiNorm": 62.118,
-          "isReactComponent": false,
-          "isMonolithic": false
-        }
-      ],
-      "complexity": [
-        {
-          "name": "downgrade",
-          "type": "function_definition",
-          "startLine": 40,
-          "complexity": 1
-        },
-        {
-          "name": "upgrade",
-          "type": "function_definition",
-          "startLine": 20,
-          "complexity": 1
-        }
-      ]
-    },
-    {
-      "file": "backend/alembic/versions/aa5f998dcc5a_baseline.py",
-      "functions": 2,
-      "functionsByType": {
-        "function_definition": 2,
-        "lambda": 0
-      },
-      "functionMetrics": [
-        {
-          "name": "downgrade",
-          "type": "function_definition",
-          "startLine": 22,
-          "lines": 3,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 0,
-            "n2": 3,
-            "N1": 0,
-            "N2": 3,
-            "volume": 4.755,
-            "difficulty": 0,
-            "effort": 0
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 144.865,
-          "maintainabilityIndexGradAiNorm": 84.716,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "upgrade",
-          "type": "function_definition",
-          "startLine": 17,
-          "lines": 3,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 0,
-            "n2": 3,
-            "N1": 0,
-            "N2": 3,
-            "volume": 4.755,
-            "difficulty": 0,
-            "effort": 0
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 144.865,
-          "maintainabilityIndexGradAiNorm": 84.716,
-          "isReactComponent": false,
-          "isMonolithic": false
-        }
-      ],
-      "complexity": [
-        {
-          "name": "downgrade",
-          "type": "function_definition",
-          "startLine": 22,
-          "complexity": 1
-        },
-        {
-          "name": "upgrade",
-          "type": "function_definition",
-          "startLine": 17,
-          "complexity": 1
-        }
-      ]
-    },
-    {
-      "file": "backend/alembic/versions/b3c2d1e4f5a6_raw_reports_and_incidents.py",
-      "functions": 2,
-      "functionsByType": {
-        "function_definition": 2,
-        "lambda": 0
-      },
-      "functionMetrics": [
-        {
-          "name": "downgrade",
-          "type": "function_definition",
-          "startLine": 98,
-          "lines": 4,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 0,
-            "n2": 5,
-            "N1": 0,
-            "N2": 11,
-            "volume": 25.541,
-            "difficulty": 0,
-            "effort": 0
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 131.463,
-          "maintainabilityIndexGradAiNorm": 76.879,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "upgrade",
-          "type": "function_definition",
-          "startLine": 18,
-          "lines": 78,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 0,
-            "n2": 5,
-            "N1": 0,
-            "N2": 23,
-            "volume": 53.404,
-            "difficulty": 0,
-            "effort": 0
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 79.506,
-          "maintainabilityIndexGradAiNorm": 46.495,
-          "isReactComponent": false,
-          "isMonolithic": false
-        }
-      ],
-      "complexity": [
-        {
-          "name": "downgrade",
-          "type": "function_definition",
-          "startLine": 98,
-          "complexity": 1
-        },
-        {
-          "name": "upgrade",
-          "type": "function_definition",
-          "startLine": 18,
-          "complexity": 1
-        }
-      ]
-    },
-    {
-      "file": "backend/alembic/versions/b52deb03cabc_precomputed_aggregate_tables.py",
-      "functions": 2,
-      "functionsByType": {
-        "function_definition": 2,
-        "lambda": 0
-      },
-      "functionMetrics": [
-        {
-          "name": "downgrade",
-          "type": "function_definition",
-          "startLine": 45,
-          "lines": 2,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 0,
-            "n2": 5,
-            "N1": 0,
-            "N2": 5,
-            "volume": 11.61,
-            "difficulty": 0,
-            "effort": 0
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 146.791,
-          "maintainabilityIndexGradAiNorm": 85.843,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "upgrade",
-          "type": "function_definition",
-          "startLine": 20,
-          "lines": 23,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 0,
-            "n2": 5,
-            "N1": 0,
-            "N2": 11,
-            "volume": 25.541,
-            "difficulty": 0,
-            "effort": 0
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 103.126,
-          "maintainabilityIndexGradAiNorm": 60.308,
-          "isReactComponent": false,
-          "isMonolithic": false
-        }
-      ],
-      "complexity": [
-        {
-          "name": "downgrade",
-          "type": "function_definition",
-          "startLine": 45,
-          "complexity": 1
-        },
-        {
-          "name": "upgrade",
-          "type": "function_definition",
-          "startLine": 20,
-          "complexity": 1
         }
       ]
     },
@@ -19074,24 +18794,284 @@
       ]
     },
     {
-      "file": "pipeline/adapters/chicago/__init__.py",
-      "functions": 0,
+      "file": "backend/alembic/versions/40c7e2a3a883_geography_dimension_table.py",
+      "functions": 2,
       "functionsByType": {
-        "function_definition": 0,
+        "function_definition": 2,
         "lambda": 0
       },
-      "functionMetrics": [],
-      "complexity": []
+      "functionMetrics": [
+        {
+          "name": "downgrade",
+          "type": "function_definition",
+          "startLine": 40,
+          "lines": 2,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 5,
+            "N1": 0,
+            "N2": 5,
+            "volume": 11.61,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 146.791,
+          "maintainabilityIndexGradAiNorm": 85.843,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "upgrade",
+          "type": "function_definition",
+          "startLine": 20,
+          "lines": 19,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 5,
+            "N1": 0,
+            "N2": 11,
+            "volume": 25.541,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 106.221,
+          "maintainabilityIndexGradAiNorm": 62.118,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "downgrade",
+          "type": "function_definition",
+          "startLine": 40,
+          "complexity": 1
+        },
+        {
+          "name": "upgrade",
+          "type": "function_definition",
+          "startLine": 20,
+          "complexity": 1
+        }
+      ]
     },
     {
-      "file": "pipeline/adapters/chicago/ingest.py",
-      "functions": 0,
+      "file": "backend/alembic/versions/aa5f998dcc5a_baseline.py",
+      "functions": 2,
       "functionsByType": {
-        "function_definition": 0,
+        "function_definition": 2,
         "lambda": 0
       },
-      "functionMetrics": [],
-      "complexity": []
+      "functionMetrics": [
+        {
+          "name": "downgrade",
+          "type": "function_definition",
+          "startLine": 22,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 3,
+            "N1": 0,
+            "N2": 3,
+            "volume": 4.755,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 144.865,
+          "maintainabilityIndexGradAiNorm": 84.716,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "upgrade",
+          "type": "function_definition",
+          "startLine": 17,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 3,
+            "N1": 0,
+            "N2": 3,
+            "volume": 4.755,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 144.865,
+          "maintainabilityIndexGradAiNorm": 84.716,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "downgrade",
+          "type": "function_definition",
+          "startLine": 22,
+          "complexity": 1
+        },
+        {
+          "name": "upgrade",
+          "type": "function_definition",
+          "startLine": 17,
+          "complexity": 1
+        }
+      ]
+    },
+    {
+      "file": "backend/alembic/versions/b3c2d1e4f5a6_raw_reports_and_incidents.py",
+      "functions": 2,
+      "functionsByType": {
+        "function_definition": 2,
+        "lambda": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "downgrade",
+          "type": "function_definition",
+          "startLine": 98,
+          "lines": 4,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 5,
+            "N1": 0,
+            "N2": 11,
+            "volume": 25.541,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 131.463,
+          "maintainabilityIndexGradAiNorm": 76.879,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "upgrade",
+          "type": "function_definition",
+          "startLine": 18,
+          "lines": 78,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 5,
+            "N1": 0,
+            "N2": 23,
+            "volume": 53.404,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 79.506,
+          "maintainabilityIndexGradAiNorm": 46.495,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "downgrade",
+          "type": "function_definition",
+          "startLine": 98,
+          "complexity": 1
+        },
+        {
+          "name": "upgrade",
+          "type": "function_definition",
+          "startLine": 18,
+          "complexity": 1
+        }
+      ]
+    },
+    {
+      "file": "backend/alembic/versions/b52deb03cabc_precomputed_aggregate_tables.py",
+      "functions": 2,
+      "functionsByType": {
+        "function_definition": 2,
+        "lambda": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "downgrade",
+          "type": "function_definition",
+          "startLine": 45,
+          "lines": 2,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 5,
+            "N1": 0,
+            "N2": 5,
+            "volume": 11.61,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 146.791,
+          "maintainabilityIndexGradAiNorm": 85.843,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "upgrade",
+          "type": "function_definition",
+          "startLine": 20,
+          "lines": 23,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 5,
+            "N1": 0,
+            "N2": 11,
+            "volume": 25.541,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 103.126,
+          "maintainabilityIndexGradAiNorm": 60.308,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "downgrade",
+          "type": "function_definition",
+          "startLine": 45,
+          "complexity": 1
+        },
+        {
+          "name": "upgrade",
+          "type": "function_definition",
+          "startLine": 20,
+          "complexity": 1
+        }
+      ]
     },
     {
       "file": "pipeline/adapters/sf/__init__.py",
@@ -19300,6 +19280,26 @@
           "complexity": 1
         }
       ]
+    },
+    {
+      "file": "pipeline/adapters/chicago/__init__.py",
+      "functions": 0,
+      "functionsByType": {
+        "function_definition": 0,
+        "lambda": 0
+      },
+      "functionMetrics": [],
+      "complexity": []
+    },
+    {
+      "file": "pipeline/adapters/chicago/ingest.py",
+      "functions": 0,
+      "functionsByType": {
+        "function_definition": 0,
+        "lambda": 0
+      },
+      "functionMetrics": [],
+      "complexity": []
     }
   ],
   "reactMetrics": {
@@ -20114,6 +20114,51 @@
       "riskScore": 1
     },
     {
+      "file": "backend/app/api/incidents.py",
+      "name": "get_categories",
+      "startLine": 45,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "backend/app/api/lens.py",
+      "name": "_month_end",
+      "startLine": 217,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "backend/app/api/lens.py",
+      "name": "get_lens3",
+      "startLine": 192,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "backend/app/api/lens.py",
+      "name": "_connect",
+      "startLine": 37,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "backend/app/api/neighborhoods.py",
+      "name": "get_neighborhoods",
+      "startLine": 33,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
       "file": "backend/alembic/versions/40c7e2a3a883_geography_dimension_table.py",
       "name": "downgrade",
       "startLine": 40,
@@ -20180,51 +20225,6 @@
       "file": "backend/alembic/versions/b52deb03cabc_precomputed_aggregate_tables.py",
       "name": "upgrade",
       "startLine": 20,
-      "cyclomaticComplexity": 1,
-      "verificationScore": 0,
-      "evidence": "none",
-      "riskScore": 1
-    },
-    {
-      "file": "backend/app/api/incidents.py",
-      "name": "get_categories",
-      "startLine": 45,
-      "cyclomaticComplexity": 1,
-      "verificationScore": 0,
-      "evidence": "none",
-      "riskScore": 1
-    },
-    {
-      "file": "backend/app/api/lens.py",
-      "name": "_month_end",
-      "startLine": 217,
-      "cyclomaticComplexity": 1,
-      "verificationScore": 0,
-      "evidence": "none",
-      "riskScore": 1
-    },
-    {
-      "file": "backend/app/api/lens.py",
-      "name": "get_lens3",
-      "startLine": 192,
-      "cyclomaticComplexity": 1,
-      "verificationScore": 0,
-      "evidence": "none",
-      "riskScore": 1
-    },
-    {
-      "file": "backend/app/api/lens.py",
-      "name": "_connect",
-      "startLine": 37,
-      "cyclomaticComplexity": 1,
-      "verificationScore": 0,
-      "evidence": "none",
-      "riskScore": 1
-    },
-    {
-      "file": "backend/app/api/neighborhoods.py",
-      "name": "get_neighborhoods",
-      "startLine": 33,
       "cyclomaticComplexity": 1,
       "verificationScore": 0,
       "evidence": "none",

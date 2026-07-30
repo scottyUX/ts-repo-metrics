@@ -8,7 +8,7 @@
   },
   "filesAnalyzed": 56,
   "analyzer_version": "0.2.0",
-  "analysis_timestamp": "2026-07-30T05:51:10.001Z",
+  "analysis_timestamp": "2026-07-30T14:20:36.628Z",
   "distributions": {
     "p50_function_length": 9,
     "p75_function_length": 19,
@@ -12401,6 +12401,88 @@
       ]
     },
     {
+      "file": "prompts/evaluation/run_qa_tests.py",
+      "functions": 1,
+      "functionsByType": {
+        "function_definition": 1,
+        "lambda": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "main",
+          "type": "function_definition",
+          "startLine": 25,
+          "lines": 12,
+          "maxNestingDepth": 2,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 5,
+          "halstead": {
+            "n1": 3,
+            "n2": 22,
+            "N1": 4,
+            "N2": 52,
+            "volume": 260.056,
+            "difficulty": 3.545,
+            "effort": 922.017
+          },
+          "cognitiveComplexity": 7,
+          "maintainabilityIndexGradAiRaw": 100.678,
+          "maintainabilityIndexGradAiNorm": 58.876,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "main",
+          "type": "function_definition",
+          "startLine": 25,
+          "complexity": 5
+        }
+      ]
+    },
+    {
+      "file": "prompts/evaluation/validator.py",
+      "functions": 1,
+      "functionsByType": {
+        "function_definition": 1,
+        "lambda": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "validate_response",
+          "type": "function_definition",
+          "startLine": 8,
+          "lines": 23,
+          "maxNestingDepth": 2,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 9,
+          "halstead": {
+            "n1": 4,
+            "n2": 23,
+            "N1": 9,
+            "N2": 98,
+            "volume": 508.773,
+            "difficulty": 8.522,
+            "effort": 4335.63
+          },
+          "cognitiveComplexity": 11,
+          "maintainabilityIndexGradAiRaw": 85.729,
+          "maintainabilityIndexGradAiNorm": 50.134,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "validate_response",
+          "type": "function_definition",
+          "startLine": 8,
+          "complexity": 9
+        }
+      ]
+    },
+    {
       "file": "frontend/src/App.tsx",
       "functions": 1,
       "functionsByType": {
@@ -12535,88 +12617,6 @@
       },
       "functionMetrics": [],
       "complexity": []
-    },
-    {
-      "file": "prompts/evaluation/run_qa_tests.py",
-      "functions": 1,
-      "functionsByType": {
-        "function_definition": 1,
-        "lambda": 0
-      },
-      "functionMetrics": [
-        {
-          "name": "main",
-          "type": "function_definition",
-          "startLine": 25,
-          "lines": 12,
-          "maxNestingDepth": 2,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 5,
-          "halstead": {
-            "n1": 3,
-            "n2": 22,
-            "N1": 4,
-            "N2": 52,
-            "volume": 260.056,
-            "difficulty": 3.545,
-            "effort": 922.017
-          },
-          "cognitiveComplexity": 7,
-          "maintainabilityIndexGradAiRaw": 100.678,
-          "maintainabilityIndexGradAiNorm": 58.876,
-          "isReactComponent": false,
-          "isMonolithic": false
-        }
-      ],
-      "complexity": [
-        {
-          "name": "main",
-          "type": "function_definition",
-          "startLine": 25,
-          "complexity": 5
-        }
-      ]
-    },
-    {
-      "file": "prompts/evaluation/validator.py",
-      "functions": 1,
-      "functionsByType": {
-        "function_definition": 1,
-        "lambda": 0
-      },
-      "functionMetrics": [
-        {
-          "name": "validate_response",
-          "type": "function_definition",
-          "startLine": 8,
-          "lines": 23,
-          "maxNestingDepth": 2,
-          "parameterCount": 2,
-          "cyclomaticComplexity": 9,
-          "halstead": {
-            "n1": 4,
-            "n2": 23,
-            "N1": 9,
-            "N2": 98,
-            "volume": 508.773,
-            "difficulty": 8.522,
-            "effort": 4335.63
-          },
-          "cognitiveComplexity": 11,
-          "maintainabilityIndexGradAiRaw": 85.729,
-          "maintainabilityIndexGradAiNorm": 50.134,
-          "isReactComponent": false,
-          "isMonolithic": false
-        }
-      ],
-      "complexity": [
-        {
-          "name": "validate_response",
-          "type": "function_definition",
-          "startLine": 8,
-          "complexity": 9
-        }
-      ]
     },
     {
       "file": "frontend/src/api/chat.ts",
@@ -13111,214 +13111,6 @@
       ]
     },
     {
-      "file": "frontend/src/hooks/useChat.ts",
-      "functions": 5,
-      "functionsByType": {
-        "function_declaration": 2,
-        "generator_function_declaration": 0,
-        "method_definition": 0,
-        "arrow_function": 3,
-        "function": 0,
-        "function_expression": 0,
-        "generator_function": 0
-      },
-      "functionMetrics": [
-        {
-          "name": "useChat",
-          "type": "function_declaration",
-          "startLine": 10,
-          "lines": 42,
-          "maxNestingDepth": 1,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 2,
-            "n2": 4,
-            "N1": 4,
-            "N2": 7,
-            "volume": 28.435,
-            "difficulty": 1.75,
-            "effort": 49.761
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 92.812,
-          "maintainabilityIndexGradAiNorm": 54.276,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "sendMessage",
-          "type": "function_declaration",
-          "startLine": 15,
-          "lines": 29,
-          "maxNestingDepth": 1,
-          "parameterCount": 2,
-          "cyclomaticComplexity": 3,
-          "halstead": {
-            "n1": 5,
-            "n2": 9,
-            "N1": 8,
-            "N2": 15,
-            "volume": 87.569,
-            "difficulty": 4.167,
-            "effort": 364.872
-          },
-          "cognitiveComplexity": 1,
-          "maintainabilityIndexGradAiRaw": 92.503,
-          "maintainabilityIndexGradAiNorm": 54.095,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "onSuccess",
-          "type": "arrow_function",
-          "startLine": 31,
-          "lines": 8,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 2,
-            "n2": 4,
-            "N1": 3,
-            "N2": 6,
-            "volume": 23.265,
-            "difficulty": 1.5,
-            "effort": 34.897
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 120.719,
-          "maintainabilityIndexGradAiNorm": 70.596,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 37,
-          "lines": 1,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 2,
-            "n2": 2,
-            "N1": 2,
-            "N2": 3,
-            "volume": 10,
-            "difficulty": 1.5,
-            "effort": 15
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 158.797,
-          "maintainabilityIndexGradAiNorm": 92.864,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 26,
-          "lines": 1,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 2,
-            "n2": 2,
-            "N1": 2,
-            "N2": 3,
-            "volume": 10,
-            "difficulty": 1.5,
-            "effort": 15
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 158.797,
-          "maintainabilityIndexGradAiNorm": 92.864,
-          "isReactComponent": false,
-          "isMonolithic": false
-        }
-      ],
-      "complexity": [
-        {
-          "name": "useChat",
-          "type": "function_declaration",
-          "startLine": 10,
-          "complexity": 1
-        },
-        {
-          "name": "sendMessage",
-          "type": "function_declaration",
-          "startLine": 15,
-          "complexity": 3
-        },
-        {
-          "name": "onSuccess",
-          "type": "arrow_function",
-          "startLine": 31,
-          "complexity": 1
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 37,
-          "complexity": 1
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 26,
-          "complexity": 1
-        }
-      ]
-    },
-    {
-      "file": "frontend/src/hooks/useHealth.ts",
-      "functions": 1,
-      "functionsByType": {
-        "function_declaration": 1,
-        "generator_function_declaration": 0,
-        "method_definition": 0,
-        "arrow_function": 0,
-        "function": 0,
-        "function_expression": 0,
-        "generator_function": 0
-      },
-      "functionMetrics": [
-        {
-          "name": "useHealth",
-          "type": "function_declaration",
-          "startLine": 4,
-          "lines": 8,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 1,
-            "n2": 6,
-            "N1": 1,
-            "N2": 6,
-            "volume": 19.651,
-            "difficulty": 0.5,
-            "effort": 9.826
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 121.597,
-          "maintainabilityIndexGradAiNorm": 71.109,
-          "isReactComponent": false,
-          "isMonolithic": false
-        }
-      ],
-      "complexity": [
-        {
-          "name": "useHealth",
-          "type": "function_declaration",
-          "startLine": 4,
-          "complexity": 1
-        }
-      ]
-    },
-    {
       "file": "frontend/src/pages/ChatPage.tsx",
       "functions": 9,
       "functionsByType": {
@@ -13788,423 +13580,169 @@
       ]
     },
     {
-      "file": "frontend/src/components/chat/AssistantMessage.tsx",
-      "functions": 2,
+      "file": "frontend/src/hooks/useChat.ts",
+      "functions": 5,
       "functionsByType": {
-        "function_declaration": 1,
+        "function_declaration": 2,
         "generator_function_declaration": 0,
         "method_definition": 0,
-        "arrow_function": 1,
+        "arrow_function": 3,
         "function": 0,
         "function_expression": 0,
         "generator_function": 0
       },
       "functionMetrics": [
         {
-          "name": "AssistantMessage",
-          "type": "function_declaration",
-          "startLine": 8,
-          "lines": 27,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 2,
-          "halstead": {
-            "n1": 4,
-            "n2": 12,
-            "N1": 5,
-            "N2": 20,
-            "volume": 100,
-            "difficulty": 3.333,
-            "effort": 333.333
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 93.201,
-          "maintainabilityIndexGradAiNorm": 54.504,
-          "isReactComponent": true,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 16,
-          "lines": 13,
-          "maxNestingDepth": 0,
-          "parameterCount": 2,
-          "cyclomaticComplexity": 3,
-          "halstead": {
-            "n1": 3,
-            "n2": 8,
-            "N1": 9,
-            "N2": 16,
-            "volume": 86.486,
-            "difficulty": 3,
-            "effort": 259.457
-          },
-          "cognitiveComplexity": 3,
-          "maintainabilityIndexGradAiRaw": 105.566,
-          "maintainabilityIndexGradAiNorm": 61.735,
-          "isReactComponent": true,
-          "isMonolithic": false
-        }
-      ],
-      "complexity": [
-        {
-          "name": "AssistantMessage",
-          "type": "function_declaration",
-          "startLine": 8,
-          "complexity": 2
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 16,
-          "complexity": 3
-        }
-      ]
-    },
-    {
-      "file": "frontend/src/components/chat/ChatInput.tsx",
-      "functions": 4,
-      "functionsByType": {
-        "function_declaration": 3,
-        "generator_function_declaration": 0,
-        "method_definition": 0,
-        "arrow_function": 1,
-        "function": 0,
-        "function_expression": 0,
-        "generator_function": 0
-      },
-      "functionMetrics": [
-        {
-          "name": "ChatInput",
+          "name": "useChat",
           "type": "function_declaration",
           "startLine": 10,
-          "lines": 46,
+          "lines": 42,
           "maxNestingDepth": 1,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 2,
-          "halstead": {
-            "n1": 5,
-            "n2": 19,
-            "N1": 5,
-            "N2": 26,
-            "volume": 142.134,
-            "difficulty": 3.421,
-            "effort": 486.247
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 82.741,
-          "maintainabilityIndexGradAiNorm": 48.387,
-          "isReactComponent": true,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 42,
-          "lines": 1,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
+          "parameterCount": 0,
           "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 2,
-            "n2": 2,
-            "N1": 3,
-            "N2": 3,
-            "volume": 12,
-            "difficulty": 1.5,
-            "effort": 18
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 157.848,
-          "maintainabilityIndexGradAiNorm": 92.309,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "handleSubmit",
-          "type": "function_declaration",
-          "startLine": 27,
-          "lines": 7,
-          "maxNestingDepth": 1,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 3,
-          "halstead": {
-            "n1": 5,
-            "n2": 8,
-            "N1": 6,
-            "N2": 11,
-            "volume": 62.907,
-            "difficulty": 3.438,
-            "effort": 216.244
-          },
-          "cognitiveComplexity": 1,
-          "maintainabilityIndexGradAiRaw": 117.25,
-          "maintainabilityIndexGradAiNorm": 68.567,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "setValue",
-          "type": "function_declaration",
-          "startLine": 19,
-          "lines": 7,
-          "maxNestingDepth": 1,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 2,
           "halstead": {
             "n1": 2,
             "n2": 4,
-            "N1": 2,
+            "N1": 4,
             "N2": 7,
-            "volume": 23.265,
+            "volume": 28.435,
             "difficulty": 1.75,
-            "effort": 40.713
+            "effort": 49.761
           },
-          "cognitiveComplexity": 2,
-          "maintainabilityIndexGradAiRaw": 122.652,
-          "maintainabilityIndexGradAiNorm": 71.726,
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 92.812,
+          "maintainabilityIndexGradAiNorm": 54.276,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "sendMessage",
+          "type": "function_declaration",
+          "startLine": 15,
+          "lines": 29,
+          "maxNestingDepth": 1,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 3,
+          "halstead": {
+            "n1": 5,
+            "n2": 9,
+            "N1": 8,
+            "N2": 15,
+            "volume": 87.569,
+            "difficulty": 4.167,
+            "effort": 364.872
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 92.503,
+          "maintainabilityIndexGradAiNorm": 54.095,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "onSuccess",
+          "type": "arrow_function",
+          "startLine": 31,
+          "lines": 8,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 4,
+            "N1": 3,
+            "N2": 6,
+            "volume": 23.265,
+            "difficulty": 1.5,
+            "effort": 34.897
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 120.719,
+          "maintainabilityIndexGradAiNorm": 70.596,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 37,
+          "lines": 1,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 2,
+            "N1": 2,
+            "N2": 3,
+            "volume": 10,
+            "difficulty": 1.5,
+            "effort": 15
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 158.797,
+          "maintainabilityIndexGradAiNorm": 92.864,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 26,
+          "lines": 1,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 2,
+            "N1": 2,
+            "N2": 3,
+            "volume": 10,
+            "difficulty": 1.5,
+            "effort": 15
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 158.797,
+          "maintainabilityIndexGradAiNorm": 92.864,
           "isReactComponent": false,
           "isMonolithic": false
         }
       ],
       "complexity": [
         {
-          "name": "ChatInput",
+          "name": "useChat",
           "type": "function_declaration",
           "startLine": 10,
-          "complexity": 2
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 42,
           "complexity": 1
         },
         {
-          "name": "handleSubmit",
+          "name": "sendMessage",
           "type": "function_declaration",
-          "startLine": 27,
+          "startLine": 15,
           "complexity": 3
         },
         {
-          "name": "setValue",
-          "type": "function_declaration",
-          "startLine": 19,
-          "complexity": 2
-        }
-      ]
-    },
-    {
-      "file": "frontend/src/components/chat/EmptyState.tsx",
-      "functions": 3,
-      "functionsByType": {
-        "function_declaration": 1,
-        "generator_function_declaration": 0,
-        "method_definition": 0,
-        "arrow_function": 2,
-        "function": 0,
-        "function_expression": 0,
-        "generator_function": 0
-      },
-      "functionMetrics": [
-        {
-          "name": "EmptyState",
-          "type": "function_declaration",
-          "startLine": 12,
-          "lines": 24,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 2,
-            "n2": 8,
-            "N1": 2,
-            "N2": 14,
-            "volume": 53.151,
-            "difficulty": 1.75,
-            "effort": 93.014
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 98.625,
-          "maintainabilityIndexGradAiNorm": 57.675,
-          "isReactComponent": true,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
+          "name": "onSuccess",
           "type": "arrow_function",
-          "startLine": 21,
-          "lines": 11,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 1,
-            "n2": 5,
-            "N1": 1,
-            "N2": 8,
-            "volume": 23.265,
-            "difficulty": 0.8,
-            "effort": 18.612
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 115.56,
-          "maintainabilityIndexGradAiNorm": 67.579,
-          "isReactComponent": true,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 27,
-          "lines": 1,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 1,
-            "n2": 2,
-            "N1": 1,
-            "N2": 2,
-            "volume": 4.755,
-            "difficulty": 0.5,
-            "effort": 2.377
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 162.662,
-          "maintainabilityIndexGradAiNorm": 95.124,
-          "isReactComponent": false,
-          "isMonolithic": false
-        }
-      ],
-      "complexity": [
-        {
-          "name": "EmptyState",
-          "type": "function_declaration",
-          "startLine": 12,
+          "startLine": 31,
           "complexity": 1
         },
         {
           "name": "(anonymous)",
           "type": "arrow_function",
-          "startLine": 21,
+          "startLine": 37,
           "complexity": 1
         },
         {
           "name": "(anonymous)",
           "type": "arrow_function",
-          "startLine": 27,
+          "startLine": 26,
           "complexity": 1
         }
       ]
     },
     {
-      "file": "frontend/src/components/chat/MessageList.tsx",
-      "functions": 3,
-      "functionsByType": {
-        "function_declaration": 1,
-        "generator_function_declaration": 0,
-        "method_definition": 0,
-        "arrow_function": 2,
-        "function": 0,
-        "function_expression": 0,
-        "generator_function": 0
-      },
-      "functionMetrics": [
-        {
-          "name": "MessageList",
-          "type": "function_declaration",
-          "startLine": 10,
-          "lines": 24,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 2,
-            "n2": 8,
-            "N1": 2,
-            "N2": 12,
-            "volume": 46.507,
-            "difficulty": 1.5,
-            "effort": 69.76
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 99.32,
-          "maintainabilityIndexGradAiNorm": 58.082,
-          "isReactComponent": true,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 19,
-          "lines": 10,
-          "maxNestingDepth": 0,
-          "parameterCount": 2,
-          "cyclomaticComplexity": 2,
-          "halstead": {
-            "n1": 4,
-            "n2": 5,
-            "N1": 7,
-            "N2": 11,
-            "volume": 57.059,
-            "difficulty": 4.4,
-            "effort": 251.058
-          },
-          "cognitiveComplexity": 1,
-          "maintainabilityIndexGradAiRaw": 112.209,
-          "maintainabilityIndexGradAiNorm": 65.619,
-          "isReactComponent": true,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 13,
-          "lines": 3,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 3,
-            "n2": 2,
-            "N1": 4,
-            "N2": 2,
-            "volume": 13.932,
-            "difficulty": 1.5,
-            "effort": 20.897
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 139.275,
-          "maintainabilityIndexGradAiNorm": 81.447,
-          "isReactComponent": false,
-          "isMonolithic": false
-        }
-      ],
-      "complexity": [
-        {
-          "name": "MessageList",
-          "type": "function_declaration",
-          "startLine": 10,
-          "complexity": 1
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 19,
-          "complexity": 2
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 13,
-          "complexity": 1
-        }
-      ]
-    },
-    {
-      "file": "frontend/src/components/chat/UserMessage.tsx",
+      "file": "frontend/src/hooks/useHealth.ts",
       "functions": 1,
       "functionsByType": {
         "function_declaration": 1,
@@ -14217,34 +13755,34 @@
       },
       "functionMetrics": [
         {
-          "name": "UserMessage",
+          "name": "useHealth",
           "type": "function_declaration",
-          "startLine": 5,
+          "startLine": 4,
           "lines": 8,
           "maxNestingDepth": 0,
-          "parameterCount": 1,
+          "parameterCount": 0,
           "cyclomaticComplexity": 1,
           "halstead": {
             "n1": 1,
-            "n2": 7,
+            "n2": 6,
             "N1": 1,
-            "N2": 11,
-            "volume": 36,
-            "difficulty": 0.786,
-            "effort": 28.286
+            "N2": 6,
+            "volume": 19.651,
+            "difficulty": 0.5,
+            "effort": 9.826
           },
           "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 118.449,
-          "maintainabilityIndexGradAiNorm": 69.268,
-          "isReactComponent": true,
+          "maintainabilityIndexGradAiRaw": 121.597,
+          "maintainabilityIndexGradAiNorm": 71.109,
+          "isReactComponent": false,
           "isMonolithic": false
         }
       ],
       "complexity": [
         {
-          "name": "UserMessage",
+          "name": "useHealth",
           "type": "function_declaration",
-          "startLine": 5,
+          "startLine": 4,
           "complexity": 1
         }
       ]
@@ -15133,6 +14671,468 @@
           "complexity": 1
         }
       ]
+    },
+    {
+      "file": "frontend/src/components/chat/AssistantMessage.tsx",
+      "functions": 2,
+      "functionsByType": {
+        "function_declaration": 1,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 1,
+        "function": 0,
+        "function_expression": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "AssistantMessage",
+          "type": "function_declaration",
+          "startLine": 8,
+          "lines": 27,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 4,
+            "n2": 12,
+            "N1": 5,
+            "N2": 20,
+            "volume": 100,
+            "difficulty": 3.333,
+            "effort": 333.333
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 93.201,
+          "maintainabilityIndexGradAiNorm": 54.504,
+          "isReactComponent": true,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 16,
+          "lines": 13,
+          "maxNestingDepth": 0,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 3,
+          "halstead": {
+            "n1": 3,
+            "n2": 8,
+            "N1": 9,
+            "N2": 16,
+            "volume": 86.486,
+            "difficulty": 3,
+            "effort": 259.457
+          },
+          "cognitiveComplexity": 3,
+          "maintainabilityIndexGradAiRaw": 105.566,
+          "maintainabilityIndexGradAiNorm": 61.735,
+          "isReactComponent": true,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "AssistantMessage",
+          "type": "function_declaration",
+          "startLine": 8,
+          "complexity": 2
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 16,
+          "complexity": 3
+        }
+      ]
+    },
+    {
+      "file": "frontend/src/components/chat/ChatInput.tsx",
+      "functions": 4,
+      "functionsByType": {
+        "function_declaration": 3,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 1,
+        "function": 0,
+        "function_expression": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "ChatInput",
+          "type": "function_declaration",
+          "startLine": 10,
+          "lines": 46,
+          "maxNestingDepth": 1,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 5,
+            "n2": 19,
+            "N1": 5,
+            "N2": 26,
+            "volume": 142.134,
+            "difficulty": 3.421,
+            "effort": 486.247
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 82.741,
+          "maintainabilityIndexGradAiNorm": 48.387,
+          "isReactComponent": true,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 42,
+          "lines": 1,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 2,
+            "N1": 3,
+            "N2": 3,
+            "volume": 12,
+            "difficulty": 1.5,
+            "effort": 18
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 157.848,
+          "maintainabilityIndexGradAiNorm": 92.309,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "handleSubmit",
+          "type": "function_declaration",
+          "startLine": 27,
+          "lines": 7,
+          "maxNestingDepth": 1,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 3,
+          "halstead": {
+            "n1": 5,
+            "n2": 8,
+            "N1": 6,
+            "N2": 11,
+            "volume": 62.907,
+            "difficulty": 3.438,
+            "effort": 216.244
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 117.25,
+          "maintainabilityIndexGradAiNorm": 68.567,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "setValue",
+          "type": "function_declaration",
+          "startLine": 19,
+          "lines": 7,
+          "maxNestingDepth": 1,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 2,
+            "n2": 4,
+            "N1": 2,
+            "N2": 7,
+            "volume": 23.265,
+            "difficulty": 1.75,
+            "effort": 40.713
+          },
+          "cognitiveComplexity": 2,
+          "maintainabilityIndexGradAiRaw": 122.652,
+          "maintainabilityIndexGradAiNorm": 71.726,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "ChatInput",
+          "type": "function_declaration",
+          "startLine": 10,
+          "complexity": 2
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 42,
+          "complexity": 1
+        },
+        {
+          "name": "handleSubmit",
+          "type": "function_declaration",
+          "startLine": 27,
+          "complexity": 3
+        },
+        {
+          "name": "setValue",
+          "type": "function_declaration",
+          "startLine": 19,
+          "complexity": 2
+        }
+      ]
+    },
+    {
+      "file": "frontend/src/components/chat/EmptyState.tsx",
+      "functions": 3,
+      "functionsByType": {
+        "function_declaration": 1,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 2,
+        "function": 0,
+        "function_expression": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "EmptyState",
+          "type": "function_declaration",
+          "startLine": 12,
+          "lines": 24,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 8,
+            "N1": 2,
+            "N2": 14,
+            "volume": 53.151,
+            "difficulty": 1.75,
+            "effort": 93.014
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 98.625,
+          "maintainabilityIndexGradAiNorm": 57.675,
+          "isReactComponent": true,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 21,
+          "lines": 11,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 5,
+            "N1": 1,
+            "N2": 8,
+            "volume": 23.265,
+            "difficulty": 0.8,
+            "effort": 18.612
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 115.56,
+          "maintainabilityIndexGradAiNorm": 67.579,
+          "isReactComponent": true,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 27,
+          "lines": 1,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 2,
+            "N1": 1,
+            "N2": 2,
+            "volume": 4.755,
+            "difficulty": 0.5,
+            "effort": 2.377
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 162.662,
+          "maintainabilityIndexGradAiNorm": 95.124,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "EmptyState",
+          "type": "function_declaration",
+          "startLine": 12,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 21,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 27,
+          "complexity": 1
+        }
+      ]
+    },
+    {
+      "file": "frontend/src/components/chat/MessageList.tsx",
+      "functions": 3,
+      "functionsByType": {
+        "function_declaration": 1,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 2,
+        "function": 0,
+        "function_expression": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "MessageList",
+          "type": "function_declaration",
+          "startLine": 10,
+          "lines": 24,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 8,
+            "N1": 2,
+            "N2": 12,
+            "volume": 46.507,
+            "difficulty": 1.5,
+            "effort": 69.76
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 99.32,
+          "maintainabilityIndexGradAiNorm": 58.082,
+          "isReactComponent": true,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 19,
+          "lines": 10,
+          "maxNestingDepth": 0,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 4,
+            "n2": 5,
+            "N1": 7,
+            "N2": 11,
+            "volume": 57.059,
+            "difficulty": 4.4,
+            "effort": 251.058
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 112.209,
+          "maintainabilityIndexGradAiNorm": 65.619,
+          "isReactComponent": true,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 13,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 3,
+            "n2": 2,
+            "N1": 4,
+            "N2": 2,
+            "volume": 13.932,
+            "difficulty": 1.5,
+            "effort": 20.897
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 139.275,
+          "maintainabilityIndexGradAiNorm": 81.447,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "MessageList",
+          "type": "function_declaration",
+          "startLine": 10,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 19,
+          "complexity": 2
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 13,
+          "complexity": 1
+        }
+      ]
+    },
+    {
+      "file": "frontend/src/components/chat/UserMessage.tsx",
+      "functions": 1,
+      "functionsByType": {
+        "function_declaration": 1,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 0,
+        "function": 0,
+        "function_expression": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "UserMessage",
+          "type": "function_declaration",
+          "startLine": 5,
+          "lines": 8,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 7,
+            "N1": 1,
+            "N2": 11,
+            "volume": 36,
+            "difficulty": 0.786,
+            "effort": 28.286
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 118.449,
+          "maintainabilityIndexGradAiNorm": 69.268,
+          "isReactComponent": true,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "UserMessage",
+          "type": "function_declaration",
+          "startLine": 5,
+          "complexity": 1
+        }
+      ]
     }
   ],
   "reactMetrics": {
@@ -15201,96 +15201,6 @@
         "ferreiraLackOfCohesion": false,
         "maxJsxDepth": 6,
         "tampereJsxDepthExceeded": true,
-        "propDrillingEdges": 0,
-        "hookSafety": {
-          "conditionalHookCalls": 0,
-          "asyncUseEffect": 0,
-          "missingOrInvalidDepsArray": 0,
-          "nonPrimitiveDepRisk": 0
-        }
-      },
-      {
-        "name": "AssistantMessage",
-        "file": "frontend/src/components/chat/AssistantMessage.tsx",
-        "startLine": 8,
-        "lines": 27,
-        "hookCount": 0,
-        "hooksPerSloc": 0,
-        "ferreiraLackOfCohesion": false,
-        "maxJsxDepth": 3,
-        "tampereJsxDepthExceeded": false,
-        "propDrillingEdges": 0,
-        "hookSafety": {
-          "conditionalHookCalls": 0,
-          "asyncUseEffect": 0,
-          "missingOrInvalidDepsArray": 0,
-          "nonPrimitiveDepRisk": 0
-        }
-      },
-      {
-        "name": "ChatInput",
-        "file": "frontend/src/components/chat/ChatInput.tsx",
-        "startLine": 10,
-        "lines": 46,
-        "hookCount": 1,
-        "hooksPerSloc": 0.022,
-        "ferreiraLackOfCohesion": false,
-        "maxJsxDepth": 2,
-        "tampereJsxDepthExceeded": false,
-        "propDrillingEdges": 3,
-        "hookSafety": {
-          "conditionalHookCalls": 0,
-          "asyncUseEffect": 0,
-          "missingOrInvalidDepsArray": 0,
-          "nonPrimitiveDepRisk": 0
-        }
-      },
-      {
-        "name": "EmptyState",
-        "file": "frontend/src/components/chat/EmptyState.tsx",
-        "startLine": 12,
-        "lines": 24,
-        "hookCount": 0,
-        "hooksPerSloc": 0,
-        "ferreiraLackOfCohesion": false,
-        "maxJsxDepth": 2,
-        "tampereJsxDepthExceeded": false,
-        "propDrillingEdges": 1,
-        "hookSafety": {
-          "conditionalHookCalls": 0,
-          "asyncUseEffect": 0,
-          "missingOrInvalidDepsArray": 0,
-          "nonPrimitiveDepRisk": 0
-        }
-      },
-      {
-        "name": "MessageList",
-        "file": "frontend/src/components/chat/MessageList.tsx",
-        "startLine": 10,
-        "lines": 24,
-        "hookCount": 2,
-        "hooksPerSloc": 0.083,
-        "ferreiraLackOfCohesion": false,
-        "maxJsxDepth": 2,
-        "tampereJsxDepthExceeded": false,
-        "propDrillingEdges": 0,
-        "hookSafety": {
-          "conditionalHookCalls": 0,
-          "asyncUseEffect": 0,
-          "missingOrInvalidDepsArray": 1,
-          "nonPrimitiveDepRisk": 0
-        }
-      },
-      {
-        "name": "UserMessage",
-        "file": "frontend/src/components/chat/UserMessage.tsx",
-        "startLine": 5,
-        "lines": 8,
-        "hookCount": 0,
-        "hooksPerSloc": 0,
-        "ferreiraLackOfCohesion": false,
-        "maxJsxDepth": 2,
-        "tampereJsxDepthExceeded": false,
         "propDrillingEdges": 0,
         "hookSafety": {
           "conditionalHookCalls": 0,
@@ -15416,6 +15326,96 @@
         "hooksPerSloc": 0,
         "ferreiraLackOfCohesion": false,
         "maxJsxDepth": 3,
+        "tampereJsxDepthExceeded": false,
+        "propDrillingEdges": 0,
+        "hookSafety": {
+          "conditionalHookCalls": 0,
+          "asyncUseEffect": 0,
+          "missingOrInvalidDepsArray": 0,
+          "nonPrimitiveDepRisk": 0
+        }
+      },
+      {
+        "name": "AssistantMessage",
+        "file": "frontend/src/components/chat/AssistantMessage.tsx",
+        "startLine": 8,
+        "lines": 27,
+        "hookCount": 0,
+        "hooksPerSloc": 0,
+        "ferreiraLackOfCohesion": false,
+        "maxJsxDepth": 3,
+        "tampereJsxDepthExceeded": false,
+        "propDrillingEdges": 0,
+        "hookSafety": {
+          "conditionalHookCalls": 0,
+          "asyncUseEffect": 0,
+          "missingOrInvalidDepsArray": 0,
+          "nonPrimitiveDepRisk": 0
+        }
+      },
+      {
+        "name": "ChatInput",
+        "file": "frontend/src/components/chat/ChatInput.tsx",
+        "startLine": 10,
+        "lines": 46,
+        "hookCount": 1,
+        "hooksPerSloc": 0.022,
+        "ferreiraLackOfCohesion": false,
+        "maxJsxDepth": 2,
+        "tampereJsxDepthExceeded": false,
+        "propDrillingEdges": 3,
+        "hookSafety": {
+          "conditionalHookCalls": 0,
+          "asyncUseEffect": 0,
+          "missingOrInvalidDepsArray": 0,
+          "nonPrimitiveDepRisk": 0
+        }
+      },
+      {
+        "name": "EmptyState",
+        "file": "frontend/src/components/chat/EmptyState.tsx",
+        "startLine": 12,
+        "lines": 24,
+        "hookCount": 0,
+        "hooksPerSloc": 0,
+        "ferreiraLackOfCohesion": false,
+        "maxJsxDepth": 2,
+        "tampereJsxDepthExceeded": false,
+        "propDrillingEdges": 1,
+        "hookSafety": {
+          "conditionalHookCalls": 0,
+          "asyncUseEffect": 0,
+          "missingOrInvalidDepsArray": 0,
+          "nonPrimitiveDepRisk": 0
+        }
+      },
+      {
+        "name": "MessageList",
+        "file": "frontend/src/components/chat/MessageList.tsx",
+        "startLine": 10,
+        "lines": 24,
+        "hookCount": 2,
+        "hooksPerSloc": 0.083,
+        "ferreiraLackOfCohesion": false,
+        "maxJsxDepth": 2,
+        "tampereJsxDepthExceeded": false,
+        "propDrillingEdges": 0,
+        "hookSafety": {
+          "conditionalHookCalls": 0,
+          "asyncUseEffect": 0,
+          "missingOrInvalidDepsArray": 1,
+          "nonPrimitiveDepRisk": 0
+        }
+      },
+      {
+        "name": "UserMessage",
+        "file": "frontend/src/components/chat/UserMessage.tsx",
+        "startLine": 5,
+        "lines": 8,
+        "hookCount": 0,
+        "hooksPerSloc": 0,
+        "ferreiraLackOfCohesion": false,
+        "maxJsxDepth": 2,
         "tampereJsxDepthExceeded": false,
         "propDrillingEdges": 0,
         "hookSafety": {
@@ -16181,18 +16181,18 @@
       "riskScore": 3
     },
     {
-      "file": "frontend/src/hooks/useChat.ts",
-      "name": "sendMessage",
-      "startLine": 15,
+      "file": "frontend/src/pages/ChatPage.tsx",
+      "name": "handleSend",
+      "startLine": 60,
       "cyclomaticComplexity": 3,
       "verificationScore": 0,
       "evidence": "none",
       "riskScore": 3
     },
     {
-      "file": "frontend/src/pages/ChatPage.tsx",
-      "name": "handleSend",
-      "startLine": 60,
+      "file": "frontend/src/hooks/useChat.ts",
+      "name": "sendMessage",
+      "startLine": 15,
       "cyclomaticComplexity": 3,
       "verificationScore": 0,
       "evidence": "none",
@@ -16415,6 +16415,24 @@
       "riskScore": 2
     },
     {
+      "file": "frontend/src/components/citations/SourceList.tsx",
+      "name": "SourceList",
+      "startLine": 8,
+      "cyclomaticComplexity": 2,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 2
+    },
+    {
+      "file": "frontend/src/components/layout/LeftSidebar.tsx",
+      "name": "LeftSidebar",
+      "startLine": 42,
+      "cyclomaticComplexity": 2,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 2
+    },
+    {
       "file": "frontend/src/components/chat/AssistantMessage.tsx",
       "name": "AssistantMessage",
       "startLine": 8,
@@ -16436,24 +16454,6 @@
       "file": "frontend/src/components/chat/ChatInput.tsx",
       "name": "setValue",
       "startLine": 19,
-      "cyclomaticComplexity": 2,
-      "verificationScore": 0,
-      "evidence": "none",
-      "riskScore": 2
-    },
-    {
-      "file": "frontend/src/components/citations/SourceList.tsx",
-      "name": "SourceList",
-      "startLine": 8,
-      "cyclomaticComplexity": 2,
-      "verificationScore": 0,
-      "evidence": "none",
-      "riskScore": 2
-    },
-    {
-      "file": "frontend/src/components/layout/LeftSidebar.tsx",
-      "name": "LeftSidebar",
-      "startLine": 42,
       "cyclomaticComplexity": 2,
       "verificationScore": 0,
       "evidence": "none",
@@ -16973,6 +16973,24 @@
       "riskScore": 1
     },
     {
+      "file": "frontend/src/pages/ChatPage.tsx",
+      "name": "MessageList",
+      "startLine": 21,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "frontend/src/pages/LandingPage.tsx",
+      "name": "LandingPage",
+      "startLine": 40,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
       "file": "frontend/src/hooks/useChat.ts",
       "name": "useChat",
       "startLine": 10,
@@ -16994,51 +17012,6 @@
       "file": "frontend/src/hooks/useHealth.ts",
       "name": "useHealth",
       "startLine": 4,
-      "cyclomaticComplexity": 1,
-      "verificationScore": 0,
-      "evidence": "none",
-      "riskScore": 1
-    },
-    {
-      "file": "frontend/src/pages/ChatPage.tsx",
-      "name": "MessageList",
-      "startLine": 21,
-      "cyclomaticComplexity": 1,
-      "verificationScore": 0,
-      "evidence": "none",
-      "riskScore": 1
-    },
-    {
-      "file": "frontend/src/pages/LandingPage.tsx",
-      "name": "LandingPage",
-      "startLine": 40,
-      "cyclomaticComplexity": 1,
-      "verificationScore": 0,
-      "evidence": "none",
-      "riskScore": 1
-    },
-    {
-      "file": "frontend/src/components/chat/EmptyState.tsx",
-      "name": "EmptyState",
-      "startLine": 12,
-      "cyclomaticComplexity": 1,
-      "verificationScore": 0,
-      "evidence": "none",
-      "riskScore": 1
-    },
-    {
-      "file": "frontend/src/components/chat/MessageList.tsx",
-      "name": "MessageList",
-      "startLine": 10,
-      "cyclomaticComplexity": 1,
-      "verificationScore": 0,
-      "evidence": "none",
-      "riskScore": 1
-    },
-    {
-      "file": "frontend/src/components/chat/UserMessage.tsx",
-      "name": "UserMessage",
-      "startLine": 5,
       "cyclomaticComplexity": 1,
       "verificationScore": 0,
       "evidence": "none",
@@ -17075,6 +17048,33 @@
       "file": "frontend/src/components/layout/RightPanel.tsx",
       "name": "getSections",
       "startLine": 43,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "frontend/src/components/chat/EmptyState.tsx",
+      "name": "EmptyState",
+      "startLine": 12,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "frontend/src/components/chat/MessageList.tsx",
+      "name": "MessageList",
+      "startLine": 10,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "frontend/src/components/chat/UserMessage.tsx",
+      "name": "UserMessage",
+      "startLine": 5,
       "cyclomaticComplexity": 1,
       "verificationScore": 0,
       "evidence": "none",

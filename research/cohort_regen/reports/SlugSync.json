@@ -8,7 +8,7 @@
   },
   "filesAnalyzed": 61,
   "analyzer_version": "0.2.0",
-  "analysis_timestamp": "2026-07-30T05:51:04.062Z",
+  "analysis_timestamp": "2026-07-30T14:20:29.729Z",
   "distributions": {
     "p50_function_length": 5,
     "p75_function_length": 14,
@@ -9463,6 +9463,313 @@
       ]
     },
     {
+      "file": "src/hooks/useUserPreferences.js",
+      "functions": 10,
+      "functionsByType": {
+        "function_declaration": 2,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 8,
+        "function": 0,
+        "function_expression": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "useUserPreferences",
+          "type": "function_declaration",
+          "startLine": 7,
+          "lines": 117,
+          "maxNestingDepth": 1,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 17,
+            "N1": 1,
+            "N2": 26,
+            "volume": 112.588,
+            "difficulty": 0.765,
+            "effort": 86.097
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 69.059,
+          "maintainabilityIndexGradAiNorm": 40.385,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 111,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 2,
+            "N1": 2,
+            "N2": 2,
+            "volume": 8,
+            "difficulty": 1,
+            "effort": 8
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 142.159,
+          "maintainabilityIndexGradAiNorm": 83.134,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 75,
+          "lines": 33,
+          "maxNestingDepth": 1,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 3,
+          "halstead": {
+            "n1": 8,
+            "n2": 16,
+            "N1": 24,
+            "N2": 31,
+            "volume": 252.173,
+            "difficulty": 7.75,
+            "effort": 1954.34
+          },
+          "cognitiveComplexity": 4,
+          "maintainabilityIndexGradAiRaw": 84.91,
+          "maintainabilityIndexGradAiNorm": 49.655,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 32,
+          "lines": 41,
+          "maxNestingDepth": 1,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 4,
+            "n2": 10,
+            "N1": 5,
+            "N2": 10,
+            "volume": 57.11,
+            "difficulty": 2,
+            "effort": 114.221
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 89.346,
+          "maintainabilityIndexGradAiNorm": 52.249,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 69,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 2,
+            "N1": 1,
+            "N2": 2,
+            "volume": 4.755,
+            "difficulty": 0.5,
+            "effort": 2.377
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 144.865,
+          "maintainabilityIndexGradAiNorm": 84.716,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "loadPreferences",
+          "type": "function_declaration",
+          "startLine": 42,
+          "lines": 25,
+          "maxNestingDepth": 1,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 3,
+          "halstead": {
+            "n1": 6,
+            "n2": 16,
+            "N1": 19,
+            "N2": 23,
+            "volume": 187.296,
+            "difficulty": 4.313,
+            "effort": 807.715
+          },
+          "cognitiveComplexity": 2,
+          "maintainabilityIndexGradAiRaw": 90.954,
+          "maintainabilityIndexGradAiNorm": 53.189,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 13,
+          "lines": 18,
+          "maxNestingDepth": 1,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 3,
+            "n2": 3,
+            "N1": 7,
+            "N2": 4,
+            "volume": 28.435,
+            "difficulty": 2,
+            "effort": 56.869
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 106.538,
+          "maintainabilityIndexGradAiNorm": 62.303,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 26,
+          "lines": 4,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 3,
+            "N1": 2,
+            "N2": 3,
+            "volume": 11.61,
+            "difficulty": 1,
+            "effort": 11.61
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 135.562,
+          "maintainabilityIndexGradAiNorm": 79.276,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 22,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 4,
+            "n2": 4,
+            "N1": 6,
+            "N2": 5,
+            "volume": 33,
+            "difficulty": 2.5,
+            "effort": 82.5
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 134.791,
+          "maintainabilityIndexGradAiNorm": 78.825,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 16,
+          "lines": 3,
+          "maxNestingDepth": 1,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 6,
+            "n2": 4,
+            "N1": 8,
+            "N2": 4,
+            "volume": 39.863,
+            "difficulty": 3,
+            "effort": 119.589
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 133.578,
+          "maintainabilityIndexGradAiNorm": 78.116,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "useUserPreferences",
+          "type": "function_declaration",
+          "startLine": 7,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 111,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 75,
+          "complexity": 3
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 32,
+          "complexity": 2
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 69,
+          "complexity": 1
+        },
+        {
+          "name": "loadPreferences",
+          "type": "function_declaration",
+          "startLine": 42,
+          "complexity": 3
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 13,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 26,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 22,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 16,
+          "complexity": 2
+        }
+      ]
+    },
+    {
       "file": "src/context/AuthContext.jsx",
       "functions": 12,
       "functionsByType": {
@@ -11063,6 +11370,901 @@
           "name": "matches",
           "type": "method_definition",
           "startLine": 11,
+          "complexity": 1
+        }
+      ]
+    },
+    {
+      "file": "src/lib/displayName.js",
+      "functions": 3,
+      "functionsByType": {
+        "function_declaration": 3,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 0,
+        "function": 0,
+        "function_expression": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "initialsFromName",
+          "type": "function_declaration",
+          "startLine": 17,
+          "lines": 7,
+          "maxNestingDepth": 1,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 4,
+          "halstead": {
+            "n1": 8,
+            "n2": 9,
+            "N1": 26,
+            "N2": 24,
+            "volume": 204.373,
+            "difficulty": 10.667,
+            "effort": 2179.98
+          },
+          "cognitiveComplexity": 3,
+          "maintainabilityIndexGradAiRaw": 110.893,
+          "maintainabilityIndexGradAiNorm": 64.85,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "firstNameFromEmail",
+          "type": "function_declaration",
+          "startLine": 10,
+          "lines": 6,
+          "maxNestingDepth": 1,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 3,
+          "halstead": {
+            "n1": 6,
+            "n2": 10,
+            "N1": 16,
+            "N2": 18,
+            "volume": 136,
+            "difficulty": 5.4,
+            "effort": 734.4
+          },
+          "cognitiveComplexity": 2,
+          "maintainabilityIndexGradAiRaw": 115.738,
+          "maintainabilityIndexGradAiNorm": 67.683,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "initialsFromEmail",
+          "type": "function_declaration",
+          "startLine": 4,
+          "lines": 5,
+          "maxNestingDepth": 1,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 3,
+          "halstead": {
+            "n1": 6,
+            "n2": 9,
+            "N1": 11,
+            "N2": 15,
+            "volume": 101.579,
+            "difficulty": 5,
+            "effort": 507.896
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 120.209,
+          "maintainabilityIndexGradAiNorm": 70.298,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "initialsFromName",
+          "type": "function_declaration",
+          "startLine": 17,
+          "complexity": 4
+        },
+        {
+          "name": "firstNameFromEmail",
+          "type": "function_declaration",
+          "startLine": 10,
+          "complexity": 3
+        },
+        {
+          "name": "initialsFromEmail",
+          "type": "function_declaration",
+          "startLine": 4,
+          "complexity": 3
+        }
+      ]
+    },
+    {
+      "file": "src/lib/displayName.test.js",
+      "functions": 13,
+      "functionsByType": {
+        "function_declaration": 0,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 13,
+        "function": 0,
+        "function_expression": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 41,
+          "lines": 15,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 4,
+            "N1": 1,
+            "N2": 6,
+            "volume": 16.253,
+            "difficulty": 0.75,
+            "effort": 12.19
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 112.401,
+          "maintainabilityIndexGradAiNorm": 65.732,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 50,
+          "lines": 5,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 6,
+            "N1": 4,
+            "N2": 12,
+            "volume": 48,
+            "difficulty": 2,
+            "effort": 96
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 124.567,
+          "maintainabilityIndexGradAiNorm": 72.846,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 46,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 4,
+            "N1": 2,
+            "N2": 4,
+            "volume": 15.51,
+            "difficulty": 1,
+            "effort": 15.51
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 138.717,
+          "maintainabilityIndexGradAiNorm": 81.121,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 42,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 4,
+            "N1": 2,
+            "N2": 4,
+            "volume": 15.51,
+            "difficulty": 1,
+            "effort": 15.51
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 138.717,
+          "maintainabilityIndexGradAiNorm": 81.121,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 24,
+          "lines": 16,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 4,
+            "N1": 1,
+            "N2": 6,
+            "volume": 16.253,
+            "difficulty": 0.75,
+            "effort": 12.19
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 111.355,
+          "maintainabilityIndexGradAiNorm": 65.12,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 34,
+          "lines": 5,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 6,
+            "N1": 4,
+            "N2": 12,
+            "volume": 48,
+            "difficulty": 2,
+            "effort": 96
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 124.567,
+          "maintainabilityIndexGradAiNorm": 72.846,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 29,
+          "lines": 4,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 5,
+            "N1": 3,
+            "N2": 8,
+            "volume": 30.881,
+            "difficulty": 1.6,
+            "effort": 49.409
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 130.475,
+          "maintainabilityIndexGradAiNorm": 76.301,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 25,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 4,
+            "N1": 2,
+            "N2": 4,
+            "volume": 15.51,
+            "difficulty": 1,
+            "effort": 15.51
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 138.717,
+          "maintainabilityIndexGradAiNorm": 81.121,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 4,
+          "lines": 19,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 5,
+            "N1": 1,
+            "N2": 8,
+            "volume": 23.265,
+            "difficulty": 0.8,
+            "effort": 18.612
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 106.706,
+          "maintainabilityIndexGradAiNorm": 62.401,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 17,
+          "lines": 5,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 6,
+            "N1": 4,
+            "N2": 12,
+            "volume": 48,
+            "difficulty": 2,
+            "effort": 96
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 124.567,
+          "maintainabilityIndexGradAiNorm": 72.846,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 13,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 4,
+            "N1": 2,
+            "N2": 4,
+            "volume": 15.51,
+            "difficulty": 1,
+            "effort": 15.51
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 138.717,
+          "maintainabilityIndexGradAiNorm": 81.121,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 9,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 4,
+            "N1": 2,
+            "N2": 4,
+            "volume": 15.51,
+            "difficulty": 1,
+            "effort": 15.51
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 138.717,
+          "maintainabilityIndexGradAiNorm": 81.121,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 5,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 4,
+            "N1": 2,
+            "N2": 4,
+            "volume": 15.51,
+            "difficulty": 1,
+            "effort": 15.51
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 138.717,
+          "maintainabilityIndexGradAiNorm": 81.121,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 41,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 50,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 46,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 42,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 24,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 34,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 29,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 25,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 4,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 17,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 13,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 9,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 5,
+          "complexity": 1
+        }
+      ]
+    },
+    {
+      "file": "src/lib/supabaseClient.js",
+      "functions": 0,
+      "functionsByType": {
+        "function_declaration": 0,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 0,
+        "function": 0,
+        "function_expression": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [],
+      "complexity": []
+    },
+    {
+      "file": "src/lib/tags.js",
+      "functions": 2,
+      "functionsByType": {
+        "function_declaration": 2,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 0,
+        "function": 0,
+        "function_expression": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "tagsToInput",
+          "type": "function_declaration",
+          "startLine": 27,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 4,
+            "N1": 2,
+            "N2": 5,
+            "volume": 18.095,
+            "difficulty": 1.25,
+            "effort": 22.618
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 137.915,
+          "maintainabilityIndexGradAiNorm": 80.652,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "toTagArray",
+          "type": "function_declaration",
+          "startLine": 5,
+          "lines": 21,
+          "maxNestingDepth": 2,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 6,
+          "halstead": {
+            "n1": 11,
+            "n2": 14,
+            "N1": 20,
+            "N2": 29,
+            "volume": 227.549,
+            "difficulty": 11.393,
+            "effort": 2592.433
+          },
+          "cognitiveComplexity": 10,
+          "maintainabilityIndexGradAiRaw": 92.076,
+          "maintainabilityIndexGradAiNorm": 53.846,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "tagsToInput",
+          "type": "function_declaration",
+          "startLine": 27,
+          "complexity": 1
+        },
+        {
+          "name": "toTagArray",
+          "type": "function_declaration",
+          "startLine": 5,
+          "complexity": 6
+        }
+      ]
+    },
+    {
+      "file": "src/lib/tags.test.js",
+      "functions": 10,
+      "functionsByType": {
+        "function_declaration": 0,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 10,
+        "function": 0,
+        "function_expression": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 32,
+          "lines": 14,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 4,
+            "N1": 1,
+            "N2": 6,
+            "volume": 16.253,
+            "difficulty": 0.75,
+            "effort": 12.19
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 113.518,
+          "maintainabilityIndexGradAiNorm": 66.385,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 41,
+          "lines": 4,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 4,
+            "N1": 3,
+            "N2": 8,
+            "volume": 28.435,
+            "difficulty": 2,
+            "effort": 56.869
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 130.904,
+          "maintainabilityIndexGradAiNorm": 76.552,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 37,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 4,
+            "N1": 2,
+            "N2": 4,
+            "volume": 15.51,
+            "difficulty": 1,
+            "effort": 15.51
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 138.717,
+          "maintainabilityIndexGradAiNorm": 81.121,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 33,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 5,
+            "N1": 2,
+            "N2": 5,
+            "volume": 19.651,
+            "difficulty": 1,
+            "effort": 19.651
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 137.486,
+          "maintainabilityIndexGradAiNorm": 80.401,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 4,
+          "lines": 27,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 6,
+            "N1": 1,
+            "N2": 10,
+            "volume": 30.881,
+            "difficulty": 0.833,
+            "effort": 25.734
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 99.541,
+          "maintainabilityIndexGradAiNorm": 58.211,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 24,
+          "lines": 6,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 5,
+            "N1": 5,
+            "N2": 11,
+            "volume": 44.918,
+            "difficulty": 2.2,
+            "effort": 98.819
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 121.958,
+          "maintainabilityIndexGradAiNorm": 71.32,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 20,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 4,
+            "N1": 2,
+            "N2": 4,
+            "volume": 15.51,
+            "difficulty": 1,
+            "effort": 15.51
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 138.717,
+          "maintainabilityIndexGradAiNorm": 81.121,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 16,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 5,
+            "N1": 2,
+            "N2": 5,
+            "volume": 19.651,
+            "difficulty": 1,
+            "effort": 19.651
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 137.486,
+          "maintainabilityIndexGradAiNorm": 80.401,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 12,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 5,
+            "N1": 2,
+            "N2": 5,
+            "volume": 19.651,
+            "difficulty": 1,
+            "effort": 19.651
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 137.486,
+          "maintainabilityIndexGradAiNorm": 80.401,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 5,
+          "lines": 6,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 4,
+            "N1": 2,
+            "N2": 6,
+            "volume": 20.68,
+            "difficulty": 1.5,
+            "effort": 31.02
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 125.992,
+          "maintainabilityIndexGradAiNorm": 73.68,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 32,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 41,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 37,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 33,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 4,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 24,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 20,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 16,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 12,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 5,
           "complexity": 1
         }
       ]
@@ -15549,1208 +16751,6 @@
           "type": "function_declaration",
           "startLine": 6,
           "complexity": 2
-        }
-      ]
-    },
-    {
-      "file": "src/hooks/useUserPreferences.js",
-      "functions": 10,
-      "functionsByType": {
-        "function_declaration": 2,
-        "generator_function_declaration": 0,
-        "method_definition": 0,
-        "arrow_function": 8,
-        "function": 0,
-        "function_expression": 0,
-        "generator_function": 0
-      },
-      "functionMetrics": [
-        {
-          "name": "useUserPreferences",
-          "type": "function_declaration",
-          "startLine": 7,
-          "lines": 117,
-          "maxNestingDepth": 1,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 1,
-            "n2": 17,
-            "N1": 1,
-            "N2": 26,
-            "volume": 112.588,
-            "difficulty": 0.765,
-            "effort": 86.097
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 69.059,
-          "maintainabilityIndexGradAiNorm": 40.385,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 111,
-          "lines": 3,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 2,
-            "n2": 2,
-            "N1": 2,
-            "N2": 2,
-            "volume": 8,
-            "difficulty": 1,
-            "effort": 8
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 142.159,
-          "maintainabilityIndexGradAiNorm": 83.134,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 75,
-          "lines": 33,
-          "maxNestingDepth": 1,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 3,
-          "halstead": {
-            "n1": 8,
-            "n2": 16,
-            "N1": 24,
-            "N2": 31,
-            "volume": 252.173,
-            "difficulty": 7.75,
-            "effort": 1954.34
-          },
-          "cognitiveComplexity": 4,
-          "maintainabilityIndexGradAiRaw": 84.91,
-          "maintainabilityIndexGradAiNorm": 49.655,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 32,
-          "lines": 41,
-          "maxNestingDepth": 1,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 2,
-          "halstead": {
-            "n1": 4,
-            "n2": 10,
-            "N1": 5,
-            "N2": 10,
-            "volume": 57.11,
-            "difficulty": 2,
-            "effort": 114.221
-          },
-          "cognitiveComplexity": 1,
-          "maintainabilityIndexGradAiRaw": 89.346,
-          "maintainabilityIndexGradAiNorm": 52.249,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 69,
-          "lines": 3,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 1,
-            "n2": 2,
-            "N1": 1,
-            "N2": 2,
-            "volume": 4.755,
-            "difficulty": 0.5,
-            "effort": 2.377
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 144.865,
-          "maintainabilityIndexGradAiNorm": 84.716,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "loadPreferences",
-          "type": "function_declaration",
-          "startLine": 42,
-          "lines": 25,
-          "maxNestingDepth": 1,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 3,
-          "halstead": {
-            "n1": 6,
-            "n2": 16,
-            "N1": 19,
-            "N2": 23,
-            "volume": 187.296,
-            "difficulty": 4.313,
-            "effort": 807.715
-          },
-          "cognitiveComplexity": 2,
-          "maintainabilityIndexGradAiRaw": 90.954,
-          "maintainabilityIndexGradAiNorm": 53.189,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 13,
-          "lines": 18,
-          "maxNestingDepth": 1,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 3,
-            "n2": 3,
-            "N1": 7,
-            "N2": 4,
-            "volume": 28.435,
-            "difficulty": 2,
-            "effort": 56.869
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 106.538,
-          "maintainabilityIndexGradAiNorm": 62.303,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 26,
-          "lines": 4,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 2,
-            "n2": 3,
-            "N1": 2,
-            "N2": 3,
-            "volume": 11.61,
-            "difficulty": 1,
-            "effort": 11.61
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 135.562,
-          "maintainabilityIndexGradAiNorm": 79.276,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 22,
-          "lines": 3,
-          "maxNestingDepth": 0,
-          "parameterCount": 2,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 4,
-            "n2": 4,
-            "N1": 6,
-            "N2": 5,
-            "volume": 33,
-            "difficulty": 2.5,
-            "effort": 82.5
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 134.791,
-          "maintainabilityIndexGradAiNorm": 78.825,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 16,
-          "lines": 3,
-          "maxNestingDepth": 1,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 2,
-          "halstead": {
-            "n1": 6,
-            "n2": 4,
-            "N1": 8,
-            "N2": 4,
-            "volume": 39.863,
-            "difficulty": 3,
-            "effort": 119.589
-          },
-          "cognitiveComplexity": 1,
-          "maintainabilityIndexGradAiRaw": 133.578,
-          "maintainabilityIndexGradAiNorm": 78.116,
-          "isReactComponent": false,
-          "isMonolithic": false
-        }
-      ],
-      "complexity": [
-        {
-          "name": "useUserPreferences",
-          "type": "function_declaration",
-          "startLine": 7,
-          "complexity": 1
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 111,
-          "complexity": 1
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 75,
-          "complexity": 3
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 32,
-          "complexity": 2
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 69,
-          "complexity": 1
-        },
-        {
-          "name": "loadPreferences",
-          "type": "function_declaration",
-          "startLine": 42,
-          "complexity": 3
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 13,
-          "complexity": 1
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 26,
-          "complexity": 1
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 22,
-          "complexity": 1
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 16,
-          "complexity": 2
-        }
-      ]
-    },
-    {
-      "file": "src/lib/displayName.js",
-      "functions": 3,
-      "functionsByType": {
-        "function_declaration": 3,
-        "generator_function_declaration": 0,
-        "method_definition": 0,
-        "arrow_function": 0,
-        "function": 0,
-        "function_expression": 0,
-        "generator_function": 0
-      },
-      "functionMetrics": [
-        {
-          "name": "initialsFromName",
-          "type": "function_declaration",
-          "startLine": 17,
-          "lines": 7,
-          "maxNestingDepth": 1,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 4,
-          "halstead": {
-            "n1": 8,
-            "n2": 9,
-            "N1": 26,
-            "N2": 24,
-            "volume": 204.373,
-            "difficulty": 10.667,
-            "effort": 2179.98
-          },
-          "cognitiveComplexity": 3,
-          "maintainabilityIndexGradAiRaw": 110.893,
-          "maintainabilityIndexGradAiNorm": 64.85,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "firstNameFromEmail",
-          "type": "function_declaration",
-          "startLine": 10,
-          "lines": 6,
-          "maxNestingDepth": 1,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 3,
-          "halstead": {
-            "n1": 6,
-            "n2": 10,
-            "N1": 16,
-            "N2": 18,
-            "volume": 136,
-            "difficulty": 5.4,
-            "effort": 734.4
-          },
-          "cognitiveComplexity": 2,
-          "maintainabilityIndexGradAiRaw": 115.738,
-          "maintainabilityIndexGradAiNorm": 67.683,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "initialsFromEmail",
-          "type": "function_declaration",
-          "startLine": 4,
-          "lines": 5,
-          "maxNestingDepth": 1,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 3,
-          "halstead": {
-            "n1": 6,
-            "n2": 9,
-            "N1": 11,
-            "N2": 15,
-            "volume": 101.579,
-            "difficulty": 5,
-            "effort": 507.896
-          },
-          "cognitiveComplexity": 1,
-          "maintainabilityIndexGradAiRaw": 120.209,
-          "maintainabilityIndexGradAiNorm": 70.298,
-          "isReactComponent": false,
-          "isMonolithic": false
-        }
-      ],
-      "complexity": [
-        {
-          "name": "initialsFromName",
-          "type": "function_declaration",
-          "startLine": 17,
-          "complexity": 4
-        },
-        {
-          "name": "firstNameFromEmail",
-          "type": "function_declaration",
-          "startLine": 10,
-          "complexity": 3
-        },
-        {
-          "name": "initialsFromEmail",
-          "type": "function_declaration",
-          "startLine": 4,
-          "complexity": 3
-        }
-      ]
-    },
-    {
-      "file": "src/lib/displayName.test.js",
-      "functions": 13,
-      "functionsByType": {
-        "function_declaration": 0,
-        "generator_function_declaration": 0,
-        "method_definition": 0,
-        "arrow_function": 13,
-        "function": 0,
-        "function_expression": 0,
-        "generator_function": 0
-      },
-      "functionMetrics": [
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 41,
-          "lines": 15,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 1,
-            "n2": 4,
-            "N1": 1,
-            "N2": 6,
-            "volume": 16.253,
-            "difficulty": 0.75,
-            "effort": 12.19
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 112.401,
-          "maintainabilityIndexGradAiNorm": 65.732,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 50,
-          "lines": 5,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 2,
-            "n2": 6,
-            "N1": 4,
-            "N2": 12,
-            "volume": 48,
-            "difficulty": 2,
-            "effort": 96
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 124.567,
-          "maintainabilityIndexGradAiNorm": 72.846,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 46,
-          "lines": 3,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 2,
-            "n2": 4,
-            "N1": 2,
-            "N2": 4,
-            "volume": 15.51,
-            "difficulty": 1,
-            "effort": 15.51
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 138.717,
-          "maintainabilityIndexGradAiNorm": 81.121,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 42,
-          "lines": 3,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 2,
-            "n2": 4,
-            "N1": 2,
-            "N2": 4,
-            "volume": 15.51,
-            "difficulty": 1,
-            "effort": 15.51
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 138.717,
-          "maintainabilityIndexGradAiNorm": 81.121,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 24,
-          "lines": 16,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 1,
-            "n2": 4,
-            "N1": 1,
-            "N2": 6,
-            "volume": 16.253,
-            "difficulty": 0.75,
-            "effort": 12.19
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 111.355,
-          "maintainabilityIndexGradAiNorm": 65.12,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 34,
-          "lines": 5,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 2,
-            "n2": 6,
-            "N1": 4,
-            "N2": 12,
-            "volume": 48,
-            "difficulty": 2,
-            "effort": 96
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 124.567,
-          "maintainabilityIndexGradAiNorm": 72.846,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 29,
-          "lines": 4,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 2,
-            "n2": 5,
-            "N1": 3,
-            "N2": 8,
-            "volume": 30.881,
-            "difficulty": 1.6,
-            "effort": 49.409
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 130.475,
-          "maintainabilityIndexGradAiNorm": 76.301,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 25,
-          "lines": 3,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 2,
-            "n2": 4,
-            "N1": 2,
-            "N2": 4,
-            "volume": 15.51,
-            "difficulty": 1,
-            "effort": 15.51
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 138.717,
-          "maintainabilityIndexGradAiNorm": 81.121,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 4,
-          "lines": 19,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 1,
-            "n2": 5,
-            "N1": 1,
-            "N2": 8,
-            "volume": 23.265,
-            "difficulty": 0.8,
-            "effort": 18.612
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 106.706,
-          "maintainabilityIndexGradAiNorm": 62.401,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 17,
-          "lines": 5,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 2,
-            "n2": 6,
-            "N1": 4,
-            "N2": 12,
-            "volume": 48,
-            "difficulty": 2,
-            "effort": 96
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 124.567,
-          "maintainabilityIndexGradAiNorm": 72.846,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 13,
-          "lines": 3,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 2,
-            "n2": 4,
-            "N1": 2,
-            "N2": 4,
-            "volume": 15.51,
-            "difficulty": 1,
-            "effort": 15.51
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 138.717,
-          "maintainabilityIndexGradAiNorm": 81.121,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 9,
-          "lines": 3,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 2,
-            "n2": 4,
-            "N1": 2,
-            "N2": 4,
-            "volume": 15.51,
-            "difficulty": 1,
-            "effort": 15.51
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 138.717,
-          "maintainabilityIndexGradAiNorm": 81.121,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 5,
-          "lines": 3,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 2,
-            "n2": 4,
-            "N1": 2,
-            "N2": 4,
-            "volume": 15.51,
-            "difficulty": 1,
-            "effort": 15.51
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 138.717,
-          "maintainabilityIndexGradAiNorm": 81.121,
-          "isReactComponent": false,
-          "isMonolithic": false
-        }
-      ],
-      "complexity": [
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 41,
-          "complexity": 1
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 50,
-          "complexity": 1
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 46,
-          "complexity": 1
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 42,
-          "complexity": 1
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 24,
-          "complexity": 1
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 34,
-          "complexity": 1
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 29,
-          "complexity": 1
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 25,
-          "complexity": 1
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 4,
-          "complexity": 1
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 17,
-          "complexity": 1
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 13,
-          "complexity": 1
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 9,
-          "complexity": 1
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 5,
-          "complexity": 1
-        }
-      ]
-    },
-    {
-      "file": "src/lib/supabaseClient.js",
-      "functions": 0,
-      "functionsByType": {
-        "function_declaration": 0,
-        "generator_function_declaration": 0,
-        "method_definition": 0,
-        "arrow_function": 0,
-        "function": 0,
-        "function_expression": 0,
-        "generator_function": 0
-      },
-      "functionMetrics": [],
-      "complexity": []
-    },
-    {
-      "file": "src/lib/tags.js",
-      "functions": 2,
-      "functionsByType": {
-        "function_declaration": 2,
-        "generator_function_declaration": 0,
-        "method_definition": 0,
-        "arrow_function": 0,
-        "function": 0,
-        "function_expression": 0,
-        "generator_function": 0
-      },
-      "functionMetrics": [
-        {
-          "name": "tagsToInput",
-          "type": "function_declaration",
-          "startLine": 27,
-          "lines": 3,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 2,
-            "n2": 4,
-            "N1": 2,
-            "N2": 5,
-            "volume": 18.095,
-            "difficulty": 1.25,
-            "effort": 22.618
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 137.915,
-          "maintainabilityIndexGradAiNorm": 80.652,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "toTagArray",
-          "type": "function_declaration",
-          "startLine": 5,
-          "lines": 21,
-          "maxNestingDepth": 2,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 6,
-          "halstead": {
-            "n1": 11,
-            "n2": 14,
-            "N1": 20,
-            "N2": 29,
-            "volume": 227.549,
-            "difficulty": 11.393,
-            "effort": 2592.433
-          },
-          "cognitiveComplexity": 10,
-          "maintainabilityIndexGradAiRaw": 92.076,
-          "maintainabilityIndexGradAiNorm": 53.846,
-          "isReactComponent": false,
-          "isMonolithic": false
-        }
-      ],
-      "complexity": [
-        {
-          "name": "tagsToInput",
-          "type": "function_declaration",
-          "startLine": 27,
-          "complexity": 1
-        },
-        {
-          "name": "toTagArray",
-          "type": "function_declaration",
-          "startLine": 5,
-          "complexity": 6
-        }
-      ]
-    },
-    {
-      "file": "src/lib/tags.test.js",
-      "functions": 10,
-      "functionsByType": {
-        "function_declaration": 0,
-        "generator_function_declaration": 0,
-        "method_definition": 0,
-        "arrow_function": 10,
-        "function": 0,
-        "function_expression": 0,
-        "generator_function": 0
-      },
-      "functionMetrics": [
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 32,
-          "lines": 14,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 1,
-            "n2": 4,
-            "N1": 1,
-            "N2": 6,
-            "volume": 16.253,
-            "difficulty": 0.75,
-            "effort": 12.19
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 113.518,
-          "maintainabilityIndexGradAiNorm": 66.385,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 41,
-          "lines": 4,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 2,
-            "n2": 4,
-            "N1": 3,
-            "N2": 8,
-            "volume": 28.435,
-            "difficulty": 2,
-            "effort": 56.869
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 130.904,
-          "maintainabilityIndexGradAiNorm": 76.552,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 37,
-          "lines": 3,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 2,
-            "n2": 4,
-            "N1": 2,
-            "N2": 4,
-            "volume": 15.51,
-            "difficulty": 1,
-            "effort": 15.51
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 138.717,
-          "maintainabilityIndexGradAiNorm": 81.121,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 33,
-          "lines": 3,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 2,
-            "n2": 5,
-            "N1": 2,
-            "N2": 5,
-            "volume": 19.651,
-            "difficulty": 1,
-            "effort": 19.651
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 137.486,
-          "maintainabilityIndexGradAiNorm": 80.401,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 4,
-          "lines": 27,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 1,
-            "n2": 6,
-            "N1": 1,
-            "N2": 10,
-            "volume": 30.881,
-            "difficulty": 0.833,
-            "effort": 25.734
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 99.541,
-          "maintainabilityIndexGradAiNorm": 58.211,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 24,
-          "lines": 6,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 2,
-            "n2": 5,
-            "N1": 5,
-            "N2": 11,
-            "volume": 44.918,
-            "difficulty": 2.2,
-            "effort": 98.819
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 121.958,
-          "maintainabilityIndexGradAiNorm": 71.32,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 20,
-          "lines": 3,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 2,
-            "n2": 4,
-            "N1": 2,
-            "N2": 4,
-            "volume": 15.51,
-            "difficulty": 1,
-            "effort": 15.51
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 138.717,
-          "maintainabilityIndexGradAiNorm": 81.121,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 16,
-          "lines": 3,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 2,
-            "n2": 5,
-            "N1": 2,
-            "N2": 5,
-            "volume": 19.651,
-            "difficulty": 1,
-            "effort": 19.651
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 137.486,
-          "maintainabilityIndexGradAiNorm": 80.401,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 12,
-          "lines": 3,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 2,
-            "n2": 5,
-            "N1": 2,
-            "N2": 5,
-            "volume": 19.651,
-            "difficulty": 1,
-            "effort": 19.651
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 137.486,
-          "maintainabilityIndexGradAiNorm": 80.401,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 5,
-          "lines": 6,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 2,
-            "n2": 4,
-            "N1": 2,
-            "N2": 6,
-            "volume": 20.68,
-            "difficulty": 1.5,
-            "effort": 31.02
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 125.992,
-          "maintainabilityIndexGradAiNorm": 73.68,
-          "isReactComponent": false,
-          "isMonolithic": false
-        }
-      ],
-      "complexity": [
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 32,
-          "complexity": 1
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 41,
-          "complexity": 1
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 37,
-          "complexity": 1
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 33,
-          "complexity": 1
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 4,
-          "complexity": 1
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 24,
-          "complexity": 1
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 20,
-          "complexity": 1
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 16,
-          "complexity": 1
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 12,
-          "complexity": 1
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 5,
-          "complexity": 1
         }
       ]
     },
@@ -25971,718 +25971,528 @@
       "complexity": []
     },
     {
-      "file": "src/components/groups/GroupForm.jsx",
-      "functions": 10,
+      "file": "supabase/functions/daily-digest/index.ts",
+      "functions": 7,
       "functionsByType": {
         "function_declaration": 5,
         "generator_function_declaration": 0,
         "method_definition": 0,
-        "arrow_function": 5,
+        "arrow_function": 2,
         "function": 0,
         "function_expression": 0,
         "generator_function": 0
       },
       "functionMetrics": [
         {
-          "name": "GroupForm",
-          "type": "function_declaration",
-          "startLine": 20,
-          "lines": 96,
-          "maxNestingDepth": 1,
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 68,
+          "lines": 82,
+          "maxNestingDepth": 3,
           "parameterCount": 1,
-          "cyclomaticComplexity": 4,
+          "cyclomaticComplexity": 9,
           "halstead": {
-            "n1": 4,
-            "n2": 43,
-            "N1": 9,
-            "N2": 66,
-            "volume": 416.594,
-            "difficulty": 3.07,
-            "effort": 1278.847
+            "n1": 14,
+            "n2": 55,
+            "N1": 59,
+            "N2": 121,
+            "volume": 1099.534,
+            "difficulty": 15.4,
+            "effort": 16932.83
           },
-          "cognitiveComplexity": 1,
-          "maintainabilityIndexGradAiRaw": 64.771,
-          "maintainabilityIndexGradAiNorm": 37.878,
-          "isReactComponent": true,
-          "isMonolithic": true
-        },
-        {
-          "name": "handleSubmit",
-          "type": "function_declaration",
-          "startLine": 49,
-          "lines": 16,
-          "maxNestingDepth": 1,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 2,
-          "halstead": {
-            "n1": 4,
-            "n2": 9,
-            "N1": 11,
-            "N2": 15,
-            "volume": 96.211,
-            "difficulty": 3.333,
-            "effort": 320.705
-          },
-          "cognitiveComplexity": 1,
-          "maintainabilityIndexGradAiRaw": 101.878,
-          "maintainabilityIndexGradAiNorm": 59.578,
+          "cognitiveComplexity": 8,
+          "maintainabilityIndexGradAiRaw": 61.127,
+          "maintainabilityIndexGradAiNorm": 35.747,
           "isReactComponent": false,
           "isMonolithic": false
         },
         {
-          "name": "handleMembersChange",
+          "name": "callGemini",
           "type": "function_declaration",
-          "startLine": 45,
-          "lines": 3,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 1,
+          "startLine": 47,
+          "lines": 20,
+          "maxNestingDepth": 1,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 2,
           "halstead": {
-            "n1": 0,
-            "n2": 3,
-            "N1": 0,
-            "N2": 3,
-            "volume": 4.755,
-            "difficulty": 0,
-            "effort": 0
+            "n1": 10,
+            "n2": 21,
+            "N1": 28,
+            "N2": 32,
+            "volume": 297.252,
+            "difficulty": 7.619,
+            "effort": 2264.775
           },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 144.865,
-          "maintainabilityIndexGradAiNorm": 84.716,
+          "cognitiveComplexity": 2,
+          "maintainabilityIndexGradAiRaw": 92.397,
+          "maintainabilityIndexGradAiNorm": 54.033,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "formatEvents",
+          "type": "function_declaration",
+          "startLine": 36,
+          "lines": 10,
+          "maxNestingDepth": 1,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 3,
+          "halstead": {
+            "n1": 6,
+            "n2": 5,
+            "N1": 9,
+            "N2": 8,
+            "volume": 58.81,
+            "difficulty": 4.8,
+            "effort": 282.29
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 111.822,
+          "maintainabilityIndexGradAiNorm": 65.393,
           "isReactComponent": false,
           "isMonolithic": false
         },
         {
           "name": "(anonymous)",
           "type": "arrow_function",
-          "startLine": 46,
+          "startLine": 39,
+          "lines": 5,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 3,
+          "halstead": {
+            "n1": 5,
+            "n2": 10,
+            "N1": 11,
+            "N2": 17,
+            "volume": 109.393,
+            "difficulty": 4.25,
+            "effort": 464.92
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 119.823,
+          "maintainabilityIndexGradAiNorm": 70.072,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "monthlyEventGuidance",
+          "type": "function_declaration",
+          "startLine": 31,
+          "lines": 4,
+          "maxNestingDepth": 1,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 3,
+            "n2": 5,
+            "N1": 4,
+            "N2": 6,
+            "volume": 30,
+            "difficulty": 1.8,
+            "effort": 54
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 130.396,
+          "maintainabilityIndexGradAiNorm": 76.255,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "yearContext",
+          "type": "function_declaration",
+          "startLine": 21,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 4,
+            "n2": 7,
+            "N1": 4,
+            "N2": 10,
+            "volume": 48.432,
+            "difficulty": 2.857,
+            "effort": 138.377
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 132.566,
+          "maintainabilityIndexGradAiNorm": 77.524,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "formatInterests",
+          "type": "function_declaration",
+          "startLine": 13,
+          "lines": 5,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 3,
+          "halstead": {
+            "n1": 4,
+            "n2": 9,
+            "N1": 15,
+            "N2": 17,
+            "volume": 118.414,
+            "difficulty": 3.778,
+            "effort": 447.342
+          },
+          "cognitiveComplexity": 2,
+          "maintainabilityIndexGradAiRaw": 119.411,
+          "maintainabilityIndexGradAiNorm": 69.831,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 68,
+          "complexity": 9
+        },
+        {
+          "name": "callGemini",
+          "type": "function_declaration",
+          "startLine": 47,
+          "complexity": 2
+        },
+        {
+          "name": "formatEvents",
+          "type": "function_declaration",
+          "startLine": 36,
+          "complexity": 3
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 39,
+          "complexity": 3
+        },
+        {
+          "name": "monthlyEventGuidance",
+          "type": "function_declaration",
+          "startLine": 31,
+          "complexity": 2
+        },
+        {
+          "name": "yearContext",
+          "type": "function_declaration",
+          "startLine": 21,
+          "complexity": 2
+        },
+        {
+          "name": "formatInterests",
+          "type": "function_declaration",
+          "startLine": 13,
+          "complexity": 3
+        }
+      ]
+    },
+    {
+      "file": "supabase/functions/parse-event/index.ts",
+      "functions": 1,
+      "functionsByType": {
+        "function_declaration": 0,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 1,
+        "function": 0,
+        "function_expression": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 7,
+          "lines": 81,
+          "maxNestingDepth": 2,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 8,
+          "halstead": {
+            "n1": 15,
+            "n2": 41,
+            "N1": 73,
+            "N2": 97,
+            "volume": 987.25,
+            "difficulty": 17.744,
+            "effort": 17517.674
+          },
+          "cognitiveComplexity": 6,
+          "maintainabilityIndexGradAiRaw": 62.116,
+          "maintainabilityIndexGradAiNorm": 36.325,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 7,
+          "complexity": 8
+        }
+      ]
+    },
+    {
+      "file": "supabase/functions/parse-source/index.ts",
+      "functions": 9,
+      "functionsByType": {
+        "function_declaration": 5,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 4,
+        "function": 0,
+        "function_expression": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 216,
+          "lines": 49,
+          "maxNestingDepth": 1,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 13,
+          "halstead": {
+            "n1": 16,
+            "n2": 36,
+            "N1": 64,
+            "N2": 72,
+            "volume": 775.26,
+            "difficulty": 16,
+            "effort": 12404.157
+          },
+          "cognitiveComplexity": 10,
+          "maintainabilityIndexGradAiRaw": 70.366,
+          "maintainabilityIndexGradAiNorm": 41.15,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "parseEventsWithAI",
+          "type": "function_declaration",
+          "startLine": 137,
+          "lines": 78,
+          "maxNestingDepth": 3,
+          "parameterCount": 3,
+          "cyclomaticComplexity": 7,
+          "halstead": {
+            "n1": 12,
+            "n2": 43,
+            "N1": 57,
+            "N2": 75,
+            "volume": 763.139,
+            "difficulty": 10.465,
+            "effort": 7986.343
+          },
+          "cognitiveComplexity": 11,
+          "maintainabilityIndexGradAiRaw": 64.297,
+          "maintainabilityIndexGradAiNorm": 37.601,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 179,
           "lines": 1,
           "maxNestingDepth": 0,
           "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 3,
+            "n2": 2,
+            "N1": 4,
+            "N2": 3,
+            "volume": 16.253,
+            "difficulty": 2.25,
+            "effort": 36.57
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 156.271,
+          "maintainabilityIndexGradAiNorm": 91.387,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 176,
+          "lines": 1,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 2,
+            "N1": 3,
+            "N2": 3,
+            "volume": 12,
+            "difficulty": 1.5,
+            "effort": 18
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 157.848,
+          "maintainabilityIndexGradAiNorm": 92.309,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "htmlToText",
+          "type": "function_declaration",
+          "startLine": 116,
+          "lines": 18,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 22,
+            "N1": 13,
+            "N2": 31,
+            "volume": 201.738,
+            "difficulty": 1.409,
+            "effort": 284.268
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 96.35,
+          "maintainabilityIndexGradAiNorm": 56.345,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "fetchPage",
+          "type": "function_declaration",
+          "startLine": 55,
+          "lines": 59,
+          "maxNestingDepth": 2,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 13,
+          "halstead": {
+            "n1": 14,
+            "n2": 41,
+            "N1": 57,
+            "N2": 71,
+            "volume": 740.014,
+            "difficulty": 12.122,
+            "effort": 8970.414
+          },
+          "cognitiveComplexity": 9,
+          "maintainabilityIndexGradAiRaw": 67.599,
+          "maintainabilityIndexGradAiNorm": 39.532,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 59,
+          "lines": 1,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
           "cyclomaticComplexity": 1,
           "halstead": {
             "n1": 2,
             "n2": 1,
             "N1": 2,
-            "N2": 2,
-            "volume": 6.34,
-            "difficulty": 2,
-            "effort": 12.68
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 161.166,
-          "maintainabilityIndexGradAiNorm": 94.249,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "handleField",
-          "type": "function_declaration",
-          "startLine": 35,
-          "lines": 9,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 1,
-            "n2": 2,
-            "N1": 1,
-            "N2": 2,
+            "N2": 1,
             "volume": 4.755,
-            "difficulty": 0.5,
-            "effort": 2.377
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 127.067,
-          "maintainabilityIndexGradAiNorm": 74.308,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 36,
-          "lines": 7,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 1,
-            "n2": 3,
-            "N1": 1,
-            "N2": 3,
-            "volume": 8,
-            "difficulty": 0.5,
-            "effort": 4
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 128.433,
-          "maintainabilityIndexGradAiNorm": 75.107,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 41,
-          "lines": 1,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 2,
-            "n2": 3,
-            "N1": 2,
-            "N2": 4,
-            "volume": 13.932,
-            "difficulty": 1.333,
-            "effort": 18.575
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 157.072,
-          "maintainabilityIndexGradAiNorm": 91.855,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 37,
-          "lines": 4,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 3,
-            "n2": 3,
-            "N1": 4,
-            "N2": 4,
-            "volume": 20.68,
-            "difficulty": 2,
-            "effort": 41.359
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 132.56,
-          "maintainabilityIndexGradAiNorm": 77.52,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 30,
-          "lines": 4,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 1,
-            "n2": 3,
-            "N1": 1,
-            "N2": 3,
-            "volume": 8,
-            "difficulty": 0.5,
-            "effort": 4
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 137.499,
-          "maintainabilityIndexGradAiNorm": 80.409,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "validateForm",
-          "type": "function_declaration",
-          "startLine": 10,
-          "lines": 9,
-          "maxNestingDepth": 1,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 2,
-          "halstead": {
-            "n1": 4,
-            "n2": 4,
-            "N1": 6,
-            "N2": 7,
-            "volume": 39,
-            "difficulty": 3.5,
-            "effort": 136.5
-          },
-          "cognitiveComplexity": 1,
-          "maintainabilityIndexGradAiRaw": 115.894,
-          "maintainabilityIndexGradAiNorm": 67.774,
-          "isReactComponent": false,
-          "isMonolithic": false
-        }
-      ],
-      "complexity": [
-        {
-          "name": "GroupForm",
-          "type": "function_declaration",
-          "startLine": 20,
-          "complexity": 4
-        },
-        {
-          "name": "handleSubmit",
-          "type": "function_declaration",
-          "startLine": 49,
-          "complexity": 2
-        },
-        {
-          "name": "handleMembersChange",
-          "type": "function_declaration",
-          "startLine": 45,
-          "complexity": 1
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 46,
-          "complexity": 1
-        },
-        {
-          "name": "handleField",
-          "type": "function_declaration",
-          "startLine": 35,
-          "complexity": 1
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 36,
-          "complexity": 1
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 41,
-          "complexity": 1
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 37,
-          "complexity": 1
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 30,
-          "complexity": 1
-        },
-        {
-          "name": "validateForm",
-          "type": "function_declaration",
-          "startLine": 10,
-          "complexity": 2
-        }
-      ]
-    },
-    {
-      "file": "src/components/groups/MemberSelector.jsx",
-      "functions": 16,
-      "functionsByType": {
-        "function_declaration": 6,
-        "generator_function_declaration": 0,
-        "method_definition": 0,
-        "arrow_function": 10,
-        "function": 0,
-        "function_expression": 0,
-        "generator_function": 0
-      },
-      "functionMetrics": [
-        {
-          "name": "MemberSelector",
-          "type": "function_declaration",
-          "startLine": 23,
-          "lines": 79,
-          "maxNestingDepth": 1,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 5,
-          "halstead": {
-            "n1": 5,
-            "n2": 25,
-            "N1": 17,
-            "N2": 46,
-            "volume": 309.134,
-            "difficulty": 4.6,
-            "effort": 1422.017
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 69.249,
-          "maintainabilityIndexGradAiNorm": 40.496,
-          "isReactComponent": true,
-          "isMonolithic": true
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 78,
-          "lines": 20,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 2,
-            "n2": 15,
-            "N1": 2,
-            "N2": 28,
-            "volume": 122.624,
-            "difficulty": 1.867,
-            "effort": 228.898
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 97.232,
-          "maintainabilityIndexGradAiNorm": 56.861,
-          "isReactComponent": true,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 91,
-          "lines": 1,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 2,
-            "n2": 2,
-            "N1": 2,
-            "N2": 2,
-            "volume": 8,
             "difficulty": 1,
-            "effort": 8
+            "effort": 4.755
           },
           "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 159.957,
-          "maintainabilityIndexGradAiNorm": 93.542,
+          "maintainabilityIndexGradAiRaw": 162.662,
+          "maintainabilityIndexGradAiNorm": 95.124,
           "isReactComponent": false,
           "isMonolithic": false
         },
         {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 55,
-          "lines": 11,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 2,
-            "n2": 7,
-            "N1": 2,
-            "N2": 13,
-            "volume": 47.549,
-            "difficulty": 1.857,
-            "effort": 88.305
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 111.843,
-          "maintainabilityIndexGradAiNorm": 65.405,
-          "isReactComponent": true,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 59,
-          "lines": 1,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 2,
-            "n2": 2,
-            "N1": 2,
-            "N2": 2,
-            "volume": 8,
-            "difficulty": 1,
-            "effort": 8
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 159.957,
-          "maintainabilityIndexGradAiNorm": 93.542,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 46,
-          "lines": 1,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 2,
-            "n2": 2,
-            "N1": 3,
-            "N2": 3,
-            "volume": 12,
-            "difficulty": 1.5,
-            "effort": 18
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 157.848,
-          "maintainabilityIndexGradAiNorm": 92.309,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "removeMember",
+          "name": "validateUrl",
           "type": "function_declaration",
-          "startLine": 36,
-          "lines": 3,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 1,
-            "n2": 4,
-            "N1": 1,
-            "N2": 4,
-            "volume": 11.61,
-            "difficulty": 0.5,
-            "effort": 5.805
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 140.223,
-          "maintainabilityIndexGradAiNorm": 82.002,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 37,
-          "lines": 1,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 2,
-            "n2": 2,
-            "N1": 2,
-            "N2": 3,
-            "volume": 10,
-            "difficulty": 1.5,
-            "effort": 15
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 158.797,
-          "maintainabilityIndexGradAiNorm": 92.864,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "addMember",
-          "type": "function_declaration",
-          "startLine": 31,
-          "lines": 4,
+          "startLine": 21,
+          "lines": 31,
           "maxNestingDepth": 1,
           "parameterCount": 1,
-          "cyclomaticComplexity": 2,
+          "cyclomaticComplexity": 11,
           "halstead": {
-            "n1": 4,
-            "n2": 5,
-            "N1": 4,
-            "N2": 7,
-            "volume": 34.869,
-            "difficulty": 2.8,
-            "effort": 97.634
+            "n1": 11,
+            "n2": 23,
+            "N1": 33,
+            "N2": 43,
+            "volume": 386.647,
+            "difficulty": 10.283,
+            "effort": 3975.742
           },
-          "cognitiveComplexity": 1,
-          "maintainabilityIndexGradAiRaw": 129.614,
-          "maintainabilityIndexGradAiNorm": 75.798,
+          "cognitiveComplexity": 4,
+          "maintainabilityIndexGradAiRaw": 81.86,
+          "maintainabilityIndexGradAiNorm": 47.871,
           "isReactComponent": false,
           "isMonolithic": false
         },
         {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 28,
-          "lines": 1,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 2,
-          "halstead": {
-            "n1": 4,
-            "n2": 4,
-            "N1": 5,
-            "N2": 6,
-            "volume": 33,
-            "difficulty": 3,
-            "effort": 99
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 152.358,
-          "maintainabilityIndexGradAiNorm": 89.098,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 26,
-          "lines": 1,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 2,
-            "n2": 2,
-            "N1": 3,
-            "N2": 3,
-            "volume": 12,
-            "difficulty": 1.5,
-            "effort": 18
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 157.848,
-          "maintainabilityIndexGradAiNorm": 92.309,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 25,
-          "lines": 1,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 2,
-            "n2": 2,
-            "N1": 2,
-            "N2": 2,
-            "volume": 8,
-            "difficulty": 1,
-            "effort": 8
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 159.957,
-          "maintainabilityIndexGradAiNorm": 93.542,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "matchesQuery",
+          "name": "jsonResponse",
           "type": "function_declaration",
-          "startLine": 14,
-          "lines": 8,
-          "maxNestingDepth": 1,
+          "startLine": 12,
+          "lines": 6,
+          "maxNestingDepth": 0,
           "parameterCount": 2,
-          "cyclomaticComplexity": 2,
-          "halstead": {
-            "n1": 4,
-            "n2": 6,
-            "N1": 12,
-            "N2": 12,
-            "volume": 79.726,
-            "difficulty": 4,
-            "effort": 318.905
-          },
-          "cognitiveComplexity": 1,
-          "maintainabilityIndexGradAiRaw": 114.084,
-          "maintainabilityIndexGradAiNorm": 66.716,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 20,
-          "lines": 1,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
           "cyclomaticComplexity": 1,
           "halstead": {
-            "n1": 2,
-            "n2": 2,
-            "N1": 3,
-            "N2": 3,
-            "volume": 12,
-            "difficulty": 1.5,
-            "effort": 18
+            "n1": 4,
+            "n2": 9,
+            "N1": 4,
+            "N2": 10,
+            "volume": 51.806,
+            "difficulty": 2.222,
+            "effort": 115.125
           },
           "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 157.848,
-          "maintainabilityIndexGradAiNorm": 92.309,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "profileMeta",
-          "type": "function_declaration",
-          "startLine": 8,
-          "lines": 5,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 2,
-          "halstead": {
-            "n1": 3,
-            "n2": 5,
-            "N1": 8,
-            "N2": 9,
-            "volume": 51,
-            "difficulty": 2.7,
-            "effort": 137.7
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 124.022,
-          "maintainabilityIndexGradAiNorm": 72.527,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "displayName",
-          "type": "function_declaration",
-          "startLine": 4,
-          "lines": 3,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 3,
-          "halstead": {
-            "n1": 3,
-            "n2": 3,
-            "N1": 5,
-            "N2": 5,
-            "volume": 25.85,
-            "difficulty": 2.5,
-            "effort": 64.624
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 135.6,
-          "maintainabilityIndexGradAiNorm": 79.298,
+          "maintainabilityIndexGradAiRaw": 121.216,
+          "maintainabilityIndexGradAiNorm": 70.887,
           "isReactComponent": false,
           "isMonolithic": false
         }
       ],
       "complexity": [
         {
-          "name": "MemberSelector",
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 216,
+          "complexity": 13
+        },
+        {
+          "name": "parseEventsWithAI",
           "type": "function_declaration",
-          "startLine": 23,
-          "complexity": 5
+          "startLine": 137,
+          "complexity": 7
         },
         {
           "name": "(anonymous)",
           "type": "arrow_function",
-          "startLine": 78,
+          "startLine": 179,
           "complexity": 1
         },
         {
           "name": "(anonymous)",
           "type": "arrow_function",
-          "startLine": 91,
+          "startLine": 176,
           "complexity": 1
         },
         {
-          "name": "(anonymous)",
-          "type": "arrow_function",
+          "name": "htmlToText",
+          "type": "function_declaration",
+          "startLine": 116,
+          "complexity": 1
+        },
+        {
+          "name": "fetchPage",
+          "type": "function_declaration",
           "startLine": 55,
-          "complexity": 1
+          "complexity": 13
         },
         {
           "name": "(anonymous)",
@@ -26691,70 +26501,16 @@
           "complexity": 1
         },
         {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 46,
-          "complexity": 1
-        },
-        {
-          "name": "removeMember",
+          "name": "validateUrl",
           "type": "function_declaration",
-          "startLine": 36,
-          "complexity": 1
+          "startLine": 21,
+          "complexity": 11
         },
         {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 37,
-          "complexity": 1
-        },
-        {
-          "name": "addMember",
+          "name": "jsonResponse",
           "type": "function_declaration",
-          "startLine": 31,
-          "complexity": 2
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 28,
-          "complexity": 2
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 26,
+          "startLine": 12,
           "complexity": 1
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 25,
-          "complexity": 1
-        },
-        {
-          "name": "matchesQuery",
-          "type": "function_declaration",
-          "startLine": 14,
-          "complexity": 2
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 20,
-          "complexity": 1
-        },
-        {
-          "name": "profileMeta",
-          "type": "function_declaration",
-          "startLine": 8,
-          "complexity": 2
-        },
-        {
-          "name": "displayName",
-          "type": "function_declaration",
-          "startLine": 4,
-          "complexity": 3
         }
       ]
     },
@@ -27859,6 +27615,794 @@
       ]
     },
     {
+      "file": "src/components/groups/GroupForm.jsx",
+      "functions": 10,
+      "functionsByType": {
+        "function_declaration": 5,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 5,
+        "function": 0,
+        "function_expression": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "GroupForm",
+          "type": "function_declaration",
+          "startLine": 20,
+          "lines": 96,
+          "maxNestingDepth": 1,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 4,
+          "halstead": {
+            "n1": 4,
+            "n2": 43,
+            "N1": 9,
+            "N2": 66,
+            "volume": 416.594,
+            "difficulty": 3.07,
+            "effort": 1278.847
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 64.771,
+          "maintainabilityIndexGradAiNorm": 37.878,
+          "isReactComponent": true,
+          "isMonolithic": true
+        },
+        {
+          "name": "handleSubmit",
+          "type": "function_declaration",
+          "startLine": 49,
+          "lines": 16,
+          "maxNestingDepth": 1,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 4,
+            "n2": 9,
+            "N1": 11,
+            "N2": 15,
+            "volume": 96.211,
+            "difficulty": 3.333,
+            "effort": 320.705
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 101.878,
+          "maintainabilityIndexGradAiNorm": 59.578,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "handleMembersChange",
+          "type": "function_declaration",
+          "startLine": 45,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 3,
+            "N1": 0,
+            "N2": 3,
+            "volume": 4.755,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 144.865,
+          "maintainabilityIndexGradAiNorm": 84.716,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 46,
+          "lines": 1,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 1,
+            "N1": 2,
+            "N2": 2,
+            "volume": 6.34,
+            "difficulty": 2,
+            "effort": 12.68
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 161.166,
+          "maintainabilityIndexGradAiNorm": 94.249,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "handleField",
+          "type": "function_declaration",
+          "startLine": 35,
+          "lines": 9,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 2,
+            "N1": 1,
+            "N2": 2,
+            "volume": 4.755,
+            "difficulty": 0.5,
+            "effort": 2.377
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 127.067,
+          "maintainabilityIndexGradAiNorm": 74.308,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 36,
+          "lines": 7,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 3,
+            "N1": 1,
+            "N2": 3,
+            "volume": 8,
+            "difficulty": 0.5,
+            "effort": 4
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 128.433,
+          "maintainabilityIndexGradAiNorm": 75.107,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 41,
+          "lines": 1,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 3,
+            "N1": 2,
+            "N2": 4,
+            "volume": 13.932,
+            "difficulty": 1.333,
+            "effort": 18.575
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 157.072,
+          "maintainabilityIndexGradAiNorm": 91.855,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 37,
+          "lines": 4,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 3,
+            "n2": 3,
+            "N1": 4,
+            "N2": 4,
+            "volume": 20.68,
+            "difficulty": 2,
+            "effort": 41.359
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 132.56,
+          "maintainabilityIndexGradAiNorm": 77.52,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 30,
+          "lines": 4,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 3,
+            "N1": 1,
+            "N2": 3,
+            "volume": 8,
+            "difficulty": 0.5,
+            "effort": 4
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 137.499,
+          "maintainabilityIndexGradAiNorm": 80.409,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "validateForm",
+          "type": "function_declaration",
+          "startLine": 10,
+          "lines": 9,
+          "maxNestingDepth": 1,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 4,
+            "n2": 4,
+            "N1": 6,
+            "N2": 7,
+            "volume": 39,
+            "difficulty": 3.5,
+            "effort": 136.5
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 115.894,
+          "maintainabilityIndexGradAiNorm": 67.774,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "GroupForm",
+          "type": "function_declaration",
+          "startLine": 20,
+          "complexity": 4
+        },
+        {
+          "name": "handleSubmit",
+          "type": "function_declaration",
+          "startLine": 49,
+          "complexity": 2
+        },
+        {
+          "name": "handleMembersChange",
+          "type": "function_declaration",
+          "startLine": 45,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 46,
+          "complexity": 1
+        },
+        {
+          "name": "handleField",
+          "type": "function_declaration",
+          "startLine": 35,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 36,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 41,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 37,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 30,
+          "complexity": 1
+        },
+        {
+          "name": "validateForm",
+          "type": "function_declaration",
+          "startLine": 10,
+          "complexity": 2
+        }
+      ]
+    },
+    {
+      "file": "src/components/groups/MemberSelector.jsx",
+      "functions": 16,
+      "functionsByType": {
+        "function_declaration": 6,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 10,
+        "function": 0,
+        "function_expression": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "MemberSelector",
+          "type": "function_declaration",
+          "startLine": 23,
+          "lines": 79,
+          "maxNestingDepth": 1,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 5,
+          "halstead": {
+            "n1": 5,
+            "n2": 25,
+            "N1": 17,
+            "N2": 46,
+            "volume": 309.134,
+            "difficulty": 4.6,
+            "effort": 1422.017
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 69.249,
+          "maintainabilityIndexGradAiNorm": 40.496,
+          "isReactComponent": true,
+          "isMonolithic": true
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 78,
+          "lines": 20,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 15,
+            "N1": 2,
+            "N2": 28,
+            "volume": 122.624,
+            "difficulty": 1.867,
+            "effort": 228.898
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 97.232,
+          "maintainabilityIndexGradAiNorm": 56.861,
+          "isReactComponent": true,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 91,
+          "lines": 1,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 2,
+            "N1": 2,
+            "N2": 2,
+            "volume": 8,
+            "difficulty": 1,
+            "effort": 8
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 159.957,
+          "maintainabilityIndexGradAiNorm": 93.542,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 55,
+          "lines": 11,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 7,
+            "N1": 2,
+            "N2": 13,
+            "volume": 47.549,
+            "difficulty": 1.857,
+            "effort": 88.305
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 111.843,
+          "maintainabilityIndexGradAiNorm": 65.405,
+          "isReactComponent": true,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 59,
+          "lines": 1,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 2,
+            "N1": 2,
+            "N2": 2,
+            "volume": 8,
+            "difficulty": 1,
+            "effort": 8
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 159.957,
+          "maintainabilityIndexGradAiNorm": 93.542,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 46,
+          "lines": 1,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 2,
+            "N1": 3,
+            "N2": 3,
+            "volume": 12,
+            "difficulty": 1.5,
+            "effort": 18
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 157.848,
+          "maintainabilityIndexGradAiNorm": 92.309,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "removeMember",
+          "type": "function_declaration",
+          "startLine": 36,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 4,
+            "N1": 1,
+            "N2": 4,
+            "volume": 11.61,
+            "difficulty": 0.5,
+            "effort": 5.805
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 140.223,
+          "maintainabilityIndexGradAiNorm": 82.002,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 37,
+          "lines": 1,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 2,
+            "N1": 2,
+            "N2": 3,
+            "volume": 10,
+            "difficulty": 1.5,
+            "effort": 15
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 158.797,
+          "maintainabilityIndexGradAiNorm": 92.864,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "addMember",
+          "type": "function_declaration",
+          "startLine": 31,
+          "lines": 4,
+          "maxNestingDepth": 1,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 4,
+            "n2": 5,
+            "N1": 4,
+            "N2": 7,
+            "volume": 34.869,
+            "difficulty": 2.8,
+            "effort": 97.634
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 129.614,
+          "maintainabilityIndexGradAiNorm": 75.798,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 28,
+          "lines": 1,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 4,
+            "n2": 4,
+            "N1": 5,
+            "N2": 6,
+            "volume": 33,
+            "difficulty": 3,
+            "effort": 99
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 152.358,
+          "maintainabilityIndexGradAiNorm": 89.098,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 26,
+          "lines": 1,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 2,
+            "N1": 3,
+            "N2": 3,
+            "volume": 12,
+            "difficulty": 1.5,
+            "effort": 18
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 157.848,
+          "maintainabilityIndexGradAiNorm": 92.309,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 25,
+          "lines": 1,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 2,
+            "N1": 2,
+            "N2": 2,
+            "volume": 8,
+            "difficulty": 1,
+            "effort": 8
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 159.957,
+          "maintainabilityIndexGradAiNorm": 93.542,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "matchesQuery",
+          "type": "function_declaration",
+          "startLine": 14,
+          "lines": 8,
+          "maxNestingDepth": 1,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 4,
+            "n2": 6,
+            "N1": 12,
+            "N2": 12,
+            "volume": 79.726,
+            "difficulty": 4,
+            "effort": 318.905
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 114.084,
+          "maintainabilityIndexGradAiNorm": 66.716,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 20,
+          "lines": 1,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 2,
+            "N1": 3,
+            "N2": 3,
+            "volume": 12,
+            "difficulty": 1.5,
+            "effort": 18
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 157.848,
+          "maintainabilityIndexGradAiNorm": 92.309,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "profileMeta",
+          "type": "function_declaration",
+          "startLine": 8,
+          "lines": 5,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 3,
+            "n2": 5,
+            "N1": 8,
+            "N2": 9,
+            "volume": 51,
+            "difficulty": 2.7,
+            "effort": 137.7
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 124.022,
+          "maintainabilityIndexGradAiNorm": 72.527,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "displayName",
+          "type": "function_declaration",
+          "startLine": 4,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 3,
+          "halstead": {
+            "n1": 3,
+            "n2": 3,
+            "N1": 5,
+            "N2": 5,
+            "volume": 25.85,
+            "difficulty": 2.5,
+            "effort": 64.624
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 135.6,
+          "maintainabilityIndexGradAiNorm": 79.298,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "MemberSelector",
+          "type": "function_declaration",
+          "startLine": 23,
+          "complexity": 5
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 78,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 91,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 55,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 59,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 46,
+          "complexity": 1
+        },
+        {
+          "name": "removeMember",
+          "type": "function_declaration",
+          "startLine": 36,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 37,
+          "complexity": 1
+        },
+        {
+          "name": "addMember",
+          "type": "function_declaration",
+          "startLine": 31,
+          "complexity": 2
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 28,
+          "complexity": 2
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 26,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 25,
+          "complexity": 1
+        },
+        {
+          "name": "matchesQuery",
+          "type": "function_declaration",
+          "startLine": 14,
+          "complexity": 2
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 20,
+          "complexity": 1
+        },
+        {
+          "name": "profileMeta",
+          "type": "function_declaration",
+          "startLine": 8,
+          "complexity": 2
+        },
+        {
+          "name": "displayName",
+          "type": "function_declaration",
+          "startLine": 4,
+          "complexity": 3
+        }
+      ]
+    },
+    {
       "file": "src/lib/supabase/client.js",
       "functions": 1,
       "functionsByType": {
@@ -28033,550 +28577,6 @@
           "name": "getAll",
           "type": "method_definition",
           "startLine": 11,
-          "complexity": 1
-        }
-      ]
-    },
-    {
-      "file": "supabase/functions/daily-digest/index.ts",
-      "functions": 7,
-      "functionsByType": {
-        "function_declaration": 5,
-        "generator_function_declaration": 0,
-        "method_definition": 0,
-        "arrow_function": 2,
-        "function": 0,
-        "function_expression": 0,
-        "generator_function": 0
-      },
-      "functionMetrics": [
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 68,
-          "lines": 82,
-          "maxNestingDepth": 3,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 9,
-          "halstead": {
-            "n1": 14,
-            "n2": 55,
-            "N1": 59,
-            "N2": 121,
-            "volume": 1099.534,
-            "difficulty": 15.4,
-            "effort": 16932.83
-          },
-          "cognitiveComplexity": 8,
-          "maintainabilityIndexGradAiRaw": 61.127,
-          "maintainabilityIndexGradAiNorm": 35.747,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "callGemini",
-          "type": "function_declaration",
-          "startLine": 47,
-          "lines": 20,
-          "maxNestingDepth": 1,
-          "parameterCount": 2,
-          "cyclomaticComplexity": 2,
-          "halstead": {
-            "n1": 10,
-            "n2": 21,
-            "N1": 28,
-            "N2": 32,
-            "volume": 297.252,
-            "difficulty": 7.619,
-            "effort": 2264.775
-          },
-          "cognitiveComplexity": 2,
-          "maintainabilityIndexGradAiRaw": 92.397,
-          "maintainabilityIndexGradAiNorm": 54.033,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "formatEvents",
-          "type": "function_declaration",
-          "startLine": 36,
-          "lines": 10,
-          "maxNestingDepth": 1,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 3,
-          "halstead": {
-            "n1": 6,
-            "n2": 5,
-            "N1": 9,
-            "N2": 8,
-            "volume": 58.81,
-            "difficulty": 4.8,
-            "effort": 282.29
-          },
-          "cognitiveComplexity": 1,
-          "maintainabilityIndexGradAiRaw": 111.822,
-          "maintainabilityIndexGradAiNorm": 65.393,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 39,
-          "lines": 5,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 3,
-          "halstead": {
-            "n1": 5,
-            "n2": 10,
-            "N1": 11,
-            "N2": 17,
-            "volume": 109.393,
-            "difficulty": 4.25,
-            "effort": 464.92
-          },
-          "cognitiveComplexity": 1,
-          "maintainabilityIndexGradAiRaw": 119.823,
-          "maintainabilityIndexGradAiNorm": 70.072,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "monthlyEventGuidance",
-          "type": "function_declaration",
-          "startLine": 31,
-          "lines": 4,
-          "maxNestingDepth": 1,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 2,
-          "halstead": {
-            "n1": 3,
-            "n2": 5,
-            "N1": 4,
-            "N2": 6,
-            "volume": 30,
-            "difficulty": 1.8,
-            "effort": 54
-          },
-          "cognitiveComplexity": 1,
-          "maintainabilityIndexGradAiRaw": 130.396,
-          "maintainabilityIndexGradAiNorm": 76.255,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "yearContext",
-          "type": "function_declaration",
-          "startLine": 21,
-          "lines": 3,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 2,
-          "halstead": {
-            "n1": 4,
-            "n2": 7,
-            "N1": 4,
-            "N2": 10,
-            "volume": 48.432,
-            "difficulty": 2.857,
-            "effort": 138.377
-          },
-          "cognitiveComplexity": 1,
-          "maintainabilityIndexGradAiRaw": 132.566,
-          "maintainabilityIndexGradAiNorm": 77.524,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "formatInterests",
-          "type": "function_declaration",
-          "startLine": 13,
-          "lines": 5,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 3,
-          "halstead": {
-            "n1": 4,
-            "n2": 9,
-            "N1": 15,
-            "N2": 17,
-            "volume": 118.414,
-            "difficulty": 3.778,
-            "effort": 447.342
-          },
-          "cognitiveComplexity": 2,
-          "maintainabilityIndexGradAiRaw": 119.411,
-          "maintainabilityIndexGradAiNorm": 69.831,
-          "isReactComponent": false,
-          "isMonolithic": false
-        }
-      ],
-      "complexity": [
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 68,
-          "complexity": 9
-        },
-        {
-          "name": "callGemini",
-          "type": "function_declaration",
-          "startLine": 47,
-          "complexity": 2
-        },
-        {
-          "name": "formatEvents",
-          "type": "function_declaration",
-          "startLine": 36,
-          "complexity": 3
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 39,
-          "complexity": 3
-        },
-        {
-          "name": "monthlyEventGuidance",
-          "type": "function_declaration",
-          "startLine": 31,
-          "complexity": 2
-        },
-        {
-          "name": "yearContext",
-          "type": "function_declaration",
-          "startLine": 21,
-          "complexity": 2
-        },
-        {
-          "name": "formatInterests",
-          "type": "function_declaration",
-          "startLine": 13,
-          "complexity": 3
-        }
-      ]
-    },
-    {
-      "file": "supabase/functions/parse-event/index.ts",
-      "functions": 1,
-      "functionsByType": {
-        "function_declaration": 0,
-        "generator_function_declaration": 0,
-        "method_definition": 0,
-        "arrow_function": 1,
-        "function": 0,
-        "function_expression": 0,
-        "generator_function": 0
-      },
-      "functionMetrics": [
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 7,
-          "lines": 81,
-          "maxNestingDepth": 2,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 8,
-          "halstead": {
-            "n1": 15,
-            "n2": 41,
-            "N1": 73,
-            "N2": 97,
-            "volume": 987.25,
-            "difficulty": 17.744,
-            "effort": 17517.674
-          },
-          "cognitiveComplexity": 6,
-          "maintainabilityIndexGradAiRaw": 62.116,
-          "maintainabilityIndexGradAiNorm": 36.325,
-          "isReactComponent": false,
-          "isMonolithic": false
-        }
-      ],
-      "complexity": [
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 7,
-          "complexity": 8
-        }
-      ]
-    },
-    {
-      "file": "supabase/functions/parse-source/index.ts",
-      "functions": 9,
-      "functionsByType": {
-        "function_declaration": 5,
-        "generator_function_declaration": 0,
-        "method_definition": 0,
-        "arrow_function": 4,
-        "function": 0,
-        "function_expression": 0,
-        "generator_function": 0
-      },
-      "functionMetrics": [
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 216,
-          "lines": 49,
-          "maxNestingDepth": 1,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 13,
-          "halstead": {
-            "n1": 16,
-            "n2": 36,
-            "N1": 64,
-            "N2": 72,
-            "volume": 775.26,
-            "difficulty": 16,
-            "effort": 12404.157
-          },
-          "cognitiveComplexity": 10,
-          "maintainabilityIndexGradAiRaw": 70.366,
-          "maintainabilityIndexGradAiNorm": 41.15,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "parseEventsWithAI",
-          "type": "function_declaration",
-          "startLine": 137,
-          "lines": 78,
-          "maxNestingDepth": 3,
-          "parameterCount": 3,
-          "cyclomaticComplexity": 7,
-          "halstead": {
-            "n1": 12,
-            "n2": 43,
-            "N1": 57,
-            "N2": 75,
-            "volume": 763.139,
-            "difficulty": 10.465,
-            "effort": 7986.343
-          },
-          "cognitiveComplexity": 11,
-          "maintainabilityIndexGradAiRaw": 64.297,
-          "maintainabilityIndexGradAiNorm": 37.601,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 179,
-          "lines": 1,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 3,
-            "n2": 2,
-            "N1": 4,
-            "N2": 3,
-            "volume": 16.253,
-            "difficulty": 2.25,
-            "effort": 36.57
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 156.271,
-          "maintainabilityIndexGradAiNorm": 91.387,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 176,
-          "lines": 1,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 2,
-            "n2": 2,
-            "N1": 3,
-            "N2": 3,
-            "volume": 12,
-            "difficulty": 1.5,
-            "effort": 18
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 157.848,
-          "maintainabilityIndexGradAiNorm": 92.309,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "htmlToText",
-          "type": "function_declaration",
-          "startLine": 116,
-          "lines": 18,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 2,
-            "n2": 22,
-            "N1": 13,
-            "N2": 31,
-            "volume": 201.738,
-            "difficulty": 1.409,
-            "effort": 284.268
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 96.35,
-          "maintainabilityIndexGradAiNorm": 56.345,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "fetchPage",
-          "type": "function_declaration",
-          "startLine": 55,
-          "lines": 59,
-          "maxNestingDepth": 2,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 13,
-          "halstead": {
-            "n1": 14,
-            "n2": 41,
-            "N1": 57,
-            "N2": 71,
-            "volume": 740.014,
-            "difficulty": 12.122,
-            "effort": 8970.414
-          },
-          "cognitiveComplexity": 9,
-          "maintainabilityIndexGradAiRaw": 67.599,
-          "maintainabilityIndexGradAiNorm": 39.532,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 59,
-          "lines": 1,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 2,
-            "n2": 1,
-            "N1": 2,
-            "N2": 1,
-            "volume": 4.755,
-            "difficulty": 1,
-            "effort": 4.755
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 162.662,
-          "maintainabilityIndexGradAiNorm": 95.124,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "validateUrl",
-          "type": "function_declaration",
-          "startLine": 21,
-          "lines": 31,
-          "maxNestingDepth": 1,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 11,
-          "halstead": {
-            "n1": 11,
-            "n2": 23,
-            "N1": 33,
-            "N2": 43,
-            "volume": 386.647,
-            "difficulty": 10.283,
-            "effort": 3975.742
-          },
-          "cognitiveComplexity": 4,
-          "maintainabilityIndexGradAiRaw": 81.86,
-          "maintainabilityIndexGradAiNorm": 47.871,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "jsonResponse",
-          "type": "function_declaration",
-          "startLine": 12,
-          "lines": 6,
-          "maxNestingDepth": 0,
-          "parameterCount": 2,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 4,
-            "n2": 9,
-            "N1": 4,
-            "N2": 10,
-            "volume": 51.806,
-            "difficulty": 2.222,
-            "effort": 115.125
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 121.216,
-          "maintainabilityIndexGradAiNorm": 70.887,
-          "isReactComponent": false,
-          "isMonolithic": false
-        }
-      ],
-      "complexity": [
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 216,
-          "complexity": 13
-        },
-        {
-          "name": "parseEventsWithAI",
-          "type": "function_declaration",
-          "startLine": 137,
-          "complexity": 7
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 179,
-          "complexity": 1
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 176,
-          "complexity": 1
-        },
-        {
-          "name": "htmlToText",
-          "type": "function_declaration",
-          "startLine": 116,
-          "complexity": 1
-        },
-        {
-          "name": "fetchPage",
-          "type": "function_declaration",
-          "startLine": 55,
-          "complexity": 13
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 59,
-          "complexity": 1
-        },
-        {
-          "name": "validateUrl",
-          "type": "function_declaration",
-          "startLine": 21,
-          "complexity": 11
-        },
-        {
-          "name": "jsonResponse",
-          "type": "function_declaration",
-          "startLine": 12,
           "complexity": 1
         }
       ]
@@ -29143,42 +29143,6 @@
         }
       },
       {
-        "name": "GroupForm",
-        "file": "src/components/groups/GroupForm.jsx",
-        "startLine": 20,
-        "lines": 96,
-        "hookCount": 3,
-        "hooksPerSloc": 0.031,
-        "ferreiraLackOfCohesion": false,
-        "maxJsxDepth": 3,
-        "tampereJsxDepthExceeded": false,
-        "propDrillingEdges": 2,
-        "hookSafety": {
-          "conditionalHookCalls": 0,
-          "asyncUseEffect": 0,
-          "missingOrInvalidDepsArray": 1,
-          "nonPrimitiveDepRisk": 0
-        }
-      },
-      {
-        "name": "MemberSelector",
-        "file": "src/components/groups/MemberSelector.jsx",
-        "startLine": 23,
-        "lines": 79,
-        "hookCount": 2,
-        "hooksPerSloc": 0.025,
-        "ferreiraLackOfCohesion": false,
-        "maxJsxDepth": 4,
-        "tampereJsxDepthExceeded": false,
-        "propDrillingEdges": 1,
-        "hookSafety": {
-          "conditionalHookCalls": 0,
-          "asyncUseEffect": 0,
-          "missingOrInvalidDepsArray": 1,
-          "nonPrimitiveDepRisk": 0
-        }
-      },
-      {
         "name": "InterestPicker",
         "file": "src/components/profile/InterestPicker.jsx",
         "startLine": 6,
@@ -29265,6 +29229,42 @@
           "conditionalHookCalls": 0,
           "asyncUseEffect": 0,
           "missingOrInvalidDepsArray": 0,
+          "nonPrimitiveDepRisk": 0
+        }
+      },
+      {
+        "name": "GroupForm",
+        "file": "src/components/groups/GroupForm.jsx",
+        "startLine": 20,
+        "lines": 96,
+        "hookCount": 3,
+        "hooksPerSloc": 0.031,
+        "ferreiraLackOfCohesion": false,
+        "maxJsxDepth": 3,
+        "tampereJsxDepthExceeded": false,
+        "propDrillingEdges": 2,
+        "hookSafety": {
+          "conditionalHookCalls": 0,
+          "asyncUseEffect": 0,
+          "missingOrInvalidDepsArray": 1,
+          "nonPrimitiveDepRisk": 0
+        }
+      },
+      {
+        "name": "MemberSelector",
+        "file": "src/components/groups/MemberSelector.jsx",
+        "startLine": 23,
+        "lines": 79,
+        "hookCount": 2,
+        "hooksPerSloc": 0.025,
+        "ferreiraLackOfCohesion": false,
+        "maxJsxDepth": 4,
+        "tampereJsxDepthExceeded": false,
+        "propDrillingEdges": 1,
+        "hookSafety": {
+          "conditionalHookCalls": 0,
+          "asyncUseEffect": 0,
+          "missingOrInvalidDepsArray": 1,
           "nonPrimitiveDepRisk": 0
         }
       }
@@ -29521,18 +29521,18 @@
       "riskScore": 7
     },
     {
-      "file": "src/components/profile/InterestPicker.jsx",
-      "name": "InterestPicker",
-      "startLine": 6,
+      "file": "supabase/functions/parse-source/index.ts",
+      "name": "parseEventsWithAI",
+      "startLine": 137,
       "cyclomaticComplexity": 7,
       "verificationScore": 0,
       "evidence": "none",
       "riskScore": 7
     },
     {
-      "file": "supabase/functions/parse-source/index.ts",
-      "name": "parseEventsWithAI",
-      "startLine": 137,
+      "file": "src/components/profile/InterestPicker.jsx",
+      "name": "InterestPicker",
+      "startLine": 6,
       "cyclomaticComplexity": 7,
       "verificationScore": 0,
       "evidence": "none",
@@ -30014,6 +30014,15 @@
       "riskScore": 3
     },
     {
+      "file": "src/hooks/useUserPreferences.js",
+      "name": "loadPreferences",
+      "startLine": 42,
+      "cyclomaticComplexity": 3,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 3
+    },
+    {
       "file": "src/data/eventService.js",
       "name": "fetchCommunityEvents",
       "startLine": 138,
@@ -30098,15 +30107,6 @@
       "file": "src/data/ucscEvents.js",
       "name": "parseLocalDate",
       "startLine": 22,
-      "cyclomaticComplexity": 3,
-      "verificationScore": 0,
-      "evidence": "none",
-      "riskScore": 3
-    },
-    {
-      "file": "src/hooks/useUserPreferences.js",
-      "name": "loadPreferences",
-      "startLine": 42,
       "cyclomaticComplexity": 3,
       "verificationScore": 0,
       "evidence": "none",
@@ -30275,9 +30275,18 @@
       "riskScore": 3
     },
     {
-      "file": "src/components/groups/MemberSelector.jsx",
-      "name": "displayName",
-      "startLine": 4,
+      "file": "supabase/functions/daily-digest/index.ts",
+      "name": "formatEvents",
+      "startLine": 36,
+      "cyclomaticComplexity": 3,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 3
+    },
+    {
+      "file": "supabase/functions/daily-digest/index.ts",
+      "name": "formatInterests",
+      "startLine": 13,
       "cyclomaticComplexity": 3,
       "verificationScore": 0,
       "evidence": "none",
@@ -30311,18 +30320,9 @@
       "riskScore": 3
     },
     {
-      "file": "supabase/functions/daily-digest/index.ts",
-      "name": "formatEvents",
-      "startLine": 36,
-      "cyclomaticComplexity": 3,
-      "verificationScore": 0,
-      "evidence": "none",
-      "riskScore": 3
-    },
-    {
-      "file": "supabase/functions/daily-digest/index.ts",
-      "name": "formatInterests",
-      "startLine": 13,
+      "file": "src/components/groups/MemberSelector.jsx",
+      "name": "displayName",
+      "startLine": 4,
       "cyclomaticComplexity": 3,
       "verificationScore": 0,
       "evidence": "none",
@@ -30648,6 +30648,33 @@
       "riskScore": 2
     },
     {
+      "file": "supabase/functions/daily-digest/index.ts",
+      "name": "callGemini",
+      "startLine": 47,
+      "cyclomaticComplexity": 2,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 2
+    },
+    {
+      "file": "supabase/functions/daily-digest/index.ts",
+      "name": "monthlyEventGuidance",
+      "startLine": 31,
+      "cyclomaticComplexity": 2,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 2
+    },
+    {
+      "file": "supabase/functions/daily-digest/index.ts",
+      "name": "yearContext",
+      "startLine": 21,
+      "cyclomaticComplexity": 2,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 2
+    },
+    {
       "file": "src/components/groups/GroupForm.jsx",
       "name": "handleSubmit",
       "startLine": 49,
@@ -30687,33 +30714,6 @@
       "file": "src/components/groups/MemberSelector.jsx",
       "name": "profileMeta",
       "startLine": 8,
-      "cyclomaticComplexity": 2,
-      "verificationScore": 0,
-      "evidence": "none",
-      "riskScore": 2
-    },
-    {
-      "file": "supabase/functions/daily-digest/index.ts",
-      "name": "callGemini",
-      "startLine": 47,
-      "cyclomaticComplexity": 2,
-      "verificationScore": 0,
-      "evidence": "none",
-      "riskScore": 2
-    },
-    {
-      "file": "supabase/functions/daily-digest/index.ts",
-      "name": "monthlyEventGuidance",
-      "startLine": 31,
-      "cyclomaticComplexity": 2,
-      "verificationScore": 0,
-      "evidence": "none",
-      "riskScore": 2
-    },
-    {
-      "file": "supabase/functions/daily-digest/index.ts",
-      "name": "yearContext",
-      "startLine": 21,
       "cyclomaticComplexity": 2,
       "verificationScore": 0,
       "evidence": "none",
@@ -30844,6 +30844,15 @@
       "riskScore": 1
     },
     {
+      "file": "src/hooks/useUserPreferences.js",
+      "name": "useUserPreferences",
+      "startLine": 7,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
       "file": "src/context/AuthContext.jsx",
       "name": "AuthProvider",
       "startLine": 20,
@@ -30919,15 +30928,6 @@
       "file": "src/data/ucscEvents.js",
       "name": "toDateParam",
       "startLine": 78,
-      "cyclomaticComplexity": 1,
-      "verificationScore": 0,
-      "evidence": "none",
-      "riskScore": 1
-    },
-    {
-      "file": "src/hooks/useUserPreferences.js",
-      "name": "useUserPreferences",
-      "startLine": 7,
       "cyclomaticComplexity": 1,
       "verificationScore": 0,
       "evidence": "none",
@@ -31159,6 +31159,42 @@
       "riskScore": 1
     },
     {
+      "file": "supabase/functions/parse-source/index.ts",
+      "name": "htmlToText",
+      "startLine": 116,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "supabase/functions/parse-source/index.ts",
+      "name": "jsonResponse",
+      "startLine": 12,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "src/components/profile/InterestPicker.jsx",
+      "name": "removeInterest",
+      "startLine": 45,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "src/components/profile/PrivacySettings.jsx",
+      "name": "PrivacySettings",
+      "startLine": 21,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
       "file": "src/components/groups/GroupForm.jsx",
       "name": "handleMembersChange",
       "startLine": 45,
@@ -31180,24 +31216,6 @@
       "file": "src/components/groups/MemberSelector.jsx",
       "name": "removeMember",
       "startLine": 36,
-      "cyclomaticComplexity": 1,
-      "verificationScore": 0,
-      "evidence": "none",
-      "riskScore": 1
-    },
-    {
-      "file": "src/components/profile/InterestPicker.jsx",
-      "name": "removeInterest",
-      "startLine": 45,
-      "cyclomaticComplexity": 1,
-      "verificationScore": 0,
-      "evidence": "none",
-      "riskScore": 1
-    },
-    {
-      "file": "src/components/profile/PrivacySettings.jsx",
-      "name": "PrivacySettings",
-      "startLine": 21,
       "cyclomaticComplexity": 1,
       "verificationScore": 0,
       "evidence": "none",
@@ -31234,24 +31252,6 @@
       "file": "src/lib/supabase/server.js",
       "name": "getAll",
       "startLine": 11,
-      "cyclomaticComplexity": 1,
-      "verificationScore": 0,
-      "evidence": "none",
-      "riskScore": 1
-    },
-    {
-      "file": "supabase/functions/parse-source/index.ts",
-      "name": "htmlToText",
-      "startLine": 116,
-      "cyclomaticComplexity": 1,
-      "verificationScore": 0,
-      "evidence": "none",
-      "riskScore": 1
-    },
-    {
-      "file": "supabase/functions/parse-source/index.ts",
-      "name": "jsonResponse",
-      "startLine": 12,
       "cyclomaticComplexity": 1,
       "verificationScore": 0,
       "evidence": "none",
@@ -31638,26 +31638,6 @@
       "riskScore": 0
     },
     {
-      "file": "src/data/digestRange.js",
-      "name": "isEventInRange",
-      "startLine": 68,
-      "cyclomaticComplexity": 3,
-      "verificationScore": 1,
-      "evidence": "referenced_in_test",
-      "pairedTestPath": "src/data/digestRange.test.js",
-      "riskScore": 0
-    },
-    {
-      "file": "src/data/profileCompleteness.js",
-      "name": "computeCompleteness",
-      "startLine": 51,
-      "cyclomaticComplexity": 3,
-      "verificationScore": 1,
-      "evidence": "referenced_in_test",
-      "pairedTestPath": "src/data/profileCompleteness.test.js",
-      "riskScore": 0
-    },
-    {
       "file": "src/lib/displayName.js",
       "name": "firstNameFromEmail",
       "startLine": 10,
@@ -31675,6 +31655,26 @@
       "verificationScore": 1,
       "evidence": "referenced_in_test",
       "pairedTestPath": "src/lib/displayName.test.js",
+      "riskScore": 0
+    },
+    {
+      "file": "src/data/digestRange.js",
+      "name": "isEventInRange",
+      "startLine": 68,
+      "cyclomaticComplexity": 3,
+      "verificationScore": 1,
+      "evidence": "referenced_in_test",
+      "pairedTestPath": "src/data/digestRange.test.js",
+      "riskScore": 0
+    },
+    {
+      "file": "src/data/profileCompleteness.js",
+      "name": "computeCompleteness",
+      "startLine": 51,
+      "cyclomaticComplexity": 3,
+      "verificationScore": 1,
+      "evidence": "referenced_in_test",
+      "pairedTestPath": "src/data/profileCompleteness.test.js",
       "riskScore": 0
     },
     {
@@ -31708,6 +31708,16 @@
       "riskScore": 0
     },
     {
+      "file": "src/lib/tags.js",
+      "name": "tagsToInput",
+      "startLine": 27,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 1,
+      "evidence": "referenced_in_test",
+      "pairedTestPath": "src/lib/tags.test.js",
+      "riskScore": 0
+    },
+    {
       "file": "src/data/digestRange.js",
       "name": "filterEventsInRange",
       "startLine": 75,
@@ -31735,16 +31745,6 @@
       "verificationScore": 1,
       "evidence": "referenced_in_test",
       "pairedTestPath": "src/data/digestRange.test.js",
-      "riskScore": 0
-    },
-    {
-      "file": "src/lib/tags.js",
-      "name": "tagsToInput",
-      "startLine": 27,
-      "cyclomaticComplexity": 1,
-      "verificationScore": 1,
-      "evidence": "referenced_in_test",
-      "pairedTestPath": "src/lib/tags.test.js",
       "riskScore": 0
     }
   ]

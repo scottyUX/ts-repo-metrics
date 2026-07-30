@@ -1,6 +1,6 @@
 {
   "engine": {
-    "git_sha": "12530fc70b1ae3fbc7a89535a4e8d34ccb8501f9",
+    "git_sha": "01c99a2bb2a73ce22135a605ddac4bdc9d05d444",
     "analyzer_version": "0.2.0"
   },
   "line_tolerance": 2,
@@ -21,7 +21,7 @@
         "sourceLOC": 43656,
         "testLOC": 4583
       },
-      "commit": "12530fc70b1ae3fbc7a89535a4e8d34ccb8501f9",
+      "commit": "01c99a2bb2a73ce22135a605ddac4bdc9d05d444",
       "url": "https://github.com/scottyUX/ts-repo-metrics",
       "path": "/Users/lunawang/Documents/GitHub/ts-repo-metrics",
       "ts_tsx_files": 343,

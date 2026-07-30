@@ -1,0 +1,51 @@
+[
+  {
+    "repo": "alexandria",
+    "commit": "e4d1139f0ff8d39e1d0e759854350109e8199509",
+    "filesSkipped": "none (key absent)",
+    "analysisSkipped": "not fired",
+    "duplication": 1.8
+  },
+  {
+    "repo": "wayfinder",
+    "commit": "a8c860c746c62d389ceb4acf4d21315a8bade572",
+    "filesSkipped": "none (key absent)",
+    "analysisSkipped": "not fired",
+    "duplication": 3.1
+  },
+  {
+    "repo": "SlugSync",
+    "commit": "dff085a999c5bec3253579b8093eb7820f42243f",
+    "filesSkipped": "none (key absent)",
+    "analysisSkipped": "not fired",
+    "duplication": 1.1
+  },
+  {
+    "repo": "Lens",
+    "commit": "d1db5e94b2ddddd94904c3661b25caa623287389",
+    "filesSkipped": "none (key absent)",
+    "analysisSkipped": "not fired",
+    "duplication": 0.3
+  },
+  {
+    "repo": "VeriFi",
+    "commit": "3f55467c45fca19a21a160532cd0879d84216673",
+    "filesSkipped": "none (key absent)",
+    "analysisSkipped": "not fired",
+    "duplication": 0.8
+  },
+  {
+    "repo": "CsLife",
+    "commit": "42227097b4c79473bc0b06565efcf9e715c30358",
+    "filesSkipped": "none (key absent)",
+    "analysisSkipped": "not fired",
+    "duplication": 1.3
+  },
+  {
+    "repo": "ts-repo-metrics (self)",
+    "commit": "01c99a2bb2a73ce22135a605ddac4bdc9d05d444",
+    "filesSkipped": "none (key absent)",
+    "analysisSkipped": "not fired",
+    "duplication": 3.3
+  }
+]

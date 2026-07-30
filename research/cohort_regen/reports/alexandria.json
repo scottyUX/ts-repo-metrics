@@ -8,7 +8,7 @@
   },
   "filesAnalyzed": 114,
   "analyzer_version": "0.2.0",
-  "analysis_timestamp": "2026-07-30T05:50:56.070Z",
+  "analysis_timestamp": "2026-07-30T14:20:20.981Z",
   "distributions": {
     "p50_function_length": 7,
     "p75_function_length": 13,
@@ -8619,158 +8619,6 @@
       "complexity": []
     },
     {
-      "file": "examples/reduce_prompt.py",
-      "functions": 1,
-      "functionsByType": {
-        "function_definition": 1,
-        "lambda": 0
-      },
-      "functionMetrics": [
-        {
-          "name": "main",
-          "type": "function_definition",
-          "startLine": 22,
-          "lines": 5,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 0,
-            "n2": 12,
-            "N1": 0,
-            "N2": 16,
-            "volume": 57.359,
-            "difficulty": 0,
-            "effort": 0
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 123.641,
-          "maintainabilityIndexGradAiNorm": 72.305,
-          "isReactComponent": false,
-          "isMonolithic": false
-        }
-      ],
-      "complexity": [
-        {
-          "name": "main",
-          "type": "function_definition",
-          "startLine": 22,
-          "complexity": 1
-        }
-      ]
-    },
-    {
-      "file": "tests/ai_e2e_test.py",
-      "functions": 1,
-      "functionsByType": {
-        "function_definition": 1,
-        "lambda": 0
-      },
-      "functionMetrics": [
-        {
-          "name": "test_reduce_shortens_a_verbose_prompt",
-          "type": "function_definition",
-          "startLine": 30,
-          "lines": 8,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 0,
-            "n2": 19,
-            "N1": 0,
-            "N2": 26,
-            "volume": 110.446,
-            "difficulty": 0,
-            "effort": 0
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 112.62,
-          "maintainabilityIndexGradAiNorm": 65.86,
-          "isReactComponent": false,
-          "isMonolithic": false
-        }
-      ],
-      "complexity": [
-        {
-          "name": "test_reduce_shortens_a_verbose_prompt",
-          "type": "function_definition",
-          "startLine": 30,
-          "complexity": 1
-        }
-      ]
-    },
-    {
-      "file": "tests/pipeline_e2e_test.py",
-      "functions": 2,
-      "functionsByType": {
-        "function_definition": 2,
-        "lambda": 0
-      },
-      "functionMetrics": [
-        {
-          "name": "test_reduce_removes_an_exact_duplicate_without_calling_the_merger",
-          "type": "function_definition",
-          "startLine": 14,
-          "lines": 12,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 0,
-            "n2": 20,
-            "N1": 0,
-            "N2": 28,
-            "volume": 121.014,
-            "difficulty": 0,
-            "effort": 0
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 105.576,
-          "maintainabilityIndexGradAiNorm": 61.74,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "merge",
-          "type": "function_definition",
-          "startLine": 9,
-          "lines": 3,
-          "maxNestingDepth": 0,
-          "parameterCount": 4,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 1,
-            "n2": 8,
-            "N1": 1,
-            "N2": 15,
-            "volume": 50.719,
-            "difficulty": 0.938,
-            "effort": 47.549
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 132.556,
-          "maintainabilityIndexGradAiNorm": 77.518,
-          "isReactComponent": false,
-          "isMonolithic": false
-        }
-      ],
-      "complexity": [
-        {
-          "name": "test_reduce_removes_an_exact_duplicate_without_calling_the_merger",
-          "type": "function_definition",
-          "startLine": 14,
-          "complexity": 1
-        },
-        {
-          "name": "merge",
-          "type": "function_definition",
-          "startLine": 9,
-          "complexity": 1
-        }
-      ]
-    },
-    {
       "file": "scripts/babilong_8k_keep90_measure.py",
       "functions": 17,
       "functionsByType": {
@@ -14883,116 +14731,89 @@
       ]
     },
     {
-      "file": "benchmarks/longbench_v2/__init__.py",
-      "functions": 0,
+      "file": "examples/reduce_prompt.py",
+      "functions": 1,
       "functionsByType": {
-        "function_definition": 0,
-        "lambda": 0
-      },
-      "functionMetrics": [],
-      "complexity": []
-    },
-    {
-      "file": "benchmarks/longbench_v2/cases.py",
-      "functions": 3,
-      "functionsByType": {
-        "function_definition": 3,
+        "function_definition": 1,
         "lambda": 0
       },
       "functionMetrics": [
         {
-          "name": "verify",
+          "name": "main",
           "type": "function_definition",
-          "startLine": 89,
-          "lines": 6,
+          "startLine": 22,
+          "lines": 5,
           "maxNestingDepth": 0,
-          "parameterCount": 3,
-          "cyclomaticComplexity": 2,
-          "halstead": {
-            "n1": 2,
-            "n2": 22,
-            "N1": 2,
-            "N2": 36,
-            "volume": 174.229,
-            "difficulty": 1.636,
-            "effort": 285.101
-          },
-          "cognitiveComplexity": 1,
-          "maintainabilityIndexGradAiRaw": 114.68,
-          "maintainabilityIndexGradAiNorm": 67.064,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "load_cases",
-          "type": "function_definition",
-          "startLine": 67,
-          "lines": 21,
-          "maxNestingDepth": 1,
-          "parameterCount": 6,
-          "cyclomaticComplexity": 3,
-          "halstead": {
-            "n1": 6,
-            "n2": 32,
-            "N1": 6,
-            "N2": 60,
-            "volume": 346.363,
-            "difficulty": 5.625,
-            "effort": 1948.293
-          },
-          "cognitiveComplexity": 3,
-          "maintainabilityIndexGradAiRaw": 90.582,
-          "maintainabilityIndexGradAiNorm": 52.972,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "to_case",
-          "type": "function_definition",
-          "startLine": 37,
-          "lines": 20,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
+          "parameterCount": 0,
           "cyclomaticComplexity": 1,
           "halstead": {
-            "n1": 1,
-            "n2": 33,
-            "N1": 1,
-            "N2": 58,
-            "volume": 300.16,
-            "difficulty": 0.879,
-            "effort": 263.777
+            "n1": 0,
+            "n2": 12,
+            "N1": 0,
+            "N2": 16,
+            "volume": 57.359,
+            "difficulty": 0,
+            "effort": 0
           },
           "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 92.577,
-          "maintainabilityIndexGradAiNorm": 54.139,
+          "maintainabilityIndexGradAiRaw": 123.641,
+          "maintainabilityIndexGradAiNorm": 72.305,
           "isReactComponent": false,
           "isMonolithic": false
         }
       ],
       "complexity": [
         {
-          "name": "verify",
+          "name": "main",
           "type": "function_definition",
-          "startLine": 89,
-          "complexity": 2
-        },
-        {
-          "name": "load_cases",
-          "type": "function_definition",
-          "startLine": 67,
-          "complexity": 3
-        },
-        {
-          "name": "to_case",
-          "type": "function_definition",
-          "startLine": 37,
+          "startLine": 22,
           "complexity": 1
         }
       ]
     },
     {
-      "file": "benchmarks/longbench_v2/cases_test.py",
+      "file": "tests/ai_e2e_test.py",
+      "functions": 1,
+      "functionsByType": {
+        "function_definition": 1,
+        "lambda": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "test_reduce_shortens_a_verbose_prompt",
+          "type": "function_definition",
+          "startLine": 30,
+          "lines": 8,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 19,
+            "N1": 0,
+            "N2": 26,
+            "volume": 110.446,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 112.62,
+          "maintainabilityIndexGradAiNorm": 65.86,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "test_reduce_shortens_a_verbose_prompt",
+          "type": "function_definition",
+          "startLine": 30,
+          "complexity": 1
+        }
+      ]
+    },
+    {
+      "file": "tests/pipeline_e2e_test.py",
       "functions": 2,
       "functionsByType": {
         "function_definition": 2,
@@ -15000,63 +14821,63 @@
       },
       "functionMetrics": [
         {
-          "name": "test_loads_official_shape_and_reproduces_prompt",
+          "name": "test_reduce_removes_an_exact_duplicate_without_calling_the_merger",
           "type": "function_definition",
-          "startLine": 29,
-          "lines": 9,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 0,
-            "n2": 26,
-            "N1": 0,
-            "N2": 47,
-            "volume": 220.921,
-            "difficulty": 0,
-            "effort": 0
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 107.106,
-          "maintainabilityIndexGradAiNorm": 62.635,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "_row",
-          "type": "function_definition",
-          "startLine": 12,
-          "lines": 15,
+          "startLine": 14,
+          "lines": 12,
           "maxNestingDepth": 0,
           "parameterCount": 0,
           "cyclomaticComplexity": 1,
           "halstead": {
-            "n1": 1,
-            "n2": 4,
-            "N1": 1,
+            "n1": 0,
+            "n2": 20,
+            "N1": 0,
             "N2": 28,
-            "volume": 67.336,
-            "difficulty": 3.5,
-            "effort": 235.676
+            "volume": 121.014,
+            "difficulty": 0,
+            "effort": 0
           },
           "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 105.009,
-          "maintainabilityIndexGradAiNorm": 61.409,
+          "maintainabilityIndexGradAiRaw": 105.576,
+          "maintainabilityIndexGradAiNorm": 61.74,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "merge",
+          "type": "function_definition",
+          "startLine": 9,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 4,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 8,
+            "N1": 1,
+            "N2": 15,
+            "volume": 50.719,
+            "difficulty": 0.938,
+            "effort": 47.549
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 132.556,
+          "maintainabilityIndexGradAiNorm": 77.518,
           "isReactComponent": false,
           "isMonolithic": false
         }
       ],
       "complexity": [
         {
-          "name": "test_loads_official_shape_and_reproduces_prompt",
+          "name": "test_reduce_removes_an_exact_duplicate_without_calling_the_merger",
           "type": "function_definition",
-          "startLine": 29,
+          "startLine": 14,
           "complexity": 1
         },
         {
-          "name": "_row",
+          "name": "merge",
           "type": "function_definition",
-          "startLine": 12,
+          "startLine": 9,
           "complexity": 1
         }
       ]
@@ -19017,6 +18838,185 @@
           "name": "_record",
           "type": "function_definition",
           "startLine": 17,
+          "complexity": 1
+        }
+      ]
+    },
+    {
+      "file": "benchmarks/longbench_v2/__init__.py",
+      "functions": 0,
+      "functionsByType": {
+        "function_definition": 0,
+        "lambda": 0
+      },
+      "functionMetrics": [],
+      "complexity": []
+    },
+    {
+      "file": "benchmarks/longbench_v2/cases.py",
+      "functions": 3,
+      "functionsByType": {
+        "function_definition": 3,
+        "lambda": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "verify",
+          "type": "function_definition",
+          "startLine": 89,
+          "lines": 6,
+          "maxNestingDepth": 0,
+          "parameterCount": 3,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 2,
+            "n2": 22,
+            "N1": 2,
+            "N2": 36,
+            "volume": 174.229,
+            "difficulty": 1.636,
+            "effort": 285.101
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 114.68,
+          "maintainabilityIndexGradAiNorm": 67.064,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "load_cases",
+          "type": "function_definition",
+          "startLine": 67,
+          "lines": 21,
+          "maxNestingDepth": 1,
+          "parameterCount": 6,
+          "cyclomaticComplexity": 3,
+          "halstead": {
+            "n1": 6,
+            "n2": 32,
+            "N1": 6,
+            "N2": 60,
+            "volume": 346.363,
+            "difficulty": 5.625,
+            "effort": 1948.293
+          },
+          "cognitiveComplexity": 3,
+          "maintainabilityIndexGradAiRaw": 90.582,
+          "maintainabilityIndexGradAiNorm": 52.972,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "to_case",
+          "type": "function_definition",
+          "startLine": 37,
+          "lines": 20,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 33,
+            "N1": 1,
+            "N2": 58,
+            "volume": 300.16,
+            "difficulty": 0.879,
+            "effort": 263.777
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 92.577,
+          "maintainabilityIndexGradAiNorm": 54.139,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "verify",
+          "type": "function_definition",
+          "startLine": 89,
+          "complexity": 2
+        },
+        {
+          "name": "load_cases",
+          "type": "function_definition",
+          "startLine": 67,
+          "complexity": 3
+        },
+        {
+          "name": "to_case",
+          "type": "function_definition",
+          "startLine": 37,
+          "complexity": 1
+        }
+      ]
+    },
+    {
+      "file": "benchmarks/longbench_v2/cases_test.py",
+      "functions": 2,
+      "functionsByType": {
+        "function_definition": 2,
+        "lambda": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "test_loads_official_shape_and_reproduces_prompt",
+          "type": "function_definition",
+          "startLine": 29,
+          "lines": 9,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 26,
+            "N1": 0,
+            "N2": 47,
+            "volume": 220.921,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 107.106,
+          "maintainabilityIndexGradAiNorm": 62.635,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "_row",
+          "type": "function_definition",
+          "startLine": 12,
+          "lines": 15,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 4,
+            "N1": 1,
+            "N2": 28,
+            "volume": 67.336,
+            "difficulty": 3.5,
+            "effort": 235.676
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 105.009,
+          "maintainabilityIndexGradAiNorm": 61.409,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "test_loads_official_shape_and_reproduces_prompt",
+          "type": "function_definition",
+          "startLine": 29,
+          "complexity": 1
+        },
+        {
+          "name": "_row",
+          "type": "function_definition",
+          "startLine": 12,
           "complexity": 1
         }
       ]
@@ -24948,6 +24948,2664 @@
       ]
     },
     {
+      "file": "src/alexandria/ops/__init__.py",
+      "functions": 0,
+      "functionsByType": {
+        "function_definition": 0,
+        "lambda": 0
+      },
+      "functionMetrics": [],
+      "complexity": []
+    },
+    {
+      "file": "src/alexandria/ops/pipe.py",
+      "functions": 10,
+      "functionsByType": {
+        "function_definition": 10,
+        "lambda": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "_required_scorers",
+          "type": "function_definition",
+          "startLine": 191,
+          "lines": 2,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 9,
+            "N1": 1,
+            "N2": 15,
+            "volume": 53.151,
+            "difficulty": 0.833,
+            "effort": 44.292
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 138.881,
+          "maintainabilityIndexGradAiNorm": 81.217,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "score_report",
+          "type": "function_definition",
+          "startLine": 178,
+          "lines": 11,
+          "maxNestingDepth": 0,
+          "parameterCount": 3,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 2,
+            "n2": 19,
+            "N1": 2,
+            "N2": 32,
+            "volume": 149.339,
+            "difficulty": 1.684,
+            "effort": 251.518
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 105.662,
+          "maintainabilityIndexGradAiNorm": 61.791,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "propose",
+          "type": "function_definition",
+          "startLine": 155,
+          "lines": 21,
+          "maxNestingDepth": 0,
+          "parameterCount": 6,
+          "cyclomaticComplexity": 4,
+          "halstead": {
+            "n1": 2,
+            "n2": 28,
+            "N1": 4,
+            "N2": 67,
+            "volume": 348.389,
+            "difficulty": 2.393,
+            "effort": 833.646
+          },
+          "cognitiveComplexity": 3,
+          "maintainabilityIndexGradAiRaw": 90.321,
+          "maintainabilityIndexGradAiNorm": 52.819,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "_finalize_metrics",
+          "type": "function_definition",
+          "startLine": 144,
+          "lines": 9,
+          "maxNestingDepth": 0,
+          "parameterCount": 3,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 14,
+            "N1": 1,
+            "N2": 22,
+            "volume": 89.858,
+            "difficulty": 0.786,
+            "effort": 70.603
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 111.784,
+          "maintainabilityIndexGradAiNorm": 65.371,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "_target_merge_metrics",
+          "type": "function_definition",
+          "startLine": 131,
+          "lines": 11,
+          "maxNestingDepth": 0,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 19,
+            "N1": 1,
+            "N2": 34,
+            "volume": 151.267,
+            "difficulty": 0.895,
+            "effort": 135.345
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 105.825,
+          "maintainabilityIndexGradAiNorm": 61.886,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "_retry_exhaustively",
+          "type": "function_definition",
+          "startLine": 113,
+          "lines": 16,
+          "maxNestingDepth": 0,
+          "parameterCount": 8,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 30,
+            "N1": 1,
+            "N2": 52,
+            "volume": 262.572,
+            "difficulty": 0.867,
+            "effort": 227.563
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 96.887,
+          "maintainabilityIndexGradAiNorm": 56.659,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "reduce",
+          "type": "function_definition",
+          "startLine": 64,
+          "lines": 47,
+          "maxNestingDepth": 2,
+          "parameterCount": 8,
+          "cyclomaticComplexity": 7,
+          "halstead": {
+            "n1": 8,
+            "n2": 59,
+            "N1": 13,
+            "N2": 160,
+            "volume": 1049.433,
+            "difficulty": 10.847,
+            "effort": 11383.685
+          },
+          "cognitiveComplexity": 12,
+          "maintainabilityIndexGradAiRaw": 70.846,
+          "maintainabilityIndexGradAiNorm": 41.43,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "reduced_tokens",
+          "type": "function_definition",
+          "startLine": 52,
+          "lines": 2,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 5,
+            "N1": 1,
+            "N2": 6,
+            "volume": 18.095,
+            "difficulty": 0.6,
+            "effort": 10.857
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 144.484,
+          "maintainabilityIndexGradAiNorm": 84.494,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "source_tokens",
+          "type": "function_definition",
+          "startLine": 48,
+          "lines": 2,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 5,
+            "N1": 1,
+            "N2": 6,
+            "volume": 18.095,
+            "difficulty": 0.6,
+            "effort": 10.857
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 144.484,
+          "maintainabilityIndexGradAiNorm": 84.494,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "text",
+          "type": "function_definition",
+          "startLine": 44,
+          "lines": 2,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 4,
+            "N1": 1,
+            "N2": 6,
+            "volume": 16.253,
+            "difficulty": 0.75,
+            "effort": 12.19
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 145.042,
+          "maintainabilityIndexGradAiNorm": 84.82,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "_required_scorers",
+          "type": "function_definition",
+          "startLine": 191,
+          "complexity": 1
+        },
+        {
+          "name": "score_report",
+          "type": "function_definition",
+          "startLine": 178,
+          "complexity": 2
+        },
+        {
+          "name": "propose",
+          "type": "function_definition",
+          "startLine": 155,
+          "complexity": 4
+        },
+        {
+          "name": "_finalize_metrics",
+          "type": "function_definition",
+          "startLine": 144,
+          "complexity": 1
+        },
+        {
+          "name": "_target_merge_metrics",
+          "type": "function_definition",
+          "startLine": 131,
+          "complexity": 1
+        },
+        {
+          "name": "_retry_exhaustively",
+          "type": "function_definition",
+          "startLine": 113,
+          "complexity": 1
+        },
+        {
+          "name": "reduce",
+          "type": "function_definition",
+          "startLine": 64,
+          "complexity": 7
+        },
+        {
+          "name": "reduced_tokens",
+          "type": "function_definition",
+          "startLine": 52,
+          "complexity": 1
+        },
+        {
+          "name": "source_tokens",
+          "type": "function_definition",
+          "startLine": 48,
+          "complexity": 1
+        },
+        {
+          "name": "text",
+          "type": "function_definition",
+          "startLine": 44,
+          "complexity": 1
+        }
+      ]
+    },
+    {
+      "file": "src/alexandria/ops/pipe_test.py",
+      "functions": 12,
+      "functionsByType": {
+        "function_definition": 12,
+        "lambda": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "test_propose_returns_the_document_and_one_diff_per_candidate",
+          "type": "function_definition",
+          "startLine": 114,
+          "lines": 12,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 21,
+            "N1": 0,
+            "N2": 32,
+            "volume": 140.554,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 104.797,
+          "maintainabilityIndexGradAiNorm": 61.285,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "test_reduce_stamps_embedding_and_wall_clock_metrics",
+          "type": "function_definition",
+          "startLine": 100,
+          "lines": 12,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 17,
+            "N1": 0,
+            "N2": 24,
+            "volume": 98.099,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 106.667,
+          "maintainabilityIndexGradAiNorm": 62.378,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "test_reduce_records_merge_calls_and_retries",
+          "type": "function_definition",
+          "startLine": 85,
+          "lines": 13,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 18,
+            "N1": 0,
+            "N2": 31,
+            "volume": 129.268,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 103.936,
+          "maintainabilityIndexGradAiNorm": 60.781,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "test_score_report_single_sentence_has_no_peer",
+          "type": "function_definition",
+          "startLine": 79,
+          "lines": 4,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 7,
+            "N1": 0,
+            "N2": 14,
+            "volume": 39.303,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 129.221,
+          "maintainabilityIndexGradAiNorm": 75.568,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "test_score_report_adds_the_redundant_peer",
+          "type": "function_definition",
+          "startLine": 70,
+          "lines": 7,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 11,
+            "N1": 0,
+            "N2": 25,
+            "volume": 86.486,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 116.054,
+          "maintainabilityIndexGradAiNorm": 67.868,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "test_default_reduce_and_propose_skip_the_unused_score_phase",
+          "type": "function_definition",
+          "startLine": 46,
+          "lines": 22,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 23,
+            "N1": 0,
+            "N2": 36,
+            "volume": 162.848,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 94.212,
+          "maintainabilityIndexGradAiNorm": 55.095,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "unexpected_score",
+          "type": "function_definition",
+          "startLine": 47,
+          "lines": 2,
+          "maxNestingDepth": 0,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 7,
+            "N1": 1,
+            "N2": 8,
+            "volume": 27,
+            "difficulty": 0.571,
+            "effort": 15.429
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 142.403,
+          "maintainabilityIndexGradAiNorm": 83.277,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "test_default_whole_prompt_cos_sim_diff_budget_is_fifty_percent",
+          "type": "function_definition",
+          "startLine": 42,
+          "lines": 2,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 5,
+            "N1": 0,
+            "N2": 5,
+            "volume": 11.61,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 146.791,
+          "maintainabilityIndexGradAiNorm": 85.843,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "embed",
+          "type": "function_definition",
+          "startLine": 38,
+          "lines": 2,
+          "maxNestingDepth": 0,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 13,
+            "N1": 1,
+            "N2": 25,
+            "volume": 98.991,
+            "difficulty": 0.962,
+            "effort": 95.184
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 135.647,
+          "maintainabilityIndexGradAiNorm": 79.326,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "model_id",
+          "type": "function_definition",
+          "startLine": 35,
+          "lines": 2,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 4,
+            "N1": 1,
+            "N2": 4,
+            "volume": 11.61,
+            "difficulty": 0.5,
+            "effort": 5.805
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 146.791,
+          "maintainabilityIndexGradAiNorm": 85.843,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "merge",
+          "type": "function_definition",
+          "startLine": 26,
+          "lines": 5,
+          "maxNestingDepth": 1,
+          "parameterCount": 4,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 2,
+            "n2": 9,
+            "N1": 3,
+            "N2": 17,
+            "volume": 69.189,
+            "difficulty": 1.889,
+            "effort": 130.69
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 122.436,
+          "maintainabilityIndexGradAiNorm": 71.6,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "merge",
+          "type": "function_definition",
+          "startLine": 20,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 4,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 8,
+            "N1": 1,
+            "N2": 15,
+            "volume": 50.719,
+            "difficulty": 0.938,
+            "effort": 47.549
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 132.556,
+          "maintainabilityIndexGradAiNorm": 77.518,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "test_propose_returns_the_document_and_one_diff_per_candidate",
+          "type": "function_definition",
+          "startLine": 114,
+          "complexity": 1
+        },
+        {
+          "name": "test_reduce_stamps_embedding_and_wall_clock_metrics",
+          "type": "function_definition",
+          "startLine": 100,
+          "complexity": 1
+        },
+        {
+          "name": "test_reduce_records_merge_calls_and_retries",
+          "type": "function_definition",
+          "startLine": 85,
+          "complexity": 1
+        },
+        {
+          "name": "test_score_report_single_sentence_has_no_peer",
+          "type": "function_definition",
+          "startLine": 79,
+          "complexity": 1
+        },
+        {
+          "name": "test_score_report_adds_the_redundant_peer",
+          "type": "function_definition",
+          "startLine": 70,
+          "complexity": 1
+        },
+        {
+          "name": "test_default_reduce_and_propose_skip_the_unused_score_phase",
+          "type": "function_definition",
+          "startLine": 46,
+          "complexity": 1
+        },
+        {
+          "name": "unexpected_score",
+          "type": "function_definition",
+          "startLine": 47,
+          "complexity": 1
+        },
+        {
+          "name": "test_default_whole_prompt_cos_sim_diff_budget_is_fifty_percent",
+          "type": "function_definition",
+          "startLine": 42,
+          "complexity": 1
+        },
+        {
+          "name": "embed",
+          "type": "function_definition",
+          "startLine": 38,
+          "complexity": 1
+        },
+        {
+          "name": "model_id",
+          "type": "function_definition",
+          "startLine": 35,
+          "complexity": 1
+        },
+        {
+          "name": "merge",
+          "type": "function_definition",
+          "startLine": 26,
+          "complexity": 2
+        },
+        {
+          "name": "merge",
+          "type": "function_definition",
+          "startLine": 20,
+          "complexity": 1
+        }
+      ]
+    },
+    {
+      "file": "src/alexandria/ops/report.py",
+      "functions": 7,
+      "functionsByType": {
+        "function_definition": 7,
+        "lambda": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "_append_max_regression",
+          "type": "function_definition",
+          "startLine": 215,
+          "lines": 13,
+          "maxNestingDepth": 1,
+          "parameterCount": 5,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 1,
+            "n2": 14,
+            "N1": 1,
+            "N2": 29,
+            "volume": 117.207,
+            "difficulty": 1.036,
+            "effort": 121.393
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 104.215,
+          "maintainabilityIndexGradAiNorm": 60.944,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "_append_min_regression",
+          "type": "function_definition",
+          "startLine": 200,
+          "lines": 13,
+          "maxNestingDepth": 1,
+          "parameterCount": 5,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 1,
+            "n2": 14,
+            "N1": 1,
+            "N2": 29,
+            "volume": 117.207,
+            "difficulty": 1.036,
+            "effort": 121.393
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 104.215,
+          "maintainabilityIndexGradAiNorm": 60.944,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "_merger_identity",
+          "type": "function_definition",
+          "startLine": 191,
+          "lines": 7,
+          "maxNestingDepth": 1,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 2,
+            "n2": 14,
+            "N1": 3,
+            "N2": 25,
+            "volume": 112,
+            "difficulty": 1.786,
+            "effort": 200
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 114.48,
+          "maintainabilityIndexGradAiNorm": 66.947,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "_round_score",
+          "type": "function_definition",
+          "startLine": 187,
+          "lines": 2,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 5,
+            "N1": 1,
+            "N2": 7,
+            "volume": 20.68,
+            "difficulty": 0.7,
+            "effort": 14.476
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 143.789,
+          "maintainabilityIndexGradAiNorm": 84.087,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "_instruction_quality",
+          "type": "function_definition",
+          "startLine": 176,
+          "lines": 9,
+          "maxNestingDepth": 0,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 2,
+            "n2": 32,
+            "N1": 2,
+            "N2": 70,
+            "volume": 366.297,
+            "difficulty": 2.188,
+            "effort": 801.275
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 104.247,
+          "maintainabilityIndexGradAiNorm": 60.963,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "compare_reports",
+          "type": "function_definition",
+          "startLine": 134,
+          "lines": 40,
+          "maxNestingDepth": 1,
+          "parameterCount": 4,
+          "cyclomaticComplexity": 5,
+          "halstead": {
+            "n1": 3,
+            "n2": 27,
+            "N1": 9,
+            "N2": 75,
+            "volume": 412.179,
+            "difficulty": 4.167,
+            "effort": 1717.412
+          },
+          "cognitiveComplexity": 8,
+          "maintainabilityIndexGradAiRaw": 78.779,
+          "maintainabilityIndexGradAiNorm": 46.07,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "optimization_report",
+          "type": "function_definition",
+          "startLine": 84,
+          "lines": 48,
+          "maxNestingDepth": 0,
+          "parameterCount": 7,
+          "cyclomaticComplexity": 4,
+          "halstead": {
+            "n1": 3,
+            "n2": 53,
+            "N1": 5,
+            "N2": 125,
+            "volume": 754.956,
+            "difficulty": 3.538,
+            "effort": 2670.835
+          },
+          "cognitiveComplexity": 3,
+          "maintainabilityIndexGradAiRaw": 72.908,
+          "maintainabilityIndexGradAiNorm": 42.636,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "_append_max_regression",
+          "type": "function_definition",
+          "startLine": 215,
+          "complexity": 2
+        },
+        {
+          "name": "_append_min_regression",
+          "type": "function_definition",
+          "startLine": 200,
+          "complexity": 2
+        },
+        {
+          "name": "_merger_identity",
+          "type": "function_definition",
+          "startLine": 191,
+          "complexity": 2
+        },
+        {
+          "name": "_round_score",
+          "type": "function_definition",
+          "startLine": 187,
+          "complexity": 1
+        },
+        {
+          "name": "_instruction_quality",
+          "type": "function_definition",
+          "startLine": 176,
+          "complexity": 2
+        },
+        {
+          "name": "compare_reports",
+          "type": "function_definition",
+          "startLine": 134,
+          "complexity": 5
+        },
+        {
+          "name": "optimization_report",
+          "type": "function_definition",
+          "startLine": 84,
+          "complexity": 4
+        }
+      ]
+    },
+    {
+      "file": "src/alexandria/ops/report_test.py",
+      "functions": 7,
+      "functionsByType": {
+        "function_definition": 7,
+        "lambda": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "test_compare_reports_flags_token_and_quality_regressions",
+          "type": "function_definition",
+          "startLine": 78,
+          "lines": 23,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 25,
+            "N1": 0,
+            "N2": 48,
+            "volume": 222.905,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 91.86,
+          "maintainabilityIndexGradAiNorm": 53.719,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "test_report_schema_v3_rejects_a_v2_baseline",
+          "type": "function_definition",
+          "startLine": 64,
+          "lines": 12,
+          "maxNestingDepth": 1,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 20,
+            "N1": 1,
+            "N2": 25,
+            "volume": 114.2,
+            "difficulty": 0.625,
+            "effort": 71.375
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 105.877,
+          "maintainabilityIndexGradAiNorm": 61.916,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "test_report_comparison_rejects_a_different_merger_identity",
+          "type": "function_definition",
+          "startLine": 55,
+          "lines": 7,
+          "maxNestingDepth": 1,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 19,
+            "N1": 1,
+            "N2": 30,
+            "volume": 133.98,
+            "difficulty": 0.789,
+            "effort": 105.774
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 113.778,
+          "maintainabilityIndexGradAiNorm": 66.537,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "test_report_config_captures_target_settings",
+          "type": "function_definition",
+          "startLine": 43,
+          "lines": 10,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 14,
+            "N1": 0,
+            "N2": 21,
+            "volume": 79.954,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 110.685,
+          "maintainabilityIndexGradAiNorm": 64.728,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "test_optimization_report_includes_compression_and_quality_metrics",
+          "type": "function_definition",
+          "startLine": 27,
+          "lines": 14,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 23,
+            "N1": 0,
+            "N2": 42,
+            "volume": 189.99,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 100.733,
+          "maintainabilityIndexGradAiNorm": 58.908,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "merge_candidates_to_target",
+          "type": "function_definition",
+          "startLine": 18,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 3,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 7,
+            "N1": 1,
+            "N2": 10,
+            "volume": 33,
+            "difficulty": 0.714,
+            "effort": 23.571
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 134.791,
+          "maintainabilityIndexGradAiNorm": 78.825,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "merge",
+          "type": "function_definition",
+          "startLine": 14,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 4,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 8,
+            "N1": 1,
+            "N2": 15,
+            "volume": 50.719,
+            "difficulty": 0.938,
+            "effort": 47.549
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 132.556,
+          "maintainabilityIndexGradAiNorm": 77.518,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "test_compare_reports_flags_token_and_quality_regressions",
+          "type": "function_definition",
+          "startLine": 78,
+          "complexity": 1
+        },
+        {
+          "name": "test_report_schema_v3_rejects_a_v2_baseline",
+          "type": "function_definition",
+          "startLine": 64,
+          "complexity": 1
+        },
+        {
+          "name": "test_report_comparison_rejects_a_different_merger_identity",
+          "type": "function_definition",
+          "startLine": 55,
+          "complexity": 1
+        },
+        {
+          "name": "test_report_config_captures_target_settings",
+          "type": "function_definition",
+          "startLine": 43,
+          "complexity": 1
+        },
+        {
+          "name": "test_optimization_report_includes_compression_and_quality_metrics",
+          "type": "function_definition",
+          "startLine": 27,
+          "complexity": 1
+        },
+        {
+          "name": "merge_candidates_to_target",
+          "type": "function_definition",
+          "startLine": 18,
+          "complexity": 1
+        },
+        {
+          "name": "merge",
+          "type": "function_definition",
+          "startLine": 14,
+          "complexity": 1
+        }
+      ]
+    },
+    {
+      "file": "src/alexandria/utils/__init__.py",
+      "functions": 0,
+      "functionsByType": {
+        "function_definition": 0,
+        "lambda": 0
+      },
+      "functionMetrics": [],
+      "complexity": []
+    },
+    {
+      "file": "src/alexandria/utils/config.py",
+      "functions": 5,
+      "functionsByType": {
+        "function_definition": 5,
+        "lambda": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "require_api_key",
+          "type": "function_definition",
+          "startLine": 51,
+          "lines": 6,
+          "maxNestingDepth": 1,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 3,
+            "n2": 9,
+            "N1": 3,
+            "N2": 15,
+            "volume": 64.529,
+            "difficulty": 2.5,
+            "effort": 161.323
+          },
+          "cognitiveComplexity": 2,
+          "maintainabilityIndexGradAiRaw": 119.844,
+          "maintainabilityIndexGradAiNorm": 70.084,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "resolve_api_key",
+          "type": "function_definition",
+          "startLine": 46,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 10,
+            "N1": 3,
+            "N2": 14,
+            "volume": 60.944,
+            "difficulty": 1.4,
+            "effort": 85.322
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 131.601,
+          "maintainabilityIndexGradAiNorm": 76.96,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "write_config_key",
+          "type": "function_definition",
+          "startLine": 33,
+          "lines": 11,
+          "maxNestingDepth": 1,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 5,
+            "n2": 29,
+            "N1": 5,
+            "N2": 53,
+            "volume": 295.073,
+            "difficulty": 4.569,
+            "effort": 1348.178
+          },
+          "cognitiveComplexity": 2,
+          "maintainabilityIndexGradAiRaw": 102.121,
+          "maintainabilityIndexGradAiNorm": 59.72,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "read_config_key",
+          "type": "function_definition",
+          "startLine": 24,
+          "lines": 7,
+          "maxNestingDepth": 1,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 3,
+          "halstead": {
+            "n1": 4,
+            "n2": 14,
+            "N1": 5,
+            "N2": 22,
+            "volume": 112.588,
+            "difficulty": 3.143,
+            "effort": 353.848
+          },
+          "cognitiveComplexity": 2,
+          "maintainabilityIndexGradAiRaw": 114.223,
+          "maintainabilityIndexGradAiNorm": 66.797,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "config_path",
+          "type": "function_definition",
+          "startLine": 17,
+          "lines": 5,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 2,
+            "n2": 9,
+            "N1": 2,
+            "N2": 18,
+            "volume": 69.189,
+            "difficulty": 2,
+            "effort": 138.377
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 122.436,
+          "maintainabilityIndexGradAiNorm": 71.6,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "require_api_key",
+          "type": "function_definition",
+          "startLine": 51,
+          "complexity": 2
+        },
+        {
+          "name": "resolve_api_key",
+          "type": "function_definition",
+          "startLine": 46,
+          "complexity": 1
+        },
+        {
+          "name": "write_config_key",
+          "type": "function_definition",
+          "startLine": 33,
+          "complexity": 2
+        },
+        {
+          "name": "read_config_key",
+          "type": "function_definition",
+          "startLine": 24,
+          "complexity": 3
+        },
+        {
+          "name": "config_path",
+          "type": "function_definition",
+          "startLine": 17,
+          "complexity": 2
+        }
+      ]
+    },
+    {
+      "file": "src/alexandria/utils/config_test.py",
+      "functions": 7,
+      "functionsByType": {
+        "function_definition": 7,
+        "lambda": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "test_write_rejects_keys_that_would_break_the_toml",
+          "type": "function_definition",
+          "startLine": 74,
+          "lines": 3,
+          "maxNestingDepth": 1,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 8,
+            "N1": 1,
+            "N2": 9,
+            "volume": 31.699,
+            "difficulty": 0.563,
+            "effort": 17.831
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 135,
+          "maintainabilityIndexGradAiNorm": 78.947,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "test_write_tightens_a_pre_existing_world_readable_file",
+          "type": "function_definition",
+          "startLine": 61,
+          "lines": 10,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 18,
+            "N1": 0,
+            "N2": 28,
+            "volume": 116.758,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 108.716,
+          "maintainabilityIndexGradAiNorm": 63.577,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "test_require_api_key_returns_the_resolved_key",
+          "type": "function_definition",
+          "startLine": 55,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 5,
+            "N1": 0,
+            "N2": 6,
+            "volume": 13.932,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 139.275,
+          "maintainabilityIndexGradAiNorm": 81.447,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "test_require_api_key_raises_the_setup_message_when_unset",
+          "type": "function_definition",
+          "startLine": 48,
+          "lines": 4,
+          "maxNestingDepth": 1,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 9,
+            "N1": 1,
+            "N2": 10,
+            "volume": 36.541,
+            "difficulty": 0.556,
+            "effort": 20.301
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 129.6,
+          "maintainabilityIndexGradAiNorm": 75.789,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "test_resolution_order_is_explicit_then_env_then_file",
+          "type": "function_definition",
+          "startLine": 38,
+          "lines": 7,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 9,
+            "N1": 0,
+            "N2": 18,
+            "volume": 57.059,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 118.217,
+          "maintainabilityIndexGradAiNorm": 69.133,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "test_write_then_resolve_round_trips",
+          "type": "function_definition",
+          "startLine": 28,
+          "lines": 7,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 12,
+            "N1": 0,
+            "N2": 18,
+            "volume": 64.529,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 117.577,
+          "maintainabilityIndexGradAiNorm": 68.758,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "isolated_config",
+          "type": "function_definition",
+          "startLine": 21,
+          "lines": 4,
+          "maxNestingDepth": 0,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 12,
+            "N1": 1,
+            "N2": 18,
+            "volume": 70.308,
+            "difficulty": 0.75,
+            "effort": 52.731
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 126.197,
+          "maintainabilityIndexGradAiNorm": 73.799,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "test_write_rejects_keys_that_would_break_the_toml",
+          "type": "function_definition",
+          "startLine": 74,
+          "complexity": 1
+        },
+        {
+          "name": "test_write_tightens_a_pre_existing_world_readable_file",
+          "type": "function_definition",
+          "startLine": 61,
+          "complexity": 1
+        },
+        {
+          "name": "test_require_api_key_returns_the_resolved_key",
+          "type": "function_definition",
+          "startLine": 55,
+          "complexity": 1
+        },
+        {
+          "name": "test_require_api_key_raises_the_setup_message_when_unset",
+          "type": "function_definition",
+          "startLine": 48,
+          "complexity": 1
+        },
+        {
+          "name": "test_resolution_order_is_explicit_then_env_then_file",
+          "type": "function_definition",
+          "startLine": 38,
+          "complexity": 1
+        },
+        {
+          "name": "test_write_then_resolve_round_trips",
+          "type": "function_definition",
+          "startLine": 28,
+          "complexity": 1
+        },
+        {
+          "name": "isolated_config",
+          "type": "function_definition",
+          "startLine": 21,
+          "complexity": 1
+        }
+      ]
+    },
+    {
+      "file": "src/alexandria/utils/embedders.py",
+      "functions": 11,
+      "functionsByType": {
+        "function_definition": 11,
+        "lambda": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "default_embedder",
+          "type": "function_definition",
+          "startLine": 120,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 7,
+            "N1": 1,
+            "N2": 9,
+            "volume": 30,
+            "difficulty": 0.643,
+            "effort": 19.286
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 135.286,
+          "maintainabilityIndexGradAiNorm": 79.115,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "embed",
+          "type": "function_definition",
+          "startLine": 94,
+          "lines": 23,
+          "maxNestingDepth": 2,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 4,
+          "halstead": {
+            "n1": 5,
+            "n2": 45,
+            "N1": 6,
+            "N2": 86,
+            "volume": 519.235,
+            "difficulty": 4.778,
+            "effort": 2480.788
+          },
+          "cognitiveComplexity": 7,
+          "maintainabilityIndexGradAiRaw": 86.773,
+          "maintainabilityIndexGradAiNorm": 50.744,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "model_id",
+          "type": "function_definition",
+          "startLine": 91,
+          "lines": 2,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 4,
+            "N1": 1,
+            "N2": 4,
+            "volume": 11.61,
+            "difficulty": 0.5,
+            "effort": 5.805
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 146.791,
+          "maintainabilityIndexGradAiNorm": 85.843,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "__init__",
+          "type": "function_definition",
+          "startLine": 85,
+          "lines": 4,
+          "maxNestingDepth": 0,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 9,
+            "N1": 0,
+            "N2": 15,
+            "volume": 47.549,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 128.231,
+          "maintainabilityIndexGradAiNorm": 74.989,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "_one",
+          "type": "function_definition",
+          "startLine": 78,
+          "lines": 4,
+          "maxNestingDepth": 0,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 23,
+            "N1": 1,
+            "N2": 31,
+            "volume": 146.719,
+            "difficulty": 0.674,
+            "effort": 98.876
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 122.372,
+          "maintainabilityIndexGradAiNorm": 71.563,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "embed",
+          "type": "function_definition",
+          "startLine": 75,
+          "lines": 2,
+          "maxNestingDepth": 0,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 10,
+            "N1": 1,
+            "N2": 14,
+            "volume": 51.891,
+            "difficulty": 0.7,
+            "effort": 36.324
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 139.005,
+          "maintainabilityIndexGradAiNorm": 81.289,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "model_id",
+          "type": "function_definition",
+          "startLine": 72,
+          "lines": 2,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 5,
+            "N1": 1,
+            "N2": 6,
+            "volume": 18.095,
+            "difficulty": 0.6,
+            "effort": 10.857
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 144.484,
+          "maintainabilityIndexGradAiNorm": 84.494,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "__init__",
+          "type": "function_definition",
+          "startLine": 68,
+          "lines": 2,
+          "maxNestingDepth": 0,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 7,
+            "N1": 0,
+            "N2": 9,
+            "volume": 25.266,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 142.748,
+          "maintainabilityIndexGradAiNorm": 83.478,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "_pool",
+          "type": "function_definition",
+          "startLine": 58,
+          "lines": 6,
+          "maxNestingDepth": 1,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 2,
+            "n2": 18,
+            "N1": 3,
+            "N2": 41,
+            "volume": 190.165,
+            "difficulty": 2.278,
+            "effort": 433.153
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 114.224,
+          "maintainabilityIndexGradAiNorm": 66.798,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "_request_batches",
+          "type": "function_definition",
+          "startLine": 38,
+          "lines": 18,
+          "maxNestingDepth": 2,
+          "parameterCount": 3,
+          "cyclomaticComplexity": 4,
+          "halstead": {
+            "n1": 5,
+            "n2": 18,
+            "N1": 6,
+            "N2": 61,
+            "volume": 303.079,
+            "difficulty": 8.472,
+            "effort": 2567.75
+          },
+          "cognitiveComplexity": 4,
+          "maintainabilityIndexGradAiRaw": 93.543,
+          "maintainabilityIndexGradAiNorm": 54.704,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "_token_chunks",
+          "type": "function_definition",
+          "startLine": 28,
+          "lines": 8,
+          "maxNestingDepth": 1,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 2,
+            "n2": 18,
+            "N1": 3,
+            "N2": 36,
+            "volume": 168.555,
+            "difficulty": 2,
+            "effort": 337.11
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 110.191,
+          "maintainabilityIndexGradAiNorm": 64.439,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "default_embedder",
+          "type": "function_definition",
+          "startLine": 120,
+          "complexity": 1
+        },
+        {
+          "name": "embed",
+          "type": "function_definition",
+          "startLine": 94,
+          "complexity": 4
+        },
+        {
+          "name": "model_id",
+          "type": "function_definition",
+          "startLine": 91,
+          "complexity": 1
+        },
+        {
+          "name": "__init__",
+          "type": "function_definition",
+          "startLine": 85,
+          "complexity": 1
+        },
+        {
+          "name": "_one",
+          "type": "function_definition",
+          "startLine": 78,
+          "complexity": 1
+        },
+        {
+          "name": "embed",
+          "type": "function_definition",
+          "startLine": 75,
+          "complexity": 1
+        },
+        {
+          "name": "model_id",
+          "type": "function_definition",
+          "startLine": 72,
+          "complexity": 1
+        },
+        {
+          "name": "__init__",
+          "type": "function_definition",
+          "startLine": 68,
+          "complexity": 1
+        },
+        {
+          "name": "_pool",
+          "type": "function_definition",
+          "startLine": 58,
+          "complexity": 2
+        },
+        {
+          "name": "_request_batches",
+          "type": "function_definition",
+          "startLine": 38,
+          "complexity": 4
+        },
+        {
+          "name": "_token_chunks",
+          "type": "function_definition",
+          "startLine": 28,
+          "complexity": 2
+        }
+      ]
+    },
+    {
+      "file": "src/alexandria/utils/embedders_test.py",
+      "functions": 7,
+      "functionsByType": {
+        "function_definition": 7,
+        "lambda": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "test_pool_preserves_one_vector_and_normalizes_multiple",
+          "type": "function_definition",
+          "startLine": 48,
+          "lines": 7,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 15,
+            "N1": 0,
+            "N2": 39,
+            "volume": 152.369,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 113.109,
+          "maintainabilityIndexGradAiNorm": 66.146,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "test_request_batches_enforce_api_item_limit",
+          "type": "function_definition",
+          "startLine": 42,
+          "lines": 4,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 14,
+            "N1": 0,
+            "N2": 23,
+            "volume": 87.569,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 125.055,
+          "maintainabilityIndexGradAiNorm": 73.132,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "test_request_batches_preserve_order_and_budget",
+          "type": "function_definition",
+          "startLine": 36,
+          "lines": 4,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 8,
+            "N1": 0,
+            "N2": 21,
+            "volume": 63,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 126.768,
+          "maintainabilityIndexGradAiNorm": 74.133,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "test_token_chunks_round_trip_long_text",
+          "type": "function_definition",
+          "startLine": 28,
+          "lines": 6,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 15,
+            "N1": 0,
+            "N2": 26,
+            "volume": 101.579,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 117.715,
+          "maintainabilityIndexGradAiNorm": 68.839,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "test_model_id_reports_the_hash_dimension",
+          "type": "function_definition",
+          "startLine": 24,
+          "lines": 2,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 5,
+            "N1": 0,
+            "N2": 5,
+            "volume": 11.61,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 146.791,
+          "maintainabilityIndexGradAiNorm": 85.843,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "test_different_text_yields_different_vector",
+          "type": "function_definition",
+          "startLine": 19,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 9,
+            "N1": 0,
+            "N2": 14,
+            "volume": 44.379,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 133.25,
+          "maintainabilityIndexGradAiNorm": 77.924,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "test_identical_text_yields_identical_vector",
+          "type": "function_definition",
+          "startLine": 14,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 9,
+            "N1": 0,
+            "N2": 14,
+            "volume": 44.379,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 133.25,
+          "maintainabilityIndexGradAiNorm": 77.924,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "test_pool_preserves_one_vector_and_normalizes_multiple",
+          "type": "function_definition",
+          "startLine": 48,
+          "complexity": 1
+        },
+        {
+          "name": "test_request_batches_enforce_api_item_limit",
+          "type": "function_definition",
+          "startLine": 42,
+          "complexity": 1
+        },
+        {
+          "name": "test_request_batches_preserve_order_and_budget",
+          "type": "function_definition",
+          "startLine": 36,
+          "complexity": 1
+        },
+        {
+          "name": "test_token_chunks_round_trip_long_text",
+          "type": "function_definition",
+          "startLine": 28,
+          "complexity": 1
+        },
+        {
+          "name": "test_model_id_reports_the_hash_dimension",
+          "type": "function_definition",
+          "startLine": 24,
+          "complexity": 1
+        },
+        {
+          "name": "test_different_text_yields_different_vector",
+          "type": "function_definition",
+          "startLine": 19,
+          "complexity": 1
+        },
+        {
+          "name": "test_identical_text_yields_identical_vector",
+          "type": "function_definition",
+          "startLine": 14,
+          "complexity": 1
+        }
+      ]
+    },
+    {
+      "file": "src/alexandria/utils/merger.py",
+      "functions": 8,
+      "functionsByType": {
+        "function_definition": 8,
+        "lambda": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "default_merger",
+          "type": "function_definition",
+          "startLine": 132,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 9,
+            "N1": 1,
+            "N2": 14,
+            "volume": 49.829,
+            "difficulty": 0.778,
+            "effort": 38.756
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 132.648,
+          "maintainabilityIndexGradAiNorm": 77.572,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "_generate",
+          "type": "function_definition",
+          "startLine": 109,
+          "lines": 20,
+          "maxNestingDepth": 1,
+          "parameterCount": 4,
+          "cyclomaticComplexity": 3,
+          "halstead": {
+            "n1": 5,
+            "n2": 32,
+            "N1": 6,
+            "N2": 52,
+            "volume": 302.148,
+            "difficulty": 4.063,
+            "effort": 1227.477
+          },
+          "cognitiveComplexity": 5,
+          "maintainabilityIndexGradAiRaw": 92.082,
+          "maintainabilityIndexGradAiNorm": 53.849,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "merge_candidates_to_target",
+          "type": "function_definition",
+          "startLine": 99,
+          "lines": 9,
+          "maxNestingDepth": 1,
+          "parameterCount": 3,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 20,
+            "N1": 2,
+            "N2": 30,
+            "volume": 142.702,
+            "difficulty": 1.5,
+            "effort": 214.053
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 109.379,
+          "maintainabilityIndexGradAiNorm": 63.964,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "merge",
+          "type": "function_definition",
+          "startLine": 81,
+          "lines": 17,
+          "maxNestingDepth": 1,
+          "parameterCount": 4,
+          "cyclomaticComplexity": 3,
+          "halstead": {
+            "n1": 5,
+            "n2": 25,
+            "N1": 5,
+            "N2": 48,
+            "volume": 260.065,
+            "difficulty": 4.8,
+            "effort": 1248.313
+          },
+          "cognitiveComplexity": 5,
+          "maintainabilityIndexGradAiRaw": 95.495,
+          "maintainabilityIndexGradAiNorm": 55.845,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "model_id",
+          "type": "function_definition",
+          "startLine": 78,
+          "lines": 2,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 4,
+            "N1": 1,
+            "N2": 5,
+            "volume": 13.932,
+            "difficulty": 0.625,
+            "effort": 8.707
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 145.843,
+          "maintainabilityIndexGradAiNorm": 85.288,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "__init__",
+          "type": "function_definition",
+          "startLine": 71,
+          "lines": 5,
+          "maxNestingDepth": 0,
+          "parameterCount": 3,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 12,
+            "N1": 0,
+            "N2": 21,
+            "volume": 75.284,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 122.227,
+          "maintainabilityIndexGradAiNorm": 71.478,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "_target_instructions",
+          "type": "function_definition",
+          "startLine": 55,
+          "lines": 13,
+          "maxNestingDepth": 1,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 2,
+            "n2": 9,
+            "N1": 2,
+            "N2": 22,
+            "volume": 83.026,
+            "difficulty": 2.444,
+            "effort": 202.953
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 106.008,
+          "maintainabilityIndexGradAiNorm": 61.993,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "trim_to_last_sentence",
+          "type": "function_definition",
+          "startLine": 36,
+          "lines": 17,
+          "maxNestingDepth": 2,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 5,
+          "halstead": {
+            "n1": 3,
+            "n2": 17,
+            "N1": 7,
+            "N2": 34,
+            "volume": 177.199,
+            "difficulty": 3,
+            "effort": 531.597
+          },
+          "cognitiveComplexity": 5,
+          "maintainabilityIndexGradAiRaw": 97.03,
+          "maintainabilityIndexGradAiNorm": 56.743,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "default_merger",
+          "type": "function_definition",
+          "startLine": 132,
+          "complexity": 1
+        },
+        {
+          "name": "_generate",
+          "type": "function_definition",
+          "startLine": 109,
+          "complexity": 3
+        },
+        {
+          "name": "merge_candidates_to_target",
+          "type": "function_definition",
+          "startLine": 99,
+          "complexity": 1
+        },
+        {
+          "name": "merge",
+          "type": "function_definition",
+          "startLine": 81,
+          "complexity": 3
+        },
+        {
+          "name": "model_id",
+          "type": "function_definition",
+          "startLine": 78,
+          "complexity": 1
+        },
+        {
+          "name": "__init__",
+          "type": "function_definition",
+          "startLine": 71,
+          "complexity": 1
+        },
+        {
+          "name": "_target_instructions",
+          "type": "function_definition",
+          "startLine": 55,
+          "complexity": 2
+        },
+        {
+          "name": "trim_to_last_sentence",
+          "type": "function_definition",
+          "startLine": 36,
+          "complexity": 5
+        }
+      ]
+    },
+    {
+      "file": "src/alexandria/utils/merger_test.py",
+      "functions": 6,
+      "functionsByType": {
+        "function_definition": 6,
+        "lambda": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "test_trim_returns_stripped_text_when_no_boundary_found",
+          "type": "function_definition",
+          "startLine": 34,
+          "lines": 4,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 5,
+            "N1": 0,
+            "N2": 7,
+            "volume": 16.253,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 133.813,
+          "maintainabilityIndexGradAiNorm": 78.253,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "test_trim_keeps_closing_paren_after_period",
+          "type": "function_definition",
+          "startLine": 28,
+          "lines": 4,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 5,
+            "N1": 0,
+            "N2": 7,
+            "volume": 16.253,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 133.813,
+          "maintainabilityIndexGradAiNorm": 78.253,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "test_trim_cuts_on_newline_boundary_keeping_the_period",
+          "type": "function_definition",
+          "startLine": 22,
+          "lines": 4,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 5,
+            "N1": 0,
+            "N2": 7,
+            "volume": 16.253,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 133.813,
+          "maintainabilityIndexGradAiNorm": 78.253,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "test_trim_cuts_dangling_fragment_at_last_sentence_boundary",
+          "type": "function_definition",
+          "startLine": 16,
+          "lines": 4,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 5,
+            "N1": 0,
+            "N2": 7,
+            "volume": 16.253,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 133.813,
+          "maintainabilityIndexGradAiNorm": 78.253,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "test_trim_keeps_text_ending_on_quote",
+          "type": "function_definition",
+          "startLine": 12,
+          "lines": 2,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 4,
+            "N1": 0,
+            "N2": 5,
+            "volume": 10,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 147.568,
+          "maintainabilityIndexGradAiNorm": 86.297,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "test_trim_keeps_text_already_ending_on_final_punctuation",
+          "type": "function_definition",
+          "startLine": 6,
+          "lines": 4,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 5,
+            "N1": 0,
+            "N2": 7,
+            "volume": 16.253,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 133.813,
+          "maintainabilityIndexGradAiNorm": 78.253,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "test_trim_returns_stripped_text_when_no_boundary_found",
+          "type": "function_definition",
+          "startLine": 34,
+          "complexity": 1
+        },
+        {
+          "name": "test_trim_keeps_closing_paren_after_period",
+          "type": "function_definition",
+          "startLine": 28,
+          "complexity": 1
+        },
+        {
+          "name": "test_trim_cuts_on_newline_boundary_keeping_the_period",
+          "type": "function_definition",
+          "startLine": 22,
+          "complexity": 1
+        },
+        {
+          "name": "test_trim_cuts_dangling_fragment_at_last_sentence_boundary",
+          "type": "function_definition",
+          "startLine": 16,
+          "complexity": 1
+        },
+        {
+          "name": "test_trim_keeps_text_ending_on_quote",
+          "type": "function_definition",
+          "startLine": 12,
+          "complexity": 1
+        },
+        {
+          "name": "test_trim_keeps_text_already_ending_on_final_punctuation",
+          "type": "function_definition",
+          "startLine": 6,
+          "complexity": 1
+        }
+      ]
+    },
+    {
+      "file": "src/alexandria/utils/tokens.py",
+      "functions": 2,
+      "functionsByType": {
+        "function_definition": 2,
+        "lambda": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "truncate_tokens",
+          "type": "function_definition",
+          "startLine": 15,
+          "lines": 18,
+          "maxNestingDepth": 3,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 6,
+          "halstead": {
+            "n1": 5,
+            "n2": 24,
+            "N1": 10,
+            "N2": 58,
+            "volume": 330.343,
+            "difficulty": 6.042,
+            "effort": 1995.821
+          },
+          "cognitiveComplexity": 9,
+          "maintainabilityIndexGradAiRaw": 92.635,
+          "maintainabilityIndexGradAiNorm": 54.173,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "count_tokens",
+          "type": "function_definition",
+          "startLine": 10,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 9,
+            "N1": 1,
+            "N2": 10,
+            "volume": 36.541,
+            "difficulty": 0.556,
+            "effort": 20.301
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 134.261,
+          "maintainabilityIndexGradAiNorm": 78.515,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "truncate_tokens",
+          "type": "function_definition",
+          "startLine": 15,
+          "complexity": 6
+        },
+        {
+          "name": "count_tokens",
+          "type": "function_definition",
+          "startLine": 10,
+          "complexity": 1
+        }
+      ]
+    },
+    {
+      "file": "src/alexandria/utils/tokens_test.py",
+      "functions": 4,
+      "functionsByType": {
+        "function_definition": 4,
+        "lambda": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "test_truncate_tokens_leaves_text_within_the_limit_unchanged",
+          "type": "function_definition",
+          "startLine": 30,
+          "lines": 4,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 6,
+            "N1": 0,
+            "N2": 9,
+            "volume": 23.265,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 131.948,
+          "maintainabilityIndexGradAiNorm": 77.163,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "test_truncate_tokens_enforces_the_limit_and_preserves_trailing_newline",
+          "type": "function_definition",
+          "startLine": 20,
+          "lines": 8,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 10,
+            "N1": 0,
+            "N2": 16,
+            "volume": 53.151,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 116.423,
+          "maintainabilityIndexGradAiNorm": 68.084,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "test_literal_special_token_text_is_counted_as_ordinary_input",
+          "type": "function_definition",
+          "startLine": 13,
+          "lines": 5,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 13,
+            "N1": 0,
+            "N2": 20,
+            "volume": 74.009,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 122.315,
+          "maintainabilityIndexGradAiNorm": 71.529,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "test_count_tokens_matches_cl100k_base",
+          "type": "function_definition",
+          "startLine": 8,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 9,
+            "N1": 0,
+            "N2": 12,
+            "volume": 38.039,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 134.052,
+          "maintainabilityIndexGradAiNorm": 78.393,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "test_truncate_tokens_leaves_text_within_the_limit_unchanged",
+          "type": "function_definition",
+          "startLine": 30,
+          "complexity": 1
+        },
+        {
+          "name": "test_truncate_tokens_enforces_the_limit_and_preserves_trailing_newline",
+          "type": "function_definition",
+          "startLine": 20,
+          "complexity": 1
+        },
+        {
+          "name": "test_literal_special_token_text_is_counted_as_ordinary_input",
+          "type": "function_definition",
+          "startLine": 13,
+          "complexity": 1
+        },
+        {
+          "name": "test_count_tokens_matches_cl100k_base",
+          "type": "function_definition",
+          "startLine": 8,
+          "complexity": 1
+        }
+      ]
+    },
+    {
       "file": "src/alexandria/ir/__init__.py",
       "functions": 0,
       "functionsByType": {
@@ -28471,2664 +31129,6 @@
           "name": "test_identical_vectors_have_similarity_one",
           "type": "function_definition",
           "startLine": 15,
-          "complexity": 1
-        }
-      ]
-    },
-    {
-      "file": "src/alexandria/ops/__init__.py",
-      "functions": 0,
-      "functionsByType": {
-        "function_definition": 0,
-        "lambda": 0
-      },
-      "functionMetrics": [],
-      "complexity": []
-    },
-    {
-      "file": "src/alexandria/ops/pipe.py",
-      "functions": 10,
-      "functionsByType": {
-        "function_definition": 10,
-        "lambda": 0
-      },
-      "functionMetrics": [
-        {
-          "name": "_required_scorers",
-          "type": "function_definition",
-          "startLine": 191,
-          "lines": 2,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 1,
-            "n2": 9,
-            "N1": 1,
-            "N2": 15,
-            "volume": 53.151,
-            "difficulty": 0.833,
-            "effort": 44.292
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 138.881,
-          "maintainabilityIndexGradAiNorm": 81.217,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "score_report",
-          "type": "function_definition",
-          "startLine": 178,
-          "lines": 11,
-          "maxNestingDepth": 0,
-          "parameterCount": 3,
-          "cyclomaticComplexity": 2,
-          "halstead": {
-            "n1": 2,
-            "n2": 19,
-            "N1": 2,
-            "N2": 32,
-            "volume": 149.339,
-            "difficulty": 1.684,
-            "effort": 251.518
-          },
-          "cognitiveComplexity": 1,
-          "maintainabilityIndexGradAiRaw": 105.662,
-          "maintainabilityIndexGradAiNorm": 61.791,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "propose",
-          "type": "function_definition",
-          "startLine": 155,
-          "lines": 21,
-          "maxNestingDepth": 0,
-          "parameterCount": 6,
-          "cyclomaticComplexity": 4,
-          "halstead": {
-            "n1": 2,
-            "n2": 28,
-            "N1": 4,
-            "N2": 67,
-            "volume": 348.389,
-            "difficulty": 2.393,
-            "effort": 833.646
-          },
-          "cognitiveComplexity": 3,
-          "maintainabilityIndexGradAiRaw": 90.321,
-          "maintainabilityIndexGradAiNorm": 52.819,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "_finalize_metrics",
-          "type": "function_definition",
-          "startLine": 144,
-          "lines": 9,
-          "maxNestingDepth": 0,
-          "parameterCount": 3,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 1,
-            "n2": 14,
-            "N1": 1,
-            "N2": 22,
-            "volume": 89.858,
-            "difficulty": 0.786,
-            "effort": 70.603
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 111.784,
-          "maintainabilityIndexGradAiNorm": 65.371,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "_target_merge_metrics",
-          "type": "function_definition",
-          "startLine": 131,
-          "lines": 11,
-          "maxNestingDepth": 0,
-          "parameterCount": 2,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 1,
-            "n2": 19,
-            "N1": 1,
-            "N2": 34,
-            "volume": 151.267,
-            "difficulty": 0.895,
-            "effort": 135.345
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 105.825,
-          "maintainabilityIndexGradAiNorm": 61.886,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "_retry_exhaustively",
-          "type": "function_definition",
-          "startLine": 113,
-          "lines": 16,
-          "maxNestingDepth": 0,
-          "parameterCount": 8,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 1,
-            "n2": 30,
-            "N1": 1,
-            "N2": 52,
-            "volume": 262.572,
-            "difficulty": 0.867,
-            "effort": 227.563
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 96.887,
-          "maintainabilityIndexGradAiNorm": 56.659,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "reduce",
-          "type": "function_definition",
-          "startLine": 64,
-          "lines": 47,
-          "maxNestingDepth": 2,
-          "parameterCount": 8,
-          "cyclomaticComplexity": 7,
-          "halstead": {
-            "n1": 8,
-            "n2": 59,
-            "N1": 13,
-            "N2": 160,
-            "volume": 1049.433,
-            "difficulty": 10.847,
-            "effort": 11383.685
-          },
-          "cognitiveComplexity": 12,
-          "maintainabilityIndexGradAiRaw": 70.846,
-          "maintainabilityIndexGradAiNorm": 41.43,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "reduced_tokens",
-          "type": "function_definition",
-          "startLine": 52,
-          "lines": 2,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 1,
-            "n2": 5,
-            "N1": 1,
-            "N2": 6,
-            "volume": 18.095,
-            "difficulty": 0.6,
-            "effort": 10.857
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 144.484,
-          "maintainabilityIndexGradAiNorm": 84.494,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "source_tokens",
-          "type": "function_definition",
-          "startLine": 48,
-          "lines": 2,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 1,
-            "n2": 5,
-            "N1": 1,
-            "N2": 6,
-            "volume": 18.095,
-            "difficulty": 0.6,
-            "effort": 10.857
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 144.484,
-          "maintainabilityIndexGradAiNorm": 84.494,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "text",
-          "type": "function_definition",
-          "startLine": 44,
-          "lines": 2,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 1,
-            "n2": 4,
-            "N1": 1,
-            "N2": 6,
-            "volume": 16.253,
-            "difficulty": 0.75,
-            "effort": 12.19
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 145.042,
-          "maintainabilityIndexGradAiNorm": 84.82,
-          "isReactComponent": false,
-          "isMonolithic": false
-        }
-      ],
-      "complexity": [
-        {
-          "name": "_required_scorers",
-          "type": "function_definition",
-          "startLine": 191,
-          "complexity": 1
-        },
-        {
-          "name": "score_report",
-          "type": "function_definition",
-          "startLine": 178,
-          "complexity": 2
-        },
-        {
-          "name": "propose",
-          "type": "function_definition",
-          "startLine": 155,
-          "complexity": 4
-        },
-        {
-          "name": "_finalize_metrics",
-          "type": "function_definition",
-          "startLine": 144,
-          "complexity": 1
-        },
-        {
-          "name": "_target_merge_metrics",
-          "type": "function_definition",
-          "startLine": 131,
-          "complexity": 1
-        },
-        {
-          "name": "_retry_exhaustively",
-          "type": "function_definition",
-          "startLine": 113,
-          "complexity": 1
-        },
-        {
-          "name": "reduce",
-          "type": "function_definition",
-          "startLine": 64,
-          "complexity": 7
-        },
-        {
-          "name": "reduced_tokens",
-          "type": "function_definition",
-          "startLine": 52,
-          "complexity": 1
-        },
-        {
-          "name": "source_tokens",
-          "type": "function_definition",
-          "startLine": 48,
-          "complexity": 1
-        },
-        {
-          "name": "text",
-          "type": "function_definition",
-          "startLine": 44,
-          "complexity": 1
-        }
-      ]
-    },
-    {
-      "file": "src/alexandria/ops/pipe_test.py",
-      "functions": 12,
-      "functionsByType": {
-        "function_definition": 12,
-        "lambda": 0
-      },
-      "functionMetrics": [
-        {
-          "name": "test_propose_returns_the_document_and_one_diff_per_candidate",
-          "type": "function_definition",
-          "startLine": 114,
-          "lines": 12,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 0,
-            "n2": 21,
-            "N1": 0,
-            "N2": 32,
-            "volume": 140.554,
-            "difficulty": 0,
-            "effort": 0
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 104.797,
-          "maintainabilityIndexGradAiNorm": 61.285,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "test_reduce_stamps_embedding_and_wall_clock_metrics",
-          "type": "function_definition",
-          "startLine": 100,
-          "lines": 12,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 0,
-            "n2": 17,
-            "N1": 0,
-            "N2": 24,
-            "volume": 98.099,
-            "difficulty": 0,
-            "effort": 0
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 106.667,
-          "maintainabilityIndexGradAiNorm": 62.378,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "test_reduce_records_merge_calls_and_retries",
-          "type": "function_definition",
-          "startLine": 85,
-          "lines": 13,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 0,
-            "n2": 18,
-            "N1": 0,
-            "N2": 31,
-            "volume": 129.268,
-            "difficulty": 0,
-            "effort": 0
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 103.936,
-          "maintainabilityIndexGradAiNorm": 60.781,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "test_score_report_single_sentence_has_no_peer",
-          "type": "function_definition",
-          "startLine": 79,
-          "lines": 4,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 0,
-            "n2": 7,
-            "N1": 0,
-            "N2": 14,
-            "volume": 39.303,
-            "difficulty": 0,
-            "effort": 0
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 129.221,
-          "maintainabilityIndexGradAiNorm": 75.568,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "test_score_report_adds_the_redundant_peer",
-          "type": "function_definition",
-          "startLine": 70,
-          "lines": 7,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 0,
-            "n2": 11,
-            "N1": 0,
-            "N2": 25,
-            "volume": 86.486,
-            "difficulty": 0,
-            "effort": 0
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 116.054,
-          "maintainabilityIndexGradAiNorm": 67.868,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "test_default_reduce_and_propose_skip_the_unused_score_phase",
-          "type": "function_definition",
-          "startLine": 46,
-          "lines": 22,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 0,
-            "n2": 23,
-            "N1": 0,
-            "N2": 36,
-            "volume": 162.848,
-            "difficulty": 0,
-            "effort": 0
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 94.212,
-          "maintainabilityIndexGradAiNorm": 55.095,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "unexpected_score",
-          "type": "function_definition",
-          "startLine": 47,
-          "lines": 2,
-          "maxNestingDepth": 0,
-          "parameterCount": 2,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 1,
-            "n2": 7,
-            "N1": 1,
-            "N2": 8,
-            "volume": 27,
-            "difficulty": 0.571,
-            "effort": 15.429
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 142.403,
-          "maintainabilityIndexGradAiNorm": 83.277,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "test_default_whole_prompt_cos_sim_diff_budget_is_fifty_percent",
-          "type": "function_definition",
-          "startLine": 42,
-          "lines": 2,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 0,
-            "n2": 5,
-            "N1": 0,
-            "N2": 5,
-            "volume": 11.61,
-            "difficulty": 0,
-            "effort": 0
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 146.791,
-          "maintainabilityIndexGradAiNorm": 85.843,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "embed",
-          "type": "function_definition",
-          "startLine": 38,
-          "lines": 2,
-          "maxNestingDepth": 0,
-          "parameterCount": 2,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 1,
-            "n2": 13,
-            "N1": 1,
-            "N2": 25,
-            "volume": 98.991,
-            "difficulty": 0.962,
-            "effort": 95.184
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 135.647,
-          "maintainabilityIndexGradAiNorm": 79.326,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "model_id",
-          "type": "function_definition",
-          "startLine": 35,
-          "lines": 2,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 1,
-            "n2": 4,
-            "N1": 1,
-            "N2": 4,
-            "volume": 11.61,
-            "difficulty": 0.5,
-            "effort": 5.805
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 146.791,
-          "maintainabilityIndexGradAiNorm": 85.843,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "merge",
-          "type": "function_definition",
-          "startLine": 26,
-          "lines": 5,
-          "maxNestingDepth": 1,
-          "parameterCount": 4,
-          "cyclomaticComplexity": 2,
-          "halstead": {
-            "n1": 2,
-            "n2": 9,
-            "N1": 3,
-            "N2": 17,
-            "volume": 69.189,
-            "difficulty": 1.889,
-            "effort": 130.69
-          },
-          "cognitiveComplexity": 1,
-          "maintainabilityIndexGradAiRaw": 122.436,
-          "maintainabilityIndexGradAiNorm": 71.6,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "merge",
-          "type": "function_definition",
-          "startLine": 20,
-          "lines": 3,
-          "maxNestingDepth": 0,
-          "parameterCount": 4,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 1,
-            "n2": 8,
-            "N1": 1,
-            "N2": 15,
-            "volume": 50.719,
-            "difficulty": 0.938,
-            "effort": 47.549
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 132.556,
-          "maintainabilityIndexGradAiNorm": 77.518,
-          "isReactComponent": false,
-          "isMonolithic": false
-        }
-      ],
-      "complexity": [
-        {
-          "name": "test_propose_returns_the_document_and_one_diff_per_candidate",
-          "type": "function_definition",
-          "startLine": 114,
-          "complexity": 1
-        },
-        {
-          "name": "test_reduce_stamps_embedding_and_wall_clock_metrics",
-          "type": "function_definition",
-          "startLine": 100,
-          "complexity": 1
-        },
-        {
-          "name": "test_reduce_records_merge_calls_and_retries",
-          "type": "function_definition",
-          "startLine": 85,
-          "complexity": 1
-        },
-        {
-          "name": "test_score_report_single_sentence_has_no_peer",
-          "type": "function_definition",
-          "startLine": 79,
-          "complexity": 1
-        },
-        {
-          "name": "test_score_report_adds_the_redundant_peer",
-          "type": "function_definition",
-          "startLine": 70,
-          "complexity": 1
-        },
-        {
-          "name": "test_default_reduce_and_propose_skip_the_unused_score_phase",
-          "type": "function_definition",
-          "startLine": 46,
-          "complexity": 1
-        },
-        {
-          "name": "unexpected_score",
-          "type": "function_definition",
-          "startLine": 47,
-          "complexity": 1
-        },
-        {
-          "name": "test_default_whole_prompt_cos_sim_diff_budget_is_fifty_percent",
-          "type": "function_definition",
-          "startLine": 42,
-          "complexity": 1
-        },
-        {
-          "name": "embed",
-          "type": "function_definition",
-          "startLine": 38,
-          "complexity": 1
-        },
-        {
-          "name": "model_id",
-          "type": "function_definition",
-          "startLine": 35,
-          "complexity": 1
-        },
-        {
-          "name": "merge",
-          "type": "function_definition",
-          "startLine": 26,
-          "complexity": 2
-        },
-        {
-          "name": "merge",
-          "type": "function_definition",
-          "startLine": 20,
-          "complexity": 1
-        }
-      ]
-    },
-    {
-      "file": "src/alexandria/ops/report.py",
-      "functions": 7,
-      "functionsByType": {
-        "function_definition": 7,
-        "lambda": 0
-      },
-      "functionMetrics": [
-        {
-          "name": "_append_max_regression",
-          "type": "function_definition",
-          "startLine": 215,
-          "lines": 13,
-          "maxNestingDepth": 1,
-          "parameterCount": 5,
-          "cyclomaticComplexity": 2,
-          "halstead": {
-            "n1": 1,
-            "n2": 14,
-            "N1": 1,
-            "N2": 29,
-            "volume": 117.207,
-            "difficulty": 1.036,
-            "effort": 121.393
-          },
-          "cognitiveComplexity": 1,
-          "maintainabilityIndexGradAiRaw": 104.215,
-          "maintainabilityIndexGradAiNorm": 60.944,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "_append_min_regression",
-          "type": "function_definition",
-          "startLine": 200,
-          "lines": 13,
-          "maxNestingDepth": 1,
-          "parameterCount": 5,
-          "cyclomaticComplexity": 2,
-          "halstead": {
-            "n1": 1,
-            "n2": 14,
-            "N1": 1,
-            "N2": 29,
-            "volume": 117.207,
-            "difficulty": 1.036,
-            "effort": 121.393
-          },
-          "cognitiveComplexity": 1,
-          "maintainabilityIndexGradAiRaw": 104.215,
-          "maintainabilityIndexGradAiNorm": 60.944,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "_merger_identity",
-          "type": "function_definition",
-          "startLine": 191,
-          "lines": 7,
-          "maxNestingDepth": 1,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 2,
-          "halstead": {
-            "n1": 2,
-            "n2": 14,
-            "N1": 3,
-            "N2": 25,
-            "volume": 112,
-            "difficulty": 1.786,
-            "effort": 200
-          },
-          "cognitiveComplexity": 1,
-          "maintainabilityIndexGradAiRaw": 114.48,
-          "maintainabilityIndexGradAiNorm": 66.947,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "_round_score",
-          "type": "function_definition",
-          "startLine": 187,
-          "lines": 2,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 1,
-            "n2": 5,
-            "N1": 1,
-            "N2": 7,
-            "volume": 20.68,
-            "difficulty": 0.7,
-            "effort": 14.476
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 143.789,
-          "maintainabilityIndexGradAiNorm": 84.087,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "_instruction_quality",
-          "type": "function_definition",
-          "startLine": 176,
-          "lines": 9,
-          "maxNestingDepth": 0,
-          "parameterCount": 2,
-          "cyclomaticComplexity": 2,
-          "halstead": {
-            "n1": 2,
-            "n2": 32,
-            "N1": 2,
-            "N2": 70,
-            "volume": 366.297,
-            "difficulty": 2.188,
-            "effort": 801.275
-          },
-          "cognitiveComplexity": 1,
-          "maintainabilityIndexGradAiRaw": 104.247,
-          "maintainabilityIndexGradAiNorm": 60.963,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "compare_reports",
-          "type": "function_definition",
-          "startLine": 134,
-          "lines": 40,
-          "maxNestingDepth": 1,
-          "parameterCount": 4,
-          "cyclomaticComplexity": 5,
-          "halstead": {
-            "n1": 3,
-            "n2": 27,
-            "N1": 9,
-            "N2": 75,
-            "volume": 412.179,
-            "difficulty": 4.167,
-            "effort": 1717.412
-          },
-          "cognitiveComplexity": 8,
-          "maintainabilityIndexGradAiRaw": 78.779,
-          "maintainabilityIndexGradAiNorm": 46.07,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "optimization_report",
-          "type": "function_definition",
-          "startLine": 84,
-          "lines": 48,
-          "maxNestingDepth": 0,
-          "parameterCount": 7,
-          "cyclomaticComplexity": 4,
-          "halstead": {
-            "n1": 3,
-            "n2": 53,
-            "N1": 5,
-            "N2": 125,
-            "volume": 754.956,
-            "difficulty": 3.538,
-            "effort": 2670.835
-          },
-          "cognitiveComplexity": 3,
-          "maintainabilityIndexGradAiRaw": 72.908,
-          "maintainabilityIndexGradAiNorm": 42.636,
-          "isReactComponent": false,
-          "isMonolithic": false
-        }
-      ],
-      "complexity": [
-        {
-          "name": "_append_max_regression",
-          "type": "function_definition",
-          "startLine": 215,
-          "complexity": 2
-        },
-        {
-          "name": "_append_min_regression",
-          "type": "function_definition",
-          "startLine": 200,
-          "complexity": 2
-        },
-        {
-          "name": "_merger_identity",
-          "type": "function_definition",
-          "startLine": 191,
-          "complexity": 2
-        },
-        {
-          "name": "_round_score",
-          "type": "function_definition",
-          "startLine": 187,
-          "complexity": 1
-        },
-        {
-          "name": "_instruction_quality",
-          "type": "function_definition",
-          "startLine": 176,
-          "complexity": 2
-        },
-        {
-          "name": "compare_reports",
-          "type": "function_definition",
-          "startLine": 134,
-          "complexity": 5
-        },
-        {
-          "name": "optimization_report",
-          "type": "function_definition",
-          "startLine": 84,
-          "complexity": 4
-        }
-      ]
-    },
-    {
-      "file": "src/alexandria/ops/report_test.py",
-      "functions": 7,
-      "functionsByType": {
-        "function_definition": 7,
-        "lambda": 0
-      },
-      "functionMetrics": [
-        {
-          "name": "test_compare_reports_flags_token_and_quality_regressions",
-          "type": "function_definition",
-          "startLine": 78,
-          "lines": 23,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 0,
-            "n2": 25,
-            "N1": 0,
-            "N2": 48,
-            "volume": 222.905,
-            "difficulty": 0,
-            "effort": 0
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 91.86,
-          "maintainabilityIndexGradAiNorm": 53.719,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "test_report_schema_v3_rejects_a_v2_baseline",
-          "type": "function_definition",
-          "startLine": 64,
-          "lines": 12,
-          "maxNestingDepth": 1,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 1,
-            "n2": 20,
-            "N1": 1,
-            "N2": 25,
-            "volume": 114.2,
-            "difficulty": 0.625,
-            "effort": 71.375
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 105.877,
-          "maintainabilityIndexGradAiNorm": 61.916,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "test_report_comparison_rejects_a_different_merger_identity",
-          "type": "function_definition",
-          "startLine": 55,
-          "lines": 7,
-          "maxNestingDepth": 1,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 1,
-            "n2": 19,
-            "N1": 1,
-            "N2": 30,
-            "volume": 133.98,
-            "difficulty": 0.789,
-            "effort": 105.774
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 113.778,
-          "maintainabilityIndexGradAiNorm": 66.537,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "test_report_config_captures_target_settings",
-          "type": "function_definition",
-          "startLine": 43,
-          "lines": 10,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 0,
-            "n2": 14,
-            "N1": 0,
-            "N2": 21,
-            "volume": 79.954,
-            "difficulty": 0,
-            "effort": 0
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 110.685,
-          "maintainabilityIndexGradAiNorm": 64.728,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "test_optimization_report_includes_compression_and_quality_metrics",
-          "type": "function_definition",
-          "startLine": 27,
-          "lines": 14,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 0,
-            "n2": 23,
-            "N1": 0,
-            "N2": 42,
-            "volume": 189.99,
-            "difficulty": 0,
-            "effort": 0
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 100.733,
-          "maintainabilityIndexGradAiNorm": 58.908,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "merge_candidates_to_target",
-          "type": "function_definition",
-          "startLine": 18,
-          "lines": 3,
-          "maxNestingDepth": 0,
-          "parameterCount": 3,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 1,
-            "n2": 7,
-            "N1": 1,
-            "N2": 10,
-            "volume": 33,
-            "difficulty": 0.714,
-            "effort": 23.571
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 134.791,
-          "maintainabilityIndexGradAiNorm": 78.825,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "merge",
-          "type": "function_definition",
-          "startLine": 14,
-          "lines": 3,
-          "maxNestingDepth": 0,
-          "parameterCount": 4,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 1,
-            "n2": 8,
-            "N1": 1,
-            "N2": 15,
-            "volume": 50.719,
-            "difficulty": 0.938,
-            "effort": 47.549
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 132.556,
-          "maintainabilityIndexGradAiNorm": 77.518,
-          "isReactComponent": false,
-          "isMonolithic": false
-        }
-      ],
-      "complexity": [
-        {
-          "name": "test_compare_reports_flags_token_and_quality_regressions",
-          "type": "function_definition",
-          "startLine": 78,
-          "complexity": 1
-        },
-        {
-          "name": "test_report_schema_v3_rejects_a_v2_baseline",
-          "type": "function_definition",
-          "startLine": 64,
-          "complexity": 1
-        },
-        {
-          "name": "test_report_comparison_rejects_a_different_merger_identity",
-          "type": "function_definition",
-          "startLine": 55,
-          "complexity": 1
-        },
-        {
-          "name": "test_report_config_captures_target_settings",
-          "type": "function_definition",
-          "startLine": 43,
-          "complexity": 1
-        },
-        {
-          "name": "test_optimization_report_includes_compression_and_quality_metrics",
-          "type": "function_definition",
-          "startLine": 27,
-          "complexity": 1
-        },
-        {
-          "name": "merge_candidates_to_target",
-          "type": "function_definition",
-          "startLine": 18,
-          "complexity": 1
-        },
-        {
-          "name": "merge",
-          "type": "function_definition",
-          "startLine": 14,
-          "complexity": 1
-        }
-      ]
-    },
-    {
-      "file": "src/alexandria/utils/__init__.py",
-      "functions": 0,
-      "functionsByType": {
-        "function_definition": 0,
-        "lambda": 0
-      },
-      "functionMetrics": [],
-      "complexity": []
-    },
-    {
-      "file": "src/alexandria/utils/config.py",
-      "functions": 5,
-      "functionsByType": {
-        "function_definition": 5,
-        "lambda": 0
-      },
-      "functionMetrics": [
-        {
-          "name": "require_api_key",
-          "type": "function_definition",
-          "startLine": 51,
-          "lines": 6,
-          "maxNestingDepth": 1,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 2,
-          "halstead": {
-            "n1": 3,
-            "n2": 9,
-            "N1": 3,
-            "N2": 15,
-            "volume": 64.529,
-            "difficulty": 2.5,
-            "effort": 161.323
-          },
-          "cognitiveComplexity": 2,
-          "maintainabilityIndexGradAiRaw": 119.844,
-          "maintainabilityIndexGradAiNorm": 70.084,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "resolve_api_key",
-          "type": "function_definition",
-          "startLine": 46,
-          "lines": 3,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 2,
-            "n2": 10,
-            "N1": 3,
-            "N2": 14,
-            "volume": 60.944,
-            "difficulty": 1.4,
-            "effort": 85.322
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 131.601,
-          "maintainabilityIndexGradAiNorm": 76.96,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "write_config_key",
-          "type": "function_definition",
-          "startLine": 33,
-          "lines": 11,
-          "maxNestingDepth": 1,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 2,
-          "halstead": {
-            "n1": 5,
-            "n2": 29,
-            "N1": 5,
-            "N2": 53,
-            "volume": 295.073,
-            "difficulty": 4.569,
-            "effort": 1348.178
-          },
-          "cognitiveComplexity": 2,
-          "maintainabilityIndexGradAiRaw": 102.121,
-          "maintainabilityIndexGradAiNorm": 59.72,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "read_config_key",
-          "type": "function_definition",
-          "startLine": 24,
-          "lines": 7,
-          "maxNestingDepth": 1,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 3,
-          "halstead": {
-            "n1": 4,
-            "n2": 14,
-            "N1": 5,
-            "N2": 22,
-            "volume": 112.588,
-            "difficulty": 3.143,
-            "effort": 353.848
-          },
-          "cognitiveComplexity": 2,
-          "maintainabilityIndexGradAiRaw": 114.223,
-          "maintainabilityIndexGradAiNorm": 66.797,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "config_path",
-          "type": "function_definition",
-          "startLine": 17,
-          "lines": 5,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 2,
-          "halstead": {
-            "n1": 2,
-            "n2": 9,
-            "N1": 2,
-            "N2": 18,
-            "volume": 69.189,
-            "difficulty": 2,
-            "effort": 138.377
-          },
-          "cognitiveComplexity": 1,
-          "maintainabilityIndexGradAiRaw": 122.436,
-          "maintainabilityIndexGradAiNorm": 71.6,
-          "isReactComponent": false,
-          "isMonolithic": false
-        }
-      ],
-      "complexity": [
-        {
-          "name": "require_api_key",
-          "type": "function_definition",
-          "startLine": 51,
-          "complexity": 2
-        },
-        {
-          "name": "resolve_api_key",
-          "type": "function_definition",
-          "startLine": 46,
-          "complexity": 1
-        },
-        {
-          "name": "write_config_key",
-          "type": "function_definition",
-          "startLine": 33,
-          "complexity": 2
-        },
-        {
-          "name": "read_config_key",
-          "type": "function_definition",
-          "startLine": 24,
-          "complexity": 3
-        },
-        {
-          "name": "config_path",
-          "type": "function_definition",
-          "startLine": 17,
-          "complexity": 2
-        }
-      ]
-    },
-    {
-      "file": "src/alexandria/utils/config_test.py",
-      "functions": 7,
-      "functionsByType": {
-        "function_definition": 7,
-        "lambda": 0
-      },
-      "functionMetrics": [
-        {
-          "name": "test_write_rejects_keys_that_would_break_the_toml",
-          "type": "function_definition",
-          "startLine": 74,
-          "lines": 3,
-          "maxNestingDepth": 1,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 1,
-            "n2": 8,
-            "N1": 1,
-            "N2": 9,
-            "volume": 31.699,
-            "difficulty": 0.563,
-            "effort": 17.831
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 135,
-          "maintainabilityIndexGradAiNorm": 78.947,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "test_write_tightens_a_pre_existing_world_readable_file",
-          "type": "function_definition",
-          "startLine": 61,
-          "lines": 10,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 0,
-            "n2": 18,
-            "N1": 0,
-            "N2": 28,
-            "volume": 116.758,
-            "difficulty": 0,
-            "effort": 0
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 108.716,
-          "maintainabilityIndexGradAiNorm": 63.577,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "test_require_api_key_returns_the_resolved_key",
-          "type": "function_definition",
-          "startLine": 55,
-          "lines": 3,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 0,
-            "n2": 5,
-            "N1": 0,
-            "N2": 6,
-            "volume": 13.932,
-            "difficulty": 0,
-            "effort": 0
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 139.275,
-          "maintainabilityIndexGradAiNorm": 81.447,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "test_require_api_key_raises_the_setup_message_when_unset",
-          "type": "function_definition",
-          "startLine": 48,
-          "lines": 4,
-          "maxNestingDepth": 1,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 1,
-            "n2": 9,
-            "N1": 1,
-            "N2": 10,
-            "volume": 36.541,
-            "difficulty": 0.556,
-            "effort": 20.301
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 129.6,
-          "maintainabilityIndexGradAiNorm": 75.789,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "test_resolution_order_is_explicit_then_env_then_file",
-          "type": "function_definition",
-          "startLine": 38,
-          "lines": 7,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 0,
-            "n2": 9,
-            "N1": 0,
-            "N2": 18,
-            "volume": 57.059,
-            "difficulty": 0,
-            "effort": 0
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 118.217,
-          "maintainabilityIndexGradAiNorm": 69.133,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "test_write_then_resolve_round_trips",
-          "type": "function_definition",
-          "startLine": 28,
-          "lines": 7,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 0,
-            "n2": 12,
-            "N1": 0,
-            "N2": 18,
-            "volume": 64.529,
-            "difficulty": 0,
-            "effort": 0
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 117.577,
-          "maintainabilityIndexGradAiNorm": 68.758,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "isolated_config",
-          "type": "function_definition",
-          "startLine": 21,
-          "lines": 4,
-          "maxNestingDepth": 0,
-          "parameterCount": 2,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 1,
-            "n2": 12,
-            "N1": 1,
-            "N2": 18,
-            "volume": 70.308,
-            "difficulty": 0.75,
-            "effort": 52.731
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 126.197,
-          "maintainabilityIndexGradAiNorm": 73.799,
-          "isReactComponent": false,
-          "isMonolithic": false
-        }
-      ],
-      "complexity": [
-        {
-          "name": "test_write_rejects_keys_that_would_break_the_toml",
-          "type": "function_definition",
-          "startLine": 74,
-          "complexity": 1
-        },
-        {
-          "name": "test_write_tightens_a_pre_existing_world_readable_file",
-          "type": "function_definition",
-          "startLine": 61,
-          "complexity": 1
-        },
-        {
-          "name": "test_require_api_key_returns_the_resolved_key",
-          "type": "function_definition",
-          "startLine": 55,
-          "complexity": 1
-        },
-        {
-          "name": "test_require_api_key_raises_the_setup_message_when_unset",
-          "type": "function_definition",
-          "startLine": 48,
-          "complexity": 1
-        },
-        {
-          "name": "test_resolution_order_is_explicit_then_env_then_file",
-          "type": "function_definition",
-          "startLine": 38,
-          "complexity": 1
-        },
-        {
-          "name": "test_write_then_resolve_round_trips",
-          "type": "function_definition",
-          "startLine": 28,
-          "complexity": 1
-        },
-        {
-          "name": "isolated_config",
-          "type": "function_definition",
-          "startLine": 21,
-          "complexity": 1
-        }
-      ]
-    },
-    {
-      "file": "src/alexandria/utils/embedders.py",
-      "functions": 11,
-      "functionsByType": {
-        "function_definition": 11,
-        "lambda": 0
-      },
-      "functionMetrics": [
-        {
-          "name": "default_embedder",
-          "type": "function_definition",
-          "startLine": 120,
-          "lines": 3,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 1,
-            "n2": 7,
-            "N1": 1,
-            "N2": 9,
-            "volume": 30,
-            "difficulty": 0.643,
-            "effort": 19.286
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 135.286,
-          "maintainabilityIndexGradAiNorm": 79.115,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "embed",
-          "type": "function_definition",
-          "startLine": 94,
-          "lines": 23,
-          "maxNestingDepth": 2,
-          "parameterCount": 2,
-          "cyclomaticComplexity": 4,
-          "halstead": {
-            "n1": 5,
-            "n2": 45,
-            "N1": 6,
-            "N2": 86,
-            "volume": 519.235,
-            "difficulty": 4.778,
-            "effort": 2480.788
-          },
-          "cognitiveComplexity": 7,
-          "maintainabilityIndexGradAiRaw": 86.773,
-          "maintainabilityIndexGradAiNorm": 50.744,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "model_id",
-          "type": "function_definition",
-          "startLine": 91,
-          "lines": 2,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 1,
-            "n2": 4,
-            "N1": 1,
-            "N2": 4,
-            "volume": 11.61,
-            "difficulty": 0.5,
-            "effort": 5.805
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 146.791,
-          "maintainabilityIndexGradAiNorm": 85.843,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "__init__",
-          "type": "function_definition",
-          "startLine": 85,
-          "lines": 4,
-          "maxNestingDepth": 0,
-          "parameterCount": 2,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 0,
-            "n2": 9,
-            "N1": 0,
-            "N2": 15,
-            "volume": 47.549,
-            "difficulty": 0,
-            "effort": 0
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 128.231,
-          "maintainabilityIndexGradAiNorm": 74.989,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "_one",
-          "type": "function_definition",
-          "startLine": 78,
-          "lines": 4,
-          "maxNestingDepth": 0,
-          "parameterCount": 2,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 1,
-            "n2": 23,
-            "N1": 1,
-            "N2": 31,
-            "volume": 146.719,
-            "difficulty": 0.674,
-            "effort": 98.876
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 122.372,
-          "maintainabilityIndexGradAiNorm": 71.563,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "embed",
-          "type": "function_definition",
-          "startLine": 75,
-          "lines": 2,
-          "maxNestingDepth": 0,
-          "parameterCount": 2,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 1,
-            "n2": 10,
-            "N1": 1,
-            "N2": 14,
-            "volume": 51.891,
-            "difficulty": 0.7,
-            "effort": 36.324
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 139.005,
-          "maintainabilityIndexGradAiNorm": 81.289,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "model_id",
-          "type": "function_definition",
-          "startLine": 72,
-          "lines": 2,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 1,
-            "n2": 5,
-            "N1": 1,
-            "N2": 6,
-            "volume": 18.095,
-            "difficulty": 0.6,
-            "effort": 10.857
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 144.484,
-          "maintainabilityIndexGradAiNorm": 84.494,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "__init__",
-          "type": "function_definition",
-          "startLine": 68,
-          "lines": 2,
-          "maxNestingDepth": 0,
-          "parameterCount": 2,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 0,
-            "n2": 7,
-            "N1": 0,
-            "N2": 9,
-            "volume": 25.266,
-            "difficulty": 0,
-            "effort": 0
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 142.748,
-          "maintainabilityIndexGradAiNorm": 83.478,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "_pool",
-          "type": "function_definition",
-          "startLine": 58,
-          "lines": 6,
-          "maxNestingDepth": 1,
-          "parameterCount": 2,
-          "cyclomaticComplexity": 2,
-          "halstead": {
-            "n1": 2,
-            "n2": 18,
-            "N1": 3,
-            "N2": 41,
-            "volume": 190.165,
-            "difficulty": 2.278,
-            "effort": 433.153
-          },
-          "cognitiveComplexity": 1,
-          "maintainabilityIndexGradAiRaw": 114.224,
-          "maintainabilityIndexGradAiNorm": 66.798,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "_request_batches",
-          "type": "function_definition",
-          "startLine": 38,
-          "lines": 18,
-          "maxNestingDepth": 2,
-          "parameterCount": 3,
-          "cyclomaticComplexity": 4,
-          "halstead": {
-            "n1": 5,
-            "n2": 18,
-            "N1": 6,
-            "N2": 61,
-            "volume": 303.079,
-            "difficulty": 8.472,
-            "effort": 2567.75
-          },
-          "cognitiveComplexity": 4,
-          "maintainabilityIndexGradAiRaw": 93.543,
-          "maintainabilityIndexGradAiNorm": 54.704,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "_token_chunks",
-          "type": "function_definition",
-          "startLine": 28,
-          "lines": 8,
-          "maxNestingDepth": 1,
-          "parameterCount": 2,
-          "cyclomaticComplexity": 2,
-          "halstead": {
-            "n1": 2,
-            "n2": 18,
-            "N1": 3,
-            "N2": 36,
-            "volume": 168.555,
-            "difficulty": 2,
-            "effort": 337.11
-          },
-          "cognitiveComplexity": 1,
-          "maintainabilityIndexGradAiRaw": 110.191,
-          "maintainabilityIndexGradAiNorm": 64.439,
-          "isReactComponent": false,
-          "isMonolithic": false
-        }
-      ],
-      "complexity": [
-        {
-          "name": "default_embedder",
-          "type": "function_definition",
-          "startLine": 120,
-          "complexity": 1
-        },
-        {
-          "name": "embed",
-          "type": "function_definition",
-          "startLine": 94,
-          "complexity": 4
-        },
-        {
-          "name": "model_id",
-          "type": "function_definition",
-          "startLine": 91,
-          "complexity": 1
-        },
-        {
-          "name": "__init__",
-          "type": "function_definition",
-          "startLine": 85,
-          "complexity": 1
-        },
-        {
-          "name": "_one",
-          "type": "function_definition",
-          "startLine": 78,
-          "complexity": 1
-        },
-        {
-          "name": "embed",
-          "type": "function_definition",
-          "startLine": 75,
-          "complexity": 1
-        },
-        {
-          "name": "model_id",
-          "type": "function_definition",
-          "startLine": 72,
-          "complexity": 1
-        },
-        {
-          "name": "__init__",
-          "type": "function_definition",
-          "startLine": 68,
-          "complexity": 1
-        },
-        {
-          "name": "_pool",
-          "type": "function_definition",
-          "startLine": 58,
-          "complexity": 2
-        },
-        {
-          "name": "_request_batches",
-          "type": "function_definition",
-          "startLine": 38,
-          "complexity": 4
-        },
-        {
-          "name": "_token_chunks",
-          "type": "function_definition",
-          "startLine": 28,
-          "complexity": 2
-        }
-      ]
-    },
-    {
-      "file": "src/alexandria/utils/embedders_test.py",
-      "functions": 7,
-      "functionsByType": {
-        "function_definition": 7,
-        "lambda": 0
-      },
-      "functionMetrics": [
-        {
-          "name": "test_pool_preserves_one_vector_and_normalizes_multiple",
-          "type": "function_definition",
-          "startLine": 48,
-          "lines": 7,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 0,
-            "n2": 15,
-            "N1": 0,
-            "N2": 39,
-            "volume": 152.369,
-            "difficulty": 0,
-            "effort": 0
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 113.109,
-          "maintainabilityIndexGradAiNorm": 66.146,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "test_request_batches_enforce_api_item_limit",
-          "type": "function_definition",
-          "startLine": 42,
-          "lines": 4,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 0,
-            "n2": 14,
-            "N1": 0,
-            "N2": 23,
-            "volume": 87.569,
-            "difficulty": 0,
-            "effort": 0
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 125.055,
-          "maintainabilityIndexGradAiNorm": 73.132,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "test_request_batches_preserve_order_and_budget",
-          "type": "function_definition",
-          "startLine": 36,
-          "lines": 4,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 0,
-            "n2": 8,
-            "N1": 0,
-            "N2": 21,
-            "volume": 63,
-            "difficulty": 0,
-            "effort": 0
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 126.768,
-          "maintainabilityIndexGradAiNorm": 74.133,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "test_token_chunks_round_trip_long_text",
-          "type": "function_definition",
-          "startLine": 28,
-          "lines": 6,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 0,
-            "n2": 15,
-            "N1": 0,
-            "N2": 26,
-            "volume": 101.579,
-            "difficulty": 0,
-            "effort": 0
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 117.715,
-          "maintainabilityIndexGradAiNorm": 68.839,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "test_model_id_reports_the_hash_dimension",
-          "type": "function_definition",
-          "startLine": 24,
-          "lines": 2,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 0,
-            "n2": 5,
-            "N1": 0,
-            "N2": 5,
-            "volume": 11.61,
-            "difficulty": 0,
-            "effort": 0
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 146.791,
-          "maintainabilityIndexGradAiNorm": 85.843,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "test_different_text_yields_different_vector",
-          "type": "function_definition",
-          "startLine": 19,
-          "lines": 3,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 0,
-            "n2": 9,
-            "N1": 0,
-            "N2": 14,
-            "volume": 44.379,
-            "difficulty": 0,
-            "effort": 0
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 133.25,
-          "maintainabilityIndexGradAiNorm": 77.924,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "test_identical_text_yields_identical_vector",
-          "type": "function_definition",
-          "startLine": 14,
-          "lines": 3,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 0,
-            "n2": 9,
-            "N1": 0,
-            "N2": 14,
-            "volume": 44.379,
-            "difficulty": 0,
-            "effort": 0
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 133.25,
-          "maintainabilityIndexGradAiNorm": 77.924,
-          "isReactComponent": false,
-          "isMonolithic": false
-        }
-      ],
-      "complexity": [
-        {
-          "name": "test_pool_preserves_one_vector_and_normalizes_multiple",
-          "type": "function_definition",
-          "startLine": 48,
-          "complexity": 1
-        },
-        {
-          "name": "test_request_batches_enforce_api_item_limit",
-          "type": "function_definition",
-          "startLine": 42,
-          "complexity": 1
-        },
-        {
-          "name": "test_request_batches_preserve_order_and_budget",
-          "type": "function_definition",
-          "startLine": 36,
-          "complexity": 1
-        },
-        {
-          "name": "test_token_chunks_round_trip_long_text",
-          "type": "function_definition",
-          "startLine": 28,
-          "complexity": 1
-        },
-        {
-          "name": "test_model_id_reports_the_hash_dimension",
-          "type": "function_definition",
-          "startLine": 24,
-          "complexity": 1
-        },
-        {
-          "name": "test_different_text_yields_different_vector",
-          "type": "function_definition",
-          "startLine": 19,
-          "complexity": 1
-        },
-        {
-          "name": "test_identical_text_yields_identical_vector",
-          "type": "function_definition",
-          "startLine": 14,
-          "complexity": 1
-        }
-      ]
-    },
-    {
-      "file": "src/alexandria/utils/merger.py",
-      "functions": 8,
-      "functionsByType": {
-        "function_definition": 8,
-        "lambda": 0
-      },
-      "functionMetrics": [
-        {
-          "name": "default_merger",
-          "type": "function_definition",
-          "startLine": 132,
-          "lines": 3,
-          "maxNestingDepth": 0,
-          "parameterCount": 2,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 1,
-            "n2": 9,
-            "N1": 1,
-            "N2": 14,
-            "volume": 49.829,
-            "difficulty": 0.778,
-            "effort": 38.756
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 132.648,
-          "maintainabilityIndexGradAiNorm": 77.572,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "_generate",
-          "type": "function_definition",
-          "startLine": 109,
-          "lines": 20,
-          "maxNestingDepth": 1,
-          "parameterCount": 4,
-          "cyclomaticComplexity": 3,
-          "halstead": {
-            "n1": 5,
-            "n2": 32,
-            "N1": 6,
-            "N2": 52,
-            "volume": 302.148,
-            "difficulty": 4.063,
-            "effort": 1227.477
-          },
-          "cognitiveComplexity": 5,
-          "maintainabilityIndexGradAiRaw": 92.082,
-          "maintainabilityIndexGradAiNorm": 53.849,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "merge_candidates_to_target",
-          "type": "function_definition",
-          "startLine": 99,
-          "lines": 9,
-          "maxNestingDepth": 1,
-          "parameterCount": 3,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 2,
-            "n2": 20,
-            "N1": 2,
-            "N2": 30,
-            "volume": 142.702,
-            "difficulty": 1.5,
-            "effort": 214.053
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 109.379,
-          "maintainabilityIndexGradAiNorm": 63.964,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "merge",
-          "type": "function_definition",
-          "startLine": 81,
-          "lines": 17,
-          "maxNestingDepth": 1,
-          "parameterCount": 4,
-          "cyclomaticComplexity": 3,
-          "halstead": {
-            "n1": 5,
-            "n2": 25,
-            "N1": 5,
-            "N2": 48,
-            "volume": 260.065,
-            "difficulty": 4.8,
-            "effort": 1248.313
-          },
-          "cognitiveComplexity": 5,
-          "maintainabilityIndexGradAiRaw": 95.495,
-          "maintainabilityIndexGradAiNorm": 55.845,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "model_id",
-          "type": "function_definition",
-          "startLine": 78,
-          "lines": 2,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 1,
-            "n2": 4,
-            "N1": 1,
-            "N2": 5,
-            "volume": 13.932,
-            "difficulty": 0.625,
-            "effort": 8.707
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 145.843,
-          "maintainabilityIndexGradAiNorm": 85.288,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "__init__",
-          "type": "function_definition",
-          "startLine": 71,
-          "lines": 5,
-          "maxNestingDepth": 0,
-          "parameterCount": 3,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 0,
-            "n2": 12,
-            "N1": 0,
-            "N2": 21,
-            "volume": 75.284,
-            "difficulty": 0,
-            "effort": 0
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 122.227,
-          "maintainabilityIndexGradAiNorm": 71.478,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "_target_instructions",
-          "type": "function_definition",
-          "startLine": 55,
-          "lines": 13,
-          "maxNestingDepth": 1,
-          "parameterCount": 2,
-          "cyclomaticComplexity": 2,
-          "halstead": {
-            "n1": 2,
-            "n2": 9,
-            "N1": 2,
-            "N2": 22,
-            "volume": 83.026,
-            "difficulty": 2.444,
-            "effort": 202.953
-          },
-          "cognitiveComplexity": 1,
-          "maintainabilityIndexGradAiRaw": 106.008,
-          "maintainabilityIndexGradAiNorm": 61.993,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "trim_to_last_sentence",
-          "type": "function_definition",
-          "startLine": 36,
-          "lines": 17,
-          "maxNestingDepth": 2,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 5,
-          "halstead": {
-            "n1": 3,
-            "n2": 17,
-            "N1": 7,
-            "N2": 34,
-            "volume": 177.199,
-            "difficulty": 3,
-            "effort": 531.597
-          },
-          "cognitiveComplexity": 5,
-          "maintainabilityIndexGradAiRaw": 97.03,
-          "maintainabilityIndexGradAiNorm": 56.743,
-          "isReactComponent": false,
-          "isMonolithic": false
-        }
-      ],
-      "complexity": [
-        {
-          "name": "default_merger",
-          "type": "function_definition",
-          "startLine": 132,
-          "complexity": 1
-        },
-        {
-          "name": "_generate",
-          "type": "function_definition",
-          "startLine": 109,
-          "complexity": 3
-        },
-        {
-          "name": "merge_candidates_to_target",
-          "type": "function_definition",
-          "startLine": 99,
-          "complexity": 1
-        },
-        {
-          "name": "merge",
-          "type": "function_definition",
-          "startLine": 81,
-          "complexity": 3
-        },
-        {
-          "name": "model_id",
-          "type": "function_definition",
-          "startLine": 78,
-          "complexity": 1
-        },
-        {
-          "name": "__init__",
-          "type": "function_definition",
-          "startLine": 71,
-          "complexity": 1
-        },
-        {
-          "name": "_target_instructions",
-          "type": "function_definition",
-          "startLine": 55,
-          "complexity": 2
-        },
-        {
-          "name": "trim_to_last_sentence",
-          "type": "function_definition",
-          "startLine": 36,
-          "complexity": 5
-        }
-      ]
-    },
-    {
-      "file": "src/alexandria/utils/merger_test.py",
-      "functions": 6,
-      "functionsByType": {
-        "function_definition": 6,
-        "lambda": 0
-      },
-      "functionMetrics": [
-        {
-          "name": "test_trim_returns_stripped_text_when_no_boundary_found",
-          "type": "function_definition",
-          "startLine": 34,
-          "lines": 4,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 0,
-            "n2": 5,
-            "N1": 0,
-            "N2": 7,
-            "volume": 16.253,
-            "difficulty": 0,
-            "effort": 0
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 133.813,
-          "maintainabilityIndexGradAiNorm": 78.253,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "test_trim_keeps_closing_paren_after_period",
-          "type": "function_definition",
-          "startLine": 28,
-          "lines": 4,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 0,
-            "n2": 5,
-            "N1": 0,
-            "N2": 7,
-            "volume": 16.253,
-            "difficulty": 0,
-            "effort": 0
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 133.813,
-          "maintainabilityIndexGradAiNorm": 78.253,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "test_trim_cuts_on_newline_boundary_keeping_the_period",
-          "type": "function_definition",
-          "startLine": 22,
-          "lines": 4,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 0,
-            "n2": 5,
-            "N1": 0,
-            "N2": 7,
-            "volume": 16.253,
-            "difficulty": 0,
-            "effort": 0
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 133.813,
-          "maintainabilityIndexGradAiNorm": 78.253,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "test_trim_cuts_dangling_fragment_at_last_sentence_boundary",
-          "type": "function_definition",
-          "startLine": 16,
-          "lines": 4,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 0,
-            "n2": 5,
-            "N1": 0,
-            "N2": 7,
-            "volume": 16.253,
-            "difficulty": 0,
-            "effort": 0
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 133.813,
-          "maintainabilityIndexGradAiNorm": 78.253,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "test_trim_keeps_text_ending_on_quote",
-          "type": "function_definition",
-          "startLine": 12,
-          "lines": 2,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 0,
-            "n2": 4,
-            "N1": 0,
-            "N2": 5,
-            "volume": 10,
-            "difficulty": 0,
-            "effort": 0
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 147.568,
-          "maintainabilityIndexGradAiNorm": 86.297,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "test_trim_keeps_text_already_ending_on_final_punctuation",
-          "type": "function_definition",
-          "startLine": 6,
-          "lines": 4,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 0,
-            "n2": 5,
-            "N1": 0,
-            "N2": 7,
-            "volume": 16.253,
-            "difficulty": 0,
-            "effort": 0
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 133.813,
-          "maintainabilityIndexGradAiNorm": 78.253,
-          "isReactComponent": false,
-          "isMonolithic": false
-        }
-      ],
-      "complexity": [
-        {
-          "name": "test_trim_returns_stripped_text_when_no_boundary_found",
-          "type": "function_definition",
-          "startLine": 34,
-          "complexity": 1
-        },
-        {
-          "name": "test_trim_keeps_closing_paren_after_period",
-          "type": "function_definition",
-          "startLine": 28,
-          "complexity": 1
-        },
-        {
-          "name": "test_trim_cuts_on_newline_boundary_keeping_the_period",
-          "type": "function_definition",
-          "startLine": 22,
-          "complexity": 1
-        },
-        {
-          "name": "test_trim_cuts_dangling_fragment_at_last_sentence_boundary",
-          "type": "function_definition",
-          "startLine": 16,
-          "complexity": 1
-        },
-        {
-          "name": "test_trim_keeps_text_ending_on_quote",
-          "type": "function_definition",
-          "startLine": 12,
-          "complexity": 1
-        },
-        {
-          "name": "test_trim_keeps_text_already_ending_on_final_punctuation",
-          "type": "function_definition",
-          "startLine": 6,
-          "complexity": 1
-        }
-      ]
-    },
-    {
-      "file": "src/alexandria/utils/tokens.py",
-      "functions": 2,
-      "functionsByType": {
-        "function_definition": 2,
-        "lambda": 0
-      },
-      "functionMetrics": [
-        {
-          "name": "truncate_tokens",
-          "type": "function_definition",
-          "startLine": 15,
-          "lines": 18,
-          "maxNestingDepth": 3,
-          "parameterCount": 2,
-          "cyclomaticComplexity": 6,
-          "halstead": {
-            "n1": 5,
-            "n2": 24,
-            "N1": 10,
-            "N2": 58,
-            "volume": 330.343,
-            "difficulty": 6.042,
-            "effort": 1995.821
-          },
-          "cognitiveComplexity": 9,
-          "maintainabilityIndexGradAiRaw": 92.635,
-          "maintainabilityIndexGradAiNorm": 54.173,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "count_tokens",
-          "type": "function_definition",
-          "startLine": 10,
-          "lines": 3,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 1,
-            "n2": 9,
-            "N1": 1,
-            "N2": 10,
-            "volume": 36.541,
-            "difficulty": 0.556,
-            "effort": 20.301
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 134.261,
-          "maintainabilityIndexGradAiNorm": 78.515,
-          "isReactComponent": false,
-          "isMonolithic": false
-        }
-      ],
-      "complexity": [
-        {
-          "name": "truncate_tokens",
-          "type": "function_definition",
-          "startLine": 15,
-          "complexity": 6
-        },
-        {
-          "name": "count_tokens",
-          "type": "function_definition",
-          "startLine": 10,
-          "complexity": 1
-        }
-      ]
-    },
-    {
-      "file": "src/alexandria/utils/tokens_test.py",
-      "functions": 4,
-      "functionsByType": {
-        "function_definition": 4,
-        "lambda": 0
-      },
-      "functionMetrics": [
-        {
-          "name": "test_truncate_tokens_leaves_text_within_the_limit_unchanged",
-          "type": "function_definition",
-          "startLine": 30,
-          "lines": 4,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 0,
-            "n2": 6,
-            "N1": 0,
-            "N2": 9,
-            "volume": 23.265,
-            "difficulty": 0,
-            "effort": 0
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 131.948,
-          "maintainabilityIndexGradAiNorm": 77.163,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "test_truncate_tokens_enforces_the_limit_and_preserves_trailing_newline",
-          "type": "function_definition",
-          "startLine": 20,
-          "lines": 8,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 0,
-            "n2": 10,
-            "N1": 0,
-            "N2": 16,
-            "volume": 53.151,
-            "difficulty": 0,
-            "effort": 0
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 116.423,
-          "maintainabilityIndexGradAiNorm": 68.084,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "test_literal_special_token_text_is_counted_as_ordinary_input",
-          "type": "function_definition",
-          "startLine": 13,
-          "lines": 5,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 0,
-            "n2": 13,
-            "N1": 0,
-            "N2": 20,
-            "volume": 74.009,
-            "difficulty": 0,
-            "effort": 0
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 122.315,
-          "maintainabilityIndexGradAiNorm": 71.529,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "test_count_tokens_matches_cl100k_base",
-          "type": "function_definition",
-          "startLine": 8,
-          "lines": 3,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 0,
-            "n2": 9,
-            "N1": 0,
-            "N2": 12,
-            "volume": 38.039,
-            "difficulty": 0,
-            "effort": 0
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 134.052,
-          "maintainabilityIndexGradAiNorm": 78.393,
-          "isReactComponent": false,
-          "isMonolithic": false
-        }
-      ],
-      "complexity": [
-        {
-          "name": "test_truncate_tokens_leaves_text_within_the_limit_unchanged",
-          "type": "function_definition",
-          "startLine": 30,
-          "complexity": 1
-        },
-        {
-          "name": "test_truncate_tokens_enforces_the_limit_and_preserves_trailing_newline",
-          "type": "function_definition",
-          "startLine": 20,
-          "complexity": 1
-        },
-        {
-          "name": "test_literal_special_token_text_is_counted_as_ordinary_input",
-          "type": "function_definition",
-          "startLine": 13,
-          "complexity": 1
-        },
-        {
-          "name": "test_count_tokens_matches_cl100k_base",
-          "type": "function_definition",
-          "startLine": 8,
           "complexity": 1
         }
       ]
@@ -37444,36 +37444,6 @@
       "riskScore": 2.1
     },
     {
-      "file": "src/alexandria/ir/document.py",
-      "name": "_validate",
-      "startLine": 114,
-      "cyclomaticComplexity": 3,
-      "verificationScore": 0.3,
-      "evidence": "paired_file_only",
-      "pairedTestPath": "src/alexandria/ir/document_test.py",
-      "riskScore": 2.1
-    },
-    {
-      "file": "src/alexandria/ir/document.py",
-      "name": "leaves",
-      "startLine": 94,
-      "cyclomaticComplexity": 3,
-      "verificationScore": 0.3,
-      "evidence": "paired_file_only",
-      "pairedTestPath": "src/alexandria/ir/document_test.py",
-      "riskScore": 2.1
-    },
-    {
-      "file": "src/alexandria/ir/document.py",
-      "name": "__eq__",
-      "startLine": 50,
-      "cyclomaticComplexity": 3,
-      "verificationScore": 0.3,
-      "evidence": "paired_file_only",
-      "pairedTestPath": "src/alexandria/ir/document_test.py",
-      "riskScore": 2.1
-    },
-    {
       "file": "src/alexandria/utils/config.py",
       "name": "read_config_key",
       "startLine": 24,
@@ -37501,6 +37471,36 @@
       "verificationScore": 0.3,
       "evidence": "paired_file_only",
       "pairedTestPath": "src/alexandria/utils/merger_test.py",
+      "riskScore": 2.1
+    },
+    {
+      "file": "src/alexandria/ir/document.py",
+      "name": "_validate",
+      "startLine": 114,
+      "cyclomaticComplexity": 3,
+      "verificationScore": 0.3,
+      "evidence": "paired_file_only",
+      "pairedTestPath": "src/alexandria/ir/document_test.py",
+      "riskScore": 2.1
+    },
+    {
+      "file": "src/alexandria/ir/document.py",
+      "name": "leaves",
+      "startLine": 94,
+      "cyclomaticComplexity": 3,
+      "verificationScore": 0.3,
+      "evidence": "paired_file_only",
+      "pairedTestPath": "src/alexandria/ir/document_test.py",
+      "riskScore": 2.1
+    },
+    {
+      "file": "src/alexandria/ir/document.py",
+      "name": "__eq__",
+      "startLine": 50,
+      "cyclomaticComplexity": 3,
+      "verificationScore": 0.3,
+      "evidence": "paired_file_only",
+      "pairedTestPath": "src/alexandria/ir/document_test.py",
       "riskScore": 2.1
     },
     {
@@ -38015,6 +38015,56 @@
       "riskScore": 1.4
     },
     {
+      "file": "src/alexandria/ops/report.py",
+      "name": "_append_max_regression",
+      "startLine": 215,
+      "cyclomaticComplexity": 2,
+      "verificationScore": 0.3,
+      "evidence": "paired_file_only",
+      "pairedTestPath": "src/alexandria/ops/report_test.py",
+      "riskScore": 1.4
+    },
+    {
+      "file": "src/alexandria/ops/report.py",
+      "name": "_append_min_regression",
+      "startLine": 200,
+      "cyclomaticComplexity": 2,
+      "verificationScore": 0.3,
+      "evidence": "paired_file_only",
+      "pairedTestPath": "src/alexandria/ops/report_test.py",
+      "riskScore": 1.4
+    },
+    {
+      "file": "src/alexandria/ops/report.py",
+      "name": "_merger_identity",
+      "startLine": 191,
+      "cyclomaticComplexity": 2,
+      "verificationScore": 0.3,
+      "evidence": "paired_file_only",
+      "pairedTestPath": "src/alexandria/ops/report_test.py",
+      "riskScore": 1.4
+    },
+    {
+      "file": "src/alexandria/ops/report.py",
+      "name": "_instruction_quality",
+      "startLine": 176,
+      "cyclomaticComplexity": 2,
+      "verificationScore": 0.3,
+      "evidence": "paired_file_only",
+      "pairedTestPath": "src/alexandria/ops/report_test.py",
+      "riskScore": 1.4
+    },
+    {
+      "file": "src/alexandria/utils/merger.py",
+      "name": "_target_instructions",
+      "startLine": 55,
+      "cyclomaticComplexity": 2,
+      "verificationScore": 0.3,
+      "evidence": "paired_file_only",
+      "pairedTestPath": "src/alexandria/utils/merger_test.py",
+      "riskScore": 1.4
+    },
+    {
       "file": "src/alexandria/ir/contracts.py",
       "name": "_reject_duplicate_targets",
       "startLine": 172,
@@ -38092,56 +38142,6 @@
       "verificationScore": 0.3,
       "evidence": "paired_file_only",
       "pairedTestPath": "src/alexandria/ir/registry_test.py",
-      "riskScore": 1.4
-    },
-    {
-      "file": "src/alexandria/ops/report.py",
-      "name": "_append_max_regression",
-      "startLine": 215,
-      "cyclomaticComplexity": 2,
-      "verificationScore": 0.3,
-      "evidence": "paired_file_only",
-      "pairedTestPath": "src/alexandria/ops/report_test.py",
-      "riskScore": 1.4
-    },
-    {
-      "file": "src/alexandria/ops/report.py",
-      "name": "_append_min_regression",
-      "startLine": 200,
-      "cyclomaticComplexity": 2,
-      "verificationScore": 0.3,
-      "evidence": "paired_file_only",
-      "pairedTestPath": "src/alexandria/ops/report_test.py",
-      "riskScore": 1.4
-    },
-    {
-      "file": "src/alexandria/ops/report.py",
-      "name": "_merger_identity",
-      "startLine": 191,
-      "cyclomaticComplexity": 2,
-      "verificationScore": 0.3,
-      "evidence": "paired_file_only",
-      "pairedTestPath": "src/alexandria/ops/report_test.py",
-      "riskScore": 1.4
-    },
-    {
-      "file": "src/alexandria/ops/report.py",
-      "name": "_instruction_quality",
-      "startLine": 176,
-      "cyclomaticComplexity": 2,
-      "verificationScore": 0.3,
-      "evidence": "paired_file_only",
-      "pairedTestPath": "src/alexandria/ops/report_test.py",
-      "riskScore": 1.4
-    },
-    {
-      "file": "src/alexandria/utils/merger.py",
-      "name": "_target_instructions",
-      "startLine": 55,
-      "cyclomaticComplexity": 2,
-      "verificationScore": 0.3,
-      "evidence": "paired_file_only",
-      "pairedTestPath": "src/alexandria/utils/merger_test.py",
       "riskScore": 1.4
     },
     {
@@ -38287,15 +38287,6 @@
     {
       "file": "conftest.py",
       "name": "pytest_configure",
-      "startLine": 22,
-      "cyclomaticComplexity": 1,
-      "verificationScore": 0,
-      "evidence": "none",
-      "riskScore": 1
-    },
-    {
-      "file": "examples/reduce_prompt.py",
-      "name": "main",
       "startLine": 22,
       "cyclomaticComplexity": 1,
       "verificationScore": 0,
@@ -38477,6 +38468,15 @@
       "file": "scripts/summarize_prompt_compression_benchmark.py",
       "name": "_parse_args",
       "startLine": 13,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "examples/reduce_prompt.py",
+      "name": "main",
+      "startLine": 22,
       "cyclomaticComplexity": 1,
       "verificationScore": 0,
       "evidence": "none",
@@ -38846,16 +38846,6 @@
       "riskScore": 0.7
     },
     {
-      "file": "benchmarks/longbench_v2/cases.py",
-      "name": "to_case",
-      "startLine": 37,
-      "cyclomaticComplexity": 1,
-      "verificationScore": 0.3,
-      "evidence": "paired_file_only",
-      "pairedTestPath": "benchmarks/longbench_v2/cases_test.py",
-      "riskScore": 0.7
-    },
-    {
       "file": "benchmarks/babilong_8k/cases.py",
       "name": "to_case",
       "startLine": 56,
@@ -38923,6 +38913,16 @@
       "verificationScore": 0.3,
       "evidence": "paired_file_only",
       "pairedTestPath": "benchmarks/prompt_compression/store_test.py",
+      "riskScore": 0.7
+    },
+    {
+      "file": "benchmarks/longbench_v2/cases.py",
+      "name": "to_case",
+      "startLine": 37,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0.3,
+      "evidence": "paired_file_only",
+      "pairedTestPath": "benchmarks/longbench_v2/cases_test.py",
       "riskScore": 0.7
     },
     {
@@ -39053,6 +39053,156 @@
       "verificationScore": 0.3,
       "evidence": "paired_file_only",
       "pairedTestPath": "src/alexandria/cli/verbose_test.py",
+      "riskScore": 0.7
+    },
+    {
+      "file": "src/alexandria/ops/pipe.py",
+      "name": "_required_scorers",
+      "startLine": 191,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0.3,
+      "evidence": "paired_file_only",
+      "pairedTestPath": "src/alexandria/ops/pipe_test.py",
+      "riskScore": 0.7
+    },
+    {
+      "file": "src/alexandria/ops/pipe.py",
+      "name": "_finalize_metrics",
+      "startLine": 144,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0.3,
+      "evidence": "paired_file_only",
+      "pairedTestPath": "src/alexandria/ops/pipe_test.py",
+      "riskScore": 0.7
+    },
+    {
+      "file": "src/alexandria/ops/pipe.py",
+      "name": "_target_merge_metrics",
+      "startLine": 131,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0.3,
+      "evidence": "paired_file_only",
+      "pairedTestPath": "src/alexandria/ops/pipe_test.py",
+      "riskScore": 0.7
+    },
+    {
+      "file": "src/alexandria/ops/pipe.py",
+      "name": "_retry_exhaustively",
+      "startLine": 113,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0.3,
+      "evidence": "paired_file_only",
+      "pairedTestPath": "src/alexandria/ops/pipe_test.py",
+      "riskScore": 0.7
+    },
+    {
+      "file": "src/alexandria/ops/pipe.py",
+      "name": "reduced_tokens",
+      "startLine": 52,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0.3,
+      "evidence": "paired_file_only",
+      "pairedTestPath": "src/alexandria/ops/pipe_test.py",
+      "riskScore": 0.7
+    },
+    {
+      "file": "src/alexandria/ops/pipe.py",
+      "name": "source_tokens",
+      "startLine": 48,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0.3,
+      "evidence": "paired_file_only",
+      "pairedTestPath": "src/alexandria/ops/pipe_test.py",
+      "riskScore": 0.7
+    },
+    {
+      "file": "src/alexandria/ops/report.py",
+      "name": "_round_score",
+      "startLine": 187,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0.3,
+      "evidence": "paired_file_only",
+      "pairedTestPath": "src/alexandria/ops/report_test.py",
+      "riskScore": 0.7
+    },
+    {
+      "file": "src/alexandria/utils/embedders.py",
+      "name": "default_embedder",
+      "startLine": 120,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0.3,
+      "evidence": "paired_file_only",
+      "pairedTestPath": "src/alexandria/utils/embedders_test.py",
+      "riskScore": 0.7
+    },
+    {
+      "file": "src/alexandria/utils/embedders.py",
+      "name": "__init__",
+      "startLine": 85,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0.3,
+      "evidence": "paired_file_only",
+      "pairedTestPath": "src/alexandria/utils/embedders_test.py",
+      "riskScore": 0.7
+    },
+    {
+      "file": "src/alexandria/utils/embedders.py",
+      "name": "_one",
+      "startLine": 78,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0.3,
+      "evidence": "paired_file_only",
+      "pairedTestPath": "src/alexandria/utils/embedders_test.py",
+      "riskScore": 0.7
+    },
+    {
+      "file": "src/alexandria/utils/embedders.py",
+      "name": "__init__",
+      "startLine": 68,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0.3,
+      "evidence": "paired_file_only",
+      "pairedTestPath": "src/alexandria/utils/embedders_test.py",
+      "riskScore": 0.7
+    },
+    {
+      "file": "src/alexandria/utils/merger.py",
+      "name": "default_merger",
+      "startLine": 132,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0.3,
+      "evidence": "paired_file_only",
+      "pairedTestPath": "src/alexandria/utils/merger_test.py",
+      "riskScore": 0.7
+    },
+    {
+      "file": "src/alexandria/utils/merger.py",
+      "name": "merge_candidates_to_target",
+      "startLine": 99,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0.3,
+      "evidence": "paired_file_only",
+      "pairedTestPath": "src/alexandria/utils/merger_test.py",
+      "riskScore": 0.7
+    },
+    {
+      "file": "src/alexandria/utils/merger.py",
+      "name": "model_id",
+      "startLine": 78,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0.3,
+      "evidence": "paired_file_only",
+      "pairedTestPath": "src/alexandria/utils/merger_test.py",
+      "riskScore": 0.7
+    },
+    {
+      "file": "src/alexandria/utils/merger.py",
+      "name": "__init__",
+      "startLine": 71,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0.3,
+      "evidence": "paired_file_only",
+      "pairedTestPath": "src/alexandria/utils/merger_test.py",
       "riskScore": 0.7
     },
     {
@@ -39316,156 +39466,6 @@
       "riskScore": 0.7
     },
     {
-      "file": "src/alexandria/ops/pipe.py",
-      "name": "_required_scorers",
-      "startLine": 191,
-      "cyclomaticComplexity": 1,
-      "verificationScore": 0.3,
-      "evidence": "paired_file_only",
-      "pairedTestPath": "src/alexandria/ops/pipe_test.py",
-      "riskScore": 0.7
-    },
-    {
-      "file": "src/alexandria/ops/pipe.py",
-      "name": "_finalize_metrics",
-      "startLine": 144,
-      "cyclomaticComplexity": 1,
-      "verificationScore": 0.3,
-      "evidence": "paired_file_only",
-      "pairedTestPath": "src/alexandria/ops/pipe_test.py",
-      "riskScore": 0.7
-    },
-    {
-      "file": "src/alexandria/ops/pipe.py",
-      "name": "_target_merge_metrics",
-      "startLine": 131,
-      "cyclomaticComplexity": 1,
-      "verificationScore": 0.3,
-      "evidence": "paired_file_only",
-      "pairedTestPath": "src/alexandria/ops/pipe_test.py",
-      "riskScore": 0.7
-    },
-    {
-      "file": "src/alexandria/ops/pipe.py",
-      "name": "_retry_exhaustively",
-      "startLine": 113,
-      "cyclomaticComplexity": 1,
-      "verificationScore": 0.3,
-      "evidence": "paired_file_only",
-      "pairedTestPath": "src/alexandria/ops/pipe_test.py",
-      "riskScore": 0.7
-    },
-    {
-      "file": "src/alexandria/ops/pipe.py",
-      "name": "reduced_tokens",
-      "startLine": 52,
-      "cyclomaticComplexity": 1,
-      "verificationScore": 0.3,
-      "evidence": "paired_file_only",
-      "pairedTestPath": "src/alexandria/ops/pipe_test.py",
-      "riskScore": 0.7
-    },
-    {
-      "file": "src/alexandria/ops/pipe.py",
-      "name": "source_tokens",
-      "startLine": 48,
-      "cyclomaticComplexity": 1,
-      "verificationScore": 0.3,
-      "evidence": "paired_file_only",
-      "pairedTestPath": "src/alexandria/ops/pipe_test.py",
-      "riskScore": 0.7
-    },
-    {
-      "file": "src/alexandria/ops/report.py",
-      "name": "_round_score",
-      "startLine": 187,
-      "cyclomaticComplexity": 1,
-      "verificationScore": 0.3,
-      "evidence": "paired_file_only",
-      "pairedTestPath": "src/alexandria/ops/report_test.py",
-      "riskScore": 0.7
-    },
-    {
-      "file": "src/alexandria/utils/embedders.py",
-      "name": "default_embedder",
-      "startLine": 120,
-      "cyclomaticComplexity": 1,
-      "verificationScore": 0.3,
-      "evidence": "paired_file_only",
-      "pairedTestPath": "src/alexandria/utils/embedders_test.py",
-      "riskScore": 0.7
-    },
-    {
-      "file": "src/alexandria/utils/embedders.py",
-      "name": "__init__",
-      "startLine": 85,
-      "cyclomaticComplexity": 1,
-      "verificationScore": 0.3,
-      "evidence": "paired_file_only",
-      "pairedTestPath": "src/alexandria/utils/embedders_test.py",
-      "riskScore": 0.7
-    },
-    {
-      "file": "src/alexandria/utils/embedders.py",
-      "name": "_one",
-      "startLine": 78,
-      "cyclomaticComplexity": 1,
-      "verificationScore": 0.3,
-      "evidence": "paired_file_only",
-      "pairedTestPath": "src/alexandria/utils/embedders_test.py",
-      "riskScore": 0.7
-    },
-    {
-      "file": "src/alexandria/utils/embedders.py",
-      "name": "__init__",
-      "startLine": 68,
-      "cyclomaticComplexity": 1,
-      "verificationScore": 0.3,
-      "evidence": "paired_file_only",
-      "pairedTestPath": "src/alexandria/utils/embedders_test.py",
-      "riskScore": 0.7
-    },
-    {
-      "file": "src/alexandria/utils/merger.py",
-      "name": "default_merger",
-      "startLine": 132,
-      "cyclomaticComplexity": 1,
-      "verificationScore": 0.3,
-      "evidence": "paired_file_only",
-      "pairedTestPath": "src/alexandria/utils/merger_test.py",
-      "riskScore": 0.7
-    },
-    {
-      "file": "src/alexandria/utils/merger.py",
-      "name": "merge_candidates_to_target",
-      "startLine": 99,
-      "cyclomaticComplexity": 1,
-      "verificationScore": 0.3,
-      "evidence": "paired_file_only",
-      "pairedTestPath": "src/alexandria/utils/merger_test.py",
-      "riskScore": 0.7
-    },
-    {
-      "file": "src/alexandria/utils/merger.py",
-      "name": "model_id",
-      "startLine": 78,
-      "cyclomaticComplexity": 1,
-      "verificationScore": 0.3,
-      "evidence": "paired_file_only",
-      "pairedTestPath": "src/alexandria/utils/merger_test.py",
-      "riskScore": 0.7
-    },
-    {
-      "file": "src/alexandria/utils/merger.py",
-      "name": "__init__",
-      "startLine": 71,
-      "cyclomaticComplexity": 1,
-      "verificationScore": 0.3,
-      "evidence": "paired_file_only",
-      "pairedTestPath": "src/alexandria/utils/merger_test.py",
-      "riskScore": 0.7
-    },
-    {
       "file": "src/alexandria/ops/features/compare.py",
       "name": "_pooled_embedding",
       "startLine": 60,
@@ -39726,16 +39726,6 @@
       "riskScore": 0
     },
     {
-      "file": "src/alexandria/ir/document.py",
-      "name": "apply",
-      "startLine": 123,
-      "cyclomaticComplexity": 6,
-      "verificationScore": 1,
-      "evidence": "referenced_in_test",
-      "pairedTestPath": "src/alexandria/ir/document_test.py",
-      "riskScore": 0
-    },
-    {
       "file": "src/alexandria/utils/tokens.py",
       "name": "truncate_tokens",
       "startLine": 15,
@@ -39743,6 +39733,16 @@
       "verificationScore": 1,
       "evidence": "referenced_in_test",
       "pairedTestPath": "src/alexandria/utils/tokens_test.py",
+      "riskScore": 0
+    },
+    {
+      "file": "src/alexandria/ir/document.py",
+      "name": "apply",
+      "startLine": 123,
+      "cyclomaticComplexity": 6,
+      "verificationScore": 1,
+      "evidence": "referenced_in_test",
+      "pairedTestPath": "src/alexandria/ir/document_test.py",
       "riskScore": 0
     },
     {
