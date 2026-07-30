@@ -3,7 +3,7 @@
 exports[`analyzeRepo snapshot > produces stable report structure for fixture repo 1`] = `
 {
   "analysis_timestamp": "<timestamp>",
-  "analyzer_version": "0.1.0",
+  "analyzer_version": "0.2.0",
   "complexity": {
     "average": 1.1,
     "highComplexityFunctions": 0,
