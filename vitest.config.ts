@@ -14,6 +14,13 @@ export default defineConfig({
     exclude: ["**/node_modules/**", "**/dist/**", "**/fixtures/**"],
     environment: "node",
     passWithNoTests: true,
+    // analyzeRepo() spawns a real jscpd subprocess, so those tests take ~4.4s
+    // each on an idle machine — 88% of vitest's 5s default. Under full-suite
+    // parallelism they tipped over and failed intermittently (reproducible on a
+    // clean tree, so pre-existing rather than introduced by any one change).
+    // Raised for headroom; nothing about what is measured changes.
+    testTimeout: 30_000,
+    hookTimeout: 30_000,
   },
   resolve: {
     alias: {
