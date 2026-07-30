@@ -3,11 +3,21 @@
 Figure 3 — analysis time vs source LOC, log-log, with fitted trend.
 
 Plots ANALYSIS TIME WITH THE DUPLICATION STEP EXCLUDED for every repository, so
-the y axis measures the same quantity everywhere. jscpd's contribution is
-subtracted using its separately measured per-repo runtime; where jscpd was
-killed by the engine's 60 s timeout instead of completing, the subtracted amount
-is that 60 s and the point is marked, because its wall clock is dominated by a
-fixed timeout rather than by work proportional to LOC.
+the y axis measures the same quantity everywhere.
+
+What the y value IS:   wall clock of analyzeRepo() minus the separately measured
+                       jscpd runtime for the same repository, i.e. parse +
+                       structural/cognitive/Halstead extraction + git + smells.
+What it is NOT:        it excludes duplication detection entirely, and excludes
+                       clone/fetch time (all repositories were already on disk).
+
+As of analyzer_version 0.2.0 every point completed its duplication step, so the
+"timed out" series does not render. Before the jscpd ignore-glob fix (Bug 1) the
+self-analysis point was killed by the engine's 60 s timeout and had to be marked,
+because its wall clock was dominated by a fixed timeout rather than by work
+proportional to LOC. That marker is driven by `jscpd_status` in the CSV, so it
+reappears automatically if the condition ever returns -- it is not hard-coded
+either way.
 
 Every repository analyzed in this run is plotted. No point is excluded.
 
@@ -87,6 +97,20 @@ ax.set_title(f"Figure 3 — Analysis time vs repository size\n"
              f"n={len(rows)} repositories, analyzer_version {ANALYZER_VERSION}")
 ax.grid(alpha=0.25, linewidth=0.5, which="both")
 ax.legend(loc="upper left", fontsize=8.5, framealpha=0.95)
+
+# State the measured quantity on the figure itself, so it cannot be misread once
+# the image is separated from this script or from timing_data.csv.
+n_timed_out = int(timed_out.sum())
+fig.text(
+    0.5, -0.02,
+    "y = analyzeRepo() wall clock minus separately measured jscpd runtime "
+    "(duplication excluded for every point, uniformly).\n"
+    "Excludes clone/fetch time; all repositories were already on disk. "
+    + (f"{n_timed_out} point(s) hit the 60 s duplication timeout."
+       if n_timed_out else
+       "All points completed the duplication step; none is timeout-dominated."),
+    ha="center", va="top", fontsize=7.5, color="#4a5568",
+)
 fig.tight_layout()
 
 for ext in ("svg", "pdf", "png"):

@@ -45,6 +45,7 @@ await mkdir(outReports, { recursive: true });
 
 const timing = [];
 const rows = [];
+const integrity = [];
 
 async function run(label, repoPath, outFile) {
   // jscpd measured on its own so Figure 3's y axis excludes duplication.
@@ -69,11 +70,27 @@ async function run(label, repoPath, outFile) {
     duplication_pct: report.duplication?.percentage ?? "",
   });
 
+  // Integrity discipline: both are recorded per repo, and `filesSkipped` is
+  // reported as "absent" vs a number, since the key is omitted when nothing was
+  // skipped and an absent key must not be read as a zero that was measured.
+  integrity.push({
+    repo: label,
+    commit: report.source?.commit ?? "(local)",
+    filesSkipped:
+      report.filesSkipped === undefined ? "none (key absent)" : report.filesSkipped,
+    analysisSkipped: report.analysisSkipped
+      ? `FIRED: ${report.analysisSkipped.id}`
+      : "not fired",
+    duplication: report.duplication?.percentage ?? "null",
+  });
+
   console.error(
     `  ${label.padEnd(24)} files=${String(report.filesAnalyzed).padStart(4)} ` +
       `sourceLOC=${String(report.profile.sourceLOC).padStart(6)} ` +
       `fn=${String(report.totals.functions).padStart(5)} ` +
       `dup=${report.duplication?.percentage ?? "null"}% ` +
+      `skipped=${report.filesSkipped === undefined ? "absent" : report.filesSkipped} ` +
+      `analysisSkipped=${report.analysisSkipped ? report.analysisSkipped.id : "no"} ` +
       `wall=${wallS.toFixed(2)}s jscpd=${jscpdS.toFixed(2)}s ` +
       `analyzer=${report.analyzer_version}`,
   );
@@ -137,5 +154,19 @@ await writeFile(
     ...timing.map((t) => TIMING_HEADERS.map((h) => t[h]).join(",")),
   ].join("\n") + "\n",
 );
+
+console.error("\n=== integrity check (per repo) ===");
+console.error(
+  "repo".padEnd(24) + "commit".padEnd(14) + "filesSkipped".padEnd(20) +
+  "analysisSkipped".padEnd(18) + "duplication",
+);
+for (const i of integrity) {
+  console.error(
+    i.repo.padEnd(24) + String(i.commit).slice(0, 12).padEnd(14) +
+    String(i.filesSkipped).padEnd(20) + String(i.analysisSkipped).padEnd(18) +
+    i.duplication,
+  );
+}
+await writeFile(path.join(HERE, "integrity.json"), JSON.stringify(integrity, null, 2) + "\n");
 
 console.error("\nwrote reports/, summary.csv, timing_data.csv, report.json, reports/ts-repo-metrics.json");
