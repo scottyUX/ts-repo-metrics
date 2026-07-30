@@ -1,0 +1,24 @@
+eslint-plugin-sonarjs 3.0.7 total rules exposed: 269
+metric-ish rule names: [
+ "max-lines",
+ "max-lines-per-function",
+ "expression-complexity",
+ "no-duplicate-string",
+ "call-argument-line",
+ "cyclomatic-complexity",
+ "no-duplicated-branches",
+ "no-unenclosed-multiline-block",
+ "cognitive-complexity",
+ "no-all-duplicated-branches",
+ "no-same-line-conditional",
+ "no-duplicate-in-composite",
+ "regex-complexity",
+ "duplicates-in-character-class"
+]
+
+rules declaring requiresTypeChecking: 61 of 269
+configs exported: recommended, recommended-legacy
+FREE plugin rules matching react|hook|jsx|component: ["jsx-no-leaked-render","no-hook-setter-in-body","no-useless-react-setstate"]
+
+For contrast, README lists these Sonar rule IDs as delegated to React plugins (i.e. present in SonarQube tier, absent here):
+S6440 S6441 S6477 S6478 S6479 S6481 

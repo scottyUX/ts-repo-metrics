@@ -1,0 +1,1048 @@
+{
+  "engine": {
+    "git_sha": "01c99a2bb2a73ce22135a605ddac4bdc9d05d444",
+    "analyzer_version": "0.2.0"
+  },
+  "line_tolerance": 2,
+  "corpus": {
+    "ts-repo-metrics": {
+      "analyzer_version": "0.2.0",
+      "files_analyzed": 366,
+      "total_functions": 2293,
+      "profile": {
+        "totalFiles": 366,
+        "tsFiles": 216,
+        "tsxFiles": 133,
+        "jsFiles": 3,
+        "jsxFiles": 1,
+        "pyFiles": 13,
+        "testFiles": 61,
+        "totalLOC": 48239,
+        "sourceLOC": 43656,
+        "testLOC": 4583
+      },
+      "commit": "01c99a2bb2a73ce22135a605ddac4bdc9d05d444",
+      "url": "https://github.com/scottyUX/ts-repo-metrics",
+      "path": "/Users/lunawang/Documents/GitHub/ts-repo-metrics",
+      "ts_tsx_files": 343,
+      "inventory_functions": 2168,
+      "ours_records_in_scope": 2168,
+      "ours_records_out_of_scope": 125,
+      "tsc_records": 2168,
+      "sonar_records": 710,
+      "esc_records": 2114,
+      "esc_transpiled_records": 2164,
+      "collector_errors": 3,
+      "collector_error_sample": [
+        {
+          "file": "packages/engine/src/collect/pythonFrameworkDetection.ts",
+          "stage": "escomplex-raw",
+          "message": "state.generator[node.type] is not a function"
+        },
+        {
+          "file": "packages/engine/src/collect/pythonFrameworkDetection.ts",
+          "stage": "escomplex-transpiled",
+          "message": "state.generator[node.type] is not a function"
+        },
+        {
+          "file": "packages/engine/src/pipeline/analyzeRepo.ts",
+          "stage": "escomplex-raw",
+          "message": "state.generator[node.type] is not a function"
+        }
+      ],
+      "engine_parse_failures": 0,
+      "versions": {
+        "node": "v24.12.0",
+        "typescript": "5.9.3",
+        "tsComplex": "1.0.0",
+        "eslint": "9.39.5",
+        "eslintPluginSonarjs": "3.0.7",
+        "typescriptEslint": "8.65.0",
+        "typhonjsEscomplex": "0.1.0",
+        "babelCore": "7.29.7"
+      }
+    },
+    "Colin-Posat__SlugFound": {
+      "analyzer_version": "0.2.0",
+      "files_analyzed": 92,
+      "total_functions": 423,
+      "profile": {
+        "totalFiles": 92,
+        "tsFiles": 42,
+        "tsxFiles": 50,
+        "jsFiles": 0,
+        "jsxFiles": 0,
+        "pyFiles": 0,
+        "testFiles": 13,
+        "totalLOC": 8210,
+        "sourceLOC": 7452,
+        "testLOC": 758
+      },
+      "commit": "c8556ef8e1d1e661c57f1deebc6e20706a323740",
+      "url": "https://github.com/Colin-Posat/SlugFound",
+      "path": "/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound",
+      "ts_tsx_files": 92,
+      "inventory_functions": 423,
+      "ours_records_in_scope": 423,
+      "ours_records_out_of_scope": 0,
+      "tsc_records": 423,
+      "sonar_records": 133,
+      "esc_records": 418,
+      "esc_transpiled_records": 418,
+      "collector_errors": 0,
+      "collector_error_sample": [],
+      "engine_parse_failures": 0,
+      "versions": {
+        "node": "v24.12.0",
+        "typescript": "5.9.3",
+        "tsComplex": "1.0.0",
+        "eslint": "9.39.5",
+        "eslintPluginSonarjs": "3.0.7",
+        "typescriptEslint": "8.65.0",
+        "typhonjsEscomplex": "0.1.0",
+        "babelCore": "7.29.7"
+      }
+    },
+    "MikeyZv__SlugMarket": {
+      "analyzer_version": "0.2.0",
+      "files_analyzed": 69,
+      "total_functions": 793,
+      "profile": {
+        "totalFiles": 69,
+        "tsFiles": 13,
+        "tsxFiles": 56,
+        "jsFiles": 0,
+        "jsxFiles": 0,
+        "pyFiles": 0,
+        "testFiles": 17,
+        "totalLOC": 6959,
+        "sourceLOC": 4195,
+        "testLOC": 2764
+      },
+      "commit": "0bd29d7e29b3223c0c34b07b36afa2c297260068",
+      "url": "https://github.com/MikeyZv/SlugMarket",
+      "path": "/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket",
+      "ts_tsx_files": 69,
+      "inventory_functions": 793,
+      "ours_records_in_scope": 793,
+      "ours_records_out_of_scope": 0,
+      "tsc_records": 793,
+      "sonar_records": 132,
+      "esc_records": 793,
+      "esc_transpiled_records": 797,
+      "collector_errors": 0,
+      "collector_error_sample": [],
+      "engine_parse_failures": 0,
+      "versions": {
+        "node": "v24.12.0",
+        "typescript": "5.9.3",
+        "tsComplex": "1.0.0",
+        "eslint": "9.39.5",
+        "eslintPluginSonarjs": "3.0.7",
+        "typescriptEslint": "8.65.0",
+        "typhonjsEscomplex": "0.1.0",
+        "babelCore": "7.29.7"
+      }
+    },
+    "Brinqa-CRQ-2026__VulnContext-Desktop": {
+      "analyzer_version": "0.2.0",
+      "files_analyzed": 269,
+      "total_functions": 1586,
+      "profile": {
+        "totalFiles": 269,
+        "tsFiles": 89,
+        "tsxFiles": 82,
+        "jsFiles": 2,
+        "jsxFiles": 0,
+        "pyFiles": 96,
+        "testFiles": 76,
+        "totalLOC": 31862,
+        "sourceLOC": 22166,
+        "testLOC": 9696
+      },
+      "commit": "a3f75c2ed9a466d19e66f821e5eb3e5452794b63",
+      "url": "https://github.com/Brinqa-CRQ-2026/VulnContext-Desktop",
+      "path": "/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop",
+      "ts_tsx_files": 171,
+      "inventory_functions": 1041,
+      "ours_records_in_scope": 1041,
+      "ours_records_out_of_scope": 545,
+      "tsc_records": 1041,
+      "sonar_records": 203,
+      "esc_records": 1039,
+      "esc_transpiled_records": 1069,
+      "collector_errors": 0,
+      "collector_error_sample": [],
+      "engine_parse_failures": 0,
+      "versions": {
+        "node": "v24.12.0",
+        "typescript": "5.9.3",
+        "tsComplex": "1.0.0",
+        "eslint": "9.39.5",
+        "eslintPluginSonarjs": "3.0.7",
+        "typescriptEslint": "8.65.0",
+        "typhonjsEscomplex": "0.1.0",
+        "babelCore": "7.29.7"
+      }
+    },
+    "cse115a-Memori__Memori": {
+      "analyzer_version": "0.2.0",
+      "files_analyzed": 106,
+      "total_functions": 207,
+      "profile": {
+        "totalFiles": 106,
+        "tsFiles": 104,
+        "tsxFiles": 0,
+        "jsFiles": 2,
+        "jsxFiles": 0,
+        "pyFiles": 0,
+        "testFiles": 1,
+        "totalLOC": 3975,
+        "sourceLOC": 3969,
+        "testLOC": 6
+      },
+      "commit": "5cb9df5e8ab906c27ebf6f225d9ad997f1c0204e",
+      "url": "https://github.com/cse115a-Memori/Memori",
+      "path": "/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/cse115a-Memori__Memori",
+      "ts_tsx_files": 103,
+      "inventory_functions": 206,
+      "ours_records_in_scope": 206,
+      "ours_records_out_of_scope": 1,
+      "tsc_records": 206,
+      "sonar_records": 75,
+      "esc_records": 178,
+      "esc_transpiled_records": 191,
+      "collector_errors": 2,
+      "collector_error_sample": [
+        {
+          "file": "memori-app/src/lib/components/ui/data-table/data-table.svelte.ts",
+          "stage": "escomplex-raw",
+          "message": "state.generator[node.type] is not a function"
+        },
+        {
+          "file": "memori-app/src/lib/components/ui/data-table/render-helpers.ts",
+          "stage": "escomplex-raw",
+          "message": "this[node.right.type] is not a function"
+        }
+      ],
+      "engine_parse_failures": 0,
+      "versions": {
+        "node": "v24.12.0",
+        "typescript": "5.9.3",
+        "tsComplex": "1.0.0",
+        "eslint": "9.39.5",
+        "eslintPluginSonarjs": "3.0.7",
+        "typescriptEslint": "8.65.0",
+        "typhonjsEscomplex": "0.1.0",
+        "babelCore": "7.29.7"
+      }
+    }
+  },
+  "join_rates": {
+    "inventory_functions": 4631,
+    "ours": {
+      "reported_records": 4631,
+      "paired_to_inventory": 4631,
+      "join_rate": 1.0
+    },
+    "ts-complex": {
+      "reported_records": 4631,
+      "paired_to_inventory": 4631,
+      "join_rate": 1.0
+    },
+    "sonarjs": {
+      "reported_records": 1253,
+      "paired_to_inventory": 1248,
+      "join_rate": 0.2694882314834809
+    },
+    "escomplex": {
+      "reported_records": 4542,
+      "paired_to_inventory": 4542,
+      "join_rate": 0.9807816886201685
+    },
+    "usable_pairs": {
+      "structural": 4631,
+      "cognitive": 4631,
+      "lexical": 4542
+    },
+    "missed_by_category": {
+      "sonarjs": {
+        "nested_arrow_closure": 2109,
+        "function_declaration": 625,
+        "arrow_argument": 395,
+        "object_method": 168,
+        "arrow_const_tsx": 53,
+        "arrow_const": 22,
+        "class_method": 8,
+        "iife": 2,
+        "class_property_fn": 1
+      },
+      "escomplex": {
+        "object_method": 60,
+        "function_declaration": 15,
+        "nested_arrow_closure": 10,
+        "arrow_const": 2,
+        "class_method": 2
+      }
+    },
+    "tool_records_outside_inventory": {
+      "sonarjs": 5
+    }
+  },
+  "structural": {
+    "n": 4631,
+    "exact_agreement": 4622,
+    "exact_agreement_rate": 0.9980565752537249,
+    "spearman_rho": 0.9971762273291761,
+    "spearman_p": 0.0,
+    "mean_diff": 0.0021593608291945584,
+    "median_diff": 0.0,
+    "sd_diff": 0.1330635912151193,
+    "modal_diff": 0.0,
+    "modal_diff_share": 0.9980565752537249,
+    "diff_percentiles": {
+      "1": 0.0,
+      "5": 0.0,
+      "25": 0.0,
+      "50": 0.0,
+      "75": 0.0,
+      "95": 0.0,
+      "99": 0.0
+    },
+    "diff_min": -3.0,
+    "diff_max": 7.0,
+    "ours_mean": 2.1068883610451308,
+    "base_mean": 2.104729000215936,
+    "ours_median": 1.0,
+    "base_median": 1.0,
+    "ba_bias": 0.0021593608291945584,
+    "ba_loa_lower": -0.25864527795243925,
+    "ba_loa_upper": 0.26296399961082834
+  },
+  "structural_nontrivial": {
+    "n": 1312,
+    "exact_agreement": 1303,
+    "exact_agreement_rate": 0.993140243902439,
+    "spearman_rho": 0.9940845286422652,
+    "spearman_p": 0.0,
+    "mean_diff": 0.007621951219512195,
+    "median_diff": 0.0,
+    "sd_diff": 0.24997906928064423,
+    "modal_diff": 0.0,
+    "modal_diff_share": 0.993140243902439,
+    "diff_percentiles": {
+      "1": 0.0,
+      "5": 0.0,
+      "25": 0.0,
+      "50": 0.0,
+      "75": 0.0,
+      "95": 0.0,
+      "99": 0.0
+    },
+    "diff_min": -3.0,
+    "diff_max": 7.0,
+    "ours_mean": 4.907012195121951,
+    "base_mean": 4.899390243902439,
+    "ours_median": 3.0,
+    "base_median": 3.0,
+    "ba_bias": 0.007621951219512195,
+    "ba_loa_lower": -0.4823370245705505,
+    "ba_loa_upper": 0.4975809270095749
+  },
+  "cognitive": {
+    "n": 4631,
+    "exact_agreement": 4281,
+    "exact_agreement_rate": 0.9244223709781905,
+    "spearman_rho": 0.9767875957620248,
+    "spearman_p": 0.0,
+    "mean_diff": -0.06218959188080328,
+    "median_diff": 0.0,
+    "sd_diff": 0.4996952413637133,
+    "modal_diff": 0.0,
+    "modal_diff_share": 0.9244223709781905,
+    "diff_percentiles": {
+      "1": -2.0,
+      "5": -1.0,
+      "25": 0.0,
+      "50": 0.0,
+      "75": 0.0,
+      "95": 0.0,
+      "99": 1.0
+    },
+    "diff_min": -7.0,
+    "diff_max": 5.0,
+    "ours_mean": 1.1196285899373786,
+    "base_mean": 1.1818181818181819,
+    "ours_median": 0.0,
+    "base_median": 0.0,
+    "ba_bias": -0.06218959188080328,
+    "ba_loa_lower": -1.0415922649536813,
+    "ba_loa_upper": 0.9172130811920748
+  },
+  "cognitive_nontrivial": {
+    "n": 1254,
+    "exact_agreement": 904,
+    "exact_agreement_rate": 0.7208931419457735,
+    "spearman_rho": 0.9375315584207565,
+    "spearman_p": 0.0,
+    "mean_diff": -0.22966507177033493,
+    "median_diff": 0.0,
+    "sd_diff": 0.9402995139008069,
+    "modal_diff": 0.0,
+    "modal_diff_share": 0.7208931419457735,
+    "diff_percentiles": {
+      "1": -4.0,
+      "5": -2.0,
+      "25": 0.0,
+      "50": 0.0,
+      "75": 0.0,
+      "95": 1.0,
+      "99": 2.0
+    },
+    "diff_min": -7.0,
+    "diff_max": 5.0,
+    "ours_mean": 4.134768740031898,
+    "base_mean": 4.3644338118022326,
+    "ours_median": 2.0,
+    "base_median": 2.0,
+    "ba_bias": -0.22966507177033493,
+    "ba_loa_lower": -2.0726521190159164,
+    "ba_loa_upper": 1.6133219754752466
+  },
+  "cognitive_reported_only": {
+    "n": 1248,
+    "exact_agreement": 904,
+    "exact_agreement_rate": 0.7243589743589743,
+    "spearman_rho": 0.9464885718891335,
+    "spearman_p": 0.0,
+    "mean_diff": -0.24278846153846154,
+    "median_diff": 0.0,
+    "sd_diff": 0.9191167163177875,
+    "modal_diff": 0.0,
+    "modal_diff_share": 0.7243589743589743,
+    "diff_percentiles": {
+      "1": -4.0,
+      "5": -2.0,
+      "25": 0.0,
+      "50": 0.0,
+      "75": 0.0,
+      "95": 1.0,
+      "99": 2.0
+    },
+    "diff_min": -7.0,
+    "diff_max": 5.0,
+    "ours_mean": 4.142628205128205,
+    "base_mean": 4.385416666666667,
+    "ours_median": 2.0,
+    "base_median": 2.0,
+    "ba_bias": -0.24278846153846154,
+    "ba_loa_lower": -2.044257225521325,
+    "ba_loa_upper": 1.558680302444402
+  },
+  "attribution": [
+    {
+      "label": "structural: else_clause + empty fall-through case",
+      "n": 4631,
+      "disagreeing_pairs": 9,
+      "predicted_exactly": 4553,
+      "predicted_exactly_rate": 0.9831569855322825,
+      "disagreeing_predicted_exactly": 2,
+      "disagreeing_predicted_exactly_rate": 0.2222222222222222,
+      "mean_observed_diff": 0.0021593608291945584,
+      "mean_predicted_diff": 0.0259123299503347,
+      "mean_residual": -0.023752969121140142,
+      "residual_sd": 0.24564771936559748,
+      "variance_explained": -2.4080581179110845
+    },
+    {
+      "label": "cognitive: unlabeled jumps - logical-operator runs - else",
+      "n": 4631,
+      "disagreeing_pairs": 350,
+      "predicted_exactly": 4200,
+      "predicted_exactly_rate": 0.9069315482617145,
+      "disagreeing_predicted_exactly": 214,
+      "disagreeing_predicted_exactly_rate": 0.6114285714285714,
+      "mean_observed_diff": -0.06218959188080328,
+      "mean_predicted_diff": -0.20211617361261067,
+      "mean_residual": 0.1399265817318074,
+      "residual_sd": 0.7722687642813346,
+      "variance_explained": -1.388506962279481
+    }
+  ],
+  "lexical": {
+    "n": 4542,
+    "exact_agreement": 295,
+    "exact_agreement_rate": 0.06494936151475121,
+    "spearman_rho": 0.903799993031896,
+    "spearman_p": 0.0,
+    "mean_diff": -72.4244667547336,
+    "median_diff": -14.111999999999998,
+    "sd_diff": 260.75485896508263,
+    "modal_diff": 0.0,
+    "modal_diff_share": 0.06252752091589608,
+    "diff_percentiles": {
+      "1": -1060.36041,
+      "5": -335.01574999999997,
+      "25": -63.02874999999999,
+      "50": -14.111999999999998,
+      "75": 0.0,
+      "95": 28.781000000000002,
+      "99": 139.63632000000038
+    },
+    "diff_min": -6406.0830000000005,
+    "diff_max": 1591.774,
+    "ours_mean": 120.67861008366359,
+    "base_mean": 193.1030768383972,
+    "ours_median": 36.0,
+    "base_median": 48.432,
+    "ba_bias": -72.4244667547336,
+    "ba_loa_lower": -583.5039903262955,
+    "ba_loa_upper": 438.65505681682833
+  },
+  "lexical_transpiled": {
+    "n": 4567,
+    "exact_agreement": 279,
+    "exact_agreement_rate": 0.06109043135537552,
+    "spearman_rho": 0.9475884914245358,
+    "spearman_p": 0.0,
+    "mean_diff": -162.0560707247646,
+    "median_diff": -28.894,
+    "sd_diff": 496.5296743454519,
+    "modal_diff": 0.0,
+    "modal_diff_share": 0.06043354499671557,
+    "diff_percentiles": {
+      "1": -2423.0457599999995,
+      "5": -691.3562999999999,
+      "25": -113.4345,
+      "50": -28.894,
+      "75": -3.9000000000000004,
+      "95": 3.9795999999999876,
+      "99": 10.479900000000058
+    },
+    "diff_min": -7974.213000000001,
+    "diff_max": 124.324,
+    "ours_mean": 120.8645353623823,
+    "base_mean": 282.92060608714695,
+    "ours_median": 34.869,
+    "base_median": 68.532,
+    "ba_bias": -162.0560707247646,
+    "ba_loa_lower": -1135.2542324418503,
+    "ba_loa_upper": 811.1420909923211
+  },
+  "lexical_ts_only": {
+    "n": 1978,
+    "exact_agreement": 77,
+    "exact_agreement_rate": 0.038928210313447925,
+    "spearman_rho": 0.9505440985190715,
+    "spearman_p": 0.0,
+    "mean_diff": -107.23868250758342,
+    "median_diff": -27.944000000000003,
+    "sd_diff": 282.4299835435108,
+    "modal_diff": 2.322,
+    "modal_diff_share": 0.03943377148634985,
+    "diff_percentiles": {
+      "1": -1300.57579,
+      "5": -426.81204999999994,
+      "25": -93.81,
+      "50": -27.944000000000003,
+      "75": -3.8960000000000004,
+      "95": 3.9320000000000004,
+      "99": 9.317800000000004
+    },
+    "diff_min": -4431.7300000000005,
+    "diff_max": 28.398000000000025,
+    "ours_mean": 113.3937386248736,
+    "base_mean": 220.63242113245704,
+    "ours_median": 38.039,
+    "base_median": 70.316,
+    "ba_bias": -107.23868250758342,
+    "ba_loa_lower": -660.8014502528646,
+    "ba_loa_upper": 446.3240852376977
+  },
+  "lexical_tsx_only": {
+    "n": 2564,
+    "exact_agreement": 218,
+    "exact_agreement_rate": 0.08502340093603744,
+    "spearman_rho": 0.8736541960120527,
+    "spearman_p": 0.0,
+    "mean_diff": -45.567010140405614,
+    "median_diff": -6.094999999999999,
+    "sd_diff": 239.33435065155217,
+    "modal_diff": 0.0,
+    "modal_diff_share": 0.08073322932917316,
+    "diff_percentiles": {
+      "1": -777.9349200000001,
+      "5": -253.53160000000003,
+      "25": -36.64124999999998,
+      "50": -6.094999999999999,
+      "75": 2.5819999999999914,
+      "95": 56.49584999999979,
+      "99": 225.18319999999986
+    },
+    "diff_min": -6406.0830000000005,
+    "diff_max": 1591.774,
+    "ours_mean": 126.29853042121687,
+    "base_mean": 171.86554056162245,
+    "ours_median": 34.2785,
+    "base_median": 36.541,
+    "ba_bias": -45.567010140405614,
+    "ba_loa_lower": -514.6623374174478,
+    "ba_loa_upper": 423.52831713663664
+  },
+  "top_structural": [
+    {
+      "repo": "ts-repo-metrics",
+      "file": "packages/engine/src/parsing/tokenScanner.ts",
+      "function": "enter",
+      "start_line": 62,
+      "category": "object_method",
+      "ours": 43.0,
+      "baseline": 36.0,
+      "diff": 7.0
+    },
+    {
+      "repo": "MikeyZv__SlugMarket",
+      "file": "slugmarket_next/app/(main)/messages/__tests__/page.test.tsx",
+      "function": "@anon",
+      "start_line": 36,
+      "category": "arrow_argument",
+      "ours": 1.0,
+      "baseline": 4.0,
+      "diff": -3.0
+    },
+    {
+      "repo": "MikeyZv__SlugMarket",
+      "file": "slugmarket_next/app/(main)/messages/__tests__/page.test.tsx",
+      "function": "@anon",
+      "start_line": 36,
+      "category": "nested_arrow_closure",
+      "ours": 4.0,
+      "baseline": 1.0,
+      "diff": 3.0
+    },
+    {
+      "repo": "ts-repo-metrics",
+      "file": "apps/dashboard/components/results/SeverityTableCell.tsx",
+      "function": "defaultContent",
+      "start_line": 72,
+      "category": "function_declaration",
+      "ours": 14.0,
+      "baseline": 12.0,
+      "diff": 2.0
+    },
+    {
+      "repo": "MikeyZv__SlugMarket",
+      "file": "slugmarket_next/app/components/Navbar.tsx",
+      "function": "@anon",
+      "start_line": 141,
+      "category": "nested_arrow_closure",
+      "ours": 3.0,
+      "baseline": 1.0,
+      "diff": 2.0
+    },
+    {
+      "repo": "MikeyZv__SlugMarket",
+      "file": "slugmarket_next/app/components/Navbar.tsx",
+      "function": "@anon",
+      "start_line": 141,
+      "category": "nested_arrow_closure",
+      "ours": 1.0,
+      "baseline": 3.0,
+      "diff": -2.0
+    },
+    {
+      "repo": "ts-repo-metrics",
+      "file": "apps/dashboard/components/results/rq/SymbolRiskScatter.tsx",
+      "function": "@anon",
+      "start_line": 103,
+      "category": "nested_arrow_closure",
+      "ours": 2.0,
+      "baseline": 1.0,
+      "diff": 1.0
+    },
+    {
+      "repo": "ts-repo-metrics",
+      "file": "apps/dashboard/components/results/rq/SymbolRiskScatter.tsx",
+      "function": "@anon",
+      "start_line": 103,
+      "category": "nested_arrow_closure",
+      "ours": 1.0,
+      "baseline": 2.0,
+      "diff": -1.0
+    },
+    {
+      "repo": "ts-repo-metrics",
+      "file": "apps/dashboard/components/results/rq/SymbolRiskTable.tsx",
+      "function": "@anon",
+      "start_line": 69,
+      "category": "nested_arrow_closure",
+      "ours": 6.0,
+      "baseline": 5.0,
+      "diff": 1.0
+    },
+    {
+      "repo": "ts-repo-metrics",
+      "file": "apps/dashboard/__tests__/aiMaturityCore.test.ts",
+      "function": "@anon",
+      "start_line": 8,
+      "category": "arrow_argument",
+      "ours": 1.0,
+      "baseline": 1.0,
+      "diff": 0.0
+    },
+    {
+      "repo": "ts-repo-metrics",
+      "file": "apps/dashboard/__tests__/aiMaturityCore.test.ts",
+      "function": "@anon",
+      "start_line": 9,
+      "category": "nested_arrow_closure",
+      "ours": 1.0,
+      "baseline": 1.0,
+      "diff": 0.0
+    },
+    {
+      "repo": "ts-repo-metrics",
+      "file": "apps/dashboard/__tests__/aiMaturityCore.test.ts",
+      "function": "@anon",
+      "start_line": 10,
+      "category": "nested_arrow_closure",
+      "ours": 1.0,
+      "baseline": 1.0,
+      "diff": 0.0
+    },
+    {
+      "repo": "ts-repo-metrics",
+      "file": "apps/dashboard/__tests__/aiMaturityCore.test.ts",
+      "function": "@anon",
+      "start_line": 15,
+      "category": "nested_arrow_closure",
+      "ours": 1.0,
+      "baseline": 1.0,
+      "diff": 0.0
+    },
+    {
+      "repo": "ts-repo-metrics",
+      "file": "apps/dashboard/__tests__/aiMaturityCore.test.ts",
+      "function": "@anon",
+      "start_line": 22,
+      "category": "nested_arrow_closure",
+      "ours": 1.0,
+      "baseline": 1.0,
+      "diff": 0.0
+    },
+    {
+      "repo": "ts-repo-metrics",
+      "file": "apps/dashboard/__tests__/aiMaturityCore.test.ts",
+      "function": "@anon",
+      "start_line": 27,
+      "category": "nested_arrow_closure",
+      "ours": 1.0,
+      "baseline": 1.0,
+      "diff": 0.0
+    }
+  ],
+  "top_cognitive": [
+    {
+      "repo": "ts-repo-metrics",
+      "file": "apps/dashboard/lib/aiUsageCsv.ts",
+      "function": "analyzeAiUsageCsv",
+      "start_line": 325,
+      "category": "function_declaration",
+      "ours": 81.0,
+      "baseline": 88.0,
+      "diff": -7.0
+    },
+    {
+      "repo": "ts-repo-metrics",
+      "file": "apps/dashboard/app/api/coach-says/route.ts",
+      "function": "validateCoachFactsPayload",
+      "start_line": 40,
+      "category": "function_declaration",
+      "ours": 29.0,
+      "baseline": 35.0,
+      "diff": -6.0
+    },
+    {
+      "repo": "ts-repo-metrics",
+      "file": "apps/dashboard/components/HeaderNavClient.tsx",
+      "function": "AvatarCircle",
+      "start_line": 69,
+      "category": "function_declaration",
+      "ours": 4.0,
+      "baseline": 10.0,
+      "diff": -6.0
+    },
+    {
+      "repo": "ts-repo-metrics",
+      "file": "apps/dashboard/lib/behavioralLearningSummary.ts",
+      "function": "buildBehavioralLearningTakeaways",
+      "start_line": 26,
+      "category": "function_declaration",
+      "ours": 6.0,
+      "baseline": 12.0,
+      "diff": -6.0
+    },
+    {
+      "repo": "ts-repo-metrics",
+      "file": "apps/dashboard/app/api/doc-review/route.ts",
+      "function": "POST",
+      "start_line": 47,
+      "category": "function_declaration",
+      "ours": 47.0,
+      "baseline": 52.0,
+      "diff": -5.0
+    },
+    {
+      "repo": "ts-repo-metrics",
+      "file": "apps/dashboard/components/results/CommitHabitsPanelIntro.tsx",
+      "function": "CommitHabitsPanelIntro",
+      "start_line": 8,
+      "category": "function_declaration",
+      "ours": 3.0,
+      "baseline": 8.0,
+      "diff": -5.0
+    },
+    {
+      "repo": "ts-repo-metrics",
+      "file": "apps/dashboard/components/results/GitHubRepositoryPanel.tsx",
+      "function": "GitHubRepositoryPanel",
+      "start_line": 75,
+      "category": "function_declaration",
+      "ours": 16.0,
+      "baseline": 21.0,
+      "diff": -5.0
+    },
+    {
+      "repo": "ts-repo-metrics",
+      "file": "apps/dashboard/lib/docReview/discoverDocs.ts",
+      "function": "discoverDocs",
+      "start_line": 43,
+      "category": "function_declaration",
+      "ours": 18.0,
+      "baseline": 13.0,
+      "diff": 5.0
+    },
+    {
+      "repo": "Colin-Posat__SlugFound",
+      "file": "app/components/items-filter.tsx",
+      "function": "updateUrl",
+      "start_line": 93,
+      "category": "arrow_const_tsx",
+      "ours": 5.0,
+      "baseline": 0.0,
+      "diff": 5.0
+    },
+    {
+      "repo": "Brinqa-CRQ-2026__VulnContext-Desktop",
+      "file": "frontend/src/routing/pageMeta.ts",
+      "function": "getRouteViewState",
+      "start_line": 5,
+      "category": "function_declaration",
+      "ours": 0.0,
+      "baseline": 5.0,
+      "diff": -5.0
+    },
+    {
+      "repo": "ts-repo-metrics",
+      "file": "apps/dashboard/app/api/analyze/route.ts",
+      "function": "POST",
+      "start_line": 117,
+      "category": "function_declaration",
+      "ours": 59.0,
+      "baseline": 63.0,
+      "diff": -4.0
+    },
+    {
+      "repo": "ts-repo-metrics",
+      "file": "apps/dashboard/components/HeaderNavClient.tsx",
+      "function": "HeaderNavClient",
+      "start_line": 110,
+      "category": "function_declaration",
+      "ours": 8.0,
+      "baseline": 12.0,
+      "diff": -4.0
+    },
+    {
+      "repo": "ts-repo-metrics",
+      "file": "apps/dashboard/components/results/ResultsTabPanelIntro.tsx",
+      "function": "@anon",
+      "start_line": 83,
+      "category": "iife",
+      "ours": 20.0,
+      "baseline": 24.0,
+      "diff": -4.0
+    },
+    {
+      "repo": "ts-repo-metrics",
+      "file": "apps/dashboard/components/results/rq/DocReviewTab.tsx",
+      "function": "ReviewCard",
+      "start_line": 936,
+      "category": "function_declaration",
+      "ours": 59.0,
+      "baseline": 63.0,
+      "diff": -4.0
+    },
+    {
+      "repo": "ts-repo-metrics",
+      "file": "apps/dashboard/components/ui/chart.tsx",
+      "function": "@anon",
+      "start_line": 207,
+      "category": "nested_arrow_closure",
+      "ours": 9.0,
+      "baseline": 13.0,
+      "diff": -4.0
+    }
+  ],
+  "top_lexical": [
+    {
+      "repo": "Brinqa-CRQ-2026__VulnContext-Desktop",
+      "file": "frontend/src/tests/components/topology/BusinessServiceDetailPage.test.tsx",
+      "function": "@anon",
+      "start_line": 114,
+      "category": "nested_arrow_closure",
+      "ours": 3803.061,
+      "baseline": 10209.144,
+      "diff": -6406.0830000000005
+    },
+    {
+      "repo": "ts-repo-metrics",
+      "file": "apps/dashboard/lib/aiUsageCsv.ts",
+      "function": "analyzeAiUsageCsv",
+      "start_line": 325,
+      "category": "function_declaration",
+      "ours": 5068.569,
+      "baseline": 9500.299,
+      "diff": -4431.7300000000005
+    },
+    {
+      "repo": "Brinqa-CRQ-2026__VulnContext-Desktop",
+      "file": "frontend/src/tests/components/dashboard/FindingDetailPage.test.tsx",
+      "function": "@anon",
+      "start_line": 71,
+      "category": "nested_arrow_closure",
+      "ours": 2902.548,
+      "baseline": 7252.625,
+      "diff": -4350.077
+    },
+    {
+      "repo": "ts-repo-metrics",
+      "file": "apps/dashboard/lib/buildReportSummary.ts",
+      "function": "buildReportSummary",
+      "start_line": 9,
+      "category": "function_declaration",
+      "ours": 4741.215,
+      "baseline": 8973.217,
+      "diff": -4232.002
+    },
+    {
+      "repo": "ts-repo-metrics",
+      "file": "apps/dashboard/lib/featureVector.ts",
+      "function": "buildFeatureVector",
+      "start_line": 128,
+      "category": "function_declaration",
+      "ours": 2987.344,
+      "baseline": 6276.077,
+      "diff": -3288.733
+    },
+    {
+      "repo": "Brinqa-CRQ-2026__VulnContext-Desktop",
+      "file": "frontend/src/tests/components/topology/ApplicationDetailPage.test.tsx",
+      "function": "@anon",
+      "start_line": 77,
+      "category": "nested_arrow_closure",
+      "ours": 1856.627,
+      "baseline": 5082.924,
+      "diff": -3226.297
+    },
+    {
+      "repo": "ts-repo-metrics",
+      "file": "apps/dashboard/lib/aiSessionLogAnalyzer.ts",
+      "function": "computeSessionLogReport",
+      "start_line": 454,
+      "category": "function_declaration",
+      "ours": 5857.403,
+      "baseline": 9024.915,
+      "diff": -3167.5120000000006
+    },
+    {
+      "repo": "ts-repo-metrics",
+      "file": "apps/dashboard/app/api/analyze/route.ts",
+      "function": "POST",
+      "start_line": 117,
+      "category": "function_declaration",
+      "ours": 2981.356,
+      "baseline": 5716.181,
+      "diff": -2734.8249999999994
+    },
+    {
+      "repo": "Brinqa-CRQ-2026__VulnContext-Desktop",
+      "file": "frontend/src/tests/components/topology/BusinessUnitDetailPage.test.tsx",
+      "function": "@anon",
+      "start_line": 181,
+      "category": "nested_arrow_closure",
+      "ours": 1715.779,
+      "baseline": 4206.945,
+      "diff": -2491.1659999999997
+    },
+    {
+      "repo": "ts-repo-metrics",
+      "file": "apps/dashboard/app/api/doc-review/route.ts",
+      "function": "POST",
+      "start_line": 47,
+      "category": "function_declaration",
+      "ours": 2467.377,
+      "baseline": 4893.162,
+      "diff": -2425.7850000000003
+    },
+    {
+      "repo": "ts-repo-metrics",
+      "file": "packages/engine/src/parsing/tokenScanner.ts",
+      "function": "collectHalsteadAtoms",
+      "start_line": 47,
+      "category": "function_declaration",
+      "ours": 36.541,
+      "baseline": 2452.859,
+      "diff": -2416.3179999999998
+    },
+    {
+      "repo": "ts-repo-metrics",
+      "file": "apps/dashboard/lib/docReview/reviewDoc.ts",
+      "function": "reviewDoc",
+      "start_line": 186,
+      "category": "function_declaration",
+      "ours": 2849.414,
+      "baseline": 5199.81,
+      "diff": -2350.396
+    },
+    {
+      "repo": "Brinqa-CRQ-2026__VulnContext-Desktop",
+      "file": "frontend/src/tests/components/dashboard/RiskTable.test.tsx",
+      "function": "@anon",
+      "start_line": 14,
+      "category": "nested_arrow_closure",
+      "ours": 1352.678,
+      "baseline": 3696.565,
+      "diff": -2343.8869999999997
+    },
+    {
+      "repo": "Brinqa-CRQ-2026__VulnContext-Desktop",
+      "file": "frontend/src/tests/components/topology/BusinessServiceDetailPage.test.tsx",
+      "function": "@anon",
+      "start_line": 407,
+      "category": "nested_arrow_closure",
+      "ours": 972.576,
+      "baseline": 3217.38,
+      "diff": -2244.804
+    },
+    {
+      "repo": "ts-repo-metrics",
+      "file": "apps/dashboard/app/api/coach-says/route.ts",
+      "function": "validateCoachFactsPayload",
+      "start_line": 40,
+      "category": "function_declaration",
+      "ours": 2300.0,
+      "baseline": 4310.343,
+      "diff": -2010.3429999999998
+    }
+  ]
+}

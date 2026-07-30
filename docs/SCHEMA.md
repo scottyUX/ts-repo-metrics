@@ -4,31 +4,51 @@ This document describes the complete JSON report produced by `ts-repo-metrics` (
 
 ## Top-level structure (`RepoReport`)
 
-| Field | Type | Nullable | Description |
-|-------|------|----------|-------------|
-| `repoPath` | `string` | no | Absolute path to the analyzed repository |
-| `source` | `SourceInfo` | no | Origin metadata (local path vs cloned GitHub URL) |
-| `filesAnalyzed` | `number` | no | Total `.ts`/`.tsx`/`.js`/`.jsx`/`.py` files successfully parsed |
-| `filesSkipped` | `number` | **yes** | Files skipped due to read or parse errors |
-| `analysisSkipped` | `UnsupportedFrameworkInfo` | **yes** | Present when static analysis was skipped (web2py or Django) |
-| `analyzer_version` | `string` | **yes** | Analyzer package version (from `packages/engine/package.json` when run via the engine — CLI or dashboard) |
-| `analysis_timestamp` | `string` | **yes** | ISO 8601 timestamp when analysis ran |
-| `distributions` | `DistributionMetrics` | **yes** | Tail risk indicators (p50/p75/p90, concentration) |
-| `profile` | `RepoProfile` | no | File counts and LOC breakdown |
-| `totals` | `object` | no | Aggregate metrics |
-| `totals.functions` | `number` | no | Total function-like nodes |
-| `functionMetricsSummary` | `FunctionMetricsSummary` | no | Repo-wide function structural metrics |
-| `complexity` | `ComplexitySummary` | no | Repo-wide cyclomatic complexity |
-| `smells` | `SmellCounts` | no | Aggregated code smell counts |
-| `maintainability` | `MaintainabilityResult` | no | Maintainability Index score |
-| `testCoverageProxy` | `TestCoverageProxy` | no | Test LOC / source LOC ratio |
-| `duplication` | `DuplicationMetrics` | **yes** | jscpd duplication analysis (null if jscpd fails) |
-| `git` | `GitMetrics` | **yes** | Commit history metrics (null for non-git repos) |
-| `gitMetricsV2` | `GitMetricsV2` | **yes** | Extended git metrics (Epic D; null for non-git repos) |
-| `framework` | `FrameworkInfo` | **yes** | Detected framework (null if no package.json) |
-| `perFile` | `PerFileEntry[]` | no | Per-file metrics |
-| `reactMetrics` | `ReactMetricsReport` | **yes** | RQ3 React/TSX static metrics (present when at least one `.tsx` file was analyzed) |
-| `phase3` | `Phase3Metrics` | **yes** | Phase 3 — silent failures (TSX), monolithic component rate, weighted jscpd redundancy |
+The authoritative definition is `RepoReport` in
+[`packages/engine/src/types/report.ts`](../packages/engine/src/types/report.ts).
+
+**Read the Presence column carefully.** Two different things are often called
+"nullable", and consumers have to handle them differently:
+
+| Presence | Meaning | How to test |
+|----------|---------|-------------|
+| `always` | Key is always in the JSON with a non-null value | direct access |
+| `nullable` | Key is **always in the JSON** but its value may be `null` | `report.x === null` |
+| `optional` | Key is **omitted from the JSON entirely** under the stated condition | `"x" in report` |
+
+`optional` is the one that bites: `JSON.stringify` drops `undefined`, so an
+absent key is indistinguishable from a key that was never computed. Every
+`optional` row below states the condition under which it disappears.
+
+| Field | Type | Presence | Produced by | Description |
+|-------|------|----------|-------------|-------------|
+| `repoPath` | `string` | always | `pipeline/analyzeRepo` | Absolute path to the analyzed repository |
+| `source` | `SourceInfo` | always | `collect/repoMetadata` | Origin metadata (local path vs cloned GitHub URL) |
+| `filesAnalyzed` | `number` | always | `collect/fileDiscovery` | Count of `.ts`/`.tsx`/`.js`/`.jsx`/`.py` files successfully parsed. Equals `perFile.length` |
+| `filesSkipped` | `number` | **optional** | `pipeline/analyzeRepo` | Files discovered but never parsed. **Omitted entirely when zero** — do not expect `0`. See [Skipped files](#filesskipped--skipped-files-optional) |
+| `analysisSkipped` | `UnsupportedFrameworkInfo` | **optional** | `collect/pythonFrameworkDetection` | Present **instead of** real metrics when the target is web2py or Django. Absent for every supported target. See [analysisSkipped](#analysisskipped--unsupported-python-framework) |
+| `analyzer_version` | `string` | optional | `pipeline/analyzeRepo` | Engine package version. Omitted if `packages/engine/package.json` could not be read |
+| `analysis_timestamp` | `string` | always | `pipeline/analyzeRepo` | ISO 8601 timestamp when analysis ran |
+| `distributions` | `DistributionMetrics` | always | `extract/distributions` | Tail risk indicators (p50/p75/p90, concentration). Optional in the type; emitted unconditionally by current builds |
+| `profile` | `RepoProfile` | always | `collect/loc` | File counts and LOC breakdown |
+| `totals` | `object` | always | `extract/functionCount` | Aggregate metrics |
+| `totals.functions` | `number` | always | `extract/functionCount` | Total function-like nodes. See [what counts as a function](../README.md#what-counts-as-a-function) |
+| `functionMetricsSummary` | `FunctionMetricsSummary` | always | `extract/functionMetrics` | Repo-wide function structural metrics |
+| `complexity` | `ComplexitySummary` | always | `extract/complexity` | Repo-wide cyclomatic complexity |
+| `smells` | `SmellCounts` | always | `extract/smells` | Aggregated code smell counts |
+| `maintainability` | `MaintainabilityResult` | always | `extract/maintainabilityIndex` | Coleman-style repo Maintainability Index |
+| `testCoverageProxy` | `TestCoverageProxy` | always | `extract/testCoverageProxy` | Test LOC / source LOC ratio |
+| `duplication` | `DuplicationMetrics` | **nullable** | `collect/duplication` (jscpd) | `null` when jscpd fails or is unavailable |
+| `git` | `GitMetrics` | **nullable** | `collect/gitMetrics` or `collect/gitMetricsApi` | `null` for non-git repos. See [git](#git--git-history-nullable) |
+| `gitMetricsV2` | `GitMetricsV2` | **nullable** | `collect/gitMetricsV2` | `null` when no local commit history was readable |
+| `commitCalendar` | `CommitCalendar` | **optional** | `collect/gitMetricsApi` | Top-level copy populated **only** on the GitHub-API path. See [commitCalendar](#commitcalendar--commit-heatmap-optional) |
+| `contributors` | `ContributorActivity[]` | **optional** | `collect/gitMetricsV2` or `collect/gitMetricsApi` | Omitted when no history was analyzed or the list is empty. See [contributors](#contributors--per-author-activity-optional) |
+| `github` | `GitHubRepositoryMeta` | **optional** | `collect/githubRepoMeta` | GitHub REST metadata. Absent for local-path analysis **and silently absent if the API call fails**. See [github](#github--github-repository-metadata-optional) |
+| `framework` | `FrameworkInfo` | **nullable** | `collect/frameworkDetection` | `null` if no `package.json` is found |
+| `perFile` | `PerFileEntry[]` | always | `pipeline/analyzeRepo` | Per-file metrics, one entry per successfully parsed file |
+| `reactMetrics` | `ReactMetricsReport` | **optional** | `extract/react` | Omitted unless at least one `.tsx`/`.jsx` file was parsed |
+| `phase3` | `Phase3Metrics` | always | `extract/silentFailures`, `collect/weightedRedundancy` | Optional in the type; emitted unconditionally by current builds |
+| `symbolVerificationRisks` | `SymbolVerificationRisk[]` | always | `extract/symbolVerificationRisk` | May be `[]`. Absent in reports cached before this field existed. See [symbolVerificationRisks](#symbolverificationrisks--complexity-vs-test-proximity) |
 
 ## `distributions` — Distribution Metrics (optional)
 
@@ -44,6 +64,36 @@ Tail risk indicators for research. Percentiles computed across all functions.
 | `p90_complexity` | `number` | 90th percentile cyclomatic complexity |
 | `percent_high_complexity_in_top_10_percent_files` | `number` | % of high-complexity functions in the top 10% of files by total complexity |
 
+## `filesSkipped` — Skipped files (optional)
+
+Produced by `pipeline/analyzeRepo`. **Omitted from the JSON when zero**, so
+`report.filesSkipped === undefined` is the healthy case and there is no `0` to
+read.
+
+A skipped file was discovered by `collect/fileDiscovery` but never parsed, so
+**every function in it is missing from every metric in this report** —
+`totals.functions`, `complexity`, `smells`, `distributions`, `phase3` and the
+per-function tables all describe less code than the repository contains. The
+count is not a diagnostic detail; it is a caveat on every other number.
+
+Each skipped file logs a named reason to **stderr**. The reason is not carried
+in the JSON, so a report consumed without its log cannot tell you *why*:
+
+| stderr reason | Condition |
+|---------------|-----------|
+| `could not read file` | `readFile` failed — permissions, broken symlink, or the file disappeared mid-run |
+| `file_too_large_for_parser (<n> chars)` | Tree-sitter rejected the source as too large for its read buffer. Should be unreachable: `parsing/sourceParser` sizes the buffer to the source. Treat any occurrence as a bug to report |
+| `parse_error: <message>` | Tree-sitter rejected the source for some other reason |
+
+Historically any file of 32,768 characters or more failed with a bare
+`Invalid argument` and was folded into this count with no named reason, which
+silently removed 9.3% of this repository's own functions from every metric.
+See [research/validation/findings.md](../research/validation/findings.md) (D9).
+
+When comparing two reports, check this field first: a non-zero value on one
+side and an absent field on the other means the two describe different amounts
+of code, regardless of what the metrics say.
+
 ## `source` — Source Metadata
 
 | Field | Type | Description |
@@ -55,7 +105,30 @@ Tail risk indicators for research. Percentiles computed across all functions.
 
 ## `analysisSkipped` — Unsupported Python framework
 
-Present when the repository layout indicates **web2py** or **Django**. Static AST analysis is skipped; git metrics may still be populated.
+Produced by `collect/pythonFrameworkDetection`. Present when the repository
+layout indicates **web2py** or **Django**. Static AST analysis is skipped.
+
+**This is the most dangerous field to ignore.** The report is structurally
+complete and every metric key is present, but the analysis never ran, so the
+values are zeros and defaults rather than measurements:
+
+| Field | Value in a skipped report |
+|-------|---------------------------|
+| `filesAnalyzed` | `0` |
+| `filesSkipped` | absent (nothing was attempted, so nothing was skipped) |
+| `profile`, `smells` | all-zero |
+| `totals.functions`, `functionMetricsSummary`, `complexity`, `distributions` | zeros |
+| `maintainability` | computed from zeros, so `score` is the formula's floor — **not** a real maintainability reading |
+| `perFile`, `symbolVerificationRisks` | `[]` |
+| `phase3` | present, all zeros, `mcr: null` |
+| `duplication` | `null` |
+| `reactMetrics` | absent |
+| `git`, `gitMetricsV2`, `contributors`, `framework` | **genuinely populated** — git history is still read |
+
+So a consumer that reads `complexity.average` without checking
+`analysisSkipped` sees `0` and cannot tell it apart from a real repository of
+trivially simple code. Check `"analysisSkipped" in report` before using any AST
+derived value; the git-derived sections remain trustworthy.
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -165,7 +238,13 @@ In API mode, `medianCommitSize`, `avgLinesPerCommit`, and `largeCommitRatio` are
 
 ## `gitMetricsV2` — Extended Git Metrics (nullable)
 
-Returns `null` for non-git repos or when no commit history is available. Epic D metrics.
+Produced by `collect/gitMetricsV2`. Returns `null` for non-git repos or when no
+commit history is available. Epic D metrics.
+
+Both `entropy` fields are `0` when the repository has **fewer than two
+commits**, because there are no inter-commit gaps to measure. A zero std dev
+there means "not enough data", not "perfectly regular commit rhythm" — check
+`git.totalCommits` before reading it as rhythm.
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -178,15 +257,139 @@ Returns `null` for non-git repos or when no commit history is available. Epic D 
 | `burstStats.burstCount` | `number` | Count of bursts (≥3 commits in 30 min) |
 | `burstStats.burstRatio` | `number` | % of commits that fall in a burst |
 | `entropy` | `EntropyStats` | D3: Temporal irregularity |
-| `entropy.stdDevTimeBetweenCommits` | `number` | Std dev of time between consecutive commits (ms) |
+| `entropy.stdDevTimeBetweenCommits` | `number` | Population std dev of gaps between consecutive commits (ms) |
+| `entropy.meanTimeBetweenCommits` | `number` | Mean of those gaps (ms) — typical time from one commit to the next. Read the std dev against this, not on its own |
 | `churn` | `ChurnStats` | D4: Top files by churn |
 | `churn.topByModifications` | `ChurnHotspot[]` | Top 10 files by modification count |
 | `churn.topByLinesChanged` | `ChurnHotspot[]` | Top 10 files by lines changed |
+| `commitCalendar` | `CommitCalendar \| null` (optional) | Mon–Sun heatmap; present when commit timestamps were available from local `git log`. See [commitCalendar](#commitcalendar--commit-heatmap-optional) for which of the two locations is populated |
+
+### `ChurnHotspot`
+
+Entries of both `churn.topByModifications` and `churn.topByLinesChanged`. The
+two lists cover the same files ranked differently, so a file can appear in both.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `file` | `string` | Path relative to repo root, forward slashes |
+| `modifications` | `number` | Number of commits that touched this file |
+| `linesChanged` | `number` | Σ(added+deleted) lines across those commits |
 | `refactorBehavior` | `RefactorBehaviorStats` | D6: Refactor commit rate |
 | `refactorBehavior.refactorCommitRatio` | `number` | % of commits with refactor/cleanup/restructure/rename |
 | `testCoupling` | `TestCouplingStats` | D5: Test coupling |
 | `testCoupling.pctCommitsTouchingTests` | `number` | % of commits touching test files |
 | `testCoupling.testToFeatureCommitRatio` | `number` | Ratio of test commits to feature commits |
+
+## `commitCalendar` — Commit heatmap (optional)
+
+Produced by `collect/gitMetricsApi`. Mon–Sun × week contribution grid.
+
+**The same data can appear in two places, and which one is populated depends on
+how history was read:**
+
+| Situation | Where the calendar is |
+|-----------|-----------------------|
+| Local `.git` available | `gitMetricsV2.commitCalendar` — top-level key **absent** |
+| GitHub API only (zipball mode, no local `.git`) | top-level `commitCalendar` — `gitMetricsV2` is usually `null` |
+| No history at all | Neither is populated |
+
+Consumers should therefore always read
+`gitMetricsV2?.commitCalendar ?? commitCalendar`. Reading the top-level key
+alone yields an empty heatmap for every locally analyzed repository, which
+looks like "this repo has no commits" rather than "you read the wrong key".
+
+### `CommitCalendar`
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `grid` | `number[][]` | 7 rows (Mon..Sun) × `columnWeekStarts.length` columns, oldest week first. Each cell is a commit count |
+| `columnWeekStarts` | `string[]` | ISO date (UTC) of the Monday beginning each column |
+| `busiestWeekdayIndex` | `number \| null` | `0` = Monday .. `6` = Sunday; the weekday with the most commits in the window. `null` when there were no commits to rank |
+
+## `contributors` — Per-author activity (optional)
+
+Produced by `collect/gitMetricsV2` on the local-git path, or overwritten by
+`collect/gitMetricsApi` in zipball mode. **Omitted when no history was analyzed
+or when the computed list is empty** — the key is only written when
+`contributors.length > 0`, so an absent key means "no attributable commits",
+not "no contributors field in this schema version".
+
+Each entry carries the same class of signals as `gitMetricsV2`, computed over
+only the commits attributed to one author identity. Authors are grouped by
+lowercased email when present, else by name, else bucketed as `"unknown"`, so
+one human committing under two emails appears as two entries.
+
+### `ContributorActivity`
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | `string` | Grouping key: lowercased author email, else name-based, else `"unknown"` |
+| `displayName` | `string` | Author name as recorded in the commits |
+| `authorEmail` | `string` | Author email as recorded in the commits |
+| `commitCount` | `number` | Commits attributed to this identity |
+| `linesAdded` | `number` | Σ added lines from `git log --numstat` |
+| `linesDeleted` | `number` | Σ deleted lines from `git log --numstat` |
+| `testLineChurn` | `number` | Σ(add+del) on paths matching the test convention. **Historical churn, not snapshot LOC** — not comparable to `profile.testLOC` |
+| `sourceLineChurn` | `number` | Σ(add+del) on non-test paths |
+| `testFilesTouched` | `number` | Distinct test paths touched |
+| `sourceFilesTouched` | `number` | Distinct non-test paths touched |
+| `sourcePathsTouchedList` | `string[]` (optional) | Distinct non-test paths touched, forward slashes, sorted. Lets the dashboard narrow symbol views to files seen in `git log --numstat` |
+| `commitStats` | `CommitStats` | Per-author size distribution (same shape as `gitMetricsV2.commitStats`) |
+| `burstStats` | `BurstStats` | Per-author burst detection |
+| `entropy` | `EntropyStats` | Per-author temporal irregularity |
+| `churn` | `ChurnStats` | Per-author churn hotspots |
+| `testCoupling` | `TestCouplingStats` | Per-author test coupling |
+| `refactorBehavior` | `RefactorBehaviorStats` | Per-author refactor commit rate |
+| `commitCalendar` | `CommitCalendar \| null` (optional) | Per-author Mon–Sun heatmap |
+| `commitsPerWeek` | `number` (optional) | Commits per week in the recent window, aligned with `git.commitsPerWeek` (last 13 weeks) |
+
+## `github` — GitHub repository metadata (optional)
+
+Produced by `collect/githubRepoMeta` via the GitHub REST API, and only from the
+`analyzeFromGitHubUrl` entry point.
+
+**This field is absent in two very different situations, and the report cannot
+distinguish them:**
+
+1. The target was a local path, so there is no GitHub repository to describe.
+2. The target *was* a GitHub URL but the API call failed — rate limit, missing
+   or invalid `GITHUB_TOKEN`, private repository, or network error. The
+   enrichment is wrapped in a `try`/`catch` that swallows the error, so nothing
+   is logged and no flag is set.
+
+Treat an absent `github` on a GitHub target as "unknown", never as "the
+repository has no stars/topics/languages". Zeroed counts and a populated
+`languages` array are the only evidence the fetch actually succeeded.
+
+### `GitHubRepositoryMeta`
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `description` | `string \| null` | Repository About text; `null` when the repo has none |
+| `topics` | `string[]` | GitHub topics |
+| `stargazersCount` | `number` | Stars |
+| `forksCount` | `number` | Forks |
+| `subscribersCount` | `number` | Users watching the repo |
+| `languages` | `GitHubLanguageShare[]` | Language breakdown by bytes |
+| `contributors` | `GitHubRepoContributor[]` | Contributors per the GitHub API — **not** the same as top-level `contributors`, which is derived from commit history. The two can disagree |
+
+### `GitHubLanguageShare`
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `language` | `string` | Language name as GitHub reports it |
+| `bytes` | `number` | Bytes attributed to this language |
+| `percentage` | `number` | 0–100 with one decimal, same spirit as GitHub's language bar |
+
+### `GitHubRepoContributor`
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `login` | `string` | GitHub username |
+| `avatarUrl` | `string` | Avatar image URL |
+| `htmlUrl` | `string` | Profile URL |
+| `contributions` | `number` | Commit count per the GitHub contributors API |
+| `name` | `string` (optional) | Display name from `GET /users/{login}`, when that lookup succeeded |
 
 ## `framework` — Framework Detection (nullable)
 
@@ -246,6 +449,64 @@ Repo-level `maintainability` (Coleman-style index from average complexity and LO
 | `type` | `string` | AST node type |
 | `startLine` | `number` | 1-based line number |
 | `complexity` | `number` | Cyclomatic complexity (>= 1) |
+
+## `symbolVerificationRisks` — Complexity vs test proximity
+
+Produced by `extract/symbolVerificationRisk`. Always emitted by current builds,
+though it may be `[]`; absent in reports cached before the field existed.
+
+One row per **named** function, pairing its cyclomatic complexity against
+**static evidence that it is exercised by tests**.
+
+This array is **not** one row per entry in `perFile[].functionMetrics`. Two
+classes of function are skipped outright, because a name is what the heuristic
+matches on:
+
+- anonymous functions (`name === "(anonymous)"`)
+- names shorter than 3 characters, which would match too much text by accident
+
+So `symbolVerificationRisks.length` is normally well below
+`totals.functions`, and the gap is largest in arrow-heavy or callback-heavy
+codebases. Do not compute a "percentage of verified functions" against
+`totals.functions` — the denominators are different populations.
+
+> **`verificationScore` is not code coverage.** It is a filename-pairing and
+> name-matching heuristic: it asks whether a conventionally named test file
+> exists and whether the symbol's name appears inside it. It never executes
+> anything and has no relationship to Istanbul, `c8`, or any runtime coverage
+> tool. A high score means "a test file mentions this name", which a test can
+> satisfy without asserting anything about the function. Do not report it as a
+> coverage figure.
+
+An empty array means either that no functions were found or that the pairing
+step found nothing to compare — it is not evidence that the repository is
+untested.
+
+### `SymbolVerificationRisk`
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `file` | `string` | Path relative to `repoPath` |
+| `name` | `string` | Function name. Never `"(anonymous)"` and never shorter than 3 characters — those rows are not emitted |
+| `startLine` | `number` | 1-based line number |
+| `cyclomaticComplexity` | `number` | Same value as the matching `FunctionDetail.cyclomaticComplexity` |
+| `verificationScore` | `number` | Strength of the static evidence. **Discrete, not continuous**: exactly `0`, `0.3`, or `1` — one per `evidence` value below |
+| `evidence` | `VerificationEvidence` | Which rule produced the score (see below) |
+| `pairedTestPath` | `string` (optional) | Matched test file, when a conventional pair exists. Absent when `evidence` is `"none"` |
+| `riskScore` | `number` | `min(cyclomaticComplexity, 50) × (1 − verificationScore)`, for sorting and heat maps. Complexity is capped at 50 so one enormous function cannot dominate the ranking |
+
+### `VerificationEvidence`
+
+| Value | `verificationScore` | Meaning |
+|-------|---------------------|---------|
+| `"referenced_in_test"` | `1` | A paired test file exists **and** the symbol's name appears in it as a whole word — strongest evidence |
+| `"paired_file_only"` | `0.3` | A conventionally named test file exists but does not mention this symbol |
+| `"none"` | `0` | No paired test file found |
+
+Because the score is one of three fixed values, `riskScore` is likewise
+quantised: for a given complexity it takes only three possible values
+(`cc × 1`, `cc × 0.7`, `cc × 0`). Treat it as an ordering key, not a continuous
+risk measure.
 
 ## `reactMetrics` — React / TSX (optional)
 

@@ -1,0 +1,21 @@
+{
+  "name": "metric-validity-baselines",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Third-party baseline metric tools for research/validation. Isolated from the main project deps on purpose.",
+  "dependencies": {
+    "ts-complex": "1.0.0",
+    "eslint": "^9.0.0",
+    "eslint-plugin-sonarjs": "^3.0.0",
+    "typescript-eslint": "^8.0.0",
+    "typhonjs-escomplex": "^0.1.0",
+    "typescript": "5.9.3",
+    "@babel/core": "^7.24.0",
+    "@babel/preset-typescript": "^7.24.0",
+    "@babel/preset-react": "^7.24.0"
+  },
+  "overrides": {
+    "typescript": "5.9.3"
+  },
+  "comment": "typescript override forces ts-complex (which vendors TS 2.9.2) and tsutils onto one TS version; without it SyntaxKind numbering skews and ts-complex detects almost no functions."
+}

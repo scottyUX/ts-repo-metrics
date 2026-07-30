@@ -1,0 +1,29 @@
+fixture function                                 engine  model  sonar   engineOK modelOK
+--------------------------------------------------------------------------------------
+fixtures/d4_chains.ts:162 elseContainingLoop     5       7      7       MISMATCH ok
+fixtures/d4_chains.ts:148 elseIfContainingIf     4       4      4       ok       ok
+fixtures/d4_chains.ts:128 chainElseContainingIf  3       4      4       MISMATCH ok
+fixtures/d4_chains.ts:117 chainPlainElse         2       2      2       ok       ok
+fixtures/d4_chains.ts:98 chain6Link              7       7      7       ok       ok
+fixtures/d4_chains.ts:82 chainNestedTwoLevels    10      8      8       MISMATCH ok
+fixtures/d4_chains.ts:68 chainNestedOneLevel     6       5      5       MISMATCH ok
+fixtures/d4_chains.ts:47 chainNoTerminalElse     3       3      3       ok       ok
+fixtures/d4_chains.ts:30 chain4Link              5       5      5       ok       ok
+fixtures/d4_chains.ts:16 chain2Link              3       3      3       ok       ok
+fixtures/conventions.ts:33 h6_plain              0       0      0       ok       ok
+fixtures/conventions.ts:27 h5_nestedFn           0       0      0       ok       ok
+fixtures/conventions.ts:28 inner                 1       1      1       ok       ok
+fixtures/conventions.ts:23 h4_logicalOps         1       1      2       MISMATCH MISMATCH
+fixtures/conventions.ts:14 h3_switchBreaks       1       1      1       ok       ok
+fixtures/conventions.ts:4 h2_emptyCaseFallthrough 1       1      1       ok       ok
+fixtures/conventions.ts:1 h1_else                2       2      2       ok       ok
+fixtures/else_chains.ts:8 plainElse              2       2      2       ok       ok
+fixtures/else_chains.ts:1 elseIfChain            5       5      5       ok       ok
+fixtures/logical_ops.tsx:10 BoolLogical          0       0      2       MISMATCH MISMATCH
+fixtures/logical_ops.tsx:1 JsxLogical            0       0      0       ok       ok
+fixtures/nesting.ts:10 deepNesting               10      10     10      ok       ok
+fixtures/nesting.ts:1 parentWithNestedArrow      0       0      0       ok       ok
+fixtures/nesting.ts:2 (anonymous)                3       3      3       ok       ok
+--------------------------------------------------------------------------------------
+current engine matches sonarjs on 18/24
+spec model    matches sonarjs on 22/24

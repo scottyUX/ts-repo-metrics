@@ -90,6 +90,11 @@ export function collectHalsteadAtoms(
           case "none":
             addOperand(`lit:${node.type}`);
             break;
+          // NOTE: Python literals deliberately still collapse by KIND, not by
+          // value — the same defect that was fixed on the ECMAScript path
+          // below. escomplex is JS-only, so there is no baseline to validate a
+          // Python change against, and Python is out of scope for this paper.
+          // Left unchanged on purpose; do not "fix" without a baseline.
           case "string":
             addOperand("lit:string");
             break;
@@ -139,14 +144,35 @@ export function collectHalsteadAtoms(
           addOperand(`id:#${node.text}`);
           break;
         case "string":
+          // Halstead operand identity is the literal VALUE, not the literal
+          // kind. Collapsing every string to one atom compressed n2 (distinct
+          // operands) and therefore Halstead volume. escomplex, the baseline
+          // research/validation compares against, keys operands by value:
+          // "alpha"/"beta" are two operands, "same" repeated is one.
+          addOperand(`lit:str:${node.text}`);
+          break;
         case "string_fragment":
+          // A plain string's fragment is already counted by the `string` case
+          // above; emitting here as well double-counted every string literal in
+          // N2. Inside a template literal there is no enclosing `string` node,
+          // and escomplex counts each fragment as its own operand, so that is
+          // the only case that emits here.
+          if (node.parent?.type === "template_string") {
+            addOperand(`lit:str:${node.text}`);
+          }
+          break;
         case "template_string":
+          // No operand for the wrapper itself: escomplex emits operands for the
+          // fragments and for the substituted expressions, not for the template.
+          break;
         case "template_substitution":
-          addOperand("lit:string");
+          // The substituted expression is walked and counted on its own.
           break;
         case "number":
+          addOperand(`lit:num:${node.text}`);
+          break;
         case "regex":
-          addOperand(`lit:${node.type}`);
+          addOperand(`lit:re:${node.text}`);
           break;
         case "true":
         case "false":

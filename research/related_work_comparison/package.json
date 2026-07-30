@@ -1,0 +1,9 @@
+{
+  "name": "related-work-comparison",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Isolated install for tools NOT already present in research/validation. Per-tool installs that already exist (eslint, typescript-eslint, eslint-plugin-sonarjs, ts-complex, typhonjs-escomplex) are reused from ../validation/node_modules and are deliberately NOT duplicated here.",
+  "dependencies": {
+    "jscpd": "^4.0.5"
+  }
+}

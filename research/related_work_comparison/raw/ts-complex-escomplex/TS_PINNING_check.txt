@@ -1,0 +1,28 @@
+=== ts-complex TypeScript peer-dependency / pinning check ===
+Context: research/validation hit this and pinned an exact TS version via an npm 'overrides' block.
+Generated: 2026-07-30T01:31:01Z
+
+-- 1. what ts-complex DECLARES it wants --
+   ts-complex@1.0.0 dependencies: {"lodash":"^4.17.10","tsutils":"^2.27.1","typescript":"^2.8.3"}
+
+-- 2. is there a NESTED (vendored) typescript inside ts-complex? --
+   no nested typescript inside ts-complex -> it uses the hoisted one
+   tsutils version: 2.29.0
+
+-- 3. what it ACTUALLY resolves at runtime (after the validation 'overrides' pin) --
+   resolved: /Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/node_modules/typescript/lib/typescript.js
+   version : 5.9.3
+   validation/package.json overrides block:
+   {"typescript":"5.9.3"}
+
+-- 4. WHY the pin matters: ts-complex reports Halstead OPERATORS as raw numeric ts.SyntaxKind ids --
+   (SyntaxKind numbering is not stable across TS majors, so a mismatched TS skews operator identity)
+   file: __tests__/components/location-map-picker.test.tsx
+   operators._unique (raw SyntaxKind numbers): [39,64,154,159]
+   decoded with the RESOLVED TS 5.9.3: ["EqualsGreaterThanToken","FirstAssignment","StringKeyword","UnknownKeyword"]
+
+-- 5. did the issue RESURFACE in this run? --
+   functions detected by ts-complex across 92 files: 423
+   errors: 0
+   => NO. With the pin in place ts-complex detects functions normally.
+      The documented failure mode (detecting almost no functions) did not reappear.

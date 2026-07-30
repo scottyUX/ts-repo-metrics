@@ -1,0 +1,62 @@
+=== LICENSE EVIDENCE (read from each package's own package.json + shipped LICENSE file) ===
+Not assumed from documentation or memory. Generated: 2026-07-30T01:31:21Z
+
+---------- eslint ----------
+  package.json .license : MIT
+  version               : 9.39.5
+  repository            : eslint/eslint
+  shipped license file  : LICENSE
+  first non-empty line  : Copyright OpenJS Foundation and other contributors, <www.openjsf.org>
+
+---------- typescript-eslint ----------
+  package.json .license : MIT
+  version               : 8.65.0
+  repository            : https://github.com/typescript-eslint/typescript-eslint.git
+  shipped license file  : LICENSE
+  first non-empty line  : MIT License
+
+---------- @typescript-eslint/parser ----------
+  package.json .license : MIT
+  version               : 8.65.0
+  repository            : https://github.com/typescript-eslint/typescript-eslint.git
+  shipped license file  : LICENSE
+  first non-empty line  : MIT License
+
+---------- eslint-plugin-sonarjs ----------
+  package.json .license : LGPL-3.0-only
+  version               : 3.0.7
+  repository            : git+https://github.com/SonarSource/SonarJS.git
+  shipped license file  : LICENSE
+  first non-empty line  : SONAR Source-Available License v1.0
+
+---------- jscpd ----------
+  package.json .license : MIT
+  version               : 4.2.5
+  repository            : git+ssh://git@github.com/kucherenko/jscpd.git
+  shipped license file  : LICENSE
+  first non-empty line  : The MIT License (MIT)
+
+---------- ts-complex ----------
+  package.json .license : MIT
+  version               : 1.0.0
+  repository            : https://github.com/anandundavia/ts-complex
+  shipped license file  : LICENCE.md
+  first non-empty line  : MIT License
+
+---------- typhonjs-escomplex ----------
+  package.json .license : MPL-2.0
+  version               : 0.1.0
+  repository            : https://github.com/typhonjs-node-escomplex/typhonjs-escomplex.git
+  shipped license file  : LICENSE
+  first non-empty line  : Mozilla Public License Version 2.0
+
+---------- typescript ----------
+  package.json .license : Apache-2.0
+  version               : 5.9.3
+  repository            : https://github.com/microsoft/TypeScript.git
+  shipped license file  : LICENSE.txt
+  first non-empty line  : Apache License
+
+!! DISCREPANCY TO NOTE: eslint-plugin-sonarjs declares SPDX 'LGPL-3.0-only' in package.json
+   but the file it actually ships is the 'SONAR Source-Available License v1.0' (not an OSI
+   open-source license, and it contains a 'Competing' restriction). See ambiguities.md.

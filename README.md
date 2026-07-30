@@ -5,7 +5,7 @@ A TypeScript CLI tool that statically analyzes TypeScript, TSX, JavaScript, JSX,
 ## Prerequisites
 
 - Node.js >= 18
-- npm
+- npm >= 7 (workspace support)
 - Vitest (installed as devDependency for tests)
 
 ## Install
@@ -15,6 +15,13 @@ git clone https://github.com/scottyUX/ts-repo-metrics.git
 cd ts-repo-metrics
 npm install
 ```
+
+That single command is enough — no second build step. This repo is an npm
+workspace (`packages/engine`, `apps/dashboard`), so one root `npm install`
+installs every package's dependencies, and a root `postinstall` compiles
+`packages/engine` to `dist/`. The CLI and the dashboard both import
+`@repo-metrics/engine` from that build output, so skipping it would leave
+`npm run dev` failing with `MODULE_NOT_FOUND`.
 
 ## Usage
 
@@ -40,7 +47,7 @@ To run the `ts-repo-metrics` analysis tool, ensure you have the latest changes a
 
 ### Example Output (single repo)
 
-When run via the engine (CLI or dashboard), `analyzer_version` is the engine package version (e.g. `0.0.0`).
+When run via the engine (CLI or dashboard), `analyzer_version` is the engine package version (e.g. `0.2.0`).
 
 ```json
 {
@@ -52,8 +59,7 @@ When run via the engine (CLI or dashboard), `analyzer_version` is the engine pac
     "branch": "main"
   },
   "filesAnalyzed": 19,
-  "filesSkipped": 0,
-  "analyzer_version": "0.0.0",
+  "analyzer_version": "0.2.0",
   "analysis_timestamp": "2025-02-22T12:00:00.000Z",
   "distributions": {
     "p50_function_length": 12,
@@ -139,10 +145,53 @@ When the repo contains `.tsx` files, the report also includes **`reactMetrics`**
 | `testCoverageProxy` | LOC | testLOC / sourceLOC ratio and classification |
 | `duplication` | jscpd | Duplicate percentage, lines, clone clusters |
 | `git` | simple-git or GitHub API (fallback) | Commit count, sizes, frequency, large commit ratio. On Vercel (no git CLI), metrics come from the GitHub REST API when `GITHUB_TOKEN` is set. |
+| `gitMetricsV2` | `collect/gitMetricsV2` | Epic D extended git metrics: `commitStats`, `burstStats`, `entropy`, `churn`, `refactorBehavior`, `testCoupling`, and `commitCalendar` when commit timestamps were available. `null` when no history was analyzed |
+| `commitCalendar` | `collect/gitMetricsV2` or GitHub API | Mon–Sun × week commit heatmap (`grid`, `columnWeekStarts`, `busiestWeekdayIndex`). Top-level copy is populated when history came from the GitHub API only; consumers should prefer `gitMetricsV2?.commitCalendar ?? commitCalendar` |
+| `contributors` | `collect/gitMetricsV2` | Per-contributor activity: commit count, lines added/deleted, test vs source churn and files touched, per-author `commitStats`. Present when history was analyzed (local git or API) |
+| `symbolVerificationRisks` | `extract/symbolVerificationRisk` | Per-symbol complexity vs test proximity: `verificationScore` (0–1 static evidence, **not** Istanbul coverage), `evidence`, `pairedTestPath`, and `riskScore` = `min(cyclomatic, 50) × (1 − verificationScore)`. Omitted in older cached reports |
+| `github` | GitHub REST API | Repository metadata for `github.com` targets: description, topics, stars, forks, watchers, language shares, contributors |
 | `framework` | package.json | React, Next.js, Express, NestJS, Fastify, or Node |
+| `analysisSkipped` | `collect/pythonFrameworkDetection` | Present **instead of** metrics when the target is an unsupported framework (`web2py` or `django`); carries `id` and a human-readable `message` |
 | `reactMetrics` | `extract/react` (TSX only) | React/TSX: components with JSX, hooks, nested JSX depth, Ferreira/Tampere-style flags, prop pass-through MVP, hook-safety heuristics |
 | `phase3` | `extract/silentFailures`, `collect/weightedRedundancy`, `functionMetrics` | Optional pathology block: silent-failure density (TSX), monolithic component rate, weighted structural redundancy (jscpd) |
 | Per-function (in `perFile[].functionMetrics`) | `tokenScanner`, `halstead`, `cognitiveComplexity`, `utils/metrics` | Lexical / cognitive: Halstead volume, cyclomatic, cognitive complexity, GRAD-AI `MI_raw` / `MI_norm`, `isReactComponent` heuristic |
+
+### What counts as a function
+
+Every per-function metric is emitted for each node matching `FUNCTION_NODE_TYPES`
+(`packages/engine/src/utils/constants.ts`):
+
+`function_declaration`, `generator_function_declaration`, `method_definition`,
+`arrow_function`, `function`, `function_expression`, `generator_function`.
+
+`function_expression` is the node type tree-sitter-typescript 0.23 emits for
+`const x = function () {}`; older tree-sitter-javascript grammars emit `function`
+for the same construct, so both are listed. This matters for cross-corpus
+comparison: before `function_expression` was recognized, function expressions
+were absent from every metric **and** their bodies were counted into the
+enclosing function's complexity instead. Reports generated before that fix
+therefore undercount functions and overcount the complexity of their parents in
+any codebase using `function () {}` expressions. See
+[research/validation/findings.md](research/validation/findings.md) (D10).
+
+### Failure modes: skipped files
+
+`filesSkipped` counts files that were discovered but never parsed, so their
+functions are absent from every metric in the report. Each one logs a named
+reason to stderr — a skip is never silent:
+
+| stderr reason | Meaning |
+|---------------|---------|
+| `could not read file` | The file could not be read from disk (permissions, broken symlink, disappeared mid-run) |
+| `file_too_large_for_parser (<n> chars)` | The source exceeded the Tree-sitter read buffer. Should be unreachable: the parser now sizes its buffer to the source. If you see this, report it — it means whole files are missing from the metrics |
+| `parse_error: <message>` | Tree-sitter rejected the source for some other reason |
+
+Historically a file at or above 32,768 characters failed with a bare
+`Invalid argument` and was counted as a generic skip, which silently removed
+9.3% of this repository's functions from every metric. `filesSkipped` is
+normally absent — the key is omitted entirely when nothing was skipped, so
+there is no `0` to read. If it is present at all, the report describes less code
+than the repository contains, so check the stderr log before comparing runs.
 
 ## Dashboard
 
@@ -171,10 +220,10 @@ repo-metrics/
 │       ├── src/
 │       │   ├── pipeline/           # analyzeRepo, analyzeFromGitHubUrl
 │       │   ├── collect/            # fileDiscovery, loc, duplication, gitClone, weightedRedundancy, gitMetrics, gitMetricsApi, repoMetadata, frameworkDetection
-│       │   ├── parsing/            # tsParser, tokenScanner (Halstead atoms)
-│       │   ├── extract/           # functionCount, functionMetrics, complexity, halstead, cognitiveComplexity, smells, silentFailures, testCoverageProxy, maintainabilityIndex, distributions, react/
+│       │   ├── parsing/            # sourceParser (grammar selection), tokenScanner (Halstead atoms)
+│       │   ├── extract/           # functionCount, functionMetrics, complexity, halstead, cognitiveComplexity, smells, silentFailures, symbolVerificationRisk, testCoverageProxy, maintainabilityIndex, distributions, react/
 │       │   ├── types/              # report.ts (RepoReport, etc.)
-│       │   └── utils/              # constants, githubUrl, math, text, astWalker
+│       │   └── utils/              # constants, languageProfile, githubUrl, math, metrics, text, astWalker
 │       └── __tests__/              # Engine test suite (+ fixtures)
 └── apps/
     └── dashboard/                  # Next.js app; /api/analyze imports engine
@@ -183,8 +232,8 @@ repo-metrics/
 ## How It Works
 
 1. **Profile** — Counts files by type and computes LOC breakdowns before parsing.
-2. **Discover** — `fast-glob` finds all `.ts`/`.tsx` files, ignoring non-source directories.
-3. **Parse** — Each file is parsed into a CST using Tree-sitter (TypeScript or TSX grammar).
+2. **Discover** — `fast-glob` finds all `.ts`/`.tsx`/`.js`/`.jsx`/`.py` files, ignoring non-source directories (`node_modules`, `dist`, `build`, `.next`, `out`, `coverage`, `.git`) and dot-directories.
+3. **Parse** — Each file is parsed into a CST using Tree-sitter, selecting the grammar by extension (TypeScript, TSX, JavaScript, or Python). Files that fail to parse are skipped with a named reason — see [Failure modes](#failure-modes-skipped-files).
 4. **Extract** — Multiple extractors run on each parsed tree:
    - Function count and type breakdown
    - Per-function metrics (length, nesting depth, parameter count)
@@ -214,12 +263,14 @@ repo-metrics/
 | `build:engine` | `cd packages/engine && npm run build` | Builds the `@repo-metrics/engine` package |
 | `dev` | `npm run build:engine && tsx src/cli.ts` | Runs CLI from TypeScript after building the engine |
 | `build` | `tsc -p tsconfig.json` | Compile root CLI to `dist/` |
+| `build:engine` | `cd packages/engine && npm run build` | Compile `packages/engine` to `dist/` |
+| `postinstall` | `npm run build:engine` | Runs automatically after `npm install` so the engine is built and the CLI is immediately runnable |
 | `start` | `node dist/cli.js` | Run the compiled CLI |
 | `dashboard` | `cd apps/dashboard && npm run dev` | Start Next.js dashboard |
 | `dashboard:build` | Build engine then Next | Build `packages/engine` then `apps/dashboard` (for production/Vercel) |
-| `test` | `vitest run` | Run engine tests and dashboard threshold tests (`packages/engine/__tests__/`, `apps/dashboard/__tests__/`) |
+| `test` | `vitest run` | Run the full suite: engine tests and dashboard tests (`packages/engine/__tests__/`, `apps/dashboard/__tests__/`). Both are covered by a single root `npm install` — the workspace setup installs the dashboard's dependencies, which three of its test files need |
 | `test:watch` | `vitest` | Run tests in watch mode |
 
 ## License
 
-ISC
+MIT — see [LICENSE](LICENSE).

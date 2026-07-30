@@ -1,0 +1,30 @@
+{
+  "comment": "Corpus for the metric-validity evaluation. `self` is this repository, analyzed in place at whatever commit is checked out. The remainder are CSE 115A student repositories already referenced in research/datasets/manifest_sprint1.csv, cloned at the pinned commit so the study is reproducible.",
+  "repos": [
+    {
+      "name": "ts-repo-metrics",
+      "self": true,
+      "url": "https://github.com/scottyUX/ts-repo-metrics"
+    },
+    {
+      "name": "Colin-Posat__SlugFound",
+      "url": "https://github.com/Colin-Posat/SlugFound",
+      "commit": "c8556ef8e1d1e661c57f1deebc6e20706a323740"
+    },
+    {
+      "name": "MikeyZv__SlugMarket",
+      "url": "https://github.com/MikeyZv/SlugMarket",
+      "commit": "0bd29d7e29b3223c0c34b07b36afa2c297260068"
+    },
+    {
+      "name": "Brinqa-CRQ-2026__VulnContext-Desktop",
+      "url": "https://github.com/Brinqa-CRQ-2026/VulnContext-Desktop",
+      "commit": "a3f75c2ed9a466d19e66f821e5eb3e5452794b63"
+    },
+    {
+      "name": "cse115a-Memori__Memori",
+      "url": "https://github.com/cse115a-Memori/Memori",
+      "commit": "5cb9df5e8ab906c27ebf6f225d9ad997f1c0204e"
+    }
+  ]
+}

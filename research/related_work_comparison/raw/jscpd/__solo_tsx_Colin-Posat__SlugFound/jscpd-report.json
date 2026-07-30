@@ -1,0 +1,1469 @@
+{
+  "statistics": {
+    "detectionDate": "2026-07-30T01:30:39.594Z",
+    "formats": {
+      "javascript": {
+        "sources": {
+          "Colin-Posat__SlugFound/app/(app)/items/[id]/edit/page.tsx": {
+            "lines": 9,
+            "tokens": 51,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(app)/items/[id]/edit/edit-form.tsx": {
+            "lines": 257,
+            "tokens": 2084,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(app)/items/[id]/page.tsx": {
+            "lines": 0,
+            "tokens": 9,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/ui/image-overlay.tsx": {
+            "lines": 31,
+            "tokens": 188,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/ui/badge.tsx": {
+            "lines": 0,
+            "tokens": 14,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/messages/messages-view.tsx": {
+            "lines": 17,
+            "tokens": 121,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/messages/message-thread.tsx": {
+            "lines": 59,
+            "tokens": 400,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/messages/message-composer.tsx": {
+            "lines": 50,
+            "tokens": 269,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/messages/message-bubble.tsx": {
+            "lines": 54,
+            "tokens": 350,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/messages/conversation-list.tsx": {
+            "lines": 19,
+            "tokens": 159,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/messages/conversation-list-item.tsx": {
+            "lines": 21,
+            "tokens": 134,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(public)/signup/signup-form.tsx": {
+            "lines": 116,
+            "tokens": 943,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(public)/login/login-form.tsx": {
+            "lines": 48,
+            "tokens": 363,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(app)/profile/profile-view.tsx": {
+            "lines": 274,
+            "tokens": 2137,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(app)/profile/page.tsx": {
+            "lines": 3,
+            "tokens": 27,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(app)/messages/page.tsx": {
+            "lines": 3,
+            "tokens": 27,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(app)/lost/page.tsx": {
+            "lines": 6,
+            "tokens": 39,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(app)/found/page.tsx": {
+            "lines": 6,
+            "tokens": 39,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(app)/create/page.tsx": {
+            "lines": 0,
+            "tokens": 3,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(app)/create/create-form.tsx": {
+            "lines": 265,
+            "tokens": 2180,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/__tests__/components/messages/message-composer.test.tsx": {
+            "lines": 58,
+            "tokens": 448,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/__tests__/components/messages/message-bubble.test.tsx": {
+            "lines": 18,
+            "tokens": 229,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/lib/unread-context.tsx": {
+            "lines": 0,
+            "tokens": 11,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/lib/auth-context.tsx": {
+            "lines": 0,
+            "tokens": 11,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/theme-toggle.tsx": {
+            "lines": 3,
+            "tokens": 47,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/sidebar.tsx": {
+            "lines": 104,
+            "tokens": 729,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/report-menu.tsx": {
+            "lines": 93,
+            "tokens": 688,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/photo-search-form.tsx": {
+            "lines": 95,
+            "tokens": 754,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/location-map-picker.tsx": {
+            "lines": 23,
+            "tokens": 186,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/items-map.tsx": {
+            "lines": 31,
+            "tokens": 266,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/items-filter.tsx": {
+            "lines": 139,
+            "tokens": 1024,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/item-detail.tsx": {
+            "lines": 181,
+            "tokens": 1358,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/item-card.tsx": {
+            "lines": 58,
+            "tokens": 473,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/app-nav.tsx": {
+            "lines": 73,
+            "tokens": 478,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(public)/page.tsx": {
+            "lines": 64,
+            "tokens": 453,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(app)/layout.tsx": {
+            "lines": 1,
+            "tokens": 20,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/__tests__/components/location-map-picker.test.tsx": {
+            "lines": 83,
+            "tokens": 748,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/layout.tsx": {
+            "lines": 4,
+            "tokens": 53,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          }
+        },
+        "total": {
+          "lines": 2266,
+          "tokens": 17513,
+          "sources": 38,
+          "clones": 0,
+          "duplicatedLines": 0,
+          "duplicatedTokens": 0,
+          "percentage": 0,
+          "percentageTokens": 0,
+          "newDuplicatedLines": 0,
+          "newClones": 0
+        }
+      },
+      "tsx": {
+        "sources": {
+          "Colin-Posat__SlugFound/app/(app)/items/[id]/edit/page.tsx": {
+            "lines": 47,
+            "tokens": 365,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 10,
+            "duplicatedTokens": 101,
+            "percentage": 21.28,
+            "percentageTokens": 27.67,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(app)/items/[id]/edit/edit-form.tsx": {
+            "lines": 349,
+            "tokens": 2787,
+            "sources": 1,
+            "clones": 4,
+            "duplicatedLines": 43,
+            "duplicatedTokens": 477,
+            "percentage": 12.32,
+            "percentageTokens": 17.12,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(app)/lost/[id]/page.tsx": {
+            "lines": 16,
+            "tokens": 89,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(app)/items/[id]/page.tsx": {
+            "lines": 57,
+            "tokens": 440,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 10,
+            "duplicatedTokens": 101,
+            "percentage": 17.54,
+            "percentageTokens": 22.95,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(app)/items/[id]/not-found.tsx": {
+            "lines": 30,
+            "tokens": 204,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(app)/items/[id]/loading.tsx": {
+            "lines": 34,
+            "tokens": 215,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(app)/found/photo-search/page.tsx": {
+            "lines": 22,
+            "tokens": 175,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(app)/found/[id]/page.tsx": {
+            "lines": 16,
+            "tokens": 89,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/ui/image-overlay.tsx": {
+            "lines": 71,
+            "tokens": 532,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/ui/badge.tsx": {
+            "lines": 29,
+            "tokens": 220,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/messages/messages-view.tsx": {
+            "lines": 235,
+            "tokens": 1917,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/messages/message-thread.tsx": {
+            "lines": 99,
+            "tokens": 686,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/messages/message-composer.tsx": {
+            "lines": 186,
+            "tokens": 1405,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/messages/message-bubble.tsx": {
+            "lines": 81,
+            "tokens": 548,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/messages/empty-thread.tsx": {
+            "lines": 7,
+            "tokens": 76,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/messages/conversation-list.tsx": {
+            "lines": 65,
+            "tokens": 480,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/messages/conversation-list-item.tsx": {
+            "lines": 74,
+            "tokens": 476,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(public)/signup/signup-form.tsx": {
+            "lines": 190,
+            "tokens": 1572,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 10,
+            "duplicatedTokens": 71,
+            "percentage": 5.26,
+            "percentageTokens": 4.52,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(public)/signup/page.tsx": {
+            "lines": 33,
+            "tokens": 239,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 7,
+            "duplicatedTokens": 79,
+            "percentage": 21.21,
+            "percentageTokens": 33.05,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(public)/login/page.tsx": {
+            "lines": 33,
+            "tokens": 290,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 7,
+            "duplicatedTokens": 79,
+            "percentage": 21.21,
+            "percentageTokens": 27.24,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(public)/login/login-form.tsx": {
+            "lines": 76,
+            "tokens": 514,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 10,
+            "duplicatedTokens": 71,
+            "percentage": 13.16,
+            "percentageTokens": 13.81,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(app)/profile/profile-view.tsx": {
+            "lines": 414,
+            "tokens": 3352,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(app)/profile/page.tsx": {
+            "lines": 48,
+            "tokens": 310,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(app)/messages/page.tsx": {
+            "lines": 35,
+            "tokens": 306,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(app)/lost/page.tsx": {
+            "lines": 61,
+            "tokens": 438,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 14,
+            "duplicatedTokens": 115,
+            "percentage": 22.95,
+            "percentageTokens": 26.26,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(app)/found/page.tsx": {
+            "lines": 65,
+            "tokens": 483,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 14,
+            "duplicatedTokens": 115,
+            "percentage": 21.54,
+            "percentageTokens": 23.81,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(app)/create/page.tsx": {
+            "lines": 17,
+            "tokens": 133,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(app)/create/create-form.tsx": {
+            "lines": 435,
+            "tokens": 3527,
+            "sources": 1,
+            "clones": 4,
+            "duplicatedLines": 43,
+            "duplicatedTokens": 477,
+            "percentage": 9.89,
+            "percentageTokens": 13.52,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/__tests__/components/messages/message-composer.test.tsx": {
+            "lines": 81,
+            "tokens": 618,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/__tests__/components/messages/message-bubble.test.tsx": {
+            "lines": 36,
+            "tokens": 390,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/lib/unread-context.tsx": {
+            "lines": 53,
+            "tokens": 456,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/lib/auth-context.tsx": {
+            "lines": 121,
+            "tokens": 776,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/theme-toggle.tsx": {
+            "lines": 22,
+            "tokens": 170,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/sidebar.tsx": {
+            "lines": 188,
+            "tokens": 1482,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 5,
+            "duplicatedTokens": 62,
+            "percentage": 2.66,
+            "percentageTokens": 4.18,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/report-menu.tsx": {
+            "lines": 158,
+            "tokens": 1131,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/photo-search-form.tsx": {
+            "lines": 182,
+            "tokens": 1460,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/location-map-picker.tsx": {
+            "lines": 116,
+            "tokens": 871,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/location-map-picker-dynamic.tsx": {
+            "lines": 16,
+            "tokens": 117,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/items-map.tsx": {
+            "lines": 81,
+            "tokens": 535,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/items-map-dynamic.tsx": {
+            "lines": 15,
+            "tokens": 100,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/items-filter.tsx": {
+            "lines": 305,
+            "tokens": 2238,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/item-detail.tsx": {
+            "lines": 255,
+            "tokens": 1896,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/item-card.tsx": {
+            "lines": 92,
+            "tokens": 707,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/app-nav.tsx": {
+            "lines": 125,
+            "tokens": 852,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(public)/page.tsx": {
+            "lines": 212,
+            "tokens": 1747,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(public)/layout.tsx": {
+            "lines": 39,
+            "tokens": 290,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 5,
+            "duplicatedTokens": 62,
+            "percentage": 12.82,
+            "percentageTokens": 21.38,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(app)/layout.tsx": {
+            "lines": 40,
+            "tokens": 382,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/__tests__/components/report-menu.test.tsx": {
+            "lines": 50,
+            "tokens": 544,
+            "sources": 1,
+            "clones": 2,
+            "duplicatedLines": 12,
+            "duplicatedTokens": 182,
+            "percentage": 24,
+            "percentageTokens": 33.46,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/__tests__/components/location-map-picker.test.tsx": {
+            "lines": 127,
+            "tokens": 1149,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/layout.tsx": {
+            "lines": 67,
+            "tokens": 414,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          }
+        },
+        "total": {
+          "lines": 5206,
+          "tokens": 40193,
+          "sources": 50,
+          "clones": 10,
+          "duplicatedLines": 95,
+          "duplicatedTokens": 996,
+          "percentage": 1.82,
+          "percentageTokens": 2.48,
+          "newDuplicatedLines": 0,
+          "newClones": 0
+        }
+      }
+    },
+    "total": {
+      "lines": 7472,
+      "tokens": 57706,
+      "sources": 88,
+      "clones": 10,
+      "duplicatedLines": 95,
+      "duplicatedTokens": 996,
+      "percentage": 1.27,
+      "percentageTokens": 1.73,
+      "newDuplicatedLines": 0,
+      "newClones": 0
+    }
+  },
+  "duplicates": [
+    {
+      "format": "tsx",
+      "lines": 11,
+      "fragment": "({ params }: PageProps) {\n  const { id } = await params\n\n  const item = await getItemById(id)\n  if (!item) notFound()\n\n  const supabase = await createSupabaseServerClient()\n  const {\n    data: { user },\n  } = await supabase.auth.getUser()\n  const",
+      "tokens": 101,
+      "firstFile": {
+        "name": "Colin-Posat__SlugFound/app/(app)/items/[id]/page.tsx",
+        "start": 45,
+        "end": 55,
+        "startLoc": {
+          "line": 45,
+          "column": 39,
+          "position": 301
+        },
+        "endLoc": {
+          "line": 55,
+          "column": 8,
+          "position": 402
+        }
+      },
+      "secondFile": {
+        "name": "Colin-Posat__SlugFound/app/(app)/items/[id]/edit/page.tsx",
+        "start": 17,
+        "end": 28,
+        "startLoc": {
+          "line": 17,
+          "column": 43,
+          "position": 91
+        },
+        "endLoc": {
+          "line": 28,
+          "column": 81,
+          "position": 193
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 8,
+      "fragment": "() {\n  return (\n    <div className=\"flex flex-1 items-center justify-center px-4 py-16\">\n      <div className=\"w-full max-w-sm\">\n        <div className=\"rounded-2xl border border-line bg-surface p-8\">\n          <div className=\"mb-6 text-center\">\n            <span className=\"text-3xl\">🐌</span>\n            <h1 className=\"mt-3 text-2xl font-bold text-ink\">Welcome",
+      "tokens": 79,
+      "firstFile": {
+        "name": "Colin-Posat__SlugFound/app/(public)/login/page.tsx",
+        "start": 4,
+        "end": 11,
+        "startLoc": {
+          "line": 4,
+          "column": 34,
+          "position": 24
+        },
+        "endLoc": {
+          "line": 11,
+          "column": 69,
+          "position": 103
+        }
+      },
+      "secondFile": {
+        "name": "Colin-Posat__SlugFound/app/(public)/signup/page.tsx",
+        "start": 9,
+        "end": 16,
+        "startLoc": {
+          "line": 9,
+          "column": 35,
+          "position": 26
+        },
+        "endLoc": {
+          "line": 16,
+          "column": 68,
+          "position": 105
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 11,
+      "fragment": "<div className=\"flex flex-col gap-1.5\">\n        <label htmlFor=\"email\" className=\"text-sm font-medium text-ink-soft\">\n          UCSC email\n        </label>\n        <input\n          id=\"email\"\n          name=\"email\"\n          type=\"email\"\n          autoComplete=\"email\"\n          placeholder=\"slug@ucsc.edu\"\n          className",
+      "tokens": 71,
+      "firstFile": {
+        "name": "Colin-Posat__SlugFound/app/(public)/login/login-form.tsx",
+        "start": 23,
+        "end": 33,
+        "startLoc": {
+          "line": 23,
+          "column": 7,
+          "position": 128
+        },
+        "endLoc": {
+          "line": 33,
+          "column": 20,
+          "position": 199
+        }
+      },
+      "secondFile": {
+        "name": "Colin-Posat__SlugFound/app/(public)/signup/signup-form.tsx",
+        "start": 81,
+        "end": 91,
+        "startLoc": {
+          "line": 81,
+          "column": 7,
+          "position": 687
+        },
+        "endLoc": {
+          "line": 91,
+          "column": 16,
+          "position": 758
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 15,
+      "fragment": ",\n    search: q,\n    category: category || undefined,\n    location: location || undefined,\n    activeOnly: !showAll,\n  })\n\n  return (\n    <div className=\"mx-auto w-full max-w-6xl px-4 py-10\">\n      <div className=\"reveal mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between\">\n        <div>\n          <p className=\"font-mono text-[11px] uppercase tracking-[0.2em] text-gold-ink\">\n            UCSC · Lost &amp; Found Board\n          </p>\n          <h1 className=\"mt-1 font-display text-4xl font-bold text-ink\">Found",
+      "tokens": 115,
+      "firstFile": {
+        "name": "Colin-Posat__SlugFound/app/(app)/found/page.tsx",
+        "start": 20,
+        "end": 34,
+        "startLoc": {
+          "line": 20,
+          "column": 18,
+          "position": 173
+        },
+        "endLoc": {
+          "line": 34,
+          "column": 78,
+          "position": 288
+        }
+      },
+      "secondFile": {
+        "name": "Colin-Posat__SlugFound/app/(app)/lost/page.tsx",
+        "start": 24,
+        "end": 38,
+        "startLoc": {
+          "line": 24,
+          "column": 17,
+          "position": 176
+        },
+        "endLoc": {
+          "line": 38,
+          "column": 77,
+          "position": 291
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 12,
+      "fragment": ">\n                  <option value=\"\" disabled>Select a category</option>\n                  {ITEM_CATEGORIES.map((c) => (\n                    <option key={c} value={c}>{c}</option>\n                  ))}\n                </select>\n                {state?.errors?.category && (\n                  <p className=\"text-xs text-lost\">{state.errors.category[0]}</p>\n                )}\n              </div>\n\n              {",
+      "tokens": 118,
+      "firstFile": {
+        "name": "Colin-Posat__SlugFound/app/(app)/create/create-form.tsx",
+        "start": 261,
+        "end": 272,
+        "startLoc": {
+          "line": 261,
+          "column": 17,
+          "position": 2033
+        },
+        "endLoc": {
+          "line": 272,
+          "column": 16,
+          "position": 2151
+        }
+      },
+      "secondFile": {
+        "name": "Colin-Posat__SlugFound/app/(app)/items/[id]/edit/edit-form.tsx",
+        "start": 154,
+        "end": 169,
+        "startLoc": {
+          "line": 154,
+          "column": 15,
+          "position": 1219
+        },
+        "endLoc": {
+          "line": 169,
+          "column": 14,
+          "position": 1345
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 15,
+      "fragment": "value={mapLocation?.lng  ?? ''} />\n\n                <LocationMapPicker value={mapLocation} onChange={setMapLocation} />\n\n                {mapLocation && (\n                  <p className=\"text-xs text-gold-ink\">\n                    📍 {mapLocation.label}\n                    {mapLocation.label === 'Other' &&\n                      ` (${mapLocation.lat.toFixed(5)}, ${mapLocation.lng.toFixed(5)})`}\n                  </p>\n                )}\n                {state?.errors?.location && (\n                  <p className=\"text-xs text-lost\">{state.errors.location[0]}</p>\n                )}\n                {",
+      "tokens": 153,
+      "firstFile": {
+        "name": "Colin-Posat__SlugFound/app/(app)/create/create-form.tsx",
+        "start": 284,
+        "end": 298,
+        "startLoc": {
+          "line": 284,
+          "column": 54,
+          "position": 2321
+        },
+        "endLoc": {
+          "line": 298,
+          "column": 18,
+          "position": 2474
+        }
+      },
+      "secondFile": {
+        "name": "Colin-Posat__SlugFound/app/(app)/items/[id]/edit/edit-form.tsx",
+        "start": 183,
+        "end": 197,
+        "startLoc": {
+          "line": 183,
+          "column": 47,
+          "position": 1506
+        },
+        "endLoc": {
+          "line": 197,
+          "column": 15,
+          "position": 1664
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 12,
+      "fragment": ". Max 5 MB · JPG, PNG, WebP.\n            </p>\n\n            {selectedFile ? (\n              <div className=\"flex items-center justify-between rounded-xl border border-line-strong bg-surface-2 px-4 py-3\">\n                <div className=\"flex items-center gap-3\">\n                  <span className=\"text-2xl\">🖼️</span>\n                  <div>\n                    <p className=\"text-sm font-medium text-ink\">{selectedFile.name}</p>\n                    <p className=\"text-xs text-muted\">\n                      {(selectedFile.size / 1024).toFixed(0)} KB\n                    </",
+      "tokens": 126,
+      "firstFile": {
+        "name": "Colin-Posat__SlugFound/app/(app)/create/create-form.tsx",
+        "start": 337,
+        "end": 348,
+        "startLoc": {
+          "line": 337,
+          "column": 74,
+          "position": 2816
+        },
+        "endLoc": {
+          "line": 348,
+          "column": 23,
+          "position": 2942
+        }
+      },
+      "secondFile": {
+        "name": "Colin-Posat__SlugFound/app/(app)/items/[id]/edit/edit-form.tsx",
+        "start": 225,
+        "end": 235,
+        "startLoc": {
+          "line": 225,
+          "column": 58,
+          "position": 1904
+        },
+        "endLoc": {
+          "line": 235,
+          "column": 65,
+          "position": 2029
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 8,
+      "fragment": ">\n                <span className=\"text-3xl\">📷</span>\n                <span className=\"text-sm text-muted\">Click to upload a photo</span>\n                <span className=\"text-xs text-muted\">PNG, JPG, WebP up to 5 MB</span>\n              </label>\n            )}\n\n            {",
+      "tokens": 80,
+      "firstFile": {
+        "name": "Colin-Posat__SlugFound/app/(app)/create/create-form.tsx",
+        "start": 363,
+        "end": 370,
+        "startLoc": {
+          "line": 363,
+          "column": 15,
+          "position": 3024
+        },
+        "endLoc": {
+          "line": 370,
+          "column": 14,
+          "position": 3104
+        }
+      },
+      "secondFile": {
+        "name": "Colin-Posat__SlugFound/app/(app)/items/[id]/edit/edit-form.tsx",
+        "start": 266,
+        "end": 273,
+        "startLoc": {
+          "line": 266,
+          "column": 13,
+          "position": 2206
+        },
+        "endLoc": {
+          "line": 273,
+          "column": 12,
+          "position": 2286
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 6,
+      "fragment": "\" className=\"flex items-center gap-2\">\n            <span className=\"font-display text-xl font-bold tracking-tight\">\n              <span className=\"text-gold-ink\">Slug</span>\n              <span className=\"text-ink\">Found</span>\n            </span>\n            <span className=\"hidden rounded bg-gold-soft px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-gold-ink sm:inline",
+      "tokens": 62,
+      "firstFile": {
+        "name": "Colin-Posat__SlugFound/app/(public)/layout.tsx",
+        "start": 10,
+        "end": 15,
+        "startLoc": {
+          "line": 10,
+          "column": 24,
+          "position": 97
+        },
+        "endLoc": {
+          "line": 15,
+          "column": 142,
+          "position": 159
+        }
+      },
+      "secondFile": {
+        "name": "Colin-Posat__SlugFound/app/components/sidebar.tsx",
+        "start": 48,
+        "end": 53,
+        "startLoc": {
+          "line": 48,
+          "column": 28,
+          "position": 485
+        },
+        "endLoc": {
+          "line": 53,
+          "column": 125,
+          "position": 547
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 7,
+      "fragment": ", async () => {\n    const user = userEvent.setup()\n    render(<ReportMenu itemId=\"item-1\" />)\n\n    await user.click(screen.getByRole('button', { name: /more options/i }))\n    await user.click(screen.getByRole('menuitem', { name: /report/i }))\n    await",
+      "tokens": 91,
+      "firstFile": {
+        "name": "Colin-Posat__SlugFound/__tests__/components/report-menu.test.tsx",
+        "start": 36,
+        "end": 42,
+        "startLoc": {
+          "line": 36,
+          "column": 47,
+          "position": 370
+        },
+        "endLoc": {
+          "line": 42,
+          "column": 10,
+          "position": 461
+        }
+      },
+      "secondFile": {
+        "name": "Colin-Posat__SlugFound/__tests__/components/report-menu.test.tsx",
+        "start": 25,
+        "end": 32,
+        "startLoc": {
+          "line": 25,
+          "column": 53,
+          "position": 240
+        },
+        "endLoc": {
+          "line": 32,
+          "column": 11,
+          "position": 332
+        }
+      }
+    }
+  ]
+}

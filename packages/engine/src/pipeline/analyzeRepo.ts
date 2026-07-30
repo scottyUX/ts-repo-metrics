@@ -205,7 +205,17 @@ export async function analyzeRepo(
     try {
       tree = parseSource(code, flavorForFile(filePath));
     } catch (err) {
-      console.error(`Skipping ${path.relative(repoPath, filePath)}: parse error`, err instanceof Error ? err.message : err);
+      // `Invalid argument` from node-tree-sitter used to mean the source exceeded
+      // the parser's read buffer; parseSource now sizes that buffer to the
+      // source, so this reason should no longer be reachable. Name it anyway —
+      // a file dropped here is missing from every metric, and the previous
+      // generic message made that loss invisible.
+      const message = err instanceof Error ? err.message : String(err);
+      const reason =
+        message === "Invalid argument"
+          ? `file_too_large_for_parser (${code.length} chars)`
+          : `parse_error: ${message}`;
+      console.error(`Skipping ${path.relative(repoPath, filePath)}: ${reason}`);
       filesSkipped++;
       continue;
     }

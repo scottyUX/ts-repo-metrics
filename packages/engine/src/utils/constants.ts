@@ -61,7 +61,13 @@ export const FUNCTION_NODE_TYPES = new Set([
   "generator_function_declaration",
   "method_definition",
   "arrow_function",
+  // `function` is the node type older tree-sitter-javascript grammars emitted
+  // for a function expression; tree-sitter-typescript 0.23 emits
+  // `function_expression`. Both are listed so neither grammar silently drops
+  // `const x = function () {}` — an unrecognised function is not just missing,
+  // its body is also counted into the enclosing function's score.
   "function",
+  "function_expression",
   "generator_function",
 ]);
 
@@ -111,7 +117,10 @@ export const FERREIRA_COMPONENT_SLOC_THRESHOLD = 50;
  */
 export const COMPLEXITY_BRANCH_TYPES = new Set([
   "if_statement",
-  "else_clause",
+  // `else_clause` is deliberately absent. McCabe counts decision points, and a
+  // bare `else` has no predicate — it is the fall-through of an `if` already
+  // counted. An `else if` still counts once, via the `if_statement` nested
+  // inside its `else_clause`.
   "for_statement",
   "for_in_statement",
   "while_statement",

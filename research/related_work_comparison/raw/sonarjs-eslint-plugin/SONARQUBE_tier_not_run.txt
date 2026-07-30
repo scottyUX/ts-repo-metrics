@@ -1,0 +1,13 @@
+--- attempted SonarQube tier execution ---
+$ which sonar-scanner
+sonar-scanner not found
+sonar-scanner: not found
+$ which docker
+docker not found
+docker: not found
+$ echo $SONAR_TOKEN
+SONAR_TOKEN=<unset>
+
+CONCLUSION: the SonarQube Server/Cloud tier could NOT be executed on this machine.
+No scanner binary, no container runtime to host a server, and no server URL/token.
+All SonarQube-tier statements in evidence_table.md are therefore marked NOT OBSERVED.

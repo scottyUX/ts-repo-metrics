@@ -1,0 +1,14 @@
+# TIER: FREE eslint-plugin-sonarjs 3.0.7 -- REACT/HOOK RULE SUBSET
+# rules: sonarjs/jsx-no-leaked-render, sonarjs/no-hook-setter-in-body, sonarjs/no-useless-react-setstate
+# cwd: research/validation/.corpus/MikeyZv__SlugMarket @ 0bd29d7e29b3223c0c34b07b36afa2c297260068  | 2026-07-30T01:23:08Z
+
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/ListingCard.test.tsx
+  9:5  error  Definition for rule '@next/next/no-img-element' was not found  @next/next/no-img-element
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/ListingManageModal.test.tsx
+  17:5  error  Definition for rule '@next/next/no-img-element' was not found  @next/next/no-img-element
+
+✖ 2 problems (2 errors, 0 warnings)
+
+# exit=1

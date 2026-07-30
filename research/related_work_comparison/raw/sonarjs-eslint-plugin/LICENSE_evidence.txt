@@ -1,0 +1,37 @@
+=== eslint-plugin-sonarjs: license evidence (two sources disagree) ===
+--- package.json license field ---
+license: LGPL-3.0-only
+version: 3.0.7
+homepage: https://github.com/SonarSource/SonarJS/blob/master/packages/jsts/src/rules/README.md
+
+--- first 30 lines of shipped LICENSE file ---
+SONAR Source-Available License v1.0
+Last Updated November 13, 2024
+
+1. DEFINITIONS
+
+"Agreement" means this Sonar Source-Available License v1.0
+
+"Competing" means marketing a product or service as a substitute for the
+functionality or value of SonarQube. A product or service may compete regardless
+of how it is designed or deployed. For example, a product or service may compete
+even if it provides its functionality via any kind of interface (including
+services, libraries, or plug-ins), even if it is ported to a different platform
+or programming language, and even if it is provided free of charge.
+
+"Contribution" means:
+
+  a) in the case of the initial Contributor, the initial content Distributed under
+this Agreement, and
+
+  b) in the case of each subsequent Contributor:
+    i) changes to the Program, and
+    ii) additions to the Program;
+
+where such changes and/or additions to the Program originate from and are
+Distributed by that particular Contributor. A Contribution "originates" from a
+Contributor if it was added to the Program by such Contributor itself or anyone
+acting on such Contributor's behalf. Contributions do not include changes or
+additions to the Program that are not Modified Works.
+
+"Contributor" means any person or entity that Distributes the Program.
