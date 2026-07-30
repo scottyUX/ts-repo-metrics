@@ -1,0 +1,16 @@
+file:line  function                     ours  sonarjs  delta
+------------------------------------------------------------------
+d4_chains.ts:16      chain2Link                 3     3        0    
+d4_chains.ts:30      chain4Link                 5     5        0    
+d4_chains.ts:47      chainNoTerminalElse        3     3        0    
+d4_chains.ts:68      chainNestedOneLevel        6     5        1      <-- DIVERGES by +1
+d4_chains.ts:82      chainNestedTwoLevels       10    8        2      <-- DIVERGES by +2
+d4_chains.ts:98      chain6Link                 7     7        0    
+d4_chains.ts:117     chainPlainElse             2     2        0    
+d4_chains.ts:128     chainElseContainingIf      3     4        -1     <-- DIVERGES by -1
+d4_chains.ts:148     elseIfContainingIf         4     4        0    
+d4_chains.ts:162     elseContainingLoop         5     7        -2     <-- DIVERGES by -2
+------------------------------------------------------------------
+10 functions; 6 match, 4 diverge
+
+wrote results_d4.md
