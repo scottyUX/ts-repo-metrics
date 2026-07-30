@@ -2,19 +2,19 @@
 
 | fixture function | cyc ours | cyc ts-complex | cog ours | cog sonarjs | vol ours | vol escomplex | constructs present |
 |---|---|---|---|---|---|---|---|
-| `conventions.ts:1 h1_else` | 2 | 2 | 2 | 2 | 30.881 | 25.3 | else_clauses=1 |
-| `conventions.ts:4 h2_emptyCaseFallthrough` | 4 ⚠ | 2 | 1 | 1 | 54 | 43.2 | empty_case_clauses=2, nonempty_case_clauses=1, switch_statements=1 |
-| `conventions.ts:14 h3_switchBreaks` | 4 | 4 | 1 | 1 | 82.418 | 101.6 | nonempty_case_clauses=3, unlabeled_jumps=3, switch_statements=1 |
-| `conventions.ts:23 h4_logicalOps` | 4 | 4 | 1 ⚠ | 2 | 42 | 30 | logical_sequences=1 |
+| `conventions.ts:1 h1_else` | 2 | 2 | 2 | 2 | 33 | 25.3 | else_clauses=1 |
+| `conventions.ts:4 h2_emptyCaseFallthrough` | 4 ⚠ | 2 | 1 | 1 | 51.891 | 43.2 | empty_case_clauses=2, nonempty_case_clauses=1, switch_statements=1 |
+| `conventions.ts:14 h3_switchBreaks` | 4 | 4 | 1 | 1 | 87.569 | 101.6 | nonempty_case_clauses=3, unlabeled_jumps=3, switch_statements=1 |
+| `conventions.ts:23 h4_logicalOps` | 4 | 4 | 1 ⚠ | 2 | 44.379 | 30 | logical_sequences=1 |
 | `conventions.ts:27 h5_nestedFn` | 1 | 1 | 0 | 0 | 10 | 24 | nested_fn_expr=1 |
-| `conventions.ts:28 inner` | 2 | 2 | 1 | 1 | 25.85 | 20.7 | — |
-| `conventions.ts:33 h6_plain` | 1 | 1 | 0 | 0 | 33 | 53.2 | — |
-| `else_chains.ts:1 elseIfChain` | 5 | 5 | 5 | 5 | 89.835 | 99.7 | else_clauses=4 |
-| `else_chains.ts:8 plainElse` | 2 | 2 | 2 | 2 | 30.881 | 25.3 | else_clauses=1 |
+| `conventions.ts:28 inner` | 2 | 2 | 1 | 1 | 28.074 | 20.7 | — |
+| `conventions.ts:33 h6_plain` | 1 | 1 | 0 | 0 | 30 | 53.2 | — |
+| `else_chains.ts:1 elseIfChain` | 5 | 5 | 5 | 5 | 110.702 | 99.7 | else_clauses=4 |
+| `else_chains.ts:8 plainElse` | 2 | 2 | 2 | 2 | 33 | 25.3 | else_clauses=1 |
 | `logical_ops.tsx:1 JsxLogical` | 4 | 4 | 0 | 0 | 48 | 16.3 | logical_sequences=3 |
 | `logical_ops.tsx:10 BoolLogical` | 6 | 6 | 0 ⚠ | 2 | 73.082 | 83 | logical_sequences=4 |
 | `nesting.ts:1 parentWithNestedArrow` | 1 | 1 | 0 | 0 | 10 | 19.7 | — |
-| `nesting.ts:2 @anon` | 3 | 3 | 3 | 3 | 41.359 | 42 | — |
-| `nesting.ts:10 deepNesting` | 5 | 5 | 10 | 10 | 69.76 | 71.7 | — |
+| `nesting.ts:2 @anon` | 3 | 3 | 3 | 3 | 50.719 | 42 | — |
+| `nesting.ts:10 deepNesting` | 5 | 5 | 10 | 10 | 72.648 | 71.7 | — |
 
 ⚠ marks a disagreement with the corresponding baseline.

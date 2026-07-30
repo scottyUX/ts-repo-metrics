@@ -1,5 +1,5 @@
 {
-  "repoPath": "C:\\Users\\zbabr\\code\\SIP\\repos\\ts-repo-metrics\\.cache\\ts-repo-metrics\\nkalscheuer-mavericks",
+  "repoPath": "/private/tmp/claude-501/-Users-lunawang-Documents-GitHub-ts-repo-metrics/f39381f1-2a04-468e-a2d3-ba7fccfe7664/scratchpad/samples/nkalscheuer-mavericks",
   "source": {
     "type": "git",
     "url": "https://github.com/nkalscheuer/mavericks",
@@ -7,14 +7,14 @@
     "branch": "master"
   },
   "filesAnalyzed": 16,
-  "analyzer_version": "0.0.0",
-  "analysis_timestamp": "2026-07-01T22:23:01.946Z",
+  "analyzer_version": "0.2.0",
+  "analysis_timestamp": "2026-07-30T06:01:16.270Z",
   "distributions": {
     "p50_function_length": 8,
-    "p75_function_length": 29,
-    "p90_function_length": 29,
+    "p75_function_length": 18,
+    "p90_function_length": 26,
     "p50_complexity": 1,
-    "p75_complexity": 3,
+    "p75_complexity": 1,
     "p90_complexity": 3,
     "percent_high_complexity_in_top_10_percent_files": 0
   },
@@ -31,18 +31,18 @@
     "testLOC": 11
   },
   "totals": {
-    "functions": 4
+    "functions": 15
   },
   "functionMetricsSummary": {
-    "totalFunctions": 4,
-    "averageLength": 12.8,
+    "totalFunctions": 15,
+    "averageLength": 10.6,
     "medianLength": 8,
-    "maxNestingDepth": 1,
+    "maxNestingDepth": 2,
     "longFunctionPercentage": 0
   },
   "complexity": {
-    "average": 1.5,
-    "max": 3,
+    "average": 1.3,
+    "max": 4,
     "highComplexityFunctions": 0
   },
   "smells": {
@@ -53,14 +53,18 @@
     "consoleLogs": 1
   },
   "maintainability": {
-    "score": 73.8,
+    "score": 76,
     "classification": "high"
   },
   "testCoverageProxy": {
     "ratio": 0.02,
     "classification": "low"
   },
-  "duplication": null,
+  "duplication": {
+    "percentage": 0,
+    "duplicateLines": 0,
+    "cloneClusters": 0
+  },
   "git": {
     "totalCommits": 161,
     "medianCommitSize": 29,
@@ -7186,13 +7190,14 @@
         "method_definition": 0,
         "arrow_function": 0,
         "function": 0,
+        "function_expression": 0,
         "generator_function": 0
       },
       "functionMetrics": [],
       "complexity": []
     },
     {
-      "file": "config\\dev.env.js",
+      "file": "config/dev.env.js",
       "functions": 0,
       "functionsByType": {
         "function_declaration": 0,
@@ -7200,13 +7205,14 @@
         "method_definition": 0,
         "arrow_function": 0,
         "function": 0,
+        "function_expression": 0,
         "generator_function": 0
       },
       "functionMetrics": [],
       "complexity": []
     },
     {
-      "file": "config\\index.js",
+      "file": "config/index.js",
       "functions": 0,
       "functionsByType": {
         "function_declaration": 0,
@@ -7214,13 +7220,14 @@
         "method_definition": 0,
         "arrow_function": 0,
         "function": 0,
+        "function_expression": 0,
         "generator_function": 0
       },
       "functionMetrics": [],
       "complexity": []
     },
     {
-      "file": "config\\prod.env.js",
+      "file": "config/prod.env.js",
       "functions": 0,
       "functionsByType": {
         "function_declaration": 0,
@@ -7228,13 +7235,14 @@
         "method_definition": 0,
         "arrow_function": 0,
         "function": 0,
+        "function_expression": 0,
         "generator_function": 0
       },
       "functionMetrics": [],
       "complexity": []
     },
     {
-      "file": "config\\test.env.js",
+      "file": "config/test.env.js",
       "functions": 0,
       "functionsByType": {
         "function_declaration": 0,
@@ -7242,13 +7250,14 @@
         "method_definition": 0,
         "arrow_function": 0,
         "function": 0,
+        "function_expression": 0,
         "generator_function": 0
       },
       "functionMetrics": [],
       "complexity": []
     },
     {
-      "file": "src\\main.js",
+      "file": "src/main.js",
       "functions": 0,
       "functionsByType": {
         "function_declaration": 0,
@@ -7256,13 +7265,60 @@
         "method_definition": 0,
         "arrow_function": 0,
         "function": 0,
+        "function_expression": 0,
         "generator_function": 0
       },
       "functionMetrics": [],
       "complexity": []
     },
     {
-      "file": "test\\e2e\\nightwatch.conf.js",
+      "file": "src/FoNodeModules/FoPreprocessor.js",
+      "functions": 1,
+      "functionsByType": {
+        "function_declaration": 0,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 0,
+        "function": 0,
+        "function_expression": 1,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "countData",
+          "type": "function_expression",
+          "startLine": 2,
+          "lines": 22,
+          "maxNestingDepth": 2,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 4,
+          "halstead": {
+            "n1": 9,
+            "n2": 12,
+            "N1": 22,
+            "N2": 36,
+            "volume": 254.754,
+            "difficulty": 13.5,
+            "effort": 3439.185
+          },
+          "cognitiveComplexity": 6,
+          "maintainabilityIndexGradAiRaw": 91.196,
+          "maintainabilityIndexGradAiNorm": 53.331,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "countData",
+          "type": "function_expression",
+          "startLine": 2,
+          "complexity": 4
+        }
+      ]
+    },
+    {
+      "file": "src/router/index.js",
       "functions": 0,
       "functionsByType": {
         "function_declaration": 0,
@@ -7270,20 +7326,113 @@
         "method_definition": 0,
         "arrow_function": 0,
         "function": 0,
+        "function_expression": 0,
         "generator_function": 0
       },
       "functionMetrics": [],
       "complexity": []
     },
     {
-      "file": "test\\e2e\\runner.js",
-      "functions": 2,
+      "file": "src/router/routes.js",
+      "functions": 0,
+      "functionsByType": {
+        "function_declaration": 0,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 0,
+        "function": 0,
+        "function_expression": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [],
+      "complexity": []
+    },
+    {
+      "file": "test/unit/index.js",
+      "functions": 0,
+      "functionsByType": {
+        "function_declaration": 0,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 0,
+        "function": 0,
+        "function_expression": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [],
+      "complexity": []
+    },
+    {
+      "file": "test/unit/karma.conf.js",
+      "functions": 1,
+      "functionsByType": {
+        "function_declaration": 0,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 0,
+        "function": 0,
+        "function_expression": 1,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "karmaConfig",
+          "type": "function_expression",
+          "startLine": 8,
+          "lines": 26,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 17,
+            "N1": 1,
+            "N2": 19,
+            "volume": 83.399,
+            "difficulty": 0.559,
+            "effort": 46.605
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 94.986,
+          "maintainabilityIndexGradAiNorm": 55.547,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "karmaConfig",
+          "type": "function_expression",
+          "startLine": 8,
+          "complexity": 1
+        }
+      ]
+    },
+    {
+      "file": "test/e2e/nightwatch.conf.js",
+      "functions": 0,
+      "functionsByType": {
+        "function_declaration": 0,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 0,
+        "function": 0,
+        "function_expression": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [],
+      "complexity": []
+    },
+    {
+      "file": "test/e2e/runner.js",
+      "functions": 4,
       "functionsByType": {
         "function_declaration": 0,
         "generator_function_declaration": 0,
         "method_definition": 0,
         "arrow_function": 2,
         "function": 0,
+        "function_expression": 2,
         "generator_function": 0
       },
       "functionMetrics": [
@@ -7296,17 +7445,63 @@
           "parameterCount": 0,
           "cyclomaticComplexity": 3,
           "halstead": {
-            "n1": 6,
-            "n2": 10,
-            "N1": 19,
-            "N2": 47,
-            "volume": 264,
-            "difficulty": 14.1,
-            "effort": 3722.4
+            "n1": 5,
+            "n2": 16,
+            "N1": 15,
+            "N2": 29,
+            "volume": 193.262,
+            "difficulty": 4.531,
+            "effort": 875.718
           },
           "cognitiveComplexity": 2,
-          "maintainabilityIndexGradAiRaw": 86.765,
-          "maintainabilityIndexGradAiNorm": 50.74,
+          "maintainabilityIndexGradAiRaw": 88.387,
+          "maintainabilityIndexGradAiNorm": 51.688,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "function_expression",
+          "startLine": 44,
+          "lines": 4,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 2,
+            "N1": 2,
+            "N2": 3,
+            "volume": 10,
+            "difficulty": 1.5,
+            "effort": 15
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 136.339,
+          "maintainabilityIndexGradAiNorm": 79.73,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "function_expression",
+          "startLine": 39,
+          "lines": 4,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 3,
+            "N1": 2,
+            "N2": 4,
+            "volume": 12,
+            "difficulty": 0.667,
+            "effort": 8
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 135.391,
+          "maintainabilityIndexGradAiNorm": 79.176,
           "isReactComponent": false,
           "isMonolithic": false
         },
@@ -7343,6 +7538,18 @@
         },
         {
           "name": "(anonymous)",
+          "type": "function_expression",
+          "startLine": 44,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "function_expression",
+          "startLine": 39,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
           "type": "arrow_function",
           "startLine": 12,
           "complexity": 1
@@ -7350,91 +7557,7 @@
       ]
     },
     {
-      "file": "src\\FoNodeModules\\FoPreprocessor.js",
-      "functions": 0,
-      "functionsByType": {
-        "function_declaration": 0,
-        "generator_function_declaration": 0,
-        "method_definition": 0,
-        "arrow_function": 0,
-        "function": 0,
-        "generator_function": 0
-      },
-      "functionMetrics": [],
-      "complexity": []
-    },
-    {
-      "file": "test\\unit\\index.js",
-      "functions": 0,
-      "functionsByType": {
-        "function_declaration": 0,
-        "generator_function_declaration": 0,
-        "method_definition": 0,
-        "arrow_function": 0,
-        "function": 0,
-        "generator_function": 0
-      },
-      "functionMetrics": [],
-      "complexity": []
-    },
-    {
-      "file": "test\\unit\\karma.conf.js",
-      "functions": 0,
-      "functionsByType": {
-        "function_declaration": 0,
-        "generator_function_declaration": 0,
-        "method_definition": 0,
-        "arrow_function": 0,
-        "function": 0,
-        "generator_function": 0
-      },
-      "functionMetrics": [],
-      "complexity": []
-    },
-    {
-      "file": "src\\router\\index.js",
-      "functions": 0,
-      "functionsByType": {
-        "function_declaration": 0,
-        "generator_function_declaration": 0,
-        "method_definition": 0,
-        "arrow_function": 0,
-        "function": 0,
-        "generator_function": 0
-      },
-      "functionMetrics": [],
-      "complexity": []
-    },
-    {
-      "file": "src\\router\\routes.js",
-      "functions": 0,
-      "functionsByType": {
-        "function_declaration": 0,
-        "generator_function_declaration": 0,
-        "method_definition": 0,
-        "arrow_function": 0,
-        "function": 0,
-        "generator_function": 0
-      },
-      "functionMetrics": [],
-      "complexity": []
-    },
-    {
-      "file": "test\\e2e\\custom-assertions\\elementCount.js",
-      "functions": 0,
-      "functionsByType": {
-        "function_declaration": 0,
-        "generator_function_declaration": 0,
-        "method_definition": 0,
-        "arrow_function": 0,
-        "function": 0,
-        "generator_function": 0
-      },
-      "functionMetrics": [],
-      "complexity": []
-    },
-    {
-      "file": "test\\unit\\specs\\DashboardDemo.spec.js",
+      "file": "test/unit/specs/DashboardDemo.spec.js",
       "functions": 2,
       "functionsByType": {
         "function_declaration": 0,
@@ -7442,6 +7565,7 @@
         "method_definition": 0,
         "arrow_function": 2,
         "function": 0,
+        "function_expression": 0,
         "generator_function": 0
       },
       "functionMetrics": [
@@ -7457,14 +7581,14 @@
             "n1": 1,
             "n2": 2,
             "N1": 1,
-            "N2": 3,
-            "volume": 6.34,
-            "difficulty": 0.75,
-            "effort": 4.755
+            "N2": 2,
+            "volume": 4.755,
+            "difficulty": 0.5,
+            "effort": 2.377
           },
           "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 127.479,
-          "maintainabilityIndexGradAiNorm": 74.549,
+          "maintainabilityIndexGradAiRaw": 128.975,
+          "maintainabilityIndexGradAiNorm": 75.424,
           "isReactComponent": false,
           "isMonolithic": false
         },
@@ -7478,16 +7602,16 @@
           "cyclomaticComplexity": 1,
           "halstead": {
             "n1": 3,
-            "n2": 6,
+            "n2": 7,
             "N1": 9,
-            "N2": 11,
-            "volume": 63.399,
-            "difficulty": 2.75,
-            "effort": 174.346
+            "N2": 9,
+            "volume": 59.795,
+            "difficulty": 1.929,
+            "effort": 115.318
           },
           "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 120.166,
-          "maintainabilityIndexGradAiNorm": 70.273,
+          "maintainabilityIndexGradAiRaw": 120.471,
+          "maintainabilityIndexGradAiNorm": 70.451,
           "isReactComponent": false,
           "isMonolithic": false
         }
@@ -7508,18 +7632,241 @@
       ]
     },
     {
-      "file": "test\\e2e\\specs\\test.js",
-      "functions": 0,
+      "file": "test/e2e/custom-assertions/elementCount.js",
+      "functions": 6,
       "functionsByType": {
         "function_declaration": 0,
         "generator_function_declaration": 0,
         "method_definition": 0,
         "arrow_function": 0,
         "function": 0,
+        "function_expression": 6,
         "generator_function": 0
       },
-      "functionMetrics": [],
-      "complexity": []
+      "functionMetrics": [
+        {
+          "name": "(anonymous)",
+          "type": "function_expression",
+          "startLine": 10,
+          "lines": 18,
+          "maxNestingDepth": 0,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 5,
+            "N1": 8,
+            "N2": 12,
+            "volume": 56.147,
+            "difficulty": 2.4,
+            "effort": 134.753
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 103.001,
+          "maintainabilityIndexGradAiNorm": 60.235,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "function_expression",
+          "startLine": 19,
+          "lines": 8,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 4,
+            "N1": 3,
+            "N2": 5,
+            "volume": 20.68,
+            "difficulty": 1.25,
+            "effort": 25.85
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 121.331,
+          "maintainabilityIndexGradAiNorm": 70.954,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "function_expression",
+          "startLine": 23,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 3,
+            "N1": 1,
+            "N2": 4,
+            "volume": 10,
+            "difficulty": 0.667,
+            "effort": 6.667
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 140.999,
+          "maintainabilityIndexGradAiNorm": 82.456,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "function_expression",
+          "startLine": 21,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 2,
+            "N1": 3,
+            "N2": 3,
+            "volume": 12,
+            "difficulty": 1.5,
+            "effort": 18
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 140.051,
+          "maintainabilityIndexGradAiNorm": 81.901,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "function_expression",
+          "startLine": 16,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 1,
+            "N1": 2,
+            "N2": 2,
+            "volume": 6.34,
+            "difficulty": 2,
+            "effort": 12.68
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 143.369,
+          "maintainabilityIndexGradAiNorm": 83.842,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "function_expression",
+          "startLine": 13,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 3,
+            "n2": 2,
+            "N1": 3,
+            "N2": 3,
+            "volume": 13.932,
+            "difficulty": 2.25,
+            "effort": 31.346
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 139.275,
+          "maintainabilityIndexGradAiNorm": 81.447,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "(anonymous)",
+          "type": "function_expression",
+          "startLine": 10,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "function_expression",
+          "startLine": 19,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "function_expression",
+          "startLine": 23,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "function_expression",
+          "startLine": 21,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "function_expression",
+          "startLine": 16,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "function_expression",
+          "startLine": 13,
+          "complexity": 1
+        }
+      ]
+    },
+    {
+      "file": "test/e2e/specs/test.js",
+      "functions": 1,
+      "functionsByType": {
+        "function_declaration": 0,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 0,
+        "function": 0,
+        "function_expression": 1,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "'default e2e tests'",
+          "type": "function_expression",
+          "startLine": 5,
+          "lines": 14,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 9,
+            "N1": 11,
+            "N2": 12,
+            "volume": 76.404,
+            "difficulty": 0.667,
+            "effort": 50.936
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 105.47,
+          "maintainabilityIndexGradAiNorm": 61.678,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "'default e2e tests'",
+          "type": "function_expression",
+          "startLine": 5,
+          "complexity": 1
+        }
+      ]
     }
   ],
   "phase3": {
@@ -7533,76 +7880,33 @@
     "monolithicComponentCount": 0,
     "reactComponentCount": 0
   },
-  "symbolVerificationRisks": [],
-  "github": {
-    "description": "Mavericks Project in CMPS 115 Intro to Software Engineering",
-    "topics": [],
-    "stargazersCount": 0,
-    "forksCount": 3,
-    "subscribersCount": 1,
-    "languages": [
-      {
-        "language": "HTML",
-        "bytes": 112818,
-        "percentage": 45.5
-      },
-      {
-        "language": "Vue",
-        "bytes": 94469,
-        "percentage": 38.1
-      },
-      {
-        "language": "JavaScript",
-        "bytes": 35529,
-        "percentage": 14.3
-      },
-      {
-        "language": "CSS",
-        "bytes": 5143,
-        "percentage": 2.1
-      }
-    ],
-    "contributors": [
-      {
-        "login": "nkalscheuer",
-        "avatarUrl": "https://avatars.githubusercontent.com/u/11655525?v=4",
-        "htmlUrl": "https://github.com/nkalscheuer",
-        "contributions": 73,
-        "name": "Nicholas Kalscheuer"
-      },
-      {
-        "login": "sharad97",
-        "avatarUrl": "https://avatars.githubusercontent.com/u/22511717?v=4",
-        "htmlUrl": "https://github.com/sharad97",
-        "contributions": 40,
-        "name": "Sharad Shrestha"
-      },
-      {
-        "login": "randli",
-        "avatarUrl": "https://avatars.githubusercontent.com/u/13285755?v=4",
-        "htmlUrl": "https://github.com/randli",
-        "contributions": 27,
-        "name": "Randall Li"
-      },
-      {
-        "login": "nickFO",
-        "avatarUrl": "https://avatars.githubusercontent.com/u/20351395?v=4",
-        "htmlUrl": "https://github.com/nickFO",
-        "contributions": 3
-      },
-      {
-        "login": "CaseyHillers",
-        "avatarUrl": "https://avatars.githubusercontent.com/u/2148558?v=4",
-        "htmlUrl": "https://github.com/CaseyHillers",
-        "contributions": 2,
-        "name": "Casey Hillers"
-      },
-      {
-        "login": "ciarafitz",
-        "avatarUrl": "https://avatars.githubusercontent.com/u/39762299?v=4",
-        "htmlUrl": "https://github.com/ciarafitz",
-        "contributions": 1
-      }
-    ]
-  }
+  "symbolVerificationRisks": [
+    {
+      "file": "src/FoNodeModules/FoPreprocessor.js",
+      "name": "countData",
+      "startLine": 2,
+      "cyclomaticComplexity": 4,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 4
+    },
+    {
+      "file": "test/unit/karma.conf.js",
+      "name": "karmaConfig",
+      "startLine": 8,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "test/e2e/specs/test.js",
+      "name": "'default e2e tests'",
+      "startLine": 5,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    }
+  ]
 }

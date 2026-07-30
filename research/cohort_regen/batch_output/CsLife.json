@@ -8,7 +8,7 @@
   },
   "filesAnalyzed": 11,
   "analyzer_version": "0.2.0",
-  "analysis_timestamp": "2026-07-30T05:51:10.819Z",
+  "analysis_timestamp": "2026-07-30T05:51:57.715Z",
   "distributions": {
     "p50_function_length": 10,
     "p75_function_length": 18,
@@ -5438,6 +5438,67 @@
       ]
     },
     {
+      "file": "endgame/EndGame.js",
+      "functions": 1,
+      "functionsByType": {
+        "function_declaration": 1,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 0,
+        "function": 0,
+        "function_expression": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "endCareers",
+          "type": "function_declaration",
+          "startLine": 51,
+          "lines": 9,
+          "maxNestingDepth": 2,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 5,
+          "halstead": {
+            "n1": 8,
+            "n2": 5,
+            "N1": 18,
+            "N2": 14,
+            "volume": 118.414,
+            "difficulty": 11.2,
+            "effort": 1326.238
+          },
+          "cognitiveComplexity": 3,
+          "maintainabilityIndexGradAiRaw": 109.429,
+          "maintainabilityIndexGradAiNorm": 63.994,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "endCareers",
+          "type": "function_declaration",
+          "startLine": 51,
+          "complexity": 5
+        }
+      ]
+    },
+    {
+      "file": "endgame/EndGameDisplay.js",
+      "functions": 0,
+      "functionsByType": {
+        "function_declaration": 0,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 0,
+        "function": 0,
+        "function_expression": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [],
+      "complexity": []
+    },
+    {
       "file": "StartMenu/StartMenu.js",
       "functions": 2,
       "functionsByType": {
@@ -6166,76 +6227,15 @@
           "complexity": 1
         }
       ]
-    },
-    {
-      "file": "endgame/EndGame.js",
-      "functions": 1,
-      "functionsByType": {
-        "function_declaration": 1,
-        "generator_function_declaration": 0,
-        "method_definition": 0,
-        "arrow_function": 0,
-        "function": 0,
-        "function_expression": 0,
-        "generator_function": 0
-      },
-      "functionMetrics": [
-        {
-          "name": "endCareers",
-          "type": "function_declaration",
-          "startLine": 51,
-          "lines": 9,
-          "maxNestingDepth": 2,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 5,
-          "halstead": {
-            "n1": 8,
-            "n2": 5,
-            "N1": 18,
-            "N2": 14,
-            "volume": 118.414,
-            "difficulty": 11.2,
-            "effort": 1326.238
-          },
-          "cognitiveComplexity": 3,
-          "maintainabilityIndexGradAiRaw": 109.429,
-          "maintainabilityIndexGradAiNorm": 63.994,
-          "isReactComponent": false,
-          "isMonolithic": false
-        }
-      ],
-      "complexity": [
-        {
-          "name": "endCareers",
-          "type": "function_declaration",
-          "startLine": 51,
-          "complexity": 5
-        }
-      ]
-    },
-    {
-      "file": "endgame/EndGameDisplay.js",
-      "functions": 0,
-      "functionsByType": {
-        "function_declaration": 0,
-        "generator_function_declaration": 0,
-        "method_definition": 0,
-        "arrow_function": 0,
-        "function": 0,
-        "function_expression": 0,
-        "generator_function": 0
-      },
-      "functionMetrics": [],
-      "complexity": []
     }
   ],
   "phase3": {
     "sfd": 0,
     "mcr": null,
-    "srs": 0,
+    "srs": 6.08883,
     "silentFailureEvents": [],
-    "srsWeightedNumerator": 0,
-    "srsExactWeightedLines": 0,
+    "srsWeightedNumerator": 17,
+    "srsExactWeightedLines": 17,
     "srsNearWeightedLines": 0,
     "monolithicComponentCount": 0,
     "reactComponentCount": 0
@@ -6269,18 +6269,18 @@
       "riskScore": 6
     },
     {
-      "file": "mainGame/mainGame.js",
-      "name": "applyTimeAllocationEffects",
-      "startLine": 104,
+      "file": "endgame/EndGame.js",
+      "name": "endCareers",
+      "startLine": 51,
       "cyclomaticComplexity": 5,
       "verificationScore": 0,
       "evidence": "none",
       "riskScore": 5
     },
     {
-      "file": "endgame/EndGame.js",
-      "name": "endCareers",
-      "startLine": 51,
+      "file": "mainGame/mainGame.js",
+      "name": "applyTimeAllocationEffects",
+      "startLine": 104,
       "cyclomaticComplexity": 5,
       "verificationScore": 0,
       "evidence": "none",

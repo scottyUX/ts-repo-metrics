@@ -1,7 +1,16 @@
 # Table 3 — CSE 115A cohort, regenerated
 
-Six repositories analyzed under the fixed build, `analyzer_version` **0.1.0**
-(engine git `6041167`). Generated 2026-07-29.
+Six repositories analyzed under `analyzer_version` **0.2.0** (engine git
+`12530fc`). Generated 2026-07-30.
+
+**This supersedes the 0.1.0 run (commit `0ff89a1`) and everything before it.**
+0.2.0 adds, on top of 0.1.0's D1/D3/D5/D9/D10:
+
+| change | affects |
+|---|---|
+| **D7** — Halstead operands keyed by literal value | `halstead.*`, `maintainabilityIndexGradAi*` |
+| **D4 → B1/B2/B3** — cognitive complexity rule replaced | `cognitiveComplexity` |
+| **Bug 1** — jscpd ignore globs | `duplication`, analysis wall clock |
 
 Every commit SHA analyzed is recorded in full below, so the exact input to each
 row is verifiable without reference to any other document.
@@ -10,18 +19,81 @@ row is verifiable without reference to any other document.
 
 | Repo | Commit analyzed | Files | Source LOC | Functions | Files skipped | `analysisSkipped` | Duplication % | `analyzer_version` |
 |---|---|---|---|---|---|---|---|---|
-| `alexandria` | `e4d1139f0ff8d39e1d0e759854350109e8199509` | 114 | 10,119 | 929 | none (key absent) | not fired | 1.8 | 0.1.0 |
-| `wayfinder` | `a8c860c746c62d389ceb4acf4d21315a8bade572` | 126 | 31,257 | 1246 | none (key absent) | not fired | 3.1 | 0.1.0 |
-| `SlugSync` | `dff085a999c5bec3253579b8093eb7820f42243f` | 61 | 8,194 | 772 | none (key absent) | not fired | 1.1 | 0.1.0 |
-| `Lens` | `d1db5e94b2ddddd94904c3661b25caa623287389` | 56 | 4,980 | 177 | none (key absent) | not fired | 0.3 | 0.1.0 |
-| `VeriFi` | `3f55467c45fca19a21a160532cd0879d84216673` | 56 | 5,129 | 280 | none (key absent) | not fired | 0.8 | 0.1.0 |
-| `CsLife` | `42227097b4c79473bc0b06565efcf9e715c30358` | 11 | 2,792 | 69 | none (key absent) | not fired | 1.3 | 0.1.0 |
+| `alexandria` | `e4d1139f0ff8d39e1d0e759854350109e8199509` | 114 | 10,119 | 929 | none (key absent) | not fired | 1.8 | 0.2.0 |
+| `wayfinder` | `a8c860c746c62d389ceb4acf4d21315a8bade572` | 126 | 31,257 | 1246 | none (key absent) | not fired | 3.1 | 0.2.0 |
+| `SlugSync` | `dff085a999c5bec3253579b8093eb7820f42243f` | 61 | 8,194 | 772 | none (key absent) | not fired | 1.1 | 0.2.0 |
+| `Lens` | `d1db5e94b2ddddd94904c3661b25caa623287389` | 56 | 4,980 | 177 | none (key absent) | not fired | 0.3 | 0.2.0 |
+| `VeriFi` | `3f55467c45fca19a21a160532cd0879d84216673` | 56 | 5,129 | 280 | none (key absent) | not fired | 0.8 | 0.2.0 |
+| `CsLife` | `42227097b4c79473bc0b06565efcf9e715c30358` | 11 | 2,792 | 69 | none (key absent) | not fired | 1.3 | 0.2.0 |
 | **Total** | | **424** | **62,471** | **3,473** | **0** | — | — | |
 
 **Every row is a real measurement.** No repository triggered `analysisSkipped`,
 no repository skipped a file, and every repository produced a non-null
 `duplication` value — so no zeroed or false-zero figure is folded into the
-totals. The two conditions that would have required exclusion did not occur.
+totals.
+
+**The structural columns above are byte-identical to the 0.1.0 run.** Files,
+source LOC, functions and duplication did not move for any of the six. That is
+the expected result, not a failed regeneration: the three 0.2.0 changes affect
+per-function metrics (Halstead, MI, cognitive) that this table does not display,
+and the duplication fix only changes repositories that have `node_modules`
+present on disk — none of the six do, as all were fetched as fresh clones.
+
+## What actually moved: per-function metrics
+
+Cohort means, 0.1.0 → 0.2.0.
+
+| Repo | functions | mean cognitive | mean Halstead volume | mean MI_norm |
+|---|---|---|---|---|
+| `alexandria` | 929 | 1.47 → 1.47 | 185.4 → 185.4 | 67.53 → 67.53 |
+| `wayfinder` | 1246 | 1.74 → 1.74 | 176.7 → 176.3 | 70.20 → 70.28 |
+| `SlugSync` | 772 | 0.96 → 0.96 | 107.7 → 102.6 | 73.75 → 73.85 |
+| `Lens` | 177 | 1.55 → 1.55 | 155.3 → 153.8 | 71.74 → 71.76 |
+| `VeriFi` | 280 | 2.27 → 2.27 | 160.5 → 159.5 | 66.96 → 67.01 |
+| `CsLife` | 69 | 0.99 → 0.99 | 105.7 → 103.8 | 65.81 → 65.94 |
+| self (`ts-repo-metrics`) | 2293 | 1.96 → 1.95 | 166.6 → 161.8 | 69.46 → 69.53 |
+
+Two things there need saying plainly.
+
+**Mean cognitive complexity barely moves anywhere.** The D4 replacement corrects
+nested else-if chains and structures inside `else` bodies. Those are rare in this
+corpus, and the two defects it fixed pushed in opposite directions, so they
+largely cancelled in aggregate. The rule is now correct against Sonar's spec —
+but if a paper claim rests on cohort-mean cognitive complexity, that number did
+not meaningfully change. Corpus-level agreement with SonarJS moved 92.28% →
+92.44%.
+
+**`alexandria` is unchanged to the last decimal because it is 100% Python.**
+Both 0.2.0 metric changes are ECMAScript-only: the D4 port deliberately leaves
+Python's chain handling alone (Python's `elif_clause` is a sibling, not an `if`
+nested in an `else`, and there is no SonarJS baseline for Python), and the D7
+Python hunk was deliberately reverted for the same reason — no escomplex
+baseline exists for it. Summed Halstead volume for alexandria is identical
+across versions (172,271.419 in both), which is the expected outcome, not a
+regeneration failure.
+
+## ⚠ Caveat: 45% of the cohort is Python, where the Halstead fix does not apply
+
+| Repo | Python functions | JS/TS functions | % Python |
+|---|---|---|---|
+| `alexandria` | 929 | 0 | 100.0% |
+| `wayfinder` | 383 | 863 | 30.7% |
+| `SlugSync` | 0 | 772 | 0.0% |
+| `Lens` | 72 | 105 | 40.7% |
+| `VeriFi` | 182 | 98 | 65.0% |
+| `CsLife` | 0 | 69 | 0.0% |
+| **Cohort total** | **1,566** | **1,907** | **45.1%** |
+
+The Python operand path still collapses every string literal to one atom and
+every numeric literal to one atom — precisely the defect D7 fixed for TypeScript
+and JavaScript. It was left in place on purpose, because escomplex (the baseline
+`research/validation` measures against) is JavaScript-only, so a Python change
+could not be validated against anything.
+
+**Consequence: cohort Halstead volume and MI are corrected for 1,907 functions
+and still distorted for 1,566.** A single cohort-wide Halstead or MI aggregate
+mixes two operand conventions. Per-language or JS/TS-only framings avoid this.
+This needs a decision before any Halstead/MI cohort aggregate is quoted.
 
 ## Source provenance
 
@@ -34,15 +106,25 @@ totals. The two conditions that would have required exclusion did not occur.
 | `VeriFi` | https://github.com/Kurisuo/VeriFi | gitlink and prior measurement agree |
 | `CsLife` | https://github.com/Chr0no9/CsLife | gitlink and prior measurement agree |
 
+`alexandria` was checked out at `e4d1139f` for this run and restored to the
+pinned `28694b8` afterwards, so the 0.1.0 → 0.2.0 delta isolates the engine
+change rather than mixing in a 60-file source difference. `cse15/repos` is left
+exactly as found.
+
 Cohort membership and URL recovery are documented in
 [step0_cohort_sources.md](step0_cohort_sources.md). **StudyPet-Plus is not
 included**: it has no gitlink, no prior metrics run and no recorded URL anywhere
-in `cse115`, so there is no source to analyze.
+in `cse115`. Note that batch mode now *does* analyze it (see
+[batch_output/](batch_output/)), because the fixed batch gate no longer requires
+a root `package.json` — it is excluded here on cohort-membership grounds, not
+because the tooling cannot see it.
 
 ## Change from the pre-fix run
 
 Pre-fix figures are from `luna-777/cse15` `data/metrics_data/*.json`, all
-recorded under `analyzer_version` 0.0.0.
+recorded under `analyzer_version` 0.0.0. These structural deltas were
+established by the 0.1.0 run and are unchanged by 0.2.0, which moved only
+per-function metrics.
 
 | Repo | Files | Source LOC | Functions | Files skipped |
 |---|---|---|---|---|
@@ -86,34 +168,9 @@ into the enclosing function's complexity.
 | `VeriFi` | 11 | 15 | 1 | 0 | 29 | `null` | 4 |
 | `CsLife` | 0 | 0 | 11 | 0 | 0 | `null` | 0 |
 
-Three things this makes clear:
-
-**The cohort is far less TypeScript than its name suggests.** Only 24 `.ts` and
-25 `.tsx` files across all six repositories, against 85 `.js`, 28 `.jsx` and 262
-`.py`. `alexandria` and `CsLife` contain no TypeScript at all. Any claim phrased
-as being about TypeScript repositories should be checked against this mix.
-
-**`framework` is `null` for five of six.** `collect/frameworkDetection` reads a
-root `package.json`, and only `SlugSync` has one — the same condition that makes
-batch mode unusable here. This is correct per the schema (`null` = not detected),
-but it means the framework column carries no information for this cohort.
-
-**D10 fires on JavaScript, not TypeScript.** All 7 `function_expression` nodes are
-in `wayfinder` (3, in `.js`) and `VeriFi` (4). This is the pattern the validation
-pass predicted: `const x = function () {}` is a JavaScript-era idiom, absent from
-the modern TSX corpus but present in mixed JS codebases — and the planned pre-2021
-JS baseline cohort is where it will matter most.
-
 ## Reproducing
 
-Per-repo reports are in [`reports/`](reports/). The joined CSV in the batch
-schema is [`summary.csv`](summary.csv).
-
 ```bash
-# clone each repo at the SHA in Table 3, then per repo:
-npm run dev -- analyze <path> --output research/cohort_regen/reports/<name>.json
+node research/cohort_regen/regenerate.mjs [reposDir]   # reports/, summary.csv, timing_data.csv
+python3 research/cohort_regen/make_figure3.py          # figure3_analysis_time_vs_loc.{svg,pdf,png}
 ```
-
-Batch mode was **not** usable for five of the six repositories — see the flagged
-item in [findings.md](findings.md). Its actual output on this cohort is preserved
-in [`batch_output/`](batch_output/) as evidence.

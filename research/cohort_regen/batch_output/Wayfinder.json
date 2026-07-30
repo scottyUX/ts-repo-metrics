@@ -8,7 +8,7 @@
   },
   "filesAnalyzed": 126,
   "analyzer_version": "0.2.0",
-  "analysis_timestamp": "2026-07-30T05:51:01.118Z",
+  "analysis_timestamp": "2026-07-30T05:52:21.225Z",
   "distributions": {
     "p50_function_length": 7,
     "p75_function_length": 18,
@@ -26677,7 +26677,7 @@
       ]
     },
     {
-      "file": "backend/app/models/__init__.py",
+      "file": "backend/app/db/__init__.py",
       "functions": 0,
       "functionsByType": {
         "function_definition": 0,
@@ -26687,113 +26687,45 @@
       "complexity": []
     },
     {
-      "file": "backend/app/models/travel.py",
-      "functions": 3,
+      "file": "backend/app/db/session.py",
+      "functions": 1,
       "functionsByType": {
-        "function_definition": 3,
+        "function_definition": 1,
         "lambda": 0
       },
       "functionMetrics": [
         {
-          "name": "desc",
+          "name": "get_db",
           "type": "function_definition",
-          "startLine": 247,
-          "lines": 2,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
+          "startLine": 17,
+          "lines": 3,
+          "maxNestingDepth": 1,
+          "parameterCount": 0,
           "cyclomaticComplexity": 1,
           "halstead": {
             "n1": 1,
-            "n2": 4,
+            "n2": 6,
             "N1": 1,
-            "N2": 5,
-            "volume": 13.932,
-            "difficulty": 0.625,
-            "effort": 8.707
+            "N2": 7,
+            "volume": 22.459,
+            "difficulty": 0.583,
+            "effort": 13.101
           },
           "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 145.843,
-          "maintainabilityIndexGradAiNorm": 85.288,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "expires",
-          "type": "function_definition",
-          "startLine": 243,
-          "lines": 2,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 1,
-            "n2": 5,
-            "N1": 1,
-            "N2": 6,
-            "volume": 18.095,
-            "difficulty": 0.6,
-            "effort": 10.857
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 144.484,
-          "maintainabilityIndexGradAiNorm": 84.494,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "effective",
-          "type": "function_definition",
-          "startLine": 239,
-          "lines": 2,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 1,
-            "n2": 5,
-            "N1": 1,
-            "N2": 6,
-            "volume": 18.095,
-            "difficulty": 0.6,
-            "effort": 10.857
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 144.484,
-          "maintainabilityIndexGradAiNorm": 84.494,
+          "maintainabilityIndexGradAiRaw": 136.792,
+          "maintainabilityIndexGradAiNorm": 79.995,
           "isReactComponent": false,
           "isMonolithic": false
         }
       ],
       "complexity": [
         {
-          "name": "desc",
+          "name": "get_db",
           "type": "function_definition",
-          "startLine": 247,
-          "complexity": 1
-        },
-        {
-          "name": "expires",
-          "type": "function_definition",
-          "startLine": 243,
-          "complexity": 1
-        },
-        {
-          "name": "effective",
-          "type": "function_definition",
-          "startLine": 239,
+          "startLine": 17,
           "complexity": 1
         }
       ]
-    },
-    {
-      "file": "backend/app/models/user.py",
-      "functions": 0,
-      "functionsByType": {
-        "function_definition": 0,
-        "lambda": 0
-      },
-      "functionMetrics": [],
-      "complexity": []
     },
     {
       "file": "backend/app/core/__init__.py",
@@ -27091,7 +27023,7 @@
       ]
     },
     {
-      "file": "backend/app/db/__init__.py",
+      "file": "backend/app/models/__init__.py",
       "functions": 0,
       "functionsByType": {
         "function_definition": 0,
@@ -27101,45 +27033,113 @@
       "complexity": []
     },
     {
-      "file": "backend/app/db/session.py",
-      "functions": 1,
+      "file": "backend/app/models/travel.py",
+      "functions": 3,
       "functionsByType": {
-        "function_definition": 1,
+        "function_definition": 3,
         "lambda": 0
       },
       "functionMetrics": [
         {
-          "name": "get_db",
+          "name": "desc",
           "type": "function_definition",
-          "startLine": 17,
-          "lines": 3,
-          "maxNestingDepth": 1,
-          "parameterCount": 0,
+          "startLine": 247,
+          "lines": 2,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
           "cyclomaticComplexity": 1,
           "halstead": {
             "n1": 1,
-            "n2": 6,
+            "n2": 4,
             "N1": 1,
-            "N2": 7,
-            "volume": 22.459,
-            "difficulty": 0.583,
-            "effort": 13.101
+            "N2": 5,
+            "volume": 13.932,
+            "difficulty": 0.625,
+            "effort": 8.707
           },
           "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 136.792,
-          "maintainabilityIndexGradAiNorm": 79.995,
+          "maintainabilityIndexGradAiRaw": 145.843,
+          "maintainabilityIndexGradAiNorm": 85.288,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "expires",
+          "type": "function_definition",
+          "startLine": 243,
+          "lines": 2,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 5,
+            "N1": 1,
+            "N2": 6,
+            "volume": 18.095,
+            "difficulty": 0.6,
+            "effort": 10.857
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 144.484,
+          "maintainabilityIndexGradAiNorm": 84.494,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "effective",
+          "type": "function_definition",
+          "startLine": 239,
+          "lines": 2,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 5,
+            "N1": 1,
+            "N2": 6,
+            "volume": 18.095,
+            "difficulty": 0.6,
+            "effort": 10.857
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 144.484,
+          "maintainabilityIndexGradAiNorm": 84.494,
           "isReactComponent": false,
           "isMonolithic": false
         }
       ],
       "complexity": [
         {
-          "name": "get_db",
+          "name": "desc",
           "type": "function_definition",
-          "startLine": 17,
+          "startLine": 247,
+          "complexity": 1
+        },
+        {
+          "name": "expires",
+          "type": "function_definition",
+          "startLine": 243,
+          "complexity": 1
+        },
+        {
+          "name": "effective",
+          "type": "function_definition",
+          "startLine": 239,
           "complexity": 1
         }
       ]
+    },
+    {
+      "file": "backend/app/models/user.py",
+      "functions": 0,
+      "functionsByType": {
+        "function_definition": 0,
+        "lambda": 0
+      },
+      "functionMetrics": [],
+      "complexity": []
     },
     {
       "file": "backend/app/providers/__init__.py",
@@ -34410,570 +34410,6 @@
       ]
     },
     {
-      "file": "frontend/screens/shared/BottomNav.js",
-      "functions": 7,
-      "functionsByType": {
-        "function_declaration": 5,
-        "generator_function_declaration": 0,
-        "method_definition": 0,
-        "arrow_function": 2,
-        "function": 0,
-        "function_expression": 0,
-        "generator_function": 0
-      },
-      "functionMetrics": [
-        {
-          "name": "BottomNav",
-          "type": "function_declaration",
-          "startLine": 54,
-          "lines": 49,
-          "maxNestingDepth": 2,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 2,
-          "halstead": {
-            "n1": 3,
-            "n2": 11,
-            "N1": 4,
-            "N2": 16,
-            "volume": 76.147,
-            "difficulty": 2.182,
-            "effort": 166.139
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 84.963,
-          "maintainabilityIndexGradAiNorm": 49.686,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 78,
-          "lines": 22,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 5,
-          "halstead": {
-            "n1": 7,
-            "n2": 11,
-            "N1": 17,
-            "N2": 25,
-            "volume": 175.137,
-            "difficulty": 7.955,
-            "effort": 1393.134
-          },
-          "cognitiveComplexity": 2,
-          "maintainabilityIndexGradAiRaw": 92.914,
-          "maintainabilityIndexGradAiNorm": 54.336,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 87,
-          "lines": 1,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 1,
-            "n2": 2,
-            "N1": 1,
-            "N2": 2,
-            "volume": 4.755,
-            "difficulty": 0.5,
-            "effort": 2.377
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 162.662,
-          "maintainabilityIndexGradAiNorm": 95.124,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "handlePress",
-          "type": "function_declaration",
-          "startLine": 63,
-          "lines": 12,
-          "maxNestingDepth": 2,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 3,
-          "halstead": {
-            "n1": 4,
-            "n2": 6,
-            "N1": 8,
-            "N2": 10,
-            "volume": 59.795,
-            "difficulty": 3.333,
-            "effort": 199.316
-          },
-          "cognitiveComplexity": 3,
-          "maintainabilityIndexGradAiRaw": 108.782,
-          "maintainabilityIndexGradAiNorm": 63.615,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "getBottomNavActiveLabel",
-          "type": "function_declaration",
-          "startLine": 42,
-          "lines": 11,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 2,
-          "halstead": {
-            "n1": 3,
-            "n2": 9,
-            "N1": 3,
-            "N2": 11,
-            "volume": 50.189,
-            "difficulty": 1.833,
-            "effort": 92.014
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 111.332,
-          "maintainabilityIndexGradAiNorm": 65.106,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "getBottomNavContentPadding",
-          "type": "function_declaration",
-          "startLine": 36,
-          "lines": 3,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 2,
-            "n2": 6,
-            "N1": 3,
-            "N2": 7,
-            "volume": 30,
-            "difficulty": 1.167,
-            "effort": 35
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 135.286,
-          "maintainabilityIndexGradAiNorm": 79.115,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "getBottomNavBarPadding",
-          "type": "function_declaration",
-          "startLine": 25,
-          "lines": 10,
-          "maxNestingDepth": 1,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 2,
-          "halstead": {
-            "n1": 6,
-            "n2": 8,
-            "N1": 8,
-            "N2": 13,
-            "volume": 79.954,
-            "difficulty": 4.875,
-            "effort": 389.778
-          },
-          "cognitiveComplexity": 1,
-          "maintainabilityIndexGradAiRaw": 110.455,
-          "maintainabilityIndexGradAiNorm": 64.594,
-          "isReactComponent": false,
-          "isMonolithic": false
-        }
-      ],
-      "complexity": [
-        {
-          "name": "BottomNav",
-          "type": "function_declaration",
-          "startLine": 54,
-          "complexity": 2
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 78,
-          "complexity": 5
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 87,
-          "complexity": 1
-        },
-        {
-          "name": "handlePress",
-          "type": "function_declaration",
-          "startLine": 63,
-          "complexity": 3
-        },
-        {
-          "name": "getBottomNavActiveLabel",
-          "type": "function_declaration",
-          "startLine": 42,
-          "complexity": 2
-        },
-        {
-          "name": "getBottomNavContentPadding",
-          "type": "function_declaration",
-          "startLine": 36,
-          "complexity": 1
-        },
-        {
-          "name": "getBottomNavBarPadding",
-          "type": "function_declaration",
-          "startLine": 25,
-          "complexity": 2
-        }
-      ]
-    },
-    {
-      "file": "frontend/screens/shared/DimPressable.js",
-      "functions": 2,
-      "functionsByType": {
-        "function_declaration": 1,
-        "generator_function_declaration": 0,
-        "method_definition": 0,
-        "arrow_function": 1,
-        "function": 0,
-        "function_expression": 0,
-        "generator_function": 0
-      },
-      "functionMetrics": [
-        {
-          "name": "DimPressable",
-          "type": "function_declaration",
-          "startLine": 10,
-          "lines": 15,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 2,
-            "n2": 6,
-            "N1": 2,
-            "N2": 8,
-            "volume": 30,
-            "difficulty": 1.333,
-            "effort": 40
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 109.213,
-          "maintainabilityIndexGradAiNorm": 63.867,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 14,
-          "lines": 5,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 5,
-          "halstead": {
-            "n1": 9,
-            "n2": 7,
-            "N1": 13,
-            "N2": 15,
-            "volume": 112,
-            "difficulty": 9.643,
-            "effort": 1080
-          },
-          "cognitiveComplexity": 1,
-          "maintainabilityIndexGradAiRaw": 119.241,
-          "maintainabilityIndexGradAiNorm": 69.732,
-          "isReactComponent": false,
-          "isMonolithic": false
-        }
-      ],
-      "complexity": [
-        {
-          "name": "DimPressable",
-          "type": "function_declaration",
-          "startLine": 10,
-          "complexity": 1
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 14,
-          "complexity": 5
-        }
-      ]
-    },
-    {
-      "file": "frontend/screens/shared/MapCanvas.native.js",
-      "functions": 3,
-      "functionsByType": {
-        "function_declaration": 0,
-        "generator_function_declaration": 0,
-        "method_definition": 1,
-        "arrow_function": 1,
-        "function": 0,
-        "function_expression": 1,
-        "generator_function": 0
-      },
-      "functionMetrics": [
-        {
-          "name": "MapCanvas",
-          "type": "function_expression",
-          "startLine": 11,
-          "lines": 27,
-          "maxNestingDepth": 1,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 3,
-          "halstead": {
-            "n1": 6,
-            "n2": 17,
-            "N1": 11,
-            "N2": 25,
-            "volume": 162.848,
-            "difficulty": 4.412,
-            "effort": 718.448
-          },
-          "cognitiveComplexity": 2,
-          "maintainabilityIndexGradAiRaw": 90.435,
-          "maintainabilityIndexGradAiNorm": 52.886,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 14,
-          "lines": 6,
-          "maxNestingDepth": 1,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 1,
-            "n2": 0,
-            "N1": 1,
-            "N2": 0,
-            "volume": 0,
-            "difficulty": 0,
-            "effort": 0
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 141.743,
-          "maintainabilityIndexGradAiNorm": 82.891,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "animateToRegion",
-          "type": "method_definition",
-          "startLine": 15,
-          "lines": 4,
-          "maxNestingDepth": 1,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 2,
-          "halstead": {
-            "n1": 5,
-            "n2": 4,
-            "N1": 6,
-            "N2": 7,
-            "volume": 41.209,
-            "difficulty": 4.375,
-            "effort": 180.289
-          },
-          "cognitiveComplexity": 1,
-          "maintainabilityIndexGradAiRaw": 128.745,
-          "maintainabilityIndexGradAiNorm": 75.289,
-          "isReactComponent": false,
-          "isMonolithic": false
-        }
-      ],
-      "complexity": [
-        {
-          "name": "MapCanvas",
-          "type": "function_expression",
-          "startLine": 11,
-          "complexity": 3
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 14,
-          "complexity": 1
-        },
-        {
-          "name": "animateToRegion",
-          "type": "method_definition",
-          "startLine": 15,
-          "complexity": 2
-        }
-      ]
-    },
-    {
-      "file": "frontend/screens/shared/MapCanvas.web.js",
-      "functions": 3,
-      "functionsByType": {
-        "function_declaration": 0,
-        "generator_function_declaration": 0,
-        "method_definition": 1,
-        "arrow_function": 1,
-        "function": 0,
-        "function_expression": 1,
-        "generator_function": 0
-      },
-      "functionMetrics": [
-        {
-          "name": "MapCanvas",
-          "type": "function_expression",
-          "startLine": 13,
-          "lines": 18,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 2,
-          "halstead": {
-            "n1": 3,
-            "n2": 17,
-            "N1": 7,
-            "N2": 26,
-            "volume": 142.624,
-            "difficulty": 2.294,
-            "effort": 327.195
-          },
-          "cognitiveComplexity": 1,
-          "maintainabilityIndexGradAiRaw": 97.923,
-          "maintainabilityIndexGradAiNorm": 57.265,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 14,
-          "lines": 3,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 1,
-            "n2": 0,
-            "N1": 1,
-            "N2": 0,
-            "volume": 0,
-            "difficulty": 0,
-            "effort": 0
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 152.972,
-          "maintainabilityIndexGradAiNorm": 89.457,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "animateToRegion",
-          "type": "method_definition",
-          "startLine": 15,
-          "lines": 1,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 0,
-            "n2": 0,
-            "N1": 0,
-            "N2": 0,
-            "volume": 0,
-            "difficulty": 0,
-            "effort": 0
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 170.77,
-          "maintainabilityIndexGradAiNorm": 99.865,
-          "isReactComponent": false,
-          "isMonolithic": false
-        }
-      ],
-      "complexity": [
-        {
-          "name": "MapCanvas",
-          "type": "function_expression",
-          "startLine": 13,
-          "complexity": 2
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 14,
-          "complexity": 1
-        },
-        {
-          "name": "animateToRegion",
-          "type": "method_definition",
-          "startLine": 15,
-          "complexity": 1
-        }
-      ]
-    },
-    {
-      "file": "frontend/screens/shared/ScreenLayout.js",
-      "functions": 1,
-      "functionsByType": {
-        "function_declaration": 1,
-        "generator_function_declaration": 0,
-        "method_definition": 0,
-        "arrow_function": 0,
-        "function": 0,
-        "function_expression": 0,
-        "generator_function": 0
-      },
-      "functionMetrics": [
-        {
-          "name": "ScreenLayout",
-          "type": "function_declaration",
-          "startLine": 16,
-          "lines": 55,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 5,
-          "halstead": {
-            "n1": 4,
-            "n2": 33,
-            "N1": 16,
-            "N2": 66,
-            "volume": 427.175,
-            "difficulty": 4,
-            "effort": 1708.701
-          },
-          "cognitiveComplexity": 4,
-          "maintainabilityIndexGradAiRaw": 73.434,
-          "maintainabilityIndexGradAiNorm": 42.944,
-          "isReactComponent": false,
-          "isMonolithic": false
-        }
-      ],
-      "complexity": [
-        {
-          "name": "ScreenLayout",
-          "type": "function_declaration",
-          "startLine": 16,
-          "complexity": 5
-        }
-      ]
-    },
-    {
-      "file": "frontend/screens/shared/screenStyles.js",
-      "functions": 0,
-      "functionsByType": {
-        "function_declaration": 0,
-        "generator_function_declaration": 0,
-        "method_definition": 0,
-        "arrow_function": 0,
-        "function": 0,
-        "function_expression": 0,
-        "generator_function": 0
-      },
-      "functionMetrics": [],
-      "complexity": []
-    },
-    {
       "file": "frontend/src/api/client.js",
       "functions": 23,
       "functionsByType": {
@@ -37812,6 +37248,570 @@
       ]
     },
     {
+      "file": "frontend/screens/shared/BottomNav.js",
+      "functions": 7,
+      "functionsByType": {
+        "function_declaration": 5,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 2,
+        "function": 0,
+        "function_expression": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "BottomNav",
+          "type": "function_declaration",
+          "startLine": 54,
+          "lines": 49,
+          "maxNestingDepth": 2,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 3,
+            "n2": 11,
+            "N1": 4,
+            "N2": 16,
+            "volume": 76.147,
+            "difficulty": 2.182,
+            "effort": 166.139
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 84.963,
+          "maintainabilityIndexGradAiNorm": 49.686,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 78,
+          "lines": 22,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 5,
+          "halstead": {
+            "n1": 7,
+            "n2": 11,
+            "N1": 17,
+            "N2": 25,
+            "volume": 175.137,
+            "difficulty": 7.955,
+            "effort": 1393.134
+          },
+          "cognitiveComplexity": 2,
+          "maintainabilityIndexGradAiRaw": 92.914,
+          "maintainabilityIndexGradAiNorm": 54.336,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 87,
+          "lines": 1,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 2,
+            "N1": 1,
+            "N2": 2,
+            "volume": 4.755,
+            "difficulty": 0.5,
+            "effort": 2.377
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 162.662,
+          "maintainabilityIndexGradAiNorm": 95.124,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "handlePress",
+          "type": "function_declaration",
+          "startLine": 63,
+          "lines": 12,
+          "maxNestingDepth": 2,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 3,
+          "halstead": {
+            "n1": 4,
+            "n2": 6,
+            "N1": 8,
+            "N2": 10,
+            "volume": 59.795,
+            "difficulty": 3.333,
+            "effort": 199.316
+          },
+          "cognitiveComplexity": 3,
+          "maintainabilityIndexGradAiRaw": 108.782,
+          "maintainabilityIndexGradAiNorm": 63.615,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "getBottomNavActiveLabel",
+          "type": "function_declaration",
+          "startLine": 42,
+          "lines": 11,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 3,
+            "n2": 9,
+            "N1": 3,
+            "N2": 11,
+            "volume": 50.189,
+            "difficulty": 1.833,
+            "effort": 92.014
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 111.332,
+          "maintainabilityIndexGradAiNorm": 65.106,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "getBottomNavContentPadding",
+          "type": "function_declaration",
+          "startLine": 36,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 6,
+            "N1": 3,
+            "N2": 7,
+            "volume": 30,
+            "difficulty": 1.167,
+            "effort": 35
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 135.286,
+          "maintainabilityIndexGradAiNorm": 79.115,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "getBottomNavBarPadding",
+          "type": "function_declaration",
+          "startLine": 25,
+          "lines": 10,
+          "maxNestingDepth": 1,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 6,
+            "n2": 8,
+            "N1": 8,
+            "N2": 13,
+            "volume": 79.954,
+            "difficulty": 4.875,
+            "effort": 389.778
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 110.455,
+          "maintainabilityIndexGradAiNorm": 64.594,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "BottomNav",
+          "type": "function_declaration",
+          "startLine": 54,
+          "complexity": 2
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 78,
+          "complexity": 5
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 87,
+          "complexity": 1
+        },
+        {
+          "name": "handlePress",
+          "type": "function_declaration",
+          "startLine": 63,
+          "complexity": 3
+        },
+        {
+          "name": "getBottomNavActiveLabel",
+          "type": "function_declaration",
+          "startLine": 42,
+          "complexity": 2
+        },
+        {
+          "name": "getBottomNavContentPadding",
+          "type": "function_declaration",
+          "startLine": 36,
+          "complexity": 1
+        },
+        {
+          "name": "getBottomNavBarPadding",
+          "type": "function_declaration",
+          "startLine": 25,
+          "complexity": 2
+        }
+      ]
+    },
+    {
+      "file": "frontend/screens/shared/DimPressable.js",
+      "functions": 2,
+      "functionsByType": {
+        "function_declaration": 1,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 1,
+        "function": 0,
+        "function_expression": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "DimPressable",
+          "type": "function_declaration",
+          "startLine": 10,
+          "lines": 15,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 6,
+            "N1": 2,
+            "N2": 8,
+            "volume": 30,
+            "difficulty": 1.333,
+            "effort": 40
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 109.213,
+          "maintainabilityIndexGradAiNorm": 63.867,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 14,
+          "lines": 5,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 5,
+          "halstead": {
+            "n1": 9,
+            "n2": 7,
+            "N1": 13,
+            "N2": 15,
+            "volume": 112,
+            "difficulty": 9.643,
+            "effort": 1080
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 119.241,
+          "maintainabilityIndexGradAiNorm": 69.732,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "DimPressable",
+          "type": "function_declaration",
+          "startLine": 10,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 14,
+          "complexity": 5
+        }
+      ]
+    },
+    {
+      "file": "frontend/screens/shared/MapCanvas.native.js",
+      "functions": 3,
+      "functionsByType": {
+        "function_declaration": 0,
+        "generator_function_declaration": 0,
+        "method_definition": 1,
+        "arrow_function": 1,
+        "function": 0,
+        "function_expression": 1,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "MapCanvas",
+          "type": "function_expression",
+          "startLine": 11,
+          "lines": 27,
+          "maxNestingDepth": 1,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 3,
+          "halstead": {
+            "n1": 6,
+            "n2": 17,
+            "N1": 11,
+            "N2": 25,
+            "volume": 162.848,
+            "difficulty": 4.412,
+            "effort": 718.448
+          },
+          "cognitiveComplexity": 2,
+          "maintainabilityIndexGradAiRaw": 90.435,
+          "maintainabilityIndexGradAiNorm": 52.886,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 14,
+          "lines": 6,
+          "maxNestingDepth": 1,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 0,
+            "N1": 1,
+            "N2": 0,
+            "volume": 0,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 141.743,
+          "maintainabilityIndexGradAiNorm": 82.891,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "animateToRegion",
+          "type": "method_definition",
+          "startLine": 15,
+          "lines": 4,
+          "maxNestingDepth": 1,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 5,
+            "n2": 4,
+            "N1": 6,
+            "N2": 7,
+            "volume": 41.209,
+            "difficulty": 4.375,
+            "effort": 180.289
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 128.745,
+          "maintainabilityIndexGradAiNorm": 75.289,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "MapCanvas",
+          "type": "function_expression",
+          "startLine": 11,
+          "complexity": 3
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 14,
+          "complexity": 1
+        },
+        {
+          "name": "animateToRegion",
+          "type": "method_definition",
+          "startLine": 15,
+          "complexity": 2
+        }
+      ]
+    },
+    {
+      "file": "frontend/screens/shared/MapCanvas.web.js",
+      "functions": 3,
+      "functionsByType": {
+        "function_declaration": 0,
+        "generator_function_declaration": 0,
+        "method_definition": 1,
+        "arrow_function": 1,
+        "function": 0,
+        "function_expression": 1,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "MapCanvas",
+          "type": "function_expression",
+          "startLine": 13,
+          "lines": 18,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 3,
+            "n2": 17,
+            "N1": 7,
+            "N2": 26,
+            "volume": 142.624,
+            "difficulty": 2.294,
+            "effort": 327.195
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 97.923,
+          "maintainabilityIndexGradAiNorm": 57.265,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 14,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 0,
+            "N1": 1,
+            "N2": 0,
+            "volume": 0,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 152.972,
+          "maintainabilityIndexGradAiNorm": 89.457,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "animateToRegion",
+          "type": "method_definition",
+          "startLine": 15,
+          "lines": 1,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 0,
+            "N1": 0,
+            "N2": 0,
+            "volume": 0,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 170.77,
+          "maintainabilityIndexGradAiNorm": 99.865,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "MapCanvas",
+          "type": "function_expression",
+          "startLine": 13,
+          "complexity": 2
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 14,
+          "complexity": 1
+        },
+        {
+          "name": "animateToRegion",
+          "type": "method_definition",
+          "startLine": 15,
+          "complexity": 1
+        }
+      ]
+    },
+    {
+      "file": "frontend/screens/shared/ScreenLayout.js",
+      "functions": 1,
+      "functionsByType": {
+        "function_declaration": 1,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 0,
+        "function": 0,
+        "function_expression": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "ScreenLayout",
+          "type": "function_declaration",
+          "startLine": 16,
+          "lines": 55,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 5,
+          "halstead": {
+            "n1": 4,
+            "n2": 33,
+            "N1": 16,
+            "N2": 66,
+            "volume": 427.175,
+            "difficulty": 4,
+            "effort": 1708.701
+          },
+          "cognitiveComplexity": 4,
+          "maintainabilityIndexGradAiRaw": 73.434,
+          "maintainabilityIndexGradAiNorm": 42.944,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "ScreenLayout",
+          "type": "function_declaration",
+          "startLine": 16,
+          "complexity": 5
+        }
+      ]
+    },
+    {
+      "file": "frontend/screens/shared/screenStyles.js",
+      "functions": 0,
+      "functionsByType": {
+        "function_declaration": 0,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 0,
+        "function": 0,
+        "function_expression": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [],
+      "complexity": []
+    },
+    {
       "file": "frontend/src/auth/tokenStorage.js",
       "functions": 6,
       "functionsByType": {
@@ -37999,753 +37999,6 @@
           "type": "function_declaration",
           "startLine": 7,
           "complexity": 2
-        }
-      ]
-    },
-    {
-      "file": "frontend/src/navigation/screens.js",
-      "functions": 4,
-      "functionsByType": {
-        "function_declaration": 3,
-        "generator_function_declaration": 0,
-        "method_definition": 0,
-        "arrow_function": 1,
-        "function": 0,
-        "function_expression": 0,
-        "generator_function": 0
-      },
-      "functionMetrics": [
-        {
-          "name": "loadScreenData",
-          "type": "function_declaration",
-          "startLine": 33,
-          "lines": 38,
-          "maxNestingDepth": 1,
-          "parameterCount": 2,
-          "cyclomaticComplexity": 17,
-          "halstead": {
-            "n1": 9,
-            "n2": 23,
-            "N1": 58,
-            "N2": 66,
-            "volume": 620,
-            "difficulty": 12.913,
-            "effort": 8006.087
-          },
-          "cognitiveComplexity": 5,
-          "maintainabilityIndexGradAiRaw": 74.727,
-          "maintainabilityIndexGradAiNorm": 43.7,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "getScreenFromHash",
-          "type": "function_declaration",
-          "startLine": 28,
-          "lines": 4,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 2,
-          "halstead": {
-            "n1": 5,
-            "n2": 7,
-            "N1": 6,
-            "N2": 8,
-            "volume": 50.189,
-            "difficulty": 2.857,
-            "effort": 143.399
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 127.72,
-          "maintainabilityIndexGradAiNorm": 74.69,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 29,
-          "lines": 1,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 3,
-            "n2": 2,
-            "N1": 3,
-            "N2": 3,
-            "volume": 13.932,
-            "difficulty": 2.25,
-            "effort": 31.346
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 157.072,
-          "maintainabilityIndexGradAiNorm": 91.855,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "getHashForScreen",
-          "type": "function_declaration",
-          "startLine": 24,
-          "lines": 3,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 2,
-          "halstead": {
-            "n1": 5,
-            "n2": 3,
-            "N1": 7,
-            "N2": 5,
-            "volume": 36,
-            "difficulty": 4.167,
-            "effort": 150
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 134.108,
-          "maintainabilityIndexGradAiNorm": 78.426,
-          "isReactComponent": false,
-          "isMonolithic": false
-        }
-      ],
-      "complexity": [
-        {
-          "name": "loadScreenData",
-          "type": "function_declaration",
-          "startLine": 33,
-          "complexity": 17
-        },
-        {
-          "name": "getScreenFromHash",
-          "type": "function_declaration",
-          "startLine": 28,
-          "complexity": 2
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 29,
-          "complexity": 1
-        },
-        {
-          "name": "getHashForScreen",
-          "type": "function_declaration",
-          "startLine": 24,
-          "complexity": 2
-        }
-      ]
-    },
-    {
-      "file": "frontend/src/location/UserLocationContext.js",
-      "functions": 6,
-      "functionsByType": {
-        "function_declaration": 3,
-        "generator_function_declaration": 0,
-        "method_definition": 0,
-        "arrow_function": 3,
-        "function": 0,
-        "function_expression": 0,
-        "generator_function": 0
-      },
-      "functionMetrics": [
-        {
-          "name": "useUserLocation",
-          "type": "function_declaration",
-          "startLine": 72,
-          "lines": 7,
-          "maxNestingDepth": 1,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 2,
-          "halstead": {
-            "n1": 5,
-            "n2": 6,
-            "N1": 5,
-            "N2": 8,
-            "volume": 44.973,
-            "difficulty": 3.333,
-            "effort": 149.909
-          },
-          "cognitiveComplexity": 2,
-          "maintainabilityIndexGradAiRaw": 119.225,
-          "maintainabilityIndexGradAiNorm": 69.722,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "UserLocationProvider",
-          "type": "function_declaration",
-          "startLine": 14,
-          "lines": 57,
-          "maxNestingDepth": 2,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 2,
-            "n2": 17,
-            "N1": 3,
-            "N2": 27,
-            "volume": 127.438,
-            "difficulty": 1.588,
-            "effort": 202.401
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 80.065,
-          "maintainabilityIndexGradAiNorm": 46.822,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 57,
-          "lines": 7,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 4,
-            "n2": 2,
-            "N1": 4,
-            "N2": 2,
-            "volume": 15.51,
-            "difficulty": 2,
-            "effort": 31.02
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 124.991,
-          "maintainabilityIndexGradAiNorm": 73.094,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 52,
-          "lines": 3,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 1,
-            "n2": 1,
-            "N1": 1,
-            "N2": 1,
-            "volume": 2,
-            "difficulty": 0.5,
-            "effort": 1
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 149.368,
-          "maintainabilityIndexGradAiNorm": 87.35,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 19,
-          "lines": 32,
-          "maxNestingDepth": 2,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 4,
-          "halstead": {
-            "n1": 10,
-            "n2": 17,
-            "N1": 22,
-            "N2": 39,
-            "volume": 290.048,
-            "difficulty": 11.471,
-            "effort": 3327.023
-          },
-          "cognitiveComplexity": 4,
-          "maintainabilityIndexGradAiRaw": 84.451,
-          "maintainabilityIndexGradAiNorm": 49.387,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "buildLocation",
-          "type": "function_declaration",
-          "startLine": 6,
-          "lines": 7,
-          "maxNestingDepth": 0,
-          "parameterCount": 3,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 1,
-            "n2": 4,
-            "N1": 1,
-            "N2": 4,
-            "volume": 11.61,
-            "difficulty": 0.5,
-            "effort": 5.805
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 126.497,
-          "maintainabilityIndexGradAiNorm": 73.975,
-          "isReactComponent": false,
-          "isMonolithic": false
-        }
-      ],
-      "complexity": [
-        {
-          "name": "useUserLocation",
-          "type": "function_declaration",
-          "startLine": 72,
-          "complexity": 2
-        },
-        {
-          "name": "UserLocationProvider",
-          "type": "function_declaration",
-          "startLine": 14,
-          "complexity": 1
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 57,
-          "complexity": 1
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 52,
-          "complexity": 1
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 19,
-          "complexity": 4
-        },
-        {
-          "name": "buildLocation",
-          "type": "function_declaration",
-          "startLine": 6,
-          "complexity": 1
-        }
-      ]
-    },
-    {
-      "file": "frontend/src/location/geo.js",
-      "functions": 14,
-      "functionsByType": {
-        "function_declaration": 10,
-        "generator_function_declaration": 0,
-        "method_definition": 0,
-        "arrow_function": 4,
-        "function": 0,
-        "function_expression": 0,
-        "generator_function": 0
-      },
-      "functionMetrics": [
-        {
-          "name": "suggestGeocodeQuery",
-          "type": "function_declaration",
-          "startLine": 203,
-          "lines": 32,
-          "maxNestingDepth": 1,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 5,
-          "halstead": {
-            "n1": 8,
-            "n2": 16,
-            "N1": 18,
-            "N2": 25,
-            "volume": 197.153,
-            "difficulty": 6.25,
-            "effort": 1232.209
-          },
-          "cognitiveComplexity": 3,
-          "maintainabilityIndexGradAiRaw": 86.228,
-          "maintainabilityIndexGradAiNorm": 50.426,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 222,
-          "lines": 12,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 7,
-          "halstead": {
-            "n1": 3,
-            "n2": 4,
-            "N1": 16,
-            "N2": 19,
-            "volume": 98.257,
-            "difficulty": 7.125,
-            "effort": 700.084
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 105.279,
-          "maintainabilityIndexGradAiNorm": 61.567,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 220,
-          "lines": 1,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 3,
-          "halstead": {
-            "n1": 5,
-            "n2": 2,
-            "N1": 11,
-            "N2": 6,
-            "volume": 47.725,
-            "difficulty": 7.5,
-            "effort": 357.938
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 150.21,
-          "maintainabilityIndexGradAiNorm": 87.842,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "geocodeQuery",
-          "type": "function_declaration",
-          "startLine": 149,
-          "lines": 52,
-          "maxNestingDepth": 2,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 23,
-          "halstead": {
-            "n1": 14,
-            "n2": 22,
-            "N1": 74,
-            "N2": 76,
-            "volume": 775.489,
-            "difficulty": 24.182,
-            "effort": 18752.728
-          },
-          "cognitiveComplexity": 5,
-          "maintainabilityIndexGradAiRaw": 67.102,
-          "maintainabilityIndexGradAiNorm": 39.241,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "reverseGeocodeLabel",
-          "type": "function_declaration",
-          "startLine": 140,
-          "lines": 4,
-          "maxNestingDepth": 0,
-          "parameterCount": 2,
-          "cyclomaticComplexity": 2,
-          "halstead": {
-            "n1": 5,
-            "n2": 6,
-            "N1": 5,
-            "N2": 9,
-            "volume": 48.432,
-            "difficulty": 3.75,
-            "effort": 181.62
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 127.905,
-          "maintainabilityIndexGradAiNorm": 74.798,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "reverseGeocodeQuery",
-          "type": "function_declaration",
-          "startLine": 92,
-          "lines": 47,
-          "maxNestingDepth": 1,
-          "parameterCount": 2,
-          "cyclomaticComplexity": 18,
-          "halstead": {
-            "n1": 11,
-            "n2": 19,
-            "N1": 52,
-            "N2": 61,
-            "volume": 554.479,
-            "difficulty": 17.658,
-            "effort": 9790.925
-          },
-          "cognitiveComplexity": 4,
-          "maintainabilityIndexGradAiRaw": 71.634,
-          "maintainabilityIndexGradAiNorm": 41.891,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "backendGeo",
-          "type": "function_declaration",
-          "startLine": 63,
-          "lines": 27,
-          "maxNestingDepth": 2,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 6,
-          "halstead": {
-            "n1": 8,
-            "n2": 15,
-            "N1": 22,
-            "N2": 26,
-            "volume": 217.131,
-            "difficulty": 6.933,
-            "effort": 1505.441
-          },
-          "cognitiveComplexity": 5,
-          "maintainabilityIndexGradAiRaw": 88.249,
-          "maintainabilityIndexGradAiNorm": 51.608,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "formatExpoPlace",
-          "type": "function_declaration",
-          "startLine": 51,
-          "lines": 11,
-          "maxNestingDepth": 1,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 11,
-          "halstead": {
-            "n1": 7,
-            "n2": 7,
-            "N1": 21,
-            "N2": 24,
-            "volume": 171.331,
-            "difficulty": 12,
-            "effort": 2055.972
-          },
-          "cognitiveComplexity": 2,
-          "maintainabilityIndexGradAiRaw": 102.877,
-          "maintainabilityIndexGradAiNorm": 60.162,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "titleCasePlace",
-          "type": "function_declaration",
-          "startLine": 42,
-          "lines": 8,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 2,
-          "halstead": {
-            "n1": 3,
-            "n2": 7,
-            "N1": 7,
-            "N2": 8,
-            "volume": 49.829,
-            "difficulty": 1.714,
-            "effort": 85.421
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 116.528,
-          "maintainabilityIndexGradAiNorm": 68.145,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 47,
-          "lines": 1,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 3,
-            "n2": 3,
-            "N1": 6,
-            "N2": 5,
-            "volume": 28.435,
-            "difficulty": 2.5,
-            "effort": 71.086
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 153.362,
-          "maintainabilityIndexGradAiNorm": 89.685,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "milesBetween",
-          "type": "function_declaration",
-          "startLine": 34,
-          "lines": 7,
-          "maxNestingDepth": 1,
-          "parameterCount": 2,
-          "cyclomaticComplexity": 4,
-          "halstead": {
-            "n1": 7,
-            "n2": 5,
-            "N1": 16,
-            "N2": 14,
-            "volume": 107.549,
-            "difficulty": 9.8,
-            "effort": 1053.979
-          },
-          "cognitiveComplexity": 1,
-          "maintainabilityIndexGradAiRaw": 114.231,
-          "maintainabilityIndexGradAiNorm": 66.802,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "haversineMiles",
-          "type": "function_declaration",
-          "startLine": 30,
-          "lines": 3,
-          "maxNestingDepth": 0,
-          "parameterCount": 4,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 2,
-            "n2": 7,
-            "N1": 2,
-            "N2": 11,
-            "volume": 41.209,
-            "difficulty": 1.571,
-            "effort": 64.757
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 133.635,
-          "maintainabilityIndexGradAiNorm": 78.149,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "haversineKm",
-          "type": "function_declaration",
-          "startLine": 16,
-          "lines": 13,
-          "maxNestingDepth": 0,
-          "parameterCount": 4,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 7,
-            "n2": 16,
-            "N1": 20,
-            "N2": 43,
-            "volume": 284.984,
-            "difficulty": 9.406,
-            "effort": 2680.635
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 99.825,
-          "maintainabilityIndexGradAiNorm": 58.377,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "toRadians",
-          "type": "arrow_function",
-          "startLine": 17,
-          "lines": 1,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 4,
-            "n2": 3,
-            "N1": 4,
-            "N2": 4,
-            "volume": 22.459,
-            "difficulty": 2.667,
-            "effort": 59.89
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 154.589,
-          "maintainabilityIndexGradAiNorm": 90.403,
-          "isReactComponent": false,
-          "isMonolithic": false
-        }
-      ],
-      "complexity": [
-        {
-          "name": "suggestGeocodeQuery",
-          "type": "function_declaration",
-          "startLine": 203,
-          "complexity": 5
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 222,
-          "complexity": 7
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 220,
-          "complexity": 3
-        },
-        {
-          "name": "geocodeQuery",
-          "type": "function_declaration",
-          "startLine": 149,
-          "complexity": 23
-        },
-        {
-          "name": "reverseGeocodeLabel",
-          "type": "function_declaration",
-          "startLine": 140,
-          "complexity": 2
-        },
-        {
-          "name": "reverseGeocodeQuery",
-          "type": "function_declaration",
-          "startLine": 92,
-          "complexity": 18
-        },
-        {
-          "name": "backendGeo",
-          "type": "function_declaration",
-          "startLine": 63,
-          "complexity": 6
-        },
-        {
-          "name": "formatExpoPlace",
-          "type": "function_declaration",
-          "startLine": 51,
-          "complexity": 11
-        },
-        {
-          "name": "titleCasePlace",
-          "type": "function_declaration",
-          "startLine": 42,
-          "complexity": 2
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 47,
-          "complexity": 1
-        },
-        {
-          "name": "milesBetween",
-          "type": "function_declaration",
-          "startLine": 34,
-          "complexity": 4
-        },
-        {
-          "name": "haversineMiles",
-          "type": "function_declaration",
-          "startLine": 30,
-          "complexity": 1
-        },
-        {
-          "name": "haversineKm",
-          "type": "function_declaration",
-          "startLine": 16,
-          "complexity": 1
-        },
-        {
-          "name": "toRadians",
-          "type": "arrow_function",
-          "startLine": 17,
-          "complexity": 1
         }
       ]
     },
@@ -40616,6 +39869,753 @@
       ]
     },
     {
+      "file": "frontend/src/location/UserLocationContext.js",
+      "functions": 6,
+      "functionsByType": {
+        "function_declaration": 3,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 3,
+        "function": 0,
+        "function_expression": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "useUserLocation",
+          "type": "function_declaration",
+          "startLine": 72,
+          "lines": 7,
+          "maxNestingDepth": 1,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 5,
+            "n2": 6,
+            "N1": 5,
+            "N2": 8,
+            "volume": 44.973,
+            "difficulty": 3.333,
+            "effort": 149.909
+          },
+          "cognitiveComplexity": 2,
+          "maintainabilityIndexGradAiRaw": 119.225,
+          "maintainabilityIndexGradAiNorm": 69.722,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "UserLocationProvider",
+          "type": "function_declaration",
+          "startLine": 14,
+          "lines": 57,
+          "maxNestingDepth": 2,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 17,
+            "N1": 3,
+            "N2": 27,
+            "volume": 127.438,
+            "difficulty": 1.588,
+            "effort": 202.401
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 80.065,
+          "maintainabilityIndexGradAiNorm": 46.822,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 57,
+          "lines": 7,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 4,
+            "n2": 2,
+            "N1": 4,
+            "N2": 2,
+            "volume": 15.51,
+            "difficulty": 2,
+            "effort": 31.02
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 124.991,
+          "maintainabilityIndexGradAiNorm": 73.094,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 52,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 1,
+            "N1": 1,
+            "N2": 1,
+            "volume": 2,
+            "difficulty": 0.5,
+            "effort": 1
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 149.368,
+          "maintainabilityIndexGradAiNorm": 87.35,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 19,
+          "lines": 32,
+          "maxNestingDepth": 2,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 4,
+          "halstead": {
+            "n1": 10,
+            "n2": 17,
+            "N1": 22,
+            "N2": 39,
+            "volume": 290.048,
+            "difficulty": 11.471,
+            "effort": 3327.023
+          },
+          "cognitiveComplexity": 4,
+          "maintainabilityIndexGradAiRaw": 84.451,
+          "maintainabilityIndexGradAiNorm": 49.387,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "buildLocation",
+          "type": "function_declaration",
+          "startLine": 6,
+          "lines": 7,
+          "maxNestingDepth": 0,
+          "parameterCount": 3,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 4,
+            "N1": 1,
+            "N2": 4,
+            "volume": 11.61,
+            "difficulty": 0.5,
+            "effort": 5.805
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 126.497,
+          "maintainabilityIndexGradAiNorm": 73.975,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "useUserLocation",
+          "type": "function_declaration",
+          "startLine": 72,
+          "complexity": 2
+        },
+        {
+          "name": "UserLocationProvider",
+          "type": "function_declaration",
+          "startLine": 14,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 57,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 52,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 19,
+          "complexity": 4
+        },
+        {
+          "name": "buildLocation",
+          "type": "function_declaration",
+          "startLine": 6,
+          "complexity": 1
+        }
+      ]
+    },
+    {
+      "file": "frontend/src/location/geo.js",
+      "functions": 14,
+      "functionsByType": {
+        "function_declaration": 10,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 4,
+        "function": 0,
+        "function_expression": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "suggestGeocodeQuery",
+          "type": "function_declaration",
+          "startLine": 203,
+          "lines": 32,
+          "maxNestingDepth": 1,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 5,
+          "halstead": {
+            "n1": 8,
+            "n2": 16,
+            "N1": 18,
+            "N2": 25,
+            "volume": 197.153,
+            "difficulty": 6.25,
+            "effort": 1232.209
+          },
+          "cognitiveComplexity": 3,
+          "maintainabilityIndexGradAiRaw": 86.228,
+          "maintainabilityIndexGradAiNorm": 50.426,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 222,
+          "lines": 12,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 7,
+          "halstead": {
+            "n1": 3,
+            "n2": 4,
+            "N1": 16,
+            "N2": 19,
+            "volume": 98.257,
+            "difficulty": 7.125,
+            "effort": 700.084
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 105.279,
+          "maintainabilityIndexGradAiNorm": 61.567,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 220,
+          "lines": 1,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 3,
+          "halstead": {
+            "n1": 5,
+            "n2": 2,
+            "N1": 11,
+            "N2": 6,
+            "volume": 47.725,
+            "difficulty": 7.5,
+            "effort": 357.938
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 150.21,
+          "maintainabilityIndexGradAiNorm": 87.842,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "geocodeQuery",
+          "type": "function_declaration",
+          "startLine": 149,
+          "lines": 52,
+          "maxNestingDepth": 2,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 23,
+          "halstead": {
+            "n1": 14,
+            "n2": 22,
+            "N1": 74,
+            "N2": 76,
+            "volume": 775.489,
+            "difficulty": 24.182,
+            "effort": 18752.728
+          },
+          "cognitiveComplexity": 5,
+          "maintainabilityIndexGradAiRaw": 67.102,
+          "maintainabilityIndexGradAiNorm": 39.241,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "reverseGeocodeLabel",
+          "type": "function_declaration",
+          "startLine": 140,
+          "lines": 4,
+          "maxNestingDepth": 0,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 5,
+            "n2": 6,
+            "N1": 5,
+            "N2": 9,
+            "volume": 48.432,
+            "difficulty": 3.75,
+            "effort": 181.62
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 127.905,
+          "maintainabilityIndexGradAiNorm": 74.798,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "reverseGeocodeQuery",
+          "type": "function_declaration",
+          "startLine": 92,
+          "lines": 47,
+          "maxNestingDepth": 1,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 18,
+          "halstead": {
+            "n1": 11,
+            "n2": 19,
+            "N1": 52,
+            "N2": 61,
+            "volume": 554.479,
+            "difficulty": 17.658,
+            "effort": 9790.925
+          },
+          "cognitiveComplexity": 4,
+          "maintainabilityIndexGradAiRaw": 71.634,
+          "maintainabilityIndexGradAiNorm": 41.891,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "backendGeo",
+          "type": "function_declaration",
+          "startLine": 63,
+          "lines": 27,
+          "maxNestingDepth": 2,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 6,
+          "halstead": {
+            "n1": 8,
+            "n2": 15,
+            "N1": 22,
+            "N2": 26,
+            "volume": 217.131,
+            "difficulty": 6.933,
+            "effort": 1505.441
+          },
+          "cognitiveComplexity": 5,
+          "maintainabilityIndexGradAiRaw": 88.249,
+          "maintainabilityIndexGradAiNorm": 51.608,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "formatExpoPlace",
+          "type": "function_declaration",
+          "startLine": 51,
+          "lines": 11,
+          "maxNestingDepth": 1,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 11,
+          "halstead": {
+            "n1": 7,
+            "n2": 7,
+            "N1": 21,
+            "N2": 24,
+            "volume": 171.331,
+            "difficulty": 12,
+            "effort": 2055.972
+          },
+          "cognitiveComplexity": 2,
+          "maintainabilityIndexGradAiRaw": 102.877,
+          "maintainabilityIndexGradAiNorm": 60.162,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "titleCasePlace",
+          "type": "function_declaration",
+          "startLine": 42,
+          "lines": 8,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 3,
+            "n2": 7,
+            "N1": 7,
+            "N2": 8,
+            "volume": 49.829,
+            "difficulty": 1.714,
+            "effort": 85.421
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 116.528,
+          "maintainabilityIndexGradAiNorm": 68.145,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 47,
+          "lines": 1,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 3,
+            "n2": 3,
+            "N1": 6,
+            "N2": 5,
+            "volume": 28.435,
+            "difficulty": 2.5,
+            "effort": 71.086
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 153.362,
+          "maintainabilityIndexGradAiNorm": 89.685,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "milesBetween",
+          "type": "function_declaration",
+          "startLine": 34,
+          "lines": 7,
+          "maxNestingDepth": 1,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 4,
+          "halstead": {
+            "n1": 7,
+            "n2": 5,
+            "N1": 16,
+            "N2": 14,
+            "volume": 107.549,
+            "difficulty": 9.8,
+            "effort": 1053.979
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 114.231,
+          "maintainabilityIndexGradAiNorm": 66.802,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "haversineMiles",
+          "type": "function_declaration",
+          "startLine": 30,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 4,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 7,
+            "N1": 2,
+            "N2": 11,
+            "volume": 41.209,
+            "difficulty": 1.571,
+            "effort": 64.757
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 133.635,
+          "maintainabilityIndexGradAiNorm": 78.149,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "haversineKm",
+          "type": "function_declaration",
+          "startLine": 16,
+          "lines": 13,
+          "maxNestingDepth": 0,
+          "parameterCount": 4,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 7,
+            "n2": 16,
+            "N1": 20,
+            "N2": 43,
+            "volume": 284.984,
+            "difficulty": 9.406,
+            "effort": 2680.635
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 99.825,
+          "maintainabilityIndexGradAiNorm": 58.377,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "toRadians",
+          "type": "arrow_function",
+          "startLine": 17,
+          "lines": 1,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 4,
+            "n2": 3,
+            "N1": 4,
+            "N2": 4,
+            "volume": 22.459,
+            "difficulty": 2.667,
+            "effort": 59.89
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 154.589,
+          "maintainabilityIndexGradAiNorm": 90.403,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "suggestGeocodeQuery",
+          "type": "function_declaration",
+          "startLine": 203,
+          "complexity": 5
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 222,
+          "complexity": 7
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 220,
+          "complexity": 3
+        },
+        {
+          "name": "geocodeQuery",
+          "type": "function_declaration",
+          "startLine": 149,
+          "complexity": 23
+        },
+        {
+          "name": "reverseGeocodeLabel",
+          "type": "function_declaration",
+          "startLine": 140,
+          "complexity": 2
+        },
+        {
+          "name": "reverseGeocodeQuery",
+          "type": "function_declaration",
+          "startLine": 92,
+          "complexity": 18
+        },
+        {
+          "name": "backendGeo",
+          "type": "function_declaration",
+          "startLine": 63,
+          "complexity": 6
+        },
+        {
+          "name": "formatExpoPlace",
+          "type": "function_declaration",
+          "startLine": 51,
+          "complexity": 11
+        },
+        {
+          "name": "titleCasePlace",
+          "type": "function_declaration",
+          "startLine": 42,
+          "complexity": 2
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 47,
+          "complexity": 1
+        },
+        {
+          "name": "milesBetween",
+          "type": "function_declaration",
+          "startLine": 34,
+          "complexity": 4
+        },
+        {
+          "name": "haversineMiles",
+          "type": "function_declaration",
+          "startLine": 30,
+          "complexity": 1
+        },
+        {
+          "name": "haversineKm",
+          "type": "function_declaration",
+          "startLine": 16,
+          "complexity": 1
+        },
+        {
+          "name": "toRadians",
+          "type": "arrow_function",
+          "startLine": 17,
+          "complexity": 1
+        }
+      ]
+    },
+    {
+      "file": "frontend/src/navigation/screens.js",
+      "functions": 4,
+      "functionsByType": {
+        "function_declaration": 3,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 1,
+        "function": 0,
+        "function_expression": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "loadScreenData",
+          "type": "function_declaration",
+          "startLine": 33,
+          "lines": 38,
+          "maxNestingDepth": 1,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 17,
+          "halstead": {
+            "n1": 9,
+            "n2": 23,
+            "N1": 58,
+            "N2": 66,
+            "volume": 620,
+            "difficulty": 12.913,
+            "effort": 8006.087
+          },
+          "cognitiveComplexity": 5,
+          "maintainabilityIndexGradAiRaw": 74.727,
+          "maintainabilityIndexGradAiNorm": 43.7,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "getScreenFromHash",
+          "type": "function_declaration",
+          "startLine": 28,
+          "lines": 4,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 5,
+            "n2": 7,
+            "N1": 6,
+            "N2": 8,
+            "volume": 50.189,
+            "difficulty": 2.857,
+            "effort": 143.399
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 127.72,
+          "maintainabilityIndexGradAiNorm": 74.69,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 29,
+          "lines": 1,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 3,
+            "n2": 2,
+            "N1": 3,
+            "N2": 3,
+            "volume": 13.932,
+            "difficulty": 2.25,
+            "effort": 31.346
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 157.072,
+          "maintainabilityIndexGradAiNorm": 91.855,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "getHashForScreen",
+          "type": "function_declaration",
+          "startLine": 24,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 5,
+            "n2": 3,
+            "N1": 7,
+            "N2": 5,
+            "volume": 36,
+            "difficulty": 4.167,
+            "effort": 150
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 134.108,
+          "maintainabilityIndexGradAiNorm": 78.426,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "loadScreenData",
+          "type": "function_declaration",
+          "startLine": 33,
+          "complexity": 17
+        },
+        {
+          "name": "getScreenFromHash",
+          "type": "function_declaration",
+          "startLine": 28,
+          "complexity": 2
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 29,
+          "complexity": 1
+        },
+        {
+          "name": "getHashForScreen",
+          "type": "function_declaration",
+          "startLine": 24,
+          "complexity": 2
+        }
+      ]
+    },
+    {
       "file": "frontend/src/ui/MarkdownText.js",
       "functions": 5,
       "functionsByType": {
@@ -41204,11 +41204,11 @@
   "phase3": {
     "sfd": 0,
     "mcr": null,
-    "srs": 6.91045,
+    "srs": 16.86022,
     "silentFailureEvents": [],
-    "srsWeightedNumerator": 216,
-    "srsExactWeightedLines": 0,
-    "srsNearWeightedLines": 432,
+    "srsWeightedNumerator": 527,
+    "srsExactWeightedLines": 527,
+    "srsNearWeightedLines": 0,
     "monolithicComponentCount": 0,
     "reactComponentCount": 0
   },
@@ -42210,15 +42210,6 @@
       "riskScore": 6
     },
     {
-      "file": "frontend/src/location/geo.js",
-      "name": "backendGeo",
-      "startLine": 63,
-      "cyclomaticComplexity": 6,
-      "verificationScore": 0,
-      "evidence": "none",
-      "riskScore": 6
-    },
-    {
       "file": "frontend/src/itinerary/DestinationSuggestField.js",
       "name": "DestinationSuggestField",
       "startLine": 19,
@@ -42231,6 +42222,15 @@
       "file": "frontend/src/itinerary/TripSwitcherSheet.js",
       "name": "TripRow",
       "startLine": 100,
+      "cyclomaticComplexity": 6,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 6
+    },
+    {
+      "file": "frontend/src/location/geo.js",
+      "name": "backendGeo",
+      "startLine": 63,
       "cyclomaticComplexity": 6,
       "verificationScore": 0,
       "evidence": "none",
@@ -42534,15 +42534,6 @@
       "riskScore": 5
     },
     {
-      "file": "frontend/screens/shared/ScreenLayout.js",
-      "name": "ScreenLayout",
-      "startLine": 16,
-      "cyclomaticComplexity": 5,
-      "verificationScore": 0,
-      "evidence": "none",
-      "riskScore": 5
-    },
-    {
       "file": "frontend/src/api/client.js",
       "name": "unreachableMessage",
       "startLine": 155,
@@ -42564,6 +42555,15 @@
       "file": "frontend/src/api/dashboard.js",
       "name": "fetchPlans",
       "startLine": 92,
+      "cyclomaticComplexity": 5,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 5
+    },
+    {
+      "file": "frontend/screens/shared/ScreenLayout.js",
+      "name": "ScreenLayout",
+      "startLine": 16,
       "cyclomaticComplexity": 5,
       "verificationScore": 0,
       "evidence": "none",
@@ -42978,15 +42978,6 @@
       "riskScore": 4
     },
     {
-      "file": "frontend/src/location/geo.js",
-      "name": "milesBetween",
-      "startLine": 34,
-      "cyclomaticComplexity": 4,
-      "verificationScore": 0,
-      "evidence": "none",
-      "riskScore": 4
-    },
-    {
       "file": "frontend/src/itinerary/mapPlan.js",
       "name": "mapPlanActivity",
       "startLine": 113,
@@ -42999,6 +42990,15 @@
       "file": "frontend/src/itinerary/mapPlan.js",
       "name": "formatDateRange",
       "startLine": 78,
+      "cyclomaticComplexity": 4,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 4
+    },
+    {
+      "file": "frontend/src/location/geo.js",
+      "name": "milesBetween",
+      "startLine": 34,
       "cyclomaticComplexity": 4,
       "verificationScore": 0,
       "evidence": "none",
@@ -43572,24 +43572,6 @@
       "riskScore": 3
     },
     {
-      "file": "frontend/screens/shared/BottomNav.js",
-      "name": "handlePress",
-      "startLine": 63,
-      "cyclomaticComplexity": 3,
-      "verificationScore": 0,
-      "evidence": "none",
-      "riskScore": 3
-    },
-    {
-      "file": "frontend/screens/shared/MapCanvas.native.js",
-      "name": "MapCanvas",
-      "startLine": 11,
-      "cyclomaticComplexity": 3,
-      "verificationScore": 0,
-      "evidence": "none",
-      "riskScore": 3
-    },
-    {
       "file": "frontend/src/api/client.js",
       "name": "isApiUnavailableError",
       "startLine": 67,
@@ -43620,6 +43602,24 @@
       "file": "frontend/src/api/dashboard.js",
       "name": "withCoordinates",
       "startLine": 54,
+      "cyclomaticComplexity": 3,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 3
+    },
+    {
+      "file": "frontend/screens/shared/BottomNav.js",
+      "name": "handlePress",
+      "startLine": 63,
+      "cyclomaticComplexity": 3,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 3
+    },
+    {
+      "file": "frontend/screens/shared/MapCanvas.native.js",
+      "name": "MapCanvas",
+      "startLine": 11,
       "cyclomaticComplexity": 3,
       "verificationScore": 0,
       "evidence": "none",

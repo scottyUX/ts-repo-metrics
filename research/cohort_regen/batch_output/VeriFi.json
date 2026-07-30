@@ -8,7 +8,7 @@
   },
   "filesAnalyzed": 56,
   "analyzer_version": "0.2.0",
-  "analysis_timestamp": "2026-07-30T05:51:10.001Z",
+  "analysis_timestamp": "2026-07-30T05:52:17.259Z",
   "distributions": {
     "p50_function_length": 9,
     "p75_function_length": 19,
@@ -6222,366 +6222,6 @@
   "framework": null,
   "perFile": [
     {
-      "file": "chunk_viewer/server.py",
-      "functions": 12,
-      "functionsByType": {
-        "function_definition": 12,
-        "lambda": 0
-      },
-      "functionMetrics": [
-        {
-          "name": "main",
-          "type": "function_definition",
-          "startLine": 568,
-          "lines": 4,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 0,
-            "n2": 8,
-            "N1": 0,
-            "N2": 10,
-            "volume": 30,
-            "difficulty": 0,
-            "effort": 0
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 130.626,
-          "maintainabilityIndexGradAiNorm": 76.389,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "respond_json",
-          "type": "function_definition",
-          "startLine": 559,
-          "lines": 7,
-          "maxNestingDepth": 0,
-          "parameterCount": 3,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 0,
-            "n2": 17,
-            "N1": 0,
-            "N2": 30,
-            "volume": 122.624,
-            "difficulty": 0,
-            "effort": 0
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 114.239,
-          "maintainabilityIndexGradAiNorm": 66.806,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "respond_html",
-          "type": "function_definition",
-          "startLine": 551,
-          "lines": 7,
-          "maxNestingDepth": 0,
-          "parameterCount": 3,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 0,
-            "n2": 15,
-            "N1": 0,
-            "N2": 28,
-            "volume": 109.393,
-            "difficulty": 0,
-            "effort": 0
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 114.833,
-          "maintainabilityIndexGradAiNorm": 67.154,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "log_message",
-          "type": "function_definition",
-          "startLine": 548,
-          "lines": 2,
-          "maxNestingDepth": 0,
-          "parameterCount": 3,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 1,
-            "n2": 4,
-            "N1": 1,
-            "N2": 4,
-            "volume": 11.61,
-            "difficulty": 0.5,
-            "effort": 5.805
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 146.791,
-          "maintainabilityIndexGradAiNorm": 85.843,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "do_POST",
-          "type": "function_definition",
-          "startLine": 528,
-          "lines": 19,
-          "maxNestingDepth": 2,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 4,
-          "halstead": {
-            "n1": 4,
-            "n2": 19,
-            "N1": 6,
-            "N2": 44,
-            "volume": 226.178,
-            "difficulty": 4.632,
-            "effort": 1047.562
-          },
-          "cognitiveComplexity": 7,
-          "maintainabilityIndexGradAiRaw": 94.189,
-          "maintainabilityIndexGradAiNorm": 55.081,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "do_GET",
-          "type": "function_definition",
-          "startLine": 490,
-          "lines": 37,
-          "maxNestingDepth": 1,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 6,
-          "halstead": {
-            "n1": 2,
-            "n2": 17,
-            "N1": 10,
-            "N2": 70,
-            "volume": 339.834,
-            "difficulty": 4.118,
-            "effort": 1399.317
-          },
-          "cognitiveComplexity": 5,
-          "maintainabilityIndexGradAiRaw": 80.815,
-          "maintainabilityIndexGradAiNorm": 47.26,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "run_ingestion",
-          "type": "function_definition",
-          "startLine": 470,
-          "lines": 17,
-          "maxNestingDepth": 1,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 3,
-          "halstead": {
-            "n1": 3,
-            "n2": 27,
-            "N1": 3,
-            "N2": 44,
-            "volume": 230.624,
-            "difficulty": 2.444,
-            "effort": 563.747
-          },
-          "cognitiveComplexity": 2,
-          "maintainabilityIndexGradAiRaw": 96.12,
-          "maintainabilityIndexGradAiNorm": 56.211,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "prepare_records",
-          "type": "function_definition",
-          "startLine": 441,
-          "lines": 27,
-          "maxNestingDepth": 1,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 3,
-          "halstead": {
-            "n1": 2,
-            "n2": 22,
-            "N1": 3,
-            "N2": 74,
-            "volume": 353.042,
-            "difficulty": 3.364,
-            "effort": 1187.505
-          },
-          "cognitiveComplexity": 2,
-          "maintainabilityIndexGradAiRaw": 86.411,
-          "maintainabilityIndexGradAiNorm": 50.533,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "common_overlap",
-          "type": "function_definition",
-          "startLine": 429,
-          "lines": 10,
-          "maxNestingDepth": 2,
-          "parameterCount": 2,
-          "cyclomaticComplexity": 3,
-          "halstead": {
-            "n1": 3,
-            "n2": 12,
-            "N1": 4,
-            "N2": 26,
-            "volume": 117.207,
-            "difficulty": 3.25,
-            "effort": 380.922
-          },
-          "cognitiveComplexity": 3,
-          "maintainabilityIndexGradAiRaw": 108.236,
-          "maintainabilityIndexGradAiNorm": 63.296,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "split_words",
-          "type": "function_definition",
-          "startLine": 425,
-          "lines": 2,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 1,
-            "n2": 3,
-            "N1": 1,
-            "N2": 4,
-            "volume": 10,
-            "difficulty": 0.667,
-            "effort": 6.667
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 147.568,
-          "maintainabilityIndexGradAiNorm": 86.297,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "read_ingestion_stats",
-          "type": "function_definition",
-          "startLine": 418,
-          "lines": 5,
-          "maxNestingDepth": 1,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 2,
-          "halstead": {
-            "n1": 3,
-            "n2": 10,
-            "N1": 4,
-            "N2": 13,
-            "volume": 62.907,
-            "difficulty": 1.95,
-            "effort": 122.67
-          },
-          "cognitiveComplexity": 1,
-          "maintainabilityIndexGradAiRaw": 122.93,
-          "maintainabilityIndexGradAiNorm": 71.889,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "read_records",
-          "type": "function_definition",
-          "startLine": 403,
-          "lines": 13,
-          "maxNestingDepth": 3,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 4,
-          "halstead": {
-            "n1": 4,
-            "n2": 14,
-            "N1": 6,
-            "N2": 24,
-            "volume": 125.098,
-            "difficulty": 3.429,
-            "effort": 428.907
-          },
-          "cognitiveComplexity": 4,
-          "maintainabilityIndexGradAiRaw": 103.417,
-          "maintainabilityIndexGradAiNorm": 60.478,
-          "isReactComponent": false,
-          "isMonolithic": false
-        }
-      ],
-      "complexity": [
-        {
-          "name": "main",
-          "type": "function_definition",
-          "startLine": 568,
-          "complexity": 1
-        },
-        {
-          "name": "respond_json",
-          "type": "function_definition",
-          "startLine": 559,
-          "complexity": 1
-        },
-        {
-          "name": "respond_html",
-          "type": "function_definition",
-          "startLine": 551,
-          "complexity": 1
-        },
-        {
-          "name": "log_message",
-          "type": "function_definition",
-          "startLine": 548,
-          "complexity": 1
-        },
-        {
-          "name": "do_POST",
-          "type": "function_definition",
-          "startLine": 528,
-          "complexity": 4
-        },
-        {
-          "name": "do_GET",
-          "type": "function_definition",
-          "startLine": 490,
-          "complexity": 6
-        },
-        {
-          "name": "run_ingestion",
-          "type": "function_definition",
-          "startLine": 470,
-          "complexity": 3
-        },
-        {
-          "name": "prepare_records",
-          "type": "function_definition",
-          "startLine": 441,
-          "complexity": 3
-        },
-        {
-          "name": "common_overlap",
-          "type": "function_definition",
-          "startLine": 429,
-          "complexity": 3
-        },
-        {
-          "name": "split_words",
-          "type": "function_definition",
-          "startLine": 425,
-          "complexity": 1
-        },
-        {
-          "name": "read_ingestion_stats",
-          "type": "function_definition",
-          "startLine": 418,
-          "complexity": 2
-        },
-        {
-          "name": "read_records",
-          "type": "function_definition",
-          "startLine": 403,
-          "complexity": 4
-        }
-      ]
-    },
-    {
       "file": "data_ingestion/__init__.py",
       "functions": 0,
       "functionsByType": {
@@ -9900,6 +9540,366 @@
       "complexity": []
     },
     {
+      "file": "chunk_viewer/server.py",
+      "functions": 12,
+      "functionsByType": {
+        "function_definition": 12,
+        "lambda": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "main",
+          "type": "function_definition",
+          "startLine": 568,
+          "lines": 4,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 8,
+            "N1": 0,
+            "N2": 10,
+            "volume": 30,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 130.626,
+          "maintainabilityIndexGradAiNorm": 76.389,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "respond_json",
+          "type": "function_definition",
+          "startLine": 559,
+          "lines": 7,
+          "maxNestingDepth": 0,
+          "parameterCount": 3,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 17,
+            "N1": 0,
+            "N2": 30,
+            "volume": 122.624,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 114.239,
+          "maintainabilityIndexGradAiNorm": 66.806,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "respond_html",
+          "type": "function_definition",
+          "startLine": 551,
+          "lines": 7,
+          "maxNestingDepth": 0,
+          "parameterCount": 3,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 0,
+            "n2": 15,
+            "N1": 0,
+            "N2": 28,
+            "volume": 109.393,
+            "difficulty": 0,
+            "effort": 0
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 114.833,
+          "maintainabilityIndexGradAiNorm": 67.154,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "log_message",
+          "type": "function_definition",
+          "startLine": 548,
+          "lines": 2,
+          "maxNestingDepth": 0,
+          "parameterCount": 3,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 4,
+            "N1": 1,
+            "N2": 4,
+            "volume": 11.61,
+            "difficulty": 0.5,
+            "effort": 5.805
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 146.791,
+          "maintainabilityIndexGradAiNorm": 85.843,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "do_POST",
+          "type": "function_definition",
+          "startLine": 528,
+          "lines": 19,
+          "maxNestingDepth": 2,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 4,
+          "halstead": {
+            "n1": 4,
+            "n2": 19,
+            "N1": 6,
+            "N2": 44,
+            "volume": 226.178,
+            "difficulty": 4.632,
+            "effort": 1047.562
+          },
+          "cognitiveComplexity": 7,
+          "maintainabilityIndexGradAiRaw": 94.189,
+          "maintainabilityIndexGradAiNorm": 55.081,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "do_GET",
+          "type": "function_definition",
+          "startLine": 490,
+          "lines": 37,
+          "maxNestingDepth": 1,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 6,
+          "halstead": {
+            "n1": 2,
+            "n2": 17,
+            "N1": 10,
+            "N2": 70,
+            "volume": 339.834,
+            "difficulty": 4.118,
+            "effort": 1399.317
+          },
+          "cognitiveComplexity": 5,
+          "maintainabilityIndexGradAiRaw": 80.815,
+          "maintainabilityIndexGradAiNorm": 47.26,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "run_ingestion",
+          "type": "function_definition",
+          "startLine": 470,
+          "lines": 17,
+          "maxNestingDepth": 1,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 3,
+          "halstead": {
+            "n1": 3,
+            "n2": 27,
+            "N1": 3,
+            "N2": 44,
+            "volume": 230.624,
+            "difficulty": 2.444,
+            "effort": 563.747
+          },
+          "cognitiveComplexity": 2,
+          "maintainabilityIndexGradAiRaw": 96.12,
+          "maintainabilityIndexGradAiNorm": 56.211,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "prepare_records",
+          "type": "function_definition",
+          "startLine": 441,
+          "lines": 27,
+          "maxNestingDepth": 1,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 3,
+          "halstead": {
+            "n1": 2,
+            "n2": 22,
+            "N1": 3,
+            "N2": 74,
+            "volume": 353.042,
+            "difficulty": 3.364,
+            "effort": 1187.505
+          },
+          "cognitiveComplexity": 2,
+          "maintainabilityIndexGradAiRaw": 86.411,
+          "maintainabilityIndexGradAiNorm": 50.533,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "common_overlap",
+          "type": "function_definition",
+          "startLine": 429,
+          "lines": 10,
+          "maxNestingDepth": 2,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 3,
+          "halstead": {
+            "n1": 3,
+            "n2": 12,
+            "N1": 4,
+            "N2": 26,
+            "volume": 117.207,
+            "difficulty": 3.25,
+            "effort": 380.922
+          },
+          "cognitiveComplexity": 3,
+          "maintainabilityIndexGradAiRaw": 108.236,
+          "maintainabilityIndexGradAiNorm": 63.296,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "split_words",
+          "type": "function_definition",
+          "startLine": 425,
+          "lines": 2,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 3,
+            "N1": 1,
+            "N2": 4,
+            "volume": 10,
+            "difficulty": 0.667,
+            "effort": 6.667
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 147.568,
+          "maintainabilityIndexGradAiNorm": 86.297,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "read_ingestion_stats",
+          "type": "function_definition",
+          "startLine": 418,
+          "lines": 5,
+          "maxNestingDepth": 1,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 3,
+            "n2": 10,
+            "N1": 4,
+            "N2": 13,
+            "volume": 62.907,
+            "difficulty": 1.95,
+            "effort": 122.67
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 122.93,
+          "maintainabilityIndexGradAiNorm": 71.889,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "read_records",
+          "type": "function_definition",
+          "startLine": 403,
+          "lines": 13,
+          "maxNestingDepth": 3,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 4,
+          "halstead": {
+            "n1": 4,
+            "n2": 14,
+            "N1": 6,
+            "N2": 24,
+            "volume": 125.098,
+            "difficulty": 3.429,
+            "effort": 428.907
+          },
+          "cognitiveComplexity": 4,
+          "maintainabilityIndexGradAiRaw": 103.417,
+          "maintainabilityIndexGradAiNorm": 60.478,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "main",
+          "type": "function_definition",
+          "startLine": 568,
+          "complexity": 1
+        },
+        {
+          "name": "respond_json",
+          "type": "function_definition",
+          "startLine": 559,
+          "complexity": 1
+        },
+        {
+          "name": "respond_html",
+          "type": "function_definition",
+          "startLine": 551,
+          "complexity": 1
+        },
+        {
+          "name": "log_message",
+          "type": "function_definition",
+          "startLine": 548,
+          "complexity": 1
+        },
+        {
+          "name": "do_POST",
+          "type": "function_definition",
+          "startLine": 528,
+          "complexity": 4
+        },
+        {
+          "name": "do_GET",
+          "type": "function_definition",
+          "startLine": 490,
+          "complexity": 6
+        },
+        {
+          "name": "run_ingestion",
+          "type": "function_definition",
+          "startLine": 470,
+          "complexity": 3
+        },
+        {
+          "name": "prepare_records",
+          "type": "function_definition",
+          "startLine": 441,
+          "complexity": 3
+        },
+        {
+          "name": "common_overlap",
+          "type": "function_definition",
+          "startLine": 429,
+          "complexity": 3
+        },
+        {
+          "name": "split_words",
+          "type": "function_definition",
+          "startLine": 425,
+          "complexity": 1
+        },
+        {
+          "name": "read_ingestion_stats",
+          "type": "function_definition",
+          "startLine": 418,
+          "complexity": 2
+        },
+        {
+          "name": "read_records",
+          "type": "function_definition",
+          "startLine": 403,
+          "complexity": 4
+        }
+      ]
+    },
+    {
       "file": "frontend/vite.config.ts",
       "functions": 3,
       "functionsByType": {
@@ -10000,257 +10000,6 @@
           "type": "method_definition",
           "startLine": 11,
           "complexity": 1
-        }
-      ]
-    },
-    {
-      "file": "prompts/chunk_adapter.py",
-      "functions": 3,
-      "functionsByType": {
-        "function_definition": 3,
-        "lambda": 0
-      },
-      "functionMetrics": [
-        {
-          "name": "chunks_to_sources",
-          "type": "function_definition",
-          "startLine": 20,
-          "lines": 11,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 1,
-            "n2": 6,
-            "N1": 1,
-            "N2": 21,
-            "volume": 61.762,
-            "difficulty": 1.75,
-            "effort": 108.083
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 110.483,
-          "maintainabilityIndexGradAiNorm": 64.61,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "normalize_chunks",
-          "type": "function_definition",
-          "startLine": 16,
-          "lines": 2,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 1,
-            "n2": 6,
-            "N1": 1,
-            "N2": 10,
-            "volume": 30.881,
-            "difficulty": 0.833,
-            "effort": 25.734
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 141.704,
-          "maintainabilityIndexGradAiNorm": 82.868,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "normalize_chunk",
-          "type": "function_definition",
-          "startLine": 6,
-          "lines": 8,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 2,
-          "halstead": {
-            "n1": 3,
-            "n2": 9,
-            "N1": 4,
-            "N2": 39,
-            "volume": 154.153,
-            "difficulty": 6.5,
-            "effort": 1001.997
-          },
-          "cognitiveComplexity": 1,
-          "maintainabilityIndexGradAiRaw": 110.656,
-          "maintainabilityIndexGradAiNorm": 64.711,
-          "isReactComponent": false,
-          "isMonolithic": false
-        }
-      ],
-      "complexity": [
-        {
-          "name": "chunks_to_sources",
-          "type": "function_definition",
-          "startLine": 20,
-          "complexity": 1
-        },
-        {
-          "name": "normalize_chunks",
-          "type": "function_definition",
-          "startLine": 16,
-          "complexity": 1
-        },
-        {
-          "name": "normalize_chunk",
-          "type": "function_definition",
-          "startLine": 6,
-          "complexity": 2
-        }
-      ]
-    },
-    {
-      "file": "prompts/llm_client.py",
-      "functions": 1,
-      "functionsByType": {
-        "function_definition": 1,
-        "lambda": 0
-      },
-      "functionMetrics": [
-        {
-          "name": "call_llm",
-          "type": "function_definition",
-          "startLine": 10,
-          "lines": 19,
-          "maxNestingDepth": 1,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 3,
-          "halstead": {
-            "n1": 6,
-            "n2": 28,
-            "N1": 8,
-            "N2": 53,
-            "volume": 310.335,
-            "difficulty": 5.679,
-            "effort": 1762.261
-          },
-          "cognitiveComplexity": 5,
-          "maintainabilityIndexGradAiRaw": 92.774,
-          "maintainabilityIndexGradAiNorm": 54.254,
-          "isReactComponent": false,
-          "isMonolithic": false
-        }
-      ],
-      "complexity": [
-        {
-          "name": "call_llm",
-          "type": "function_definition",
-          "startLine": 10,
-          "complexity": 3
-        }
-      ]
-    },
-    {
-      "file": "prompts/prompt_builder.py",
-      "functions": 2,
-      "functionsByType": {
-        "function_definition": 2,
-        "lambda": 0
-      },
-      "functionMetrics": [
-        {
-          "name": "build_prompt",
-          "type": "function_definition",
-          "startLine": 11,
-          "lines": 31,
-          "maxNestingDepth": 1,
-          "parameterCount": 2,
-          "cyclomaticComplexity": 3,
-          "halstead": {
-            "n1": 3,
-            "n2": 21,
-            "N1": 3,
-            "N2": 46,
-            "volume": 224.663,
-            "difficulty": 3.286,
-            "effort": 738.179
-          },
-          "cognitiveComplexity": 2,
-          "maintainabilityIndexGradAiRaw": 86.523,
-          "maintainabilityIndexGradAiNorm": 50.598,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "load_system_prompt",
-          "type": "function_definition",
-          "startLine": 7,
-          "lines": 2,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 1,
-            "n2": 6,
-            "N1": 1,
-            "N2": 6,
-            "volume": 19.651,
-            "difficulty": 0.5,
-            "effort": 9.826
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 144.055,
-          "maintainabilityIndexGradAiNorm": 84.243,
-          "isReactComponent": false,
-          "isMonolithic": false
-        }
-      ],
-      "complexity": [
-        {
-          "name": "build_prompt",
-          "type": "function_definition",
-          "startLine": 11,
-          "complexity": 3
-        },
-        {
-          "name": "load_system_prompt",
-          "type": "function_definition",
-          "startLine": 7,
-          "complexity": 1
-        }
-      ]
-    },
-    {
-      "file": "prompts/rag_pipeline.py",
-      "functions": 1,
-      "functionsByType": {
-        "function_definition": 1,
-        "lambda": 0
-      },
-      "functionMetrics": [
-        {
-          "name": "generate_rag_response",
-          "type": "function_definition",
-          "startLine": 12,
-          "lines": 28,
-          "maxNestingDepth": 1,
-          "parameterCount": 2,
-          "cyclomaticComplexity": 3,
-          "halstead": {
-            "n1": 3,
-            "n2": 17,
-            "N1": 7,
-            "N2": 37,
-            "volume": 190.165,
-            "difficulty": 3.265,
-            "effort": 620.832
-          },
-          "cognitiveComplexity": 2,
-          "maintainabilityIndexGradAiRaw": 89.039,
-          "maintainabilityIndexGradAiNorm": 52.07,
-          "isReactComponent": false,
-          "isMonolithic": false
-        }
-      ],
-      "complexity": [
-        {
-          "name": "generate_rag_response",
-          "type": "function_definition",
-          "startLine": 12,
-          "complexity": 3
         }
       ]
     },
@@ -11376,6 +11125,257 @@
       ]
     },
     {
+      "file": "prompts/chunk_adapter.py",
+      "functions": 3,
+      "functionsByType": {
+        "function_definition": 3,
+        "lambda": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "chunks_to_sources",
+          "type": "function_definition",
+          "startLine": 20,
+          "lines": 11,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 6,
+            "N1": 1,
+            "N2": 21,
+            "volume": 61.762,
+            "difficulty": 1.75,
+            "effort": 108.083
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 110.483,
+          "maintainabilityIndexGradAiNorm": 64.61,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "normalize_chunks",
+          "type": "function_definition",
+          "startLine": 16,
+          "lines": 2,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 6,
+            "N1": 1,
+            "N2": 10,
+            "volume": 30.881,
+            "difficulty": 0.833,
+            "effort": 25.734
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 141.704,
+          "maintainabilityIndexGradAiNorm": 82.868,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "normalize_chunk",
+          "type": "function_definition",
+          "startLine": 6,
+          "lines": 8,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 3,
+            "n2": 9,
+            "N1": 4,
+            "N2": 39,
+            "volume": 154.153,
+            "difficulty": 6.5,
+            "effort": 1001.997
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 110.656,
+          "maintainabilityIndexGradAiNorm": 64.711,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "chunks_to_sources",
+          "type": "function_definition",
+          "startLine": 20,
+          "complexity": 1
+        },
+        {
+          "name": "normalize_chunks",
+          "type": "function_definition",
+          "startLine": 16,
+          "complexity": 1
+        },
+        {
+          "name": "normalize_chunk",
+          "type": "function_definition",
+          "startLine": 6,
+          "complexity": 2
+        }
+      ]
+    },
+    {
+      "file": "prompts/llm_client.py",
+      "functions": 1,
+      "functionsByType": {
+        "function_definition": 1,
+        "lambda": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "call_llm",
+          "type": "function_definition",
+          "startLine": 10,
+          "lines": 19,
+          "maxNestingDepth": 1,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 3,
+          "halstead": {
+            "n1": 6,
+            "n2": 28,
+            "N1": 8,
+            "N2": 53,
+            "volume": 310.335,
+            "difficulty": 5.679,
+            "effort": 1762.261
+          },
+          "cognitiveComplexity": 5,
+          "maintainabilityIndexGradAiRaw": 92.774,
+          "maintainabilityIndexGradAiNorm": 54.254,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "call_llm",
+          "type": "function_definition",
+          "startLine": 10,
+          "complexity": 3
+        }
+      ]
+    },
+    {
+      "file": "prompts/prompt_builder.py",
+      "functions": 2,
+      "functionsByType": {
+        "function_definition": 2,
+        "lambda": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "build_prompt",
+          "type": "function_definition",
+          "startLine": 11,
+          "lines": 31,
+          "maxNestingDepth": 1,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 3,
+          "halstead": {
+            "n1": 3,
+            "n2": 21,
+            "N1": 3,
+            "N2": 46,
+            "volume": 224.663,
+            "difficulty": 3.286,
+            "effort": 738.179
+          },
+          "cognitiveComplexity": 2,
+          "maintainabilityIndexGradAiRaw": 86.523,
+          "maintainabilityIndexGradAiNorm": 50.598,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "load_system_prompt",
+          "type": "function_definition",
+          "startLine": 7,
+          "lines": 2,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 6,
+            "N1": 1,
+            "N2": 6,
+            "volume": 19.651,
+            "difficulty": 0.5,
+            "effort": 9.826
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 144.055,
+          "maintainabilityIndexGradAiNorm": 84.243,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "build_prompt",
+          "type": "function_definition",
+          "startLine": 11,
+          "complexity": 3
+        },
+        {
+          "name": "load_system_prompt",
+          "type": "function_definition",
+          "startLine": 7,
+          "complexity": 1
+        }
+      ]
+    },
+    {
+      "file": "prompts/rag_pipeline.py",
+      "functions": 1,
+      "functionsByType": {
+        "function_definition": 1,
+        "lambda": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "generate_rag_response",
+          "type": "function_definition",
+          "startLine": 12,
+          "lines": 28,
+          "maxNestingDepth": 1,
+          "parameterCount": 2,
+          "cyclomaticComplexity": 3,
+          "halstead": {
+            "n1": 3,
+            "n2": 17,
+            "N1": 7,
+            "N2": 37,
+            "volume": 190.165,
+            "difficulty": 3.265,
+            "effort": 620.832
+          },
+          "cognitiveComplexity": 2,
+          "maintainabilityIndexGradAiRaw": 89.039,
+          "maintainabilityIndexGradAiNorm": 52.07,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "generate_rag_response",
+          "type": "function_definition",
+          "startLine": 12,
+          "complexity": 3
+        }
+      ]
+    },
+    {
       "file": "backend/retrieval/__init__.py",
       "functions": 0,
       "functionsByType": {
@@ -11860,6 +11860,142 @@
           "complexity": 1
         }
       ]
+    },
+    {
+      "file": "frontend/src/App.tsx",
+      "functions": 1,
+      "functionsByType": {
+        "function_declaration": 1,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 0,
+        "function": 0,
+        "function_expression": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "App",
+          "type": "function_declaration",
+          "startLine": 5,
+          "lines": 8,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 1,
+            "n2": 7,
+            "N1": 1,
+            "N2": 9,
+            "volume": 30,
+            "difficulty": 0.643,
+            "effort": 19.286
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 119.397,
+          "maintainabilityIndexGradAiNorm": 69.823,
+          "isReactComponent": true,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "App",
+          "type": "function_declaration",
+          "startLine": 5,
+          "complexity": 1
+        }
+      ]
+    },
+    {
+      "file": "frontend/src/main.tsx",
+      "functions": 2,
+      "functionsByType": {
+        "function_declaration": 1,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 1,
+        "function": 0,
+        "function_expression": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 27,
+          "lines": 11,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 2,
+            "n2": 9,
+            "N1": 3,
+            "N2": 12,
+            "volume": 51.891,
+            "difficulty": 1.333,
+            "effort": 69.189
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 111.389,
+          "maintainabilityIndexGradAiNorm": 65.14,
+          "isReactComponent": true,
+          "isMonolithic": false
+        },
+        {
+          "name": "enableMocking",
+          "type": "function_declaration",
+          "startLine": 14,
+          "lines": 10,
+          "maxNestingDepth": 1,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 2,
+          "halstead": {
+            "n1": 5,
+            "n2": 6,
+            "N1": 10,
+            "N2": 6,
+            "volume": 55.351,
+            "difficulty": 2.5,
+            "effort": 138.377
+          },
+          "cognitiveComplexity": 1,
+          "maintainabilityIndexGradAiRaw": 112.367,
+          "maintainabilityIndexGradAiNorm": 65.712,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 27,
+          "complexity": 1
+        },
+        {
+          "name": "enableMocking",
+          "type": "function_declaration",
+          "startLine": 14,
+          "complexity": 2
+        }
+      ]
+    },
+    {
+      "file": "frontend/src/vite-env.d.ts",
+      "functions": 0,
+      "functionsByType": {
+        "function_declaration": 0,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 0,
+        "function": 0,
+        "function_expression": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [],
+      "complexity": []
     },
     {
       "file": "frontend/public/mockServiceWorker.js",
@@ -12401,142 +12537,6 @@
       ]
     },
     {
-      "file": "frontend/src/App.tsx",
-      "functions": 1,
-      "functionsByType": {
-        "function_declaration": 1,
-        "generator_function_declaration": 0,
-        "method_definition": 0,
-        "arrow_function": 0,
-        "function": 0,
-        "function_expression": 0,
-        "generator_function": 0
-      },
-      "functionMetrics": [
-        {
-          "name": "App",
-          "type": "function_declaration",
-          "startLine": 5,
-          "lines": 8,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 1,
-            "n2": 7,
-            "N1": 1,
-            "N2": 9,
-            "volume": 30,
-            "difficulty": 0.643,
-            "effort": 19.286
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 119.397,
-          "maintainabilityIndexGradAiNorm": 69.823,
-          "isReactComponent": true,
-          "isMonolithic": false
-        }
-      ],
-      "complexity": [
-        {
-          "name": "App",
-          "type": "function_declaration",
-          "startLine": 5,
-          "complexity": 1
-        }
-      ]
-    },
-    {
-      "file": "frontend/src/main.tsx",
-      "functions": 2,
-      "functionsByType": {
-        "function_declaration": 1,
-        "generator_function_declaration": 0,
-        "method_definition": 0,
-        "arrow_function": 1,
-        "function": 0,
-        "function_expression": 0,
-        "generator_function": 0
-      },
-      "functionMetrics": [
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 27,
-          "lines": 11,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 2,
-            "n2": 9,
-            "N1": 3,
-            "N2": 12,
-            "volume": 51.891,
-            "difficulty": 1.333,
-            "effort": 69.189
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 111.389,
-          "maintainabilityIndexGradAiNorm": 65.14,
-          "isReactComponent": true,
-          "isMonolithic": false
-        },
-        {
-          "name": "enableMocking",
-          "type": "function_declaration",
-          "startLine": 14,
-          "lines": 10,
-          "maxNestingDepth": 1,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 2,
-          "halstead": {
-            "n1": 5,
-            "n2": 6,
-            "N1": 10,
-            "N2": 6,
-            "volume": 55.351,
-            "difficulty": 2.5,
-            "effort": 138.377
-          },
-          "cognitiveComplexity": 1,
-          "maintainabilityIndexGradAiRaw": 112.367,
-          "maintainabilityIndexGradAiNorm": 65.712,
-          "isReactComponent": false,
-          "isMonolithic": false
-        }
-      ],
-      "complexity": [
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 27,
-          "complexity": 1
-        },
-        {
-          "name": "enableMocking",
-          "type": "function_declaration",
-          "startLine": 14,
-          "complexity": 2
-        }
-      ]
-    },
-    {
-      "file": "frontend/src/vite-env.d.ts",
-      "functions": 0,
-      "functionsByType": {
-        "function_declaration": 0,
-        "generator_function_declaration": 0,
-        "method_definition": 0,
-        "arrow_function": 0,
-        "function": 0,
-        "function_expression": 0,
-        "generator_function": 0
-      },
-      "functionMetrics": [],
-      "complexity": []
-    },
-    {
       "file": "prompts/evaluation/run_qa_tests.py",
       "functions": 1,
       "functionsByType": {
@@ -12975,142 +12975,6 @@
       "complexity": []
     },
     {
-      "file": "frontend/src/mocks/browser.ts",
-      "functions": 0,
-      "functionsByType": {
-        "function_declaration": 0,
-        "generator_function_declaration": 0,
-        "method_definition": 0,
-        "arrow_function": 0,
-        "function": 0,
-        "function_expression": 0,
-        "generator_function": 0
-      },
-      "functionMetrics": [],
-      "complexity": []
-    },
-    {
-      "file": "frontend/src/mocks/data.ts",
-      "functions": 1,
-      "functionsByType": {
-        "function_declaration": 1,
-        "generator_function_declaration": 0,
-        "method_definition": 0,
-        "arrow_function": 0,
-        "function": 0,
-        "function_expression": 0,
-        "generator_function": 0
-      },
-      "functionMetrics": [
-        {
-          "name": "getMockResponse",
-          "type": "function_declaration",
-          "startLine": 142,
-          "lines": 10,
-          "maxNestingDepth": 1,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 17,
-          "halstead": {
-            "n1": 4,
-            "n2": 20,
-            "N1": 47,
-            "N2": 43,
-            "volume": 412.647,
-            "difficulty": 4.3,
-            "effort": 1774.38
-          },
-          "cognitiveComplexity": 6,
-          "maintainabilityIndexGradAiRaw": 98.471,
-          "maintainabilityIndexGradAiNorm": 57.585,
-          "isReactComponent": false,
-          "isMonolithic": false
-        }
-      ],
-      "complexity": [
-        {
-          "name": "getMockResponse",
-          "type": "function_declaration",
-          "startLine": 142,
-          "complexity": 17
-        }
-      ]
-    },
-    {
-      "file": "frontend/src/mocks/handlers.ts",
-      "functions": 2,
-      "functionsByType": {
-        "function_declaration": 0,
-        "generator_function_declaration": 0,
-        "method_definition": 0,
-        "arrow_function": 2,
-        "function": 0,
-        "function_expression": 0,
-        "generator_function": 0
-      },
-      "functionMetrics": [
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 12,
-          "lines": 8,
-          "maxNestingDepth": 0,
-          "parameterCount": 1,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 5,
-            "n2": 9,
-            "N1": 8,
-            "N2": 11,
-            "volume": 72.34,
-            "difficulty": 3.056,
-            "effort": 221.038
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 114.82,
-          "maintainabilityIndexGradAiNorm": 67.146,
-          "isReactComponent": false,
-          "isMonolithic": false
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 8,
-          "lines": 3,
-          "maxNestingDepth": 0,
-          "parameterCount": 0,
-          "cyclomaticComplexity": 1,
-          "halstead": {
-            "n1": 3,
-            "n2": 2,
-            "N1": 3,
-            "N2": 2,
-            "volume": 11.61,
-            "difficulty": 1.5,
-            "effort": 17.414
-          },
-          "cognitiveComplexity": 0,
-          "maintainabilityIndexGradAiRaw": 140.223,
-          "maintainabilityIndexGradAiNorm": 82.002,
-          "isReactComponent": false,
-          "isMonolithic": false
-        }
-      ],
-      "complexity": [
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 12,
-          "complexity": 1
-        },
-        {
-          "name": "(anonymous)",
-          "type": "arrow_function",
-          "startLine": 8,
-          "complexity": 1
-        }
-      ]
-    },
-    {
       "file": "frontend/src/hooks/useChat.ts",
       "functions": 5,
       "functionsByType": {
@@ -13314,6 +13178,142 @@
           "name": "useHealth",
           "type": "function_declaration",
           "startLine": 4,
+          "complexity": 1
+        }
+      ]
+    },
+    {
+      "file": "frontend/src/mocks/browser.ts",
+      "functions": 0,
+      "functionsByType": {
+        "function_declaration": 0,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 0,
+        "function": 0,
+        "function_expression": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [],
+      "complexity": []
+    },
+    {
+      "file": "frontend/src/mocks/data.ts",
+      "functions": 1,
+      "functionsByType": {
+        "function_declaration": 1,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 0,
+        "function": 0,
+        "function_expression": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "getMockResponse",
+          "type": "function_declaration",
+          "startLine": 142,
+          "lines": 10,
+          "maxNestingDepth": 1,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 17,
+          "halstead": {
+            "n1": 4,
+            "n2": 20,
+            "N1": 47,
+            "N2": 43,
+            "volume": 412.647,
+            "difficulty": 4.3,
+            "effort": 1774.38
+          },
+          "cognitiveComplexity": 6,
+          "maintainabilityIndexGradAiRaw": 98.471,
+          "maintainabilityIndexGradAiNorm": 57.585,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "getMockResponse",
+          "type": "function_declaration",
+          "startLine": 142,
+          "complexity": 17
+        }
+      ]
+    },
+    {
+      "file": "frontend/src/mocks/handlers.ts",
+      "functions": 2,
+      "functionsByType": {
+        "function_declaration": 0,
+        "generator_function_declaration": 0,
+        "method_definition": 0,
+        "arrow_function": 2,
+        "function": 0,
+        "function_expression": 0,
+        "generator_function": 0
+      },
+      "functionMetrics": [
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 12,
+          "lines": 8,
+          "maxNestingDepth": 0,
+          "parameterCount": 1,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 5,
+            "n2": 9,
+            "N1": 8,
+            "N2": 11,
+            "volume": 72.34,
+            "difficulty": 3.056,
+            "effort": 221.038
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 114.82,
+          "maintainabilityIndexGradAiNorm": 67.146,
+          "isReactComponent": false,
+          "isMonolithic": false
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 8,
+          "lines": 3,
+          "maxNestingDepth": 0,
+          "parameterCount": 0,
+          "cyclomaticComplexity": 1,
+          "halstead": {
+            "n1": 3,
+            "n2": 2,
+            "N1": 3,
+            "N2": 2,
+            "volume": 11.61,
+            "difficulty": 1.5,
+            "effort": 17.414
+          },
+          "cognitiveComplexity": 0,
+          "maintainabilityIndexGradAiRaw": 140.223,
+          "maintainabilityIndexGradAiNorm": 82.002,
+          "isReactComponent": false,
+          "isMonolithic": false
+        }
+      ],
+      "complexity": [
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 12,
+          "complexity": 1
+        },
+        {
+          "name": "(anonymous)",
+          "type": "arrow_function",
+          "startLine": 8,
           "complexity": 1
         }
       ]
@@ -15442,11 +15442,11 @@
   "phase3": {
     "sfd": 0,
     "mcr": 0.13793,
-    "srs": 3.80191,
+    "srs": 9.35855,
     "silentFailureEvents": [],
-    "srsWeightedNumerator": 19.5,
-    "srsExactWeightedLines": 0,
-    "srsNearWeightedLines": 39,
+    "srsWeightedNumerator": 48,
+    "srsExactWeightedLines": 48,
+    "srsNearWeightedLines": 0,
     "monolithicComponentCount": 4,
     "reactComponentCount": 29
   },
@@ -15578,15 +15578,6 @@
       "riskScore": 7
     },
     {
-      "file": "chunk_viewer/server.py",
-      "name": "do_GET",
-      "startLine": 490,
-      "cyclomaticComplexity": 6,
-      "verificationScore": 0,
-      "evidence": "none",
-      "riskScore": 6
-    },
-    {
       "file": "data_ingestion/chunker.py",
       "name": "_structured_chunk_records",
       "startLine": 246,
@@ -15662,6 +15653,15 @@
       "file": "data_ingestion/semantic_chunker.py",
       "name": "_split_words",
       "startLine": 59,
+      "cyclomaticComplexity": 6,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 6
+    },
+    {
+      "file": "chunk_viewer/server.py",
+      "name": "do_GET",
+      "startLine": 490,
       "cyclomaticComplexity": 6,
       "verificationScore": 0,
       "evidence": "none",
@@ -15812,24 +15812,6 @@
       "riskScore": 5
     },
     {
-      "file": "chunk_viewer/server.py",
-      "name": "do_POST",
-      "startLine": 528,
-      "cyclomaticComplexity": 4,
-      "verificationScore": 0,
-      "evidence": "none",
-      "riskScore": 4
-    },
-    {
-      "file": "chunk_viewer/server.py",
-      "name": "read_records",
-      "startLine": 403,
-      "cyclomaticComplexity": 4,
-      "verificationScore": 0,
-      "evidence": "none",
-      "riskScore": 4
-    },
-    {
       "file": "data_ingestion/chunker.py",
       "name": "chunk_pages",
       "startLine": 321,
@@ -15911,6 +15893,24 @@
       "riskScore": 4
     },
     {
+      "file": "chunk_viewer/server.py",
+      "name": "do_POST",
+      "startLine": 528,
+      "cyclomaticComplexity": 4,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 4
+    },
+    {
+      "file": "chunk_viewer/server.py",
+      "name": "read_records",
+      "startLine": 403,
+      "cyclomaticComplexity": 4,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 4
+    },
+    {
       "file": "frontend/public/mockServiceWorker.js",
       "name": "handleRequest",
       "startLine": 124,
@@ -15945,33 +15945,6 @@
       "verificationScore": 0,
       "evidence": "none",
       "riskScore": 4
-    },
-    {
-      "file": "chunk_viewer/server.py",
-      "name": "run_ingestion",
-      "startLine": 470,
-      "cyclomaticComplexity": 3,
-      "verificationScore": 0,
-      "evidence": "none",
-      "riskScore": 3
-    },
-    {
-      "file": "chunk_viewer/server.py",
-      "name": "prepare_records",
-      "startLine": 441,
-      "cyclomaticComplexity": 3,
-      "verificationScore": 0,
-      "evidence": "none",
-      "riskScore": 3
-    },
-    {
-      "file": "chunk_viewer/server.py",
-      "name": "common_overlap",
-      "startLine": 429,
-      "cyclomaticComplexity": 3,
-      "verificationScore": 0,
-      "evidence": "none",
-      "riskScore": 3
     },
     {
       "file": "data_ingestion/chunker.py",
@@ -16085,6 +16058,33 @@
       "file": "data_ingestion/validator.py",
       "name": "read_jsonl",
       "startLine": 38,
+      "cyclomaticComplexity": 3,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 3
+    },
+    {
+      "file": "chunk_viewer/server.py",
+      "name": "run_ingestion",
+      "startLine": 470,
+      "cyclomaticComplexity": 3,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 3
+    },
+    {
+      "file": "chunk_viewer/server.py",
+      "name": "prepare_records",
+      "startLine": 441,
+      "cyclomaticComplexity": 3,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 3
+    },
+    {
+      "file": "chunk_viewer/server.py",
+      "name": "common_overlap",
+      "startLine": 429,
       "cyclomaticComplexity": 3,
       "verificationScore": 0,
       "evidence": "none",
@@ -16206,15 +16206,6 @@
       "verificationScore": 0,
       "evidence": "none",
       "riskScore": 3
-    },
-    {
-      "file": "chunk_viewer/server.py",
-      "name": "read_ingestion_stats",
-      "startLine": 418,
-      "cyclomaticComplexity": 2,
-      "verificationScore": 0,
-      "evidence": "none",
-      "riskScore": 2
     },
     {
       "file": "data_ingestion/chunker.py",
@@ -16352,6 +16343,15 @@
       "riskScore": 2
     },
     {
+      "file": "chunk_viewer/server.py",
+      "name": "read_ingestion_stats",
+      "startLine": 418,
+      "cyclomaticComplexity": 2,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 2
+    },
+    {
       "file": "prompts/chunk_adapter.py",
       "name": "normalize_chunk",
       "startLine": 6,
@@ -16388,18 +16388,18 @@
       "riskScore": 2
     },
     {
-      "file": "frontend/public/mockServiceWorker.js",
-      "name": "respondWithMock",
-      "startLine": 311,
+      "file": "frontend/src/main.tsx",
+      "name": "enableMocking",
+      "startLine": 14,
       "cyclomaticComplexity": 2,
       "verificationScore": 0,
       "evidence": "none",
       "riskScore": 2
     },
     {
-      "file": "frontend/src/main.tsx",
-      "name": "enableMocking",
-      "startLine": 14,
+      "file": "frontend/public/mockServiceWorker.js",
+      "name": "respondWithMock",
+      "startLine": 311,
       "cyclomaticComplexity": 2,
       "verificationScore": 0,
       "evidence": "none",
@@ -16458,51 +16458,6 @@
       "verificationScore": 0,
       "evidence": "none",
       "riskScore": 2
-    },
-    {
-      "file": "chunk_viewer/server.py",
-      "name": "main",
-      "startLine": 568,
-      "cyclomaticComplexity": 1,
-      "verificationScore": 0,
-      "evidence": "none",
-      "riskScore": 1
-    },
-    {
-      "file": "chunk_viewer/server.py",
-      "name": "respond_json",
-      "startLine": 559,
-      "cyclomaticComplexity": 1,
-      "verificationScore": 0,
-      "evidence": "none",
-      "riskScore": 1
-    },
-    {
-      "file": "chunk_viewer/server.py",
-      "name": "respond_html",
-      "startLine": 551,
-      "cyclomaticComplexity": 1,
-      "verificationScore": 0,
-      "evidence": "none",
-      "riskScore": 1
-    },
-    {
-      "file": "chunk_viewer/server.py",
-      "name": "log_message",
-      "startLine": 548,
-      "cyclomaticComplexity": 1,
-      "verificationScore": 0,
-      "evidence": "none",
-      "riskScore": 1
-    },
-    {
-      "file": "chunk_viewer/server.py",
-      "name": "split_words",
-      "startLine": 425,
-      "cyclomaticComplexity": 1,
-      "verificationScore": 0,
-      "evidence": "none",
-      "riskScore": 1
     },
     {
       "file": "data_ingestion/chunker.py",
@@ -16802,6 +16757,51 @@
       "riskScore": 1
     },
     {
+      "file": "chunk_viewer/server.py",
+      "name": "main",
+      "startLine": 568,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "chunk_viewer/server.py",
+      "name": "respond_json",
+      "startLine": 559,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "chunk_viewer/server.py",
+      "name": "respond_html",
+      "startLine": 551,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "chunk_viewer/server.py",
+      "name": "log_message",
+      "startLine": 548,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
+      "file": "chunk_viewer/server.py",
+      "name": "split_words",
+      "startLine": 425,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
       "file": "frontend/vite.config.ts",
       "name": "rewrite",
       "startLine": 28,
@@ -16892,6 +16892,15 @@
       "riskScore": 1
     },
     {
+      "file": "frontend/src/App.tsx",
+      "name": "App",
+      "startLine": 5,
+      "cyclomaticComplexity": 1,
+      "verificationScore": 0,
+      "evidence": "none",
+      "riskScore": 1
+    },
+    {
       "file": "frontend/public/mockServiceWorker.js",
       "name": "serializeRequest",
       "startLine": 333,
@@ -16904,15 +16913,6 @@
       "file": "frontend/public/mockServiceWorker.js",
       "name": "sendToClient",
       "startLine": 288,
-      "cyclomaticComplexity": 1,
-      "verificationScore": 0,
-      "evidence": "none",
-      "riskScore": 1
-    },
-    {
-      "file": "frontend/src/App.tsx",
-      "name": "App",
-      "startLine": 5,
       "cyclomaticComplexity": 1,
       "verificationScore": 0,
       "evidence": "none",

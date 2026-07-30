@@ -21,11 +21,19 @@ Usage: python3 make_figure3.py [timing_data.csv] [outdir]
 import csv
 import sys
 import os
+import json
+import pathlib
 
 import numpy as np
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+
+# Read from the engine so a regenerated figure can never be labelled with a
+# stale version, which is how the previous figure ended up saying 0.1.0.
+ANALYZER_VERSION = json.loads(
+    (pathlib.Path(__file__).resolve().parents[2] / "packages/engine/package.json").read_text()
+)["version"]
 
 # Palette shared with research/validation/analyze.py
 POINT = "#2b6cb0"
@@ -76,7 +84,7 @@ ax.set_yscale("log")
 ax.set_xlabel("Source LOC (`profile.sourceLOC`, log scale)")
 ax.set_ylabel("Analysis time excluding duplication step (s, log scale)")
 ax.set_title(f"Figure 3 — Analysis time vs repository size\n"
-             f"n={len(rows)} repositories, analyzer_version 0.1.0")
+             f"n={len(rows)} repositories, analyzer_version {ANALYZER_VERSION}")
 ax.grid(alpha=0.25, linewidth=0.5, which="both")
 ax.legend(loc="upper left", fontsize=8.5, framealpha=0.95)
 fig.tight_layout()

@@ -4,169 +4,169 @@
 
 | statistic | value |
 |---|---|
-| paired functions (n) | 4588 |
-| exact agreement | 4579 / 4588 = **99.8%** |
+| paired functions (n) | 4631 |
+| exact agreement | 4622 / 4631 = **99.8%** |
 | Spearman rho | **0.9972** (p = 0) |
-| mean signed diff (ours - baseline) | **+0.003** |
+| mean signed diff (ours - baseline) | **+0.002** |
 | median signed diff | **+0.000** |
-| sd of diff | 0.183 |
+| sd of diff | 0.133 |
 | modal diff | +0 (holds for 99.8% of pairs) |
 | diff percentiles p1/p5/p25/p50/p75/p95/p99 | +0.00 / +0.00 / +0.00 / +0.00 / +0.00 / +0.00 / +0.00 |
-| diff range | -3.00 to +11.00 |
-| mean ours / baseline | 2.11 / 2.11 |
+| diff range | -3.00 to +7.00 |
+| mean ours / baseline | 2.11 / 2.10 |
 | median ours / baseline | 1.00 / 1.00 |
-| Bland-Altman bias | **+0.003** |
-| Bland-Altman 95% limits of agreement | **[-0.356, +0.362]** |
+| Bland-Altman bias | **+0.002** |
+| Bland-Altman 95% limits of agreement | **[-0.259, +0.263]** |
 
 ### Structural, non-trivial subset (max >= 2)
 
 | statistic | value |
 |---|---|
-| paired functions (n) | 1305 |
-| exact agreement | 1296 / 1305 = **99.3%** |
+| paired functions (n) | 1312 |
+| exact agreement | 1303 / 1312 = **99.3%** |
 | Spearman rho | **0.9941** (p = 0) |
-| mean signed diff (ours - baseline) | **+0.011** |
+| mean signed diff (ours - baseline) | **+0.008** |
 | median signed diff | **+0.000** |
-| sd of diff | 0.343 |
+| sd of diff | 0.250 |
 | modal diff | +0 (holds for 99.3% of pairs) |
 | diff percentiles p1/p5/p25/p50/p75/p95/p99 | +0.00 / +0.00 / +0.00 / +0.00 / +0.00 / +0.00 / +0.00 |
-| diff range | -3.00 to +11.00 |
-| mean ours / baseline | 4.90 / 4.89 |
+| diff range | -3.00 to +7.00 |
+| mean ours / baseline | 4.91 / 4.90 |
 | median ours / baseline | 3.00 / 3.00 |
-| Bland-Altman bias | **+0.011** |
-| Bland-Altman 95% limits of agreement | **[-0.663, +0.684]** |
+| Bland-Altman bias | **+0.008** |
+| Bland-Altman 95% limits of agreement | **[-0.482, +0.498]** |
 
 ### Cognitive vs eslint-plugin-sonarjs
 
 | statistic | value |
 |---|---|
-| paired functions (n) | 4588 |
-| exact agreement | 4234 / 4588 = **92.3%** |
-| Spearman rho | **0.9770** (p = 0) |
-| mean signed diff (ours - baseline) | **-0.060** |
+| paired functions (n) | 4631 |
+| exact agreement | 4281 / 4631 = **92.4%** |
+| Spearman rho | **0.9768** (p = 0) |
+| mean signed diff (ours - baseline) | **-0.062** |
 | median signed diff | **+0.000** |
-| sd of diff | 0.501 |
-| modal diff | +0 (holds for 92.3% of pairs) |
+| sd of diff | 0.500 |
+| modal diff | +0 (holds for 92.4% of pairs) |
 | diff percentiles p1/p5/p25/p50/p75/p95/p99 | -2.00 / -1.00 / +0.00 / +0.00 / +0.00 / +0.00 / +1.00 |
 | diff range | -7.00 to +5.00 |
 | mean ours / baseline | 1.12 / 1.18 |
 | median ours / baseline | 0.00 / 0.00 |
-| Bland-Altman bias | **-0.060** |
-| Bland-Altman 95% limits of agreement | **[-1.043, +0.922]** |
+| Bland-Altman bias | **-0.062** |
+| Bland-Altman 95% limits of agreement | **[-1.042, +0.917]** |
 
 ### Cognitive, non-trivial subset (max >= 1)
 
 | statistic | value |
 |---|---|
-| paired functions (n) | 1247 |
-| exact agreement | 893 / 1247 = **71.6%** |
-| Spearman rho | **0.9373** (p = 0) |
-| mean signed diff (ours - baseline) | **-0.222** |
+| paired functions (n) | 1254 |
+| exact agreement | 904 / 1254 = **72.1%** |
+| Spearman rho | **0.9375** (p = 0) |
+| mean signed diff (ours - baseline) | **-0.230** |
 | median signed diff | **+0.000** |
-| sd of diff | 0.943 |
-| modal diff | +0 (holds for 71.6% of pairs) |
+| sd of diff | 0.940 |
+| modal diff | +0 (holds for 72.1% of pairs) |
 | diff percentiles p1/p5/p25/p50/p75/p95/p99 | -4.00 / -2.00 / +0.00 / +0.00 / +0.00 / +1.00 / +2.00 |
 | diff range | -7.00 to +5.00 |
-| mean ours / baseline | 4.13 / 4.35 |
+| mean ours / baseline | 4.13 / 4.36 |
 | median ours / baseline | 2.00 / 2.00 |
-| Bland-Altman bias | **-0.222** |
-| Bland-Altman 95% limits of agreement | **[-2.070, +1.626]** |
+| Bland-Altman bias | **-0.230** |
+| Bland-Altman 95% limits of agreement | **[-2.073, +1.613]** |
 
 ### Cognitive, sonarjs-reported rows only
 
 | statistic | value |
 |---|---|
-| paired functions (n) | 1241 |
-| exact agreement | 893 / 1241 = **72.0%** |
-| Spearman rho | **0.9463** (p = 0) |
-| mean signed diff (ours - baseline) | **-0.235** |
+| paired functions (n) | 1248 |
+| exact agreement | 904 / 1248 = **72.4%** |
+| Spearman rho | **0.9465** (p = 0) |
+| mean signed diff (ours - baseline) | **-0.243** |
 | median signed diff | **+0.000** |
-| sd of diff | 0.922 |
-| modal diff | +0 (holds for 72.0% of pairs) |
+| sd of diff | 0.919 |
+| modal diff | +0 (holds for 72.4% of pairs) |
 | diff percentiles p1/p5/p25/p50/p75/p95/p99 | -4.00 / -2.00 / +0.00 / +0.00 / +0.00 / +1.00 / +2.00 |
 | diff range | -7.00 to +5.00 |
-| mean ours / baseline | 4.14 / 4.37 |
+| mean ours / baseline | 4.14 / 4.39 |
 | median ours / baseline | 2.00 / 2.00 |
-| Bland-Altman bias | **-0.235** |
-| Bland-Altman 95% limits of agreement | **[-2.042, +1.571]** |
+| Bland-Altman bias | **-0.243** |
+| Bland-Altman 95% limits of agreement | **[-2.044, +1.559]** |
 
 ### Lexical (Halstead volume) vs escomplex, raw parse
 
 | statistic | value |
 |---|---|
-| paired functions (n) | 4499 |
-| exact agreement | 242 / 4499 = **5.4%** |
-| Spearman rho | **0.8998** (p = 0) |
-| mean signed diff (ours - baseline) | **-68.845** |
-| median signed diff | **-11.821** |
-| sd of diff | 273.173 |
-| modal diff | +0 (holds for 4.9% of pairs) |
-| diff percentiles p1/p5/p25/p50/p75/p95/p99 | -1076.90 / -322.49 / -58.65 / -11.82 / +0.98 / +36.26 / +179.29 |
-| diff range | -7223.59 to +1682.55 |
-| mean ours / baseline | 123.96 / 192.80 |
-| median ours / baseline | 36.50 / 49.83 |
-| Bland-Altman bias | **-68.845** |
-| Bland-Altman 95% limits of agreement | **[-604.264, +466.574]** |
+| paired functions (n) | 4542 |
+| exact agreement | 295 / 4542 = **6.5%** |
+| Spearman rho | **0.9038** (p = 0) |
+| mean signed diff (ours - baseline) | **-72.424** |
+| median signed diff | **-14.112** |
+| sd of diff | 260.755 |
+| modal diff | +0 (holds for 6.3% of pairs) |
+| diff percentiles p1/p5/p25/p50/p75/p95/p99 | -1060.36 / -335.02 / -63.03 / -14.11 / +0.00 / +28.78 / +139.64 |
+| diff range | -6406.08 to +1591.77 |
+| mean ours / baseline | 120.68 / 193.10 |
+| median ours / baseline | 36.00 / 48.43 |
+| Bland-Altman bias | **-72.424** |
+| Bland-Altman 95% limits of agreement | **[-583.504, +438.655]** |
 
 ### Lexical, .ts only
 
 | statistic | value |
 |---|---|
-| paired functions (n) | 1935 |
-| exact agreement | 61 / 1935 = **3.2%** |
-| Spearman rho | **0.9469** (p = 0) |
-| mean signed diff (ours - baseline) | **-105.727** |
-| median signed diff | **-26.869** |
-| sd of diff | 286.089 |
-| modal diff | +0 (holds for 3.1% of pairs) |
-| diff percentiles p1/p5/p25/p50/p75/p95/p99 | -1322.24 / -422.33 / -91.83 / -26.87 / -3.55 / +4.64 / +10.69 |
-| diff range | -4682.10 to +52.40 |
-| mean ours / baseline | 114.82 / 220.55 |
-| median ours / baseline | 38.04 / 71.70 |
-| Bland-Altman bias | **-105.727** |
-| Bland-Altman 95% limits of agreement | **[-666.461, +455.007]** |
+| paired functions (n) | 1978 |
+| exact agreement | 77 / 1978 = **3.9%** |
+| Spearman rho | **0.9505** (p = 0) |
+| mean signed diff (ours - baseline) | **-107.239** |
+| median signed diff | **-27.944** |
+| sd of diff | 282.430 |
+| modal diff | +2.322 (holds for 3.9% of pairs) |
+| diff percentiles p1/p5/p25/p50/p75/p95/p99 | -1300.58 / -426.81 / -93.81 / -27.94 / -3.90 / +3.93 / +9.32 |
+| diff range | -4431.73 to +28.40 |
+| mean ours / baseline | 113.39 / 220.63 |
+| median ours / baseline | 38.04 / 70.32 |
+| Bland-Altman bias | **-107.239** |
+| Bland-Altman 95% limits of agreement | **[-660.801, +446.324]** |
 
 ### Lexical, .tsx only
 
 | statistic | value |
 |---|---|
 | paired functions (n) | 2564 |
-| exact agreement | 181 / 2564 = **7.1%** |
-| Spearman rho | **0.8710** (p = 0) |
-| mean signed diff (ours - baseline) | **-41.011** |
-| median signed diff | **-6.000** |
-| sd of diff | 259.615 |
-| modal diff | +0 (holds for 6.2% of pairs) |
-| diff percentiles p1/p5/p25/p50/p75/p95/p99 | -767.16 / -239.67 / -32.58 / -6.00 / +4.34 / +66.59 / +268.23 |
-| diff range | -7223.59 to +1682.55 |
-| mean ours / baseline | 130.85 / 171.87 |
-| median ours / baseline | 36.00 / 36.54 |
-| Bland-Altman bias | **-41.011** |
-| Bland-Altman 95% limits of agreement | **[-549.856, +467.835]** |
+| exact agreement | 218 / 2564 = **8.5%** |
+| Spearman rho | **0.8737** (p = 0) |
+| mean signed diff (ours - baseline) | **-45.567** |
+| median signed diff | **-6.095** |
+| sd of diff | 239.334 |
+| modal diff | +0 (holds for 8.1% of pairs) |
+| diff percentiles p1/p5/p25/p50/p75/p95/p99 | -777.93 / -253.53 / -36.64 / -6.09 / +2.58 / +56.50 / +225.18 |
+| diff range | -6406.08 to +1591.77 |
+| mean ours / baseline | 126.30 / 171.87 |
+| median ours / baseline | 34.28 / 36.54 |
+| Bland-Altman bias | **-45.567** |
+| Bland-Altman 95% limits of agreement | **[-514.662, +423.528]** |
 
 ### Lexical vs escomplex, Babel-transpiled parse
 
 | statistic | value |
 |---|---|
-| paired functions (n) | 4524 |
-| exact agreement | 224 / 4524 = **5.0%** |
-| Spearman rho | **0.9465** (p = 0) |
-| mean signed diff (ours - baseline) | **-159.375** |
-| median signed diff | **-26.811** |
-| sd of diff | 495.964 |
-| modal diff | +0 (holds for 4.8% of pairs) |
-| diff percentiles p1/p5/p25/p50/p75/p95/p99 | -2441.45 / -684.16 / -110.11 / -26.81 / -3.61 / +4.64 / +11.50 |
-| diff range | -7974.73 to +132.94 |
-| mean ours / baseline | 124.14 / 283.51 |
-| median ours / baseline | 36.19 / 68.53 |
-| Bland-Altman bias | **-159.375** |
-| Bland-Altman 95% limits of agreement | **[-1131.464, +812.714]** |
+| paired functions (n) | 4567 |
+| exact agreement | 279 / 4567 = **6.1%** |
+| Spearman rho | **0.9476** (p = 0) |
+| mean signed diff (ours - baseline) | **-162.056** |
+| median signed diff | **-28.894** |
+| sd of diff | 496.530 |
+| modal diff | +0 (holds for 6.0% of pairs) |
+| diff percentiles p1/p5/p25/p50/p75/p95/p99 | -2423.05 / -691.36 / -113.43 / -28.89 / -3.90 / +3.98 / +10.48 |
+| diff range | -7974.21 to +124.32 |
+| mean ours / baseline | 120.86 / 282.92 |
+| median ours / baseline | 34.87 / 68.53 |
+| Bland-Altman bias | **-162.056** |
+| Bland-Altman 95% limits of agreement | **[-1135.254, +811.142]** |
 
 ### Top 15 disagreements — structural
 
 | # | repo | file:line | function | category | ours (cyclomatic) | baseline (ts-complex) | diff |
 |---|------|-----------|----------|----------|------|----------|------|
-| 1 | ts-repo-metrics | `packages/engine/src/parsing/tokenScanner.ts`:62 | `enter` | object_method | 42 | 31 | +11 |
+| 1 | ts-repo-metrics | `packages/engine/src/parsing/tokenScanner.ts`:62 | `enter` | object_method | 43 | 36 | +7 |
 | 2 | MikeyZv__SlugMarket | `slugmarket_next/app/(main)/messages/__tests__/page.test.tsx`:36 | `@anon` | arrow_argument | 1 | 4 | -3 |
 | 3 | MikeyZv__SlugMarket | `slugmarket_next/app/(main)/messages/__tests__/page.test.tsx`:36 | `@anon` | nested_arrow_closure | 4 | 1 | +3 |
 | 4 | ts-repo-metrics | `apps/dashboard/components/results/SeverityTableCell.tsx`:72 | `defaultContent` | function_declaration | 14 | 12 | +2 |
@@ -182,7 +182,7 @@
 | 14 | ts-repo-metrics | `apps/dashboard/__tests__/aiMaturityCore.test.ts`:22 | `@anon` | nested_arrow_closure | 1 | 1 | +0 |
 | 15 | ts-repo-metrics | `apps/dashboard/__tests__/aiMaturityCore.test.ts`:27 | `@anon` | nested_arrow_closure | 1 | 1 | +0 |
 
-<details><summary>1. <code>packages/engine/src/parsing/tokenScanner.ts:62</code> <code>enter</code> &mdash; ours 42 vs baseline 31</summary>
+<details><summary>1. <code>packages/engine/src/parsing/tokenScanner.ts:62</code> <code>enter</code> &mdash; ours 43 vs baseline 36</summary>
 
 ```ts
     enter(node) {
@@ -196,7 +196,7 @@
 
       const ctrl = CONTROL_OP[node.type];
       if (ctrl) {
-    ... (94 more lines)
+    ... (120 more lines)
 ```
 </details>
 
@@ -381,16 +381,16 @@ describe("aiMaturityCore", () => {
 | # | repo | file:line | function | category | ours (cognitive) | baseline (sonarjs) | diff |
 |---|------|-----------|----------|----------|------|----------|------|
 | 1 | ts-repo-metrics | `apps/dashboard/lib/aiUsageCsv.ts`:325 | `analyzeAiUsageCsv` | function_declaration | 81 | 88 | -7 |
-| 2 | ts-repo-metrics | `apps/dashboard/components/HeaderNavClient.tsx`:69 | `AvatarCircle` | function_declaration | 4 | 10 | -6 |
-| 3 | ts-repo-metrics | `apps/dashboard/lib/behavioralLearningSummary.ts`:26 | `buildBehavioralLearningTakeaways` | function_declaration | 6 | 12 | -6 |
-| 4 | ts-repo-metrics | `apps/dashboard/app/api/doc-review/route.ts`:47 | `POST` | function_declaration | 47 | 52 | -5 |
-| 5 | ts-repo-metrics | `apps/dashboard/components/results/CommitHabitsPanelIntro.tsx`:8 | `CommitHabitsPanelIntro` | function_declaration | 3 | 8 | -5 |
-| 6 | ts-repo-metrics | `apps/dashboard/components/results/GitHubRepositoryPanel.tsx`:75 | `GitHubRepositoryPanel` | function_declaration | 16 | 21 | -5 |
-| 7 | ts-repo-metrics | `apps/dashboard/lib/docReview/discoverDocs.ts`:43 | `discoverDocs` | function_declaration | 18 | 13 | +5 |
-| 8 | Colin-Posat__SlugFound | `app/components/items-filter.tsx`:93 | `updateUrl` | arrow_const_tsx | 5 | 0 | +5 |
-| 9 | Brinqa-CRQ-2026__VulnContext-Desktop | `frontend/src/routing/pageMeta.ts`:5 | `getRouteViewState` | function_declaration | 0 | 5 | -5 |
-| 10 | ts-repo-metrics | `apps/dashboard/app/api/analyze/route.ts`:117 | `POST` | function_declaration | 59 | 63 | -4 |
-| 11 | ts-repo-metrics | `apps/dashboard/app/api/coach-says/route.ts`:40 | `validateCoachFactsPayload` | function_declaration | 31 | 35 | -4 |
+| 2 | ts-repo-metrics | `apps/dashboard/app/api/coach-says/route.ts`:40 | `validateCoachFactsPayload` | function_declaration | 29 | 35 | -6 |
+| 3 | ts-repo-metrics | `apps/dashboard/components/HeaderNavClient.tsx`:69 | `AvatarCircle` | function_declaration | 4 | 10 | -6 |
+| 4 | ts-repo-metrics | `apps/dashboard/lib/behavioralLearningSummary.ts`:26 | `buildBehavioralLearningTakeaways` | function_declaration | 6 | 12 | -6 |
+| 5 | ts-repo-metrics | `apps/dashboard/app/api/doc-review/route.ts`:47 | `POST` | function_declaration | 47 | 52 | -5 |
+| 6 | ts-repo-metrics | `apps/dashboard/components/results/CommitHabitsPanelIntro.tsx`:8 | `CommitHabitsPanelIntro` | function_declaration | 3 | 8 | -5 |
+| 7 | ts-repo-metrics | `apps/dashboard/components/results/GitHubRepositoryPanel.tsx`:75 | `GitHubRepositoryPanel` | function_declaration | 16 | 21 | -5 |
+| 8 | ts-repo-metrics | `apps/dashboard/lib/docReview/discoverDocs.ts`:43 | `discoverDocs` | function_declaration | 18 | 13 | +5 |
+| 9 | Colin-Posat__SlugFound | `app/components/items-filter.tsx`:93 | `updateUrl` | arrow_const_tsx | 5 | 0 | +5 |
+| 10 | Brinqa-CRQ-2026__VulnContext-Desktop | `frontend/src/routing/pageMeta.ts`:5 | `getRouteViewState` | function_declaration | 0 | 5 | -5 |
+| 11 | ts-repo-metrics | `apps/dashboard/app/api/analyze/route.ts`:117 | `POST` | function_declaration | 59 | 63 | -4 |
 | 12 | ts-repo-metrics | `apps/dashboard/components/HeaderNavClient.tsx`:110 | `HeaderNavClient` | function_declaration | 8 | 12 | -4 |
 | 13 | ts-repo-metrics | `apps/dashboard/components/results/ResultsTabPanelIntro.tsx`:83 | `@anon` | iife | 20 | 24 | -4 |
 | 14 | ts-repo-metrics | `apps/dashboard/components/results/rq/DocReviewTab.tsx`:936 | `ReviewCard` | function_declaration | 59 | 63 | -4 |
@@ -414,7 +414,25 @@ export function analyzeAiUsageCsv(text: string): AnalyzeAiUsageCsvResult {
 ```
 </details>
 
-<details><summary>2. <code>apps/dashboard/components/HeaderNavClient.tsx:69</code> <code>AvatarCircle</code> &mdash; ours 4 vs baseline 10</summary>
+<details><summary>2. <code>apps/dashboard/app/api/coach-says/route.ts:40</code> <code>validateCoachFactsPayload</code> &mdash; ours 29 vs baseline 35</summary>
+
+```ts
+function validateCoachFactsPayload(v: unknown): CoachSaysFacts | null {
+  if (!isRecord(v)) return null;
+
+  const tabsRaw = v.allowedPriorityTabs;
+  if (!Array.isArray(tabsRaw) || tabsRaw.length === 0) return null;
+  const allowedPriorityTabs: CoachSaysPriorityTab[] = [];
+  for (const t of tabsRaw) {
+    if (typeof t !== "string" || !isCoachPriorityTab(t)) return null;
+    allowedPriorityTabs.push(t);
+  }
+
+    ... (127 more lines)
+```
+</details>
+
+<details><summary>3. <code>apps/dashboard/components/HeaderNavClient.tsx:69</code> <code>AvatarCircle</code> &mdash; ours 4 vs baseline 10</summary>
 
 ```ts
 function AvatarCircle({
@@ -432,7 +450,7 @@ function AvatarCircle({
 ```
 </details>
 
-<details><summary>3. <code>apps/dashboard/lib/behavioralLearningSummary.ts:26</code> <code>buildBehavioralLearningTakeaways</code> &mdash; ours 6 vs baseline 12</summary>
+<details><summary>4. <code>apps/dashboard/lib/behavioralLearningSummary.ts:26</code> <code>buildBehavioralLearningTakeaways</code> &mdash; ours 6 vs baseline 12</summary>
 
 ```ts
 export function buildBehavioralLearningTakeaways(report: RepoReport): string[] {
@@ -450,7 +468,7 @@ export function buildBehavioralLearningTakeaways(report: RepoReport): string[] {
 ```
 </details>
 
-<details><summary>4. <code>apps/dashboard/app/api/doc-review/route.ts:47</code> <code>POST</code> &mdash; ours 47 vs baseline 52</summary>
+<details><summary>5. <code>apps/dashboard/app/api/doc-review/route.ts:47</code> <code>POST</code> &mdash; ours 47 vs baseline 52</summary>
 
 ```ts
 export async function POST(request: NextRequest) {
@@ -468,7 +486,7 @@ export async function POST(request: NextRequest) {
 ```
 </details>
 
-<details><summary>5. <code>apps/dashboard/components/results/CommitHabitsPanelIntro.tsx:8</code> <code>CommitHabitsPanelIntro</code> &mdash; ours 3 vs baseline 8</summary>
+<details><summary>6. <code>apps/dashboard/components/results/CommitHabitsPanelIntro.tsx:8</code> <code>CommitHabitsPanelIntro</code> &mdash; ours 3 vs baseline 8</summary>
 
 ```ts
 export function CommitHabitsPanelIntro({
@@ -486,7 +504,7 @@ export function CommitHabitsPanelIntro({
 ```
 </details>
 
-<details><summary>6. <code>apps/dashboard/components/results/GitHubRepositoryPanel.tsx:75</code> <code>GitHubRepositoryPanel</code> &mdash; ours 16 vs baseline 21</summary>
+<details><summary>7. <code>apps/dashboard/components/results/GitHubRepositoryPanel.tsx:75</code> <code>GitHubRepositoryPanel</code> &mdash; ours 16 vs baseline 21</summary>
 
 ```ts
 export function GitHubRepositoryPanel({
@@ -504,7 +522,7 @@ export function GitHubRepositoryPanel({
 ```
 </details>
 
-<details><summary>7. <code>apps/dashboard/lib/docReview/discoverDocs.ts:43</code> <code>discoverDocs</code> &mdash; ours 18 vs baseline 13</summary>
+<details><summary>8. <code>apps/dashboard/lib/docReview/discoverDocs.ts:43</code> <code>discoverDocs</code> &mdash; ours 18 vs baseline 13</summary>
 
 ```ts
 export async function discoverDocs(
@@ -522,7 +540,7 @@ export async function discoverDocs(
 ```
 </details>
 
-<details><summary>8. <code>app/components/items-filter.tsx:93</code> <code>updateUrl</code> &mdash; ours 5 vs baseline 0</summary>
+<details><summary>9. <code>app/components/items-filter.tsx:93</code> <code>updateUrl</code> &mdash; ours 5 vs baseline 0</summary>
 
 ```ts
   const updateUrl = (next: {
@@ -540,7 +558,7 @@ export async function discoverDocs(
 ```
 </details>
 
-<details><summary>9. <code>frontend/src/routing/pageMeta.ts:5</code> <code>getRouteViewState</code> &mdash; ours 0 vs baseline 5</summary>
+<details><summary>10. <code>frontend/src/routing/pageMeta.ts:5</code> <code>getRouteViewState</code> &mdash; ours 0 vs baseline 5</summary>
 
 ```ts
 export function getRouteViewState(route: AppRoute) {
@@ -558,7 +576,7 @@ export function getRouteViewState(route: AppRoute) {
 ```
 </details>
 
-<details><summary>10. <code>apps/dashboard/app/api/analyze/route.ts:117</code> <code>POST</code> &mdash; ours 59 vs baseline 63</summary>
+<details><summary>11. <code>apps/dashboard/app/api/analyze/route.ts:117</code> <code>POST</code> &mdash; ours 59 vs baseline 63</summary>
 
 ```ts
 export async function POST(request: NextRequest) {
@@ -573,24 +591,6 @@ export async function POST(request: NextRequest) {
       );
     }
     ... (231 more lines)
-```
-</details>
-
-<details><summary>11. <code>apps/dashboard/app/api/coach-says/route.ts:40</code> <code>validateCoachFactsPayload</code> &mdash; ours 31 vs baseline 35</summary>
-
-```ts
-function validateCoachFactsPayload(v: unknown): CoachSaysFacts | null {
-  if (!isRecord(v)) return null;
-
-  const tabsRaw = v.allowedPriorityTabs;
-  if (!Array.isArray(tabsRaw) || tabsRaw.length === 0) return null;
-  const allowedPriorityTabs: CoachSaysPriorityTab[] = [];
-  for (const t of tabsRaw) {
-    if (typeof t !== "string" || !isCoachPriorityTab(t)) return null;
-    allowedPriorityTabs.push(t);
-  }
-
-    ... (127 more lines)
 ```
 </details>
 
@@ -670,23 +670,23 @@ function ReviewCard({
 
 | # | repo | file:line | function | category | ours (Halstead volume) | baseline (escomplex) | diff |
 |---|------|-----------|----------|----------|------|----------|------|
-| 1 | Brinqa-CRQ-2026__VulnContext-Desktop | `frontend/src/tests/components/topology/BusinessServiceDetailPage.test.tsx`:114 | `@anon` | nested_arrow_closure | 2985.55 | 10209.1 | -7223.59 |
-| 2 | Brinqa-CRQ-2026__VulnContext-Desktop | `frontend/src/tests/components/dashboard/FindingDetailPage.test.tsx`:71 | `@anon` | nested_arrow_closure | 2050.04 | 7252.62 | -5202.58 |
-| 3 | ts-repo-metrics | `apps/dashboard/lib/buildReportSummary.ts`:9 | `buildReportSummary` | function_declaration | 4291.11 | 8973.22 | -4682.1 |
-| 4 | ts-repo-metrics | `apps/dashboard/lib/aiUsageCsv.ts`:325 | `analyzeAiUsageCsv` | function_declaration | 5000.69 | 9500.3 | -4499.61 |
-| 5 | Brinqa-CRQ-2026__VulnContext-Desktop | `frontend/src/tests/components/topology/ApplicationDetailPage.test.tsx`:77 | `@anon` | nested_arrow_closure | 1555.89 | 5082.92 | -3527.03 |
-| 6 | ts-repo-metrics | `apps/dashboard/lib/featureVector.ts`:128 | `buildFeatureVector` | function_declaration | 2917.85 | 6276.08 | -3358.23 |
-| 7 | ts-repo-metrics | `apps/dashboard/lib/aiSessionLogAnalyzer.ts`:454 | `computeSessionLogReport` | function_declaration | 5783.51 | 9024.92 | -3241.4 |
-| 8 | Brinqa-CRQ-2026__VulnContext-Desktop | `frontend/src/tests/components/topology/BusinessUnitDetailPage.test.tsx`:181 | `@anon` | nested_arrow_closure | 1418.81 | 4206.94 | -2788.14 |
-| 9 | ts-repo-metrics | `apps/dashboard/app/api/analyze/route.ts`:117 | `POST` | function_declaration | 3074.7 | 5716.18 | -2641.48 |
-| 10 | Brinqa-CRQ-2026__VulnContext-Desktop | `frontend/src/tests/components/dashboard/RiskTable.test.tsx`:14 | `@anon` | nested_arrow_closure | 1140 | 3696.57 | -2556.57 |
-| 11 | ts-repo-metrics | `apps/dashboard/app/api/doc-review/route.ts`:47 | `POST` | function_declaration | 2471.51 | 4893.16 | -2421.65 |
-| 12 | ts-repo-metrics | `apps/dashboard/lib/docReview/reviewDoc.ts`:186 | `reviewDoc` | function_declaration | 2901.86 | 5199.81 | -2297.95 |
-| 13 | Brinqa-CRQ-2026__VulnContext-Desktop | `frontend/src/tests/components/topology/BusinessServiceDetailPage.test.tsx`:407 | `@anon` | nested_arrow_closure | 922.387 | 3217.38 | -2294.99 |
-| 14 | Brinqa-CRQ-2026__VulnContext-Desktop | `frontend/src/tests/components/topology/AssetFindingsPage.test.tsx`:227 | `@anon` | nested_arrow_closure | 1324.34 | 3528.02 | -2203.68 |
-| 15 | ts-repo-metrics | `packages/engine/src/parsing/tokenScanner.ts`:47 | `collectHalsteadAtoms` | function_declaration | 36.541 | 2222.04 | -2185.5 |
+| 1 | Brinqa-CRQ-2026__VulnContext-Desktop | `frontend/src/tests/components/topology/BusinessServiceDetailPage.test.tsx`:114 | `@anon` | nested_arrow_closure | 3803.06 | 10209.1 | -6406.08 |
+| 2 | ts-repo-metrics | `apps/dashboard/lib/aiUsageCsv.ts`:325 | `analyzeAiUsageCsv` | function_declaration | 5068.57 | 9500.3 | -4431.73 |
+| 3 | Brinqa-CRQ-2026__VulnContext-Desktop | `frontend/src/tests/components/dashboard/FindingDetailPage.test.tsx`:71 | `@anon` | nested_arrow_closure | 2902.55 | 7252.62 | -4350.08 |
+| 4 | ts-repo-metrics | `apps/dashboard/lib/buildReportSummary.ts`:9 | `buildReportSummary` | function_declaration | 4741.22 | 8973.22 | -4232 |
+| 5 | ts-repo-metrics | `apps/dashboard/lib/featureVector.ts`:128 | `buildFeatureVector` | function_declaration | 2987.34 | 6276.08 | -3288.73 |
+| 6 | Brinqa-CRQ-2026__VulnContext-Desktop | `frontend/src/tests/components/topology/ApplicationDetailPage.test.tsx`:77 | `@anon` | nested_arrow_closure | 1856.63 | 5082.92 | -3226.3 |
+| 7 | ts-repo-metrics | `apps/dashboard/lib/aiSessionLogAnalyzer.ts`:454 | `computeSessionLogReport` | function_declaration | 5857.4 | 9024.92 | -3167.51 |
+| 8 | ts-repo-metrics | `apps/dashboard/app/api/analyze/route.ts`:117 | `POST` | function_declaration | 2981.36 | 5716.18 | -2734.82 |
+| 9 | Brinqa-CRQ-2026__VulnContext-Desktop | `frontend/src/tests/components/topology/BusinessUnitDetailPage.test.tsx`:181 | `@anon` | nested_arrow_closure | 1715.78 | 4206.94 | -2491.17 |
+| 10 | ts-repo-metrics | `apps/dashboard/app/api/doc-review/route.ts`:47 | `POST` | function_declaration | 2467.38 | 4893.16 | -2425.79 |
+| 11 | ts-repo-metrics | `packages/engine/src/parsing/tokenScanner.ts`:47 | `collectHalsteadAtoms` | function_declaration | 36.541 | 2452.86 | -2416.32 |
+| 12 | ts-repo-metrics | `apps/dashboard/lib/docReview/reviewDoc.ts`:186 | `reviewDoc` | function_declaration | 2849.41 | 5199.81 | -2350.4 |
+| 13 | Brinqa-CRQ-2026__VulnContext-Desktop | `frontend/src/tests/components/dashboard/RiskTable.test.tsx`:14 | `@anon` | nested_arrow_closure | 1352.68 | 3696.57 | -2343.89 |
+| 14 | Brinqa-CRQ-2026__VulnContext-Desktop | `frontend/src/tests/components/topology/BusinessServiceDetailPage.test.tsx`:407 | `@anon` | nested_arrow_closure | 972.576 | 3217.38 | -2244.8 |
+| 15 | ts-repo-metrics | `apps/dashboard/app/api/coach-says/route.ts`:40 | `validateCoachFactsPayload` | function_declaration | 2300 | 4310.34 | -2010.34 |
 
-<details><summary>1. <code>frontend/src/tests/components/topology/BusinessServiceDetailPage.test.tsx:114</code> <code>@anon</code> &mdash; ours 2985.55 vs baseline 10209.1</summary>
+<details><summary>1. <code>frontend/src/tests/components/topology/BusinessServiceDetailPage.test.tsx:114</code> <code>@anon</code> &mdash; ours 3803.06 vs baseline 10209.1</summary>
 
 ```ts
   it("renders application cards and direct assets in the explorer table", () => {
@@ -704,43 +704,7 @@ function ReviewCard({
 ```
 </details>
 
-<details><summary>2. <code>frontend/src/tests/components/dashboard/FindingDetailPage.test.tsx:71</code> <code>@anon</code> &mdash; ours 2050.04 vs baseline 7252.62</summary>
-
-```ts
-  it("renders the denser finding detail layout with compact supporting details", () => {
-    mockedUseFindingDetails.mockReturnValue({
-      finding: {
-        id: "finding-42",
-        source: "Qualys",
-        asset_id: "asset-42",
-        display_name: "OpenSSL Vulnerability",
-        risk_score: 8.7,
-        risk_band: "High",
-        source_risk_score: 7.4,
-        source_risk_rating: "High",
-    ... (155 more lines)
-```
-</details>
-
-<details><summary>3. <code>apps/dashboard/lib/buildReportSummary.ts:9</code> <code>buildReportSummary</code> &mdash; ours 4291.11 vs baseline 8973.22</summary>
-
-```ts
-export function buildReportSummary(report: RepoReport): string {
-  const lines: string[] = [];
-
-  const repoUrl = report.source?.url ?? report.repoPath ?? "unknown";
-  const commit = report.source?.commit?.slice(0, 7) ?? "unknown";
-  lines.push(`REPO: ${repoUrl} (commit: ${commit})`);
-
-  if (report.analysisSkipped) {
-    lines.push(`ANALYSIS SKIPPED: ${report.analysisSkipped.message}`);
-  }
-
-    ... (194 more lines)
-```
-</details>
-
-<details><summary>4. <code>apps/dashboard/lib/aiUsageCsv.ts:325</code> <code>analyzeAiUsageCsv</code> &mdash; ours 5000.69 vs baseline 9500.3</summary>
+<details><summary>2. <code>apps/dashboard/lib/aiUsageCsv.ts:325</code> <code>analyzeAiUsageCsv</code> &mdash; ours 5068.57 vs baseline 9500.3</summary>
 
 ```ts
 export function analyzeAiUsageCsv(text: string): AnalyzeAiUsageCsvResult {
@@ -758,25 +722,43 @@ export function analyzeAiUsageCsv(text: string): AnalyzeAiUsageCsvResult {
 ```
 </details>
 
-<details><summary>5. <code>frontend/src/tests/components/topology/ApplicationDetailPage.test.tsx:77</code> <code>@anon</code> &mdash; ours 1555.89 vs baseline 5082.92</summary>
+<details><summary>3. <code>frontend/src/tests/components/dashboard/FindingDetailPage.test.tsx:71</code> <code>@anon</code> &mdash; ours 2902.55 vs baseline 7252.62</summary>
 
 ```ts
-  it("renders assets in a sortable table and exposes asset-findings entry points", () => {
-    mockedUseApplicationDetail.mockReturnValue({
-      application: {
-        company: { name: "Virtucon" },
-        business_unit: "Online Store",
-        business_service: "Digital Storefront",
-        application: "Identity Verify",
-        slug: "identity-verify",
-        metrics: {
-          total_business_services: 0,
-          total_applications: 0,
-    ... (136 more lines)
+  it("renders the denser finding detail layout with compact supporting details", () => {
+    mockedUseFindingDetails.mockReturnValue({
+      finding: {
+        id: "finding-42",
+        source: "Qualys",
+        asset_id: "asset-42",
+        display_name: "OpenSSL Vulnerability",
+        risk_score: 8.7,
+        risk_band: "High",
+        source_risk_score: 7.4,
+        source_risk_rating: "High",
+    ... (155 more lines)
 ```
 </details>
 
-<details><summary>6. <code>apps/dashboard/lib/featureVector.ts:128</code> <code>buildFeatureVector</code> &mdash; ours 2917.85 vs baseline 6276.08</summary>
+<details><summary>4. <code>apps/dashboard/lib/buildReportSummary.ts:9</code> <code>buildReportSummary</code> &mdash; ours 4741.22 vs baseline 8973.22</summary>
+
+```ts
+export function buildReportSummary(report: RepoReport): string {
+  const lines: string[] = [];
+
+  const repoUrl = report.source?.url ?? report.repoPath ?? "unknown";
+  const commit = report.source?.commit?.slice(0, 7) ?? "unknown";
+  lines.push(`REPO: ${repoUrl} (commit: ${commit})`);
+
+  if (report.analysisSkipped) {
+    lines.push(`ANALYSIS SKIPPED: ${report.analysisSkipped.message}`);
+  }
+
+    ... (194 more lines)
+```
+</details>
+
+<details><summary>5. <code>apps/dashboard/lib/featureVector.ts:128</code> <code>buildFeatureVector</code> &mdash; ours 2987.34 vs baseline 6276.08</summary>
 
 ```ts
 export function buildFeatureVector(
@@ -794,7 +776,25 @@ export function buildFeatureVector(
 ```
 </details>
 
-<details><summary>7. <code>apps/dashboard/lib/aiSessionLogAnalyzer.ts:454</code> <code>computeSessionLogReport</code> &mdash; ours 5783.51 vs baseline 9024.92</summary>
+<details><summary>6. <code>frontend/src/tests/components/topology/ApplicationDetailPage.test.tsx:77</code> <code>@anon</code> &mdash; ours 1856.63 vs baseline 5082.92</summary>
+
+```ts
+  it("renders assets in a sortable table and exposes asset-findings entry points", () => {
+    mockedUseApplicationDetail.mockReturnValue({
+      application: {
+        company: { name: "Virtucon" },
+        business_unit: "Online Store",
+        business_service: "Digital Storefront",
+        application: "Identity Verify",
+        slug: "identity-verify",
+        metrics: {
+          total_business_services: 0,
+          total_applications: 0,
+    ... (136 more lines)
+```
+</details>
+
+<details><summary>7. <code>apps/dashboard/lib/aiSessionLogAnalyzer.ts:454</code> <code>computeSessionLogReport</code> &mdash; ours 5857.4 vs baseline 9024.92</summary>
 
 ```ts
 export function computeSessionLogReport(
@@ -812,25 +812,7 @@ export function computeSessionLogReport(
 ```
 </details>
 
-<details><summary>8. <code>frontend/src/tests/components/topology/BusinessUnitDetailPage.test.tsx:181</code> <code>@anon</code> &mdash; ours 1418.81 vs baseline 4206.94</summary>
-
-```ts
-  it("renders child business services from the live business-unit detail", () => {
-    mockedUseBusinessUnitDetail.mockReturnValue({
-      businessUnit: {
-        company: { name: "Virtucon" },
-        business_unit: "Online Store",
-        slug: "online-store",
-        description: "Online commerce systems.",
-        metrics: {
-          total_business_services: 2,
-          total_applications: 4,
-          total_assets: 9,
-    ... (90 more lines)
-```
-</details>
-
-<details><summary>9. <code>apps/dashboard/app/api/analyze/route.ts:117</code> <code>POST</code> &mdash; ours 3074.7 vs baseline 5716.18</summary>
+<details><summary>8. <code>apps/dashboard/app/api/analyze/route.ts:117</code> <code>POST</code> &mdash; ours 2981.36 vs baseline 5716.18</summary>
 
 ```ts
 export async function POST(request: NextRequest) {
@@ -848,25 +830,25 @@ export async function POST(request: NextRequest) {
 ```
 </details>
 
-<details><summary>10. <code>frontend/src/tests/components/dashboard/RiskTable.test.tsx:14</code> <code>@anon</code> &mdash; ours 1140 vs baseline 3696.57</summary>
+<details><summary>9. <code>frontend/src/tests/components/topology/BusinessUnitDetailPage.test.tsx:181</code> <code>@anon</code> &mdash; ours 1715.78 vs baseline 4206.94</summary>
 
 ```ts
-  it("keeps the main findings page columns while using configurable table data", () => {
-    mockedUseFindingsExplorerState.mockReturnValue({
-      bandFilter: "All",
-      setBandFilter: vi.fn(),
-      sortBy: "risk_score",
-      setSortBy: vi.fn(),
-      sortOrder: "desc",
-      setSortOrder: vi.fn(),
-      toggleSortOrder: vi.fn(),
-      sourceFilter: "All",
-      setSourceFilter: vi.fn(),
-    ... (72 more lines)
+  it("renders child business services from the live business-unit detail", () => {
+    mockedUseBusinessUnitDetail.mockReturnValue({
+      businessUnit: {
+        company: { name: "Virtucon" },
+        business_unit: "Online Store",
+        slug: "online-store",
+        description: "Online commerce systems.",
+        metrics: {
+          total_business_services: 2,
+          total_applications: 4,
+          total_assets: 9,
+    ... (90 more lines)
 ```
 </details>
 
-<details><summary>11. <code>apps/dashboard/app/api/doc-review/route.ts:47</code> <code>POST</code> &mdash; ours 2471.51 vs baseline 4893.16</summary>
+<details><summary>10. <code>apps/dashboard/app/api/doc-review/route.ts:47</code> <code>POST</code> &mdash; ours 2467.38 vs baseline 4893.16</summary>
 
 ```ts
 export async function POST(request: NextRequest) {
@@ -884,7 +866,25 @@ export async function POST(request: NextRequest) {
 ```
 </details>
 
-<details><summary>12. <code>apps/dashboard/lib/docReview/reviewDoc.ts:186</code> <code>reviewDoc</code> &mdash; ours 2901.86 vs baseline 5199.81</summary>
+<details><summary>11. <code>packages/engine/src/parsing/tokenScanner.ts:47</code> <code>collectHalsteadAtoms</code> &mdash; ours 36.541 vs baseline 2452.86</summary>
+
+```ts
+export function collectHalsteadAtoms(
+  fnNode: SyntaxNode,
+  profile: LanguageProfile = ECMASCRIPT_PROFILE,
+): HalsteadAtomLists {
+  const operators: string[] = [];
+  const operands: string[] = [];
+
+  const addOp = (key: string) => {
+    operators.push(key);
+  };
+  const addOperand = (key: string) => {
+    ... (139 more lines)
+```
+</details>
+
+<details><summary>12. <code>apps/dashboard/lib/docReview/reviewDoc.ts:186</code> <code>reviewDoc</code> &mdash; ours 2849.41 vs baseline 5199.81</summary>
 
 ```ts
 export async function reviewDoc(
@@ -902,7 +902,25 @@ export async function reviewDoc(
 ```
 </details>
 
-<details><summary>13. <code>frontend/src/tests/components/topology/BusinessServiceDetailPage.test.tsx:407</code> <code>@anon</code> &mdash; ours 922.387 vs baseline 3217.38</summary>
+<details><summary>13. <code>frontend/src/tests/components/dashboard/RiskTable.test.tsx:14</code> <code>@anon</code> &mdash; ours 1352.68 vs baseline 3696.57</summary>
+
+```ts
+  it("keeps the main findings page columns while using configurable table data", () => {
+    mockedUseFindingsExplorerState.mockReturnValue({
+      bandFilter: "All",
+      setBandFilter: vi.fn(),
+      sortBy: "risk_score",
+      setSortBy: vi.fn(),
+      sortOrder: "desc",
+      setSortOrder: vi.fn(),
+      toggleSortOrder: vi.fn(),
+      sourceFilter: "All",
+      setSourceFilter: vi.fn(),
+    ... (72 more lines)
+```
+</details>
+
+<details><summary>14. <code>frontend/src/tests/components/topology/BusinessServiceDetailPage.test.tsx:407</code> <code>@anon</code> &mdash; ours 972.576 vs baseline 3217.38</summary>
 
 ```ts
   it("renders application cards and preserves API order for direct assets", () => {
@@ -920,39 +938,21 @@ export async function reviewDoc(
 ```
 </details>
 
-<details><summary>14. <code>frontend/src/tests/components/topology/AssetFindingsPage.test.tsx:227</code> <code>@anon</code> &mdash; ours 1324.34 vs baseline 3528.02</summary>
+<details><summary>15. <code>apps/dashboard/app/api/coach-says/route.ts:40</code> <code>validateCoachFactsPayload</code> &mdash; ours 2300 vs baseline 4310.34</summary>
 
 ```ts
-  it("renders the compact asset-first layout and opens a finding", () => {
-    seedFindingsHook();
-    seedAssetHooks();
+function validateCoachFactsPayload(v: unknown): CoachSaysFacts | null {
+  if (!isRecord(v)) return null;
 
-    const onOpenFinding = vi.fn();
-    render(
-      <AssetFindingsPage
-        businessUnitSlug="online-store"
-        businessServiceSlug="digital-storefront"
-        applicationSlug="identity-verify"
-        assetId="asset-10"
-    ... (60 more lines)
-```
-</details>
+  const tabsRaw = v.allowedPriorityTabs;
+  if (!Array.isArray(tabsRaw) || tabsRaw.length === 0) return null;
+  const allowedPriorityTabs: CoachSaysPriorityTab[] = [];
+  for (const t of tabsRaw) {
+    if (typeof t !== "string" || !isCoachPriorityTab(t)) return null;
+    allowedPriorityTabs.push(t);
+  }
 
-<details><summary>15. <code>packages/engine/src/parsing/tokenScanner.ts:47</code> <code>collectHalsteadAtoms</code> &mdash; ours 36.541 vs baseline 2222.04</summary>
-
-```ts
-export function collectHalsteadAtoms(
-  fnNode: SyntaxNode,
-  profile: LanguageProfile = ECMASCRIPT_PROFILE,
-): HalsteadAtomLists {
-  const operators: string[] = [];
-  const operands: string[] = [];
-
-  const addOp = (key: string) => {
-    operators.push(key);
-  };
-  const addOperand = (key: string) => {
-    ... (113 more lines)
+    ... (127 more lines)
 ```
 </details>
 
@@ -960,47 +960,47 @@ export function collectHalsteadAtoms(
 
 | model | pairs | disagreeing | disagreements the convention predicts exactly | mean observed diff | mean predicted diff | mean residual | variance explained |
 |---|---|---|---|---|---|---|---|
-| structural: else_clause + empty fall-through case | 4588 | 9 | 2 / 9 = 22.2% | +0.003 | +0.026 | -0.023 | -75.7% |
-| cognitive: unlabeled jumps - logical-operator runs - else | 4588 | 354 | 214 / 354 = 60.5% | -0.060 | -0.206 | +0.145 | -139.5% |
+| structural: else_clause + empty fall-through case | 4631 | 9 | 2 / 9 = 22.2% | +0.002 | +0.026 | -0.024 | -240.8% |
+| cognitive: unlabeled jumps - logical-operator runs - else | 4631 | 350 | 214 / 350 = 61.1% | -0.062 | -0.202 | +0.140 | -138.9% |
 
 ### Join rates
 
 ```json
 {
-  "inventory_functions": 4588,
+  "inventory_functions": 4631,
   "ours": {
-    "reported_records": 4588,
-    "paired_to_inventory": 4588,
+    "reported_records": 4631,
+    "paired_to_inventory": 4631,
     "join_rate": 1.0
   },
   "ts-complex": {
-    "reported_records": 4588,
-    "paired_to_inventory": 4588,
+    "reported_records": 4631,
+    "paired_to_inventory": 4631,
     "join_rate": 1.0
   },
   "sonarjs": {
-    "reported_records": 1246,
-    "paired_to_inventory": 1241,
-    "join_rate": 0.27048823016564955
+    "reported_records": 1253,
+    "paired_to_inventory": 1248,
+    "join_rate": 0.2694882314834809
   },
   "escomplex": {
-    "reported_records": 4499,
-    "paired_to_inventory": 4499,
-    "join_rate": 0.9806015693112468
+    "reported_records": 4542,
+    "paired_to_inventory": 4542,
+    "join_rate": 0.9807816886201685
   },
   "usable_pairs": {
-    "structural": 4588,
-    "cognitive": 4588,
-    "lexical": 4499
+    "structural": 4631,
+    "cognitive": 4631,
+    "lexical": 4542
   },
   "missed_by_category": {
     "sonarjs": {
-      "nested_arrow_closure": 2082,
-      "function_declaration": 624,
-      "arrow_argument": 388,
+      "nested_arrow_closure": 2109,
+      "function_declaration": 625,
+      "arrow_argument": 395,
       "object_method": 168,
       "arrow_const_tsx": 53,
-      "arrow_const": 21,
+      "arrow_const": 22,
       "class_method": 8,
       "iife": 2,
       "class_property_fn": 1
