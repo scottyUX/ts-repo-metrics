@@ -1,0 +1,4709 @@
+{
+  "statistics": {
+    "detectionDate": "2026-07-30T01:30:20.621Z",
+    "formats": {
+      "javascript": {
+        "sources": {
+          "MikeyZv__SlugMarket/slugmarket_next/app/(main)/products/edit/[id]/page.tsx": {
+            "lines": 8,
+            "tokens": 58,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/(main)/products/[id]/page.tsx": {
+            "lines": 92,
+            "tokens": 862,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/(main)/messages/__tests__/page.test.tsx": {
+            "lines": 29,
+            "tokens": 404,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/(auth)/signup/__tests__/page.test.tsx": {
+            "lines": 0,
+            "tokens": 9,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/(auth)/signin/__tests__/page.test.tsx": {
+            "lines": 0,
+            "tokens": 9,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/(auth)/reset-password/__tests__/page.test.tsx": {
+            "lines": 0,
+            "tokens": 9,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/(auth)/forgot-password/__tests__/page.test.tsx": {
+            "lines": 0,
+            "tokens": 9,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/ShareButton.test.tsx": {
+            "lines": 75,
+            "tokens": 825,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/ReportButton.test.tsx": {
+            "lines": 39,
+            "tokens": 361,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/ProfileTabs.test.tsx": {
+            "lines": 92,
+            "tokens": 767,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/ProductListingForm.test.tsx": {
+            "lines": 245,
+            "tokens": 2832,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/ListingManageModal.test.tsx": {
+            "lines": 250,
+            "tokens": 3320,
+            "sources": 1,
+            "clones": 2,
+            "duplicatedLines": 294,
+            "duplicatedTokens": 4252,
+            "percentage": 117.6,
+            "percentageTokens": 128.07,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/ListingCard.test.tsx": {
+            "lines": 64,
+            "tokens": 618,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/EditProfile.test.tsx": {
+            "lines": 52,
+            "tokens": 578,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/EditButton.test.tsx": {
+            "lines": 61,
+            "tokens": 614,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/DeleteButton.test.tsx": {
+            "lines": 31,
+            "tokens": 310,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/(main)/search/page.tsx": {
+            "lines": 0,
+            "tokens": 20,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/(main)/messages/page.tsx": {
+            "lines": 15,
+            "tokens": 231,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/(main)/bookmarks/page.tsx": {
+            "lines": 0,
+            "tokens": 20,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/(main)/[username]/page.tsx": {
+            "lines": 28,
+            "tokens": 317,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/(auth)/signup/page.tsx": {
+            "lines": 78,
+            "tokens": 708,
+            "sources": 1,
+            "clones": 2,
+            "duplicatedLines": 71,
+            "duplicatedTokens": 595,
+            "percentage": 91.03,
+            "percentageTokens": 84.04,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/(auth)/signin/page.tsx": {
+            "lines": 46,
+            "tokens": 371,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 46,
+            "duplicatedTokens": 368,
+            "percentage": 100,
+            "percentageTokens": 99.19,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/(auth)/reset-password/page.tsx": {
+            "lines": 38,
+            "tokens": 325,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 25,
+            "duplicatedTokens": 227,
+            "percentage": 65.79,
+            "percentageTokens": 69.85,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/(auth)/forgot-password/page.tsx": {
+            "lines": 17,
+            "tokens": 133,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/ShareButton.tsx": {
+            "lines": 1,
+            "tokens": 38,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/ReviewsSection.tsx": {
+            "lines": 20,
+            "tokens": 181,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/ReportButton.tsx": {
+            "lines": 34,
+            "tokens": 443,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/ProfileTabs.tsx": {
+            "lines": 111,
+            "tokens": 868,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/ProductListingForm.tsx": {
+            "lines": 137,
+            "tokens": 1930,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/ProductImageGallery.tsx": {
+            "lines": 32,
+            "tokens": 198,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/OfferCard.tsx": {
+            "lines": 27,
+            "tokens": 386,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/NotificationBell.tsx": {
+            "lines": 43,
+            "tokens": 363,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/Navbar.tsx": {
+            "lines": 59,
+            "tokens": 526,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/NavSearchBar.tsx": {
+            "lines": 15,
+            "tokens": 122,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/MessageThread.tsx": {
+            "lines": 37,
+            "tokens": 372,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/MessageButton.tsx": {
+            "lines": 1,
+            "tokens": 9,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/MakeOfferButton.tsx": {
+            "lines": 36,
+            "tokens": 552,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/ListingManageModal.tsx": {
+            "lines": 70,
+            "tokens": 977,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/ListingCard.tsx": {
+            "lines": 34,
+            "tokens": 247,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/LeaveReviewModal.tsx": {
+            "lines": 37,
+            "tokens": 296,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/LeaveReviewButton.tsx": {
+            "lines": 10,
+            "tokens": 86,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/ImageUploadGrid.tsx": {
+            "lines": 20,
+            "tokens": 198,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/FilterForm.tsx": {
+            "lines": 54,
+            "tokens": 605,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/EditProfile.tsx": {
+            "lines": 59,
+            "tokens": 462,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/EditButton.tsx": {
+            "lines": 3,
+            "tokens": 29,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/Dropdown.tsx": {
+            "lines": 15,
+            "tokens": 240,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/DeleteButton.tsx": {
+            "lines": 24,
+            "tokens": 218,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/ConversationList.tsx": {
+            "lines": 16,
+            "tokens": 236,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/AvatarUpload.tsx": {
+            "lines": 24,
+            "tokens": 155,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/AuthProvider.tsx": {
+            "lines": 0,
+            "tokens": 3,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/(main)/page.tsx": {
+            "lines": 0,
+            "tokens": 3,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/layout.tsx": {
+            "lines": 0,
+            "tokens": 15,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(app)/items/[id]/edit/page.tsx": {
+            "lines": 9,
+            "tokens": 51,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(app)/items/[id]/edit/edit-form.tsx": {
+            "lines": 257,
+            "tokens": 2084,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(app)/items/[id]/page.tsx": {
+            "lines": 0,
+            "tokens": 9,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/ui/image-overlay.tsx": {
+            "lines": 31,
+            "tokens": 188,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/ui/badge.tsx": {
+            "lines": 0,
+            "tokens": 14,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/messages/messages-view.tsx": {
+            "lines": 17,
+            "tokens": 121,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/messages/message-thread.tsx": {
+            "lines": 59,
+            "tokens": 400,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/messages/message-composer.tsx": {
+            "lines": 50,
+            "tokens": 269,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/messages/message-bubble.tsx": {
+            "lines": 54,
+            "tokens": 350,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/messages/conversation-list.tsx": {
+            "lines": 19,
+            "tokens": 159,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/messages/conversation-list-item.tsx": {
+            "lines": 21,
+            "tokens": 134,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(public)/signup/signup-form.tsx": {
+            "lines": 116,
+            "tokens": 943,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(public)/login/login-form.tsx": {
+            "lines": 48,
+            "tokens": 363,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(app)/profile/profile-view.tsx": {
+            "lines": 274,
+            "tokens": 2137,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(app)/profile/page.tsx": {
+            "lines": 3,
+            "tokens": 27,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(app)/messages/page.tsx": {
+            "lines": 3,
+            "tokens": 27,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(app)/lost/page.tsx": {
+            "lines": 6,
+            "tokens": 39,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(app)/found/page.tsx": {
+            "lines": 6,
+            "tokens": 39,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(app)/create/page.tsx": {
+            "lines": 0,
+            "tokens": 3,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(app)/create/create-form.tsx": {
+            "lines": 265,
+            "tokens": 2180,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/__tests__/components/messages/message-composer.test.tsx": {
+            "lines": 58,
+            "tokens": 448,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/__tests__/components/messages/message-bubble.test.tsx": {
+            "lines": 18,
+            "tokens": 229,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/lib/unread-context.tsx": {
+            "lines": 0,
+            "tokens": 11,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/lib/auth-context.tsx": {
+            "lines": 0,
+            "tokens": 11,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/theme-toggle.tsx": {
+            "lines": 3,
+            "tokens": 47,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/sidebar.tsx": {
+            "lines": 104,
+            "tokens": 729,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/report-menu.tsx": {
+            "lines": 93,
+            "tokens": 688,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/photo-search-form.tsx": {
+            "lines": 95,
+            "tokens": 754,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/location-map-picker.tsx": {
+            "lines": 23,
+            "tokens": 186,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/items-map.tsx": {
+            "lines": 31,
+            "tokens": 266,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/items-filter.tsx": {
+            "lines": 139,
+            "tokens": 1024,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/item-detail.tsx": {
+            "lines": 181,
+            "tokens": 1358,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/item-card.tsx": {
+            "lines": 58,
+            "tokens": 473,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/app-nav.tsx": {
+            "lines": 73,
+            "tokens": 478,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(public)/page.tsx": {
+            "lines": 64,
+            "tokens": 453,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(app)/layout.tsx": {
+            "lines": 1,
+            "tokens": 20,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/__tests__/components/location-map-picker.test.tsx": {
+            "lines": 83,
+            "tokens": 748,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/layout.tsx": {
+            "lines": 4,
+            "tokens": 53,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          }
+        },
+        "total": {
+          "lines": 4445,
+          "tokens": 40981,
+          "sources": 90,
+          "clones": 3,
+          "duplicatedLines": 218,
+          "duplicatedTokens": 2721,
+          "percentage": 4.9,
+          "percentageTokens": 6.64,
+          "newDuplicatedLines": 0,
+          "newClones": 0
+        }
+      },
+      "tsx": {
+        "sources": {
+          "MikeyZv__SlugMarket/slugmarket_next/app/(main)/products/edit/[id]/page.tsx": {
+            "lines": 26,
+            "tokens": 200,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/(main)/products/create/page.tsx": {
+            "lines": 7,
+            "tokens": 41,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/(main)/products/[id]/page.tsx": {
+            "lines": 165,
+            "tokens": 1461,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/(main)/messages/__tests__/page.test.tsx": {
+            "lines": 333,
+            "tokens": 4078,
+            "sources": 1,
+            "clones": 6,
+            "duplicatedLines": 33,
+            "duplicatedTokens": 491,
+            "percentage": 9.91,
+            "percentageTokens": 12.04,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/(auth)/signup/__tests__/page.test.tsx": {
+            "lines": 137,
+            "tokens": 1993,
+            "sources": 1,
+            "clones": 14,
+            "duplicatedLines": 110,
+            "duplicatedTokens": 1698,
+            "percentage": 80.29,
+            "percentageTokens": 85.2,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/(auth)/signin/__tests__/page.test.tsx": {
+            "lines": 111,
+            "tokens": 1575,
+            "sources": 1,
+            "clones": 7,
+            "duplicatedLines": 55,
+            "duplicatedTokens": 798,
+            "percentage": 49.55,
+            "percentageTokens": 50.67,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/(auth)/reset-password/__tests__/page.test.tsx": {
+            "lines": 129,
+            "tokens": 1507,
+            "sources": 1,
+            "clones": 4,
+            "duplicatedLines": 32,
+            "duplicatedTokens": 451,
+            "percentage": 24.81,
+            "percentageTokens": 29.93,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/(auth)/forgot-password/__tests__/page.test.tsx": {
+            "lines": 78,
+            "tokens": 912,
+            "sources": 1,
+            "clones": 2,
+            "duplicatedLines": 16,
+            "duplicatedTokens": 200,
+            "percentage": 20.51,
+            "percentageTokens": 21.93,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/ShareButton.test.tsx": {
+            "lines": 118,
+            "tokens": 1293,
+            "sources": 1,
+            "clones": 4,
+            "duplicatedLines": 36,
+            "duplicatedTokens": 356,
+            "percentage": 30.51,
+            "percentageTokens": 27.53,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/ReportButton.test.tsx": {
+            "lines": 218,
+            "tokens": 2213,
+            "sources": 1,
+            "clones": 6,
+            "duplicatedLines": 46,
+            "duplicatedTokens": 467,
+            "percentage": 21.1,
+            "percentageTokens": 21.1,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/ProfileTabs.test.tsx": {
+            "lines": 167,
+            "tokens": 1396,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/ProductListingForm.test.tsx": {
+            "lines": 325,
+            "tokens": 3974,
+            "sources": 1,
+            "clones": 4,
+            "duplicatedLines": 37,
+            "duplicatedTokens": 319,
+            "percentage": 11.38,
+            "percentageTokens": 8.03,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/MessageButton.test.tsx": {
+            "lines": 62,
+            "tokens": 677,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/MakeOfferButton.test.tsx": {
+            "lines": 221,
+            "tokens": 2567,
+            "sources": 1,
+            "clones": 6,
+            "duplicatedLines": 62,
+            "duplicatedTokens": 732,
+            "percentage": 28.05,
+            "percentageTokens": 28.52,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/ListingManageModal.test.tsx": {
+            "lines": 282,
+            "tokens": 3733,
+            "sources": 1,
+            "clones": 13,
+            "duplicatedLines": 127,
+            "duplicatedTokens": 2046,
+            "percentage": 45.04,
+            "percentageTokens": 54.81,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/ListingCard.test.tsx": {
+            "lines": 76,
+            "tokens": 773,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 10,
+            "duplicatedTokens": 105,
+            "percentage": 13.16,
+            "percentageTokens": 13.58,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/EditProfile.test.tsx": {
+            "lines": 202,
+            "tokens": 2246,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 9,
+            "duplicatedTokens": 74,
+            "percentage": 4.46,
+            "percentageTokens": 3.29,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/EditButton.test.tsx": {
+            "lines": 72,
+            "tokens": 793,
+            "sources": 1,
+            "clones": 3,
+            "duplicatedLines": 18,
+            "duplicatedTokens": 290,
+            "percentage": 25,
+            "percentageTokens": 36.57,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/DeleteButton.test.tsx": {
+            "lines": 181,
+            "tokens": 2065,
+            "sources": 1,
+            "clones": 15,
+            "duplicatedLines": 89,
+            "duplicatedTokens": 1267,
+            "percentage": 49.17,
+            "percentageTokens": 61.36,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/(main)/search/page.tsx": {
+            "lines": 36,
+            "tokens": 347,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/(main)/products/page.tsx": {
+            "lines": 6,
+            "tokens": 40,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/(main)/messages/page.tsx": {
+            "lines": 198,
+            "tokens": 2268,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/(main)/bookmarks/page.tsx": {
+            "lines": 78,
+            "tokens": 651,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/(main)/[username]/page.tsx": {
+            "lines": 110,
+            "tokens": 1007,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/(auth)/signup/page.tsx": {
+            "lines": 145,
+            "tokens": 1269,
+            "sources": 1,
+            "clones": 5,
+            "duplicatedLines": 69,
+            "duplicatedTokens": 584,
+            "percentage": 47.59,
+            "percentageTokens": 46.02,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/(auth)/signin/page.tsx": {
+            "lines": 104,
+            "tokens": 900,
+            "sources": 1,
+            "clones": 4,
+            "duplicatedLines": 52,
+            "duplicatedTokens": 449,
+            "percentage": 50,
+            "percentageTokens": 49.89,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/(auth)/reset-password/page.tsx": {
+            "lines": 119,
+            "tokens": 1049,
+            "sources": 1,
+            "clones": 2,
+            "duplicatedLines": 26,
+            "duplicatedTokens": 204,
+            "percentage": 21.85,
+            "percentageTokens": 19.45,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/(auth)/forgot-password/page.tsx": {
+            "lines": 87,
+            "tokens": 732,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 9,
+            "duplicatedTokens": 69,
+            "percentage": 10.34,
+            "percentageTokens": 9.43,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/ShareButton.tsx": {
+            "lines": 38,
+            "tokens": 312,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/ReviewsSection.tsx": {
+            "lines": 124,
+            "tokens": 970,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/ReportButton.tsx": {
+            "lines": 113,
+            "tokens": 1249,
+            "sources": 1,
+            "clones": 2,
+            "duplicatedLines": 15,
+            "duplicatedTokens": 157,
+            "percentage": 13.27,
+            "percentageTokens": 12.57,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/ProfileTabs.tsx": {
+            "lines": 160,
+            "tokens": 1330,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/ProductListingForm.tsx": {
+            "lines": 160,
+            "tokens": 2157,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/ProductImageGallery.tsx": {
+            "lines": 143,
+            "tokens": 1080,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/OfferCard.tsx": {
+            "lines": 62,
+            "tokens": 849,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/NotificationBell.tsx": {
+            "lines": 121,
+            "tokens": 1054,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/Navbar.tsx": {
+            "lines": 160,
+            "tokens": 1358,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/NavSearchBar.tsx": {
+            "lines": 52,
+            "tokens": 382,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/MessageThread.tsx": {
+            "lines": 68,
+            "tokens": 686,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/MessageButton.tsx": {
+            "lines": 62,
+            "tokens": 528,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/MakeOfferButton.tsx": {
+            "lines": 141,
+            "tokens": 1936,
+            "sources": 1,
+            "clones": 2,
+            "duplicatedLines": 15,
+            "duplicatedTokens": 157,
+            "percentage": 10.64,
+            "percentageTokens": 8.11,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/ListingManageModal.tsx": {
+            "lines": 158,
+            "tokens": 2095,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/ListingCard.tsx": {
+            "lines": 54,
+            "tokens": 386,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/LeaveReviewModal.tsx": {
+            "lines": 100,
+            "tokens": 805,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/LeaveReviewButton.tsx": {
+            "lines": 72,
+            "tokens": 602,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/ImageUploadGrid.tsx": {
+            "lines": 46,
+            "tokens": 453,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/FilterForm.tsx": {
+            "lines": 129,
+            "tokens": 1431,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/EditProfile.tsx": {
+            "lines": 150,
+            "tokens": 1219,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/EditButton.tsx": {
+            "lines": 26,
+            "tokens": 185,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/Dropdown.tsx": {
+            "lines": 67,
+            "tokens": 706,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/DeleteButton.tsx": {
+            "lines": 93,
+            "tokens": 840,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/ConversationList.tsx": {
+            "lines": 55,
+            "tokens": 558,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/AvatarUpload.tsx": {
+            "lines": 130,
+            "tokens": 1051,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/components/AuthProvider.tsx": {
+            "lines": 84,
+            "tokens": 759,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/(main)/page.tsx": {
+            "lines": 44,
+            "tokens": 319,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "MikeyZv__SlugMarket/slugmarket_next/app/layout.tsx": {
+            "lines": 44,
+            "tokens": 291,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(app)/items/[id]/edit/page.tsx": {
+            "lines": 47,
+            "tokens": 365,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 10,
+            "duplicatedTokens": 101,
+            "percentage": 21.28,
+            "percentageTokens": 27.67,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(app)/items/[id]/edit/edit-form.tsx": {
+            "lines": 349,
+            "tokens": 2787,
+            "sources": 1,
+            "clones": 4,
+            "duplicatedLines": 43,
+            "duplicatedTokens": 477,
+            "percentage": 12.32,
+            "percentageTokens": 17.12,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(app)/lost/[id]/page.tsx": {
+            "lines": 16,
+            "tokens": 89,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(app)/items/[id]/page.tsx": {
+            "lines": 57,
+            "tokens": 440,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 10,
+            "duplicatedTokens": 101,
+            "percentage": 17.54,
+            "percentageTokens": 22.95,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(app)/items/[id]/not-found.tsx": {
+            "lines": 30,
+            "tokens": 204,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(app)/items/[id]/loading.tsx": {
+            "lines": 34,
+            "tokens": 215,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(app)/found/photo-search/page.tsx": {
+            "lines": 22,
+            "tokens": 175,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(app)/found/[id]/page.tsx": {
+            "lines": 16,
+            "tokens": 89,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/ui/image-overlay.tsx": {
+            "lines": 71,
+            "tokens": 532,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/ui/badge.tsx": {
+            "lines": 29,
+            "tokens": 220,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/messages/messages-view.tsx": {
+            "lines": 235,
+            "tokens": 1917,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/messages/message-thread.tsx": {
+            "lines": 99,
+            "tokens": 686,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/messages/message-composer.tsx": {
+            "lines": 186,
+            "tokens": 1405,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/messages/message-bubble.tsx": {
+            "lines": 81,
+            "tokens": 548,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/messages/empty-thread.tsx": {
+            "lines": 7,
+            "tokens": 76,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/messages/conversation-list.tsx": {
+            "lines": 65,
+            "tokens": 480,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/messages/conversation-list-item.tsx": {
+            "lines": 74,
+            "tokens": 476,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(public)/signup/signup-form.tsx": {
+            "lines": 190,
+            "tokens": 1572,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 10,
+            "duplicatedTokens": 71,
+            "percentage": 5.26,
+            "percentageTokens": 4.52,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(public)/signup/page.tsx": {
+            "lines": 33,
+            "tokens": 239,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 7,
+            "duplicatedTokens": 79,
+            "percentage": 21.21,
+            "percentageTokens": 33.05,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(public)/login/page.tsx": {
+            "lines": 33,
+            "tokens": 290,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 7,
+            "duplicatedTokens": 79,
+            "percentage": 21.21,
+            "percentageTokens": 27.24,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(public)/login/login-form.tsx": {
+            "lines": 76,
+            "tokens": 514,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 10,
+            "duplicatedTokens": 71,
+            "percentage": 13.16,
+            "percentageTokens": 13.81,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(app)/profile/profile-view.tsx": {
+            "lines": 414,
+            "tokens": 3352,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(app)/profile/page.tsx": {
+            "lines": 48,
+            "tokens": 310,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(app)/messages/page.tsx": {
+            "lines": 35,
+            "tokens": 306,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(app)/lost/page.tsx": {
+            "lines": 61,
+            "tokens": 438,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 14,
+            "duplicatedTokens": 115,
+            "percentage": 22.95,
+            "percentageTokens": 26.26,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(app)/found/page.tsx": {
+            "lines": 65,
+            "tokens": 483,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 14,
+            "duplicatedTokens": 115,
+            "percentage": 21.54,
+            "percentageTokens": 23.81,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(app)/create/page.tsx": {
+            "lines": 17,
+            "tokens": 133,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(app)/create/create-form.tsx": {
+            "lines": 435,
+            "tokens": 3527,
+            "sources": 1,
+            "clones": 4,
+            "duplicatedLines": 43,
+            "duplicatedTokens": 477,
+            "percentage": 9.89,
+            "percentageTokens": 13.52,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/__tests__/components/messages/message-composer.test.tsx": {
+            "lines": 81,
+            "tokens": 618,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/__tests__/components/messages/message-bubble.test.tsx": {
+            "lines": 36,
+            "tokens": 390,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/lib/unread-context.tsx": {
+            "lines": 53,
+            "tokens": 456,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/lib/auth-context.tsx": {
+            "lines": 121,
+            "tokens": 776,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/theme-toggle.tsx": {
+            "lines": 22,
+            "tokens": 170,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/sidebar.tsx": {
+            "lines": 188,
+            "tokens": 1482,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 5,
+            "duplicatedTokens": 62,
+            "percentage": 2.66,
+            "percentageTokens": 4.18,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/report-menu.tsx": {
+            "lines": 158,
+            "tokens": 1131,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/photo-search-form.tsx": {
+            "lines": 182,
+            "tokens": 1460,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/location-map-picker.tsx": {
+            "lines": 116,
+            "tokens": 871,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/location-map-picker-dynamic.tsx": {
+            "lines": 16,
+            "tokens": 117,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/items-map.tsx": {
+            "lines": 81,
+            "tokens": 535,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/items-map-dynamic.tsx": {
+            "lines": 15,
+            "tokens": 100,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/items-filter.tsx": {
+            "lines": 305,
+            "tokens": 2238,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/item-detail.tsx": {
+            "lines": 255,
+            "tokens": 1896,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/item-card.tsx": {
+            "lines": 92,
+            "tokens": 707,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/components/app-nav.tsx": {
+            "lines": 125,
+            "tokens": 852,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(public)/page.tsx": {
+            "lines": 212,
+            "tokens": 1747,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(public)/layout.tsx": {
+            "lines": 39,
+            "tokens": 290,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 5,
+            "duplicatedTokens": 62,
+            "percentage": 12.82,
+            "percentageTokens": 21.38,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/(app)/layout.tsx": {
+            "lines": 40,
+            "tokens": 382,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/__tests__/components/report-menu.test.tsx": {
+            "lines": 50,
+            "tokens": 544,
+            "sources": 1,
+            "clones": 2,
+            "duplicatedLines": 12,
+            "duplicatedTokens": 182,
+            "percentage": 24,
+            "percentageTokens": 33.46,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/__tests__/components/location-map-picker.test.tsx": {
+            "lines": 127,
+            "tokens": 1149,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "Colin-Posat__SlugFound/app/layout.tsx": {
+            "lines": 67,
+            "tokens": 414,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          }
+        },
+        "total": {
+          "lines": 11655,
+          "tokens": 107544,
+          "sources": 106,
+          "clones": 61,
+          "duplicatedLines": 528,
+          "duplicatedTokens": 6453,
+          "percentage": 4.53,
+          "percentageTokens": 6,
+          "newDuplicatedLines": 0,
+          "newClones": 0
+        }
+      }
+    },
+    "total": {
+      "lines": 16100,
+      "tokens": 148525,
+      "sources": 196,
+      "clones": 64,
+      "duplicatedLines": 746,
+      "duplicatedTokens": 9174,
+      "percentage": 4.63,
+      "percentageTokens": 6.18,
+      "newDuplicatedLines": 0,
+      "newClones": 0
+    }
+  },
+  "duplicates": [
+    {
+      "format": "tsx",
+      "lines": 6,
+      "fragment": ", async () => {\n    render(<MessagesPage />);\n    await waitFor(() => screen.getByText(\"convo-convo-1\"));\n    fireEvent.click(screen.getByText(\"convo-convo-1\"));\n    await waitFor(() => screen.getByTestId(\"message-thread\"));\n    fireEvent.change",
+      "tokens": 76,
+      "firstFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/(main)/messages/__tests__/page.test.tsx",
+        "start": 301,
+        "end": 306,
+        "startLoc": {
+          "line": 301,
+          "column": 55,
+          "position": 3598
+        },
+        "endLoc": {
+          "line": 306,
+          "column": 21,
+          "position": 3674
+        }
+      },
+      "secondFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/(main)/messages/__tests__/page.test.tsx",
+        "start": 292,
+        "end": 297,
+        "startLoc": {
+          "line": 292,
+          "column": 45,
+          "position": 3478
+        },
+        "endLoc": {
+          "line": 297,
+          "column": 20,
+          "position": 3554
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 6,
+      "fragment": ", async () => {\n    mockMsgsOrder.mockResolvedValue({ data: [mockMessageWithOffer] });\n    render(<MessagesPage />);\n    await waitFor(() => screen.getByText(\"convo-convo-1\"));\n    fireEvent.click(screen.getByText(\"convo-convo-1\"));\n    await waitFor(() => screen.getByText(\"Decline offer\"",
+      "tokens": 86,
+      "firstFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/(main)/messages/__tests__/page.test.tsx",
+        "start": 324,
+        "end": 329,
+        "startLoc": {
+          "line": 324,
+          "column": 65,
+          "position": 3917
+        },
+        "endLoc": {
+          "line": 329,
+          "column": 57,
+          "position": 4003
+        }
+      },
+      "secondFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/(main)/messages/__tests__/page.test.tsx",
+        "start": 313,
+        "end": 318,
+        "startLoc": {
+          "line": 313,
+          "column": 65,
+          "position": 3753
+        },
+        "endLoc": {
+          "line": 318,
+          "column": 56,
+          "position": 3839
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 6,
+      "fragment": "} });\n    fireEvent.change(screen.getByPlaceholderText(\"Create a password\"), { target: { value: \"password123\" } });\n    fireEvent.submit(screen.getByRole(\"button\", { name: /create account/i }).closest(\"form\")!);\n\n    await waitFor(() =>\n      expect(supabaseModule",
+      "tokens": 81,
+      "firstFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/(auth)/signup/__tests__/page.test.tsx",
+        "start": 75,
+        "end": 80,
+        "startLoc": {
+          "line": 75,
+          "column": 102,
+          "position": 966
+        },
+        "endLoc": {
+          "line": 80,
+          "column": 28,
+          "position": 1047
+        }
+      },
+      "secondFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/(auth)/signup/__tests__/page.test.tsx",
+        "start": 62,
+        "end": 67,
+        "startLoc": {
+          "line": 62,
+          "column": 103,
+          "position": 763
+        },
+        "endLoc": {
+          "line": 67,
+          "column": 20,
+          "position": 844
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 9,
+      "fragment": ", async () => {\n    render(<SignUpPage />);\n    fireEvent.change(screen.getByPlaceholderText(\"slugger123\"), { target: { value: \"slugger\" } });\n    fireEvent.change(screen.getByPlaceholderText(\"you@ucsc.edu\"), { target: { value: \"user@ucsc.edu\" } });\n    fireEvent.change(screen.getByPlaceholderText(\"Create a password\"), { target: { value: \"password123\" } });\n    fireEvent.submit(screen.getByRole(\"button\", { name: /create account/i }).closest(\"form\")!);\n\n    await waitFor(() =>\n      expect(screen.getByRole",
+      "tokens": 160,
+      "firstFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/(auth)/signup/__tests__/page.test.tsx",
+        "start": 88,
+        "end": 96,
+        "startLoc": {
+          "line": 88,
+          "column": 65,
+          "position": 1113
+        },
+        "endLoc": {
+          "line": 96,
+          "column": 30,
+          "position": 1273
+        }
+      },
+      "secondFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/(auth)/signup/__tests__/page.test.tsx",
+        "start": 59,
+        "end": 67,
+        "startLoc": {
+          "line": 59,
+          "column": 80,
+          "position": 686
+        },
+        "endLoc": {
+          "line": 67,
+          "column": 30,
+          "position": 846
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 7,
+      "fragment": "render(<SignUpPage />);\n    fireEvent.change(screen.getByPlaceholderText(\"slugger123\"), { target: { value: \"slugger\" } });\n    fireEvent.change(screen.getByPlaceholderText(\"you@ucsc.edu\"), { target: { value: \"user@ucsc.edu\" } });\n    fireEvent.change(screen.getByPlaceholderText(\"Create a password\"), { target: { value: \"password123\" } });\n    fireEvent.submit(screen.getByRole(\"button\", { name: /create account/i }).closest(\"form\")!);\n\n    await waitFor(() => expect(screen.getByText(\"Email already registered\"",
+      "tokens": 149,
+      "firstFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/(auth)/signup/__tests__/page.test.tsx",
+        "start": 109,
+        "end": 115,
+        "startLoc": {
+          "line": 109,
+          "column": 5,
+          "position": 1455
+        },
+        "endLoc": {
+          "line": 115,
+          "column": 75,
+          "position": 1604
+        }
+      },
+      "secondFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/(auth)/signup/__tests__/page.test.tsx",
+        "start": 73,
+        "end": 67,
+        "startLoc": {
+          "line": 73,
+          "column": 5,
+          "position": 901
+        },
+        "endLoc": {
+          "line": 67,
+          "column": 76,
+          "position": 848
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 9,
+      "fragment": ");\n\n    render(<SignUpPage />);\n    fireEvent.change(screen.getByPlaceholderText(\"slugger123\"), { target: { value: \"slugger\" } });\n    fireEvent.change(screen.getByPlaceholderText(\"you@ucsc.edu\"), { target: { value: \"user@ucsc.edu\" } });\n    fireEvent.change(screen.getByPlaceholderText(\"Create a password\"), { target: { value: \"password123\" } });\n    fireEvent.submit(screen.getByRole(\"button\", { name: /create account/i }).closest(\"form\")!);\n\n    expect",
+      "tokens": 139,
+      "firstFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/(auth)/signup/__tests__/page.test.tsx",
+        "start": 123,
+        "end": 131,
+        "startLoc": {
+          "line": 123,
+          "column": 5,
+          "position": 1725
+        },
+        "endLoc": {
+          "line": 131,
+          "column": 11,
+          "position": 1864
+        }
+      },
+      "secondFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/(auth)/signup/__tests__/page.test.tsx",
+        "start": 107,
+        "end": 66,
+        "startLoc": {
+          "line": 107,
+          "column": 5,
+          "position": 1450
+        },
+        "endLoc": {
+          "line": 66,
+          "column": 10,
+          "position": 832
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 13,
+      "fragment": "from \"../page\";\nimport * as supabaseModule from \"@/lib/supabase\";\n\nconst mockPush = vi.hoisted(() => vi.fn());\n\nvi.mock(\"next/navigation\", () => ({\n  useRouter: () => ({ push: mockPush }),\n}));\n\nvi.mock(\"@/lib/supabase\", () => ({\n  supabase: {\n    auth: {\n      signInWithPassword",
+      "tokens": 113,
+      "firstFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/(auth)/signin/__tests__/page.test.tsx",
+        "start": 3,
+        "end": 15,
+        "startLoc": {
+          "line": 3,
+          "column": 19,
+          "position": 51
+        },
+        "endLoc": {
+          "line": 15,
+          "column": 25,
+          "position": 164
+        }
+      },
+      "secondFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/(auth)/signup/__tests__/page.test.tsx",
+        "start": 3,
+        "end": 15,
+        "startLoc": {
+          "line": 3,
+          "column": 19,
+          "position": 51
+        },
+        "endLoc": {
+          "line": 15,
+          "column": 13,
+          "position": 164
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 12,
+      "fragment": ": vi.fn(),\n    },\n  },\n}));\n\nvi.mock(\"next/link\", () => ({\n  default: ({ href, children, className }: { href: string; children: React.ReactNode; className?: string }) => (\n    <a href={href} className={className}>{children}</a>\n  ),\n}));\n\ndescribe(\"SignInPage\"",
+      "tokens": 120,
+      "firstFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/(auth)/signin/__tests__/page.test.tsx",
+        "start": 15,
+        "end": 26,
+        "startLoc": {
+          "line": 15,
+          "column": 25,
+          "position": 165
+        },
+        "endLoc": {
+          "line": 26,
+          "column": 22,
+          "position": 285
+        }
+      },
+      "secondFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/(auth)/signup/__tests__/page.test.tsx",
+        "start": 15,
+        "end": 26,
+        "startLoc": {
+          "line": 15,
+          "column": 13,
+          "position": 165
+        },
+        "endLoc": {
+          "line": 26,
+          "column": 22,
+          "position": 285
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 11,
+      "fragment": ");\n    expect(passwordInput).toHaveAttribute(\"type\", \"password\");\n\n    fireEvent.click(screen.getByRole(\"button\", { name: \"\" }));\n    expect(passwordInput).toHaveAttribute(\"type\", \"text\");\n\n    fireEvent.click(screen.getByRole(\"button\", { name: \"\" }));\n    expect(passwordInput).toHaveAttribute(\"type\", \"password\");\n  });\n\n  it(\"calls signInWithPassword with the entered email and password\"",
+      "tokens": 107,
+      "firstFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/(auth)/signin/__tests__/page.test.tsx",
+        "start": 49,
+        "end": 59,
+        "startLoc": {
+          "line": 49,
+          "column": 76,
+          "position": 596
+        },
+        "endLoc": {
+          "line": 59,
+          "column": 68,
+          "position": 703
+        }
+      },
+      "secondFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/(auth)/signup/__tests__/page.test.tsx",
+        "start": 49,
+        "end": 59,
+        "startLoc": {
+          "line": 49,
+          "column": 74,
+          "position": 578
+        },
+        "endLoc": {
+          "line": 59,
+          "column": 80,
+          "position": 685
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 7,
+      "fragment": ", async () => {\n    render(<SignInPage />);\n    fireEvent.change(screen.getByPlaceholderText(\"you@ucsc.edu\"), { target: { value: \"user@ucsc.edu\" } });\n    fireEvent.change(screen.getByPlaceholderText(\"Enter your password\"), { target: { value: \"secret123\" } });\n    fireEvent.submit(screen.getByRole(\"button\", { name: /sign in/i }).closest(\"form\")!);\n\n    await waitFor(() => expect(mockPush",
+      "tokens": 126,
+      "firstFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/(auth)/signin/__tests__/page.test.tsx",
+        "start": 73,
+        "end": 79,
+        "startLoc": {
+          "line": 73,
+          "column": 46,
+          "position": 876
+        },
+        "endLoc": {
+          "line": 79,
+          "column": 40,
+          "position": 1002
+        }
+      },
+      "secondFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/(auth)/signin/__tests__/page.test.tsx",
+        "start": 59,
+        "end": 66,
+        "startLoc": {
+          "line": 59,
+          "column": 68,
+          "position": 704
+        },
+        "endLoc": {
+          "line": 66,
+          "column": 28,
+          "position": 831
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 6,
+      "fragment": "render(<SignInPage />);\n    fireEvent.change(screen.getByPlaceholderText(\"you@ucsc.edu\"), { target: { value: \"user@ucsc.edu\" } });\n    fireEvent.change(screen.getByPlaceholderText(\"Enter your password\"), { target: { value: \"secret123\" } });\n    fireEvent.submit(screen.getByRole(\"button\", { name: /sign in/i }).closest(\"form\")!);\n\n    expect",
+      "tokens": 103,
+      "firstFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/(auth)/signin/__tests__/page.test.tsx",
+        "start": 102,
+        "end": 107,
+        "startLoc": {
+          "line": 102,
+          "column": 5,
+          "position": 1352
+        },
+        "endLoc": {
+          "line": 107,
+          "column": 11,
+          "position": 1455
+        }
+      },
+      "secondFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/(auth)/signin/__tests__/page.test.tsx",
+        "start": 60,
+        "end": 65,
+        "startLoc": {
+          "line": 60,
+          "column": 5,
+          "position": 716
+        },
+        "endLoc": {
+          "line": 65,
+          "column": 10,
+          "position": 819
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 10,
+      "fragment": ",\n}));\n\nvi.mock(\"next/link\", () => ({\n  default: ({ href, children, className }: { href: string; children: React.ReactNode; className?: string }) => (\n    <a href={href} className={className}>{children}</a>\n  ),\n}));\n\n// Capture the auth callback so tests can fire auth events manually.",
+      "tokens": 103,
+      "firstFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/(auth)/reset-password/__tests__/page.test.tsx",
+        "start": 10,
+        "end": 19,
+        "startLoc": {
+          "line": 10,
+          "column": 40,
+          "position": 123
+        },
+        "endLoc": {
+          "line": 19,
+          "column": 69,
+          "position": 226
+        }
+      },
+      "secondFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/(auth)/signup/__tests__/page.test.tsx",
+        "start": 17,
+        "end": 26,
+        "startLoc": {
+          "line": 17,
+          "column": 4,
+          "position": 180
+        },
+        "endLoc": {
+          "line": 26,
+          "column": 9,
+          "position": 283
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 8,
+      "fragment": "render(<ResetPasswordPage />);\n    triggerAuthEvent(\"PASSWORD_RECOVERY\");\n\n    fireEvent.change(screen.getByPlaceholderText(\"Create a new password\"), { target: { value: \"newpass123\" } });\n    fireEvent.change(screen.getByPlaceholderText(\"Repeat your new password\"), { target: { value: \"newpass123\" } });\n    fireEvent.submit(screen.getByRole(\"button\", { name: /update password/i }).closest(\"form\")!);\n\n    await waitFor(() => expect(screen",
+      "tokens": 122,
+      "firstFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/(auth)/reset-password/__tests__/page.test.tsx",
+        "start": 113,
+        "end": 120,
+        "startLoc": {
+          "line": 113,
+          "column": 5,
+          "position": 1292
+        },
+        "endLoc": {
+          "line": 120,
+          "column": 38,
+          "position": 1414
+        }
+      },
+      "secondFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/(auth)/reset-password/__tests__/page.test.tsx",
+        "start": 96,
+        "end": 103,
+        "startLoc": {
+          "line": 96,
+          "column": 5,
+          "position": 1042
+        },
+        "endLoc": {
+          "line": 103,
+          "column": 40,
+          "position": 1164
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 7,
+      "fragment": "vi.mock(\"next/link\", () => ({\n  default: ({ href, children, className }: { href: string; children: React.ReactNode; className?: string }) => (\n    <a href={href} className={className}>{children}</a>\n  ),\n}));\n\n// Test suite for the ForgotPasswordPage component, covering rendering the form, showing confirmation and error messages, and calling resetPasswordForEmail with the entered email",
+      "tokens": 95,
+      "firstFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/(auth)/forgot-password/__tests__/page.test.tsx",
+        "start": 16,
+        "end": 22,
+        "startLoc": {
+          "line": 16,
+          "column": 1,
+          "position": 126
+        },
+        "endLoc": {
+          "line": 22,
+          "column": 179,
+          "position": 221
+        }
+      },
+      "secondFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/(auth)/signup/__tests__/page.test.tsx",
+        "start": 20,
+        "end": 26,
+        "startLoc": {
+          "line": 20,
+          "column": 1,
+          "position": 188
+        },
+        "endLoc": {
+          "line": 26,
+          "column": 9,
+          "position": 283
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 10,
+      "fragment": ");\n    const writeText = vi.fn().mockResolvedValue(undefined);\n    setClipboard(writeText);\n\n    render(<ShareButton title={TITLE} />);\n    await act(async () => {\n      fireEvent.click(screen.getByRole(\"button\"));\n    });\n\n    expect(writeText",
+      "tokens": 83,
+      "firstFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/ShareButton.test.tsx",
+        "start": 64,
+        "end": 73,
+        "startLoc": {
+          "line": 64,
+          "column": 63,
+          "position": 697
+        },
+        "endLoc": {
+          "line": 73,
+          "column": 21,
+          "position": 780
+        }
+      },
+      "secondFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/ShareButton.test.tsx",
+        "start": 49,
+        "end": 58,
+        "startLoc": {
+          "line": 49,
+          "column": 19,
+          "position": 510
+        },
+        "endLoc": {
+          "line": 58,
+          "column": 17,
+          "position": 593
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 10,
+      "fragment": "const writeText = vi.fn().mockResolvedValue(undefined);\n    setClipboard(writeText);\n\n    render(<ShareButton title={TITLE} />);\n    await act(async () => {\n      fireEvent.click(screen.getByRole(\"button\"));\n    });\n\n    expect(writeText).toHaveBeenCalledWith(window.location.href);\n    expect(screen",
+      "tokens": 95,
+      "firstFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/ShareButton.test.tsx",
+        "start": 80,
+        "end": 89,
+        "startLoc": {
+          "line": 80,
+          "column": 5,
+          "position": 847
+        },
+        "endLoc": {
+          "line": 89,
+          "column": 18,
+          "position": 942
+        }
+      },
+      "secondFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/ShareButton.test.tsx",
+        "start": 50,
+        "end": 74,
+        "startLoc": {
+          "line": 50,
+          "column": 5,
+          "position": 514
+        },
+        "endLoc": {
+          "line": 74,
+          "column": 17,
+          "position": 796
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 9,
+      "fragment": ");\n    await act(async () => {\n      fireEvent.click(screen.getByRole(\"button\", { name: /submit report/i }));\n    });\n    expect(mockInsert).toHaveBeenCalledWith({\n      listing_id: LISTING_ID,\n      seller_id: SELLER_ID,\n      reporter_id: REPORTER_ID,\n      reason: \"Spam or scam\"",
+      "tokens": 81,
+      "firstFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/ReportButton.test.tsx",
+        "start": 134,
+        "end": 142,
+        "startLoc": {
+          "line": 134,
+          "column": 6,
+          "position": 1271
+        },
+        "endLoc": {
+          "line": 142,
+          "column": 29,
+          "position": 1352
+        }
+      },
+      "secondFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/ReportButton.test.tsx",
+        "start": 115,
+        "end": 123,
+        "startLoc": {
+          "line": 115,
+          "column": 15,
+          "position": 1089
+        },
+        "endLoc": {
+          "line": 123,
+          "column": 43,
+          "position": 1170
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 6,
+      "fragment": ", async () => {\n    openModal();\n    fireEvent.click(screen.getByText(\"Prohibited or illegal item\"));\n    fireEvent.click(screen.getByText(\"Spam or scam\"));\n    fireEvent.change(screen.getByPlaceholderText(/additional context/i), {\n      target: { value: \"some details\"",
+      "tokens": 69,
+      "firstFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/ReportButton.test.tsx",
+        "start": 202,
+        "end": 207,
+        "startLoc": {
+          "line": 202,
+          "column": 56,
+          "position": 1999
+        },
+        "endLoc": {
+          "line": 207,
+          "column": 38,
+          "position": 2068
+        }
+      },
+      "secondFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/ReportButton.test.tsx",
+        "start": 128,
+        "end": 133,
+        "startLoc": {
+          "line": 128,
+          "column": 68,
+          "position": 1195
+        },
+        "endLoc": {
+          "line": 133,
+          "column": 44,
+          "position": 1264
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 8,
+      "fragment": ");\n  });\n\n  // --- Auth behavior ---\n\n  it(\"renders nothing while auth is loading\", () => {\n    vi.mocked(AuthProvider.useAuth).mockReturnValue({ user: null, loading: true } as ReturnType<typeof AuthProvider.useAuth>);\n    const { container } = render(<ProductListingForm",
+      "tokens": 78,
+      "firstFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/ProductListingForm.test.tsx",
+        "start": 146,
+        "end": 153,
+        "startLoc": {
+          "line": 146,
+          "column": 6,
+          "position": 1755
+        },
+        "endLoc": {
+          "line": 153,
+          "column": 53,
+          "position": 1833
+        }
+      },
+      "secondFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/(main)/messages/__tests__/page.test.tsx",
+        "start": 167,
+        "end": 174,
+        "startLoc": {
+          "line": 167,
+          "column": 49,
+          "position": 2098
+        },
+        "endLoc": {
+          "line": 174,
+          "column": 47,
+          "position": 2176
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 7,
+      "fragment": " />);\n    expect(container).toBeEmptyDOMElement();\n  });\n\n  it(\"renders nothing and redirects to /signin when unauthenticated\", async () => {\n    vi.mocked(AuthProvider.useAuth).mockReturnValue({ user: null, loading: false } as ReturnType<typeof AuthProvider.useAuth>);\n    const { container } = render(<ProductListingForm",
+      "tokens": 89,
+      "firstFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/ProductListingForm.test.tsx",
+        "start": 153,
+        "end": 159,
+        "startLoc": {
+          "line": 153,
+          "column": 67,
+          "position": 1840
+        },
+        "endLoc": {
+          "line": 159,
+          "column": 53,
+          "position": 1929
+        }
+      },
+      "secondFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/(main)/messages/__tests__/page.test.tsx",
+        "start": 174,
+        "end": 180,
+        "startLoc": {
+          "line": 174,
+          "column": 47,
+          "position": 2177
+        },
+        "endLoc": {
+          "line": 180,
+          "column": 47,
+          "position": 2266
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 13,
+      "fragment": ");\n\n    render(\n      <ProductListingForm\n        mode=\"edit\"\n        listingId=\"listing-1\"\n        initialImageUrls={[\"https://example.com/photo.jpg\"]}\n      />\n    );\n    fillForm();\n    fireEvent.submit(screen.getByRole(\"button\", { name: /save changes/i }).closest(\"form\")!);\n\n    expect",
+      "tokens": 76,
+      "firstFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/ProductListingForm.test.tsx",
+        "start": 267,
+        "end": 279,
+        "startLoc": {
+          "line": 267,
+          "column": 76,
+          "position": 3230
+        },
+        "endLoc": {
+          "line": 279,
+          "column": 11,
+          "position": 3306
+        }
+      },
+      "secondFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/ProductListingForm.test.tsx",
+        "start": 235,
+        "end": 245,
+        "startLoc": {
+          "line": 235,
+          "column": 75,
+          "position": 2825
+        },
+        "endLoc": {
+          "line": 245,
+          "column": 10,
+          "position": 2899
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 11,
+      "fragment": "await renderSettled();\n    fireEvent.click(await screen.findByRole(\"button\", { name: /make offer/i }));\n    fireEvent.change(screen.getByPlaceholderText(\"Enter your offer\"), {\n      target: { value: \"75\" },\n    });\n    const form = screen.getByPlaceholderText(\"Enter your offer\").closest(\"form\")!;\n    await act(async () => {\n      fireEvent.submit(form);\n    });\n\n    expect(h",
+      "tokens": 120,
+      "firstFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/MakeOfferButton.test.tsx",
+        "start": 179,
+        "end": 189,
+        "startLoc": {
+          "line": 179,
+          "column": 5,
+          "position": 2014
+        },
+        "endLoc": {
+          "line": 189,
+          "column": 13,
+          "position": 2134
+        }
+      },
+      "secondFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/MakeOfferButton.test.tsx",
+        "start": 155,
+        "end": 166,
+        "startLoc": {
+          "line": 155,
+          "column": 5,
+          "position": 1737
+        },
+        "endLoc": {
+          "line": 166,
+          "column": 17,
+          "position": 1858
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 12,
+      "fragment": "};\n    await renderSettled();\n    fireEvent.click(await screen.findByRole(\"button\", { name: /make offer/i }));\n    fireEvent.change(screen.getByPlaceholderText(\"Enter your offer\"), {\n      target: { value: \"75\" },\n    });\n    const form = screen.getByPlaceholderText(\"Enter your offer\").closest(\"form\")!;\n    await act(async () => {\n      fireEvent.submit(form);\n    });\n\n    expect(screen",
+      "tokens": 124,
+      "firstFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/MakeOfferButton.test.tsx",
+        "start": 193,
+        "end": 204,
+        "startLoc": {
+          "line": 193,
+          "column": 94,
+          "position": 2214
+        },
+        "endLoc": {
+          "line": 204,
+          "column": 18,
+          "position": 2338
+        }
+      },
+      "secondFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/MakeOfferButton.test.tsx",
+        "start": 178,
+        "end": 166,
+        "startLoc": {
+          "line": 178,
+          "column": 100,
+          "position": 2010
+        },
+        "endLoc": {
+          "line": 166,
+          "column": 17,
+          "position": 1858
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 11,
+      "fragment": "await renderSettled();\n    fireEvent.click(await screen.findByRole(\"button\", { name: /make offer/i }));\n    fireEvent.change(screen.getByPlaceholderText(\"Enter your offer\"), {\n      target: { value: \"75\" },\n    });\n    const form = screen.getByPlaceholderText(\"Enter your offer\").closest(\"form\")!;\n    await act(async () => {\n      fireEvent.submit(form);\n    });\n\n    expect(screen.getByRole",
+      "tokens": 122,
+      "firstFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/MakeOfferButton.test.tsx",
+        "start": 210,
+        "end": 220,
+        "startLoc": {
+          "line": 210,
+          "column": 5,
+          "position": 2417
+        },
+        "endLoc": {
+          "line": 220,
+          "column": 28,
+          "position": 2539
+        }
+      },
+      "secondFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/MakeOfferButton.test.tsx",
+        "start": 155,
+        "end": 204,
+        "startLoc": {
+          "line": 155,
+          "column": 5,
+          "position": 1737
+        },
+        "endLoc": {
+          "line": 204,
+          "column": 28,
+          "position": 2340
+        }
+      }
+    },
+    {
+      "format": "javascript",
+      "lines": 148,
+      "fragment": "} onClose={onClose} />);\n    fireEvent.click(screen.getByRole(\"button\", { name: /close/i }));\n    expect(onClose).toHaveBeenCalledTimes(1);\n  });\n\n  it(\"calls onClose when the backdrop is clicked\", () => {\n    const { container } = render(<ListingManageModal listing={baseListing} onClose={onClose} />);\n    fireEvent.click(container.firstChild as Element);\n    expect(onClose).toHaveBeenCalledTimes(1);\n  });\n\n  // --- Transition to confirm-sale step ---\n\n  it(\"transitions to 'Confirm Sale' step when 'Mark as sold' is clicked\", () => {\n    render(<ListingManageModal listing={baseListing} onClose={onClose} />);\n    fireEvent.click(screen.getByRole(\"button\", { name: /mark as sold/i }));\n    expect(screen.getByText(\"Confirm Sale\")).toBeInTheDocument();\n    expect(screen.getByText(\"Who did you sell this to?\")).toBeInTheDocument();\n    expect(screen.getByPlaceholderText(\"Search by username…\")).toBeInTheDocument();\n  });\n\n  it(\"shows 'Confirm sale' and 'Cancel' buttons in the confirm-sale step\", () => {\n    render(<ListingManageModal listing={baseListing} onClose={onClose} />);\n    fireEvent.click(screen.getByRole(\"button\", { name: /mark as sold/i }));\n    expect(screen.getByRole(\"button\", { name: /^confirm sale$/i })).toBeInTheDocument();\n    expect(screen.getByRole(\"button\", { name: /cancel/i })).toBeInTheDocument();\n  });\n\n  it(\"cancel button returns to the normal actions view\", () => {\n    render(<ListingManageModal listing={baseListing} onClose={onClose} />);\n    fireEvent.click(screen.getByRole(\"button\", { name: /mark as sold/i }));\n    fireEvent.click(screen.getByRole(\"button\", { name: /cancel/i }));\n    expect(screen.getByText(\"Manage Listing\")).toBeInTheDocument();\n    expect(screen.getByRole(\"button\", { name: /mark as sold/i })).toBeInTheDocument();\n  });\n\n  // --- Username autocomplete ---\n  // Uses fake timers to control the 200ms debounce.\n  // act(async) flushes React state + microtasks so we can assert synchronously after.\n\n  it(\"shows username suggestions after the debounce fires\", async () => {\n    mockLimit.mockResolvedValue({ data: [{ id: \"buyer-1\", username: \"janedoe\" }], error: null });\n\n    render(<ListingManageModal listing={baseListing} onClose={onClose} />);\n    fireEvent.click(screen.getByRole(\"button\", { name: /mark as sold/i }));\n    fireEvent.change(screen.getByPlaceholderText(\"Search by username…\"), { target: { value: \"jane\" } });\n\n    await act(async () => { vi.advanceTimersByTime(250); });\n\n    expect(screen.getByRole(\"button\", { name: \"@janedoe\" })).toBeInTheDocument();\n  });\n\n  it(\"does not show suggestions before the debounce delay has elapsed\", async () => {\n    mockLimit.mockResolvedValue({ data: [{ id: \"buyer-1\", username: \"janedoe\" }], error: null });\n\n    render(<ListingManageModal listing={baseListing} onClose={onClose} />);\n    fireEvent.click(screen.getByRole(\"button\", { name: /mark as sold/i }));\n    fireEvent.change(screen.getByPlaceholderText(\"Search by username…\"), { target: { value: \"jane\" } });\n\n    await act(async () => { vi.advanceTimersByTime(100); });\n\n    expect(screen.queryByRole(\"button\", { name: \"@janedoe\" })).toBeNull();\n  });\n\n  it(\"selecting a suggestion updates the input and confirm button label\", async () => {\n    mockLimit.mockResolvedValue({ data: [{ id: \"buyer-1\", username: \"janedoe\" }], error: null });\n\n    render(<ListingManageModal listing={baseListing} onClose={onClose} />);\n    fireEvent.click(screen.getByRole(\"button\", { name: /mark as sold/i }));\n    fireEvent.change(screen.getByPlaceholderText(\"Search by username…\"), { target: { value: \"jane\" } });\n\n    await act(async () => { vi.advanceTimersByTime(250); });\n\n    fireEvent.mouseDown(screen.getByRole(\"button\", { name: \"@janedoe\" }));\n\n    const input = screen.getByPlaceholderText(\"Search by username…\") as HTMLInputElement;\n    expect(input.value).toBe(\"@janedoe\");\n    expect(screen.getByRole(\"button\", { name: /confirm sale to @janedoe/i })).toBeInTheDocument();\n  });\n\n  it(\"clears the selected buyer when the user types again after a selection\", async () => {\n    mockLimit.mockResolvedValue({ data: [{ id: \"buyer-1\", username: \"janedoe\" }], error: null });\n\n    render(<ListingManageModal listing={baseListing} onClose={onClose} />);\n    fireEvent.click(screen.getByRole(\"button\", { name: /mark as sold/i }));\n    fireEvent.change(screen.getByPlaceholderText(\"Search by username…\"), { target: { value: \"jane\" } });\n\n    await act(async () => { vi.advanceTimersByTime(250); });\n\n    fireEvent.mouseDown(screen.getByRole(\"button\", { name: \"@janedoe\" }));\n    fireEvent.change(screen.getByPlaceholderText(\"Search by username…\"), { target: { value: \"j\" } });\n\n    expect(screen.getByRole(\"button\", { name: /^confirm sale$/i })).toBeInTheDocument();\n  });\n\n  // --- Confirm sale ---\n  // act(async) flushes the async supabase call so we can assert synchronously after.\n\n  it(\"confirm button is disabled until a buyer is selected\", () => {\n    render(<ListingManageModal listing={baseListing} onClose={onClose} />);\n    fireEvent.click(screen.getByRole(\"button\", { name: /mark as sold/i }));\n    expect(screen.getByRole(\"button\", { name: /confirm sale/i })).toBeDisabled();\n  });\n\n  it(\"confirms the sale with a selected buyer and passes buyer_id\", async () => {\n    mockLimit.mockResolvedValue({ data: [{ id: \"buyer-1\", username: \"janedoe\" }], error: null });\n\n    render(<ListingManageModal listing={baseListing} onClose={onClose} />);\n    fireEvent.click(screen.getByRole(\"button\", { name: /mark as sold/i }));\n    fireEvent.change(screen.getByPlaceholderText(\"Search by username…\"), { target: { value: \"jane\" } });\n\n    await act(async () => { vi.advanceTimersByTime(250); });\n\n    fireEvent.mouseDown(screen.getByRole(\"button\", { name: \"@janedoe\" }));\n\n    await act(async () => {\n      fireEvent.click(screen.getByRole(\"button\", { name: /confirm sale to @janedoe/i }));\n    });\n\n    expect(mockUpdate).toHaveBeenCalledWith({ sold: true, buyer_id: \"buyer-1\" });\n  });\n\n  it(\"shows an error message when the sale update fails\", async () => {\n    mockLimit.mockResolvedValue({ data: [{ id: \"buyer-1\", username: \"janedoe\" }], error: null });\n    mockUpdateEq.mockResolvedValue({ error: { message: \"Permission denied\" } });\n\n    render(<ListingManageModal listing={baseListing} onClose={onClose} />);\n    fireEvent.click(screen.getByRole(\"button\", { name: /mark as sold/i }));\n    fireEvent.change(screen.getByPlaceholderText(\"Search by username…\"), { target: { value: \"jane\" } });\n\n    await act(async () => { vi.advanceTimersByTime(250); });\n\n    fireEvent.mouseDown(screen.getByRole(\"button\", { name: \"@janedoe\" }));\n\n    await act(async () => {\n      fireEvent.click(screen.getByRole(\"button\", { name: /confirm sale to @janedoe/i }));\n    });\n\n    expect(screen.getByText(\"Permission denied\")).toBeInTheDocument();\n    expect(onClose).not.toHaveBeenCalled();\n    expect(mockRefresh).not.toHaveBeenCalled();\n  });\n\n  it(\"shows 'Saving...' while the update is in progress\", async () => {\n    mockLimit.mockResolvedValue({ data: [{ id: \"buyer-1\", username: \"janedoe\" }], error: null });\n    mockUpdateEq.mockReturnValue(new Promise(() => {})); // never resolves\n\n    render(<ListingManageModal listing={baseListing} onClose={onClose}",
+      "tokens": 2126,
+      "firstFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/ListingManageModal.test.tsx",
+        "start": 121,
+        "end": 268,
+        "startLoc": {
+          "line": 121,
+          "column": 52,
+          "position": 1423
+        },
+        "endLoc": {
+          "line": 268,
+          "column": 71,
+          "position": 3549
+        }
+      },
+      "secondFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/ListingManageModal.test.tsx",
+        "start": 115,
+        "end": 164,
+        "startLoc": {
+          "line": 115,
+          "column": 71,
+          "position": 1340
+        },
+        "endLoc": {
+          "line": 164,
+          "column": 71,
+          "position": 1999
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 10,
+      "fragment": "),\n}));\n\nvi.mock(\"next/link\", () => ({\n  default: ({ href, children, className }: { href: string; children: React.ReactNode; className?: string }) => (\n    <a href={href} className={className}>{children}</a>\n  ),\n}));\n\nvi",
+      "tokens": 104,
+      "firstFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/ListingManageModal.test.tsx",
+        "start": 19,
+        "end": 28,
+        "startLoc": {
+          "line": 19,
+          "column": 3,
+          "position": 243
+        },
+        "endLoc": {
+          "line": 28,
+          "column": 3,
+          "position": 347
+        }
+      },
+      "secondFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/(auth)/reset-password/__tests__/page.test.tsx",
+        "start": 10,
+        "end": 26,
+        "startLoc": {
+          "line": 10,
+          "column": 39,
+          "position": 122
+        },
+        "endLoc": {
+          "line": 26,
+          "column": 9,
+          "position": 283
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 8,
+      "fragment": ", async () => {\n    mockLimit.mockResolvedValue({ data: [{ id: \"buyer-1\", username: \"janedoe\" }], error: null });\n\n    render(<ListingManageModal listing={baseListing} onClose={onClose} />);\n    fireEvent.click(screen.getByRole(\"button\", { name: /mark as sold/i }));\n    fireEvent.change(screen.getByPlaceholderText(\"Search by username…\"), { target: { value: \"jane\" } });\n\n    await act(async () => { vi.advanceTimersByTime(100",
+      "tokens": 145,
+      "firstFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/ListingManageModal.test.tsx",
+        "start": 173,
+        "end": 180,
+        "startLoc": {
+          "line": 173,
+          "column": 71,
+          "position": 2124
+        },
+        "endLoc": {
+          "line": 180,
+          "column": 55,
+          "position": 2269
+        }
+      },
+      "secondFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/ListingManageModal.test.tsx",
+        "start": 161,
+        "end": 168,
+        "startLoc": {
+          "line": 161,
+          "column": 59,
+          "position": 1934
+        },
+        "endLoc": {
+          "line": 168,
+          "column": 55,
+          "position": 2079
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 10,
+      "fragment": ", async () => {\n    mockLimit.mockResolvedValue({ data: [{ id: \"buyer-1\", username: \"janedoe\" }], error: null });\n\n    render(<ListingManageModal listing={baseListing} onClose={onClose} />);\n    fireEvent.click(screen.getByRole(\"button\", { name: /mark as sold/i }));\n    fireEvent.change(screen.getByPlaceholderText(\"Search by username…\"), { target: { value: \"jane\" } });\n\n    await act(async () => { vi.advanceTimersByTime(250); });\n\n    fireEvent",
+      "tokens": 155,
+      "firstFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/ListingManageModal.test.tsx",
+        "start": 185,
+        "end": 194,
+        "startLoc": {
+          "line": 185,
+          "column": 73,
+          "position": 2314
+        },
+        "endLoc": {
+          "line": 194,
+          "column": 14,
+          "position": 2469
+        }
+      },
+      "secondFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/ListingManageModal.test.tsx",
+        "start": 161,
+        "end": 170,
+        "startLoc": {
+          "line": 161,
+          "column": 59,
+          "position": 1934
+        },
+        "endLoc": {
+          "line": 170,
+          "column": 11,
+          "position": 2089
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 11,
+      "fragment": ", async () => {\n    mockLimit.mockResolvedValue({ data: [{ id: \"buyer-1\", username: \"janedoe\" }], error: null });\n\n    render(<ListingManageModal listing={baseListing} onClose={onClose} />);\n    fireEvent.click(screen.getByRole(\"button\", { name: /mark as sold/i }));\n    fireEvent.change(screen.getByPlaceholderText(\"Search by username…\"), { target: { value: \"jane\" } });\n\n    await act(async () => { vi.advanceTimersByTime(250); });\n\n    fireEvent.mouseDown(screen.getByRole(\"button\", { name: \"@janedoe\" }));\n    fireEvent",
+      "tokens": 179,
+      "firstFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/ListingManageModal.test.tsx",
+        "start": 201,
+        "end": 211,
+        "startLoc": {
+          "line": 201,
+          "column": 77,
+          "position": 2562
+        },
+        "endLoc": {
+          "line": 211,
+          "column": 14,
+          "position": 2741
+        }
+      },
+      "secondFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/ListingManageModal.test.tsx",
+        "start": 161,
+        "end": 196,
+        "startLoc": {
+          "line": 161,
+          "column": 59,
+          "position": 1934
+        },
+        "endLoc": {
+          "line": 196,
+          "column": 10,
+          "position": 2494
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 12,
+      "fragment": ", async () => {\n    mockLimit.mockResolvedValue({ data: [{ id: \"buyer-1\", username: \"janedoe\" }], error: null });\n\n    render(<ListingManageModal listing={baseListing} onClose={onClose} />);\n    fireEvent.click(screen.getByRole(\"button\", { name: /mark as sold/i }));\n    fireEvent.change(screen.getByPlaceholderText(\"Search by username…\"), { target: { value: \"jane\" } });\n\n    await act(async () => { vi.advanceTimersByTime(250); });\n\n    fireEvent.mouseDown(screen.getByRole(\"button\", { name: \"@janedoe\" }));\n\n    await",
+      "tokens": 180,
+      "firstFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/ListingManageModal.test.tsx",
+        "start": 225,
+        "end": 236,
+        "startLoc": {
+          "line": 225,
+          "column": 67,
+          "position": 2906
+        },
+        "endLoc": {
+          "line": 236,
+          "column": 10,
+          "position": 3086
+        }
+      },
+      "secondFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/ListingManageModal.test.tsx",
+        "start": 161,
+        "end": 196,
+        "startLoc": {
+          "line": 161,
+          "column": 59,
+          "position": 1934
+        },
+        "endLoc": {
+          "line": 196,
+          "column": 10,
+          "position": 2494
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 15,
+      "fragment": "});\n\n    render(<ListingManageModal listing={baseListing} onClose={onClose} />);\n    fireEvent.click(screen.getByRole(\"button\", { name: /mark as sold/i }));\n    fireEvent.change(screen.getByPlaceholderText(\"Search by username…\"), { target: { value: \"jane\" } });\n\n    await act(async () => { vi.advanceTimersByTime(250); });\n\n    fireEvent.mouseDown(screen.getByRole(\"button\", { name: \"@janedoe\" }));\n\n    await act(async () => {\n      fireEvent.click(screen.getByRole(\"button\", { name: /confirm sale to @janedoe/i }));\n    });\n\n    expect(screen",
+      "tokens": 182,
+      "firstFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/ListingManageModal.test.tsx",
+        "start": 245,
+        "end": 259,
+        "startLoc": {
+          "line": 245,
+          "column": 78,
+          "position": 3231
+        },
+        "endLoc": {
+          "line": 259,
+          "column": 18,
+          "position": 3413
+        }
+      },
+      "secondFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/ListingManageModal.test.tsx",
+        "start": 162,
+        "end": 240,
+        "startLoc": {
+          "line": 162,
+          "column": 95,
+          "position": 1978
+        },
+        "endLoc": {
+          "line": 240,
+          "column": 22,
+          "position": 3132
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 9,
+      "fragment": "render(<ListingManageModal listing={baseListing} onClose={onClose} />);\n    fireEvent.click(screen.getByRole(\"button\", { name: /mark as sold/i }));\n    fireEvent.change(screen.getByPlaceholderText(\"Search by username…\"), { target: { value: \"jane\" } });\n\n    await act(async () => { vi.advanceTimersByTime(250); });\n\n    fireEvent.mouseDown(screen.getByRole(\"button\", { name: \"@janedoe\" }));\n\n    // setSaving(true) fires synchronously before the awaited supabase call",
+      "tokens": 130,
+      "firstFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/ListingManageModal.test.tsx",
+        "start": 268,
+        "end": 276,
+        "startLoc": {
+          "line": 268,
+          "column": 5,
+          "position": 3534
+        },
+        "endLoc": {
+          "line": 276,
+          "column": 76,
+          "position": 3664
+        }
+      },
+      "secondFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/ListingManageModal.test.tsx",
+        "start": 164,
+        "end": 196,
+        "startLoc": {
+          "line": 164,
+          "column": 5,
+          "position": 1984
+        },
+        "endLoc": {
+          "line": 196,
+          "column": 10,
+          "position": 2494
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 11,
+      "fragment": ",\n}));\n\n// Mock Next.js Link component to render a simple anchor tag for testing\nvi.mock(\"next/link\", () => ({\n  default: ({ href, children, className }: { href: string; children: React.ReactNode; className?: string }) => (\n    <a href={href} className={className}>{children}</a>\n  ),\n}));\n\n// Base listing object to use in tests, can be overridden for specific test cases",
+      "tokens": 105,
+      "firstFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/ListingCard.test.tsx",
+        "start": 11,
+        "end": 21,
+        "startLoc": {
+          "line": 11,
+          "column": 4,
+          "position": 141
+        },
+        "endLoc": {
+          "line": 21,
+          "column": 82,
+          "position": 246
+        }
+      },
+      "secondFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/(auth)/forgot-password/__tests__/page.test.tsx",
+        "start": 12,
+        "end": 26,
+        "startLoc": {
+          "line": 12,
+          "column": 4,
+          "position": 116
+        },
+        "endLoc": {
+          "line": 26,
+          "column": 9,
+          "position": 283
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 10,
+      "fragment": "),\n}));\n\nvi.mock(\"../AuthProvider\", () => ({\n  useAuth: vi.fn(),\n}));\n\nvi.mock(\"@/lib/supabase\", () => ({\n  supabase: {\n    from: () => ({ update",
+      "tokens": 74,
+      "firstFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/EditProfile.test.tsx",
+        "start": 8,
+        "end": 17,
+        "startLoc": {
+          "line": 8,
+          "column": 17,
+          "position": 117
+        },
+        "endLoc": {
+          "line": 17,
+          "column": 26,
+          "position": 191
+        }
+      },
+      "secondFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/ReportButton.test.tsx",
+        "start": 12,
+        "end": 21,
+        "startLoc": {
+          "line": 12,
+          "column": 39,
+          "position": 156
+        },
+        "endLoc": {
+          "line": 21,
+          "column": 26,
+          "position": 230
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 9,
+      "fragment": ";\n\nvi.mock(\"next/link\", () => ({\n  default: ({ href, children, className }: { href: string; children: React.ReactNode; className?: string }) => (\n    <a href={href} className={className}>{children}</a>\n  ),\n}));\n\nvi.mock(\"../AuthProvider\"",
+      "tokens": 102,
+      "firstFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/EditButton.test.tsx",
+        "start": 4,
+        "end": 12,
+        "startLoc": {
+          "line": 4,
+          "column": 48,
+          "position": 61
+        },
+        "endLoc": {
+          "line": 12,
+          "column": 26,
+          "position": 163
+        }
+      },
+      "secondFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/(auth)/signup/__tests__/page.test.tsx",
+        "start": 18,
+        "end": 28,
+        "startLoc": {
+          "line": 18,
+          "column": 4,
+          "position": 185
+        },
+        "endLoc": {
+          "line": 28,
+          "column": 26,
+          "position": 351
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 6,
+      "fragment": ", () => {\n    vi.mocked(AuthProvider.useAuth).mockReturnValue({\n      user: { id: SELLER_ID },\n    } as ReturnType<typeof AuthProvider.useAuth>);\n    render(<EditButton productId={PRODUCT_ID} sellerId={SELLER_ID} />);\n    expect(screen.getByRole(\"link\", { name: /edit/i })).toHaveAttribute",
+      "tokens": 94,
+      "firstFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/EditButton.test.tsx",
+        "start": 51,
+        "end": 56,
+        "startLoc": {
+          "line": 51,
+          "column": 38,
+          "position": 550
+        },
+        "endLoc": {
+          "line": 56,
+          "column": 72,
+          "position": 644
+        }
+      },
+      "secondFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/EditButton.test.tsx",
+        "start": 41,
+        "end": 46,
+        "startLoc": {
+          "line": 41,
+          "column": 67,
+          "position": 437
+        },
+        "endLoc": {
+          "line": 46,
+          "column": 74,
+          "position": 531
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 12,
+      "fragment": ": vi.fn(),\n}));\n\nvi.mock(\"next/navigation\", () => ({\n  useRouter: () => ({ push: mockPush }),\n}));\n\nvi.mock(\"../AuthProvider\", () => ({\n  useAuth: vi.fn(),\n}));\n\nvi.mock(\"@/app/actions/listings\"",
+      "tokens": 93,
+      "firstFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/DeleteButton.test.tsx",
+        "start": 10,
+        "end": 21,
+        "startLoc": {
+          "line": 10,
+          "column": 20,
+          "position": 135
+        },
+        "endLoc": {
+          "line": 21,
+          "column": 33,
+          "position": 228
+        }
+      },
+      "secondFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/ReportButton.test.tsx",
+        "start": 8,
+        "end": 19,
+        "startLoc": {
+          "line": 8,
+          "column": 13,
+          "position": 108
+        },
+        "endLoc": {
+          "line": 19,
+          "column": 25,
+          "position": 201
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 7,
+      "fragment": ", async () => {\n    renderAsSeller();\n    fireEvent.click(screen.getByRole(\"button\", { name: /delete listing/i }));\n    await act(async () => {\n      fireEvent.click(screen.getByRole(\"button\", { name: /yes, delete it/i }));\n    });\n    expect(mockStorageRemove",
+      "tokens": 87,
+      "firstFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/DeleteButton.test.tsx",
+        "start": 114,
+        "end": 120,
+        "startLoc": {
+          "line": 114,
+          "column": 66,
+          "position": 1188
+        },
+        "endLoc": {
+          "line": 120,
+          "column": 29,
+          "position": 1275
+        }
+      },
+      "secondFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/DeleteButton.test.tsx",
+        "start": 105,
+        "end": 111,
+        "startLoc": {
+          "line": 105,
+          "column": 57,
+          "position": 1079
+        },
+        "endLoc": {
+          "line": 111,
+          "column": 24,
+          "position": 1166
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 6,
+      "fragment": ");\n    fireEvent.click(screen.getByRole(\"button\", { name: /delete listing/i }));\n    await act(async () => {\n      fireEvent.click(screen.getByRole(\"button\", { name: /yes, delete it/i }));\n    });\n    expect(mockStorageRemove).not",
+      "tokens": 76,
+      "firstFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/DeleteButton.test.tsx",
+        "start": 124,
+        "end": 129,
+        "startLoc": {
+          "line": 124,
+          "column": 78,
+          "position": 1320
+        },
+        "endLoc": {
+          "line": 129,
+          "column": 34,
+          "position": 1396
+        }
+      },
+      "secondFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/DeleteButton.test.tsx",
+        "start": 106,
+        "end": 120,
+        "startLoc": {
+          "line": 106,
+          "column": 20,
+          "position": 1093
+        },
+        "endLoc": {
+          "line": 120,
+          "column": 51,
+          "position": 1278
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 7,
+      "fragment": ", async () => {\n    renderAsSeller();\n    fireEvent.click(screen.getByRole(\"button\", { name: /delete listing/i }));\n    await act(async () => {\n      fireEvent.click(screen.getByRole(\"button\", { name: /yes, delete it/i }));\n    });\n    expect(listingsActions",
+      "tokens": 87,
+      "firstFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/DeleteButton.test.tsx",
+        "start": 132,
+        "end": 138,
+        "startLoc": {
+          "line": 132,
+          "column": 58,
+          "position": 1413
+        },
+        "endLoc": {
+          "line": 138,
+          "column": 27,
+          "position": 1500
+        }
+      },
+      "secondFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/DeleteButton.test.tsx",
+        "start": 105,
+        "end": 111,
+        "startLoc": {
+          "line": 105,
+          "column": 57,
+          "position": 1079
+        },
+        "endLoc": {
+          "line": 111,
+          "column": 24,
+          "position": 1166
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 7,
+      "fragment": ", async () => {\n    renderAsSeller();\n    fireEvent.click(screen.getByRole(\"button\", { name: /delete listing/i }));\n    await act(async () => {\n      fireEvent.click(screen.getByRole(\"button\", { name: /yes, delete it/i }));\n    });\n    expect(mockPush",
+      "tokens": 87,
+      "firstFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/DeleteButton.test.tsx",
+        "start": 141,
+        "end": 147,
+        "startLoc": {
+          "line": 141,
+          "column": 50,
+          "position": 1520
+        },
+        "endLoc": {
+          "line": 147,
+          "column": 20,
+          "position": 1607
+        }
+      },
+      "secondFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/DeleteButton.test.tsx",
+        "start": 105,
+        "end": 111,
+        "startLoc": {
+          "line": 105,
+          "column": 57,
+          "position": 1079
+        },
+        "endLoc": {
+          "line": 111,
+          "column": 24,
+          "position": 1166
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 6,
+      "fragment": "renderAsSeller();\n    fireEvent.click(screen.getByRole(\"button\", { name: /delete listing/i }));\n    await act(async () => {\n      fireEvent.click(screen.getByRole(\"button\", { name: /yes, delete it/i }));\n    });\n    expect(mockPush).not",
+      "tokens": 78,
+      "firstFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/DeleteButton.test.tsx",
+        "start": 152,
+        "end": 157,
+        "startLoc": {
+          "line": 152,
+          "column": 5,
+          "position": 1661
+        },
+        "endLoc": {
+          "line": 157,
+          "column": 25,
+          "position": 1739
+        }
+      },
+      "secondFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/DeleteButton.test.tsx",
+        "start": 106,
+        "end": 147,
+        "startLoc": {
+          "line": 106,
+          "column": 5,
+          "position": 1091
+        },
+        "endLoc": {
+          "line": 147,
+          "column": 42,
+          "position": 1610
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 6,
+      "fragment": "renderAsSeller();\n    fireEvent.click(screen.getByRole(\"button\", { name: /delete listing/i }));\n    await act(async () => {\n      fireEvent.click(screen.getByRole(\"button\", { name: /yes, delete it/i }));\n    });\n    expect(screen",
+      "tokens": 75,
+      "firstFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/DeleteButton.test.tsx",
+        "start": 164,
+        "end": 169,
+        "startLoc": {
+          "line": 164,
+          "column": 5,
+          "position": 1794
+        },
+        "endLoc": {
+          "line": 169,
+          "column": 18,
+          "position": 1869
+        }
+      },
+      "secondFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/DeleteButton.test.tsx",
+        "start": 106,
+        "end": 111,
+        "startLoc": {
+          "line": 106,
+          "column": 5,
+          "position": 1091
+        },
+        "endLoc": {
+          "line": 111,
+          "column": 24,
+          "position": 1166
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 7,
+      "fragment": ");\n    renderAsSeller();\n    fireEvent.click(screen.getByRole(\"button\", { name: /delete listing/i }));\n    await act(async () => {\n      fireEvent.click(screen.getByRole(\"button\", { name: /yes, delete it/i }));\n    });\n    expect(screen.getByRole(\"button\", { name: /deleting/i })).toBeDisabled",
+      "tokens": 97,
+      "firstFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/DeleteButton.test.tsx",
+        "start": 173,
+        "end": 179,
+        "startLoc": {
+          "line": 173,
+          "column": 55,
+          "position": 1930
+        },
+        "endLoc": {
+          "line": 179,
+          "column": 75,
+          "position": 2027
+        }
+      },
+      "secondFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/DeleteButton.test.tsx",
+        "start": 151,
+        "end": 169,
+        "startLoc": {
+          "line": 151,
+          "column": 79,
+          "position": 1657
+        },
+        "endLoc": {
+          "line": 169,
+          "column": 80,
+          "position": 1887
+        }
+      }
+    },
+    {
+      "format": "javascript",
+      "lines": 47,
+      "fragment": "} className=\"flex flex-col gap-4\">\n            <div className=\"flex flex-col gap-1\">\n              <label className=\"text-sm font-medium text-gray-700\">Email</label>\n              <input\n                type=\"email\"\n                name=\"email\"\n                placeholder=\"you@ucsc.edu\"\n                value={email}\n                onChange={(e) => setEmail(e.target.value)}\n                required\n                className=\"w-full rounded-xl border-2 border-gray-200 px-4 py-3 text-base focus:border-[#0F2044] focus:outline-none transition\"\n              />\n            </div>\n\n            <div className=\"flex flex-col gap-1\">\n              <label className=\"text-sm font-medium text-gray-700\">Password</label>\n              <div className=\"relative\">\n                <input\n                  type={showPassword ? \"text\" : \"password\"}\n                  name=\"password\"\n                  placeholder=\"Enter your password\"\n                  value={password}\n                  onChange={(e) => setPassword(e.target.value)}\n                  required\n                  className=\"w-full rounded-xl border-2 border-gray-200 px-4 py-3 pr-12 text-base focus:border-[#0F2044] focus:outline-none transition\"\n                />\n                <button\n                  type=\"button\"\n                  onClick={() => setShowPassword((p) => !p)}\n                  className=\"absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer\"\n                >\n                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}\n                </button>\n              </div>\n            </div>\n\n            <div className=\"text-right -mt-1\">\n              <Link href=\"/forgot-password\" className=\"text-sm text-[#0F2044] hover:underline\">\n                Forgot password?\n              </Link>\n            </div>\n\n            {error && <p className=\"text-red-500 text-sm\">{error}</p>}\n\n            <button\n              type=\"submit\"\n              disabled={loading}",
+      "tokens": 368,
+      "firstFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/(auth)/signin/page.tsx",
+        "start": 42,
+        "end": 88,
+        "startLoc": {
+          "line": 42,
+          "column": 39,
+          "position": 423
+        },
+        "endLoc": {
+          "line": 88,
+          "column": 33,
+          "position": 791
+        }
+      },
+      "secondFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/(auth)/signup/page.tsx",
+        "start": 84,
+        "end": 129,
+        "startLoc": {
+          "line": 84,
+          "column": 61,
+          "position": 828
+        },
+        "endLoc": {
+          "line": 129,
+          "column": 33,
+          "position": 1160
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 8,
+      "fragment": ");\n  const [email, setEmail] = useState(\"\");\n  const [password, setPassword] = useState(\"\");\n  const [showPassword, setShowPassword] = useState(false);\n  const [error, setError] = useState<string | null>(null);\n  const [loading, setLoading] = useState(false);\n\n  async",
+      "tokens": 102,
+      "firstFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/(auth)/signin/page.tsx",
+        "start": 10,
+        "end": 17,
+        "startLoc": {
+          "line": 10,
+          "column": 28,
+          "position": 90
+        },
+        "endLoc": {
+          "line": 17,
+          "column": 8,
+          "position": 192
+        }
+      },
+      "secondFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/(auth)/signup/page.tsx",
+        "start": 9,
+        "end": 15,
+        "startLoc": {
+          "line": 9,
+          "column": 46,
+          "position": 86
+        },
+        "endLoc": {
+          "line": 15,
+          "column": 8,
+          "position": 187
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 21,
+      "fragment": ">\n            <div className=\"flex flex-col gap-1\">\n              <label className=\"text-sm font-medium text-gray-700\">Email</label>\n              <input\n                type=\"email\"\n                name=\"email\"\n                placeholder=\"you@ucsc.edu\"\n                value={email}\n                onChange={(e) => setEmail(e.target.value)}\n                required\n                className=\"w-full rounded-xl border-2 border-gray-200 px-4 py-3 text-base focus:border-[#0F2044] focus:outline-none transition\"\n              />\n            </div>\n\n            <div className=\"flex flex-col gap-1\">\n              <label className=\"text-sm font-medium text-gray-700\">Password</label>\n              <div className=\"relative\">\n                <input\n                  type={showPassword ? \"text\" : \"password\"}\n                  name=\"password\"\n                  placeholder=\"Enter your password",
+      "tokens": 154,
+      "firstFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/(auth)/signin/page.tsx",
+        "start": 42,
+        "end": 62,
+        "startLoc": {
+          "line": 42,
+          "column": 72,
+          "position": 430
+        },
+        "endLoc": {
+          "line": 62,
+          "column": 51,
+          "position": 584
+        }
+      },
+      "secondFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/(auth)/signup/page.tsx",
+        "start": 88,
+        "end": 109,
+        "startLoc": {
+          "line": 88,
+          "column": 18,
+          "position": 843
+        },
+        "endLoc": {
+          "line": 109,
+          "column": 49,
+          "position": 998
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 17,
+      "fragment": "\"\n                  value={password}\n                  onChange={(e) => setPassword(e.target.value)}\n                  required\n                  className=\"w-full rounded-xl border-2 border-gray-200 px-4 py-3 pr-12 text-base focus:border-[#0F2044] focus:outline-none transition\"\n                />\n                <button\n                  type=\"button\"\n                  onClick={() => setShowPassword((p) => !p)}\n                  className=\"absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer\"\n                >\n                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}\n                </button>\n              </div>\n            </div>\n\n            <",
+      "tokens": 124,
+      "firstFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/(auth)/signin/page.tsx",
+        "start": 62,
+        "end": 78,
+        "startLoc": {
+          "line": 62,
+          "column": 51,
+          "position": 585
+        },
+        "endLoc": {
+          "line": 78,
+          "column": 14,
+          "position": 709
+        }
+      },
+      "secondFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/(auth)/signup/page.tsx",
+        "start": 109,
+        "end": 125,
+        "startLoc": {
+          "line": 109,
+          "column": 49,
+          "position": 999
+        },
+        "endLoc": {
+          "line": 125,
+          "column": 14,
+          "position": 1123
+        }
+      }
+    },
+    {
+      "format": "javascript",
+      "lines": 26,
+      "fragment": "} className=\"flex flex-col gap-4\">\n            <div className=\"flex flex-col gap-1\">\n              <label className=\"text-sm font-medium text-gray-700\">New password</label>\n              <div className=\"relative\">\n                <input\n                  type={showPassword ? \"text\" : \"password\"}\n                  placeholder=\"Create a new password\"\n                  value={password}\n                  onChange={(e) => setPassword(e.target.value)}\n                  required\n                  className=\"w-full rounded-xl border-2 border-gray-200 px-4 py-3 pr-12 text-base focus:border-[#0F2044] focus:outline-none transition\"\n                />\n                <button\n                  type=\"button\"\n                  onClick={() => setShowPassword((p) => !p)}\n                  className=\"absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer\"\n                >\n                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}\n                </button>\n              </div>\n            </div>\n\n            <div className=\"flex flex-col gap-1\">\n              <label className=\"text-sm font-medium text-gray-700\">Confirm password</label>\n              <input\n                type={showPassword ",
+      "tokens": 227,
+      "firstFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/(auth)/reset-password/page.tsx",
+        "start": 72,
+        "end": 97,
+        "startLoc": {
+          "line": 72,
+          "column": 39,
+          "position": 675
+        },
+        "endLoc": {
+          "line": 97,
+          "column": 36,
+          "position": 902
+        }
+      },
+      "secondFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/(auth)/signup/page.tsx",
+        "start": 97,
+        "end": 129,
+        "startLoc": {
+          "line": 97,
+          "column": 58,
+          "position": 917
+        },
+        "endLoc": {
+          "line": 129,
+          "column": 32,
+          "position": 1159
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 11,
+      "fragment": ">\n      </main>\n    );\n  }\n\n  return (\n    <main className=\"min-h-[80vh] flex items-center justify-center px-4 py-12\">\n      <div className=\"w-full max-w-md\">\n        <div className=\"bg-white rounded-2xl shadow-xl border border-gray-100 p-8\">\n          <div className=\"text-center mb-8\">\n            <h1 className=\"text-3xl font-bold text-[#0F2044]\">Choose",
+      "tokens": 74,
+      "firstFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/(auth)/reset-password/page.tsx",
+        "start": 58,
+        "end": 68,
+        "startLoc": {
+          "line": 58,
+          "column": 62,
+          "position": 548
+        },
+        "endLoc": {
+          "line": 68,
+          "column": 69,
+          "position": 622
+        }
+      },
+      "secondFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/(auth)/signup/page.tsx",
+        "start": 62,
+        "end": 72,
+        "startLoc": {
+          "line": 62,
+          "column": 14,
+          "position": 626
+        },
+        "endLoc": {
+          "line": 72,
+          "column": 69,
+          "position": 700
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 17,
+      "fragment": "\"\n                  value={password}\n                  onChange={(e) => setPassword(e.target.value)}\n                  required\n                  className=\"w-full rounded-xl border-2 border-gray-200 px-4 py-3 pr-12 text-base focus:border-[#0F2044] focus:outline-none transition\"\n                />\n                <button\n                  type=\"button\"\n                  onClick={() => setShowPassword((p) => !p)}\n                  className=\"absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer\"\n                >\n                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}\n                </button>\n              </div>\n            </div>\n\n            <div className=\"flex flex-col gap-1",
+      "tokens": 130,
+      "firstFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/(auth)/reset-password/page.tsx",
+        "start": 78,
+        "end": 94,
+        "startLoc": {
+          "line": 78,
+          "column": 53,
+          "position": 744
+        },
+        "endLoc": {
+          "line": 94,
+          "column": 48,
+          "position": 874
+        }
+      },
+      "secondFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/(auth)/signup/page.tsx",
+        "start": 109,
+        "end": 78,
+        "startLoc": {
+          "line": 109,
+          "column": 49,
+          "position": 999
+        },
+        "endLoc": {
+          "line": 78,
+          "column": 45,
+          "position": 715
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 10,
+      "fragment": ");\n    }\n  }\n\n  return (\n    <main className=\"min-h-[80vh] flex items-center justify-center px-4 py-12\">\n      <div className=\"w-full max-w-md\">\n        <div className=\"bg-white rounded-2xl shadow-xl border border-gray-100 p-8\">\n          <div className=\"text-center mb-8\">\n            <h1 className=\"text-3xl font-bold text-[#0F2044]\">Reset",
+      "tokens": 69,
+      "firstFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/(auth)/forgot-password/page.tsx",
+        "start": 27,
+        "end": 36,
+        "startLoc": {
+          "line": 27,
+          "column": 19,
+          "position": 261
+        },
+        "endLoc": {
+          "line": 36,
+          "column": 68,
+          "position": 330
+        }
+      },
+      "secondFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/(auth)/signin/page.tsx",
+        "start": 29,
+        "end": 38,
+        "startLoc": {
+          "line": 29,
+          "column": 22,
+          "position": 308
+        },
+        "endLoc": {
+          "line": 38,
+          "column": 70,
+          "position": 377
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 9,
+      "fragment": "</button>\n\n            {open && (\n                <div className=\"fixed inset-0 z-50 flex items-center justify-center bg-black/50\">\n                    <div className=\"bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 p-6\">\n                        {submitted ? (\n                            <div className=\"flex flex-col items-center gap-4 py-4\">\n                                <div className=\"text-4xl\">✓</div>\n                                <p className=\"text-xl font-semibold text-gray-900\">Offer",
+      "tokens": 79,
+      "firstFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/components/MakeOfferButton.tsx",
+        "start": 108,
+        "end": 116,
+        "startLoc": {
+          "line": 108,
+          "column": 13,
+          "position": 1431
+        },
+        "endLoc": {
+          "line": 116,
+          "column": 89,
+          "position": 1510
+        }
+      },
+      "secondFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/components/ReportButton.tsx",
+        "start": 74,
+        "end": 82,
+        "startLoc": {
+          "line": 74,
+          "column": 13,
+          "position": 762
+        },
+        "endLoc": {
+          "line": 82,
+          "column": 90,
+          "position": 841
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 8,
+      "fragment": ".\n                                </p>\n                                <button onClick={handleClose} className=\"mt-2 w-full rounded-xl bg-[#0F2044] py-3 text-lg font-semibold text-white hover:bg-[#162d5a] transition cursor-pointer\">Done</button>\n                            </div>\n                        ) : (\n                            <form onSubmit={handleSubmit} className=\"flex flex-col gap-4\">\n                                <div className=\"flex items-center justify-between\">\n                                    <h2 className=\"text-2xl font-bold text-gray-900\">Make",
+      "tokens": 78,
+      "firstFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/components/MakeOfferButton.tsx",
+        "start": 118,
+        "end": 125,
+        "startLoc": {
+          "line": 118,
+          "column": 215,
+          "position": 1589
+        },
+        "endLoc": {
+          "line": 125,
+          "column": 90,
+          "position": 1667
+        }
+      },
+      "secondFile": {
+        "name": "MikeyZv__SlugMarket/slugmarket_next/app/components/ReportButton.tsx",
+        "start": 83,
+        "end": 89,
+        "startLoc": {
+          "line": 83,
+          "column": 148,
+          "position": 882
+        },
+        "endLoc": {
+          "line": 89,
+          "column": 92,
+          "position": 958
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 11,
+      "fragment": "({ params }: PageProps) {\n  const { id } = await params\n\n  const item = await getItemById(id)\n  if (!item) notFound()\n\n  const supabase = await createSupabaseServerClient()\n  const {\n    data: { user },\n  } = await supabase.auth.getUser()\n  const",
+      "tokens": 101,
+      "firstFile": {
+        "name": "Colin-Posat__SlugFound/app/(app)/items/[id]/page.tsx",
+        "start": 45,
+        "end": 55,
+        "startLoc": {
+          "line": 45,
+          "column": 39,
+          "position": 301
+        },
+        "endLoc": {
+          "line": 55,
+          "column": 8,
+          "position": 402
+        }
+      },
+      "secondFile": {
+        "name": "Colin-Posat__SlugFound/app/(app)/items/[id]/edit/page.tsx",
+        "start": 17,
+        "end": 28,
+        "startLoc": {
+          "line": 17,
+          "column": 43,
+          "position": 91
+        },
+        "endLoc": {
+          "line": 28,
+          "column": 81,
+          "position": 193
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 8,
+      "fragment": "() {\n  return (\n    <div className=\"flex flex-1 items-center justify-center px-4 py-16\">\n      <div className=\"w-full max-w-sm\">\n        <div className=\"rounded-2xl border border-line bg-surface p-8\">\n          <div className=\"mb-6 text-center\">\n            <span className=\"text-3xl\">🐌</span>\n            <h1 className=\"mt-3 text-2xl font-bold text-ink\">Welcome",
+      "tokens": 79,
+      "firstFile": {
+        "name": "Colin-Posat__SlugFound/app/(public)/login/page.tsx",
+        "start": 4,
+        "end": 11,
+        "startLoc": {
+          "line": 4,
+          "column": 34,
+          "position": 24
+        },
+        "endLoc": {
+          "line": 11,
+          "column": 69,
+          "position": 103
+        }
+      },
+      "secondFile": {
+        "name": "Colin-Posat__SlugFound/app/(public)/signup/page.tsx",
+        "start": 9,
+        "end": 16,
+        "startLoc": {
+          "line": 9,
+          "column": 35,
+          "position": 26
+        },
+        "endLoc": {
+          "line": 16,
+          "column": 68,
+          "position": 105
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 11,
+      "fragment": "<div className=\"flex flex-col gap-1.5\">\n        <label htmlFor=\"email\" className=\"text-sm font-medium text-ink-soft\">\n          UCSC email\n        </label>\n        <input\n          id=\"email\"\n          name=\"email\"\n          type=\"email\"\n          autoComplete=\"email\"\n          placeholder=\"slug@ucsc.edu\"\n          className",
+      "tokens": 71,
+      "firstFile": {
+        "name": "Colin-Posat__SlugFound/app/(public)/login/login-form.tsx",
+        "start": 23,
+        "end": 33,
+        "startLoc": {
+          "line": 23,
+          "column": 7,
+          "position": 128
+        },
+        "endLoc": {
+          "line": 33,
+          "column": 20,
+          "position": 199
+        }
+      },
+      "secondFile": {
+        "name": "Colin-Posat__SlugFound/app/(public)/signup/signup-form.tsx",
+        "start": 81,
+        "end": 91,
+        "startLoc": {
+          "line": 81,
+          "column": 7,
+          "position": 687
+        },
+        "endLoc": {
+          "line": 91,
+          "column": 16,
+          "position": 758
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 15,
+      "fragment": ",\n    search: q,\n    category: category || undefined,\n    location: location || undefined,\n    activeOnly: !showAll,\n  })\n\n  return (\n    <div className=\"mx-auto w-full max-w-6xl px-4 py-10\">\n      <div className=\"reveal mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between\">\n        <div>\n          <p className=\"font-mono text-[11px] uppercase tracking-[0.2em] text-gold-ink\">\n            UCSC · Lost &amp; Found Board\n          </p>\n          <h1 className=\"mt-1 font-display text-4xl font-bold text-ink\">Found",
+      "tokens": 115,
+      "firstFile": {
+        "name": "Colin-Posat__SlugFound/app/(app)/found/page.tsx",
+        "start": 20,
+        "end": 34,
+        "startLoc": {
+          "line": 20,
+          "column": 18,
+          "position": 173
+        },
+        "endLoc": {
+          "line": 34,
+          "column": 78,
+          "position": 288
+        }
+      },
+      "secondFile": {
+        "name": "Colin-Posat__SlugFound/app/(app)/lost/page.tsx",
+        "start": 24,
+        "end": 38,
+        "startLoc": {
+          "line": 24,
+          "column": 17,
+          "position": 176
+        },
+        "endLoc": {
+          "line": 38,
+          "column": 77,
+          "position": 291
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 12,
+      "fragment": ">\n                  <option value=\"\" disabled>Select a category</option>\n                  {ITEM_CATEGORIES.map((c) => (\n                    <option key={c} value={c}>{c}</option>\n                  ))}\n                </select>\n                {state?.errors?.category && (\n                  <p className=\"text-xs text-lost\">{state.errors.category[0]}</p>\n                )}\n              </div>\n\n              {",
+      "tokens": 118,
+      "firstFile": {
+        "name": "Colin-Posat__SlugFound/app/(app)/create/create-form.tsx",
+        "start": 261,
+        "end": 272,
+        "startLoc": {
+          "line": 261,
+          "column": 17,
+          "position": 2033
+        },
+        "endLoc": {
+          "line": 272,
+          "column": 16,
+          "position": 2151
+        }
+      },
+      "secondFile": {
+        "name": "Colin-Posat__SlugFound/app/(app)/items/[id]/edit/edit-form.tsx",
+        "start": 154,
+        "end": 169,
+        "startLoc": {
+          "line": 154,
+          "column": 15,
+          "position": 1219
+        },
+        "endLoc": {
+          "line": 169,
+          "column": 14,
+          "position": 1345
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 15,
+      "fragment": "value={mapLocation?.lng  ?? ''} />\n\n                <LocationMapPicker value={mapLocation} onChange={setMapLocation} />\n\n                {mapLocation && (\n                  <p className=\"text-xs text-gold-ink\">\n                    📍 {mapLocation.label}\n                    {mapLocation.label === 'Other' &&\n                      ` (${mapLocation.lat.toFixed(5)}, ${mapLocation.lng.toFixed(5)})`}\n                  </p>\n                )}\n                {state?.errors?.location && (\n                  <p className=\"text-xs text-lost\">{state.errors.location[0]}</p>\n                )}\n                {",
+      "tokens": 153,
+      "firstFile": {
+        "name": "Colin-Posat__SlugFound/app/(app)/create/create-form.tsx",
+        "start": 284,
+        "end": 298,
+        "startLoc": {
+          "line": 284,
+          "column": 54,
+          "position": 2321
+        },
+        "endLoc": {
+          "line": 298,
+          "column": 18,
+          "position": 2474
+        }
+      },
+      "secondFile": {
+        "name": "Colin-Posat__SlugFound/app/(app)/items/[id]/edit/edit-form.tsx",
+        "start": 183,
+        "end": 197,
+        "startLoc": {
+          "line": 183,
+          "column": 47,
+          "position": 1506
+        },
+        "endLoc": {
+          "line": 197,
+          "column": 15,
+          "position": 1664
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 12,
+      "fragment": ". Max 5 MB · JPG, PNG, WebP.\n            </p>\n\n            {selectedFile ? (\n              <div className=\"flex items-center justify-between rounded-xl border border-line-strong bg-surface-2 px-4 py-3\">\n                <div className=\"flex items-center gap-3\">\n                  <span className=\"text-2xl\">🖼️</span>\n                  <div>\n                    <p className=\"text-sm font-medium text-ink\">{selectedFile.name}</p>\n                    <p className=\"text-xs text-muted\">\n                      {(selectedFile.size / 1024).toFixed(0)} KB\n                    </",
+      "tokens": 126,
+      "firstFile": {
+        "name": "Colin-Posat__SlugFound/app/(app)/create/create-form.tsx",
+        "start": 337,
+        "end": 348,
+        "startLoc": {
+          "line": 337,
+          "column": 74,
+          "position": 2816
+        },
+        "endLoc": {
+          "line": 348,
+          "column": 23,
+          "position": 2942
+        }
+      },
+      "secondFile": {
+        "name": "Colin-Posat__SlugFound/app/(app)/items/[id]/edit/edit-form.tsx",
+        "start": 225,
+        "end": 235,
+        "startLoc": {
+          "line": 225,
+          "column": 58,
+          "position": 1904
+        },
+        "endLoc": {
+          "line": 235,
+          "column": 65,
+          "position": 2029
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 8,
+      "fragment": ">\n                <span className=\"text-3xl\">📷</span>\n                <span className=\"text-sm text-muted\">Click to upload a photo</span>\n                <span className=\"text-xs text-muted\">PNG, JPG, WebP up to 5 MB</span>\n              </label>\n            )}\n\n            {",
+      "tokens": 80,
+      "firstFile": {
+        "name": "Colin-Posat__SlugFound/app/(app)/create/create-form.tsx",
+        "start": 363,
+        "end": 370,
+        "startLoc": {
+          "line": 363,
+          "column": 15,
+          "position": 3024
+        },
+        "endLoc": {
+          "line": 370,
+          "column": 14,
+          "position": 3104
+        }
+      },
+      "secondFile": {
+        "name": "Colin-Posat__SlugFound/app/(app)/items/[id]/edit/edit-form.tsx",
+        "start": 266,
+        "end": 273,
+        "startLoc": {
+          "line": 266,
+          "column": 13,
+          "position": 2206
+        },
+        "endLoc": {
+          "line": 273,
+          "column": 12,
+          "position": 2286
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 6,
+      "fragment": "\" className=\"flex items-center gap-2\">\n            <span className=\"font-display text-xl font-bold tracking-tight\">\n              <span className=\"text-gold-ink\">Slug</span>\n              <span className=\"text-ink\">Found</span>\n            </span>\n            <span className=\"hidden rounded bg-gold-soft px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-gold-ink sm:inline",
+      "tokens": 62,
+      "firstFile": {
+        "name": "Colin-Posat__SlugFound/app/(public)/layout.tsx",
+        "start": 10,
+        "end": 15,
+        "startLoc": {
+          "line": 10,
+          "column": 24,
+          "position": 97
+        },
+        "endLoc": {
+          "line": 15,
+          "column": 142,
+          "position": 159
+        }
+      },
+      "secondFile": {
+        "name": "Colin-Posat__SlugFound/app/components/sidebar.tsx",
+        "start": 48,
+        "end": 53,
+        "startLoc": {
+          "line": 48,
+          "column": 28,
+          "position": 485
+        },
+        "endLoc": {
+          "line": 53,
+          "column": 125,
+          "position": 547
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 7,
+      "fragment": ", async () => {\n    const user = userEvent.setup()\n    render(<ReportMenu itemId=\"item-1\" />)\n\n    await user.click(screen.getByRole('button', { name: /more options/i }))\n    await user.click(screen.getByRole('menuitem', { name: /report/i }))\n    await",
+      "tokens": 91,
+      "firstFile": {
+        "name": "Colin-Posat__SlugFound/__tests__/components/report-menu.test.tsx",
+        "start": 36,
+        "end": 42,
+        "startLoc": {
+          "line": 36,
+          "column": 47,
+          "position": 370
+        },
+        "endLoc": {
+          "line": 42,
+          "column": 10,
+          "position": 461
+        }
+      },
+      "secondFile": {
+        "name": "Colin-Posat__SlugFound/__tests__/components/report-menu.test.tsx",
+        "start": 25,
+        "end": 32,
+        "startLoc": {
+          "line": 25,
+          "column": 53,
+          "position": 240
+        },
+        "endLoc": {
+          "line": 32,
+          "column": 11,
+          "position": 332
+        }
+      }
+    }
+  ]
+}

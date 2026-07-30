@@ -1,0 +1,74 @@
+# jscpd 4.2.5 | cwd: research/validation/.corpus/Colin-Posat__SlugFound @ c8556ef8e1d1e661c57f1deebc6e20706a323740 | 2026-07-30T01:23:55Z
+# $ node <rwc>/node_modules/jscpd/bin/jscpd . --format typescript,tsx,javascript,jsx --reporters console,json --output <out> --min-lines 5 --min-tokens 50 --ignore '**/node_modules/**,**/dist/**,**/build/**'
+
+Clone found (tsx):
+ - app/(app)/items/[id]/page.tsx [45:39 - 55:8] (10 lines, 101 tokens)
+   app/(app)/items/[id]/edit/page.tsx [17:43 - 28:81]
+
+Clone found (tsx):
+ - app/(public)/login/page.tsx [4:34 - 11:69] (7 lines, 79 tokens)
+   app/(public)/signup/page.tsx [9:35 - 16:68]
+
+Clone found (tsx):
+ - app/(public)/login/login-form.tsx [23:7 - 33:20] (10 lines, 71 tokens)
+   app/(public)/signup/signup-form.tsx [81:7 - 91:16]
+
+Clone found (tsx):
+ - app/(app)/found/page.tsx [20:18 - 34:78] (14 lines, 115 tokens)
+   app/(app)/lost/page.tsx [24:17 - 38:77]
+
+Clone found (tsx):
+ - app/(app)/create/create-form.tsx [261:17 - 272:16] (11 lines, 118 tokens)
+   app/(app)/items/[id]/edit/edit-form.tsx [154:15 - 169:14]
+
+Clone found (tsx):
+ - app/(app)/create/create-form.tsx [284:54 - 298:18] (14 lines, 153 tokens)
+   app/(app)/items/[id]/edit/edit-form.tsx [183:47 - 197:15]
+
+Clone found (tsx):
+ - app/(app)/create/create-form.tsx [337:74 - 348:23] (11 lines, 126 tokens)
+   app/(app)/items/[id]/edit/edit-form.tsx [225:58 - 235:65]
+
+Clone found (tsx):
+ - app/(app)/create/create-form.tsx [363:15 - 370:14] (7 lines, 80 tokens)
+   app/(app)/items/[id]/edit/edit-form.tsx [266:13 - 273:12]
+
+Clone found (typescript):
+ - app/actions/messages.ts [125:26 - 137:16] (12 lines, 98 tokens)
+   app/actions/messages.ts [75:25 - 86:15]
+
+Clone found (typescript):
+ - app/actions/items.ts [177:37 - 191:76] (14 lines, 131 tokens)
+   app/actions/items.ts [47:37 - 61:78]
+
+Clone found (typescript):
+ - app/actions/items.ts [211:3 - 219:10] (8 lines, 100 tokens)
+   app/actions/items.ts [65:3 - 73:75]
+
+Clone found (typescript):
+ - app/actions/items.ts [219:5 - 231:17] (12 lines, 174 tokens)
+   app/actions/items.ts [75:5 - 87:13]
+
+Clone found (tsx):
+ - app/(public)/layout.tsx [10:24 - 15:142] (5 lines, 62 tokens)
+   app/components/sidebar.tsx [48:28 - 53:125]
+
+Clone found (tsx):
+ - __tests__/components/report-menu.test.tsx [36:47 - 42:10] (6 lines, 91 tokens)
+   __tests__/components/report-menu.test.tsx [25:53 - 32:11]
+
+┌────────────┬────────────────┬─────────────┬──────────────┬──────────────┬──────────────────┬───────────────────┐
+│ Format     │ Files analyzed │ Total lines │ Total tokens │ Clones found │ Duplicated lines │ Duplicated tokens │
+├────────────┼────────────────┼─────────────┼──────────────┼──────────────┼──────────────────┼───────────────────┤
+│ javascript │ 40             │ 2289        │ 17645        │ 0            │ 0 (0%)           │ 0 (0%)            │
+├────────────┼────────────────┼─────────────┼──────────────┼──────────────┼──────────────────┼───────────────────┤
+│ tsx        │ 50             │ 5206        │ 40193        │ 10           │ 95 (1.82%)       │ 996 (2.48%)       │
+├────────────┼────────────────┼─────────────┼──────────────┼──────────────┼──────────────────┼───────────────────┤
+│ typescript │ 41             │ 2912        │ 24367        │ 4            │ 46 (1.58%)       │ 503 (2.06%)       │
+├────────────┼────────────────┼─────────────┼──────────────┼──────────────┼──────────────────┼───────────────────┤
+│ Total:     │ 131            │ 10407       │ 82205        │ 14           │ 141 (1.35%)      │ 1499 (1.82%)      │
+└────────────┴────────────────┴─────────────┴──────────────┴──────────────┴──────────────────┴───────────────────┘
+Found 14 clones.
+JSON report saved to /Users/lunawang/Documents/GitHub/ts-repo-metrics/research/related_work_comparison/raw/jscpd/Colin-Posat__SlugFound/jscpd-report.json
+time: 233.527ms
+# exit=0

@@ -1,0 +1,4677 @@
+{
+  "statistics": {
+    "detectionDate": "2026-07-30T01:23:56.268Z",
+    "formats": {
+      "javascript": {
+        "sources": {
+          "frontend/src/tests/components/shared/data-table/DataTable.test.tsx": {
+            "lines": 213,
+            "tokens": 1922,
+            "sources": 1,
+            "clones": 4,
+            "duplicatedLines": 168,
+            "duplicatedTokens": 1338,
+            "percentage": 78.87,
+            "percentageTokens": 69.61,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/components/topology/TopologyOverviewPage.test.tsx": {
+            "lines": 140,
+            "tokens": 1180,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/components/topology/TopologyChrome.test.tsx": {
+            "lines": 4,
+            "tokens": 35,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/components/topology/TopologyBadges.test.tsx": {
+            "lines": 0,
+            "tokens": 3,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/components/topology/PageIntro.test.tsx": {
+            "lines": 0,
+            "tokens": 15,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/components/topology/MetricCard.test.tsx": {
+            "lines": 0,
+            "tokens": 3,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/components/topology/FindingsExplorerPanel.test.tsx": {
+            "lines": 6,
+            "tokens": 85,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/components/topology/EntityHero.test.tsx": {
+            "lines": 38,
+            "tokens": 395,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/components/topology/EntityCard.test.tsx": {
+            "lines": 35,
+            "tokens": 332,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/components/topology/ChartPanel.test.tsx": {
+            "lines": 33,
+            "tokens": 324,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/components/topology/BusinessUnitDetailPage.test.tsx": {
+            "lines": 134,
+            "tokens": 936,
+            "sources": 1,
+            "clones": 3,
+            "duplicatedLines": 319,
+            "duplicatedTokens": 2226,
+            "percentage": 238.06,
+            "percentageTokens": 237.82,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/components/topology/BusinessServiceDetailPage.test.tsx": {
+            "lines": 210,
+            "tokens": 2258,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/components/topology/AssetInventoryPanel.test.tsx": {
+            "lines": 95,
+            "tokens": 1221,
+            "sources": 1,
+            "clones": 2,
+            "duplicatedLines": 106,
+            "duplicatedTokens": 1632,
+            "percentage": 111.58,
+            "percentageTokens": 133.66,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/components/topology/AssetFindingsPage.test.tsx": {
+            "lines": 160,
+            "tokens": 1592,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 87,
+            "duplicatedTokens": 582,
+            "percentage": 54.38,
+            "percentageTokens": 36.56,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/components/topology/ApplicationDetailPage.test.tsx": {
+            "lines": 143,
+            "tokens": 1454,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/components/shell/Header.test.tsx": {
+            "lines": 18,
+            "tokens": 155,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/components/shell/AppSidebar.test.tsx": {
+            "lines": 0,
+            "tokens": 3,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/components/integrations/IntegrationsPage.test.tsx": {
+            "lines": 62,
+            "tokens": 551,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/components/findings/FindingsTable.test.tsx": {
+            "lines": 81,
+            "tokens": 887,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/components/fair/FairPanels.test.tsx": {
+            "lines": 76,
+            "tokens": 675,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/components/dashboard/SummaryCards.test.tsx": {
+            "lines": 7,
+            "tokens": 90,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/components/dashboard/RiskTable.test.tsx": {
+            "lines": 2,
+            "tokens": 23,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/components/dashboard/RiskBandDistributionChart.test.tsx": {
+            "lines": 16,
+            "tokens": 127,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/components/dashboard/FindingDetailSections.test.tsx": {
+            "lines": 25,
+            "tokens": 193,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/components/dashboard/FindingDetailPage.test.tsx": {
+            "lines": 326,
+            "tokens": 2996,
+            "sources": 1,
+            "clones": 4,
+            "duplicatedLines": 568,
+            "duplicatedTokens": 5318,
+            "percentage": 174.23,
+            "percentageTokens": 177.5,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/components/dashboard/DashboardOverview.test.tsx": {
+            "lines": 18,
+            "tokens": 157,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/topology/shared/TopologyBadges.tsx": {
+            "lines": 60,
+            "tokens": 304,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/topology/shared/PageIntro.tsx": {
+            "lines": 3,
+            "tokens": 9,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/topology/shared/MetricCard.tsx": {
+            "lines": 35,
+            "tokens": 199,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/topology/shared/FindingsExplorerPanel.tsx": {
+            "lines": 35,
+            "tokens": 289,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/topology/shared/EntityHero.tsx": {
+            "lines": 37,
+            "tokens": 311,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/topology/shared/EntityCard.tsx": {
+            "lines": 136,
+            "tokens": 921,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/topology/shared/ChartPanel.tsx": {
+            "lines": 20,
+            "tokens": 164,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/shared/data-table/DataTable.tsx": {
+            "lines": 301,
+            "tokens": 2367,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/app/App.test.tsx": {
+            "lines": 212,
+            "tokens": 1950,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/pages/topology/TopologyRoutePage.tsx": {
+            "lines": 62,
+            "tokens": 348,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/pages/topology/TopologyOverviewPage.tsx": {
+            "lines": 103,
+            "tokens": 647,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/pages/topology/BusinessUnitFindingsSection.tsx": {
+            "lines": 107,
+            "tokens": 871,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/pages/topology/BusinessUnitDetailPage.tsx": {
+            "lines": 207,
+            "tokens": 1601,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/pages/topology/BusinessServiceSections.tsx": {
+            "lines": 118,
+            "tokens": 846,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/pages/topology/BusinessServiceDetailPage.tsx": {
+            "lines": 83,
+            "tokens": 460,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/pages/topology/AssetFindingsPage.tsx": {
+            "lines": 141,
+            "tokens": 1111,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/pages/topology/ApplicationDetailPage.tsx": {
+            "lines": 50,
+            "tokens": 339,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/pages/shell/AppSidebar.tsx": {
+            "lines": 8,
+            "tokens": 47,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/pages/findings/FindingsRoutePage.tsx": {
+            "lines": 17,
+            "tokens": 104,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/ui/tabs.tsx": {
+            "lines": 37,
+            "tokens": 193,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/ui/table.tsx": {
+            "lines": 94,
+            "tokens": 611,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/ui/spinner.tsx": {
+            "lines": 0,
+            "tokens": 8,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/ui/skeleton.tsx": {
+            "lines": 0,
+            "tokens": 8,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/ui/sheet.tsx": {
+            "lines": 90,
+            "tokens": 640,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/ui/pill.tsx": {
+            "lines": 10,
+            "tokens": 42,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/ui/pagination.tsx": {
+            "lines": 89,
+            "tokens": 594,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/ui/input.tsx": {
+            "lines": 5,
+            "tokens": 21,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/ui/hover-card.tsx": {
+            "lines": 6,
+            "tokens": 27,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/ui/empty.tsx": {
+            "lines": 35,
+            "tokens": 293,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/ui/dropdown-menu.tsx": {
+            "lines": 150,
+            "tokens": 986,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/ui/chart.tsx": {
+            "lines": 260,
+            "tokens": 1739,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/ui/card.tsx": {
+            "lines": 60,
+            "tokens": 435,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/ui/button.tsx": {
+            "lines": 1,
+            "tokens": 21,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/ui/breadcrumb.tsx": {
+            "lines": 76,
+            "tokens": 580,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/topology/TopologyChrome.tsx": {
+            "lines": 6,
+            "tokens": 88,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/topology/AssetInventoryPanel.tsx": {
+            "lines": 289,
+            "tokens": 2203,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/topology/AssetDistributionCharts.tsx": {
+            "lines": 144,
+            "tokens": 1021,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/shared/LoadingSpinnerState.tsx": {
+            "lines": 0,
+            "tokens": 11,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/layout/Header.tsx": {
+            "lines": 10,
+            "tokens": 87,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/integrations/IntegrationsPage.tsx": {
+            "lines": 0,
+            "tokens": 5,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/fair/FairScopeLossPanel.tsx": {
+            "lines": 157,
+            "tokens": 1301,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/fair/FairFrequencyPanel.tsx": {
+            "lines": 123,
+            "tokens": 857,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/dashboard/SummaryCards.tsx": {
+            "lines": 12,
+            "tokens": 119,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/dashboard/RiskTable.tsx": {
+            "lines": 231,
+            "tokens": 1794,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/dashboard/RiskBandDistributionChart.tsx": {
+            "lines": 12,
+            "tokens": 71,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/dashboard/FindingDetailSections.tsx": {
+            "lines": 513,
+            "tokens": 4638,
+            "sources": 1,
+            "clones": 2,
+            "duplicatedLines": 48,
+            "duplicatedTokens": 430,
+            "percentage": 9.36,
+            "percentageTokens": 9.27,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/dashboard/FindingDetailPage.tsx": {
+            "lines": 177,
+            "tokens": 1171,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/dashboard/DashboardOverview.tsx": {
+            "lines": 0,
+            "tokens": 9,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/controls/SecurityScorePage.tsx": {
+            "lines": 196,
+            "tokens": 1403,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/app.tsx": {
+            "lines": 64,
+            "tokens": 544,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/tailwind.config.js": {
+            "lines": 69,
+            "tokens": 412,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/postcss.config.js": {
+            "lines": 5,
+            "tokens": 35,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          }
+        },
+        "total": {
+          "lines": 6498,
+          "tokens": 52467,
+          "sources": 78,
+          "clones": 8,
+          "duplicatedLines": 648,
+          "duplicatedTokens": 5763,
+          "percentage": 9.97,
+          "percentageTokens": 10.98,
+          "newDuplicatedLines": 0,
+          "newClones": 0
+        }
+      },
+      "tsx": {
+        "sources": {
+          "frontend/src/tests/components/shared/data-table/DataTable.test.tsx": {
+            "lines": 260,
+            "tokens": 2313,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/components/topology/TopologyOverviewPage.test.tsx": {
+            "lines": 168,
+            "tokens": 1425,
+            "sources": 1,
+            "clones": 2,
+            "duplicatedLines": 34,
+            "duplicatedTokens": 228,
+            "percentage": 20.24,
+            "percentageTokens": 16,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/components/topology/TopologyChrome.test.tsx": {
+            "lines": 38,
+            "tokens": 331,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/components/topology/TopologyBadges.test.tsx": {
+            "lines": 36,
+            "tokens": 398,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/components/topology/PageIntro.test.tsx": {
+            "lines": 32,
+            "tokens": 330,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/components/topology/MetricCard.test.tsx": {
+            "lines": 19,
+            "tokens": 210,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/components/topology/FindingsExplorerPanel.test.tsx": {
+            "lines": 107,
+            "tokens": 1272,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/components/topology/EntityHero.test.tsx": {
+            "lines": 60,
+            "tokens": 614,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/components/topology/EntityCard.test.tsx": {
+            "lines": 83,
+            "tokens": 681,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/components/topology/ChartPanel.test.tsx": {
+            "lines": 50,
+            "tokens": 474,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/components/topology/BusinessUnitDetailPage.test.tsx": {
+            "lines": 281,
+            "tokens": 2516,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 5,
+            "duplicatedTokens": 122,
+            "percentage": 1.78,
+            "percentageTokens": 4.85,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/components/topology/BusinessServiceDetailPage.test.tsx": {
+            "lines": 546,
+            "tokens": 4824,
+            "sources": 1,
+            "clones": 6,
+            "duplicatedLines": 71,
+            "duplicatedTokens": 744,
+            "percentage": 13,
+            "percentageTokens": 15.42,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/components/topology/AssetInventoryPanel.test.tsx": {
+            "lines": 174,
+            "tokens": 1912,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/components/topology/AssetFindingsPage.test.tsx": {
+            "lines": 406,
+            "tokens": 3430,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/components/topology/AssetDistributionCharts.test.tsx": {
+            "lines": 67,
+            "tokens": 499,
+            "sources": 1,
+            "clones": 2,
+            "duplicatedLines": 44,
+            "duplicatedTokens": 278,
+            "percentage": 65.67,
+            "percentageTokens": 55.71,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/components/topology/ApplicationDetailPage.test.tsx": {
+            "lines": 331,
+            "tokens": 3020,
+            "sources": 1,
+            "clones": 8,
+            "duplicatedLines": 99,
+            "duplicatedTokens": 940,
+            "percentage": 29.91,
+            "percentageTokens": 31.13,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/components/shell/Header.test.tsx": {
+            "lines": 40,
+            "tokens": 357,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/components/shell/AppSidebar.test.tsx": {
+            "lines": 20,
+            "tokens": 278,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/components/shared/LoadingSpinnerState.test.tsx": {
+            "lines": 16,
+            "tokens": 169,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/components/integrations/IntegrationsPage.test.tsx": {
+            "lines": 100,
+            "tokens": 965,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/components/findings/FindingsTable.test.tsx": {
+            "lines": 125,
+            "tokens": 1224,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/components/fair/FairPanels.test.tsx": {
+            "lines": 118,
+            "tokens": 1002,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/components/dashboard/SummaryCards.test.tsx": {
+            "lines": 39,
+            "tokens": 420,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/components/dashboard/RiskTable.test.tsx": {
+            "lines": 96,
+            "tokens": 1184,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 5,
+            "duplicatedTokens": 122,
+            "percentage": 5.21,
+            "percentageTokens": 10.3,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/components/dashboard/RiskBandDistributionChart.test.tsx": {
+            "lines": 37,
+            "tokens": 361,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/components/dashboard/FindingDetailSections.test.tsx": {
+            "lines": 115,
+            "tokens": 878,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/components/dashboard/FindingDetailPage.test.tsx": {
+            "lines": 361,
+            "tokens": 3271,
+            "sources": 1,
+            "clones": 4,
+            "duplicatedLines": 44,
+            "duplicatedTokens": 364,
+            "percentage": 12.19,
+            "percentageTokens": 11.13,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/components/dashboard/DashboardOverview.test.tsx": {
+            "lines": 48,
+            "tokens": 425,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/components/controls/SecurityScorePage.test.tsx": {
+            "lines": 139,
+            "tokens": 1208,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/topology/shared/TopologyBadges.tsx": {
+            "lines": 117,
+            "tokens": 813,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/topology/shared/PageIntro.tsx": {
+            "lines": 30,
+            "tokens": 227,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/topology/shared/MetricCard.tsx": {
+            "lines": 53,
+            "tokens": 375,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/topology/shared/FindingsExplorerPanel.tsx": {
+            "lines": 213,
+            "tokens": 1809,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/topology/shared/EntityHero.tsx": {
+            "lines": 89,
+            "tokens": 693,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/topology/shared/EntityCard.tsx": {
+            "lines": 175,
+            "tokens": 1185,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/topology/shared/ChartPanel.tsx": {
+            "lines": 71,
+            "tokens": 498,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/shared/data-table/DataTable.tsx": {
+            "lines": 477,
+            "tokens": 3796,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/utils/renderWithProviders.tsx": {
+            "lines": 5,
+            "tokens": 67,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/app/App.test.tsx": {
+            "lines": 397,
+            "tokens": 3839,
+            "sources": 1,
+            "clones": 2,
+            "duplicatedLines": 12,
+            "duplicatedTokens": 132,
+            "percentage": 3.02,
+            "percentageTokens": 3.44,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/pages/topology/TopologyRoutePage.tsx": {
+            "lines": 176,
+            "tokens": 1194,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/pages/topology/TopologyOverviewPage.tsx": {
+            "lines": 195,
+            "tokens": 1370,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/pages/topology/BusinessUnitFindingsSection.tsx": {
+            "lines": 289,
+            "tokens": 2514,
+            "sources": 1,
+            "clones": 3,
+            "duplicatedLines": 179,
+            "duplicatedTokens": 1515,
+            "percentage": 61.94,
+            "percentageTokens": 60.26,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/pages/topology/BusinessUnitDetailPage.tsx": {
+            "lines": 315,
+            "tokens": 2379,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 22,
+            "duplicatedTokens": 120,
+            "percentage": 6.98,
+            "percentageTokens": 5.04,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/pages/topology/BusinessServiceSections.tsx": {
+            "lines": 171,
+            "tokens": 1173,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/pages/topology/BusinessServiceDetailPage.tsx": {
+            "lines": 185,
+            "tokens": 1183,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 22,
+            "duplicatedTokens": 120,
+            "percentage": 11.89,
+            "percentageTokens": 10.14,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/pages/topology/AssetFindingsPage.tsx": {
+            "lines": 293,
+            "tokens": 2446,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/pages/topology/ApplicationDetailPage.tsx": {
+            "lines": 140,
+            "tokens": 1014,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/pages/shell/AppSidebar.tsx": {
+            "lines": 50,
+            "tokens": 426,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/pages/findings/FindingsRoutePage.tsx": {
+            "lines": 50,
+            "tokens": 376,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/ui/tabs.tsx": {
+            "lines": 49,
+            "tokens": 299,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/ui/table.tsx": {
+            "lines": 119,
+            "tokens": 754,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/ui/spinner.tsx": {
+            "lines": 15,
+            "tokens": 102,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/ui/skeleton.tsx": {
+            "lines": 11,
+            "tokens": 90,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/ui/sheet.tsx": {
+            "lines": 123,
+            "tokens": 869,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/ui/pill.tsx": {
+            "lines": 28,
+            "tokens": 169,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/ui/pagination.tsx": {
+            "lines": 116,
+            "tokens": 786,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/ui/input.tsx": {
+            "lines": 21,
+            "tokens": 133,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/ui/hover-card.tsx": {
+            "lines": 26,
+            "tokens": 196,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/ui/empty.tsx": {
+            "lines": 48,
+            "tokens": 394,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/ui/dropdown-menu.tsx": {
+            "lines": 198,
+            "tokens": 1273,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/ui/chart.tsx": {
+            "lines": 368,
+            "tokens": 2519,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/ui/card.tsx": {
+            "lines": 75,
+            "tokens": 552,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/ui/button.tsx": {
+            "lines": 56,
+            "tokens": 375,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/ui/breadcrumb.tsx": {
+            "lines": 100,
+            "tokens": 764,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/topology/TopologyChrome.tsx": {
+            "lines": 51,
+            "tokens": 431,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/topology/AssetInventoryPanel.tsx": {
+            "lines": 345,
+            "tokens": 2863,
+            "sources": 1,
+            "clones": 4,
+            "duplicatedLines": 152,
+            "duplicatedTokens": 1290,
+            "percentage": 44.06,
+            "percentageTokens": 45.06,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/topology/AssetDistributionCharts.tsx": {
+            "lines": 191,
+            "tokens": 1343,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/shared/LoadingSpinnerState.tsx": {
+            "lines": 19,
+            "tokens": 152,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/layout/Header.tsx": {
+            "lines": 44,
+            "tokens": 320,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/integrations/IntegrationsPage.tsx": {
+            "lines": 97,
+            "tokens": 945,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/findings/FindingsTable.tsx": {
+            "lines": 112,
+            "tokens": 833,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/fair/FairScopeLossPanel.tsx": {
+            "lines": 267,
+            "tokens": 2322,
+            "sources": 1,
+            "clones": 3,
+            "duplicatedLines": 48,
+            "duplicatedTokens": 442,
+            "percentage": 17.98,
+            "percentageTokens": 19.04,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/fair/FairFrequencyPanel.tsx": {
+            "lines": 219,
+            "tokens": 1730,
+            "sources": 1,
+            "clones": 3,
+            "duplicatedLines": 48,
+            "duplicatedTokens": 442,
+            "percentage": 21.92,
+            "percentageTokens": 25.55,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/dashboard/SummaryCards.tsx": {
+            "lines": 41,
+            "tokens": 390,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/dashboard/RiskTable.tsx": {
+            "lines": 279,
+            "tokens": 2334,
+            "sources": 1,
+            "clones": 3,
+            "duplicatedLines": 179,
+            "duplicatedTokens": 1515,
+            "percentage": 64.16,
+            "percentageTokens": 64.91,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/dashboard/RiskBandDistributionChart.tsx": {
+            "lines": 102,
+            "tokens": 764,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/dashboard/FindingDetailSections.tsx": {
+            "lines": 562,
+            "tokens": 5028,
+            "sources": 1,
+            "clones": 2,
+            "duplicatedLines": 26,
+            "duplicatedTokens": 230,
+            "percentage": 4.63,
+            "percentageTokens": 4.57,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/dashboard/FindingDetailPage.tsx": {
+            "lines": 289,
+            "tokens": 2196,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/dashboard/DashboardOverview.tsx": {
+            "lines": 21,
+            "tokens": 199,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/controls/SecurityScorePage.tsx": {
+            "lines": 603,
+            "tokens": 5055,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/main.tsx": {
+            "lines": 9,
+            "tokens": 69,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/app.tsx": {
+            "lines": 256,
+            "tokens": 2246,
+            "sources": 1,
+            "clones": 2,
+            "duplicatedLines": 14,
+            "duplicatedTokens": 152,
+            "percentage": 5.47,
+            "percentageTokens": 6.77,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          }
+        },
+        "total": {
+          "lines": 12263,
+          "tokens": 101863,
+          "sources": 82,
+          "clones": 24,
+          "duplicatedLines": 502,
+          "duplicatedTokens": 4378,
+          "percentage": 4.09,
+          "percentageTokens": 4.3,
+          "newDuplicatedLines": 0,
+          "newClones": 0
+        }
+      },
+      "typescript": {
+        "sources": {
+          "frontend/src/tests/lib/sorting/sortState.test.ts": {
+            "lines": 27,
+            "tokens": 329,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/lib/pagination/getPaginationWindow.test.ts": {
+            "lines": 16,
+            "tokens": 213,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/lib/formatting/text.test.ts": {
+            "lines": 32,
+            "tokens": 321,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/lib/formatting/numbers.test.ts": {
+            "lines": 18,
+            "tokens": 241,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/lib/formatting/index.test.ts": {
+            "lines": 31,
+            "tokens": 388,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/lib/formatting/dates.test.ts": {
+            "lines": 19,
+            "tokens": 236,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/lib/findings/findingRisk.test.ts": {
+            "lines": 24,
+            "tokens": 272,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/lib/assets/assetFormatters.test.ts": {
+            "lines": 39,
+            "tokens": 371,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/hooks/topology/useBusinessUnitTopFindings.test.ts": {
+            "lines": 66,
+            "tokens": 565,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/hooks/topology/useBusinessUnitRiskOverview.test.ts": {
+            "lines": 52,
+            "tokens": 537,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/hooks/topology/useAssetsAnalytics.test.ts": {
+            "lines": 65,
+            "tokens": 496,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/hooks/topology/useAssetFindingsAnalytics.test.ts": {
+            "lines": 53,
+            "tokens": 456,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/hooks/sources/useSourcesSummary.test.ts": {
+            "lines": 52,
+            "tokens": 566,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/hooks/findings/usePaginatedFindings.test.ts": {
+            "lines": 130,
+            "tokens": 1209,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/hooks/findings/useFindingsExplorerState.test.ts": {
+            "lines": 75,
+            "tokens": 721,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/hooks/findings/useFindingDetails.test.ts": {
+            "lines": 104,
+            "tokens": 1171,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/hooks/dashboard/useDashboardOverviewData.test.ts": {
+            "lines": 64,
+            "tokens": 686,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/fixtures/topology/topology.ts": {
+            "lines": 57,
+            "tokens": 372,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/fixtures/tables/tableRows.ts": {
+            "lines": 7,
+            "tokens": 111,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/fixtures/findings/findings.ts": {
+            "lines": 22,
+            "tokens": 171,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/hooks/topology/business-units/useBusinessUnits.ts": {
+            "lines": 39,
+            "tokens": 346,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/hooks/topology/business-units/useBusinessUnitTopFindings.ts": {
+            "lines": 79,
+            "tokens": 680,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/hooks/topology/business-units/useBusinessUnitRiskOverview.ts": {
+            "lines": 52,
+            "tokens": 413,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/hooks/topology/business-units/useBusinessUnitDetail.ts": {
+            "lines": 50,
+            "tokens": 411,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/hooks/topology/business-services/useBusinessServiceDetail.ts": {
+            "lines": 57,
+            "tokens": 441,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/hooks/topology/business-services/useBusinessServiceAnalytics.ts": {
+            "lines": 56,
+            "tokens": 440,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/hooks/topology/assets/usePaginatedAssets.ts": {
+            "lines": 107,
+            "tokens": 751,
+            "sources": 1,
+            "clones": 2,
+            "duplicatedLines": 17,
+            "duplicatedTokens": 191,
+            "percentage": 15.89,
+            "percentageTokens": 25.43,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/hooks/topology/assets/useAssetsAnalytics.ts": {
+            "lines": 79,
+            "tokens": 575,
+            "sources": 1,
+            "clones": 4,
+            "duplicatedLines": 35,
+            "duplicatedTokens": 373,
+            "percentage": 44.3,
+            "percentageTokens": 64.87,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/hooks/topology/assets/useAssetInventoryState.ts": {
+            "lines": 130,
+            "tokens": 1191,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/hooks/topology/assets/useAssetFindingsAnalytics.ts": {
+            "lines": 70,
+            "tokens": 548,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 8,
+            "duplicatedTokens": 86,
+            "percentage": 11.43,
+            "percentageTokens": 15.69,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/hooks/topology/assets/useAssetFindings.ts": {
+            "lines": 87,
+            "tokens": 708,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/hooks/topology/assets/useAssetDetail.ts": {
+            "lines": 45,
+            "tokens": 403,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 9,
+            "duplicatedTokens": 96,
+            "percentage": 20,
+            "percentageTokens": 23.82,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/hooks/topology/applications/useApplicationDetail.ts": {
+            "lines": 56,
+            "tokens": 461,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/utils/setupUser.ts": {
+            "lines": 4,
+            "tokens": 30,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/utils/routeHelpers.ts": {
+            "lines": 12,
+            "tokens": 141,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/runtime/desktopBridge.test.ts": {
+            "lines": 56,
+            "tokens": 458,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/mocks/electronBridge.ts": {
+            "lines": 17,
+            "tokens": 144,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/lib/externalUrls.test.ts": {
+            "lines": 15,
+            "tokens": 160,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/app/appRoutes.test.ts": {
+            "lines": 99,
+            "tokens": 731,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/api/types.test.ts": {
+            "lines": 89,
+            "tokens": 773,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 7,
+            "duplicatedTokens": 89,
+            "percentage": 7.87,
+            "percentageTokens": 11.51,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/api/topology.test.ts": {
+            "lines": 167,
+            "tokens": 1354,
+            "sources": 1,
+            "clones": 8,
+            "duplicatedLines": 72,
+            "duplicatedTokens": 756,
+            "percentage": 43.11,
+            "percentageTokens": 55.83,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/api/sources.test.ts": {
+            "lines": 22,
+            "tokens": 220,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/api/index.test.ts": {
+            "lines": 16,
+            "tokens": 163,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/api/findings.test.ts": {
+            "lines": 142,
+            "tokens": 1210,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/api/controls.test.ts": {
+            "lines": 60,
+            "tokens": 518,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/api/client.test.ts": {
+            "lines": 129,
+            "tokens": 1081,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/lib/sorting/sortState.ts": {
+            "lines": 42,
+            "tokens": 427,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/lib/pagination/getPaginationWindow.ts": {
+            "lines": 18,
+            "tokens": 160,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/lib/formatting/text.ts": {
+            "lines": 22,
+            "tokens": 236,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/lib/formatting/numbers.ts": {
+            "lines": 17,
+            "tokens": 144,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/lib/formatting/dates.ts": {
+            "lines": 12,
+            "tokens": 180,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/lib/findings/findingStatus.ts": {
+            "lines": 28,
+            "tokens": 237,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/lib/findings/findingRisk.ts": {
+            "lines": 22,
+            "tokens": 212,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/lib/findings/findingFormatters.ts": {
+            "lines": 28,
+            "tokens": 273,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/lib/charts/assetDistribution.ts": {
+            "lines": 52,
+            "tokens": 611,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/lib/assets/assetFormatters.ts": {
+            "lines": 47,
+            "tokens": 508,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/hooks/sources/useSourcesSummary.ts": {
+            "lines": 38,
+            "tokens": 340,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/hooks/findings/usePaginatedFindings.ts": {
+            "lines": 73,
+            "tokens": 550,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/hooks/findings/useFindingsExplorerState.ts": {
+            "lines": 94,
+            "tokens": 794,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/hooks/findings/useFindingDetails.ts": {
+            "lines": 35,
+            "tokens": 350,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/hooks/dashboard/useDashboardOverviewData.ts": {
+            "lines": 38,
+            "tokens": 338,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/components/topology/types.ts": {
+            "lines": 31,
+            "tokens": 184,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/types/topology.ts": {
+            "lines": 180,
+            "tokens": 1675,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/types/risk.ts": {
+            "lines": 9,
+            "tokens": 76,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/types/index.ts": {
+            "lines": 5,
+            "tokens": 52,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/types/findings.ts": {
+            "lines": 21,
+            "tokens": 170,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/types/charts.ts": {
+            "lines": 11,
+            "tokens": 68,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/types/api.ts": {
+            "lines": 272,
+            "tokens": 2358,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 7,
+            "duplicatedTokens": 89,
+            "percentage": 2.57,
+            "percentageTokens": 3.77,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/tests/setup.ts": {
+            "lines": 35,
+            "tokens": 280,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/runtime/desktopBridge.ts": {
+            "lines": 30,
+            "tokens": 228,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/routing/pageMeta.ts": {
+            "lines": 73,
+            "tokens": 558,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/routing/appRoutes.ts": {
+            "lines": 171,
+            "tokens": 1569,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/lib/utils.ts": {
+            "lines": 6,
+            "tokens": 63,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/lib/securityScore.ts": {
+            "lines": 144,
+            "tokens": 1131,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/lib/fairVisualization.ts": {
+            "lines": 50,
+            "tokens": 520,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/lib/externalUrls.ts": {
+            "lines": 26,
+            "tokens": 218,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/api/types.ts": {
+            "lines": 5,
+            "tokens": 52,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/api/topology.ts": {
+            "lines": 384,
+            "tokens": 3071,
+            "sources": 1,
+            "clones": 7,
+            "duplicatedLines": 74,
+            "duplicatedTokens": 874,
+            "percentage": 19.27,
+            "percentageTokens": 28.46,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/api/sources.ts": {
+            "lines": 9,
+            "tokens": 99,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/api/index.ts": {
+            "lines": 4,
+            "tokens": 43,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/api/findings.ts": {
+            "lines": 98,
+            "tokens": 838,
+            "sources": 1,
+            "clones": 3,
+            "duplicatedLines": 33,
+            "duplicatedTokens": 308,
+            "percentage": 33.67,
+            "percentageTokens": 36.75,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/api/controls.ts": {
+            "lines": 27,
+            "tokens": 232,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/api/client.ts": {
+            "lines": 123,
+            "tokens": 1182,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/src/preload.ts": {
+            "lines": 12,
+            "tokens": 105,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/vite.config.ts": {
+            "lines": 21,
+            "tokens": 152,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "frontend/electron-main.ts": {
+            "lines": 118,
+            "tokens": 890,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          }
+        },
+        "total": {
+          "lines": 5119,
+          "tokens": 44957,
+          "sources": 86,
+          "clones": 14,
+          "duplicatedLines": 131,
+          "duplicatedTokens": 1431,
+          "percentage": 2.56,
+          "percentageTokens": 3.18,
+          "newDuplicatedLines": 0,
+          "newClones": 0
+        }
+      }
+    },
+    "total": {
+      "lines": 23880,
+      "tokens": 199287,
+      "sources": 246,
+      "clones": 46,
+      "duplicatedLines": 1281,
+      "duplicatedTokens": 11572,
+      "percentage": 5.36,
+      "percentageTokens": 5.81,
+      "newDuplicatedLines": 0,
+      "newClones": 0
+    }
+  },
+  "duplicates": [
+    {
+      "format": "javascript",
+      "lines": 66,
+      "fragment": ") => row.id} columns={columns} loading />\n    );\n    expect(screen.getByText(\"Loading items\")).toBeInTheDocument();\n\n    rerender(\n      <DataTable\n        items={[]}\n        getRowId={(row: DemoRow) => row.id}\n        columns={columns}\n        error=\"Failed\"\n      />\n    );\n    expect(screen.getByText(\"Failed\")).toBeInTheDocument();\n\n    rerender(\n      <DataTable\n        items={[]}\n        getRowId={(row: DemoRow) => row.id}\n        columns={columns}\n        emptyTitle=\"Nothing here\"\n        emptyDescription=\"No rows available.\"\n      />\n    );\n    expect(screen.getByText(\"Nothing here\")).toBeInTheDocument();\n    expect(screen.getByText(\"No rows available.\")).toBeInTheDocument();\n  });\n\n  it(\"renders dense data with stable absolute row context\", () => {\n    const denseRows = buildTableRows(25);\n\n    render(\n      <DataTable\n        items={denseRows}\n        getRowId={(row) => row.id}\n        columns={[\n          {\n            id: \"position\",\n            label: \"Position\",\n            render: (_row, context) => `#${context.absoluteIndex + 1}`,\n          },\n          {\n            id: \"name\",\n            label: \"Name\",\n            render: (row) => row.name,\n          },\n        ]}\n        pagination={{\n          page: 3,\n          pageSize: 10,\n          total: 25,\n          pageNumbers: [1, 2, 3],\n          onPageChange: vi.fn(),\n        }}\n      />\n    );\n\n    expect(screen.getByText(\"#21\")).toBeInTheDocument();\n    expect(screen.getByText(\"#45\")).toBeInTheDocument();\n    expect(screen.getByText(\"Row 25\")).toBeInTheDocument();\n    expect(screen.getByText(\"Showing 21-25 of 25 items\")).toBeInTheDocument();\n  });\n\n  it(\"marks pagination boundaries as unavailable\", () => {\n    const { rerender } = render(\n      <DataTable\n        items={rows",
+      "tokens": 515,
+      "firstFile": {
+        "name": "frontend/src/tests/components/shared/data-table/DataTable.test.tsx",
+        "start": 145,
+        "end": 210,
+        "startLoc": {
+          "line": 145,
+          "column": 52,
+          "position": 1408
+        },
+        "endLoc": {
+          "line": 210,
+          "column": 20,
+          "position": 1923
+        }
+      },
+      "secondFile": {
+        "name": "frontend/src/tests/components/shared/data-table/DataTable.test.tsx",
+        "start": 43,
+        "end": 161,
+        "startLoc": {
+          "line": 43,
+          "column": 23,
+          "position": 341
+        },
+        "endLoc": {
+          "line": 161,
+          "column": 17,
+          "position": 1523
+        }
+      }
+    },
+    {
+      "format": "javascript",
+      "lines": 20,
+      "fragment": ",\n          pageSize: 10,\n          total: 15,\n          pageNumbers: [1, 2],\n          onPageChange: vi.fn(),\n        }}\n      />\n    );\n\n    expect(screen.getByRole(\"link\", { name: \"Go to previous page\" })).not.toHaveClass(\n      \"pointer-events-none\"\n    );\n    expect(screen.getByRole(\"link\", { name: \"Go to next page\" })).toHaveClass(\n      \"pointer-events-none\"\n    );\n  });\n\n  it(\"does not expose row button behavior when no row action is configured\", () => {\n    render(\n      <DataTable items={rows} getRowId={(row) => row.id} columns={columns}",
+      "tokens": 154,
+      "firstFile": {
+        "name": "frontend/src/tests/components/shared/data-table/DataTable.test.tsx",
+        "start": 236,
+        "end": 255,
+        "startLoc": {
+          "line": 236,
+          "column": 18,
+          "position": 2099
+        },
+        "endLoc": {
+          "line": 255,
+          "column": 75,
+          "position": 2253
+        }
+      },
+      "secondFile": {
+        "name": "frontend/src/tests/components/shared/data-table/DataTable.test.tsx",
+        "start": 214,
+        "end": 234,
+        "startLoc": {
+          "line": 214,
+          "column": 18,
+          "position": 1953
+        },
+        "endLoc": {
+          "line": 234,
+          "column": 26,
+          "position": 2089
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 18,
+      "fragment": "mockedUseBusinessUnits.mockReturnValue({\n      businessUnits: [\n        {\n          company: { name: \"Virtuon\" },\n          business_unit: \"Online Store\",\n          slug: \"online-store\",\n          description: \"Backend supplied online-store description.\",\n          metrics: {\n            total_business_services: 3,\n            total_applications: 0,\n            total_assets: 12,\n            total_findings: 42,\n          },\n          risk_score: null,\n          risk_band: null,\n          risk_trend: null,\n        },\n      ]",
+      "tokens": 114,
+      "firstFile": {
+        "name": "frontend/src/tests/components/topology/TopologyOverviewPage.test.tsx",
+        "start": 103,
+        "end": 120,
+        "startLoc": {
+          "line": 103,
+          "column": 5,
+          "position": 966
+        },
+        "endLoc": {
+          "line": 120,
+          "column": 8,
+          "position": 1080
+        }
+      },
+      "secondFile": {
+        "name": "frontend/src/tests/components/topology/TopologyOverviewPage.test.tsx",
+        "start": 41,
+        "end": 58,
+        "startLoc": {
+          "line": 41,
+          "column": 5,
+          "position": 351
+        },
+        "endLoc": {
+          "line": 58,
+          "column": 10,
+          "position": 465
+        }
+      }
+    },
+    {
+      "format": "javascript",
+      "lines": 117,
+      "fragment": "={0}\n        onBack={vi.fn()}\n        onOpenOverview={vi.fn()}\n        onOpenBusinessService={vi.fn()}\n      />\n    );\n    expect(screen.getByText(\"Topology schema not initialized\")).toBeInTheDocument();\n\n    mockedUseBusinessUnitDetail.mockReturnValue({\n      businessUnit: null,\n      loading: false,\n      error: \"Request failed\",\n    });\n    rerender(\n      <BusinessUnitDetailPage\n        businessUnitSlug=\"online-store\"\n        refreshToken={0}\n        onBack={vi.fn()}\n        onOpenOverview={vi.fn()}\n        onOpenBusinessService={vi.fn()}\n      />\n    );\n    expect(screen.getByText(\"Business unit not found\")).toBeInTheDocument();\n    expect(screen.getByText(\"Request failed\")).toBeInTheDocument();\n\n    mockedUseBusinessUnitDetail.mockReturnValue({\n      businessUnit: {\n        company: { name: \"Virtucon\" },\n        business_unit: \"Online Store\",\n        slug: \"online-store\",\n        description: null,\n        metrics: {\n          total_business_services: 0,\n          total_applications: 0,\n          total_assets: 0,\n          total_findings: 0,\n        },\n        business_services: [],\n      },\n      loading: false,\n      error: null,\n    });\n    mockedUseBusinessUnitRiskOverview.mockReturnValue({\n      riskOverview: null,\n      loading: false,\n      error: \"Risk analytics failed\",\n    });\n    mockedUseBusinessUnitTopFindings.mockReturnValue({\n      data: { items: [], total: 0, page: 1, page_size: 20 },\n      loading: false,\n      error: null,\n      page: 1,\n      setPage: vi.fn(),\n      pageSize: 20,\n    });\n    rerender(\n      <BusinessUnitDetailPage\n        businessUnitSlug=\"online-store\"\n        refreshToken={0}\n        onBack={vi.fn()}\n        onOpenOverview={vi.fn()}\n        onOpenBusinessService={vi.fn()}\n      />\n    );\n\n    expect(screen.getByText(\"No business services\")).toBeInTheDocument();\n    expect(screen.getAllByText(\"Risk analytics failed\")).toHaveLength(2);\n  });\n\n  it(\"renders child business services from the live business-unit detail\", () => {\n    mockedUseBusinessUnitDetail.mockReturnValue({\n      businessUnit: {\n        company: { name: \"Virtucon\" },\n        business_unit: \"Online Store\",\n        slug: \"online-store\",\n        description: \"Online commerce systems.\",\n        metrics: {\n          total_business_services: 2,\n          total_applications: 4,\n          total_assets: 9,\n          total_findings: 18,\n        },\n        business_services: [\n          {\n            business_service: \"Digital Storefront\",\n            slug: \"digital-storefront\",\n            metrics: {\n              total_business_services: 0,\n              total_applications: 3,\n              total_assets: 5,\n              total_findings: 11,\n            },\n          },\n          {\n            business_service: \"Shipping and Tracking\",\n            slug: \"shipping-and-tracking\",\n            metrics: {\n              total_business_services: 0,\n              total_applications: 1,\n              total_assets: 4,\n              total_findings: 7,\n            },\n          },\n        ],\n      },\n      loading: false,\n      error: null,\n    });\n\n    const onOpenBusinessService = vi.fn();\n    const onOpenOverview = vi.fn();\n    render(\n      <BusinessUnitDetailPage\n        businessUnitSlug=\"online-store\"\n        refreshToken={0}\n        onBack={vi.fn()}\n        onOpenOverview={onOpenOverview",
+      "tokens": 822,
+      "firstFile": {
+        "name": "frontend/src/tests/components/topology/BusinessUnitDetailPage.test.tsx",
+        "start": 112,
+        "end": 228,
+        "startLoc": {
+          "line": 112,
+          "column": 21,
+          "position": 825
+        },
+        "endLoc": {
+          "line": 228,
+          "column": 39,
+          "position": 1647
+        }
+      },
+      "secondFile": {
+        "name": "frontend/src/tests/components/topology/BusinessUnitDetailPage.test.tsx",
+        "start": 95,
+        "end": 130,
+        "startLoc": {
+          "line": 95,
+          "column": 21,
+          "position": 718
+        },
+        "endLoc": {
+          "line": 130,
+          "column": 27,
+          "position": 949
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 19,
+      "fragment": ",\n        page: 1,\n        page_size: 10,\n      },\n      loading: false,\n      error: null,\n      page: 1,\n      setPage: vi.fn(),\n      pageSize: 10,\n    });\n    mockedUseBusinessServiceAnalytics.mockReturnValue({\n      analytics: {\n        service_risk_score: null,\n        service_risk_label: null,\n        business_criticality_score: 4,\n        business_criticality_max: 5,\n        business_criticality_label: \"High\",\n        totals: {\n          applications: 2",
+      "tokens": 122,
+      "firstFile": {
+        "name": "frontend/src/tests/components/topology/BusinessServiceDetailPage.test.tsx",
+        "start": 457,
+        "end": 475,
+        "startLoc": {
+          "line": 457,
+          "column": 17,
+          "position": 4133
+        },
+        "endLoc": {
+          "line": 475,
+          "column": 26,
+          "position": 4255
+        }
+      },
+      "secondFile": {
+        "name": "frontend/src/tests/components/topology/BusinessServiceDetailPage.test.tsx",
+        "start": 247,
+        "end": 265,
+        "startLoc": {
+          "line": 247,
+          "column": 17,
+          "position": 1849
+        },
+        "endLoc": {
+          "line": 265,
+          "column": 26,
+          "position": 1971
+        }
+      }
+    },
+    {
+      "format": "javascript",
+      "lines": 54,
+      "fragment": "} />);\n\n    fireEvent.change(screen.getByPlaceholderText(\"Search asset or ID\"), {\n      target: { value: \"web\" },\n    });\n    fireEvent.submit(screen.getByPlaceholderText(\"Search asset or ID\").closest(\"form\")!);\n    await user.click(screen.getByRole(\"button\", { name: /Status: All/i }));\n    await user.click(await screen.findByRole(\"menuitemradio\", { name: \"Inactive\" }));\n    await user.click(screen.getByRole(\"button\", { name: /Environment: All/i }));\n    await user.click(await screen.findByRole(\"menuitemradio\", { name: \"Production\" }));\n    await user.click(screen.getByRole(\"button\", { name: /Compliance: All/i }));\n    await user.click(await screen.findByRole(\"menuitemradio\", { name: \"PCI\" }));\n    await user.click(screen.getByRole(\"button\", { name: /Sort by: Findings/i }));\n    await user.click(await screen.findByRole(\"menuitemradio\", { name: \"Asset / hostname\" }));\n    await user.click(screen.getByRole(\"button\", { name: \"Desc\" }));\n    await user.click(screen.getByRole(\"link\", { name: \"2\" }));\n\n    expect(state.setSearchDraft).toHaveBeenCalledWith(\"web\");\n    expect(state.applySearch).toHaveBeenCalled();\n    expect(state.setStatus).toHaveBeenCalledWith(\"Inactive\");\n    expect(state.setEnvironment).toHaveBeenCalledWith(\"Production\");\n    expect(state.setCompliance).toHaveBeenCalledWith(\"PCI\");\n    expect(state.setSortBy).toHaveBeenCalledWith(\"name\");\n    expect(state.toggleSortOrder).toHaveBeenCalled();\n    expect(state.goToPage).toHaveBeenCalledWith(2);\n  });\n\n  it(\"renders loading, error, empty, and analytics-warning states\", () => {\n    const { rerender } = render(\n      <AssetInventoryPanel refreshToken={0} onOpenAsset={vi.fn()} />\n    );\n\n    useAssetInventoryStateMock.mockReturnValue(\n      buildInventoryState({ loading: true, assets: [], data: { items: [], total: 0 } })\n    );\n    rerender(<AssetInventoryPanel refreshToken={0} onOpenAsset={vi.fn()} />);\n    expect(screen.getByText(\"Loading assets\")).toBeInTheDocument();\n\n    useAssetInventoryStateMock.mockReturnValue(\n      buildInventoryState({ error: \"Unable to load assets\", assets: [], data: { items: [], total: 0 } })\n    );\n    rerender(<AssetInventoryPanel refreshToken={0} onOpenAsset={vi.fn()} />);\n    expect(screen.getByText(\"Unable to load assets\")).toBeInTheDocument();\n\n    useAssetInventoryStateMock.mockReturnValue(\n      buildInventoryState({ assets: [], data: { items: [], total: 0 } })\n    );\n    rerender(<AssetInventoryPanel refreshToken={0} onOpenAsset={vi.fn()} />);\n    expect(screen.getByText(\"No assets\")).toBeInTheDocument();\n\n    useAssetInventoryStateMock.mockReturnValue(\n      buildInventoryState({ analyticsError: \"Unable to load analytics\" })\n    );\n    rerender(<AssetInventoryPanel refreshToken={0} onOpenAsset={vi.fn()}",
+      "tokens": 816,
+      "firstFile": {
+        "name": "frontend/src/tests/components/topology/AssetInventoryPanel.test.tsx",
+        "start": 119,
+        "end": 172,
+        "startLoc": {
+          "line": 119,
+          "column": 70,
+          "position": 1066
+        },
+        "endLoc": {
+          "line": 172,
+          "column": 73,
+          "position": 1882
+        }
+      },
+      "secondFile": {
+        "name": "frontend/src/tests/components/topology/AssetInventoryPanel.test.tsx",
+        "start": 95,
+        "end": 166,
+        "startLoc": {
+          "line": 95,
+          "column": 74,
+          "position": 799
+        },
+        "endLoc": {
+          "line": 166,
+          "column": 73,
+          "position": 1816
+        }
+      }
+    },
+    {
+      "format": "javascript",
+      "lines": 88,
+      "fragment": "}\n        onOpenBusinessUnit={vi.fn()}\n        onOpenBusinessService={vi.fn()}\n        onOpenFinding={vi.fn()}\n      />\n    );\n\n    expect(mockedUseAssetFindingsAnalytics).toHaveBeenCalledWith(\"asset-10\", {\n      bandFilter: \"All\",\n      kevOnly: false,\n      source: null,\n      search: null,\n      refreshToken: 4,\n    });\n  });\n\n  it(\"shows table rows in server-provided order\", () => {\n    mockedUseAssetDetail.mockReturnValue({\n      assetDetail: null,\n      loading: false,\n      error: null,\n    });\n    mockedUseAssetFindingsAnalytics.mockReturnValue({\n      analytics: {\n        asset: {\n          asset_id: \"asset-11\",\n          hostname: \"asset-11-host\",\n        },\n        analytics: {\n          total_findings: 2,\n          kev_findings: 0,\n          critical_high_findings: 1,\n          highest_risk_band: \"Critical\",\n          average_risk_score: 5.5,\n          max_risk_score: 9.9,\n          oldest_priority_age_days: null,\n          risk_bands: { Critical: 1, High: 0, Medium: 0, Low: 1 },\n        },\n      },\n      loading: false,\n      error: null,\n    });\n    mockedUseAssetFindings.mockReturnValue({\n      assetFindings: {\n        asset: {\n          asset_id: \"asset-11\",\n          hostname: \"asset-11-host\",\n          finding_count: 2,\n        },\n        total: 2,\n        page: 1,\n        page_size: 10,\n        items: [\n          {\n            id: \"finding-z\",\n            asset_id: \"asset-11\",\n            display_name: \"Zulu Finding\",\n            risk_band: \"Low\",\n            risk_score: 1.1,\n            source: \"Qualys\",\n          },\n          {\n            id: \"finding-a\",\n            asset_id: \"asset-11\",\n            display_name: \"Alpha Finding\",\n            risk_band: \"Critical\",\n            risk_score: 9.9,\n            source: \"Qualys\",\n          },\n        ],\n      },\n      loading: false,\n      error: null,\n      page: 1,\n      setPage: vi.fn(),\n      pageSize: 10,\n    });\n\n    render(\n      <AssetFindingsPage\n        businessUnitSlug=\"online-store\"\n        businessServiceSlug=\"digital-storefront\"\n        assetId=\"asset-11\"\n        refreshToken={0}\n        onBack={vi.fn()}\n        onOpenOverview={vi.fn()}\n        onOpenBusinessUnit={vi.fn()}\n        onOpenBusinessService={vi",
+      "tokens": 582,
+      "firstFile": {
+        "name": "frontend/src/tests/components/topology/AssetFindingsPage.test.tsx",
+        "start": 310,
+        "end": 397,
+        "startLoc": {
+          "line": 310,
+          "column": 32,
+          "position": 2744
+        },
+        "endLoc": {
+          "line": 397,
+          "column": 34,
+          "position": 3326
+        }
+      },
+      "secondFile": {
+        "name": "frontend/src/tests/components/topology/BusinessUnitDetailPage.test.tsx",
+        "start": 95,
+        "end": 128,
+        "startLoc": {
+          "line": 95,
+          "column": 24,
+          "position": 721
+        },
+        "endLoc": {
+          "line": 128,
+          "column": 24,
+          "position": 933
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 23,
+      "fragment": ", () => {\n    render(\n      <AssetDistributionCharts\n        analytics={{\n          total_assets: 7,\n          asset_criticality_distribution: {\n            low: 1,\n            medium: 2,\n            high: 1,\n            critical: 2,\n            unscored: 1,\n          },\n          finding_risk_distribution: {\n            low: 0,\n            medium: 1,\n            high: 4,\n            critical: 2,\n            unscored: 0,\n          },\n        }}\n        loading={false}\n        error={null}\n        showFindingRiskDistribution",
+      "tokens": 139,
+      "firstFile": {
+        "name": "frontend/src/tests/components/topology/AssetDistributionCharts.test.tsx",
+        "start": 38,
+        "end": 60,
+        "startLoc": {
+          "line": 38,
+          "column": 84,
+          "position": 288
+        },
+        "endLoc": {
+          "line": 60,
+          "column": 36,
+          "position": 427
+        }
+      },
+      "secondFile": {
+        "name": "frontend/src/tests/components/topology/AssetDistributionCharts.test.tsx",
+        "start": 7,
+        "end": 29,
+        "startLoc": {
+          "line": 7,
+          "column": 67,
+          "position": 66
+        },
+        "endLoc": {
+          "line": 29,
+          "column": 8,
+          "position": 205
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 10,
+      "fragment": ": vi.fn(),\n}));\nvi.mock(\"../../../hooks/topology/assets/usePaginatedAssets\", () => ({\n  usePaginatedAssets: vi.fn(),\n}));\nvi.mock(\"../../../hooks/topology/assets/useAssetsAnalytics\", () => ({\n  useAssetsAnalytics: vi.fn(),\n}));\n\nconst mockedUseApplicationDetail",
+      "tokens": 79,
+      "firstFile": {
+        "name": "frontend/src/tests/components/topology/ApplicationDetailPage.test.tsx",
+        "start": 10,
+        "end": 19,
+        "startLoc": {
+          "line": 10,
+          "column": 23,
+          "position": 115
+        },
+        "endLoc": {
+          "line": 19,
+          "column": 33,
+          "position": 194
+        }
+      },
+      "secondFile": {
+        "name": "frontend/src/tests/components/topology/BusinessServiceDetailPage.test.tsx",
+        "start": 14,
+        "end": 23,
+        "startLoc": {
+          "line": 14,
+          "column": 30,
+          "position": 159
+        },
+        "endLoc": {
+          "line": 23,
+          "column": 37,
+          "position": 238
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 14,
+      "fragment": "mockedUsePaginatedAssets.mockReturnValue({\n      data: { items: [], total: 0, page: 1, page_size: 10 },\n      loading: false,\n      error: null,\n      page: 1,\n      setPage: vi.fn(),\n      pageSize: 10,\n    });\n    mockedUseAssetsAnalytics.mockReturnValue({\n      analytics: null,\n      loading: false,\n      error: null,\n    });\n    mockedUseApplicationDetail",
+      "tokens": 117,
+      "firstFile": {
+        "name": "frontend/src/tests/components/topology/ApplicationDetailPage.test.tsx",
+        "start": 25,
+        "end": 38,
+        "startLoc": {
+          "line": 25,
+          "column": 5,
+          "position": 261
+        },
+        "endLoc": {
+          "line": 38,
+          "column": 31,
+          "position": 378
+        }
+      },
+      "secondFile": {
+        "name": "frontend/src/tests/components/topology/BusinessServiceDetailPage.test.tsx",
+        "start": 35,
+        "end": 48,
+        "startLoc": {
+          "line": 35,
+          "column": 5,
+          "position": 352
+        },
+        "endLoc": {
+          "line": 48,
+          "column": 35,
+          "position": 469
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 19,
+      "fragment": ": [\n          {\n            asset_id: \"asset-10\",\n            hostname: \"id-verify-01\",\n            device_type: \"Server\",\n            environment: \"production\",\n            category: \"Host\",\n            pci: true,\n            pii: true,\n            compliance_flags: \"sox\",\n            aggregated_finding_risk: 8.5,\n            asset_context_score: 9,\n            asset_risk_score: 8.7,\n            status: \"Active\",\n            compliance_status: \"Compliant\",\n            finding_count: 2,\n          },\n        ],\n        total",
+      "tokens": 114,
+      "firstFile": {
+        "name": "frontend/src/tests/components/topology/ApplicationDetailPage.test.tsx",
+        "start": 116,
+        "end": 134,
+        "startLoc": {
+          "line": 116,
+          "column": 14,
+          "position": 967
+        },
+        "endLoc": {
+          "line": 134,
+          "column": 14,
+          "position": 1081
+        }
+      },
+      "secondFile": {
+        "name": "frontend/src/tests/components/topology/ApplicationDetailPage.test.tsx",
+        "start": 92,
+        "end": 110,
+        "startLoc": {
+          "line": 92,
+          "column": 15,
+          "position": 816
+        },
+        "endLoc": {
+          "line": 110,
+          "column": 8,
+          "position": 930
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 6,
+      "fragment": ");\n    expect(screen.getByText(\"Asset criticality spread\")).toBeInTheDocument();\n    expect(screen.getByText(\"Aggregated Finding Risk Spread\")).toBeInTheDocument();\n    expect(screen.getByRole(\"columnheader\", { name: /^Asset$/i })).toBeInTheDocument();\n    expect(screen.getByRole(\"columnheader\", { name: /^Status$/i })).toBeInTheDocument();\n    expect(screen.getByRole(\"columnheader\", { name: /^Asset type$/i",
+      "tokens": 102,
+      "firstFile": {
+        "name": "frontend/src/tests/components/topology/ApplicationDetailPage.test.tsx",
+        "start": 185,
+        "end": 190,
+        "startLoc": {
+          "line": 185,
+          "column": 69,
+          "position": 1462
+        },
+        "endLoc": {
+          "line": 190,
+          "column": 68,
+          "position": 1564
+        }
+      },
+      "secondFile": {
+        "name": "frontend/src/tests/components/topology/BusinessServiceDetailPage.test.tsx",
+        "start": 360,
+        "end": 365,
+        "startLoc": {
+          "line": 360,
+          "column": 96,
+          "position": 2890
+        },
+        "endLoc": {
+          "line": 365,
+          "column": 68,
+          "position": 2992
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 9,
+      "fragment": "})).toBeInTheDocument();\n    expect(screen.getByRole(\"columnheader\", { name: /^Category$/i })).toBeInTheDocument();\n    expect(screen.getByRole(\"columnheader\", { name: /^Asset Criticality$/i })).toBeInTheDocument();\n    expect(screen.getByRole(\"columnheader\", { name: /^Asset Risk Score$/i })).toBeInTheDocument();\n    expect(screen.getByRole(\"columnheader\", { name: /^Total Findings$/i })).toBeInTheDocument();\n    expect(screen.queryByRole(\"columnheader\", { name: /^Aggregated Finding Risk$/i })).not.toBeInTheDocument();\n    expect(screen.queryByRole(\"columnheader\", { name: /^Finding risk$/i })).not.toBeInTheDocument();\n    expect(screen.queryByRole(\"columnheader\", { name: /^Criticality$/i })).not.toBeInTheDocument();\n    expect(screen.queryByRole",
+      "tokens": 202,
+      "firstFile": {
+        "name": "frontend/src/tests/components/topology/ApplicationDetailPage.test.tsx",
+        "start": 192,
+        "end": 200,
+        "startLoc": {
+          "line": 192,
+          "column": 69,
+          "position": 1618
+        },
+        "endLoc": {
+          "line": 200,
+          "column": 30,
+          "position": 1820
+        }
+      },
+      "secondFile": {
+        "name": "frontend/src/tests/components/topology/BusinessServiceDetailPage.test.tsx",
+        "start": 367,
+        "end": 375,
+        "startLoc": {
+          "line": 367,
+          "column": 70,
+          "position": 3046
+        },
+        "endLoc": {
+          "line": 375,
+          "column": 28,
+          "position": 3248
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 15,
+      "fragment": ", () => {\n    mockedUseApplicationDetail.mockReturnValue({\n      application: {\n        company: { name: \"Virtucon\" },\n        business_unit: \"Online Store\",\n        business_service: \"Digital Storefront\",\n        application: \"Identity Verify\",\n        slug: \"identity-verify\",\n        metrics: {\n          total_business_services: 0,\n          total_applications: 0,\n          total_assets: 2,\n          total_findings: 5,\n        },\n        application_risk_score: null",
+      "tokens": 106,
+      "firstFile": {
+        "name": "frontend/src/tests/components/topology/ApplicationDetailPage.test.tsx",
+        "start": 225,
+        "end": 239,
+        "startLoc": {
+          "line": 225,
+          "column": 63,
+          "position": 2178
+        },
+        "endLoc": {
+          "line": 239,
+          "column": 37,
+          "position": 2284
+        }
+      },
+      "secondFile": {
+        "name": "frontend/src/tests/components/topology/ApplicationDetailPage.test.tsx",
+        "start": 77,
+        "end": 91,
+        "startLoc": {
+          "line": 77,
+          "column": 82,
+          "position": 705
+        },
+        "endLoc": {
+          "line": 91,
+          "column": 36,
+          "position": 811
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 6,
+      "fragment": ");\n    expect(within(table).getByRole(\"columnheader\", { name: \"Business Service\" })).toBeInTheDocument();\n    expect(within(table).getByRole(\"columnheader\", { name: \"Asset\" })).toBeInTheDocument();\n    expect(within(table).getByRole(\"columnheader\", { name: \"Risk Score\" })).toBeInTheDocument();\n    expect(within(table).getByRole(\"columnheader\", { name: /Priority Score/ })).toBeInTheDocument();\n    expect(screen",
+      "tokens": 122,
+      "firstFile": {
+        "name": "frontend/src/tests/components/dashboard/RiskTable.test.tsx",
+        "start": 72,
+        "end": 77,
+        "startLoc": {
+          "line": 72,
+          "column": 92,
+          "position": 615
+        },
+        "endLoc": {
+          "line": 77,
+          "column": 18,
+          "position": 737
+        }
+      },
+      "secondFile": {
+        "name": "frontend/src/tests/components/topology/BusinessUnitDetailPage.test.tsx",
+        "start": 259,
+        "end": 264,
+        "startLoc": {
+          "line": 259,
+          "column": 43,
+          "position": 2168
+        },
+        "endLoc": {
+          "line": 264,
+          "column": 18,
+          "position": 2290
+        }
+      }
+    },
+    {
+      "format": "javascript",
+      "lines": 218,
+      "fragment": "={0}\n        origin={{ mode: \"global\" }}\n        breadcrumbs={[\n          { label: \"Findings\", onClick: vi.fn() },\n          { label: \"Finding\" },\n        ]}\n        backLabel=\"Back to Findings\"\n        onBack={vi.fn()}\n      />\n    );\n\n    expect(screen.getByText(\"Finding not available\")).toBeInTheDocument();\n    expect(screen.getByText(\"Finding not found.\")).toBeInTheDocument();\n  });\n\n  it(\"renders the denser finding detail layout with compact supporting details\", () => {\n    mockedUseFindingDetails.mockReturnValue({\n      finding: {\n        id: \"finding-42\",\n        source: \"Qualys\",\n        asset_id: \"asset-42\",\n        display_name: \"OpenSSL Vulnerability\",\n        risk_score: 8.7,\n        risk_band: \"High\",\n        source_risk_score: 7.4,\n        source_risk_rating: \"High\",\n        cvss_score: 8.1,\n        cvss_severity: \"High\",\n        epss_score: 0.8732,\n        epss_percentile: 0.9912,\n        status: \"Open\",\n        lifecycle_status: \"Active\",\n        age_in_days: 29,\n        cve_id: \"CVE-2025-0001\",\n        cwe_ids: \"CWE-79\",\n        description: \"Primary finding description.\",\n        cveDescription: \"Separate CVE description.\",\n        nvd_vuln_status: \"ANALYZED\",\n        nvd_published: \"2022-01-11T12:00:00Z\",\n        nvd_last_modified: \"2025-04-15T12:00:00Z\",\n        kevDateAdded: \"2022-07-20T00:00:00Z\",\n        kevDueDate: \"2022-08-10T00:00:00Z\",\n        kevVulnerabilityName: \"Atlassian Questions For Confluence Hardcoded Credentials Vulnerability\",\n        record_id: \"SRC-77\",\n        uid: \"uid-123\",\n        record_link: \"https://example.com/finding/42\",\n        due_date: \"2026-05-12\",\n        severity: \"Critical\",\n        cvss_version: \"3.1\",\n        cvss_vector: \"CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:H/I:H/A:H\",\n        attack_vector: \"Network\",\n        attack_complexity: \"Low\",\n        privileges_required: \"NONE\",\n        user_interaction: \"REQUIRED\",\n        scope: \"CHANGED\",\n        confidentiality_impact: \"HIGH\",\n        integrity_impact: \"HIGH\",\n        availability_impact: \"HIGH\",\n        primary_cwe_id: \"CWE-416\",\n        primary_cwe_description: \"Use After Free\",\n        references: [\n          {\n            url: \"https://example.com/vendor-advisory\",\n            source: \"Example Vendor\",\n            tags: [\"Vendor Advisory\"],\n            group: \"Vendor Advisory\",\n          },\n        ],\n        reference_groups: {\n          \"Patch / Release Notes\": [\n            {\n              url: \"https://example.com/release-notes\",\n              source: \"Example Project\",\n              tags: [\"Patch\", \"Release Notes\"],\n              group: \"Patch / Release Notes\",\n            },\n          ],\n          \"Vendor Advisory\": [\n            {\n              url: \"https://example.com/vendor-advisory\",\n              source: \"Example Vendor\",\n              tags: [\"Vendor Advisory\"],\n              group: \"Vendor Advisory\",\n            },\n          ],\n        },\n        score_source: \"CRQ v4\",\n        crq_score_version: \"v4\",\n        crq_scored_at: \"2026-04-20T10:30:00Z\",\n        crq_notes: \"Score elevated due to exploitable attack path.\",\n        isKev: false,\n        target_ids: \"asset-42\",\n        target_names: \"api-gateway-01\",\n        remediation_status: \"Planned\",\n        remediation_owner_name: \"Blue Team\",\n        attack_pattern_names: \"Exploit Public-Facing Application\",\n        attack_technique_names: \"T1190\",\n        attack_tactic_names: \"Initial Access\",\n      },\n      setFinding: vi.fn(),\n      loading: false,\n      error: null,\n    });\n\n    render(\n      <FindingDetailPage\n        findingId=\"finding-42\"\n        refreshToken={0}\n        origin={{ mode: \"global\" }}\n        breadcrumbs={[\n          { label: \"Findings\", onClick: vi.fn() },\n          { label: \"Finding\" },\n        ]}\n        backLabel=\"Back to Findings\"\n        onBack={vi.fn()}\n      />\n    );\n\n    expect(screen.getAllByText(\"Finding\").length).toBeGreaterThan(0);\n    expect(screen.getByText(\"OpenSSL Vulnerability\")).toBeInTheDocument();\n    expect(screen.getByText(\"Active\")).toBeInTheDocument();\n    expect(screen.queryByText(\"KEV\")).not.toBeInTheDocument();\n    expect(screen.queryByText(\"Source: Qualys\")).not.toBeInTheDocument();\n    expect(screen.queryByText(\"High / 8.7\")).not.toBeInTheDocument();\n    expect(screen.queryByText(\"CVE: CVE-2025-0001\")).not.toBeInTheDocument();\n    expect(screen.queryByText(\"Status: Open / Active\")).not.toBeInTheDocument();\n    expect(screen.queryByRole(\"button\", { name: /Back to Findings/i })).not.toBeInTheDocument();\n    expect(screen.getByText(\"Risk Score\")).toBeInTheDocument();\n    expect(screen.getByLabelText(\"About risk score\")).toBeInTheDocument();\n    expect(screen.queryByText(\"Display Risk\")).not.toBeInTheDocument();\n    expect(screen.queryByText(\"Vendor Risk\")).not.toBeInTheDocument();\n    expect(screen.getByText(\"CVSS\")).toBeInTheDocument();\n    expect(screen.getByText(\"EPSS\")).toBeInTheDocument();\n    expect(screen.getByText(\"Age\")).toBeInTheDocument();\n    expect(screen.getByText(\"Percentile 0.9912\")).toBeInTheDocument();\n    expect(screen.getByText(\"Finding Overview\")).toBeInTheDocument();\n    expect(screen.getByText(\"Supporting Details\")).toBeInTheDocument();\n    expect(screen.getByRole(\"tab\", { name: \"Asset & Business Context\" })).toBeInTheDocument();\n    expect(screen.queryByText(\"KEV Details\")).not.toBeInTheDocument();\n    expect(screen.getByRole(\"link\", { name: \"Open remediation reference\" })).toHaveAttribute(\n      \"href\",\n      \"https://example.com/release-notes\"\n    );\n    expect(screen.queryByText(\"Short Summary\")).not.toBeInTheDocument();\n    expect(screen.queryByText(\"Patch the affected OpenSSL package.\")).not.toBeInTheDocument();\n    expect(screen.getByText(\"Description\")).toBeInTheDocument();\n    expect(screen.getByText(\"Separate CVE description.\")).toBeInTheDocument();\n    expect(screen.getByText(\"CVE Intelligence\")).toBeInTheDocument();\n    expect(screen.getByText(\"CISA Known Exploited Vulnerability\")).toBeInTheDocument();\n    expect(screen.getByText(\"NVD Status\")).toBeInTheDocument();\n    expect(screen.getByText(\"Name\")).toBeInTheDocument();\n    expect(screen.getByText(\"Added to KEV\")).toBeInTheDocument();\n    expect(screen.getByText(\"Action Due\")).toBeInTheDocument();\n    expect(screen.getByText(\"Analyzed\")).toBeInTheDocument();\n    expect(screen.getByText(\"Atlassian Questions For Confluence Hardcoded Credentials Vulnerability\")).toBeInTheDocument();\n    expect(screen.getByText(\"Published\")).toBeInTheDocument();\n    expect(screen.getByText(\"Last Modified\")).toBeInTheDocument();\n    expect(screen.getByText(\"CVSS Version\")).toBeInTheDocument();\n    expect(screen.getByText(\"3.1\")).toBeInTheDocument();\n    expect(screen.queryByText(\"CVSS Vector\")).not.toBeInTheDocument();\n    expect(screen.queryByText(\"CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:H/I:H/A:H\")).not.toBeInTheDocument();\n    expect(screen.queryByText(\"Primary Description\")).not.toBeInTheDocument();\n    expect(screen.queryByText(\"CVE Description\")).not.toBeInTheDocument();\n    expect(screen.getByText(\"Vulnerability Type\")).toBeInTheDocument();\n    expect(screen.getByText(\"CWE-416\")).toBeInTheDocument();\n    expect(screen.getByText(\"Use After Free\")).toBeInTheDocument();\n    expect(screen.getByRole(\"columnheader\", { name: \"Attack Vector\" })).toBeInTheDocument();\n    expect(screen.getByRole(\"columnheader\", { name: \"Attack Complexity\" })).toBeInTheDocument();\n    expect(screen.getByRole(\"columnheader\", { name: \"Privileges Required\" })).toBeInTheDocument();\n    expect(screen.getByRole(\"columnheader\", { name: \"User Interaction\" })).toBeInTheDocument();\n    expect(screen.getByRole(\"columnheader\", { name: \"Confidentiality Impact\" })).toBeInTheDocument();\n    expect(screen.getByRole(\"columnheader\", { name: \"Integrity Impact\" })).toBeInTheDocument();\n    expect(screen.getByRole(\"columnheader\", { name: \"Availability Impact\" })).toBeInTheDocument();\n    expect(screen.getByRole(\"columnheader\", { name: \"Scope\" })).toBeInTheDocument();\n    expect(screen.getAllByText(\"Required\").length).toBeGreaterThan(0);\n    expect(screen.getByText(\"Changed\")).toBeInTheDocument();\n    expect(screen.getByText(\"Identifiers\")).toBeInTheDocument();\n    expect(screen.getByText(\"Internal finding row ID\")).toBeInTheDocument();\n    expect(screen.queryByText(\"Source finding ID\")).not.toBeInTheDocument();\n    expect(screen.getByText(\"Scoring\")).toBeInTheDocument();\n  });\n\n  it(\"shows KEV details only for KEV findings and keeps them near the top\", () => {\n    mockedUseFindingDetails.mockReturnValue({\n      finding: {\n        id: \"finding-88\",\n        source: \"Qualys\",\n        asset_id: \"asset-88\",\n        display_name: \"Critical Edge Vulnerability\",\n        risk_score: 9.9,\n        risk_band: \"Critical\",\n        source_risk_score: 9.4,\n        cvss_score: 9.8,\n        epss_score: 0.9981,\n        status: \"Open\",\n        lifecycle_status: \"Active\",\n        cve_id: \"CVE-2026-9999\",\n        description: \"Edge service exposure.\",\n        isKev: true,\n        kevDateAdded: \"2026-04-20\",\n        kevDueDate: \"2026-05-01\",\n        kevRansomwareUse: \"Known\",\n        kevRequiredAction: \"Patch immediately.\",\n        kevShortDescription: \"Actively exploited edge-service issue.\",\n        record_id: \"SRC-88\",\n        uid: \"uid-888\",\n      },\n      setFinding: vi.fn(),\n      loading: false,\n      error: null,\n    });\n\n    render(\n      <FindingDetailPage\n        findingId=\"finding-88\"\n        refreshToken={0}\n        origin={{\n          mode",
+      "tokens": 2133,
+      "firstFile": {
+        "name": "frontend/src/tests/components/dashboard/FindingDetailPage.test.tsx",
+        "start": 56,
+        "end": 273,
+        "startLoc": {
+          "line": 56,
+          "column": 21,
+          "position": 433
+        },
+        "endLoc": {
+          "line": 273,
+          "column": 15,
+          "position": 2566
+        }
+      },
+      "secondFile": {
+        "name": "frontend/src/tests/components/dashboard/FindingDetailPage.test.tsx",
+        "start": 33,
+        "end": 57,
+        "startLoc": {
+          "line": 33,
+          "column": 21,
+          "position": 267
+        },
+        "endLoc": {
+          "line": 57,
+          "column": 23,
+          "position": 442
+        }
+      }
+    },
+    {
+      "format": "javascript",
+      "lines": 68,
+      "fragment": ", onClick: vi.fn() },\n          { label: \"Finding\" },\n        ]}\n        backLabel=\"Back to Asset Findings\"\n        onBack={vi.fn()}\n      />\n    );\n\n    expect(screen.getAllByText(\"Patch immediately.\").length).toBeGreaterThan(0);\n    expect(screen.getByRole(\"tab\", { name: \"Asset & Business Context\" })).toBeInTheDocument();\n    expect(screen.getAllByText(\"identity-verify-01\").length).toBeGreaterThan(0);\n    expect(screen.getByText(\"Added to KEV\")).toBeInTheDocument();\n    expect(screen.queryByText(\"KEV\")).not.toBeInTheDocument();\n  });\n\n  it(\"does not show large empty remediation callouts when no remediation narrative exists\", () => {\n    mockedUseFindingDetails.mockReturnValue({\n      finding: {\n        id: \"finding-12\",\n        source: \"Brinqa\",\n        asset_id: \"asset-12\",\n        risk_score: 6.2,\n        risk_band: \"Medium\",\n      },\n      setFinding: vi.fn(),\n      loading: false,\n      error: null,\n    });\n\n    render(\n      <FindingDetailPage\n        findingId=\"finding-12\"\n        refreshToken={0}\n        origin={{ mode: \"global\" }}\n        breadcrumbs={[\n          { label: \"Findings\", onClick: vi.fn() },\n          { label: \"Finding\" },\n        ]}\n        backLabel=\"Back to Findings\"\n        onBack={vi.fn()}\n      />\n    );\n\n    expect(screen.getByText(\"Finding Overview\")).toBeInTheDocument();\n    expect(screen.getByText(\"Supporting Details\")).toBeInTheDocument();\n    expect(screen.getByRole(\"tab\", { name: \"Asset & Business Context\" })).toBeInTheDocument();\n  });\n});\n\nfunction renderDetailPage(\n  hookState: ReturnType<typeof mockedUseFindingDetails> extends never\n    ? never\n    : {\n        finding: null;\n        setFinding: ReturnType<typeof vi.fn>;\n        loading: boolean;\n        error: string | null;\n      }\n) {\n  mockedUseFindingDetails.mockReturnValue(hookState);\n\n  return render(\n    <FindingDetailPage\n      findingId=\"finding-404\"\n      refreshToken={0}\n      origin={{ mode: \"global\" }}\n      breadcrumbs={[\n        ",
+      "tokens": 526,
+      "firstFile": {
+        "name": "frontend/src/tests/components/dashboard/FindingDetailPage.test.tsx",
+        "start": 288,
+        "end": 355,
+        "startLoc": {
+          "line": 288,
+          "column": 40,
+          "position": 2693
+        },
+        "endLoc": {
+          "line": 355,
+          "column": 9,
+          "position": 3219
+        }
+      },
+      "secondFile": {
+        "name": "frontend/src/tests/components/dashboard/FindingDetailPage.test.tsx",
+        "start": 36,
+        "end": 59,
+        "startLoc": {
+          "line": 36,
+          "column": 30,
+          "position": 294
+        },
+        "endLoc": {
+          "line": 59,
+          "column": 11,
+          "position": 454
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 18,
+      "fragment": ",\n    });\n    rerender(\n      <FindingDetailPage\n        findingId=\"finding-404\"\n        refreshToken={0}\n        origin={{ mode: \"global\" }}\n        breadcrumbs={[\n          { label: \"Findings\", onClick: vi.fn() },\n          { label: \"Finding\" },\n        ]}\n        backLabel=\"Back to Findings\"\n        onBack={vi.fn()}\n      />\n    );\n\n    expect(screen.getByText(\"Finding not available\")).toBeInTheDocument();\n    expect(screen.getByText(\"Finding not found.\"",
+      "tokens": 119,
+      "firstFile": {
+        "name": "frontend/src/tests/components/dashboard/FindingDetailPage.test.tsx",
+        "start": 51,
+        "end": 68,
+        "startLoc": {
+          "line": 51,
+          "column": 18,
+          "position": 411
+        },
+        "endLoc": {
+          "line": 68,
+          "column": 49,
+          "position": 530
+        }
+      },
+      "secondFile": {
+        "name": "frontend/src/tests/components/dashboard/FindingDetailPage.test.tsx",
+        "start": 28,
+        "end": 45,
+        "startLoc": {
+          "line": 28,
+          "column": 45,
+          "position": 245
+        },
+        "endLoc": {
+          "line": 45,
+          "column": 60,
+          "position": 364
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 6,
+      "fragment": ");\n\n    expect(screen.getByText(\"Finding Overview\")).toBeInTheDocument();\n    expect(screen.getByText(\"Supporting Details\")).toBeInTheDocument();\n    expect(screen.getByRole(\"tab\", { name: \"Asset & Business Context\" })).toBeInTheDocument();\n  }",
+      "tokens": 63,
+      "firstFile": {
+        "name": "frontend/src/tests/components/dashboard/FindingDetailPage.test.tsx",
+        "start": 329,
+        "end": 334,
+        "startLoc": {
+          "line": 329,
+          "column": 5,
+          "position": 3025
+        },
+        "endLoc": {
+          "line": 334,
+          "column": 4,
+          "position": 3088
+        }
+      },
+      "secondFile": {
+        "name": "frontend/src/tests/components/dashboard/FindingDetailPage.test.tsx",
+        "start": 190,
+        "end": 194,
+        "startLoc": {
+          "line": 190,
+          "column": 69,
+          "position": 1525
+        },
+        "endLoc": {
+          "line": 194,
+          "column": 11,
+          "position": 1587
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 9,
+      "fragment": "businessUnit?: string | null;\n  businessService?: string | null;\n  application?: string | null;\n  status?: string | null;\n  environment?: string | null;\n  compliance?: string | null;\n  search?: string | null;\n  directOnly?: boolean;\n  refreshToken",
+      "tokens": 92,
+      "firstFile": {
+        "name": "frontend/src/hooks/topology/assets/useAssetsAnalytics.ts",
+        "start": 17,
+        "end": 25,
+        "startLoc": {
+          "line": 17,
+          "column": 3,
+          "position": 104
+        },
+        "endLoc": {
+          "line": 25,
+          "column": 15,
+          "position": 196
+        }
+      },
+      "secondFile": {
+        "name": "frontend/src/hooks/topology/assets/usePaginatedAssets.ts",
+        "start": 25,
+        "end": 33,
+        "startLoc": {
+          "line": 25,
+          "column": 3,
+          "position": 146
+        },
+        "endLoc": {
+          "line": 33,
+          "column": 9,
+          "position": 238
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 9,
+      "fragment": "| null>(null);\n  const [loading, setLoading] = useState(true);\n  const [error, setError] = useState<string | null>(null);\n\n  useEffect(() => {\n    let active = true;\n\n    async function load() {\n      if",
+      "tokens": 86,
+      "firstFile": {
+        "name": "frontend/src/hooks/topology/assets/useAssetFindingsAnalytics.ts",
+        "start": 25,
+        "end": 33,
+        "startLoc": {
+          "line": 25,
+          "column": 77,
+          "position": 190
+        },
+        "endLoc": {
+          "line": 33,
+          "column": 9,
+          "position": 276
+        }
+      },
+      "secondFile": {
+        "name": "frontend/src/hooks/topology/assets/useAssetsAnalytics.ts",
+        "start": 27,
+        "end": 35,
+        "startLoc": {
+          "line": 27,
+          "column": 69,
+          "position": 224
+        },
+        "endLoc": {
+          "line": 35,
+          "column": 10,
+          "position": 310
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 10,
+      "fragment": "| null>(null);\n  const [loading, setLoading] = useState(true);\n  const [error, setError] = useState<string | null>(null);\n\n  useEffect(() => {\n    let active = true;\n\n    async function load() {\n      if (!assetId) {\n        setAssetDetail",
+      "tokens": 96,
+      "firstFile": {
+        "name": "frontend/src/hooks/topology/assets/useAssetDetail.ts",
+        "start": 7,
+        "end": 16,
+        "startLoc": {
+          "line": 7,
+          "column": 62,
+          "position": 86
+        },
+        "endLoc": {
+          "line": 16,
+          "column": 23,
+          "position": 182
+        }
+      },
+      "secondFile": {
+        "name": "frontend/src/hooks/topology/assets/useAssetsAnalytics.ts",
+        "start": 27,
+        "end": 34,
+        "startLoc": {
+          "line": 27,
+          "column": 69,
+          "position": 224
+        },
+        "endLoc": {
+          "line": 34,
+          "column": 21,
+          "position": 286
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 7,
+      "fragment": "));\n    await screen.findByText(\"business-unit-detail:online-store\");\n    fireEvent.click(screen.getByText(\"open-business-service\"));\n    await screen.findByText(\"business-service-detail:digital-storefront\");\n    fireEvent.click(screen.getByText(\"open-application\"));\n    await screen.findByText(\"application-detail:identity-verify\");\n    fireEvent",
+      "tokens": 66,
+      "firstFile": {
+        "name": "frontend/src/tests/app/App.test.tsx",
+        "start": 352,
+        "end": 358,
+        "startLoc": {
+          "line": 352,
+          "column": 58,
+          "position": 3407
+        },
+        "endLoc": {
+          "line": 358,
+          "column": 14,
+          "position": 3473
+        }
+      },
+      "secondFile": {
+        "name": "frontend/src/tests/app/App.test.tsx",
+        "start": 301,
+        "end": 309,
+        "startLoc": {
+          "line": 301,
+          "column": 82,
+          "position": 2819
+        },
+        "endLoc": {
+          "line": 309,
+          "column": 11,
+          "position": 2887
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 11,
+      "fragment": ", async () => {\n    vi.stubEnv(\"VITE_API_BASE_URL\", \"https://api.example.com\");\n    vi.stubGlobal(\"window\", {\n      location: {\n        protocol: \"https:\",\n        hostname: \"frontend.example.test\",\n      },\n    });\n    const fetchMock = vi.fn().mockResolvedValue(\n      new Response(\n        JSON.stringify({ items",
+      "tokens": 91,
+      "firstFile": {
+        "name": "frontend/src/tests/api/topology.test.ts",
+        "start": 51,
+        "end": 61,
+        "startLoc": {
+          "line": 51,
+          "column": 56,
+          "position": 386
+        },
+        "endLoc": {
+          "line": 61,
+          "column": 31,
+          "position": 477
+        }
+      },
+      "secondFile": {
+        "name": "frontend/src/tests/api/topology.test.ts",
+        "start": 14,
+        "end": 25,
+        "startLoc": {
+          "line": 14,
+          "column": 54,
+          "position": 104
+        },
+        "endLoc": {
+          "line": 25,
+          "column": 24,
+          "position": 196
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 10,
+      "fragment": ", async () => {\n    vi.stubEnv(\"VITE_API_BASE_URL\", \"https://api.example.com\");\n    vi.stubGlobal(\"window\", {\n      location: {\n        protocol: \"https:\",\n        hostname: \"frontend.example.test\",\n      },\n    });\n    const fetchMock = vi.fn().mockResolvedValue(\n      new Response(JSON.stringify({ asset",
+      "tokens": 89,
+      "firstFile": {
+        "name": "frontend/src/tests/api/topology.test.ts",
+        "start": 82,
+        "end": 91,
+        "startLoc": {
+          "line": 82,
+          "column": 70,
+          "position": 633
+        },
+        "endLoc": {
+          "line": 91,
+          "column": 42,
+          "position": 722
+        }
+      },
+      "secondFile": {
+        "name": "frontend/src/tests/api/topology.test.ts",
+        "start": 14,
+        "end": 25,
+        "startLoc": {
+          "line": 14,
+          "column": 54,
+          "position": 104
+        },
+        "endLoc": {
+          "line": 25,
+          "column": 24,
+          "position": 196
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 10,
+      "fragment": ", async () => {\n    vi.stubEnv(\"VITE_API_BASE_URL\", \"https://api.example.com\");\n    vi.stubGlobal(\"window\", {\n      location: {\n        protocol: \"https:\",\n        hostname: \"frontend.example.test\",\n      },\n    });\n    const fetchMock = vi.fn().mockResolvedValue(\n      new Response(JSON.stringify({ items: [], total: 0, page: 1, page_size: 25",
+      "tokens": 111,
+      "firstFile": {
+        "name": "frontend/src/tests/api/topology.test.ts",
+        "start": 108,
+        "end": 117,
+        "startLoc": {
+          "line": 108,
+          "column": 65,
+          "position": 844
+        },
+        "endLoc": {
+          "line": 117,
+          "column": 80,
+          "position": 955
+        }
+      },
+      "secondFile": {
+        "name": "frontend/src/tests/api/topology.test.ts",
+        "start": 14,
+        "end": 61,
+        "startLoc": {
+          "line": 14,
+          "column": 54,
+          "position": 104
+        },
+        "endLoc": {
+          "line": 61,
+          "column": 68,
+          "position": 499
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 9,
+      "fragment": ", async () => {\n    vi.stubEnv(\"VITE_API_BASE_URL\", \"https://api.example.com\");\n    vi.stubGlobal(\"window\", {\n      location: {\n        protocol: \"https:\",\n        hostname: \"frontend.example.test\",\n      },\n    });\n    const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({ ok",
+      "tokens": 87,
+      "firstFile": {
+        "name": "frontend/src/tests/api/topology.test.ts",
+        "start": 142,
+        "end": 150,
+        "startLoc": {
+          "line": 142,
+          "column": 72,
+          "position": 1119
+        },
+        "endLoc": {
+          "line": 150,
+          "column": 81,
+          "position": 1206
+        }
+      },
+      "secondFile": {
+        "name": "frontend/src/tests/api/topology.test.ts",
+        "start": 14,
+        "end": 25,
+        "startLoc": {
+          "line": 14,
+          "column": 54,
+          "position": 104
+        },
+        "endLoc": {
+          "line": 25,
+          "column": 24,
+          "position": 196
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 23,
+      "fragment": ">\n  );\n}\n\nfunction DetailEmptyState({\n  title,\n  description,\n}: {\n  title: string;\n  description: string;\n}) {\n  return (\n    <Empty>\n      <EmptyIcon>\n        <Layers3 className=\"h-5 w-5\" />\n      </EmptyIcon>\n      <EmptyHeader>\n        <EmptyTitle>{title}</EmptyTitle>\n        <EmptyDescription>{description}</EmptyDescription>\n      </EmptyHeader>\n    </Empty>\n  );\n}",
+      "tokens": 120,
+      "firstFile": {
+        "name": "frontend/src/pages/topology/BusinessServiceDetailPage.tsx",
+        "start": 164,
+        "end": 186,
+        "startLoc": {
+          "line": 164,
+          "column": 10,
+          "position": 1063
+        },
+        "endLoc": {
+          "line": 186,
+          "column": 2,
+          "position": 1183
+        }
+      },
+      "secondFile": {
+        "name": "frontend/src/pages/topology/BusinessUnitDetailPage.tsx",
+        "start": 294,
+        "end": 316,
+        "startLoc": {
+          "line": 294,
+          "column": 14,
+          "position": 2259
+        },
+        "endLoc": {
+          "line": 316,
+          "column": 2,
+          "position": 2379
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 9,
+      "fragment": ": Array<{ label: string; value: AssetListSortBy }> = [\n  { label: \"Findings\", value: \"finding_count\" },\n  { label: \"Asset / hostname\", value: \"name\" },\n  { label: \"Asset type\", value: \"asset_type\" },\n  { label: \"Criticality\", value: \"asset_criticality\" },\n  { label: \"Status\", value: \"status\" },\n];\n\nconst ASSET_COLUMNS",
+      "tokens": 115,
+      "firstFile": {
+        "name": "frontend/src/components/topology/AssetInventoryPanel.tsx",
+        "start": 30,
+        "end": 38,
+        "startLoc": {
+          "line": 30,
+          "column": 32,
+          "position": 347
+        },
+        "endLoc": {
+          "line": 38,
+          "column": 20,
+          "position": 462
+        }
+      },
+      "secondFile": {
+        "name": "frontend/src/components/topology/AssetInventoryPanel.tsx",
+        "start": 22,
+        "end": 30,
+        "startLoc": {
+          "line": 22,
+          "column": 25,
+          "position": 231
+        },
+        "endLoc": {
+          "line": 30,
+          "column": 32,
+          "position": 346
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 69,
+      "fragment": ": Array<DataTableColumn<AssetSummary, AssetListSortBy>> = [\n  {\n    id: \"status\",\n    label: \"Status\",\n    widthClassName: \"w-[112px]\",\n    render: (asset) => <AssetStatusBadge status={asset.status} />,\n  },\n  {\n    id: \"compliance\",\n    label: \"Compliance\",\n    widthClassName: \"w-[150px]\",\n    render: (asset) => <AssetComplianceBadges asset={asset} />,\n  },\n  {\n    id: \"asset\",\n    label: \"Asset\",\n    widthClassName: \"w-[320px]\",\n    render: (asset) => (\n      <div className=\"font-medium text-slate-900\">{getAssetName(asset)}</div>\n    ),\n  },\n  {\n    id: \"category\",\n    label: \"Category\",\n    widthClassName: \"w-[150px]\",\n    render: (asset) => formatCategory(asset.category),\n  },\n  {\n    id: \"asset-type\",\n    label: \"Asset type\",\n    widthClassName: \"w-[170px]\",\n    cellClassName: \"text-slate-500\",\n    render: (asset) => getAssetType(asset),\n  },\n  {\n    id: \"environment\",\n    label: \"Environment\",\n    widthClassName: \"w-[150px]\",\n    render: (asset) => formatEnvironment(asset.environment),\n  },\n  {\n    id: \"asset-criticality\",\n    label: \"Asset Criticality\",\n    widthClassName: \"w-[170px]\",\n    headerClassName: \"text-right\",\n    cellClassName: \"text-right text-slate-700\",\n    group: \"score\",\n    render: (asset) => formatNullable(asset.asset_context_score),\n  },\n  {\n    id: \"asset-risk-score\",\n    label: \"Asset Risk Score\",\n    widthClassName: \"w-[190px]\",\n    headerClassName: \"text-right\",\n    cellClassName: \"text-right text-slate-700\",\n    group: \"score\",\n    render: (asset) => <AssetRiskScoreCell score={asset.asset_risk_score} />,\n  },\n  {\n    id: \"total-findings\",\n    label: \"Total Findings\",\n    widthClassName: \"w-[150px]\",\n    headerClassName: \"text-right\",\n    cellClassName: \"text-right text-slate-700\",\n    render: (asset) => asset.finding_count.toLocaleString(),\n  },\n];\n\nexport",
+      "tokens": 530,
+      "firstFile": {
+        "name": "frontend/src/components/topology/AssetInventoryPanel.tsx",
+        "start": 106,
+        "end": 174,
+        "startLoc": {
+          "line": 106,
+          "column": 27,
+          "position": 996
+        },
+        "endLoc": {
+          "line": 174,
+          "column": 7,
+          "position": 1526
+        }
+      },
+      "secondFile": {
+        "name": "frontend/src/components/topology/AssetInventoryPanel.tsx",
+        "start": 38,
+        "end": 106,
+        "startLoc": {
+          "line": 38,
+          "column": 20,
+          "position": 463
+        },
+        "endLoc": {
+          "line": 106,
+          "column": 6,
+          "position": 993
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 14,
+      "fragment": "const [prediction, setPrediction] = useState<FairLossPredictionResponse | null>(null);\n  const [loading, setLoading] = useState(false);\n  const [error, setError] = useState<string | null>(null);\n  const [infoOpen, setInfoOpen] = useState(false);\n\n  useEffect(() => {\n    let active = true;\n    const timer = window.setTimeout(async () => {\n      try {\n        setLoading(true);\n        setError(null);\n        const result = await onPredict({\n          control_context: toNestedControlContext(readControlContext()),\n          primary_loss_mean: 0",
+      "tokens": 174,
+      "firstFile": {
+        "name": "frontend/src/components/fair/FairFrequencyPanel.tsx",
+        "start": 39,
+        "end": 52,
+        "startLoc": {
+          "line": 39,
+          "column": 3,
+          "position": 367
+        },
+        "endLoc": {
+          "line": 52,
+          "column": 31,
+          "position": 541
+        }
+      },
+      "secondFile": {
+        "name": "frontend/src/components/fair/FairScopeLossPanel.tsx",
+        "start": 44,
+        "end": 57,
+        "startLoc": {
+          "line": 44,
+          "column": 3,
+          "position": 421
+        },
+        "endLoc": {
+          "line": 57,
+          "column": 41,
+          "position": 595
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 11,
+      "fragment": ">\n      <CardHeader>\n        <div className=\"flex items-start justify-between gap-3\">\n          <div>\n            <CardTitle className=\"text-base\">{title}</CardTitle>\n            <p className=\"mt-1 text-sm leading-6 text-slate-500\">{description}</p>\n          </div>\n          <button\n            type=\"button\"\n            onClick={() => setInfoOpen(true)}\n            className=\"inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-slate-400 transition-colors hover:text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2",
+      "tokens": 89,
+      "firstFile": {
+        "name": "frontend/src/components/fair/FairFrequencyPanel.tsx",
+        "start": 77,
+        "end": 87,
+        "startLoc": {
+          "line": 77,
+          "column": 29,
+          "position": 720
+        },
+        "endLoc": {
+          "line": 87,
+          "column": 218,
+          "position": 809
+        }
+      },
+      "secondFile": {
+        "name": "frontend/src/components/fair/FairScopeLossPanel.tsx",
+        "start": 82,
+        "end": 92,
+        "startLoc": {
+          "line": 82,
+          "column": 10,
+          "position": 774
+        },
+        "endLoc": {
+          "line": 92,
+          "column": 188,
+          "position": 863
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 26,
+      "fragment": ".\n            </p>\n          </div>\n          <button\n            type=\"button\"\n            onClick={onClose}\n            className=\"rounded-md p-1 text-slate-500 hover:bg-slate-100 hover:text-slate-900\"\n            aria-label=\"Close FAIR guide\"\n          >\n            <X className=\"h-4 w-4\" />\n          </button>\n        </div>\n        <div className=\"grid gap-3 p-4 sm:grid-cols-2\">\n          {sections.map((section) => (\n            <div key={section.title} className=\"rounded-md border border-slate-200 bg-slate-50 p-3\">\n              <div className=\"text-sm font-semibold uppercase tracking-wide text-slate-900\">\n                {section.title}\n              </div>\n              <p className=\"mt-1 text-sm leading-6 text-slate-600\">{section.body}</p>\n            </div>\n          ))}\n        </div>\n      </div>\n    </div>\n  );\n}",
+      "tokens": 179,
+      "firstFile": {
+        "name": "frontend/src/components/fair/FairFrequencyPanel.tsx",
+        "start": 195,
+        "end": 220,
+        "startLoc": {
+          "line": 195,
+          "column": 45,
+          "position": 1551
+        },
+        "endLoc": {
+          "line": 220,
+          "column": 2,
+          "position": 1730
+        }
+      },
+      "secondFile": {
+        "name": "frontend/src/components/fair/FairScopeLossPanel.tsx",
+        "start": 234,
+        "end": 259,
+        "startLoc": {
+          "line": 234,
+          "column": 75,
+          "position": 2049
+        },
+        "endLoc": {
+          "line": 259,
+          "column": 2,
+          "position": 2228
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 50,
+      "fragment": "const RISK_BAND_OPTIONS: RiskBandFilter[] = [\"All\", \"Critical\", \"High\", \"Medium\", \"Low\"];\n\nconst SORT_OPTIONS: Array<{ label: string; value: FindingsSortBy }> = [\n  { label: \"Priority Score\", value: \"priority_score\" },\n  { label: \"Risk Score\", value: \"risk_score\" },\n  { label: \"Age\", value: \"age_in_days\" },\n];\n\nconst formatNumber = (value?: number | null, digits = 1) =>\n  formatDisplayNumber(value, digits, \"—\");\n\nfunction deriveRiskBand(score?: number | null) {\n  if (score === null || score === undefined) return null;\n  if (score >= 9) return \"Critical\";\n  if (score >= 7) return \"High\";\n  if (score >= 4) return \"Medium\";\n  return \"Low\";\n}\n\nfunction PriorityScoreLabel() {\n  return (\n    <span className=\"inline-flex w-full items-center justify-end gap-1.5\">\n      Priority Score\n      <HoverCard openDelay={150} closeDelay={100}>\n        <HoverCardTrigger asChild>\n          <button\n            type=\"button\"\n            className=\"inline-flex h-4 w-4 items-center justify-center rounded-full text-slate-400 transition-colors hover:text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2\"\n            aria-label=\"About priority score\"\n          >\n            <Info className=\"h-3.5 w-3.5\" aria-hidden=\"true\" />\n          </button>\n        </HoverCardTrigger>\n        <HoverCardContent\n          side=\"bottom\"\n          align=\"end\"\n          className=\"w-80 max-w-[calc(100vw-2rem)] whitespace-normal text-left text-sm leading-5\"\n        >\n          <div className=\"font-semibold text-slate-950\">Priority Score</div>\n          <p className=\"mt-1 whitespace-normal break-words text-sm font-normal leading-5 text-slate-500 normal-case\">\n            This is the remediation ranking score. It combines finding risk, asset\n            context, and business importance to show what should be fixed first.\n          </p>\n        </HoverCardContent>\n      </HoverCard>\n    </span>\n  );\n}\n\nconst MAIN_FINDINGS_COLUMNS",
+      "tokens": 486,
+      "firstFile": {
+        "name": "frontend/src/components/dashboard/RiskTable.tsx",
+        "start": 21,
+        "end": 70,
+        "startLoc": {
+          "line": 21,
+          "column": 1,
+          "position": 229
+        },
+        "endLoc": {
+          "line": 70,
+          "column": 28,
+          "position": 715
+        }
+      },
+      "secondFile": {
+        "name": "frontend/src/pages/topology/BusinessUnitFindingsSection.tsx",
+        "start": 21,
+        "end": 69,
+        "startLoc": {
+          "line": 21,
+          "column": 1,
+          "position": 201
+        },
+        "endLoc": {
+          "line": 69,
+          "column": 37,
+          "position": 686
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 111,
+      "fragment": ": Array<FindingsTableColumn<FindingsSortBy>> = [\n  {\n    id: \"row-number\",\n    label: \"#\",\n    widthClassName: \"w-[72px]\",\n    headerClassName: \"pr-4\",\n    cellClassName: \"pr-4\",\n    render: (_finding, { absoluteIndex }) => absoluteIndex + 1,\n  },\n  {\n    id: \"status\",\n    label: \"Status\",\n    widthClassName: \"w-[132px]\",\n    sortField: \"status\",\n    render: (finding) => {\n      const normalizedStatus = normalizeFindingStatus(finding);\n      return (\n        <div className=\"flex items-center gap-2\">\n          <StatusBadge tone={normalizedStatus === \"Fixed\" ? \"fixed\" : \"active\"}>\n            {normalizedStatus}\n          </StatusBadge>\n          {finding.isKev ? <StatusBadge tone=\"dark\">KEV</StatusBadge> : null}\n        </div>\n      );\n    },\n  },\n  {\n    id: \"finding\",\n    label: \"Finding\",\n    cellClassName: \"pl-5\",\n    headerClassName: \"pl-5\",\n    render: (finding) => (\n      <div className=\"font-medium text-slate-900\">\n        {finding.cve_id ?? getNormalizedFindingTitle(finding)}\n      </div>\n    ),\n  },\n  {\n    id: \"business-service\",\n    label: \"Business Service\",\n    widthClassName: \"w-[240px]\",\n    render: (finding) => finding.business_service || \"—\",\n  },\n  {\n    id: \"asset\",\n    label: \"Asset\",\n    widthClassName: \"w-[240px]\",\n    render: (finding) => finding.asset_name || finding.target_names || \"—\",\n  },\n  {\n    id: \"risk-score\",\n    label: \"Risk Score\",\n    widthClassName: \"w-[150px]\",\n    headerClassName: \"border-l border-slate-200 pl-5 text-right\",\n    cellClassName: \"border-l border-slate-200 pl-5 text-right\",\n    sortField: \"risk_score\",\n    render: (finding) => (\n      <span className=\"font-semibold text-slate-900\">\n        {formatNumber(finding.risk_score)}\n      </span>\n    ),\n  },\n  {\n    id: \"priority-score\",\n    label: <PriorityScoreLabel />,\n    widthClassName: \"w-[190px]\",\n    headerClassName: \"text-right\",\n    cellClassName: \"text-right\",\n    sortField: \"priority_score\",\n    render: (finding) => {\n      const priorityScore = finding.priority_score ?? finding.risk_score ?? null;\n      const priorityBand = deriveRiskBand(priorityScore) ?? finding.risk_band;\n      return (\n        <div className=\"flex items-center justify-end gap-3\">\n          <span className=\"font-semibold text-slate-900\">\n            {formatNumber(priorityScore)}\n          </span>\n          {priorityBand ? (\n            <span\n              className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold ${riskBandPillClass(\n                priorityBand\n              )}`}\n            >\n              {priorityBand}\n            </span>\n          ) : null}\n        </div>\n      );\n    },\n  },\n  {\n    id: \"age\",\n    label: \"Age\",\n    widthClassName: \"w-[120px]\",\n    headerClassName: \"text-right\",\n    cellClassName: \"text-right\",\n    sortField: \"age_in_days\",\n    render: (finding) => {\n      if (finding.age_in_days === null || finding.age_in_days === undefined) {\n        return <span className=\"text-slate-400\">—</span>;\n      }\n      return (\n        <span className=\"font-medium text-slate-700\">\n          {Math.round(finding.age_in_days).toLocaleString()}d\n        </span>\n      );\n    },\n  },\n];\n\nexport function RiskTable",
+      "tokens": 868,
+      "firstFile": {
+        "name": "frontend/src/components/dashboard/RiskTable.tsx",
+        "start": 70,
+        "end": 180,
+        "startLoc": {
+          "line": 70,
+          "column": 28,
+          "position": 716
+        },
+        "endLoc": {
+          "line": 180,
+          "column": 26,
+          "position": 1584
+        }
+      },
+      "secondFile": {
+        "name": "frontend/src/pages/topology/BusinessUnitFindingsSection.tsx",
+        "start": 69,
+        "end": 179,
+        "startLoc": {
+          "line": 69,
+          "column": 37,
+          "position": 687
+        },
+        "endLoc": {
+          "line": 179,
+          "column": 44,
+          "position": 1555
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 21,
+      "fragment": ")}\n      filters={[\n        {\n          id: \"risk-band\",\n          label: \"Risk band\",\n          value: bandFilter,\n          options: RISK_BAND_OPTIONS.map((band) => ({ label: band, value: band })),\n          onChange: (value) => setBandFilter(value as RiskBandFilter),\n        },\n        {\n          id: \"kev-only\",\n          label: \"KEV\",\n          checked: showKevOnly,\n          onChange: setShowKevOnly,\n        },\n      ]}\n      sortOptions={SORT_OPTIONS}\n      sortBy={sortBy}\n      onSortByChange={setSortBy}\n      sortOrder={sortOrder}\n      onToggleSortOrder={toggleSortOrder",
+      "tokens": 161,
+      "firstFile": {
+        "name": "frontend/src/components/dashboard/RiskTable.tsx",
+        "start": 248,
+        "end": 268,
+        "startLoc": {
+          "line": 248,
+          "column": 57,
+          "position": 2053
+        },
+        "endLoc": {
+          "line": 268,
+          "column": 41,
+          "position": 2214
+        }
+      },
+      "secondFile": {
+        "name": "frontend/src/pages/topology/BusinessUnitFindingsSection.tsx",
+        "start": 254,
+        "end": 274,
+        "startLoc": {
+          "line": 254,
+          "column": 67,
+          "position": 2229
+        },
+        "endLoc": {
+          "line": 274,
+          "column": 29,
+          "position": 2390
+        }
+      }
+    },
+    {
+      "format": "javascript",
+      "lines": 25,
+      "fragment": "} />\n          </div>\n        </TabsContent>\n\n        <TabsContent value=\"asset-business-context\">\n          <div className=\"rounded-xl border border-slate-200 bg-slate-50/40 p-4\">\n            <CompactDetailList\n              columns={1}\n              items={[\n                { label: \"Affected asset\", value: assetLabel },\n                { label: \"Asset ID\", value: origin?.assetId || finding.asset_id || \"-\" },\n                { label: \"Target ID\", value: finding.target_ids || finding.asset_id || \"-\" },\n                { label: \"Target names\", value: finding.target_names || \"-\" },\n                { label: \"Business context\", value: businessContext || \"-\" },\n                { label: \"Asset criticality\", value: formatNumber(finding.asset_criticality) },\n              ]}\n            />\n          </div>\n        </TabsContent>\n\n        {hasAttackContext ? (\n          <TabsContent value=\"attack\">\n            <div className=\"rounded-xl border border-slate-200 bg-slate-50/40 p-4\">\n              <CompactDetailList\n                columns={1",
+      "tokens": 215,
+      "firstFile": {
+        "name": "frontend/src/components/dashboard/FindingDetailSections.tsx",
+        "start": 186,
+        "end": 210,
+        "startLoc": {
+          "line": 186,
+          "column": 63,
+          "position": 1688
+        },
+        "endLoc": {
+          "line": 210,
+          "column": 27,
+          "position": 1903
+        }
+      },
+      "secondFile": {
+        "name": "frontend/src/components/dashboard/FindingDetailSections.tsx",
+        "start": 56,
+        "end": 180,
+        "startLoc": {
+          "line": 56,
+          "column": 42,
+          "position": 467
+        },
+        "endLoc": {
+          "line": 180,
+          "column": 54,
+          "position": 1630
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 14,
+      "fragment": "</div>\n      <dl className=\"mt-3 divide-y divide-slate-200\">\n        {items.map((item) => (\n          <div key={item.label} className=\"grid gap-2 py-2 first:pt-0 last:pb-0 sm:grid-cols-[8.5rem_minmax(0,1fr)]\">\n            <dt className=\"text-sm font-medium text-slate-600\">{item.label}</dt>\n            <dd className=\"break-words text-sm text-slate-900\">{item.value}</dd>\n          </div>\n        ))}\n      </dl>\n    </div>\n  );\n}\n\nfunction formatCvssMetric",
+      "tokens": 115,
+      "firstFile": {
+        "name": "frontend/src/components/dashboard/FindingDetailSections.tsx",
+        "start": 525,
+        "end": 538,
+        "startLoc": {
+          "line": 525,
+          "column": 7,
+          "position": 4721
+        },
+        "endLoc": {
+          "line": 538,
+          "column": 26,
+          "position": 4836
+        }
+      },
+      "secondFile": {
+        "name": "frontend/src/components/dashboard/FindingDetailSections.tsx",
+        "start": 492,
+        "end": 505,
+        "startLoc": {
+          "line": 492,
+          "column": 7,
+          "position": 4381
+        },
+        "endLoc": {
+          "line": 505,
+          "column": 29,
+          "position": 4496
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 8,
+      "fragment": "?: string | null;\n  primary_cwe_id?: string | null;\n  primary_cwe_description?: string | null;\n  weaknesses?: NvdWeakness[] | null;\n  affected_products?: NvdAffectedProduct[] | null;\n  references?: NvdReference[] | null;\n  reference_groups?: NvdReferenceGroups | null;\n  attack_pattern_names",
+      "tokens": 89,
+      "firstFile": {
+        "name": "frontend/src/types/api.ts",
+        "start": 122,
+        "end": 129,
+        "startLoc": {
+          "line": 122,
+          "column": 26,
+          "position": 1236
+        },
+        "endLoc": {
+          "line": 129,
+          "column": 23,
+          "position": 1325
+        }
+      },
+      "secondFile": {
+        "name": "frontend/src/tests/api/types.test.ts",
+        "start": 81,
+        "end": 88,
+        "startLoc": {
+          "line": 81,
+          "column": 26,
+          "position": 671
+        },
+        "endLoc": {
+          "line": 88,
+          "column": 6,
+          "position": 760
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 14,
+      "fragment": ");\n  if (riskBand !== \"All\") {\n    params.set(\"risk_band\", riskBand);\n  }\n  if (kevOnly) {\n    params.set(\"kev_only\", \"true\");\n  }\n  if (source && source !== \"All\") {\n    params.set(\"source\", source);\n  }\n  if (search) {\n    params.set(\"search\", search);\n  }\n  const res = await apiFetch(buildApiUrl(`/assets/${assetId}/findings`",
+      "tokens": 128,
+      "firstFile": {
+        "name": "frontend/src/api/topology.ts",
+        "start": 284,
+        "end": 297,
+        "startLoc": {
+          "line": 284,
+          "column": 4,
+          "position": 2102
+        },
+        "endLoc": {
+          "line": 297,
+          "column": 71,
+          "position": 2230
+        }
+      },
+      "secondFile": {
+        "name": "frontend/src/api/topology.ts",
+        "start": 237,
+        "end": 250,
+        "startLoc": {
+          "line": 237,
+          "column": 38,
+          "position": 1733
+        },
+        "endLoc": {
+          "line": 250,
+          "column": 81,
+          "position": 1861
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 10,
+      "fragment": ": number;\n  businessUnit?: string | null;\n  businessService?: string | null;\n  application?: string | null;\n  status?: string | null;\n  environment?: string | null;\n  compliance?: string | null;\n  search?: string | null;\n  directOnly?: boolean;\n  sortBy:",
+      "tokens": 99,
+      "firstFile": {
+        "name": "frontend/src/api/topology.ts",
+        "start": 319,
+        "end": 328,
+        "startLoc": {
+          "line": 319,
+          "column": 11,
+          "position": 2342
+        },
+        "endLoc": {
+          "line": 328,
+          "column": 10,
+          "position": 2441
+        }
+      },
+      "secondFile": {
+        "name": "frontend/src/hooks/topology/assets/usePaginatedAssets.ts",
+        "start": 24,
+        "end": 33,
+        "startLoc": {
+          "line": 24,
+          "column": 12,
+          "position": 140
+        },
+        "endLoc": {
+          "line": 33,
+          "column": 10,
+          "position": 239
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 11,
+      "fragment": ",\n}: {\n  businessUnit?: string | null;\n  businessService?: string | null;\n  application?: string | null;\n  status?: string | null;\n  environment?: string | null;\n  compliance?: string | null;\n  search?: string | null;\n  directOnly?: boolean;\n}",
+      "tokens": 99,
+      "firstFile": {
+        "name": "frontend/src/api/topology.ts",
+        "start": 360,
+        "end": 370,
+        "startLoc": {
+          "line": 360,
+          "column": 13,
+          "position": 2753
+        },
+        "endLoc": {
+          "line": 370,
+          "column": 2,
+          "position": 2852
+        }
+      },
+      "secondFile": {
+        "name": "frontend/src/hooks/topology/assets/useAssetsAnalytics.ts",
+        "start": 15,
+        "end": 33,
+        "startLoc": {
+          "line": 15,
+          "column": 19,
+          "position": 96
+        },
+        "endLoc": {
+          "line": 33,
+          "column": 9,
+          "position": 238
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 10,
+      "fragment": ");\n  if (businessUnit) params.set(\"business_unit\", businessUnit);\n  if (businessService) params.set(\"business_service\", businessService);\n  if (application) params.set(\"application\", application);\n  if (status) params.set(\"status\", status);\n  if (environment) params.set(\"environment\", environment);\n  if (compliance) params.set(\"compliance\", compliance);\n  if (search) params.set(\"search\", search);\n  if (directOnly) params.set(\"direct_only\", \"true\");\n  const res = await apiFetch(buildApiUrl(\"/assets/analytics\"",
+      "tokens": 160,
+      "firstFile": {
+        "name": "frontend/src/api/topology.ts",
+        "start": 371,
+        "end": 380,
+        "startLoc": {
+          "line": 371,
+          "column": 38,
+          "position": 2874
+        },
+        "endLoc": {
+          "line": 380,
+          "column": 61,
+          "position": 3034
+        }
+      },
+      "secondFile": {
+        "name": "frontend/src/api/topology.ts",
+        "start": 336,
+        "end": 345,
+        "startLoc": {
+          "line": 336,
+          "column": 4,
+          "position": 2513
+        },
+        "endLoc": {
+          "line": 345,
+          "column": 51,
+          "position": 2673
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 12,
+      "fragment": "): Promise<PaginatedFindings> {\n  const params = new URLSearchParams({\n    page: String(page),\n    page_size: String(pageSize),\n    sort_by: sortBy,\n    sort_order: sortOrder,\n  });\n  if (source && source.trim()) {\n    params.set(\"source\", source.trim());\n  }\n\n  const",
+      "tokens": 100,
+      "firstFile": {
+        "name": "frontend/src/api/findings.ts",
+        "start": 32,
+        "end": 43,
+        "startLoc": {
+          "line": 32,
+          "column": 1,
+          "position": 251
+        },
+        "endLoc": {
+          "line": 43,
+          "column": 8,
+          "position": 351
+        }
+      },
+      "secondFile": {
+        "name": "frontend/src/api/topology.ts",
+        "start": 71,
+        "end": 81,
+        "startLoc": {
+          "line": 71,
+          "column": 1,
+          "position": 490
+        },
+        "endLoc": {
+          "line": 81,
+          "column": 5,
+          "position": 589
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 12,
+      "fragment": "page: number,\n  pageSize: number,\n  sortBy: FindingsSortBy = \"risk_score\",\n  sortOrder: SortOrder = \"desc\",\n  source?: string | null\n): Promise<PaginatedFindings> {\n  const params = new URLSearchParams({\n    page: String(page),\n    page_size: String(pageSize),\n    sort_by: sortBy,\n    sort_order: sortOrder,\n    risk_band",
+      "tokens": 104,
+      "firstFile": {
+        "name": "frontend/src/api/findings.ts",
+        "start": 52,
+        "end": 63,
+        "startLoc": {
+          "line": 52,
+          "column": 3,
+          "position": 426
+        },
+        "endLoc": {
+          "line": 63,
+          "column": 14,
+          "position": 530
+        }
+      },
+      "secondFile": {
+        "name": "frontend/src/api/findings.ts",
+        "start": 27,
+        "end": 38,
+        "startLoc": {
+          "line": 27,
+          "column": 3,
+          "position": 205
+        },
+        "endLoc": {
+          "line": 38,
+          "column": 4,
+          "position": 309
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 8,
+      "fragment": ",\n            onClick: () =>\n              updateRoute({\n                ...getEmptyRoute(\"business-services\"),\n                businessUnitSlug: route.findingOrigin?.businessUnitSlug ?? null,\n                businessServiceSlug: route.findingOrigin?.businessServiceSlug ?? null,\n                applicationSlug: route.findingOrigin?.applicationSlug ?? null,\n                assetId",
+      "tokens": 76,
+      "firstFile": {
+        "name": "frontend/src/app.tsx",
+        "start": 137,
+        "end": 144,
+        "startLoc": {
+          "line": 137,
+          "column": 92,
+          "position": 1278
+        },
+        "endLoc": {
+          "line": 144,
+          "column": 24,
+          "position": 1354
+        }
+      },
+      "secondFile": {
+        "name": "frontend/src/app.tsx",
+        "start": 125,
+        "end": 132,
+        "startLoc": {
+          "line": 125,
+          "column": 88,
+          "position": 1157
+        },
+        "endLoc": {
+          "line": 132,
+          "column": 22,
+          "position": 1233
+        }
+      }
+    }
+  ]
+}

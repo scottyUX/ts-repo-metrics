@@ -1,0 +1,4 @@
+# Reinstallable / reused-via-symlink; see setup.md for exact versions.
+node_modules/
+
+# Raw tool logs ARE committed on purpose -- they are the evidence base.

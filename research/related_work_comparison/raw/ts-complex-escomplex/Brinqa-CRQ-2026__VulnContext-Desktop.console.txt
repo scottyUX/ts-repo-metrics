@@ -1,0 +1,12 @@
+# ts-complex 1.0.0 + typhonjs-escomplex 0.1.0 (neither ships a CLI; run_tool4.mjs is the driver)
+# $ node run_tool4.mjs <corpus>/Brinqa-CRQ-2026__VulnContext-Desktop Brinqa-CRQ-2026__VulnContext-Desktop raw/ts-complex-escomplex
+# 2026-07-30T01:27:53Z
+
+repo: Brinqa-CRQ-2026__VulnContext-Desktop | files: 171 (tsx: 82)
+versions: {"tsComplex":"1.0.0","tsComplexDeclaredTsRange":"^2.8.3","typescriptActuallyResolved":"5.9.3","typhonjsEscomplex":"0.1.0","babelCore":"7.29.7","node":"v24.12.0"}
+errors by stage: {}
+.tsx files where ts-complex cyclomatic errored: 0 / 82
+.tsx files where escomplex RAW errored: 0 / 82
+.tsx files where escomplex TRANSPILED errored: 0 / 82
+escomplex project mode: {"attempted":true,"moduleCount":25,"topLevelKeys":["settings","adjacencyList","changeCost","coreSize","errors","firstOrderDensity","moduleAverage","modules","visibilityList"],"projectMetrics":{"adjacencyListLen":12,"firstOrderDensity":2.88,"changeCost":8.16,"coreSize":52}}
+# exit=0

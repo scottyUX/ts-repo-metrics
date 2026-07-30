@@ -1,0 +1,234 @@
+# jscpd 4.2.5 | cwd: research/validation/.corpus/MikeyZv__SlugMarket @ 0bd29d7e29b3223c0c34b07b36afa2c297260068 | 2026-07-30T01:23:55Z
+# $ node <rwc>/node_modules/jscpd/bin/jscpd . --format typescript,tsx,javascript,jsx --reporters console,json --output <out> --min-lines 5 --min-tokens 50 --ignore '**/node_modules/**,**/dist/**,**/build/**'
+
+Clone found (tsx):
+ - slugmarket_next/app/(main)/messages/__tests__/page.test.tsx [301:55 - 306:21] (5 lines, 76 tokens)
+   slugmarket_next/app/(main)/messages/__tests__/page.test.tsx [292:45 - 297:20]
+
+Clone found (tsx):
+ - slugmarket_next/app/(main)/messages/__tests__/page.test.tsx [324:65 - 329:57] (5 lines, 86 tokens)
+   slugmarket_next/app/(main)/messages/__tests__/page.test.tsx [313:65 - 318:56]
+
+Clone found (tsx):
+ - slugmarket_next/app/(auth)/signup/__tests__/page.test.tsx [75:102 - 80:28] (5 lines, 81 tokens)
+   slugmarket_next/app/(auth)/signup/__tests__/page.test.tsx [62:103 - 67:20]
+
+Clone found (tsx):
+ - slugmarket_next/app/(auth)/signup/__tests__/page.test.tsx [88:65 - 96:30] (8 lines, 160 tokens)
+   slugmarket_next/app/(auth)/signup/__tests__/page.test.tsx [59:80 - 67:30]
+
+Clone found (tsx):
+ - slugmarket_next/app/(auth)/signup/__tests__/page.test.tsx [109:5 - 115:75] (6 lines, 149 tokens)
+   slugmarket_next/app/(auth)/signup/__tests__/page.test.tsx [73:5 - 67:76]
+
+Clone found (tsx):
+ - slugmarket_next/app/(auth)/signup/__tests__/page.test.tsx [123:5 - 131:11] (8 lines, 139 tokens)
+   slugmarket_next/app/(auth)/signup/__tests__/page.test.tsx [107:5 - 66:10]
+
+Clone found (tsx):
+ - slugmarket_next/app/(auth)/signin/__tests__/page.test.tsx [3:19 - 15:25] (12 lines, 113 tokens)
+   slugmarket_next/app/(auth)/signup/__tests__/page.test.tsx [3:19 - 15:13]
+
+Clone found (tsx):
+ - slugmarket_next/app/(auth)/signin/__tests__/page.test.tsx [15:25 - 26:22] (11 lines, 120 tokens)
+   slugmarket_next/app/(auth)/signup/__tests__/page.test.tsx [15:13 - 26:22]
+
+Clone found (tsx):
+ - slugmarket_next/app/(auth)/signin/__tests__/page.test.tsx [49:76 - 59:68] (10 lines, 107 tokens)
+   slugmarket_next/app/(auth)/signup/__tests__/page.test.tsx [49:74 - 59:80]
+
+Clone found (tsx):
+ - slugmarket_next/app/(auth)/signin/__tests__/page.test.tsx [73:46 - 79:40] (6 lines, 126 tokens)
+   slugmarket_next/app/(auth)/signin/__tests__/page.test.tsx [59:68 - 66:28]
+
+Clone found (tsx):
+ - slugmarket_next/app/(auth)/signin/__tests__/page.test.tsx [102:5 - 107:11] (5 lines, 103 tokens)
+   slugmarket_next/app/(auth)/signin/__tests__/page.test.tsx [60:5 - 65:10]
+
+Clone found (tsx):
+ - slugmarket_next/app/(auth)/reset-password/__tests__/page.test.tsx [10:40 - 19:69] (9 lines, 103 tokens)
+   slugmarket_next/app/(auth)/signup/__tests__/page.test.tsx [17:4 - 26:9]
+
+Clone found (tsx):
+ - slugmarket_next/app/(auth)/reset-password/__tests__/page.test.tsx [113:5 - 120:38] (7 lines, 122 tokens)
+   slugmarket_next/app/(auth)/reset-password/__tests__/page.test.tsx [96:5 - 103:40]
+
+Clone found (tsx):
+ - slugmarket_next/app/(auth)/forgot-password/__tests__/page.test.tsx [16:1 - 22:179] (6 lines, 95 tokens)
+   slugmarket_next/app/(auth)/signup/__tests__/page.test.tsx [20:1 - 26:9]
+
+Clone found (tsx):
+ - slugmarket_next/app/components/__tests__/ShareButton.test.tsx [64:63 - 73:21] (9 lines, 83 tokens)
+   slugmarket_next/app/components/__tests__/ShareButton.test.tsx [49:19 - 58:17]
+
+Clone found (tsx):
+ - slugmarket_next/app/components/__tests__/ShareButton.test.tsx [80:5 - 89:18] (9 lines, 95 tokens)
+   slugmarket_next/app/components/__tests__/ShareButton.test.tsx [50:5 - 74:17]
+
+Clone found (tsx):
+ - slugmarket_next/app/components/__tests__/ReportButton.test.tsx [134:6 - 142:29] (8 lines, 81 tokens)
+   slugmarket_next/app/components/__tests__/ReportButton.test.tsx [115:15 - 123:43]
+
+Clone found (tsx):
+ - slugmarket_next/app/components/__tests__/ReportButton.test.tsx [202:56 - 207:38] (5 lines, 69 tokens)
+   slugmarket_next/app/components/__tests__/ReportButton.test.tsx [128:68 - 133:44]
+
+Clone found (tsx):
+ - slugmarket_next/app/components/__tests__/ProductListingForm.test.tsx [146:6 - 153:53] (7 lines, 78 tokens)
+   slugmarket_next/app/(main)/messages/__tests__/page.test.tsx [167:49 - 174:47]
+
+Clone found (tsx):
+ - slugmarket_next/app/components/__tests__/ProductListingForm.test.tsx [153:67 - 159:53] (6 lines, 89 tokens)
+   slugmarket_next/app/(main)/messages/__tests__/page.test.tsx [174:47 - 180:47]
+
+Clone found (tsx):
+ - slugmarket_next/app/components/__tests__/ProductListingForm.test.tsx [267:76 - 279:11] (12 lines, 76 tokens)
+   slugmarket_next/app/components/__tests__/ProductListingForm.test.tsx [235:75 - 245:10]
+
+Clone found (tsx):
+ - slugmarket_next/app/components/__tests__/MakeOfferButton.test.tsx [179:5 - 189:13] (10 lines, 120 tokens)
+   slugmarket_next/app/components/__tests__/MakeOfferButton.test.tsx [155:5 - 166:17]
+
+Clone found (tsx):
+ - slugmarket_next/app/components/__tests__/MakeOfferButton.test.tsx [193:94 - 204:18] (11 lines, 124 tokens)
+   slugmarket_next/app/components/__tests__/MakeOfferButton.test.tsx [178:100 - 166:17]
+
+Clone found (tsx):
+ - slugmarket_next/app/components/__tests__/MakeOfferButton.test.tsx [210:5 - 220:28] (10 lines, 122 tokens)
+   slugmarket_next/app/components/__tests__/MakeOfferButton.test.tsx [155:5 - 204:28]
+
+Clone found (javascript):
+ - slugmarket_next/app/components/__tests__/ListingManageModal.test.tsx [121:52 - 268:71] (147 lines, 2126 tokens)
+   slugmarket_next/app/components/__tests__/ListingManageModal.test.tsx [115:71 - 164:71]
+
+Clone found (tsx):
+ - slugmarket_next/app/components/__tests__/ListingManageModal.test.tsx [19:3 - 28:3] (9 lines, 104 tokens)
+   slugmarket_next/app/(auth)/reset-password/__tests__/page.test.tsx [10:39 - 26:9]
+
+Clone found (tsx):
+ - slugmarket_next/app/components/__tests__/ListingManageModal.test.tsx [173:71 - 180:55] (7 lines, 145 tokens)
+   slugmarket_next/app/components/__tests__/ListingManageModal.test.tsx [161:59 - 168:55]
+
+Clone found (tsx):
+ - slugmarket_next/app/components/__tests__/ListingManageModal.test.tsx [185:73 - 194:14] (9 lines, 155 tokens)
+   slugmarket_next/app/components/__tests__/ListingManageModal.test.tsx [161:59 - 170:11]
+
+Clone found (tsx):
+ - slugmarket_next/app/components/__tests__/ListingManageModal.test.tsx [201:77 - 211:14] (10 lines, 179 tokens)
+   slugmarket_next/app/components/__tests__/ListingManageModal.test.tsx [161:59 - 196:10]
+
+Clone found (tsx):
+ - slugmarket_next/app/components/__tests__/ListingManageModal.test.tsx [225:67 - 236:10] (11 lines, 180 tokens)
+   slugmarket_next/app/components/__tests__/ListingManageModal.test.tsx [161:59 - 196:10]
+
+Clone found (tsx):
+ - slugmarket_next/app/components/__tests__/ListingManageModal.test.tsx [245:78 - 259:18] (14 lines, 182 tokens)
+   slugmarket_next/app/components/__tests__/ListingManageModal.test.tsx [162:95 - 240:22]
+
+Clone found (tsx):
+ - slugmarket_next/app/components/__tests__/ListingManageModal.test.tsx [268:5 - 276:76] (8 lines, 130 tokens)
+   slugmarket_next/app/components/__tests__/ListingManageModal.test.tsx [164:5 - 196:10]
+
+Clone found (tsx):
+ - slugmarket_next/app/components/__tests__/ListingCard.test.tsx [11:4 - 21:82] (10 lines, 105 tokens)
+   slugmarket_next/app/(auth)/forgot-password/__tests__/page.test.tsx [12:4 - 26:9]
+
+Clone found (tsx):
+ - slugmarket_next/app/components/__tests__/EditProfile.test.tsx [8:17 - 17:26] (9 lines, 74 tokens)
+   slugmarket_next/app/components/__tests__/ReportButton.test.tsx [12:39 - 21:26]
+
+Clone found (tsx):
+ - slugmarket_next/app/components/__tests__/EditButton.test.tsx [4:48 - 12:26] (8 lines, 102 tokens)
+   slugmarket_next/app/(auth)/signup/__tests__/page.test.tsx [18:4 - 28:26]
+
+Clone found (tsx):
+ - slugmarket_next/app/components/__tests__/EditButton.test.tsx [51:38 - 56:72] (5 lines, 94 tokens)
+   slugmarket_next/app/components/__tests__/EditButton.test.tsx [41:67 - 46:74]
+
+Clone found (tsx):
+ - slugmarket_next/app/components/__tests__/DeleteButton.test.tsx [10:20 - 21:33] (11 lines, 93 tokens)
+   slugmarket_next/app/components/__tests__/ReportButton.test.tsx [8:13 - 19:25]
+
+Clone found (tsx):
+ - slugmarket_next/app/components/__tests__/DeleteButton.test.tsx [114:66 - 120:29] (6 lines, 87 tokens)
+   slugmarket_next/app/components/__tests__/DeleteButton.test.tsx [105:57 - 111:24]
+
+Clone found (tsx):
+ - slugmarket_next/app/components/__tests__/DeleteButton.test.tsx [124:78 - 129:34] (5 lines, 76 tokens)
+   slugmarket_next/app/components/__tests__/DeleteButton.test.tsx [106:20 - 120:51]
+
+Clone found (tsx):
+ - slugmarket_next/app/components/__tests__/DeleteButton.test.tsx [132:58 - 138:27] (6 lines, 87 tokens)
+   slugmarket_next/app/components/__tests__/DeleteButton.test.tsx [105:57 - 111:24]
+
+Clone found (tsx):
+ - slugmarket_next/app/components/__tests__/DeleteButton.test.tsx [141:50 - 147:20] (6 lines, 87 tokens)
+   slugmarket_next/app/components/__tests__/DeleteButton.test.tsx [105:57 - 111:24]
+
+Clone found (tsx):
+ - slugmarket_next/app/components/__tests__/DeleteButton.test.tsx [152:5 - 157:25] (5 lines, 78 tokens)
+   slugmarket_next/app/components/__tests__/DeleteButton.test.tsx [106:5 - 147:42]
+
+Clone found (tsx):
+ - slugmarket_next/app/components/__tests__/DeleteButton.test.tsx [164:5 - 169:18] (5 lines, 75 tokens)
+   slugmarket_next/app/components/__tests__/DeleteButton.test.tsx [106:5 - 111:24]
+
+Clone found (tsx):
+ - slugmarket_next/app/components/__tests__/DeleteButton.test.tsx [173:55 - 179:75] (6 lines, 97 tokens)
+   slugmarket_next/app/components/__tests__/DeleteButton.test.tsx [151:79 - 169:80]
+
+Clone found (javascript):
+ - slugmarket_next/app/(auth)/signin/page.tsx [42:39 - 88:33] (46 lines, 368 tokens)
+   slugmarket_next/app/(auth)/signup/page.tsx [84:61 - 129:33]
+
+Clone found (tsx):
+ - slugmarket_next/app/(auth)/signin/page.tsx [10:28 - 17:8] (7 lines, 102 tokens)
+   slugmarket_next/app/(auth)/signup/page.tsx [9:46 - 15:8]
+
+Clone found (tsx):
+ - slugmarket_next/app/(auth)/signin/page.tsx [42:72 - 62:51] (20 lines, 154 tokens)
+   slugmarket_next/app/(auth)/signup/page.tsx [88:18 - 109:49]
+
+Clone found (tsx):
+ - slugmarket_next/app/(auth)/signin/page.tsx [62:51 - 78:14] (16 lines, 124 tokens)
+   slugmarket_next/app/(auth)/signup/page.tsx [109:49 - 125:14]
+
+Clone found (javascript):
+ - slugmarket_next/app/(auth)/reset-password/page.tsx [72:39 - 97:36] (25 lines, 227 tokens)
+   slugmarket_next/app/(auth)/signup/page.tsx [97:58 - 129:32]
+
+Clone found (tsx):
+ - slugmarket_next/app/(auth)/reset-password/page.tsx [58:62 - 68:69] (10 lines, 74 tokens)
+   slugmarket_next/app/(auth)/signup/page.tsx [62:14 - 72:69]
+
+Clone found (tsx):
+ - slugmarket_next/app/(auth)/reset-password/page.tsx [78:53 - 94:48] (16 lines, 130 tokens)
+   slugmarket_next/app/(auth)/signup/page.tsx [109:49 - 78:45]
+
+Clone found (tsx):
+ - slugmarket_next/app/(auth)/forgot-password/page.tsx [27:19 - 36:68] (9 lines, 69 tokens)
+   slugmarket_next/app/(auth)/signin/page.tsx [29:22 - 38:70]
+
+Clone found (tsx):
+ - slugmarket_next/app/components/MakeOfferButton.tsx [108:13 - 116:89] (8 lines, 79 tokens)
+   slugmarket_next/app/components/ReportButton.tsx [74:13 - 82:90]
+
+Clone found (tsx):
+ - slugmarket_next/app/components/MakeOfferButton.tsx [118:215 - 125:90] (7 lines, 78 tokens)
+   slugmarket_next/app/components/ReportButton.tsx [83:148 - 89:92]
+
+┌────────────┬────────────────┬─────────────┬──────────────┬──────────────┬──────────────────┬───────────────────┐
+│ Format     │ Files analyzed │ Total lines │ Total tokens │ Clones found │ Duplicated lines │ Duplicated tokens │
+├────────────┼────────────────┼─────────────┼──────────────┼──────────────┼──────────────────┼───────────────────┤
+│ javascript │ 54             │ 2202        │ 23600        │ 3            │ 218 (9.9%)       │ 2721 (11.53%)     │
+├────────────┼────────────────┼─────────────┼──────────────┼──────────────┼──────────────────┼───────────────────┤
+│ tsx        │ 56             │ 6449        │ 67351        │ 51           │ 433 (6.71%)      │ 5457 (8.1%)       │
+├────────────┼────────────────┼─────────────┼──────────────┼──────────────┼──────────────────┼───────────────────┤
+│ typescript │ 12             │ 440         │ 3891         │ 0            │ 0 (0%)           │ 0 (0%)            │
+├────────────┼────────────────┼─────────────┼──────────────┼──────────────┼──────────────────┼───────────────────┤
+│ Total:     │ 122            │ 9091        │ 94842        │ 54           │ 651 (7.16%)      │ 8178 (8.62%)      │
+└────────────┴────────────────┴─────────────┴──────────────┴──────────────┴──────────────────┴───────────────────┘
+Found 54 clones.
+JSON report saved to /Users/lunawang/Documents/GitHub/ts-repo-metrics/research/related_work_comparison/raw/jscpd/MikeyZv__SlugMarket/jscpd-report.json
+time: 277.795ms
+# exit=0

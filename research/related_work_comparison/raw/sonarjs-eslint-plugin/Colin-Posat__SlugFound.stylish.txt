@@ -1,0 +1,278 @@
+# TIER: FREE eslint-plugin-sonarjs 3.0.7 (NOT SonarQube/SonarCloud)
+# cwd: research/validation/.corpus/Colin-Posat__SlugFound @ c8556ef8e1d1e661c57f1deebc6e20706a323740
+# $ node <rwc>/node_modules/eslint/bin/eslint.js --no-config-lookup --config <rwc>/configs/eslint.sonarjs.config.mjs '**/*.ts' '**/*.tsx' --format stylish
+# 2026-07-30T01:21:28Z
+
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/__tests__/lib/item-schemas.test.ts
+  12:67  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  25:65  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  34:67  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  65:41  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/__tests__/lib/profile-schemas.test.ts
+  9:41  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/(app)/create/create-form.tsx
+  28:25  warning  Refactor this function to reduce its Cognitive Complexity from 13 to the 0 allowed  sonarjs/cognitive-complexity
+  67:30  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed   sonarjs/cognitive-complexity
+  82:26  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed   sonarjs/cognitive-complexity
+  97:18  warning  Refactor this function to reduce its Cognitive Complexity from 9 to the 0 allowed   sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/(app)/create/page.tsx
+  10:31  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/(app)/found/page.tsx
+  14:31  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/(app)/items/[id]/edit/edit-form.tsx
+   34:25  warning  Refactor this function to reduce its Cognitive Complexity from 10 to the 0 allowed  sonarjs/cognitive-complexity
+   67:26  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed   sonarjs/cognitive-complexity
+  249:16  error    Definition for rule '@next/next/no-img-element' was not found                       @next/next/no-img-element
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/(app)/items/[id]/edit/page.tsx
+  17:31  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/(app)/items/[id]/page.tsx
+  25:23  warning  Refactor this function to reduce its Cognitive Complexity from 3 to the 0 allowed  sonarjs/cognitive-complexity
+  45:31  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/(app)/layout.tsx
+  8:31  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/(app)/lost/page.tsx
+  18:31  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/(app)/messages/page.tsx
+  10:31  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/(app)/profile/page.tsx
+  17:31  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/(app)/profile/profile-view.tsx
+   43:25  warning  Refactor this function to reduce its Cognitive Complexity from 7 to the 0 allowed  sonarjs/cognitive-complexity
+   61:30  warning  Refactor this function to reduce its Cognitive Complexity from 4 to the 0 allowed  sonarjs/cognitive-complexity
+   75:30  warning  Refactor this function to reduce its Cognitive Complexity from 3 to the 0 allowed  sonarjs/cognitive-complexity
+  101:12  warning  Refactor this function to reduce its Cognitive Complexity from 4 to the 0 allowed  sonarjs/cognitive-complexity
+  127:11  error    Definition for rule '@next/next/no-img-element' was not found                      @next/next/no-img-element
+  186:17  error    Definition for rule '@next/next/no-img-element' was not found                      @next/next/no-img-element
+  240:28  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  263:32  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/(public)/login/login-form.tsx
+  18:25  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/(public)/page.tsx
+  89:40  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/(public)/signup/signup-form.tsx
+   27:10  warning  Refactor this function to reduce its Cognitive Complexity from 4 to the 0 allowed  sonarjs/cognitive-complexity
+   47:25  warning  Refactor this function to reduce its Cognitive Complexity from 3 to the 0 allowed  sonarjs/cognitive-complexity
+  125:39  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/actions/auth.ts
+  31:23  warning  Refactor this function to reduce its Cognitive Complexity from 6 to the 0 allowed  sonarjs/cognitive-complexity
+  69:23  warning  Refactor this function to reduce its Cognitive Complexity from 4 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/actions/items.ts
+   32:23  warning  Refactor this function to reduce its Cognitive Complexity from 12 to the 0 allowed  sonarjs/cognitive-complexity
+  123:23  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed   sonarjs/cognitive-complexity
+  163:23  warning  Refactor this function to reduce its Cognitive Complexity from 18 to the 0 allowed  sonarjs/cognitive-complexity
+  276:23  warning  Refactor this function to reduce its Cognitive Complexity from 7 to the 0 allowed   sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/actions/messages.ts
+   13:23  warning  Refactor this function to reduce its Cognitive Complexity from 7 to the 0 allowed  sonarjs/cognitive-complexity
+   74:23  warning  Refactor this function to reduce its Cognitive Complexity from 4 to the 0 allowed  sonarjs/cognitive-complexity
+  111:23  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  122:23  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/actions/profile.ts
+   22:23  warning  Refactor this function to reduce its Cognitive Complexity from 16 to the 0 allowed  sonarjs/cognitive-complexity
+  109:23  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed   sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/actions/reports.ts
+  14:23  warning  Refactor this function to reduce its Cognitive Complexity from 7 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/api/ai/scan-item/route.ts
+  14:10  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+  20:23  warning  Refactor this function to reduce its Cognitive Complexity from 8 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/api/notifications/new-message/route.ts
+  36:23  warning  Refactor this function to reduce its Cognitive Complexity from 10 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/api/notifications/unsubscribe/route.ts
+  26:23  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/api/photo-search/route.ts
+  18:10  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+  24:16  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+  38:23  warning  Refactor this function to reduce its Cognitive Complexity from 8 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/components/app-nav.tsx
+  12:25  warning  Refactor this function to reduce its Cognitive Complexity from 4 to the 0 allowed  sonarjs/cognitive-complexity
+  40:32  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  91:34  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/components/item-card.tsx
+  15:25  warning  Refactor this function to reduce its Cognitive Complexity from 8 to the 0 allowed  sonarjs/cognitive-complexity
+  29:11  error    Definition for rule '@next/next/no-img-element' was not found                      @next/next/no-img-element
+  76:11  error    Definition for rule '@next/next/no-img-element' was not found                      @next/next/no-img-element
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/components/item-detail.tsx
+   30:25  warning  Refactor this function to reduce its Cognitive Complexity from 12 to the 0 allowed  sonarjs/cognitive-complexity
+   49:30  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed   sonarjs/cognitive-complexity
+   86:21  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed   sonarjs/cognitive-complexity
+   93:15  error    Definition for rule '@next/next/no-img-element' was not found                       @next/next/no-img-element
+  155:11  error    Definition for rule '@next/next/no-img-element' was not found                       @next/next/no-img-element
+  217:40  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed   sonarjs/cognitive-complexity
+  246:12  error    Definition for rule '@next/next/no-img-element' was not found                       @next/next/no-img-element
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/components/items-filter.tsx
+   66:25  warning  Refactor this function to reduce its Cognitive Complexity from 21 to the 0 allowed  sonarjs/cognitive-complexity
+   98:6   warning  Refactor this function to reduce its Cognitive Complexity from 7 to the 0 allowed   sonarjs/cognitive-complexity
+  112:16  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed   sonarjs/cognitive-complexity
+  114:41  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed   sonarjs/cognitive-complexity
+  121:15  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed   sonarjs/cognitive-complexity
+  124:5   error    Definition for rule 'react-hooks/exhaustive-deps' was not found                     react-hooks/exhaustive-deps
+  192:31  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed   sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/components/items-map.tsx
+  50:24  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  55:17  error    Definition for rule '@next/next/no-img-element' was not found                      @next/next/no-img-element
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/components/location-map-picker.tsx
+  47:25  warning  Refactor this function to reduce its Cognitive Complexity from 3 to the 0 allowed  sonarjs/cognitive-complexity
+  74:12  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  80:12  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/components/messages/conversation-list-item.tsx
+  13:25  warning  Refactor this function to reduce its Cognitive Complexity from 6 to the 0 allowed  sonarjs/cognitive-complexity
+  31:9   error    Definition for rule '@next/next/no-img-element' was not found                      @next/next/no-img-element
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/components/messages/conversation-list.tsx
+  14:25  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/components/messages/message-bubble.tsx
+  13:25  warning  Refactor this function to reduce its Cognitive Complexity from 5 to the 0 allowed  sonarjs/cognitive-complexity
+  37:16  error    Definition for rule '@next/next/no-img-element' was not found                      @next/next/no-img-element
+  72:12  error    Definition for rule '@next/next/no-img-element' was not found                      @next/next/no-img-element
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/components/messages/message-composer.tsx
+   17:25  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+   29:12  warning  Refactor this function to reduce its Cognitive Complexity from 4 to the 0 allowed  sonarjs/cognitive-complexity
+   51:12  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+   58:18  warning  Refactor this function to reduce its Cognitive Complexity from 7 to the 0 allowed  sonarjs/cognitive-complexity
+  108:12  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+  122:12  error    Definition for rule '@next/next/no-img-element' was not found                      @next/next/no-img-element
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/components/messages/message-thread.tsx
+  17:25  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+  46:11  error    Definition for rule '@next/next/no-img-element' was not found                      @next/next/no-img-element
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/components/messages/messages-view.tsx
+   28:10  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+   47:10  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+   52:25  warning  Refactor this function to reduce its Cognitive Complexity from 6 to the 0 allowed  sonarjs/cognitive-complexity
+  109:16  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  116:58  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+  128:16  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  136:23  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+  173:18  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/components/photo-search-form.tsx
+  17:25  warning  Refactor this function to reduce its Cognitive Complexity from 5 to the 0 allowed  sonarjs/cognitive-complexity
+  24:12  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  34:18  warning  Refactor this function to reduce its Cognitive Complexity from 3 to the 0 allowed  sonarjs/cognitive-complexity
+  64:12  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  81:13  error    Definition for rule '@next/next/no-img-element' was not found                      @next/next/no-img-element
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/components/report-menu.tsx
+  18:25  warning  Refactor this function to reduce its Cognitive Complexity from 3 to the 0 allowed  sonarjs/cognitive-complexity
+  33:30  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/components/sidebar.tsx
+   32:25  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+   67:17  error    Definition for rule '@next/next/no-img-element' was not found                      @next/next/no-img-element
+   88:32  warning  Refactor this function to reduce its Cognitive Complexity from 6 to the 0 allowed  sonarjs/cognitive-complexity
+  148:30  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/components/theme-toggle.tsx
+  8:25  warning  Refactor this function to reduce its Cognitive Complexity from 3 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/components/ui/image-overlay.tsx
+  12:25  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  22:16  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  24:38  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  41:10  error    Definition for rule '@next/next/no-img-element' was not found                      @next/next/no-img-element
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/lib/auth-context.tsx
+   60:53  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+   78:47  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+   92:65  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+  118:17  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/lib/conversations.ts
+   28:17  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+   65:23  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+   86:38  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+  123:23  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  140:23  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  156:57  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/lib/email/new-message-template.ts
+  11:17  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/lib/email/resend.ts
+  15:23  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/lib/format.ts
+   9:17  warning  Refactor this function to reduce its Cognitive Complexity from 5 to the 0 allowed  sonarjs/cognitive-complexity
+  29:17  warning  Refactor this function to reduce its Cognitive Complexity from 3 to the 0 allowed  sonarjs/cognitive-complexity
+  47:17  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/lib/gemini.ts
+   8:23  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+  39:23  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+  63:23  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+  92:23  warning  Refactor this function to reduce its Cognitive Complexity from 3 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/lib/geo.ts
+  9:17  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/lib/item-schemas.ts
+  12:39  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/lib/item-status.ts
+  13:17  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/lib/items.ts
+   38:23  warning  Refactor this function to reduce its Cognitive Complexity from 7 to the 0 allowed  sonarjs/cognitive-complexity
+   86:75  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  137:23  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/lib/storage.ts
+  17:17  warning  Refactor this function to reduce its Cognitive Complexity from 3 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/lib/supabase/admin.ts
+  13:17  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/lib/supabase/proxy.ts
+  25:23  warning  Refactor this function to reduce its Cognitive Complexity from 4 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/lib/supabase/server.ts
+  27:9  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/lib/unread-context.tsx
+  50:17  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/lib/use-realtime-messages.ts
+  32:19  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  39:32  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/lib/use-theme.ts
+  28:10  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  39:38  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+
+✖ 151 problems (18 errors, 133 warnings)
+
+# exit=1

@@ -1,0 +1,237 @@
+# TIER: FREE eslint-plugin-sonarjs 3.0.7 (NOT SonarQube/SonarCloud)
+# cwd: research/validation/.corpus/MikeyZv__SlugMarket @ 0bd29d7e29b3223c0c34b07b36afa2c297260068
+# $ node <rwc>/node_modules/eslint/bin/eslint.js --no-config-lookup --config <rwc>/configs/eslint.sonarjs.config.mjs '**/*.ts' '**/*.tsx' --format stylish
+# 2026-07-30T01:21:30Z
+
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/(auth)/forgot-password/page.tsx
+   7:25  warning  Refactor this function to reduce its Cognitive Complexity from 3 to the 0 allowed  sonarjs/cognitive-complexity
+  13:18  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/(auth)/reset-password/page.tsx
+   9:25  warning  Refactor this function to reduce its Cognitive Complexity from 5 to the 0 allowed  sonarjs/cognitive-complexity
+  22:80  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  30:18  warning  Refactor this function to reduce its Cognitive Complexity from 4 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/(auth)/signin/page.tsx
+   9:25  warning  Refactor this function to reduce its Cognitive Complexity from 3 to the 0 allowed  sonarjs/cognitive-complexity
+  17:18  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/(auth)/signup/page.tsx
+   8:25  warning  Refactor this function to reduce its Cognitive Complexity from 4 to the 0 allowed  sonarjs/cognitive-complexity
+  17:18  warning  Refactor this function to reduce its Cognitive Complexity from 3 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/(main)/[username]/page.tsx
+  12:31  warning  Refactor this function to reduce its Cognitive Complexity from 9 to the 0 allowed  sonarjs/cognitive-complexity
+  89:53  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/(main)/bookmarks/page.tsx
+  12:25  warning  Refactor this function to reduce its Cognitive Complexity from 3 to the 0 allowed  sonarjs/cognitive-complexity
+  17:16  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  19:20  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/(main)/messages/__tests__/page.test.tsx
+  36:57  warning  Refactor this function to reduce its Cognitive Complexity from 3 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/(main)/messages/page.tsx
+   11:10  warning  Refactor this function to reduce its Cognitive Complexity from 3 to the 0 allowed  sonarjs/cognitive-complexity
+   24:18  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+   28:18  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+   30:24  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+   46:18  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+   51:18  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+   55:24  warning  Refactor this function to reduce its Cognitive Complexity from 4 to the 0 allowed  sonarjs/cognitive-complexity
+   67:31  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+   74:44  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+   93:33  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  106:38  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  119:40  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  136:20  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  143:20  warning  Refactor this function to reduce its Cognitive Complexity from 3 to the 0 allowed  sonarjs/cognitive-complexity
+  150:28  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/(main)/products/[id]/page.tsx
+  26:31  warning  Refactor this function to reduce its Cognitive Complexity from 7 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/(main)/products/edit/[id]/page.tsx
+  7:31  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/(main)/search/page.tsx
+  8:31  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/api/products/route.ts
+  6:23  warning  Refactor this function to reduce its Cognitive Complexity from 5 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/auth/callback/route.ts
+  6:23  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/AuthProvider.tsx
+  34:33  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+  44:89  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  58:18  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  79:17  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/AvatarUpload.tsx
+  14:25  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  30:18  warning  Refactor this function to reduce its Cognitive Complexity from 6 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/ConversationList.tsx
+  18:25  warning  Refactor this function to reduce its Cognitive Complexity from 4 to the 0 allowed  sonarjs/cognitive-complexity
+  26:43  warning  Refactor this function to reduce its Cognitive Complexity from 3 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/DeleteButton.tsx
+  18:25  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+  26:20  warning  Refactor this function to reduce its Cognitive Complexity from 4 to the 0 allowed  sonarjs/cognitive-complexity
+  33:24  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/Dropdown.tsx
+  11:25  warning  Refactor this function to reduce its Cognitive Complexity from 3 to the 0 allowed  sonarjs/cognitive-complexity
+  32:14  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/EditButton.tsx
+  13:25  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/EditProfile.tsx
+  22:10  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  32:25  warning  Refactor this function to reduce its Cognitive Complexity from 4 to the 0 allowed  sonarjs/cognitive-complexity
+  93:24  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/FilterForm.tsx
+  49:25  warning  Refactor this function to reduce its Cognitive Complexity from 3 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/ImageUploadGrid.tsx
+  15:14  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/LeaveReviewButton.tsx
+  18:25  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+  29:18  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  46:18  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/LeaveReviewModal.tsx
+  16:25  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  23:20  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+  67:49  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/ListingCard.tsx
+  13:25  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/ListingManageModal.tsx
+   15:25  warning  Refactor this function to reduce its Cognitive Complexity from 11 to the 0 allowed  sonarjs/cognitive-complexity
+   29:18  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed   sonarjs/cognitive-complexity
+   42:41  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed   sonarjs/cognitive-complexity
+   53:20  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed   sonarjs/cognitive-complexity
+  115:41  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed   sonarjs/cognitive-complexity
+  144:83  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed   sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/MakeOfferButton.tsx
+   30:25  warning  Refactor this function to reduce its Cognitive Complexity from 6 to the 0 allowed  sonarjs/cognitive-complexity
+   40:18  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+   43:19  warning  Refactor this function to reduce its Cognitive Complexity from 6 to the 0 allowed  sonarjs/cognitive-complexity
+   56:20  warning  Refactor this function to reduce its Cognitive Complexity from 9 to the 0 allowed  sonarjs/cognitive-complexity
+   90:14  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  103:29  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/MessageButton.tsx
+   8:25  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+  15:18  warning  Refactor this function to reduce its Cognitive Complexity from 6 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/MessageThread.tsx
+  22:25  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  38:37  warning  Refactor this function to reduce its Cognitive Complexity from 5 to the 0 allowed  sonarjs/cognitive-complexity
+  61:36  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/NavSearchBar.tsx
+  19:14  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/Navbar.tsx
+   31:25  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+   38:12  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+   49:18  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  103:34  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+  141:73  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/NotificationBell.tsx
+  10:25  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+  16:18  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  25:29  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  49:18  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+  62:34  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  92:49  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/OfferCard.tsx
+  13:10  warning  Refactor this function to reduce its Cognitive Complexity from 3 to the 0 allowed  sonarjs/cognitive-complexity
+  23:25  warning  Refactor this function to reduce its Cognitive Complexity from 3 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/ProductImageGallery.tsx
+  17:25  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  26:16  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+  37:20  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+  56:18  warning  Refactor this function to reduce its Cognitive Complexity from 8 to the 0 allowed  sonarjs/cognitive-complexity
+  88:28  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  92:28  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/ProductListingForm.tsx
+  31:25  warning  Refactor this function to reduce its Cognitive Complexity from 8 to the 0 allowed   sonarjs/cognitive-complexity
+  35:18  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed   sonarjs/cognitive-complexity
+  62:26  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed   sonarjs/cognitive-complexity
+  71:20  warning  Refactor this function to reduce its Cognitive Complexity from 13 to the 0 allowed  sonarjs/cognitive-complexity
+  82:61  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed   sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/ProfileTabs.tsx
+   21:25  warning  Refactor this function to reduce its Cognitive Complexity from 23 to the 0 allowed  sonarjs/cognitive-complexity
+   30:18  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed   sonarjs/cognitive-complexity
+  120:37  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed   sonarjs/cognitive-complexity
+  135:39  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed   sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/ReportButton.tsx
+  23:25  warning  Refactor this function to reduce its Cognitive Complexity from 4 to the 0 allowed  sonarjs/cognitive-complexity
+  39:20  warning  Refactor this function to reduce its Cognitive Complexity from 9 to the 0 allowed  sonarjs/cognitive-complexity
+  69:29  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/ReviewsSection.tsx
+   6:25  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+  11:20  warning  Refactor this function to reduce its Cognitive Complexity from 3 to the 0 allowed  sonarjs/cognitive-complexity
+  73:14  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/ShareButton.tsx
+   9:25  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+  12:20  warning  Refactor this function to reduce its Cognitive Complexity from 4 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/ListingCard.test.tsx
+  9:5  error  Definition for rule '@next/next/no-img-element' was not found  @next/next/no-img-element
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/ListingManageModal.test.tsx
+  17:5   error    Definition for rule '@next/next/no-img-element' was not found                      @next/next/no-img-element
+  49:27  warning  Refactor this function to reduce its Cognitive Complexity from 3 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/MakeOfferButton.test.tsx
+  61:10  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/ShareButton.test.tsx
+   8:10  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+  16:10  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/lib/fetchProducts.ts
+    5:23  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+   16:23  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+   28:23  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+   45:23  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+   62:23  warning  Refactor this function to reduce its Cognitive Complexity from 3 to the 0 allowed  sonarjs/cognitive-complexity
+   93:23  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+  112:23  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+  131:23  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/lib/uploadImages.ts
+  3:23  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  6:32  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/lib/useUnreadMessageCount.ts
+   9:18  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  12:24  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/lib/utils.ts
+  3:17  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+
+✖ 134 problems (2 errors, 132 warnings)
+
+# exit=1

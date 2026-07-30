@@ -1,0 +1,12 @@
+# ts-complex 1.0.0 + typhonjs-escomplex 0.1.0 (neither ships a CLI; run_tool4.mjs is the driver)
+# $ node run_tool4.mjs <corpus>/Colin-Posat__SlugFound Colin-Posat__SlugFound raw/ts-complex-escomplex
+# 2026-07-30T01:27:51Z
+
+repo: Colin-Posat__SlugFound | files: 92 (tsx: 50)
+versions: {"tsComplex":"1.0.0","tsComplexDeclaredTsRange":"^2.8.3","typescriptActuallyResolved":"5.9.3","typhonjsEscomplex":"0.1.0","babelCore":"7.29.7","node":"v24.12.0"}
+errors by stage: {}
+.tsx files where ts-complex cyclomatic errored: 0 / 50
+.tsx files where escomplex RAW errored: 0 / 50
+.tsx files where escomplex TRANSPILED errored: 0 / 50
+escomplex project mode: {"attempted":true,"moduleCount":25,"topLevelKeys":["settings","adjacencyList","changeCost","coreSize","errors","firstOrderDensity","moduleAverage","modules","visibilityList"],"projectMetrics":{"adjacencyListLen":2,"firstOrderDensity":0.32,"changeCost":4.32,"coreSize":100}}
+# exit=0

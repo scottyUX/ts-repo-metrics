@@ -1,0 +1,4061 @@
+{
+  "statistics": {
+    "detectionDate": "2026-07-30T01:24:53.396Z",
+    "formats": {
+      "javascript": {
+        "sources": {
+          "app/(app)/items/[id]/edit/page.tsx": {
+            "lines": 9,
+            "tokens": 51,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/(app)/items/[id]/edit/edit-form.tsx": {
+            "lines": 257,
+            "tokens": 2084,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/(app)/items/[id]/page.tsx": {
+            "lines": 0,
+            "tokens": 9,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/components/ui/image-overlay.tsx": {
+            "lines": 31,
+            "tokens": 188,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/components/ui/badge.tsx": {
+            "lines": 0,
+            "tokens": 14,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/components/messages/messages-view.tsx": {
+            "lines": 17,
+            "tokens": 121,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/components/messages/message-thread.tsx": {
+            "lines": 59,
+            "tokens": 400,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/components/messages/message-composer.tsx": {
+            "lines": 50,
+            "tokens": 269,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/components/messages/message-bubble.tsx": {
+            "lines": 54,
+            "tokens": 350,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/components/messages/conversation-list.tsx": {
+            "lines": 19,
+            "tokens": 159,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/components/messages/conversation-list-item.tsx": {
+            "lines": 21,
+            "tokens": 134,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/(public)/signup/signup-form.tsx": {
+            "lines": 116,
+            "tokens": 943,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/(public)/login/login-form.tsx": {
+            "lines": 48,
+            "tokens": 363,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/(app)/profile/profile-view.tsx": {
+            "lines": 274,
+            "tokens": 2137,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/(app)/profile/page.tsx": {
+            "lines": 3,
+            "tokens": 27,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/(app)/messages/page.tsx": {
+            "lines": 3,
+            "tokens": 27,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/(app)/lost/page.tsx": {
+            "lines": 6,
+            "tokens": 39,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/(app)/found/page.tsx": {
+            "lines": 6,
+            "tokens": 39,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/(app)/create/page.tsx": {
+            "lines": 0,
+            "tokens": 3,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/(app)/create/create-form.tsx": {
+            "lines": 265,
+            "tokens": 2180,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "__tests__/components/messages/message-composer.test.tsx": {
+            "lines": 58,
+            "tokens": 448,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "__tests__/components/messages/message-bubble.test.tsx": {
+            "lines": 18,
+            "tokens": 229,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/lib/unread-context.tsx": {
+            "lines": 0,
+            "tokens": 11,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/lib/auth-context.tsx": {
+            "lines": 0,
+            "tokens": 11,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/components/theme-toggle.tsx": {
+            "lines": 3,
+            "tokens": 47,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/components/sidebar.tsx": {
+            "lines": 104,
+            "tokens": 729,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/components/report-menu.tsx": {
+            "lines": 93,
+            "tokens": 688,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/components/photo-search-form.tsx": {
+            "lines": 95,
+            "tokens": 754,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/components/location-map-picker.tsx": {
+            "lines": 23,
+            "tokens": 186,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/components/items-map.tsx": {
+            "lines": 31,
+            "tokens": 266,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/components/items-filter.tsx": {
+            "lines": 139,
+            "tokens": 1024,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/components/item-detail.tsx": {
+            "lines": 181,
+            "tokens": 1358,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/components/item-card.tsx": {
+            "lines": 58,
+            "tokens": 473,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/components/app-nav.tsx": {
+            "lines": 73,
+            "tokens": 478,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/(public)/page.tsx": {
+            "lines": 64,
+            "tokens": 453,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/(app)/layout.tsx": {
+            "lines": 1,
+            "tokens": 20,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "__tests__/components/location-map-picker.test.tsx": {
+            "lines": 83,
+            "tokens": 748,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/layout.tsx": {
+            "lines": 4,
+            "tokens": 53,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          }
+        },
+        "total": {
+          "lines": 2266,
+          "tokens": 17513,
+          "sources": 38,
+          "clones": 0,
+          "duplicatedLines": 0,
+          "duplicatedTokens": 0,
+          "percentage": 0,
+          "percentageTokens": 0,
+          "newDuplicatedLines": 0,
+          "newClones": 0
+        }
+      },
+      "tsx": {
+        "sources": {
+          "app/(app)/items/[id]/edit/page.tsx": {
+            "lines": 47,
+            "tokens": 365,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 10,
+            "duplicatedTokens": 101,
+            "percentage": 21.28,
+            "percentageTokens": 27.67,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/(app)/items/[id]/edit/edit-form.tsx": {
+            "lines": 349,
+            "tokens": 2787,
+            "sources": 1,
+            "clones": 4,
+            "duplicatedLines": 43,
+            "duplicatedTokens": 477,
+            "percentage": 12.32,
+            "percentageTokens": 17.12,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/(app)/lost/[id]/page.tsx": {
+            "lines": 16,
+            "tokens": 89,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/(app)/items/[id]/page.tsx": {
+            "lines": 57,
+            "tokens": 440,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 10,
+            "duplicatedTokens": 101,
+            "percentage": 17.54,
+            "percentageTokens": 22.95,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/(app)/items/[id]/not-found.tsx": {
+            "lines": 30,
+            "tokens": 204,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/(app)/items/[id]/loading.tsx": {
+            "lines": 34,
+            "tokens": 215,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/(app)/found/photo-search/page.tsx": {
+            "lines": 22,
+            "tokens": 175,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/(app)/found/[id]/page.tsx": {
+            "lines": 16,
+            "tokens": 89,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/components/ui/image-overlay.tsx": {
+            "lines": 71,
+            "tokens": 532,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/components/ui/badge.tsx": {
+            "lines": 29,
+            "tokens": 220,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/components/messages/messages-view.tsx": {
+            "lines": 235,
+            "tokens": 1917,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/components/messages/message-thread.tsx": {
+            "lines": 99,
+            "tokens": 686,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/components/messages/message-composer.tsx": {
+            "lines": 186,
+            "tokens": 1405,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/components/messages/message-bubble.tsx": {
+            "lines": 81,
+            "tokens": 548,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/components/messages/empty-thread.tsx": {
+            "lines": 7,
+            "tokens": 76,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/components/messages/conversation-list.tsx": {
+            "lines": 65,
+            "tokens": 480,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/components/messages/conversation-list-item.tsx": {
+            "lines": 74,
+            "tokens": 476,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/(public)/signup/signup-form.tsx": {
+            "lines": 190,
+            "tokens": 1572,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 10,
+            "duplicatedTokens": 71,
+            "percentage": 5.26,
+            "percentageTokens": 4.52,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/(public)/signup/page.tsx": {
+            "lines": 33,
+            "tokens": 239,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 7,
+            "duplicatedTokens": 79,
+            "percentage": 21.21,
+            "percentageTokens": 33.05,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/(public)/login/page.tsx": {
+            "lines": 33,
+            "tokens": 290,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 7,
+            "duplicatedTokens": 79,
+            "percentage": 21.21,
+            "percentageTokens": 27.24,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/(public)/login/login-form.tsx": {
+            "lines": 76,
+            "tokens": 514,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 10,
+            "duplicatedTokens": 71,
+            "percentage": 13.16,
+            "percentageTokens": 13.81,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/(app)/profile/profile-view.tsx": {
+            "lines": 414,
+            "tokens": 3352,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/(app)/profile/page.tsx": {
+            "lines": 48,
+            "tokens": 310,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/(app)/messages/page.tsx": {
+            "lines": 35,
+            "tokens": 306,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/(app)/lost/page.tsx": {
+            "lines": 61,
+            "tokens": 438,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 14,
+            "duplicatedTokens": 115,
+            "percentage": 22.95,
+            "percentageTokens": 26.26,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/(app)/found/page.tsx": {
+            "lines": 65,
+            "tokens": 483,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 14,
+            "duplicatedTokens": 115,
+            "percentage": 21.54,
+            "percentageTokens": 23.81,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/(app)/create/page.tsx": {
+            "lines": 17,
+            "tokens": 133,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/(app)/create/create-form.tsx": {
+            "lines": 435,
+            "tokens": 3527,
+            "sources": 1,
+            "clones": 4,
+            "duplicatedLines": 43,
+            "duplicatedTokens": 477,
+            "percentage": 9.89,
+            "percentageTokens": 13.52,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "__tests__/components/messages/message-composer.test.tsx": {
+            "lines": 81,
+            "tokens": 618,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "__tests__/components/messages/message-bubble.test.tsx": {
+            "lines": 36,
+            "tokens": 390,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/lib/unread-context.tsx": {
+            "lines": 53,
+            "tokens": 456,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/lib/auth-context.tsx": {
+            "lines": 121,
+            "tokens": 776,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/components/theme-toggle.tsx": {
+            "lines": 22,
+            "tokens": 170,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/components/sidebar.tsx": {
+            "lines": 188,
+            "tokens": 1482,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 5,
+            "duplicatedTokens": 62,
+            "percentage": 2.66,
+            "percentageTokens": 4.18,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/components/report-menu.tsx": {
+            "lines": 158,
+            "tokens": 1131,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/components/photo-search-form.tsx": {
+            "lines": 182,
+            "tokens": 1460,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/components/location-map-picker.tsx": {
+            "lines": 116,
+            "tokens": 871,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/components/location-map-picker-dynamic.tsx": {
+            "lines": 16,
+            "tokens": 117,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/components/items-map.tsx": {
+            "lines": 81,
+            "tokens": 535,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/components/items-map-dynamic.tsx": {
+            "lines": 15,
+            "tokens": 100,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/components/items-filter.tsx": {
+            "lines": 305,
+            "tokens": 2238,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/components/item-detail.tsx": {
+            "lines": 255,
+            "tokens": 1896,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/components/item-card.tsx": {
+            "lines": 92,
+            "tokens": 707,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/components/app-nav.tsx": {
+            "lines": 125,
+            "tokens": 852,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/(public)/page.tsx": {
+            "lines": 212,
+            "tokens": 1747,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/(public)/layout.tsx": {
+            "lines": 39,
+            "tokens": 290,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 5,
+            "duplicatedTokens": 62,
+            "percentage": 12.82,
+            "percentageTokens": 21.38,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/(app)/layout.tsx": {
+            "lines": 40,
+            "tokens": 382,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "__tests__/components/report-menu.test.tsx": {
+            "lines": 50,
+            "tokens": 544,
+            "sources": 1,
+            "clones": 2,
+            "duplicatedLines": 12,
+            "duplicatedTokens": 182,
+            "percentage": 24,
+            "percentageTokens": 33.46,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "__tests__/components/location-map-picker.test.tsx": {
+            "lines": 127,
+            "tokens": 1149,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/layout.tsx": {
+            "lines": 67,
+            "tokens": 414,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          }
+        },
+        "total": {
+          "lines": 5206,
+          "tokens": 40193,
+          "sources": 50,
+          "clones": 10,
+          "duplicatedLines": 95,
+          "duplicatedTokens": 996,
+          "percentage": 1.82,
+          "percentageTokens": 2.48,
+          "newDuplicatedLines": 0,
+          "newClones": 0
+        }
+      },
+      "typescript": {
+        "sources": {
+          "app/api/notifications/unsubscribe/route.ts": {
+            "lines": 46,
+            "tokens": 323,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/api/notifications/new-message/route.ts": {
+            "lines": 121,
+            "tokens": 1178,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/api/ai/scan-item/route.ts": {
+            "lines": 88,
+            "tokens": 815,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/lib/supabase/server.ts": {
+            "lines": 40,
+            "tokens": 198,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/lib/supabase/proxy.ts": {
+            "lines": 75,
+            "tokens": 507,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/lib/supabase/client.ts": {
+            "lines": 22,
+            "tokens": 52,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/lib/supabase/admin.ts": {
+            "lines": 25,
+            "tokens": 127,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/lib/email/resend.ts": {
+            "lines": 30,
+            "tokens": 232,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/lib/email/new-message-template.ts": {
+            "lines": 81,
+            "tokens": 463,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/api/photo-search/route.ts": {
+            "lines": 115,
+            "tokens": 1325,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "__tests__/lib/email/new-message-template.test.ts": {
+            "lines": 52,
+            "tokens": 441,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/lib/use-theme.ts": {
+            "lines": 50,
+            "tokens": 371,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/lib/use-realtime-messages.ts": {
+            "lines": 51,
+            "tokens": 410,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/lib/storage.ts": {
+            "lines": 26,
+            "tokens": 137,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/lib/reports-schemas.ts": {
+            "lines": 18,
+            "tokens": 160,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/lib/profile-schemas.ts": {
+            "lines": 26,
+            "tokens": 134,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/lib/items.ts": {
+            "lines": 150,
+            "tokens": 1125,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/lib/item-status.ts": {
+            "lines": 29,
+            "tokens": 128,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/lib/item-schemas.ts": {
+            "lines": 47,
+            "tokens": 427,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/lib/geo.ts": {
+            "lines": 19,
+            "tokens": 159,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/lib/gemini.ts": {
+            "lines": 131,
+            "tokens": 1442,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/lib/format.ts": {
+            "lines": 50,
+            "tokens": 566,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/lib/definitions.ts": {
+            "lines": 159,
+            "tokens": 1174,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/lib/conversations.ts": {
+            "lines": 171,
+            "tokens": 1636,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/lib/auth-schemas.ts": {
+            "lines": 66,
+            "tokens": 435,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/actions/reports.ts": {
+            "lines": 47,
+            "tokens": 357,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/actions/profile.ts": {
+            "lines": 131,
+            "tokens": 1080,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/actions/messages.ts": {
+            "lines": 148,
+            "tokens": 1304,
+            "sources": 1,
+            "clones": 2,
+            "duplicatedLines": 24,
+            "duplicatedTokens": 196,
+            "percentage": 16.22,
+            "percentageTokens": 15.03,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/actions/items.ts": {
+            "lines": 315,
+            "tokens": 2536,
+            "sources": 1,
+            "clones": 6,
+            "duplicatedLines": 68,
+            "duplicatedTokens": 810,
+            "percentage": 21.59,
+            "percentageTokens": 31.94,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "app/actions/auth.ts": {
+            "lines": 112,
+            "tokens": 707,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "__tests__/lib/storage.test.ts": {
+            "lines": 34,
+            "tokens": 312,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "__tests__/lib/reports-schemas.test.ts": {
+            "lines": 37,
+            "tokens": 351,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "__tests__/lib/profile-schemas.test.ts": {
+            "lines": 25,
+            "tokens": 267,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "__tests__/lib/item-status.test.ts": {
+            "lines": 25,
+            "tokens": 225,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "__tests__/lib/item-schemas.test.ts": {
+            "lines": 81,
+            "tokens": 845,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "__tests__/lib/geo.test.ts": {
+            "lines": 31,
+            "tokens": 415,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "__tests__/lib/format.test.ts": {
+            "lines": 43,
+            "tokens": 479,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "__tests__/lib/conversations.test.ts": {
+            "lines": 123,
+            "tokens": 1202,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "proxy.ts": {
+            "lines": 33,
+            "tokens": 85,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "next.config.ts": {
+            "lines": 28,
+            "tokens": 151,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "jest.config.ts": {
+            "lines": 11,
+            "tokens": 86,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          }
+        },
+        "total": {
+          "lines": 2912,
+          "tokens": 24367,
+          "sources": 41,
+          "clones": 4,
+          "duplicatedLines": 46,
+          "duplicatedTokens": 503,
+          "percentage": 1.58,
+          "percentageTokens": 2.06,
+          "newDuplicatedLines": 0,
+          "newClones": 0
+        }
+      }
+    },
+    "total": {
+      "lines": 10384,
+      "tokens": 82073,
+      "sources": 129,
+      "clones": 14,
+      "duplicatedLines": 141,
+      "duplicatedTokens": 1499,
+      "percentage": 1.36,
+      "percentageTokens": 1.83,
+      "newDuplicatedLines": 0,
+      "newClones": 0
+    }
+  },
+  "duplicates": [
+    {
+      "format": "tsx",
+      "lines": 11,
+      "fragment": "({ params }: PageProps) {\n  const { id } = await params\n\n  const item = await getItemById(id)\n  if (!item) notFound()\n\n  const supabase = await createSupabaseServerClient()\n  const {\n    data: { user },\n  } = await supabase.auth.getUser()\n  const",
+      "tokens": 101,
+      "firstFile": {
+        "name": "app/(app)/items/[id]/page.tsx",
+        "start": 45,
+        "end": 55,
+        "startLoc": {
+          "line": 45,
+          "column": 39,
+          "position": 301
+        },
+        "endLoc": {
+          "line": 55,
+          "column": 8,
+          "position": 402
+        },
+        "blame": {
+          "45": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:38:55 -0700",
+            "line": "45",
+            "rev": "a2155239"
+          },
+          "46": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:38:55 -0700",
+            "line": "46",
+            "rev": "a2155239"
+          },
+          "47": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:38:55 -0700",
+            "line": "47",
+            "rev": "a2155239"
+          },
+          "48": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:38:55 -0700",
+            "line": "48",
+            "rev": "a2155239"
+          },
+          "49": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:38:55 -0700",
+            "line": "49",
+            "rev": "a2155239"
+          },
+          "50": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:38:55 -0700",
+            "line": "50",
+            "rev": "a2155239"
+          },
+          "51": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:38:55 -0700",
+            "line": "51",
+            "rev": "a2155239"
+          },
+          "52": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:38:55 -0700",
+            "line": "52",
+            "rev": "a2155239"
+          },
+          "53": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:38:55 -0700",
+            "line": "53",
+            "rev": "a2155239"
+          },
+          "54": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:38:55 -0700",
+            "line": "54",
+            "rev": "a2155239"
+          },
+          "55": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:38:55 -0700",
+            "line": "55",
+            "rev": "a2155239"
+          }
+        }
+      },
+      "secondFile": {
+        "name": "app/(app)/items/[id]/edit/page.tsx",
+        "start": 17,
+        "end": 28,
+        "startLoc": {
+          "line": 17,
+          "column": 43,
+          "position": 91
+        },
+        "endLoc": {
+          "line": 28,
+          "column": 81,
+          "position": 193
+        },
+        "blame": {
+          "17": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "17",
+            "rev": "9ba1ad05"
+          },
+          "18": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "18",
+            "rev": "9ba1ad05"
+          },
+          "19": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "19",
+            "rev": "9ba1ad05"
+          },
+          "20": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "20",
+            "rev": "9ba1ad05"
+          },
+          "21": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "21",
+            "rev": "9ba1ad05"
+          },
+          "22": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "22",
+            "rev": "9ba1ad05"
+          },
+          "23": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "23",
+            "rev": "9ba1ad05"
+          },
+          "24": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "24",
+            "rev": "9ba1ad05"
+          },
+          "25": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "25",
+            "rev": "9ba1ad05"
+          },
+          "26": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "26",
+            "rev": "9ba1ad05"
+          },
+          "27": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "27",
+            "rev": "9ba1ad05"
+          },
+          "28": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "28",
+            "rev": "9ba1ad05"
+          }
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 8,
+      "fragment": "() {\n  return (\n    <div className=\"flex flex-1 items-center justify-center px-4 py-16\">\n      <div className=\"w-full max-w-sm\">\n        <div className=\"rounded-2xl border border-line bg-surface p-8\">\n          <div className=\"mb-6 text-center\">\n            <span className=\"text-3xl\">🐌</span>\n            <h1 className=\"mt-3 text-2xl font-bold text-ink\">Welcome",
+      "tokens": 79,
+      "firstFile": {
+        "name": "app/(public)/login/page.tsx",
+        "start": 4,
+        "end": 11,
+        "startLoc": {
+          "line": 4,
+          "column": 34,
+          "position": 24
+        },
+        "endLoc": {
+          "line": 11,
+          "column": 69,
+          "position": 103
+        },
+        "blame": {
+          "4": {
+            "author": "Colin-Posat",
+            "date": "2026-04-13 15:10:31 -0700",
+            "line": "4",
+            "rev": "7e9a8542"
+          },
+          "5": {
+            "author": "Colin-Posat",
+            "date": "2026-04-13 15:10:31 -0700",
+            "line": "5",
+            "rev": "7e9a8542"
+          },
+          "6": {
+            "author": "Colin-Posat",
+            "date": "2026-04-13 15:10:31 -0700",
+            "line": "6",
+            "rev": "7e9a8542"
+          },
+          "7": {
+            "author": "Colin-Posat",
+            "date": "2026-04-13 15:10:31 -0700",
+            "line": "7",
+            "rev": "7e9a8542"
+          },
+          "8": {
+            "author": "Bardia     ",
+            "date": "2026-06-02 15:47:08 -0700",
+            "line": "8",
+            "rev": "14420238"
+          },
+          "9": {
+            "author": "Colin-Posat",
+            "date": "2026-04-13 15:10:31 -0700",
+            "line": "9",
+            "rev": "7e9a8542"
+          },
+          "10": {
+            "author": "Colin-Posat",
+            "date": "2026-04-13 15:10:31 -0700",
+            "line": "10",
+            "rev": "7e9a8542"
+          },
+          "11": {
+            "author": "Bardia     ",
+            "date": "2026-06-02 15:47:08 -0700",
+            "line": "11",
+            "rev": "14420238"
+          }
+        }
+      },
+      "secondFile": {
+        "name": "app/(public)/signup/page.tsx",
+        "start": 9,
+        "end": 16,
+        "startLoc": {
+          "line": 9,
+          "column": 35,
+          "position": 26
+        },
+        "endLoc": {
+          "line": 16,
+          "column": 68,
+          "position": 105
+        },
+        "blame": {
+          "9": {
+            "author": "Colin-Posat",
+            "date": "2026-04-13 15:10:31 -0700",
+            "line": "9",
+            "rev": "7e9a8542"
+          },
+          "10": {
+            "author": "Colin-Posat",
+            "date": "2026-04-13 15:10:31 -0700",
+            "line": "10",
+            "rev": "7e9a8542"
+          },
+          "11": {
+            "author": "Colin-Posat",
+            "date": "2026-04-13 15:10:31 -0700",
+            "line": "11",
+            "rev": "7e9a8542"
+          },
+          "12": {
+            "author": "Colin-Posat",
+            "date": "2026-04-13 15:10:31 -0700",
+            "line": "12",
+            "rev": "7e9a8542"
+          },
+          "13": {
+            "author": "Bardia     ",
+            "date": "2026-06-02 15:47:08 -0700",
+            "line": "13",
+            "rev": "14420238"
+          },
+          "14": {
+            "author": "Colin-Posat",
+            "date": "2026-04-13 15:10:31 -0700",
+            "line": "14",
+            "rev": "7e9a8542"
+          },
+          "15": {
+            "author": "Colin-Posat",
+            "date": "2026-04-13 15:10:31 -0700",
+            "line": "15",
+            "rev": "7e9a8542"
+          },
+          "16": {
+            "author": "Bardia     ",
+            "date": "2026-06-02 15:47:08 -0700",
+            "line": "16",
+            "rev": "14420238"
+          }
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 11,
+      "fragment": "<div className=\"flex flex-col gap-1.5\">\n        <label htmlFor=\"email\" className=\"text-sm font-medium text-ink-soft\">\n          UCSC email\n        </label>\n        <input\n          id=\"email\"\n          name=\"email\"\n          type=\"email\"\n          autoComplete=\"email\"\n          placeholder=\"slug@ucsc.edu\"\n          className",
+      "tokens": 71,
+      "firstFile": {
+        "name": "app/(public)/login/login-form.tsx",
+        "start": 23,
+        "end": 33,
+        "startLoc": {
+          "line": 23,
+          "column": 7,
+          "position": 128
+        },
+        "endLoc": {
+          "line": 33,
+          "column": 20,
+          "position": 199
+        },
+        "blame": {
+          "23": {
+            "author": "Colin-Posat",
+            "date": "2026-04-13 15:10:31 -0700",
+            "line": "23",
+            "rev": "7e9a8542"
+          },
+          "24": {
+            "author": "Bardia     ",
+            "date": "2026-06-02 15:47:08 -0700",
+            "line": "24",
+            "rev": "14420238"
+          },
+          "25": {
+            "author": "Colin-Posat",
+            "date": "2026-04-13 15:10:31 -0700",
+            "line": "25",
+            "rev": "7e9a8542"
+          },
+          "26": {
+            "author": "Colin-Posat",
+            "date": "2026-04-13 15:10:31 -0700",
+            "line": "26",
+            "rev": "7e9a8542"
+          },
+          "27": {
+            "author": "Colin-Posat",
+            "date": "2026-04-13 15:10:31 -0700",
+            "line": "27",
+            "rev": "7e9a8542"
+          },
+          "28": {
+            "author": "Colin-Posat",
+            "date": "2026-04-13 15:10:31 -0700",
+            "line": "28",
+            "rev": "7e9a8542"
+          },
+          "29": {
+            "author": "Colin-Posat",
+            "date": "2026-04-13 15:10:31 -0700",
+            "line": "29",
+            "rev": "7e9a8542"
+          },
+          "30": {
+            "author": "Colin-Posat",
+            "date": "2026-04-13 15:10:31 -0700",
+            "line": "30",
+            "rev": "7e9a8542"
+          },
+          "31": {
+            "author": "Colin-Posat",
+            "date": "2026-04-13 15:10:31 -0700",
+            "line": "31",
+            "rev": "7e9a8542"
+          },
+          "32": {
+            "author": "Colin-Posat",
+            "date": "2026-04-13 15:10:31 -0700",
+            "line": "32",
+            "rev": "7e9a8542"
+          },
+          "33": {
+            "author": "Bardia     ",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "33",
+            "rev": "412bcaf4"
+          }
+        }
+      },
+      "secondFile": {
+        "name": "app/(public)/signup/signup-form.tsx",
+        "start": 81,
+        "end": 91,
+        "startLoc": {
+          "line": 81,
+          "column": 7,
+          "position": 687
+        },
+        "endLoc": {
+          "line": 91,
+          "column": 16,
+          "position": 758
+        },
+        "blame": {
+          "81": {
+            "author": "Bardia",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "81",
+            "rev": "412bcaf4"
+          },
+          "82": {
+            "author": "Bardia",
+            "date": "2026-06-02 15:47:08 -0700",
+            "line": "82",
+            "rev": "14420238"
+          },
+          "83": {
+            "author": "Bardia",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "83",
+            "rev": "412bcaf4"
+          },
+          "84": {
+            "author": "Bardia",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "84",
+            "rev": "412bcaf4"
+          },
+          "85": {
+            "author": "Bardia",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "85",
+            "rev": "412bcaf4"
+          },
+          "86": {
+            "author": "Bardia",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "86",
+            "rev": "412bcaf4"
+          },
+          "87": {
+            "author": "Bardia",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "87",
+            "rev": "412bcaf4"
+          },
+          "88": {
+            "author": "Bardia",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "88",
+            "rev": "412bcaf4"
+          },
+          "89": {
+            "author": "Bardia",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "89",
+            "rev": "412bcaf4"
+          },
+          "90": {
+            "author": "Bardia",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "90",
+            "rev": "412bcaf4"
+          },
+          "91": {
+            "author": "Bardia",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "91",
+            "rev": "412bcaf4"
+          }
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 15,
+      "fragment": ",\n    search: q,\n    category: category || undefined,\n    location: location || undefined,\n    activeOnly: !showAll,\n  })\n\n  return (\n    <div className=\"mx-auto w-full max-w-6xl px-4 py-10\">\n      <div className=\"reveal mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between\">\n        <div>\n          <p className=\"font-mono text-[11px] uppercase tracking-[0.2em] text-gold-ink\">\n            UCSC · Lost &amp; Found Board\n          </p>\n          <h1 className=\"mt-1 font-display text-4xl font-bold text-ink\">Found",
+      "tokens": 115,
+      "firstFile": {
+        "name": "app/(app)/found/page.tsx",
+        "start": 20,
+        "end": 34,
+        "startLoc": {
+          "line": 20,
+          "column": 18,
+          "position": 173
+        },
+        "endLoc": {
+          "line": 34,
+          "column": 78,
+          "position": 288
+        },
+        "blame": {
+          "20": {
+            "author": "Bardia     ",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "20",
+            "rev": "412bcaf4"
+          },
+          "21": {
+            "author": "Bardia     ",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "21",
+            "rev": "412bcaf4"
+          },
+          "22": {
+            "author": "Bardia     ",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "22",
+            "rev": "412bcaf4"
+          },
+          "23": {
+            "author": "Bardia     ",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "23",
+            "rev": "412bcaf4"
+          },
+          "24": {
+            "author": "Bardia     ",
+            "date": "2026-06-01 10:49:12 -0700",
+            "line": "24",
+            "rev": "a9423d7c"
+          },
+          "25": {
+            "author": "Bardia     ",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "25",
+            "rev": "412bcaf4"
+          },
+          "26": {
+            "author": "Colin-Posat",
+            "date": "2026-04-13 15:10:31 -0700",
+            "line": "26",
+            "rev": "7e9a8542"
+          },
+          "27": {
+            "author": "Colin-Posat",
+            "date": "2026-04-13 15:10:31 -0700",
+            "line": "27",
+            "rev": "7e9a8542"
+          },
+          "28": {
+            "author": "Colin-Posat",
+            "date": "2026-04-13 15:10:31 -0700",
+            "line": "28",
+            "rev": "7e9a8542"
+          },
+          "29": {
+            "author": "Bardia     ",
+            "date": "2026-06-02 15:47:08 -0700",
+            "line": "29",
+            "rev": "14420238"
+          },
+          "30": {
+            "author": "Colin-Posat",
+            "date": "2026-04-13 15:10:31 -0700",
+            "line": "30",
+            "rev": "7e9a8542"
+          },
+          "31": {
+            "author": "Bardia     ",
+            "date": "2026-06-02 15:47:08 -0700",
+            "line": "31",
+            "rev": "14420238"
+          },
+          "32": {
+            "author": "Bardia     ",
+            "date": "2026-06-02 15:47:08 -0700",
+            "line": "32",
+            "rev": "14420238"
+          },
+          "33": {
+            "author": "Bardia     ",
+            "date": "2026-06-02 15:47:08 -0700",
+            "line": "33",
+            "rev": "14420238"
+          },
+          "34": {
+            "author": "Bardia     ",
+            "date": "2026-06-02 15:47:08 -0700",
+            "line": "34",
+            "rev": "14420238"
+          }
+        }
+      },
+      "secondFile": {
+        "name": "app/(app)/lost/page.tsx",
+        "start": 24,
+        "end": 38,
+        "startLoc": {
+          "line": 24,
+          "column": 17,
+          "position": 176
+        },
+        "endLoc": {
+          "line": 38,
+          "column": 77,
+          "position": 291
+        },
+        "blame": {
+          "24": {
+            "author": "Bardia     ",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "24",
+            "rev": "412bcaf4"
+          },
+          "25": {
+            "author": "Bardia     ",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "25",
+            "rev": "412bcaf4"
+          },
+          "26": {
+            "author": "Bardia     ",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "26",
+            "rev": "412bcaf4"
+          },
+          "27": {
+            "author": "Bardia     ",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "27",
+            "rev": "412bcaf4"
+          },
+          "28": {
+            "author": "Bardia     ",
+            "date": "2026-06-01 10:49:12 -0700",
+            "line": "28",
+            "rev": "a9423d7c"
+          },
+          "29": {
+            "author": "Bardia     ",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "29",
+            "rev": "412bcaf4"
+          },
+          "30": {
+            "author": "Colin-Posat",
+            "date": "2026-04-13 15:10:31 -0700",
+            "line": "30",
+            "rev": "7e9a8542"
+          },
+          "31": {
+            "author": "Colin-Posat",
+            "date": "2026-04-13 15:10:31 -0700",
+            "line": "31",
+            "rev": "7e9a8542"
+          },
+          "32": {
+            "author": "Colin-Posat",
+            "date": "2026-04-13 15:10:31 -0700",
+            "line": "32",
+            "rev": "7e9a8542"
+          },
+          "33": {
+            "author": "Bardia     ",
+            "date": "2026-06-02 15:47:08 -0700",
+            "line": "33",
+            "rev": "14420238"
+          },
+          "34": {
+            "author": "Colin-Posat",
+            "date": "2026-04-13 15:10:31 -0700",
+            "line": "34",
+            "rev": "7e9a8542"
+          },
+          "35": {
+            "author": "Bardia     ",
+            "date": "2026-06-02 15:47:08 -0700",
+            "line": "35",
+            "rev": "14420238"
+          },
+          "36": {
+            "author": "Bardia     ",
+            "date": "2026-06-02 15:47:08 -0700",
+            "line": "36",
+            "rev": "14420238"
+          },
+          "37": {
+            "author": "Bardia     ",
+            "date": "2026-06-02 15:47:08 -0700",
+            "line": "37",
+            "rev": "14420238"
+          },
+          "38": {
+            "author": "Bardia     ",
+            "date": "2026-06-02 15:47:08 -0700",
+            "line": "38",
+            "rev": "14420238"
+          }
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 12,
+      "fragment": ">\n                  <option value=\"\" disabled>Select a category</option>\n                  {ITEM_CATEGORIES.map((c) => (\n                    <option key={c} value={c}>{c}</option>\n                  ))}\n                </select>\n                {state?.errors?.category && (\n                  <p className=\"text-xs text-lost\">{state.errors.category[0]}</p>\n                )}\n              </div>\n\n              {",
+      "tokens": 118,
+      "firstFile": {
+        "name": "app/(app)/create/create-form.tsx",
+        "start": 261,
+        "end": 272,
+        "startLoc": {
+          "line": 261,
+          "column": 17,
+          "position": 2033
+        },
+        "endLoc": {
+          "line": 272,
+          "column": 16,
+          "position": 2151
+        },
+        "blame": {
+          "261": {
+            "author": "aidann23   ",
+            "date": "2026-05-17 23:19:00 -0700",
+            "line": "261",
+            "rev": "02419811"
+          },
+          "262": {
+            "author": "Bardia     ",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "262",
+            "rev": "412bcaf4"
+          },
+          "263": {
+            "author": "Bardia     ",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "263",
+            "rev": "412bcaf4"
+          },
+          "264": {
+            "author": "Bardia     ",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "264",
+            "rev": "412bcaf4"
+          },
+          "265": {
+            "author": "Bardia     ",
+            "date": "2026-04-20 14:29:50 -0700",
+            "line": "265",
+            "rev": "ad0ffa4d"
+          },
+          "266": {
+            "author": "Bardia     ",
+            "date": "2026-04-20 14:29:50 -0700",
+            "line": "266",
+            "rev": "ad0ffa4d"
+          },
+          "267": {
+            "author": "Bardia     ",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "267",
+            "rev": "412bcaf4"
+          },
+          "268": {
+            "author": "Bardia     ",
+            "date": "2026-06-02 15:47:08 -0700",
+            "line": "268",
+            "rev": "14420238"
+          },
+          "269": {
+            "author": "Bardia     ",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "269",
+            "rev": "412bcaf4"
+          },
+          "270": {
+            "author": "Bardia     ",
+            "date": "2026-04-20 14:29:50 -0700",
+            "line": "270",
+            "rev": "ad0ffa4d"
+          },
+          "271": {
+            "author": "Sam madinya",
+            "date": "2026-05-18 11:40:58 -0700",
+            "line": "271",
+            "rev": "14a830d4"
+          },
+          "272": {
+            "author": "Sam madinya",
+            "date": "2026-05-18 11:40:58 -0700",
+            "line": "272",
+            "rev": "14a830d4"
+          }
+        }
+      },
+      "secondFile": {
+        "name": "app/(app)/items/[id]/edit/edit-form.tsx",
+        "start": 154,
+        "end": 169,
+        "startLoc": {
+          "line": 154,
+          "column": 15,
+          "position": 1219
+        },
+        "endLoc": {
+          "line": 169,
+          "column": 14,
+          "position": 1345
+        },
+        "blame": {
+          "154": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "154",
+            "rev": "9ba1ad05"
+          },
+          "155": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "155",
+            "rev": "9ba1ad05"
+          },
+          "156": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "156",
+            "rev": "9ba1ad05"
+          },
+          "157": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "157",
+            "rev": "9ba1ad05"
+          },
+          "158": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "158",
+            "rev": "9ba1ad05"
+          },
+          "159": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "159",
+            "rev": "9ba1ad05"
+          },
+          "160": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "160",
+            "rev": "9ba1ad05"
+          },
+          "161": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "161",
+            "rev": "9ba1ad05"
+          },
+          "162": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "162",
+            "rev": "9ba1ad05"
+          },
+          "163": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "163",
+            "rev": "9ba1ad05"
+          },
+          "164": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "164",
+            "rev": "9ba1ad05"
+          },
+          "165": {
+            "author": "Bardia",
+            "date": "2026-06-02 15:47:08 -0700",
+            "line": "165",
+            "rev": "14420238"
+          },
+          "166": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "166",
+            "rev": "9ba1ad05"
+          },
+          "167": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "167",
+            "rev": "9ba1ad05"
+          },
+          "168": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "168",
+            "rev": "9ba1ad05"
+          },
+          "169": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "169",
+            "rev": "9ba1ad05"
+          }
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 15,
+      "fragment": "value={mapLocation?.lng  ?? ''} />\n\n                <LocationMapPicker value={mapLocation} onChange={setMapLocation} />\n\n                {mapLocation && (\n                  <p className=\"text-xs text-gold-ink\">\n                    📍 {mapLocation.label}\n                    {mapLocation.label === 'Other' &&\n                      ` (${mapLocation.lat.toFixed(5)}, ${mapLocation.lng.toFixed(5)})`}\n                  </p>\n                )}\n                {state?.errors?.location && (\n                  <p className=\"text-xs text-lost\">{state.errors.location[0]}</p>\n                )}\n                {",
+      "tokens": 153,
+      "firstFile": {
+        "name": "app/(app)/create/create-form.tsx",
+        "start": 284,
+        "end": 298,
+        "startLoc": {
+          "line": 284,
+          "column": 54,
+          "position": 2321
+        },
+        "endLoc": {
+          "line": 298,
+          "column": 18,
+          "position": 2474
+        },
+        "blame": {
+          "284": {
+            "author": "Sam madinya",
+            "date": "2026-05-18 11:40:58 -0700",
+            "line": "284",
+            "rev": "14a830d4"
+          },
+          "285": {
+            "author": "Sam madinya",
+            "date": "2026-05-18 11:40:58 -0700",
+            "line": "285",
+            "rev": "14a830d4"
+          },
+          "286": {
+            "author": "Sam madinya",
+            "date": "2026-05-18 11:40:58 -0700",
+            "line": "286",
+            "rev": "14a830d4"
+          },
+          "287": {
+            "author": "Sam madinya",
+            "date": "2026-05-18 11:40:58 -0700",
+            "line": "287",
+            "rev": "14a830d4"
+          },
+          "288": {
+            "author": "Sam madinya",
+            "date": "2026-05-18 11:40:58 -0700",
+            "line": "288",
+            "rev": "14a830d4"
+          },
+          "289": {
+            "author": "Bardia     ",
+            "date": "2026-06-02 15:47:08 -0700",
+            "line": "289",
+            "rev": "14420238"
+          },
+          "290": {
+            "author": "Sam madinya",
+            "date": "2026-05-18 11:40:58 -0700",
+            "line": "290",
+            "rev": "14a830d4"
+          },
+          "291": {
+            "author": "Sam madinya",
+            "date": "2026-05-18 11:40:58 -0700",
+            "line": "291",
+            "rev": "14a830d4"
+          },
+          "292": {
+            "author": "Sam madinya",
+            "date": "2026-05-18 11:40:58 -0700",
+            "line": "292",
+            "rev": "14a830d4"
+          },
+          "293": {
+            "author": "Sam madinya",
+            "date": "2026-05-18 11:40:58 -0700",
+            "line": "293",
+            "rev": "14a830d4"
+          },
+          "294": {
+            "author": "Sam madinya",
+            "date": "2026-05-18 11:40:58 -0700",
+            "line": "294",
+            "rev": "14a830d4"
+          },
+          "295": {
+            "author": "Bardia     ",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "295",
+            "rev": "412bcaf4"
+          },
+          "296": {
+            "author": "Bardia     ",
+            "date": "2026-06-02 15:47:08 -0700",
+            "line": "296",
+            "rev": "14420238"
+          },
+          "297": {
+            "author": "Bardia     ",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "297",
+            "rev": "412bcaf4"
+          },
+          "298": {
+            "author": "Sam madinya",
+            "date": "2026-05-18 11:40:58 -0700",
+            "line": "298",
+            "rev": "14a830d4"
+          }
+        }
+      },
+      "secondFile": {
+        "name": "app/(app)/items/[id]/edit/edit-form.tsx",
+        "start": 183,
+        "end": 197,
+        "startLoc": {
+          "line": 183,
+          "column": 47,
+          "position": 1506
+        },
+        "endLoc": {
+          "line": 197,
+          "column": 15,
+          "position": 1664
+        },
+        "blame": {
+          "183": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "183",
+            "rev": "9ba1ad05"
+          },
+          "184": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "184",
+            "rev": "9ba1ad05"
+          },
+          "185": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "185",
+            "rev": "9ba1ad05"
+          },
+          "186": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "186",
+            "rev": "9ba1ad05"
+          },
+          "187": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "187",
+            "rev": "9ba1ad05"
+          },
+          "188": {
+            "author": "Bardia",
+            "date": "2026-06-02 15:47:08 -0700",
+            "line": "188",
+            "rev": "14420238"
+          },
+          "189": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "189",
+            "rev": "9ba1ad05"
+          },
+          "190": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "190",
+            "rev": "9ba1ad05"
+          },
+          "191": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "191",
+            "rev": "9ba1ad05"
+          },
+          "192": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "192",
+            "rev": "9ba1ad05"
+          },
+          "193": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "193",
+            "rev": "9ba1ad05"
+          },
+          "194": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "194",
+            "rev": "9ba1ad05"
+          },
+          "195": {
+            "author": "Bardia",
+            "date": "2026-06-02 15:47:08 -0700",
+            "line": "195",
+            "rev": "14420238"
+          },
+          "196": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "196",
+            "rev": "9ba1ad05"
+          },
+          "197": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "197",
+            "rev": "9ba1ad05"
+          }
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 12,
+      "fragment": ". Max 5 MB · JPG, PNG, WebP.\n            </p>\n\n            {selectedFile ? (\n              <div className=\"flex items-center justify-between rounded-xl border border-line-strong bg-surface-2 px-4 py-3\">\n                <div className=\"flex items-center gap-3\">\n                  <span className=\"text-2xl\">🖼️</span>\n                  <div>\n                    <p className=\"text-sm font-medium text-ink\">{selectedFile.name}</p>\n                    <p className=\"text-xs text-muted\">\n                      {(selectedFile.size / 1024).toFixed(0)} KB\n                    </",
+      "tokens": 126,
+      "firstFile": {
+        "name": "app/(app)/create/create-form.tsx",
+        "start": 337,
+        "end": 348,
+        "startLoc": {
+          "line": 337,
+          "column": 74,
+          "position": 2816
+        },
+        "endLoc": {
+          "line": 348,
+          "column": 23,
+          "position": 2942
+        },
+        "blame": {
+          "337": {
+            "author": "Bardia     ",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "337",
+            "rev": "412bcaf4"
+          },
+          "338": {
+            "author": "Bardia     ",
+            "date": "2026-04-20 14:29:50 -0700",
+            "line": "338",
+            "rev": "ad0ffa4d"
+          },
+          "339": {
+            "author": "Bardia     ",
+            "date": "2026-04-20 14:29:50 -0700",
+            "line": "339",
+            "rev": "ad0ffa4d"
+          },
+          "340": {
+            "author": "Bardia     ",
+            "date": "2026-04-20 14:29:50 -0700",
+            "line": "340",
+            "rev": "ad0ffa4d"
+          },
+          "341": {
+            "author": "Bardia     ",
+            "date": "2026-06-02 15:47:08 -0700",
+            "line": "341",
+            "rev": "14420238"
+          },
+          "342": {
+            "author": "Bardia     ",
+            "date": "2026-04-20 14:29:50 -0700",
+            "line": "342",
+            "rev": "ad0ffa4d"
+          },
+          "343": {
+            "author": "Bardia     ",
+            "date": "2026-04-20 14:29:50 -0700",
+            "line": "343",
+            "rev": "ad0ffa4d"
+          },
+          "344": {
+            "author": "Bardia     ",
+            "date": "2026-04-20 14:29:50 -0700",
+            "line": "344",
+            "rev": "ad0ffa4d"
+          },
+          "345": {
+            "author": "Bardia     ",
+            "date": "2026-06-02 15:47:08 -0700",
+            "line": "345",
+            "rev": "14420238"
+          },
+          "346": {
+            "author": "Bardia     ",
+            "date": "2026-06-02 15:47:08 -0700",
+            "line": "346",
+            "rev": "14420238"
+          },
+          "347": {
+            "author": "Bardia     ",
+            "date": "2026-04-20 14:29:50 -0700",
+            "line": "347",
+            "rev": "ad0ffa4d"
+          },
+          "348": {
+            "author": "Bardia     ",
+            "date": "2026-04-20 14:29:50 -0700",
+            "line": "348",
+            "rev": "ad0ffa4d"
+          }
+        }
+      },
+      "secondFile": {
+        "name": "app/(app)/items/[id]/edit/edit-form.tsx",
+        "start": 225,
+        "end": 235,
+        "startLoc": {
+          "line": 225,
+          "column": 58,
+          "position": 1904
+        },
+        "endLoc": {
+          "line": 235,
+          "column": 65,
+          "position": 2029
+        },
+        "blame": {
+          "225": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "225",
+            "rev": "9ba1ad05"
+          },
+          "226": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "226",
+            "rev": "9ba1ad05"
+          },
+          "227": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "227",
+            "rev": "9ba1ad05"
+          },
+          "228": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "228",
+            "rev": "9ba1ad05"
+          },
+          "229": {
+            "author": "Bardia",
+            "date": "2026-06-02 15:47:08 -0700",
+            "line": "229",
+            "rev": "14420238"
+          },
+          "230": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "230",
+            "rev": "9ba1ad05"
+          },
+          "231": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "231",
+            "rev": "9ba1ad05"
+          },
+          "232": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "232",
+            "rev": "9ba1ad05"
+          },
+          "233": {
+            "author": "Bardia",
+            "date": "2026-06-02 15:47:08 -0700",
+            "line": "233",
+            "rev": "14420238"
+          },
+          "234": {
+            "author": "Bardia",
+            "date": "2026-06-02 15:47:08 -0700",
+            "line": "234",
+            "rev": "14420238"
+          },
+          "235": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "235",
+            "rev": "9ba1ad05"
+          }
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 8,
+      "fragment": ">\n                <span className=\"text-3xl\">📷</span>\n                <span className=\"text-sm text-muted\">Click to upload a photo</span>\n                <span className=\"text-xs text-muted\">PNG, JPG, WebP up to 5 MB</span>\n              </label>\n            )}\n\n            {",
+      "tokens": 80,
+      "firstFile": {
+        "name": "app/(app)/create/create-form.tsx",
+        "start": 363,
+        "end": 370,
+        "startLoc": {
+          "line": 363,
+          "column": 15,
+          "position": 3024
+        },
+        "endLoc": {
+          "line": 370,
+          "column": 14,
+          "position": 3104
+        },
+        "blame": {
+          "363": {
+            "author": "Bardia     ",
+            "date": "2026-04-20 14:29:50 -0700",
+            "line": "363",
+            "rev": "ad0ffa4d"
+          },
+          "364": {
+            "author": "Bardia     ",
+            "date": "2026-04-20 14:29:50 -0700",
+            "line": "364",
+            "rev": "ad0ffa4d"
+          },
+          "365": {
+            "author": "Bardia     ",
+            "date": "2026-06-02 15:47:08 -0700",
+            "line": "365",
+            "rev": "14420238"
+          },
+          "366": {
+            "author": "Bardia     ",
+            "date": "2026-06-02 15:47:08 -0700",
+            "line": "366",
+            "rev": "14420238"
+          },
+          "367": {
+            "author": "Bardia     ",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "367",
+            "rev": "412bcaf4"
+          },
+          "368": {
+            "author": "Bardia     ",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "368",
+            "rev": "412bcaf4"
+          },
+          "369": {
+            "author": "Bardia     ",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "369",
+            "rev": "412bcaf4"
+          },
+          "370": {
+            "author": "Bardia     ",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "370",
+            "rev": "412bcaf4"
+          }
+        }
+      },
+      "secondFile": {
+        "name": "app/(app)/items/[id]/edit/edit-form.tsx",
+        "start": 266,
+        "end": 273,
+        "startLoc": {
+          "line": 266,
+          "column": 13,
+          "position": 2206
+        },
+        "endLoc": {
+          "line": 273,
+          "column": 12,
+          "position": 2286
+        },
+        "blame": {
+          "266": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "266",
+            "rev": "9ba1ad05"
+          },
+          "267": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "267",
+            "rev": "9ba1ad05"
+          },
+          "268": {
+            "author": "Bardia",
+            "date": "2026-06-02 15:47:08 -0700",
+            "line": "268",
+            "rev": "14420238"
+          },
+          "269": {
+            "author": "Bardia",
+            "date": "2026-06-02 15:47:08 -0700",
+            "line": "269",
+            "rev": "14420238"
+          },
+          "270": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "270",
+            "rev": "9ba1ad05"
+          },
+          "271": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "271",
+            "rev": "9ba1ad05"
+          },
+          "272": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "272",
+            "rev": "9ba1ad05"
+          },
+          "273": {
+            "author": "Bardia",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "273",
+            "rev": "9ba1ad05"
+          }
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 13,
+      "fragment": ",\n): Promise<{ error?: string }> {\n  const supabase = await createSupabaseServerClient()\n\n  const {\n    data: { user },\n  } = await supabase.auth.getUser()\n  \n  if (!user) {\n    return { error: 'Not signed in.' }\n  }\n\n  const { error",
+      "tokens": 98,
+      "firstFile": {
+        "name": "app/actions/messages.ts",
+        "start": 125,
+        "end": 137,
+        "startLoc": {
+          "line": 125,
+          "column": 26,
+          "position": 1118
+        },
+        "endLoc": {
+          "line": 137,
+          "column": 16,
+          "position": 1216
+        },
+        "blame": {
+          "125": {
+            "author": "Bardia     ",
+            "date": "2026-06-02 16:44:05 -0700",
+            "line": "125",
+            "rev": "d870ed26"
+          },
+          "126": {
+            "author": "Bardia     ",
+            "date": "2026-06-02 16:44:05 -0700",
+            "line": "126",
+            "rev": "d870ed26"
+          },
+          "127": {
+            "author": "Bardia     ",
+            "date": "2026-06-02 16:44:05 -0700",
+            "line": "127",
+            "rev": "d870ed26"
+          },
+          "128": {
+            "author": "Bardia     ",
+            "date": "2026-06-02 16:44:05 -0700",
+            "line": "128",
+            "rev": "d870ed26"
+          },
+          "129": {
+            "author": "Bardia     ",
+            "date": "2026-06-02 16:44:05 -0700",
+            "line": "129",
+            "rev": "d870ed26"
+          },
+          "130": {
+            "author": "Bardia     ",
+            "date": "2026-06-02 16:44:05 -0700",
+            "line": "130",
+            "rev": "d870ed26"
+          },
+          "131": {
+            "author": "Bardia     ",
+            "date": "2026-06-02 16:44:05 -0700",
+            "line": "131",
+            "rev": "d870ed26"
+          },
+          "132": {
+            "author": "Bardia     ",
+            "date": "2026-06-02 16:44:05 -0700",
+            "line": "132",
+            "rev": "d870ed26"
+          },
+          "133": {
+            "author": "Bardia     ",
+            "date": "2026-06-02 16:44:05 -0700",
+            "line": "133",
+            "rev": "d870ed26"
+          },
+          "134": {
+            "author": "Bardia     ",
+            "date": "2026-06-02 16:44:05 -0700",
+            "line": "134",
+            "rev": "d870ed26"
+          },
+          "135": {
+            "author": "Bardia     ",
+            "date": "2026-06-02 16:44:05 -0700",
+            "line": "135",
+            "rev": "d870ed26"
+          },
+          "136": {
+            "author": "Bardia     ",
+            "date": "2026-06-02 16:44:05 -0700",
+            "line": "136",
+            "rev": "d870ed26"
+          },
+          "137": {
+            "author": "Bardia     ",
+            "date": "2026-06-02 16:44:05 -0700",
+            "line": "137",
+            "rev": "d870ed26"
+          }
+        }
+      },
+      "secondFile": {
+        "name": "app/actions/messages.ts",
+        "start": 75,
+        "end": 86,
+        "startLoc": {
+          "line": 75,
+          "column": 25,
+          "position": 684
+        },
+        "endLoc": {
+          "line": 86,
+          "column": 15,
+          "position": 780
+        },
+        "blame": {
+          "75": {
+            "author": "Sam madinya",
+            "date": "2026-05-28 01:01:05 -0700",
+            "line": "75",
+            "rev": "66ed4a9d"
+          },
+          "76": {
+            "author": "Sam madinya",
+            "date": "2026-05-28 01:01:05 -0700",
+            "line": "76",
+            "rev": "66ed4a9d"
+          },
+          "77": {
+            "author": "Sam madinya",
+            "date": "2026-05-28 01:01:05 -0700",
+            "line": "77",
+            "rev": "66ed4a9d"
+          },
+          "78": {
+            "author": "Sam madinya",
+            "date": "2026-05-28 01:01:05 -0700",
+            "line": "78",
+            "rev": "66ed4a9d"
+          },
+          "79": {
+            "author": "Sam madinya",
+            "date": "2026-05-28 01:01:05 -0700",
+            "line": "79",
+            "rev": "66ed4a9d"
+          },
+          "80": {
+            "author": "Sam madinya",
+            "date": "2026-05-28 01:01:05 -0700",
+            "line": "80",
+            "rev": "66ed4a9d"
+          },
+          "81": {
+            "author": "Sam madinya",
+            "date": "2026-05-28 01:01:05 -0700",
+            "line": "81",
+            "rev": "66ed4a9d"
+          },
+          "82": {
+            "author": "Sam madinya",
+            "date": "2026-05-28 01:01:05 -0700",
+            "line": "82",
+            "rev": "66ed4a9d"
+          },
+          "83": {
+            "author": "Sam madinya",
+            "date": "2026-05-28 01:01:05 -0700",
+            "line": "83",
+            "rev": "66ed4a9d"
+          },
+          "84": {
+            "author": "Sam madinya",
+            "date": "2026-05-28 01:01:05 -0700",
+            "line": "84",
+            "rev": "66ed4a9d"
+          },
+          "85": {
+            "author": "Sam madinya",
+            "date": "2026-05-28 01:01:05 -0700",
+            "line": "85",
+            "rev": "66ed4a9d"
+          },
+          "86": {
+            "author": "Sam madinya",
+            "date": "2026-05-28 01:01:05 -0700",
+            "line": "86",
+            "rev": "66ed4a9d"
+          }
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 15,
+      "fragment": ".safeParse({\n    type: formData.get('type'),\n    title: formData.get('title'),\n    description: formData.get('description'),\n    category: formData.get('category'),\n    location: formData.get('location'),\n    lat: formData.get('lat'),\n    lng: formData.get('lng'),\n  })\n\n  if (!validated.success) {\n    return { errors: validated.error.flatten().fieldErrors }\n  }\n\n  // Load the current row so we have the old image to swap out, and to fail",
+      "tokens": 131,
+      "firstFile": {
+        "name": "app/actions/items.ts",
+        "start": 177,
+        "end": 191,
+        "startLoc": {
+          "line": 177,
+          "column": 37,
+          "position": 1290
+        },
+        "endLoc": {
+          "line": 191,
+          "column": 76,
+          "position": 1421
+        },
+        "blame": {
+          "177": {
+            "author": "Bardia     ",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "177",
+            "rev": "9ba1ad05"
+          },
+          "178": {
+            "author": "Bardia     ",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "178",
+            "rev": "9ba1ad05"
+          },
+          "179": {
+            "author": "Bardia     ",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "179",
+            "rev": "9ba1ad05"
+          },
+          "180": {
+            "author": "Bardia     ",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "180",
+            "rev": "9ba1ad05"
+          },
+          "181": {
+            "author": "Bardia     ",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "181",
+            "rev": "9ba1ad05"
+          },
+          "182": {
+            "author": "Bardia     ",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "182",
+            "rev": "9ba1ad05"
+          },
+          "183": {
+            "author": "Bardia     ",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "183",
+            "rev": "9ba1ad05"
+          },
+          "184": {
+            "author": "Bardia     ",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "184",
+            "rev": "9ba1ad05"
+          },
+          "185": {
+            "author": "Bardia     ",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "185",
+            "rev": "9ba1ad05"
+          },
+          "186": {
+            "author": "Bardia     ",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "186",
+            "rev": "9ba1ad05"
+          },
+          "187": {
+            "author": "Bardia     ",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "187",
+            "rev": "9ba1ad05"
+          },
+          "188": {
+            "author": "Bardia     ",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "188",
+            "rev": "9ba1ad05"
+          },
+          "189": {
+            "author": "Bardia     ",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "189",
+            "rev": "9ba1ad05"
+          },
+          "190": {
+            "author": "Bardia     ",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "190",
+            "rev": "9ba1ad05"
+          },
+          "191": {
+            "author": "Bardia     ",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "191",
+            "rev": "9ba1ad05"
+          }
+        }
+      },
+      "secondFile": {
+        "name": "app/actions/items.ts",
+        "start": 47,
+        "end": 61,
+        "startLoc": {
+          "line": 47,
+          "column": 37,
+          "position": 244
+        },
+        "endLoc": {
+          "line": 61,
+          "column": 78,
+          "position": 375
+        },
+        "blame": {
+          "47": {
+            "author": "Bardia     ",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "47",
+            "rev": "412bcaf4"
+          },
+          "48": {
+            "author": "Bardia     ",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "48",
+            "rev": "412bcaf4"
+          },
+          "49": {
+            "author": "Bardia     ",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "49",
+            "rev": "412bcaf4"
+          },
+          "50": {
+            "author": "Bardia     ",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "50",
+            "rev": "412bcaf4"
+          },
+          "51": {
+            "author": "Bardia     ",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "51",
+            "rev": "412bcaf4"
+          },
+          "52": {
+            "author": "Bardia     ",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "52",
+            "rev": "412bcaf4"
+          },
+          "53": {
+            "author": "Sam madinya",
+            "date": "2026-05-18 11:40:58 -0700",
+            "line": "53",
+            "rev": "14a830d4"
+          },
+          "54": {
+            "author": "Sam madinya",
+            "date": "2026-05-18 11:40:58 -0700",
+            "line": "54",
+            "rev": "14a830d4"
+          },
+          "55": {
+            "author": "Bardia     ",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "55",
+            "rev": "412bcaf4"
+          },
+          "56": {
+            "author": "Bardia     ",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "56",
+            "rev": "412bcaf4"
+          },
+          "57": {
+            "author": "Bardia     ",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "57",
+            "rev": "412bcaf4"
+          },
+          "58": {
+            "author": "Bardia     ",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "58",
+            "rev": "412bcaf4"
+          },
+          "59": {
+            "author": "Bardia     ",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "59",
+            "rev": "412bcaf4"
+          },
+          "60": {
+            "author": "Bardia     ",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "60",
+            "rev": "412bcaf4"
+          },
+          "61": {
+            "author": "Bardia     ",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "61",
+            "rev": "412bcaf4"
+          }
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 9,
+      "fragment": "if (photo && photo.size > 0) {\n    if (photo.size > MAX_IMAGE_BYTES) {\n      return { errors: { photo: ['Image must be 5 MB or smaller.'] } }\n    }\n    if (!ALLOWED_MIME.includes(photo.type)) {\n      return { errors: { photo: ['Image must be JPG, PNG, or WebP.'] } }\n    }\n\n    const",
+      "tokens": 100,
+      "firstFile": {
+        "name": "app/actions/items.ts",
+        "start": 211,
+        "end": 219,
+        "startLoc": {
+          "line": 211,
+          "column": 3,
+          "position": 1585
+        },
+        "endLoc": {
+          "line": 219,
+          "column": 10,
+          "position": 1685
+        },
+        "blame": {
+          "211": {
+            "author": "Bardia     ",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "211",
+            "rev": "9ba1ad05"
+          },
+          "212": {
+            "author": "Bardia     ",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "212",
+            "rev": "9ba1ad05"
+          },
+          "213": {
+            "author": "Bardia     ",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "213",
+            "rev": "9ba1ad05"
+          },
+          "214": {
+            "author": "Bardia     ",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "214",
+            "rev": "9ba1ad05"
+          },
+          "215": {
+            "author": "Bardia     ",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "215",
+            "rev": "9ba1ad05"
+          },
+          "216": {
+            "author": "Bardia     ",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "216",
+            "rev": "9ba1ad05"
+          },
+          "217": {
+            "author": "Bardia     ",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "217",
+            "rev": "9ba1ad05"
+          },
+          "218": {
+            "author": "Bardia     ",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "218",
+            "rev": "9ba1ad05"
+          },
+          "219": {
+            "author": "Bardia     ",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "219",
+            "rev": "9ba1ad05"
+          }
+        }
+      },
+      "secondFile": {
+        "name": "app/actions/items.ts",
+        "start": 65,
+        "end": 73,
+        "startLoc": {
+          "line": 65,
+          "column": 3,
+          "position": 417
+        },
+        "endLoc": {
+          "line": 73,
+          "column": 75,
+          "position": 517
+        },
+        "blame": {
+          "65": {
+            "author": "Bardia     ",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "65",
+            "rev": "412bcaf4"
+          },
+          "66": {
+            "author": "Bardia     ",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "66",
+            "rev": "412bcaf4"
+          },
+          "67": {
+            "author": "Bardia     ",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "67",
+            "rev": "412bcaf4"
+          },
+          "68": {
+            "author": "Bardia     ",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "68",
+            "rev": "412bcaf4"
+          },
+          "69": {
+            "author": "Bardia     ",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "69",
+            "rev": "412bcaf4"
+          },
+          "70": {
+            "author": "Bardia     ",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "70",
+            "rev": "412bcaf4"
+          },
+          "71": {
+            "author": "Bardia     ",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "71",
+            "rev": "412bcaf4"
+          },
+          "72": {
+            "author": "Bardia     ",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "72",
+            "rev": "412bcaf4"
+          },
+          "73": {
+            "author": "Bardia     ",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "73",
+            "rev": "412bcaf4"
+          }
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 13,
+      "fragment": "const ext = photo.name.split('.').pop() ?? 'bin'\n    const path = `${user.id}/${crypto.randomUUID()}.${ext}`\n\n    const { error: uploadError } = await supabase.storage\n      .from('item-images')\n      .upload(path, photo, { contentType: photo.type, upsert: false })\n\n    if (uploadError) {\n      return { errors: { photo: [`Image upload failed: ${uploadError.message}`] } }\n    }\n\n    const { data } = supabase.storage.from('item-images').getPublicUrl(path)\n    nextImageUrl",
+      "tokens": 174,
+      "firstFile": {
+        "name": "app/actions/items.ts",
+        "start": 219,
+        "end": 231,
+        "startLoc": {
+          "line": 219,
+          "column": 5,
+          "position": 1685
+        },
+        "endLoc": {
+          "line": 231,
+          "column": 17,
+          "position": 1859
+        },
+        "blame": {
+          "219": {
+            "author": "Bardia     ",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "219",
+            "rev": "9ba1ad05"
+          },
+          "220": {
+            "author": "Bardia     ",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "220",
+            "rev": "9ba1ad05"
+          },
+          "221": {
+            "author": "Bardia     ",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "221",
+            "rev": "9ba1ad05"
+          },
+          "222": {
+            "author": "Bardia     ",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "222",
+            "rev": "9ba1ad05"
+          },
+          "223": {
+            "author": "Bardia     ",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "223",
+            "rev": "9ba1ad05"
+          },
+          "224": {
+            "author": "Bardia     ",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "224",
+            "rev": "9ba1ad05"
+          },
+          "225": {
+            "author": "Bardia     ",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "225",
+            "rev": "9ba1ad05"
+          },
+          "226": {
+            "author": "Bardia     ",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "226",
+            "rev": "9ba1ad05"
+          },
+          "227": {
+            "author": "Bardia     ",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "227",
+            "rev": "9ba1ad05"
+          },
+          "228": {
+            "author": "Bardia     ",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "228",
+            "rev": "9ba1ad05"
+          },
+          "229": {
+            "author": "Bardia     ",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "229",
+            "rev": "9ba1ad05"
+          },
+          "230": {
+            "author": "Bardia     ",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "230",
+            "rev": "9ba1ad05"
+          },
+          "231": {
+            "author": "Bardia     ",
+            "date": "2026-06-01 10:43:58 -0700",
+            "line": "231",
+            "rev": "9ba1ad05"
+          }
+        }
+      },
+      "secondFile": {
+        "name": "app/actions/items.ts",
+        "start": 75,
+        "end": 87,
+        "startLoc": {
+          "line": 75,
+          "column": 5,
+          "position": 523
+        },
+        "endLoc": {
+          "line": 87,
+          "column": 13,
+          "position": 697
+        },
+        "blame": {
+          "75": {
+            "author": "Bardia     ",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "75",
+            "rev": "412bcaf4"
+          },
+          "76": {
+            "author": "Bardia     ",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "76",
+            "rev": "412bcaf4"
+          },
+          "77": {
+            "author": "Bardia     ",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "77",
+            "rev": "412bcaf4"
+          },
+          "78": {
+            "author": "Bardia     ",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "78",
+            "rev": "412bcaf4"
+          },
+          "79": {
+            "author": "Bardia     ",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "79",
+            "rev": "412bcaf4"
+          },
+          "80": {
+            "author": "Bardia     ",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "80",
+            "rev": "412bcaf4"
+          },
+          "81": {
+            "author": "Bardia     ",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "81",
+            "rev": "412bcaf4"
+          },
+          "82": {
+            "author": "Bardia     ",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "82",
+            "rev": "412bcaf4"
+          },
+          "83": {
+            "author": "Bardia     ",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "83",
+            "rev": "412bcaf4"
+          },
+          "84": {
+            "author": "Bardia     ",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "84",
+            "rev": "412bcaf4"
+          },
+          "85": {
+            "author": "Bardia     ",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "85",
+            "rev": "412bcaf4"
+          },
+          "86": {
+            "author": "Bardia     ",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "86",
+            "rev": "412bcaf4"
+          },
+          "87": {
+            "author": "Bardia     ",
+            "date": "2026-05-03 22:21:01 -0700",
+            "line": "87",
+            "rev": "412bcaf4"
+          }
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 6,
+      "fragment": "\" className=\"flex items-center gap-2\">\n            <span className=\"font-display text-xl font-bold tracking-tight\">\n              <span className=\"text-gold-ink\">Slug</span>\n              <span className=\"text-ink\">Found</span>\n            </span>\n            <span className=\"hidden rounded bg-gold-soft px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-gold-ink sm:inline",
+      "tokens": 62,
+      "firstFile": {
+        "name": "app/(public)/layout.tsx",
+        "start": 10,
+        "end": 15,
+        "startLoc": {
+          "line": 10,
+          "column": 24,
+          "position": 97
+        },
+        "endLoc": {
+          "line": 15,
+          "column": 142,
+          "position": 159
+        },
+        "blame": {
+          "10": {
+            "author": "Colin-Posat",
+            "date": "2026-04-13 15:10:31 -0700",
+            "line": "10",
+            "rev": "7e9a8542"
+          },
+          "11": {
+            "author": "Bardia     ",
+            "date": "2026-06-02 15:47:08 -0700",
+            "line": "11",
+            "rev": "14420238"
+          },
+          "12": {
+            "author": "Bardia     ",
+            "date": "2026-06-02 15:47:08 -0700",
+            "line": "12",
+            "rev": "14420238"
+          },
+          "13": {
+            "author": "Bardia     ",
+            "date": "2026-06-02 15:47:08 -0700",
+            "line": "13",
+            "rev": "14420238"
+          },
+          "14": {
+            "author": "Colin-Posat",
+            "date": "2026-04-13 15:10:31 -0700",
+            "line": "14",
+            "rev": "7e9a8542"
+          },
+          "15": {
+            "author": "Bardia     ",
+            "date": "2026-06-02 15:47:08 -0700",
+            "line": "15",
+            "rev": "14420238"
+          }
+        }
+      },
+      "secondFile": {
+        "name": "app/components/sidebar.tsx",
+        "start": 48,
+        "end": 53,
+        "startLoc": {
+          "line": 48,
+          "column": 28,
+          "position": 485
+        },
+        "endLoc": {
+          "line": 53,
+          "column": 125,
+          "position": 547
+        },
+        "blame": {
+          "48": {
+            "author": "Colin-Posat",
+            "date": "2026-04-13 15:10:31 -0700",
+            "line": "48",
+            "rev": "7e9a8542"
+          },
+          "49": {
+            "author": "Bardia     ",
+            "date": "2026-06-02 15:47:08 -0700",
+            "line": "49",
+            "rev": "14420238"
+          },
+          "50": {
+            "author": "Bardia     ",
+            "date": "2026-06-02 15:47:08 -0700",
+            "line": "50",
+            "rev": "14420238"
+          },
+          "51": {
+            "author": "Bardia     ",
+            "date": "2026-06-02 15:47:08 -0700",
+            "line": "51",
+            "rev": "14420238"
+          },
+          "52": {
+            "author": "Colin-Posat",
+            "date": "2026-04-13 15:10:31 -0700",
+            "line": "52",
+            "rev": "7e9a8542"
+          },
+          "53": {
+            "author": "Bardia     ",
+            "date": "2026-06-02 15:47:08 -0700",
+            "line": "53",
+            "rev": "14420238"
+          }
+        }
+      }
+    },
+    {
+      "format": "tsx",
+      "lines": 7,
+      "fragment": ", async () => {\n    const user = userEvent.setup()\n    render(<ReportMenu itemId=\"item-1\" />)\n\n    await user.click(screen.getByRole('button', { name: /more options/i }))\n    await user.click(screen.getByRole('menuitem', { name: /report/i }))\n    await",
+      "tokens": 91,
+      "firstFile": {
+        "name": "__tests__/components/report-menu.test.tsx",
+        "start": 36,
+        "end": 42,
+        "startLoc": {
+          "line": 36,
+          "column": 47,
+          "position": 370
+        },
+        "endLoc": {
+          "line": 42,
+          "column": 10,
+          "position": 461
+        },
+        "blame": {
+          "36": {
+            "author": "Bardia",
+            "date": "2026-06-01 11:06:48 -0700",
+            "line": "36",
+            "rev": "4058f5f1"
+          },
+          "37": {
+            "author": "Bardia",
+            "date": "2026-06-01 11:06:48 -0700",
+            "line": "37",
+            "rev": "4058f5f1"
+          },
+          "38": {
+            "author": "Bardia",
+            "date": "2026-06-01 11:06:48 -0700",
+            "line": "38",
+            "rev": "4058f5f1"
+          },
+          "39": {
+            "author": "Bardia",
+            "date": "2026-06-01 11:06:48 -0700",
+            "line": "39",
+            "rev": "4058f5f1"
+          },
+          "40": {
+            "author": "Bardia",
+            "date": "2026-06-01 11:06:48 -0700",
+            "line": "40",
+            "rev": "4058f5f1"
+          },
+          "41": {
+            "author": "Bardia",
+            "date": "2026-06-01 11:06:48 -0700",
+            "line": "41",
+            "rev": "4058f5f1"
+          },
+          "42": {
+            "author": "Bardia",
+            "date": "2026-06-01 11:06:48 -0700",
+            "line": "42",
+            "rev": "4058f5f1"
+          }
+        }
+      },
+      "secondFile": {
+        "name": "__tests__/components/report-menu.test.tsx",
+        "start": 25,
+        "end": 32,
+        "startLoc": {
+          "line": 25,
+          "column": 53,
+          "position": 240
+        },
+        "endLoc": {
+          "line": 32,
+          "column": 11,
+          "position": 332
+        },
+        "blame": {
+          "25": {
+            "author": "Bardia",
+            "date": "2026-06-01 11:06:48 -0700",
+            "line": "25",
+            "rev": "4058f5f1"
+          },
+          "26": {
+            "author": "Bardia",
+            "date": "2026-06-01 11:06:48 -0700",
+            "line": "26",
+            "rev": "4058f5f1"
+          },
+          "27": {
+            "author": "Bardia",
+            "date": "2026-06-01 11:06:48 -0700",
+            "line": "27",
+            "rev": "4058f5f1"
+          },
+          "28": {
+            "author": "Bardia",
+            "date": "2026-06-01 11:06:48 -0700",
+            "line": "28",
+            "rev": "4058f5f1"
+          },
+          "29": {
+            "author": "Bardia",
+            "date": "2026-06-01 11:06:48 -0700",
+            "line": "29",
+            "rev": "4058f5f1"
+          },
+          "30": {
+            "author": "Bardia",
+            "date": "2026-06-01 11:06:48 -0700",
+            "line": "30",
+            "rev": "4058f5f1"
+          },
+          "31": {
+            "author": "Bardia",
+            "date": "2026-06-01 11:06:48 -0700",
+            "line": "31",
+            "rev": "4058f5f1"
+          },
+          "32": {
+            "author": "Bardia",
+            "date": "2026-06-01 11:06:48 -0700",
+            "line": "32",
+            "rev": "4058f5f1"
+          }
+        }
+      }
+    }
+  ]
+}

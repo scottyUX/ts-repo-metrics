@@ -1,0 +1,100 @@
+=== STRUCTURED CAPABILITY / ABSENCE CHECK ===
+Evidence is at the schema level: rule IDs emitted, JSON key names, metric field names.
+Incidental matches inside analyzed file paths or source fragments are NOT counted.
+Generated: 2026-07-30T01:29:53.243Z
+
+## Tool 1: ESLint 9.39.5 + typescript-eslint 8.65.0
+- Colin-Posat__SlugFound: ruleIds emitted = ["@next/next/no-img-element","@typescript-eslint/no-explicit-any","@typescript-eslint/no-unused-vars","complexity","max-depth","react-hooks/exhaustive-deps"]
+    message object keys = ["column","data","desc","endColumn","endLine","fix","line","message","messageId","nodeType","range","ruleId","severity","suggestions","text","varName"]
+    genuine findings=190  "rule definition not found" errors=18
+    keys matching /halstead|volume|operand/  -> []
+    keys matching /cognitive/                -> []
+    keys matching /commit|author|blame|git/   -> []
+    numeric metric field (score outside message text)? -> NO - score only inside `message` prose
+- MikeyZv__SlugMarket: ruleIds emitted = ["@next/next/no-img-element","@typescript-eslint/no-explicit-any","@typescript-eslint/no-unused-vars","complexity","max-depth","prefer-const"]
+    message object keys = ["column","data","desc","endColumn","endLine","fix","line","message","messageId","nodeType","range","ruleId","severity","suggestions","text","varName"]
+    genuine findings=184  "rule definition not found" errors=2
+    keys matching /halstead|volume|operand/  -> []
+    keys matching /cognitive/                -> []
+    keys matching /commit|author|blame|git/   -> []
+    numeric metric field (score outside message text)? -> NO - score only inside `message` prose
+- Brinqa-CRQ-2026__VulnContext-Desktop: ruleIds emitted = ["@typescript-eslint/no-unused-vars","complexity","max-depth"]
+    message object keys = ["column","data","desc","endColumn","endLine","fix","line","message","messageId","nodeType","range","ruleId","severity","suggestions","text","varName"]
+    genuine findings=358  "rule definition not found" errors=0
+    keys matching /halstead|volume|operand/  -> []
+    keys matching /cognitive/                -> []
+    keys matching /commit|author|blame|git/   -> []
+    numeric metric field (score outside message text)? -> NO - score only inside `message` prose
+
+## Tool 2 (FREE tier): eslint-plugin-sonarjs 3.0.7
+- Colin-Posat__SlugFound: cognitive-complexity findings = 133
+    message object keys = ["column","endColumn","endLine","line","message","messageId","nodeType","ruleId","severity"]
+    keys matching /halstead|volume|operand/ -> []
+    numeric cognitive score as its own field? -> NO - integer embedded in `message` prose only
+    React-rule subset actually triggered: 0 finding(s)  [raw/sonarjs-eslint-plugin/Colin-Posat__SlugFound.react-rules.txt]
+- MikeyZv__SlugMarket: cognitive-complexity findings = 132
+    message object keys = ["column","endColumn","endLine","line","message","messageId","nodeType","ruleId","severity"]
+    keys matching /halstead|volume|operand/ -> []
+    numeric cognitive score as its own field? -> NO - integer embedded in `message` prose only
+    React-rule subset actually triggered: 0 finding(s)  [raw/sonarjs-eslint-plugin/MikeyZv__SlugMarket.react-rules.txt]
+- Brinqa-CRQ-2026__VulnContext-Desktop: cognitive-complexity findings = 203
+    message object keys = ["column","endColumn","endLine","line","message","messageId","nodeType","ruleId","severity"]
+    keys matching /halstead|volume|operand/ -> []
+    numeric cognitive score as its own field? -> NO - integer embedded in `message` prose only
+    React-rule subset actually triggered: 0 finding(s)  [raw/sonarjs-eslint-plugin/Brinqa-CRQ-2026__VulnContext-Desktop.react-rules.txt]
+
+## Tool 3: jscpd 4.2.5
+- Colin-Posat__SlugFound: clones=14  top-level keys=["statistics","duplicates"]
+    clone-record keys = ["format","lines","fragment","tokens","firstFile","secondFile"]
+    per-file location keys = ["name","start","end","startLoc","endLoc"]
+    keys matching /halstead|volume/   -> []
+    keys matching /cognitive|cyclomatic/ -> []
+    keys matching /function|method|symbol/ -> [] (per-function granularity?)
+    exact git-ish keys (blame|author|commit|rev|date) -> []
+- MikeyZv__SlugMarket: clones=54  top-level keys=["statistics","duplicates"]
+    clone-record keys = ["format","lines","fragment","tokens","firstFile","secondFile"]
+    per-file location keys = ["name","start","end","startLoc","endLoc"]
+    keys matching /halstead|volume/   -> []
+    keys matching /cognitive|cyclomatic/ -> []
+    keys matching /function|method|symbol/ -> [] (per-function granularity?)
+    exact git-ish keys (blame|author|commit|rev|date) -> []
+- Brinqa-CRQ-2026__VulnContext-Desktop: clones=46  top-level keys=["statistics","duplicates"]
+    clone-record keys = ["format","lines","fragment","tokens","firstFile","secondFile"]
+    per-file location keys = ["name","start","end","startLoc","endLoc"]
+    keys matching /halstead|volume/   -> []
+    keys matching /cognitive|cyclomatic/ -> []
+    keys matching /function|method|symbol/ -> [] (per-function granularity?)
+    exact git-ish keys (blame|author|commit|rev|date) -> []
+- Colin-Posat__SlugFound__blame_shallow: blamed lines=314 distinctRevs=1 distinctAuthors=1
+    blame entry keys = ["author","date","line","rev"]
+- Colin-Posat__SlugFound__blame_fullhistory: blamed lines=314 distinctRevs=12 distinctAuthors=5
+    blame entry keys = ["author","date","line","rev"]
+
+## Tool 4: ts-complex 1.0.0 + typhonjs-escomplex 0.1.0
+- Colin-Posat__SlugFound: files=92 (tsx=50)  errors=0
+    ts-complex Halstead field names = ["_unique","bugsDelivered","difficulty","effort","length","operands","operators","time","total","unique","vocabulary","volume"]
+    ts-complex function keys: named=140  character-offset(anonymous)=283  -> no line numbers in either case
+    ts-complex maintainability keys = ["averageMaintainability","minMaintainability"] (file-level only)
+    escomplex methods carrying a line number = 418
+    any /cognitive/ field anywhere? -> NO
+    any /react|hook|jsx|component/ field anywhere? -> NO
+    any /commit|author|blame|git/ field anywhere? -> NO
+    escomplex project mode = {"adjacencyListLen":2,"firstOrderDensity":0.32,"changeCost":4.32,"coreSize":100}
+- MikeyZv__SlugMarket: files=69 (tsx=56)  errors=0
+    ts-complex Halstead field names = ["_unique","bugsDelivered","difficulty","effort","length","operands","operators","time","total","unique","vocabulary","volume"]
+    ts-complex function keys: named=116  character-offset(anonymous)=676  -> no line numbers in either case
+    ts-complex maintainability keys = ["averageMaintainability","minMaintainability"] (file-level only)
+    escomplex methods carrying a line number = 793
+    any /cognitive/ field anywhere? -> NO
+    any /react|hook|jsx|component/ field anywhere? -> NO
+    any /commit|author|blame|git/ field anywhere? -> NO
+    escomplex project mode = {"adjacencyListLen":9,"firstOrderDensity":1.44,"changeCost":5.76,"coreSize":100}
+- Brinqa-CRQ-2026__VulnContext-Desktop: files=171 (tsx=82)  errors=0
+    ts-complex Halstead field names = ["_unique","bugsDelivered","difficulty","effort","length","operands","operators","time","total","unique","vocabulary","volume"]
+    ts-complex function keys: named=264  character-offset(anonymous)=777  -> no line numbers in either case
+    ts-complex maintainability keys = ["averageMaintainability","minMaintainability"] (file-level only)
+    escomplex methods carrying a line number = 1036
+    any /cognitive/ field anywhere? -> NO
+    any /react|hook|jsx|component/ field anywhere? -> NO
+    any /commit|author|blame|git/ field anywhere? -> NO
+    escomplex project mode = {"adjacencyListLen":12,"firstOrderDensity":2.88,"changeCost":8.16,"coreSize":52}

@@ -1,0 +1,25 @@
+=== BATCH / MULTI-REPO MODE TEST ===
+Question: can one invocation analyse TWO repos at once, or is external scripting required?
+Generated: 2026-07-30T01:30:19Z
+
+########## Tool 1: ESLint -- two repos in one invocation, run from the corpus parent ##########
+$ (cd <corpus> && eslint --config <rwc>/configs/eslint.baseline.config.mjs Colin-Posat__SlugFound/**/*.tsx MikeyZv__SlugMarket/**/*.tsx)
+RESULT: single invocation linted files from repos: {"Colin-Posat__SlugFound":50,"MikeyZv__SlugMarket":56}
+=> one flat result array, NO per-repo grouping field in the output
+
+########## Tool 3: jscpd -- two repos in one invocation (CLI signature is 'jscpd [options] <path ...>') ##########
+$ (cd <corpus> && jscpd Colin-Posat__SlugFound MikeyZv__SlugMarket --format tsx --reporters json)
+JSON report saved to /Users/lunawang/Documents/GitHub/ts-repo-metrics/research/related_work_comparison/raw/jscpd/__batch_two_repos/jscpd-report.json
+Duplications detection: Found 64 exact clones with 746(4.63%) duplicated lines in 196 (2 formats) files.
+RESULT: clones found per repo: {"MikeyZv__SlugMarket":54,"Colin-Posat__SlugFound":10}
+CROSS-REPO clones detected: 0
+=> accepts N paths in one run, but treats them as ONE corpus (statistics are pooled, not per-repo)
+=== Is pooling N repos into ONE jscpd run equivalent to N separate runs? ===
+Controlled: identical flags (--format tsx only) in both arms, so the only variable is pooled vs separate.
+
+  SEPARATE run, Colin-Posat__SlugFound (--format tsx): 10 clones
+  SEPARATE run, MikeyZv__SlugMarket (--format tsx): 54 clones
+  POOLED run (both repos, --format tsx): {"MikeyZv__SlugMarket":54,"Colin-Posat__SlugFound":10} total 64
+
+  INTERPRETATION NOTE: compare the two arms above. Any difference means pooling is not
+  equivalent to per-repo runs, which matters for how a cohort-wide number is produced.

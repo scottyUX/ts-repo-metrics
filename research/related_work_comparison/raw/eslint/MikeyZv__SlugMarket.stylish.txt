@@ -1,0 +1,297 @@
+# cwd: research/validation/.corpus/MikeyZv__SlugMarket  (shallow clone, pinned commit 0bd29d7e29b3223c0c34b07b36afa2c297260068)
+# $ node <rwc>/node_modules/eslint/bin/eslint.js --no-config-lookup --config <rwc>/configs/eslint.baseline.config.mjs '**/*.ts' '**/*.tsx' --format stylish
+# eslint 9.39.5 | typescript-eslint 8.65.0 | 2026-07-30T01:20:36Z
+
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/(auth)/forgot-password/page.tsx
+   7:16  warning  Function 'ForgotPasswordPage' has a complexity of 4. Maximum allowed is 1  complexity
+  13:3   warning  Async function 'handleSubmit' has a complexity of 2. Maximum allowed is 1  complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/(auth)/reset-password/__tests__/page.test.tsx
+  39:10  warning  Arrow function has a complexity of 2. Maximum allowed is 1  complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/(auth)/reset-password/page.tsx
+   4:8   error    'Link' is defined but never used                                           @typescript-eslint/no-unused-vars
+   9:16  warning  Function 'ResetPasswordPage' has a complexity of 7. Maximum allowed is 1   complexity
+  22:80  warning  Arrow function has a complexity of 3. Maximum allowed is 1                 complexity
+  30:3   warning  Async function 'handleSubmit' has a complexity of 4. Maximum allowed is 1  complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/(auth)/signin/page.tsx
+   9:16  warning  Function 'SignInPage' has a complexity of 5. Maximum allowed is 1          complexity
+  17:3   warning  Async function 'handleSubmit' has a complexity of 2. Maximum allowed is 1  complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/(auth)/signup/page.tsx
+   8:16  warning  Function 'SignUpPage' has a complexity of 6. Maximum allowed is 1          complexity
+  17:3   warning  Async function 'handleSubmit' has a complexity of 3. Maximum allowed is 1  complexity
+  28:13  error    'data' is assigned a value but never used                                  @typescript-eslint/no-unused-vars
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/(main)/[username]/page.tsx
+  12:16  warning  Async function 'ProfilePage' has a complexity of 23. Maximum allowed is 1  complexity
+  39:7   error    'buyerUsernames' is never reassigned. Use 'const' instead                  prefer-const
+  45:5   warning  Blocks are nested too deeply (2). Maximum allowed is 1                     max-depth
+  60:5   warning  Blocks are nested too deeply (2). Maximum allowed is 1                     max-depth
+  89:53  warning  Arrow function has a complexity of 2. Maximum allowed is 1                 complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/(main)/bookmarks/page.tsx
+  12:16  warning  Function 'BookmarksPage' has a complexity of 5. Maximum allowed is 1        complexity
+  17:16  warning  Arrow function has a complexity of 2. Maximum allowed is 1                  complexity
+  19:5   warning  Async function 'loadBookmarks' has a complexity of 3. Maximum allowed is 1  complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/(main)/messages/__tests__/page.test.tsx
+  36:57  warning  Arrow function has a complexity of 4. Maximum allowed is 1    complexity
+  66:3   warning  Method 'default' has a complexity of 2. Maximum allowed is 1  complexity
+  90:25  warning  Arrow function has a complexity of 3. Maximum allowed is 1    complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/(main)/messages/page.tsx
+   11:1   warning  Function 'MessagesContent' has a complexity of 5. Maximum allowed is 1                complexity
+   24:18  warning  Arrow function has a complexity of 3. Maximum allowed is 1                            complexity
+   28:18  warning  Arrow function has a complexity of 2. Maximum allowed is 1                            complexity
+   30:9   warning  Async function 'load' has a complexity of 2. Maximum allowed is 1                     complexity
+   46:18  warning  Arrow function has a complexity of 2. Maximum allowed is 1                            complexity
+   51:18  warning  Arrow function has a complexity of 3. Maximum allowed is 1                            complexity
+   55:9   warning  Async function 'load' has a complexity of 3. Maximum allowed is 1                     complexity
+   67:31  warning  Arrow function has a complexity of 3. Maximum allowed is 1                            complexity
+   69:17  warning  Blocks are nested too deeply (2). Maximum allowed is 1                                max-depth
+   74:44  warning  Arrow function has a complexity of 4. Maximum allowed is 1                            complexity
+   93:33  warning  Async arrow function has a complexity of 2. Maximum allowed is 1                      complexity
+  106:38  warning  Arrow function has a complexity of 2. Maximum allowed is 1                            complexity
+  119:40  warning  Arrow function has a complexity of 3. Maximum allowed is 1                            complexity
+  132:18  warning  Arrow function has a complexity of 2. Maximum allowed is 1                            complexity
+  136:5   warning  Async function 'sendMessage' has a complexity of 4. Maximum allowed is 1              complexity
+  143:5   warning  Async function 'handleOfferStatusChange' has a complexity of 3. Maximum allowed is 1  complexity
+  150:28  warning  Arrow function has a complexity of 3. Maximum allowed is 1                            complexity
+  160:42  error    Unexpected any. Specify a different type                                              @typescript-eslint/no-explicit-any
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/(main)/products/[id]/page.tsx
+  26:16  warning  Async function 'ProductPage' has a complexity of 16. Maximum allowed is 1  complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/(main)/products/edit/[id]/page.tsx
+  7:16  warning  Async function 'EditListingPage' has a complexity of 3. Maximum allowed is 1  complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/(main)/search/page.tsx
+  8:16  warning  Async function 'SearchPage' has a complexity of 4. Maximum allowed is 1  complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/api/products/route.ts
+  6:8  warning  Async function 'POST' has a complexity of 6. Maximum allowed is 1  complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/auth/callback/route.ts
+  6:8  warning  Async function 'GET' has a complexity of 2. Maximum allowed is 1  complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/AuthProvider.tsx
+  23:16  warning  Function 'AuthProvider' has a complexity of 2. Maximum allowed is 1  complexity
+  34:33  warning  Arrow function has a complexity of 6. Maximum allowed is 1           complexity
+  44:89  warning  Arrow function has a complexity of 5. Maximum allowed is 1           complexity
+  58:18  warning  Arrow function has a complexity of 2. Maximum allowed is 1           complexity
+  65:30  warning  Arrow function has a complexity of 3. Maximum allowed is 1           complexity
+  79:8   warning  Function 'useAuth' has a complexity of 2. Maximum allowed is 1       complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/AvatarUpload.tsx
+   14:16  warning  Function 'AvatarUpload' has a complexity of 6. Maximum allowed is 1            complexity
+   30:3   warning  Async function 'handleFileChange' has a complexity of 8. Maximum allowed is 1  complexity
+   48:7   warning  Blocks are nested too deeply (2). Maximum allowed is 1                         max-depth
+   64:7   warning  Blocks are nested too deeply (2). Maximum allowed is 1                         max-depth
+  101:25  warning  Arrow function has a complexity of 2. Maximum allowed is 1                     complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/ConversationList.tsx
+  18:16  warning  Function 'ConversationList' has a complexity of 4. Maximum allowed is 1  complexity
+  26:43  warning  Arrow function has a complexity of 7. Maximum allowed is 1               complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/DeleteButton.tsx
+  18:16  warning  Function 'DeleteButton' has a complexity of 6. Maximum allowed is 1        complexity
+  26:5   warning  Async function 'handleDelete' has a complexity of 4. Maximum allowed is 1  complexity
+  33:24  warning  Arrow function has a complexity of 3. Maximum allowed is 1                 complexity
+  43:13  warning  Blocks are nested too deeply (2). Maximum allowed is 1                     max-depth
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/Dropdown.tsx
+  11:16  warning  Function 'Dropdown' has a complexity of 14. Maximum allowed is 1           complexity
+  32:5   warning  Function 'handleClickOutside' has a complexity of 3. Maximum allowed is 1  complexity
+  52:30  warning  Arrow function has a complexity of 3. Maximum allowed is 1                 complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/EditButton.tsx
+  13:16  warning  Function 'EditButton' has a complexity of 4. Maximum allowed is 1  complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/EditProfile.tsx
+  22:1   warning  Function 'formatCollege' has a complexity of 2. Maximum allowed is 1     complexity
+  32:16  warning  Function 'EditProfile' has a complexity of 12. Maximum allowed is 1      complexity
+  53:3   warning  Async function 'handleSave' has a complexity of 3. Maximum allowed is 1  complexity
+  93:24  warning  Arrow function has a complexity of 2. Maximum allowed is 1               complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/FilterForm.tsx
+  49:16  warning  Function 'FilterForm' has a complexity of 9. Maximum allowed is 1  complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/ImageUploadGrid.tsx
+  12:16  warning  Function 'ImageUploadGrid' has a complexity of 2. Maximum allowed is 1  complexity
+  15:5   warning  Function 'handleChange' has a complexity of 3. Maximum allowed is 1     complexity
+  38:33  warning  Arrow function has a complexity of 2. Maximum allowed is 1              complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/LeaveReviewButton.tsx
+  18:16  warning  Function 'LeaveReviewButton' has a complexity of 7. Maximum allowed is 1  complexity
+  29:18  warning  Arrow function has a complexity of 3. Maximum allowed is 1                complexity
+  46:18  warning  Arrow function has a complexity of 5. Maximum allowed is 1                complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/LeaveReviewModal.tsx
+  16:16  warning  Function 'LeaveReviewModal' has a complexity of 4. Maximum allowed is 1    complexity
+  23:5   warning  Async function 'handleSubmit' has a complexity of 6. Maximum allowed is 1  complexity
+  67:49  warning  Arrow function has a complexity of 2. Maximum allowed is 1                 complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/ListingCard.tsx
+  13:16  warning  Function 'ListingCard' has a complexity of 3. Maximum allowed is 1  complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/ListingManageModal.tsx
+   15:16  warning  Function 'ListingManageModal' has a complexity of 16. Maximum allowed is 1      complexity
+   29:18  warning  Arrow function has a complexity of 3. Maximum allowed is 1                      complexity
+   33:43  warning  Async arrow function has a complexity of 2. Maximum allowed is 1                complexity
+   42:41  warning  Arrow function has a complexity of 3. Maximum allowed is 1                      complexity
+   53:5   warning  Async function 'handleConfirmSale' has a complexity of 4. Maximum allowed is 1  complexity
+  115:41  warning  Arrow function has a complexity of 2. Maximum allowed is 1                      complexity
+  144:83  warning  Arrow function has a complexity of 2. Maximum allowed is 1                      complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/MakeOfferButton.tsx
+   30:16  warning  Function 'MakeOfferButton' has a complexity of 9. Maximum allowed is 1     complexity
+   40:18  warning  Arrow function has a complexity of 2. Maximum allowed is 1                 complexity
+   43:19  warning  Async arrow function has a complexity of 4. Maximum allowed is 1           complexity
+   56:5   warning  Async function 'handleSubmit' has a complexity of 9. Maximum allowed is 1  complexity
+   67:13  warning  Blocks are nested too deeply (2). Maximum allowed is 1                     max-depth
+   70:17  warning  Blocks are nested too deeply (3). Maximum allowed is 1                     max-depth
+   76:13  warning  Blocks are nested too deeply (2). Maximum allowed is 1                     max-depth
+   79:13  warning  Blocks are nested too deeply (2). Maximum allowed is 1                     max-depth
+   90:5   warning  Function 'handleClose' has a complexity of 2. Maximum allowed is 1         complexity
+  103:29  warning  Arrow function has a complexity of 2. Maximum allowed is 1                 complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/MessageButton.tsx
+   8:16  warning  Function 'MessageButton' has a complexity of 4. Maximum allowed is 1      complexity
+  15:3   warning  Async function 'handleClick' has a complexity of 7. Maximum allowed is 1  complexity
+  34:7   warning  Blocks are nested too deeply (2). Maximum allowed is 1                    max-depth
+  45:7   warning  Blocks are nested too deeply (2). Maximum allowed is 1                    max-depth
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/MessageThread.tsx
+  22:16  warning  Function 'MessageThread' has a complexity of 2. Maximum allowed is 1  complexity
+  38:37  warning  Arrow function has a complexity of 5. Maximum allowed is 1            complexity
+  61:36  warning  Arrow function has a complexity of 2. Maximum allowed is 1            complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/NavSearchBar.tsx
+   9:16  warning  Function 'NavSearchBar' has a complexity of 2. Maximum allowed is 1  complexity
+  19:5   warning  Function 'onSubmit' has a complexity of 2. Maximum allowed is 1      complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/Navbar.tsx
+   31:16  warning  Function 'Navbar' has a complexity of 9. Maximum allowed is 1               complexity
+   38:3   warning  Function 'getLinkClasses' has a complexity of 4. Maximum allowed is 1       complexity
+   49:3   warning  Async function 'handleSignOut' has a complexity of 2. Maximum allowed is 1  complexity
+  103:34  warning  Arrow function has a complexity of 5. Maximum allowed is 1                  complexity
+  141:73  warning  Arrow function has a complexity of 3. Maximum allowed is 1                  complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/NotificationBell.tsx
+   2:31  error    'useRef' is defined but never used                                       @typescript-eslint/no-unused-vars
+  10:16  warning  Function 'NotificationBell' has a complexity of 6. Maximum allowed is 1  complexity
+  16:18  warning  Arrow function has a complexity of 2. Maximum allowed is 1               complexity
+  25:29  warning  Arrow function has a complexity of 2. Maximum allowed is 1               complexity
+  49:18  warning  Arrow function has a complexity of 4. Maximum allowed is 1               complexity
+  62:34  warning  Arrow function has a complexity of 2. Maximum allowed is 1               complexity
+  92:49  warning  Arrow function has a complexity of 4. Maximum allowed is 1               complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/OfferCard.tsx
+  13:1   warning  Function 'getExpiryLabel' has a complexity of 4. Maximum allowed is 1  complexity
+  23:16  warning  Function 'OfferCard' has a complexity of 11. Maximum allowed is 1      complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/ProductImageGallery.tsx
+  17:16  warning  Function 'ProductImageGallery' has a complexity of 4. Maximum allowed is 1        complexity
+  26:16  warning  Arrow function has a complexity of 3. Maximum allowed is 1                        complexity
+  37:5   warning  Async function 'checkBookmarkExists' has a complexity of 5. Maximum allowed is 1  complexity
+  56:3   warning  Async function 'toggleBookmark' has a complexity of 8. Maximum allowed is 1       complexity
+  72:7   warning  Blocks are nested too deeply (2). Maximum allowed is 1                            max-depth
+  79:7   warning  Blocks are nested too deeply (2). Maximum allowed is 1                            max-depth
+  88:28  warning  Arrow function has a complexity of 2. Maximum allowed is 1                        complexity
+  92:28  warning  Arrow function has a complexity of 2. Maximum allowed is 1                        complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/ProductListingForm.tsx
+  31:16  warning  Function 'ProductListingForm' has a complexity of 20. Maximum allowed is 1  complexity
+  35:18  warning  Arrow function has a complexity of 3. Maximum allowed is 1                  complexity
+  62:26  warning  Arrow function has a complexity of 3. Maximum allowed is 1                  complexity
+  71:5   warning  Async function 'handleSubmit' has a complexity of 10. Maximum allowed is 1  complexity
+  82:61  warning  Arrow function has a complexity of 2. Maximum allowed is 1                  complexity
+  87:13  warning  Blocks are nested too deeply (2). Maximum allowed is 1                      max-depth
+  90:17  warning  Blocks are nested too deeply (3). Maximum allowed is 1                      max-depth
+  96:17  warning  Blocks are nested too deeply (3). Maximum allowed is 1                      max-depth
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/ProfileTabs.tsx
+   21:16  warning  Function 'ProfileTabs' has a complexity of 19. Maximum allowed is 1              complexity
+   30:3   warning  Async function 'handleBookmarksTab' has a complexity of 2. Maximum allowed is 1  complexity
+  120:37  warning  Arrow function has a complexity of 2. Maximum allowed is 1                       complexity
+  135:39  warning  Arrow function has a complexity of 3. Maximum allowed is 1                       complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/ReportButton.tsx
+  23:16  warning  Function 'ReportButton' has a complexity of 8. Maximum allowed is 1         complexity
+  39:5   warning  Async function 'handleSubmit' has a complexity of 10. Maximum allowed is 1  complexity
+  52:13  warning  Blocks are nested too deeply (2). Maximum allowed is 1                      max-depth
+  69:29  warning  Arrow function has a complexity of 2. Maximum allowed is 1                  complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/ReviewsSection.tsx
+   6:16  warning  Function 'ReviewsSection' has a complexity of 3. Maximum allowed is 1  complexity
+   7:42  error    Unexpected any. Specify a different type                               @typescript-eslint/no-explicit-any
+  11:5   warning  Async function 'load' has a complexity of 5. Maximum allowed is 1      complexity
+  62:41  warning  Arrow function has a complexity of 2. Maximum allowed is 1             complexity
+  73:5   warning  Function 'handleRefresh' has a complexity of 2. Maximum allowed is 1   complexity
+  92:24  warning  Arrow function has a complexity of 4. Maximum allowed is 1             complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/ShareButton.tsx
+   9:16  warning  Function 'ShareButton' has a complexity of 3. Maximum allowed is 1        complexity
+  12:5   warning  Async function 'handleShare' has a complexity of 4. Maximum allowed is 1  complexity
+  16:13  warning  Blocks are nested too deeply (2). Maximum allowed is 1                    max-depth
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/DeleteButton.test.tsx
+  40:1  warning  Function 'renderAsSeller' has a complexity of 3. Maximum allowed is 1  complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/EditProfile.test.tsx
+  30:1  warning  Function 'renderAsOwner' has a complexity of 5. Maximum allowed is 1  complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/ListingCard.test.tsx
+  9:5  error  Definition for rule '@next/next/no-img-element' was not found  @next/next/no-img-element
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/ListingManageModal.test.tsx
+  17:5  error    Definition for rule '@next/next/no-img-element' was not found  @next/next/no-img-element
+  49:5  warning  Method 'from' has a complexity of 4. Maximum allowed is 1      complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/MakeOfferButton.test.tsx
+    1:42  error    'waitFor' is defined but never used                                         @typescript-eslint/no-unused-vars
+   37:7   warning  Method 'maybeSingle' has a complexity of 2. Maximum allowed is 1            complexity
+   39:7   warning  Method 'single' has a complexity of 2. Maximum allowed is 1                 complexity
+   41:7   warning  Method 'then' has a complexity of 2. Maximum allowed is 1                   complexity
+   61:1   warning  Function 'loginAs' has a complexity of 2. Maximum allowed is 1              complexity
+   68:1   warning  Async function 'renderSettled' has a complexity of 2. Maximum allowed is 1  complexity
+  154:70  warning  Async arrow function has a complexity of 2. Maximum allowed is 1            complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/ProductListingForm.test.tsx
+  319:1  warning  Function 'fillForm' has a complexity of 6. Maximum allowed is 1  complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/app/components/__tests__/ShareButton.test.tsx
+   1:42  error    'waitFor' is defined but never used                                  @typescript-eslint/no-unused-vars
+   8:1   warning  Function 'setShare' has a complexity of 2. Maximum allowed is 1      complexity
+  16:1   warning  Function 'setClipboard' has a complexity of 2. Maximum allowed is 1  complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/lib/fetchProducts.ts
+    5:8  warning  Async function 'fetchProducts' has a complexity of 2. Maximum allowed is 1                complexity
+   16:8  warning  Async function 'fetchProductById' has a complexity of 2. Maximum allowed is 1             complexity
+   28:8  warning  Async function 'fetchProductsBySellerId' has a complexity of 2. Maximum allowed is 1      complexity
+   45:8  warning  Async function 'fetchSoldListingsBySellerId' has a complexity of 2. Maximum allowed is 1  complexity
+   62:8  warning  Async function 'fetchBookmarkedProducts' has a complexity of 7. Maximum allowed is 1      complexity
+   93:8  warning  Async function 'fetchProductByQuery' has a complexity of 4. Maximum allowed is 1          complexity
+  112:8  warning  Async function 'fetchBookmarkCount' has a complexity of 4. Maximum allowed is 1           complexity
+  119:5  warning  Blocks are nested too deeply (2). Maximum allowed is 1                                    max-depth
+  131:8  warning  Async function 'fetchOfferCount' has a complexity of 4. Maximum allowed is 1              complexity
+  141:5  warning  Blocks are nested too deeply (2). Maximum allowed is 1                                    max-depth
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/lib/uploadImages.ts
+  3:8   warning  Async function 'uploadLocals' has a complexity of 2. Maximum allowed is 1  complexity
+  6:32  warning  Async arrow function has a complexity of 2. Maximum allowed is 1           complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/lib/useUnreadMessageCount.ts
+   9:18  warning  Arrow function has a complexity of 2. Maximum allowed is 1               complexity
+  12:9   warning  Async function 'fetchCount' has a complexity of 4. Maximum allowed is 1  complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/MikeyZv__SlugMarket/slugmarket_next/lib/utils.ts
+  3:8  warning  Function 'formatTime' has a complexity of 3. Maximum allowed is 1  complexity
+
+✖ 186 problems (10 errors, 176 warnings)
+  1 error and 0 warnings potentially fixable with the `--fix` option.
+
+# exit=1

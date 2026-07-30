@@ -1,0 +1,202 @@
+# jscpd 4.2.5 | cwd: research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop @ a3f75c2ed9a466d19e66f821e5eb3e5452794b63 | 2026-07-30T01:23:56Z
+# $ node <rwc>/node_modules/jscpd/bin/jscpd . --format typescript,tsx,javascript,jsx --reporters console,json --output <out> --min-lines 5 --min-tokens 50 --ignore '**/node_modules/**,**/dist/**,**/build/**'
+
+Clone found (javascript):
+ - frontend/src/tests/components/shared/data-table/DataTable.test.tsx [145:52 - 210:20] (65 lines, 515 tokens)
+   frontend/src/tests/components/shared/data-table/DataTable.test.tsx [43:23 - 161:17]
+
+Clone found (javascript):
+ - frontend/src/tests/components/shared/data-table/DataTable.test.tsx [236:18 - 255:75] (19 lines, 154 tokens)
+   frontend/src/tests/components/shared/data-table/DataTable.test.tsx [214:18 - 234:26]
+
+Clone found (tsx):
+ - frontend/src/tests/components/topology/TopologyOverviewPage.test.tsx [103:5 - 120:8] (17 lines, 114 tokens)
+   frontend/src/tests/components/topology/TopologyOverviewPage.test.tsx [41:5 - 58:10]
+
+Clone found (javascript):
+ - frontend/src/tests/components/topology/BusinessUnitDetailPage.test.tsx [112:21 - 228:39] (116 lines, 822 tokens)
+   frontend/src/tests/components/topology/BusinessUnitDetailPage.test.tsx [95:21 - 130:27]
+
+Clone found (tsx):
+ - frontend/src/tests/components/topology/BusinessServiceDetailPage.test.tsx [457:17 - 475:26] (18 lines, 122 tokens)
+   frontend/src/tests/components/topology/BusinessServiceDetailPage.test.tsx [247:17 - 265:26]
+
+Clone found (javascript):
+ - frontend/src/tests/components/topology/AssetInventoryPanel.test.tsx [119:70 - 172:73] (53 lines, 816 tokens)
+   frontend/src/tests/components/topology/AssetInventoryPanel.test.tsx [95:74 - 166:73]
+
+Clone found (javascript):
+ - frontend/src/tests/components/topology/AssetFindingsPage.test.tsx [310:32 - 397:34] (87 lines, 582 tokens)
+   frontend/src/tests/components/topology/BusinessUnitDetailPage.test.tsx [95:24 - 128:24]
+
+Clone found (tsx):
+ - frontend/src/tests/components/topology/AssetDistributionCharts.test.tsx [38:84 - 60:36] (22 lines, 139 tokens)
+   frontend/src/tests/components/topology/AssetDistributionCharts.test.tsx [7:67 - 29:8]
+
+Clone found (tsx):
+ - frontend/src/tests/components/topology/ApplicationDetailPage.test.tsx [10:23 - 19:33] (9 lines, 79 tokens)
+   frontend/src/tests/components/topology/BusinessServiceDetailPage.test.tsx [14:30 - 23:37]
+
+Clone found (tsx):
+ - frontend/src/tests/components/topology/ApplicationDetailPage.test.tsx [25:5 - 38:31] (13 lines, 117 tokens)
+   frontend/src/tests/components/topology/BusinessServiceDetailPage.test.tsx [35:5 - 48:35]
+
+Clone found (tsx):
+ - frontend/src/tests/components/topology/ApplicationDetailPage.test.tsx [116:14 - 134:14] (18 lines, 114 tokens)
+   frontend/src/tests/components/topology/ApplicationDetailPage.test.tsx [92:15 - 110:8]
+
+Clone found (tsx):
+ - frontend/src/tests/components/topology/ApplicationDetailPage.test.tsx [185:69 - 190:68] (5 lines, 102 tokens)
+   frontend/src/tests/components/topology/BusinessServiceDetailPage.test.tsx [360:96 - 365:68]
+
+Clone found (tsx):
+ - frontend/src/tests/components/topology/ApplicationDetailPage.test.tsx [192:69 - 200:30] (8 lines, 202 tokens)
+   frontend/src/tests/components/topology/BusinessServiceDetailPage.test.tsx [367:70 - 375:28]
+
+Clone found (tsx):
+ - frontend/src/tests/components/topology/ApplicationDetailPage.test.tsx [225:63 - 239:37] (14 lines, 106 tokens)
+   frontend/src/tests/components/topology/ApplicationDetailPage.test.tsx [77:82 - 91:36]
+
+Clone found (tsx):
+ - frontend/src/tests/components/dashboard/RiskTable.test.tsx [72:92 - 77:18] (5 lines, 122 tokens)
+   frontend/src/tests/components/topology/BusinessUnitDetailPage.test.tsx [259:43 - 264:18]
+
+Clone found (javascript):
+ - frontend/src/tests/components/dashboard/FindingDetailPage.test.tsx [56:21 - 273:15] (217 lines, 2133 tokens)
+   frontend/src/tests/components/dashboard/FindingDetailPage.test.tsx [33:21 - 57:23]
+
+Clone found (javascript):
+ - frontend/src/tests/components/dashboard/FindingDetailPage.test.tsx [288:40 - 355:9] (67 lines, 526 tokens)
+   frontend/src/tests/components/dashboard/FindingDetailPage.test.tsx [36:30 - 59:11]
+
+Clone found (tsx):
+ - frontend/src/tests/components/dashboard/FindingDetailPage.test.tsx [51:18 - 68:49] (17 lines, 119 tokens)
+   frontend/src/tests/components/dashboard/FindingDetailPage.test.tsx [28:45 - 45:60]
+
+Clone found (tsx):
+ - frontend/src/tests/components/dashboard/FindingDetailPage.test.tsx [329:5 - 334:4] (5 lines, 63 tokens)
+   frontend/src/tests/components/dashboard/FindingDetailPage.test.tsx [190:69 - 194:11]
+
+Clone found (typescript):
+ - frontend/src/hooks/topology/assets/useAssetsAnalytics.ts [17:3 - 25:15] (8 lines, 92 tokens)
+   frontend/src/hooks/topology/assets/usePaginatedAssets.ts [25:3 - 33:9]
+
+Clone found (typescript):
+ - frontend/src/hooks/topology/assets/useAssetFindingsAnalytics.ts [25:77 - 33:9] (8 lines, 86 tokens)
+   frontend/src/hooks/topology/assets/useAssetsAnalytics.ts [27:69 - 35:10]
+
+Clone found (typescript):
+ - frontend/src/hooks/topology/assets/useAssetDetail.ts [7:62 - 16:23] (9 lines, 96 tokens)
+   frontend/src/hooks/topology/assets/useAssetsAnalytics.ts [27:69 - 34:21]
+
+Clone found (tsx):
+ - frontend/src/tests/app/App.test.tsx [352:58 - 358:14] (6 lines, 66 tokens)
+   frontend/src/tests/app/App.test.tsx [301:82 - 309:11]
+
+Clone found (typescript):
+ - frontend/src/tests/api/topology.test.ts [51:56 - 61:31] (10 lines, 91 tokens)
+   frontend/src/tests/api/topology.test.ts [14:54 - 25:24]
+
+Clone found (typescript):
+ - frontend/src/tests/api/topology.test.ts [82:70 - 91:42] (9 lines, 89 tokens)
+   frontend/src/tests/api/topology.test.ts [14:54 - 25:24]
+
+Clone found (typescript):
+ - frontend/src/tests/api/topology.test.ts [108:65 - 117:80] (9 lines, 111 tokens)
+   frontend/src/tests/api/topology.test.ts [14:54 - 61:68]
+
+Clone found (typescript):
+ - frontend/src/tests/api/topology.test.ts [142:72 - 150:81] (8 lines, 87 tokens)
+   frontend/src/tests/api/topology.test.ts [14:54 - 25:24]
+
+Clone found (tsx):
+ - frontend/src/pages/topology/BusinessServiceDetailPage.tsx [164:10 - 186:2] (22 lines, 120 tokens)
+   frontend/src/pages/topology/BusinessUnitDetailPage.tsx [294:14 - 316:2]
+
+Clone found (tsx):
+ - frontend/src/components/topology/AssetInventoryPanel.tsx [30:32 - 38:20] (8 lines, 115 tokens)
+   frontend/src/components/topology/AssetInventoryPanel.tsx [22:25 - 30:32]
+
+Clone found (tsx):
+ - frontend/src/components/topology/AssetInventoryPanel.tsx [106:27 - 174:7] (68 lines, 530 tokens)
+   frontend/src/components/topology/AssetInventoryPanel.tsx [38:20 - 106:6]
+
+Clone found (tsx):
+ - frontend/src/components/fair/FairFrequencyPanel.tsx [39:3 - 52:31] (13 lines, 174 tokens)
+   frontend/src/components/fair/FairScopeLossPanel.tsx [44:3 - 57:41]
+
+Clone found (tsx):
+ - frontend/src/components/fair/FairFrequencyPanel.tsx [77:29 - 87:218] (10 lines, 89 tokens)
+   frontend/src/components/fair/FairScopeLossPanel.tsx [82:10 - 92:188]
+
+Clone found (tsx):
+ - frontend/src/components/fair/FairFrequencyPanel.tsx [195:45 - 220:2] (25 lines, 179 tokens)
+   frontend/src/components/fair/FairScopeLossPanel.tsx [234:75 - 259:2]
+
+Clone found (tsx):
+ - frontend/src/components/dashboard/RiskTable.tsx [21:1 - 70:28] (49 lines, 486 tokens)
+   frontend/src/pages/topology/BusinessUnitFindingsSection.tsx [21:1 - 69:37]
+
+Clone found (tsx):
+ - frontend/src/components/dashboard/RiskTable.tsx [70:28 - 180:26] (110 lines, 868 tokens)
+   frontend/src/pages/topology/BusinessUnitFindingsSection.tsx [69:37 - 179:44]
+
+Clone found (tsx):
+ - frontend/src/components/dashboard/RiskTable.tsx [248:57 - 268:41] (20 lines, 161 tokens)
+   frontend/src/pages/topology/BusinessUnitFindingsSection.tsx [254:67 - 274:29]
+
+Clone found (javascript):
+ - frontend/src/components/dashboard/FindingDetailSections.tsx [186:63 - 210:27] (24 lines, 215 tokens)
+   frontend/src/components/dashboard/FindingDetailSections.tsx [56:42 - 180:54]
+
+Clone found (tsx):
+ - frontend/src/components/dashboard/FindingDetailSections.tsx [525:7 - 538:26] (13 lines, 115 tokens)
+   frontend/src/components/dashboard/FindingDetailSections.tsx [492:7 - 505:29]
+
+Clone found (typescript):
+ - frontend/src/types/api.ts [122:26 - 129:23] (7 lines, 89 tokens)
+   frontend/src/tests/api/types.test.ts [81:26 - 88:6]
+
+Clone found (typescript):
+ - frontend/src/api/topology.ts [284:4 - 297:71] (13 lines, 128 tokens)
+   frontend/src/api/topology.ts [237:38 - 250:81]
+
+Clone found (typescript):
+ - frontend/src/api/topology.ts [319:11 - 328:10] (9 lines, 99 tokens)
+   frontend/src/hooks/topology/assets/usePaginatedAssets.ts [24:12 - 33:10]
+
+Clone found (typescript):
+ - frontend/src/api/topology.ts [360:13 - 370:2] (10 lines, 99 tokens)
+   frontend/src/hooks/topology/assets/useAssetsAnalytics.ts [15:19 - 33:9]
+
+Clone found (typescript):
+ - frontend/src/api/topology.ts [371:38 - 380:61] (9 lines, 160 tokens)
+   frontend/src/api/topology.ts [336:4 - 345:51]
+
+Clone found (typescript):
+ - frontend/src/api/findings.ts [32:1 - 43:8] (11 lines, 100 tokens)
+   frontend/src/api/topology.ts [71:1 - 81:5]
+
+Clone found (typescript):
+ - frontend/src/api/findings.ts [52:3 - 63:14] (11 lines, 104 tokens)
+   frontend/src/api/findings.ts [27:3 - 38:4]
+
+Clone found (tsx):
+ - frontend/src/app.tsx [137:92 - 144:24] (7 lines, 76 tokens)
+   frontend/src/app.tsx [125:88 - 132:22]
+
+┌────────────┬────────────────┬─────────────┬──────────────┬──────────────┬──────────────────┬───────────────────┐
+│ Format     │ Files analyzed │ Total lines │ Total tokens │ Clones found │ Duplicated lines │ Duplicated tokens │
+├────────────┼────────────────┼─────────────┼──────────────┼──────────────┼──────────────────┼───────────────────┤
+│ javascript │ 78             │ 6498        │ 52467        │ 8            │ 648 (9.97%)      │ 5763 (10.98%)     │
+├────────────┼────────────────┼─────────────┼──────────────┼──────────────┼──────────────────┼───────────────────┤
+│ tsx        │ 82             │ 12263       │ 101863       │ 24           │ 502 (4.09%)      │ 4378 (4.3%)       │
+├────────────┼────────────────┼─────────────┼──────────────┼──────────────┼──────────────────┼───────────────────┤
+│ typescript │ 86             │ 5119        │ 44957        │ 14           │ 131 (2.56%)      │ 1431 (3.18%)      │
+├────────────┼────────────────┼─────────────┼──────────────┼──────────────┼──────────────────┼───────────────────┤
+│ Total:     │ 246            │ 23880       │ 199287       │ 46           │ 1281 (5.36%)     │ 11572 (5.81%)     │
+└────────────┴────────────────┴─────────────┴──────────────┴──────────────┴──────────────────┴───────────────────┘
+Found 46 clones.
+JSON report saved to /Users/lunawang/Documents/GitHub/ts-repo-metrics/research/related_work_comparison/raw/jscpd/Brinqa-CRQ-2026__VulnContext-Desktop/jscpd-report.json
+time: 510.927ms
+# exit=0

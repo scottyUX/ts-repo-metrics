@@ -1,0 +1,52 @@
+# TIER: FREE eslint-plugin-sonarjs 3.0.7 -- REACT/HOOK RULE SUBSET
+# rules: sonarjs/jsx-no-leaked-render, sonarjs/no-hook-setter-in-body, sonarjs/no-useless-react-setstate
+# cwd: research/validation/.corpus/Colin-Posat__SlugFound @ c8556ef8e1d1e661c57f1deebc6e20706a323740  | 2026-07-30T01:23:07Z
+
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/(app)/items/[id]/edit/edit-form.tsx
+  249:16  error  Definition for rule '@next/next/no-img-element' was not found  @next/next/no-img-element
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/(app)/profile/profile-view.tsx
+  127:11  error  Definition for rule '@next/next/no-img-element' was not found  @next/next/no-img-element
+  186:17  error  Definition for rule '@next/next/no-img-element' was not found  @next/next/no-img-element
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/components/item-card.tsx
+  29:11  error  Definition for rule '@next/next/no-img-element' was not found  @next/next/no-img-element
+  76:11  error  Definition for rule '@next/next/no-img-element' was not found  @next/next/no-img-element
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/components/item-detail.tsx
+   93:15  error  Definition for rule '@next/next/no-img-element' was not found  @next/next/no-img-element
+  155:11  error  Definition for rule '@next/next/no-img-element' was not found  @next/next/no-img-element
+  246:12  error  Definition for rule '@next/next/no-img-element' was not found  @next/next/no-img-element
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/components/items-filter.tsx
+  124:5  error  Definition for rule 'react-hooks/exhaustive-deps' was not found  react-hooks/exhaustive-deps
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/components/items-map.tsx
+  55:17  error  Definition for rule '@next/next/no-img-element' was not found  @next/next/no-img-element
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/components/messages/conversation-list-item.tsx
+  31:9  error  Definition for rule '@next/next/no-img-element' was not found  @next/next/no-img-element
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/components/messages/message-bubble.tsx
+  37:16  error  Definition for rule '@next/next/no-img-element' was not found  @next/next/no-img-element
+  72:12  error  Definition for rule '@next/next/no-img-element' was not found  @next/next/no-img-element
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/components/messages/message-composer.tsx
+  122:12  error  Definition for rule '@next/next/no-img-element' was not found  @next/next/no-img-element
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/components/messages/message-thread.tsx
+  46:11  error  Definition for rule '@next/next/no-img-element' was not found  @next/next/no-img-element
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/components/photo-search-form.tsx
+  81:13  error  Definition for rule '@next/next/no-img-element' was not found  @next/next/no-img-element
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/components/sidebar.tsx
+  67:17  error  Definition for rule '@next/next/no-img-element' was not found  @next/next/no-img-element
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Colin-Posat__SlugFound/app/components/ui/image-overlay.tsx
+  41:10  error  Definition for rule '@next/next/no-img-element' was not found  @next/next/no-img-element
+
+✖ 18 problems (18 errors, 0 warnings)
+
+# exit=1

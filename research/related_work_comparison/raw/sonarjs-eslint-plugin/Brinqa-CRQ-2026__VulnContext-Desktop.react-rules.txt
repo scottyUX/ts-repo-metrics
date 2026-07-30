@@ -1,0 +1,5 @@
+# TIER: FREE eslint-plugin-sonarjs 3.0.7 -- REACT/HOOK RULE SUBSET
+# rules: sonarjs/jsx-no-leaked-render, sonarjs/no-hook-setter-in-body, sonarjs/no-useless-react-setstate
+# cwd: research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop @ a3f75c2ed9a466d19e66f821e5eb3e5452794b63  | 2026-07-30T01:23:09Z
+
+# exit=0

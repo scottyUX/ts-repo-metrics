@@ -1,0 +1,370 @@
+# TIER: FREE eslint-plugin-sonarjs 3.0.7 (NOT SonarQube/SonarCloud)
+# cwd: research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop @ a3f75c2ed9a466d19e66f821e5eb3e5452794b63
+# $ node <rwc>/node_modules/eslint/bin/eslint.js --no-config-lookup --config <rwc>/configs/eslint.sonarjs.config.mjs '**/*.ts' '**/*.tsx' --format stylish
+# 2026-07-30T01:21:31Z
+
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/electron-main.ts
+   23:10  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+   33:10  warning  Refactor this function to reduce its Cognitive Complexity from 4 to the 0 allowed  sonarjs/cognitive-complexity
+   50:10  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+   67:57  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+   71:59  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+   83:34  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  110:25  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  117:32  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/api/client.ts
+   20:10  warning  Refactor this function to reduce its Cognitive Complexity from 3 to the 0 allowed  sonarjs/cognitive-complexity
+   35:17  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+   41:10  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+   54:10  warning  Refactor this function to reduce its Cognitive Complexity from 7 to the 0 allowed  sonarjs/cognitive-complexity
+   90:23  warning  Refactor this function to reduce its Cognitive Complexity from 4 to the 0 allowed  sonarjs/cognitive-complexity
+  105:23  warning  Refactor this function to reduce its Cognitive Complexity from 4 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/api/findings.ts
+  26:23  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+  50:23  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/api/topology.ts
+   52:23  warning  Refactor this function to reduce its Cognitive Complexity from 6 to the 0 allowed  sonarjs/cognitive-complexity
+  223:23  warning  Refactor this function to reduce its Cognitive Complexity from 5 to the 0 allowed  sonarjs/cognitive-complexity
+  257:23  warning  Refactor this function to reduce its Cognitive Complexity from 5 to the 0 allowed  sonarjs/cognitive-complexity
+  304:23  warning  Refactor this function to reduce its Cognitive Complexity from 8 to the 0 allowed  sonarjs/cognitive-complexity
+  352:23  warning  Refactor this function to reduce its Cognitive Complexity from 8 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/app.tsx
+  25:10  warning  Refactor this function to reduce its Cognitive Complexity from 28 to the 0 allowed  sonarjs/cognitive-complexity
+  30:16  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed   sonarjs/cognitive-complexity
+  79:32  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed   sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/components/controls/SecurityScorePage.tsx
+  281:17  warning  Refactor this function to reduce its Cognitive Complexity from 12 to the 0 allowed  sonarjs/cognitive-complexity
+  292:20  warning  Refactor this function to reduce its Cognitive Complexity from 7 to the 0 allowed   sonarjs/cognitive-complexity
+  343:70  warning  Refactor this function to reduce its Cognitive Complexity from 3 to the 0 allowed   sonarjs/cognitive-complexity
+  366:31  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed   sonarjs/cognitive-complexity
+  447:50  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed   sonarjs/cognitive-complexity
+  476:56  warning  Refactor this function to reduce its Cognitive Complexity from 4 to the 0 allowed   sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/components/dashboard/DashboardOverview.tsx
+  9:17  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/components/dashboard/FindingDetailPage.tsx
+   31:10  warning  Refactor this function to reduce its Cognitive Complexity from 6 to the 0 allowed  sonarjs/cognitive-complexity
+   56:10  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+   62:10  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  122:10  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+  143:17  warning  Refactor this function to reduce its Cognitive Complexity from 3 to the 0 allowed  sonarjs/cognitive-complexity
+  286:10  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/components/dashboard/FindingDetailSections.tsx
+  100:17  warning  Refactor this function to reduce its Cognitive Complexity from 13 to the 0 allowed  sonarjs/cognitive-complexity
+  226:10  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed   sonarjs/cognitive-complexity
+  268:10  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed   sonarjs/cognitive-complexity
+  291:10  warning  Refactor this function to reduce its Cognitive Complexity from 5 to the 0 allowed   sonarjs/cognitive-complexity
+  337:38  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed   sonarjs/cognitive-complexity
+  352:38  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed   sonarjs/cognitive-complexity
+  381:10  warning  Refactor this function to reduce its Cognitive Complexity from 3 to the 0 allowed   sonarjs/cognitive-complexity
+  431:10  warning  Refactor this function to reduce its Cognitive Complexity from 3 to the 0 allowed   sonarjs/cognitive-complexity
+  449:10  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed   sonarjs/cognitive-complexity
+  455:10  warning  Refactor this function to reduce its Cognitive Complexity from 7 to the 0 allowed   sonarjs/cognitive-complexity
+  505:10  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed   sonarjs/cognitive-complexity
+  538:10  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed   sonarjs/cognitive-complexity
+  547:10  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed   sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/components/dashboard/RiskBandDistributionChart.tsx
+  49:17  warning  Refactor this function to reduce its Cognitive Complexity from 4 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/components/dashboard/RiskTable.tsx
+   32:10  warning  Refactor this function to reduce its Cognitive Complexity from 4 to the 0 allowed  sonarjs/cognitive-complexity
+   84:23  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+  139:23  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  167:23  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  180:17  warning  Refactor this function to reduce its Cognitive Complexity from 6 to the 0 allowed  sonarjs/cognitive-complexity
+  206:31  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/components/dashboard/SummaryCards.tsx
+   9:10  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  14:17  warning  Refactor this function to reduce its Cognitive Complexity from 9 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/components/fair/FairFrequencyPanel.tsx
+   23:10  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+   28:10  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+   33:17  warning  Refactor this function to reduce its Cognitive Complexity from 7 to the 0 allowed  sonarjs/cognitive-complexity
+   46:46  warning  Refactor this function to reduce its Cognitive Complexity from 8 to the 0 allowed  sonarjs/cognitive-complexity
+  151:10  warning  Refactor this function to reduce its Cognitive Complexity from 4 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/components/fair/FairScopeLossPanel.tsx
+   23:10  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+   32:10  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+   37:17  warning  Refactor this function to reduce its Cognitive Complexity from 7 to the 0 allowed  sonarjs/cognitive-complexity
+   51:46  warning  Refactor this function to reduce its Cognitive Complexity from 8 to the 0 allowed  sonarjs/cognitive-complexity
+  194:10  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/components/findings/FindingsTable.tsx
+  47:17  warning  Refactor this function to reduce its Cognitive Complexity from 4 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/components/layout/Header.tsx
+  14:17  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/components/shared/data-table/DataTable.tsx
+  137:17  warning  Refactor this function to reduce its Cognitive Complexity from 29 to the 0 allowed  sonarjs/cognitive-complexity
+  167:47  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed   sonarjs/cognitive-complexity
+  347:39  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed   sonarjs/cognitive-complexity
+  365:43  warning  Refactor this function to reduce its Cognitive Complexity from 4 to the 0 allowed   sonarjs/cognitive-complexity
+  380:40  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed   sonarjs/cognitive-complexity
+  388:43  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed   sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/components/topology/AssetDistributionCharts.tsx
+   32:17  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+   64:17  warning  Refactor this function to reduce its Cognitive Complexity from 7 to the 0 allowed  sonarjs/cognitive-complexity
+  172:10  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/components/topology/AssetInventoryPanel.tsx
+  174:17  warning  Refactor this function to reduce its Cognitive Complexity from 4 to the 0 allowed  sonarjs/cognitive-complexity
+  304:10  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  309:10  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  316:27  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  325:10  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  340:10  warning  Refactor this function to reduce its Cognitive Complexity from 4 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/components/topology/TopologyChrome.tsx
+  21:34  warning  Refactor this function to reduce its Cognitive Complexity from 4 to the 0 allowed  sonarjs/cognitive-complexity
+  44:17  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/components/topology/shared/ChartPanel.tsx
+  6:17  warning  Refactor this function to reduce its Cognitive Complexity from 7 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/components/topology/shared/EntityCard.tsx
+    9:17  warning  Refactor this function to reduce its Cognitive Complexity from 3 to the 0 allowed  sonarjs/cognitive-complexity
+  103:17  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/components/topology/shared/EntityHero.tsx
+  9:17  warning  Refactor this function to reduce its Cognitive Complexity from 6 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/components/topology/shared/FindingsExplorerPanel.tsx
+   32:23  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+   47:23  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+   66:23  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+   99:23  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+  106:17  warning  Refactor this function to reduce its Cognitive Complexity from 3 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/components/topology/shared/MetricCard.tsx
+  14:17  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/components/topology/shared/PageIntro.tsx
+  4:17  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/components/topology/shared/TopologyBadges.tsx
+    7:17  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+   29:17  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+   85:10  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+   95:10  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  108:10  warning  Refactor this function to reduce its Cognitive Complexity from 8 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/components/ui/breadcrumb.tsx
+  36:43  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/components/ui/button.tsx
+  44:66  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/components/ui/chart.tsx
+   27:10  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed   sonarjs/cognitive-complexity
+   70:74  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed   sonarjs/cognitive-complexity
+   87:28  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed   sonarjs/cognitive-complexity
+  133:5   warning  Refactor this function to reduce its Cognitive Complexity from 3 to the 0 allowed   sonarjs/cognitive-complexity
+  136:43  warning  Refactor this function to reduce its Cognitive Complexity from 5 to the 0 allowed   sonarjs/cognitive-complexity
+  190:32  warning  Refactor this function to reduce its Cognitive Complexity from 11 to the 0 allowed  sonarjs/cognitive-complexity
+  274:5   warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed   sonarjs/cognitive-complexity
+  292:23  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed   sonarjs/cognitive-complexity
+  324:10  warning  Refactor this function to reduce its Cognitive Complexity from 8 to the 0 allowed   sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/components/ui/dropdown-menu.tsx
+   24:51  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+   81:41  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  145:41  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/components/ui/pagination.tsx
+  47:25  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/components/ui/pill.tsx
+  7:17  warning  Refactor this function to reduce its Cognitive Complexity from 6 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/hooks/dashboard/useDashboardOverviewData.ts
+  14:20  warning  Refactor this function to reduce its Cognitive Complexity from 5 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/hooks/findings/useFindingDetails.ts
+  14:20  warning  Refactor this function to reduce its Cognitive Complexity from 7 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/hooks/findings/useFindingsExplorerState.ts
+  27:17  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+  35:16  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+  61:39  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  67:25  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/hooks/findings/usePaginatedFindings.ts
+  30:20  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/hooks/sources/useSourcesSummary.ts
+  14:20  warning  Refactor this function to reduce its Cognitive Complexity from 5 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/hooks/topology/applications/useApplicationDetail.ts
+  19:20  warning  Refactor this function to reduce its Cognitive Complexity from 8 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/hooks/topology/assets/useAssetDetail.ts
+  14:20  warning  Refactor this function to reduce its Cognitive Complexity from 8 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/hooks/topology/assets/useAssetFindings.ts
+  45:20  warning  Refactor this function to reduce its Cognitive Complexity from 8 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/hooks/topology/assets/useAssetFindingsAnalytics.ts
+  32:20  warning  Refactor this function to reduce its Cognitive Complexity from 8 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/hooks/topology/assets/useAssetInventoryState.ts
+  10:17  warning  Refactor this function to reduce its Cognitive Complexity from 3 to the 0 allowed  sonarjs/cognitive-complexity
+  71:28  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  93:25  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  95:39  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/hooks/topology/assets/useAssetsAnalytics.ts
+  34:20  warning  Refactor this function to reduce its Cognitive Complexity from 7 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/hooks/topology/assets/usePaginatedAssets.ts
+  49:20  warning  Refactor this function to reduce its Cognitive Complexity from 7 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/hooks/topology/business-services/useBusinessServiceAnalytics.ts
+  18:20  warning  Refactor this function to reduce its Cognitive Complexity from 8 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/hooks/topology/business-services/useBusinessServiceDetail.ts
+  19:20  warning  Refactor this function to reduce its Cognitive Complexity from 8 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/hooks/topology/business-units/useBusinessUnitDetail.ts
+  17:20  warning  Refactor this function to reduce its Cognitive Complexity from 8 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/hooks/topology/business-units/useBusinessUnitRiskOverview.ts
+  17:20  warning  Refactor this function to reduce its Cognitive Complexity from 8 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/hooks/topology/business-units/useBusinessUnitTopFindings.ts
+  38:20  warning  Refactor this function to reduce its Cognitive Complexity from 8 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/hooks/topology/business-units/useBusinessUnits.ts
+  14:20  warning  Refactor this function to reduce its Cognitive Complexity from 7 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/lib/assets/assetFormatters.ts
+  12:17  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  22:17  warning  Refactor this function to reduce its Cognitive Complexity from 4 to the 0 allowed  sonarjs/cognitive-complexity
+  33:17  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+  41:27  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/lib/charts/assetDistribution.ts
+   3:17  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+  35:17  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/lib/externalUrls.ts
+   3:17  warning  Refactor this function to reduce its Cognitive Complexity from 4 to the 0 allowed  sonarjs/cognitive-complexity
+  20:23  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/lib/fairVisualization.ts
+   6:17  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  15:17  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  20:17  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/lib/findings/findingFormatters.ts
+  3:17  warning  Refactor this function to reduce its Cognitive Complexity from 6 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/lib/findings/findingRisk.ts
+   1:17  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  16:17  warning  Refactor this function to reduce its Cognitive Complexity from 4 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/lib/findings/findingStatus.ts
+   5:17  warning  Refactor this function to reduce its Cognitive Complexity from 3 to the 0 allowed  sonarjs/cognitive-complexity
+  23:17  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/lib/formatting/dates.ts
+  1:17  warning  Refactor this function to reduce its Cognitive Complexity from 3 to the 0 allowed  sonarjs/cognitive-complexity
+  8:17  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/lib/formatting/numbers.ts
+  1:17  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/lib/formatting/text.ts
+   1:17  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  12:17  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/lib/pagination/getPaginationWindow.ts
+  1:17  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/lib/securityScore.ts
+  107:17  warning  Refactor this function to reduce its Cognitive Complexity from 4 to the 0 allowed  sonarjs/cognitive-complexity
+  126:69  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  136:17  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/lib/sorting/sortState.ts
+   8:17  warning  Refactor this function to reduce its Cognitive Complexity from 3 to the 0 allowed  sonarjs/cognitive-complexity
+  25:17  warning  Refactor this function to reduce its Cognitive Complexity from 4 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/pages/findings/FindingsRoutePage.tsx
+  8:17  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/pages/shell/AppSidebar.tsx
+  28:30  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/pages/topology/ApplicationDetailPage.tsx
+  34:17  warning  Refactor this function to reduce its Cognitive Complexity from 6 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/pages/topology/AssetFindingsPage.tsx
+   46:17  warning  Refactor this function to reduce its Cognitive Complexity from 10 to the 0 allowed  sonarjs/cognitive-complexity
+   97:16  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed   sonarjs/cognitive-complexity
+  256:31  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed   sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/pages/topology/BusinessServiceDetailPage.tsx
+  38:17  warning  Refactor this function to reduce its Cognitive Complexity from 8 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/pages/topology/BusinessServiceSections.tsx
+  33:17  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  59:17  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/pages/topology/BusinessUnitDetailPage.tsx
+   58:17  warning  Refactor this function to reduce its Cognitive Complexity from 7 to the 0 allowed  sonarjs/cognitive-complexity
+  198:10  warning  Refactor this function to reduce its Cognitive Complexity from 4 to the 0 allowed  sonarjs/cognitive-complexity
+  217:36  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/pages/topology/BusinessUnitFindingsSection.tsx
+   31:10  warning  Refactor this function to reduce its Cognitive Complexity from 4 to the 0 allowed  sonarjs/cognitive-complexity
+   83:23  warning  Refactor this function to reduce its Cognitive Complexity from 2 to the 0 allowed  sonarjs/cognitive-complexity
+  138:23  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  166:23  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  179:17  warning  Refactor this function to reduce its Cognitive Complexity from 6 to the 0 allowed  sonarjs/cognitive-complexity
+  275:31  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/pages/topology/TopologyOverviewPage.tsx
+  25:17  warning  Refactor this function to reduce its Cognitive Complexity from 7 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/pages/topology/TopologyRoutePage.tsx
+  17:17  warning  Refactor this function to reduce its Cognitive Complexity from 6 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/routing/appRoutes.ts
+   27:17  warning  Refactor this function to reduce its Cognitive Complexity from 4 to the 0 allowed   sonarjs/cognitive-complexity
+   46:17  warning  Refactor this function to reduce its Cognitive Complexity from 16 to the 0 allowed  sonarjs/cognitive-complexity
+   99:17  warning  Refactor this function to reduce its Cognitive Complexity from 4 to the 0 allowed   sonarjs/cognitive-complexity
+  123:17  warning  Refactor this function to reduce its Cognitive Complexity from 3 to the 0 allowed   sonarjs/cognitive-complexity
+  126:23  warning  Refactor this function to reduce its Cognitive Complexity from 7 to the 0 allowed   sonarjs/cognitive-complexity
+  157:10  warning  Refactor this function to reduce its Cognitive Complexity from 4 to the 0 allowed   sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/routing/pageMeta.ts
+   5:17  warning  Refactor this function to reduce its Cognitive Complexity from 5 to the 0 allowed   sonarjs/cognitive-complexity
+  36:17  warning  Refactor this function to reduce its Cognitive Complexity from 22 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/runtime/desktopBridge.ts
+  15:23  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+  24:23  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/tests/app/App.test.tsx
+  85:32  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+/Users/lunawang/Documents/GitHub/ts-repo-metrics/research/validation/.corpus/Brinqa-CRQ-2026__VulnContext-Desktop/frontend/src/tests/fixtures/tables/tableRows.ts
+  2:51  warning  Refactor this function to reduce its Cognitive Complexity from 1 to the 0 allowed  sonarjs/cognitive-complexity
+
+✖ 203 problems (0 errors, 203 warnings)
+
+# exit=0
