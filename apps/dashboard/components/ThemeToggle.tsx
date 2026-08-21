@@ -24,7 +24,7 @@ function useIsMounted() {
 export function ThemeToggle({
   variant = "default",
 }: {
-  /** Dark chrome used in the top nav (Figma). */
+  /** @deprecated Both variants share the same theme-aware chrome. */
   variant?: "default" | "nav";
 }) {
   const { theme, setTheme, resolvedTheme } = useTheme();
@@ -40,7 +40,7 @@ export function ThemeToggle({
   if (!mounted) {
     return (
       <span
-        className={cn("size-[1.625rem]", variant === "nav" && "size-9")}
+        className={cn("size-[1.625rem]", variant === "nav" && "size-8")}
         aria-hidden
       />
     );
@@ -65,13 +65,7 @@ export function ThemeToggle({
       onClick={handleClick}
       title={label}
       aria-label={label}
-      className={cn(
-        "inline-flex items-center justify-center rounded-md border p-1.5 transition-colors",
-        variant === "default" &&
-          "border-border bg-muted/40 text-muted-foreground hover:bg-muted hover:text-foreground",
-        variant === "nav" &&
-          "border-[#262626] bg-[rgba(38,38,38,0.3)] text-[#a1a1a1] hover:bg-primary/15 hover:text-primary",
-      )}
+      className="inline-flex items-center justify-center rounded-md border border-border bg-background p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
     >
       <Icon className="size-3.5 shrink-0" aria-hidden />
     </button>

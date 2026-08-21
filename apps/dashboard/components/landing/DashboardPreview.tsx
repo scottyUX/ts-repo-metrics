@@ -1,9 +1,9 @@
 const PREVIEW_METRICS = [
-  { label: "Code Complexity", score: 77, rating: "Strong",     color: "text-green-400" },
-  { label: "Commit Habits",   score: 70, rating: "Strong",     color: "text-green-400" },
-  { label: "Testing",         score: 69, rating: "Good",       color: "text-green-400" },
-  { label: "Code Quality",    score: 40, rating: "Needs Work", color: "text-amber-400" },
-  { label: "React",           score: 18, rating: "Critical",   color: "text-red-400"   },
+  { label: "Code Complexity", score: 77, rating: "Strong",     color: "text-green-700 dark:text-green-400" },
+  { label: "Commit Habits",   score: 70, rating: "Strong",     color: "text-green-700 dark:text-green-400" },
+  { label: "Testing",         score: 69, rating: "Good",       color: "text-green-700 dark:text-green-400" },
+  { label: "Code Quality",    score: 40, rating: "Needs Work", color: "text-amber-700 dark:text-amber-400" },
+  { label: "React",           score: 18, rating: "Critical",   color: "text-red-700 dark:text-red-400"   },
 ] as const;
 
 const PREVIEW_CARDS = [
@@ -19,7 +19,7 @@ const PREVIEW_TABS = [
 
 export function DashboardPreview() {
   return (
-    <div className="overflow-hidden rounded-xl border border-border bg-card shadow-2xl">
+    <div className="overflow-hidden rounded-md border border-border bg-card">
       {/* Browser chrome */}
       <div className="flex items-center gap-3 border-b border-border bg-muted/40 px-4 py-3">
         <div className="flex gap-1.5">
@@ -50,7 +50,7 @@ export function DashboardPreview() {
             <div
               key={tab}
               className={`shrink-0 px-3 py-2 text-[11px] font-medium ${
-                i === 0 ? "border-b-2 border-foreground text-foreground" : "text-muted-foreground"
+                i === 0 ? "border-b-2 border-primary text-foreground" : "text-muted-foreground"
               }`}
             >
               {tab}
@@ -63,7 +63,7 @@ export function DashboardPreview() {
           {PREVIEW_CARDS.map((m) => (
             <div key={m.label} className="space-y-1 rounded-lg border border-border bg-background/40 p-4">
               <p className="text-[11px] text-muted-foreground">{m.label}</p>
-              <p className={`text-[10px] font-medium ${m.rating === "Strong" ? "text-green-400" : "text-amber-400"}`}>
+              <p className={`text-[10px] font-medium ${m.rating === "Strong" ? "text-green-700 dark:text-green-400" : "text-amber-700 dark:text-amber-400"}`}>
                 {m.rating}
               </p>
               <p className="text-2xl font-bold">{m.value}</p>

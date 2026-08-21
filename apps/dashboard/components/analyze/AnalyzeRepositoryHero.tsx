@@ -140,13 +140,11 @@ export function AnalyzeRepositoryHero({ compact }: AnalyzeRepositoryHeroProps) {
         </span>
       </div>
 
-      <div className="space-y-4 text-center">
-        <h1 className="text-5xl font-bold tracking-tight sm:text-6xl xl:text-7xl">
-          <span className="bg-gradient-to-r from-primary via-orange-400 to-amber-400 bg-clip-text text-transparent">
-            Analyze your repository
-          </span>
+      <div className="space-y-3 text-center">
+        <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+          Analyze your repository
         </h1>
-        <p className="mx-auto max-w-xl text-lg text-muted-foreground">
+        <p className="mx-auto max-w-xl text-base text-muted-foreground">
           Enter a GitHub URL for complexity, maintainability, duplication, and git behavior
           metrics. You must{" "}
           <strong className="font-medium text-foreground">sign in with GitHub</strong> to run an
@@ -171,7 +169,7 @@ export function AnalyzeRepositoryHero({ compact }: AnalyzeRepositoryHeroProps) {
       ) : null}
 
       {supabaseOk && signedIn === false ? (
-        <div className="flex w-full max-w-md flex-col items-center gap-4 rounded-xl border border-border bg-card p-6 text-center shadow-sm">
+        <div className="flex w-full max-w-md flex-col items-center gap-4 rounded-md border border-border bg-card p-6 text-center">
           <p className="text-sm text-muted-foreground">
             Sign in with GitHub to analyze a repository. By using Repo Metrics, you agree to its{" "}
             <a href="/license" className="underline underline-offset-4 hover:text-foreground">license</a>{" "}
@@ -198,24 +196,24 @@ export function AnalyzeRepositoryHero({ compact }: AnalyzeRepositoryHeroProps) {
       {signedIn === true ? (
         <>
           <form onSubmit={handleSubmit} className="w-full">
-            <div className="flex h-[60px] w-full overflow-hidden rounded-xl border border-neutral-200 bg-white focus-within:ring-2 focus-within:ring-neutral-400 focus-within:ring-offset-2 focus-within:ring-offset-background dark:border-neutral-700 dark:bg-neutral-900/50 dark:focus-within:ring-neutral-600">
-              <div className="flex items-center justify-center pl-4 text-neutral-400">
-                <Github className="size-5" />
+            <div className="flex h-10 w-full overflow-hidden rounded-md border border-border bg-background focus-within:border-primary focus-within:ring-1 focus-within:ring-primary">
+              <div className="flex items-center justify-center pl-3 text-muted-foreground">
+                <Github className="size-4" />
               </div>
               <input
                 type="text"
                 placeholder="https://github.com/owner/repo"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
-                className="min-w-0 flex-1 bg-transparent px-3 py-0 text-base outline-none placeholder:text-neutral-400"
+                className="min-w-0 flex-1 bg-transparent px-2 py-0 text-sm outline-none placeholder:text-muted-foreground"
                 disabled={loading}
               />
               <button
                 type="submit"
                 disabled={!valid || loading}
-                className="flex h-full shrink-0 items-center justify-center gap-2 bg-neutral-900 px-6 font-medium text-white hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-neutral-200"
+                className="flex h-full shrink-0 items-center justify-center gap-1.5 bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {loading ? "Analyzing…" : "Go"}
+                {loading ? "Analyzing…" : "Analyze"}
                 <ArrowRight className="size-4" />
               </button>
             </div>
@@ -230,7 +228,7 @@ export function AnalyzeRepositoryHero({ compact }: AnalyzeRepositoryHeroProps) {
                 setUrl(EXAMPLE_GITHUB_REPO);
                 void runAnalysisForUrl(EXAMPLE_GITHUB_REPO);
               }}
-              className="inline-flex items-center gap-2 rounded-lg border border-border bg-muted/40 px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:pointer-events-none disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:pointer-events-none disabled:opacity-50"
             >
               <Github className="size-4 shrink-0 text-muted-foreground" aria-hidden />
               <span>Try sample repo</span>
