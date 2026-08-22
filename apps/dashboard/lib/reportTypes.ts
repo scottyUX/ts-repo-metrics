@@ -161,7 +161,17 @@ export interface SymbolVerificationRisk {
 
 export interface RepoReport {
   repoPath: string;
-  source: { type: string; url: string; commit: string; branch: string };
+  source: {
+    type: string;
+    url: string;
+    commit: string;
+    branch: string;
+    scope?: "repo" | "pr";
+    prNumber?: number;
+    baseSha?: string;
+    headSha?: string;
+    changedFiles?: string[];
+  };
   filesAnalyzed: number;
   filesSkipped?: number;
   analyzer_version?: string;

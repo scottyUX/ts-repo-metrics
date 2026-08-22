@@ -17,6 +17,7 @@ import { DatasetTab } from "./dataset/DatasetTab";
 import { GlobalCoachSays } from "./coach";
 import { GitHubRepositoryPanel } from "./GitHubRepositoryPanel";
 import { OverviewCardsStrip } from "./OverviewCardsStrip";
+import { AnalysisScopeBanner } from "./AnalysisScopeBanner";
 import { buildOverviewScoreStrip } from "@/lib/buildOverviewCards";
 import { hasReactUiScope } from "@/lib/hasReactUiScope";
 import type { RepoReport } from "@/lib/reportTypes";
@@ -135,6 +136,7 @@ export function ResultsDashboard({ report, resultId }: ResultsDashboardProps) {
             </span>
           </div>
         ) : null}
+        <AnalysisScopeBanner report={report} />
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <h1 className="text-xl font-semibold tracking-tight">Analysis Results</h1>

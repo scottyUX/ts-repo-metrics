@@ -67,6 +67,7 @@ async function main() {
   if (!target) {
     console.error("Usage: npm run dev -- analyze <local-path> [--output file.json]");
     console.error("       npm run dev -- analyze https://github.com/user/repo [--no-cache] [--output file.json]");
+    console.error("       npm run dev -- analyze https://github.com/user/repo/pull/42 [--no-cache] [--output file.json]");
     console.error("       npm run dev -- batch /path/to/repos [--output dir] [--csv]");
     process.exit(1);
   }

@@ -8,9 +8,9 @@
  */
 
 import { readFile } from "node:fs/promises";
-import fg from "fast-glob";
-import { SOURCE_PATTERNS, IGNORE_PATTERNS, TEST_FILE_RE } from "../utils/constants.js";
+import { TEST_FILE_RE } from "../utils/constants.js";
 import { countLines } from "../utils/text.js";
+import { discoverSourceFiles } from "./fileDiscovery.js";
 import type { RepoProfile } from "../types/report.js";
 
 export type { RepoProfile } from "../types/report.js";
@@ -22,14 +22,14 @@ export type { RepoProfile } from "../types/report.js";
  * classifies each as source or test, and counts lines of code.
  *
  * @param repoPath - Absolute path to the repository root.
+ * @param includePaths - Optional repo-relative allow-list (PR changed files).
  * @returns A {@link RepoProfile} with file counts and LOC breakdowns.
  */
-export async function profileRepo(repoPath: string): Promise<RepoProfile> {
-  const files = await fg(SOURCE_PATTERNS, {
-    cwd: repoPath,
-    absolute: true,
-    ignore: IGNORE_PATTERNS,
-  });
+export async function profileRepo(
+  repoPath: string,
+  includePaths?: string[],
+): Promise<RepoProfile> {
+  const files = await discoverSourceFiles(repoPath, includePaths);
 
   let tsFiles = 0;
   let tsxFiles = 0;

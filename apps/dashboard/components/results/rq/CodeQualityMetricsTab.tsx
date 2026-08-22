@@ -12,6 +12,7 @@ import {
   COMMIT_HABITS_SCOPE_TEAM,
   type CommitHabitsScopeId,
 } from "@/lib/commitHabitsScopeMetrics";
+import { analysisTeamOptionLabel, isPrScopedReport } from "@/lib/analysisScope";
 import {
   buildCodeQualityDisplayReport,
   resolveCodeQualityScope,
@@ -93,7 +94,9 @@ export function CodeQualityMetricsTab({
       const n = scope.scopedPerFile.length;
       return `${n} file${n === 1 ? "" : "s"} from ${scope.contributorDisplayName}'s git-touched source paths.`;
     }
-    return "Whole-repository static scan.";
+    return isPrScopedReport(report)
+      ? "Pull-request static scan of changed source files."
+      : "Whole-repository static scan.";
   })();
 
   return (
@@ -110,7 +113,7 @@ export function CodeQualityMetricsTab({
               onChange={(e) => onScopeIdChange(e.target.value)}
               className="min-w-[220px] rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              <option value={COMMIT_HABITS_SCOPE_TEAM}>Whole repository (team)</option>
+              <option value={COMMIT_HABITS_SCOPE_TEAM}>{analysisTeamOptionLabel(report)}</option>
               {contributors.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.displayName || c.authorEmail || c.id}
@@ -130,8 +133,9 @@ export function CodeQualityMetricsTab({
 
       {scope.contributorFilterYieldedNone ? (
         <p className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">
-          No analyzed files overlap this contributor&apos;s recorded source paths. Select whole
-          repository or re-run with git history that includes path stats.
+          No analyzed files overlap this contributor&apos;s recorded source paths. Select{" "}
+          {isPrScopedReport(report) ? "this pull request" : "whole repository"}{" "}
+          or re-run with git history that includes path stats.
         </p>
       ) : null}
 
@@ -263,7 +267,7 @@ export function CodeQualityMetricsTab({
           <h3 className="text-sm font-medium text-muted-foreground">Maintainability &amp; hygiene</h3>
           {hygieneHint ? (
             <p className="text-xs text-muted-foreground max-w-3xl">
-              These cards reflect the <strong>full repository</strong> snapshot from the analyzer, not
+              These cards reflect the <strong>{isPrScopedReport(report) ? "pull-request" : "full repository"}</strong> snapshot from the analyzer, not
               the contributor path filter.
             </p>
           ) : null}

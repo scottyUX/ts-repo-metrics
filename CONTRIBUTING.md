@@ -42,7 +42,6 @@ src/
 │   ├── loc.ts
 │   ├── duplication.ts
 │   ├── gitMetrics.ts
-│   ├── gitMetricsApi.ts
 │   └── frameworkDetection.ts
 ├── parsing/tsParser.ts             # Tree-sitter wrapper
 ├── extract/                        # AST-based extractors

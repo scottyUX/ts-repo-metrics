@@ -279,6 +279,19 @@ export interface SourceInfo {
   url: string;
   commit: string;
   branch: string;
+  /**
+   * Analysis corpus. `"pr"` means changed source files at the pull-request head.
+   * Omitted on older reports — treat as `"repo"`.
+   */
+  scope?: "repo" | "pr";
+  /** Pull request number when `scope` is `"pr"`. */
+  prNumber?: number;
+  /** Merge-base / PR base SHA when `scope` is `"pr"`. */
+  baseSha?: string;
+  /** PR head SHA when `scope` is `"pr"` (same as `commit` after checkout). */
+  headSha?: string;
+  /** Repo-relative source paths included in a PR-scoped run. */
+  changedFiles?: string[];
 }
 
 /** Aggregated code smell counts across the repository. */

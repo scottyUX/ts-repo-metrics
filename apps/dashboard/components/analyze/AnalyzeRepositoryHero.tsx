@@ -89,7 +89,7 @@ export function AnalyzeRepositoryHero({ compact }: AnalyzeRepositoryHeroProps) {
     async (rawUrl: string) => {
       if (loading || signedIn !== true) return;
       if (!isValidGitHubUrl(rawUrl)) {
-        setError("Enter a valid GitHub repository URL");
+        setError("Enter a valid GitHub repository or pull request URL");
         return;
       }
       setLoading(true);
@@ -145,7 +145,7 @@ export function AnalyzeRepositoryHero({ compact }: AnalyzeRepositoryHeroProps) {
           Analyze your repository
         </h1>
         <p className="mx-auto max-w-xl text-base text-muted-foreground">
-          Enter a GitHub URL for complexity, maintainability, duplication, and git behavior
+          Enter a GitHub repository or pull request URL for complexity, maintainability, duplication, and git behavior
           metrics. You must{" "}
           <strong className="font-medium text-foreground">sign in with GitHub</strong> to run an
           analysis (public and private repos).
@@ -202,7 +202,7 @@ export function AnalyzeRepositoryHero({ compact }: AnalyzeRepositoryHeroProps) {
               </div>
               <input
                 type="text"
-                placeholder="https://github.com/owner/repo"
+                placeholder="https://github.com/owner/repo or …/pull/42"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 className="min-w-0 flex-1 bg-transparent px-2 py-0 text-sm outline-none placeholder:text-muted-foreground"
@@ -242,7 +242,7 @@ export function AnalyzeRepositoryHero({ compact }: AnalyzeRepositoryHeroProps) {
 
           {url && !valid && (
             <p className="text-center text-sm text-destructive">
-              Enter a valid GitHub repository URL
+              Enter a valid GitHub repository or pull request URL
             </p>
           )}
 

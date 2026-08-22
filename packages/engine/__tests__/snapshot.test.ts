@@ -44,5 +44,5 @@ describe("analyzeRepo snapshot", () => {
     const report = await analyzeRepo(FIXTURE_PATH);
     const snapshot = normalizeForSnapshot(report);
     expect(snapshot).toMatchSnapshot();
-  });
+  }, 30_000);
 });

@@ -24,15 +24,24 @@ describe("parseGitHubUrl", () => {
     });
   });
 
+  it("parses pull request URLs", () => {
+    expect(parseGitHubUrl("https://github.com/foo/bar/pull/12")).toEqual({
+      owner: "foo",
+      repo: "bar",
+      pullNumber: 12,
+    });
+  });
+
   it("returns null for invalid input", () => {
     expect(parseGitHubUrl("not-a-url")).toBeNull();
   });
 });
 
 describe("isValidGitHubUrl", () => {
-  it("accepts shorthand and full URLs", () => {
+  it("accepts shorthand, full URLs, and pull requests", () => {
     expect(isValidGitHubUrl("foo/bar")).toBe(true);
     expect(isValidGitHubUrl("https://github.com/foo/bar")).toBe(true);
+    expect(isValidGitHubUrl("https://github.com/foo/bar/pull/3")).toBe(true);
   });
 
   it("rejects invalid input", () => {

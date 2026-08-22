@@ -1,12 +1,12 @@
 /**
  * POST /api/analyze
- * Triggers repo-metrics analysis for a public GitHub repo URL.
+ * Triggers repo-metrics analysis for a GitHub repo, branch, or pull request URL.
  * Returns { status, resultId } or full result.
  * Signed-in dashboard users only (requires Supabase session when user-auth is configured).
  */
 
-import type { RepoReport as EngineRepoReport } from "@repo-metrics/engine";
-import { analyzeFromGitHubUrl } from "@repo-metrics/engine";
+import type { RepoReport as EngineRepoReport, AnalyzeRef } from "@repo-metrics/engine";
+import { analyzeFromGitHubUrl, parseGitHubUrl } from "@repo-metrics/engine";
 import type { User } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 import path from "node:path";
@@ -25,11 +25,9 @@ import { getDecryptedGitHubTokenForUser } from "@/lib/userGitHubToken";
 import { ANALYZE_SIGN_IN_REQUIRED_MESSAGE } from "@/lib/analyzeConstants";
 import type { RepoReport as DashboardRepoReport } from "@/lib/reportTypes";
 import { devStoreReport } from "@/lib/devReportStore";
-import {
-  isValidGitHubUrl,
-  normalizeGitHubUrl,
-  parseGitHubUrl,
-} from "@/lib/github/parseGitHubUrl";
+import { isValidGitHubUrl, normalizeGitHubUrl } from "@/lib/github/parseGitHubUrl";
+import { parseAnalyzeRef } from "@/lib/github/analyzeRef";
+import { buildAnalysisResultId } from "@/lib/analysisResultId";
 
 export const runtime = "nodejs";
 
@@ -194,12 +192,13 @@ export async function POST(request: NextRequest) {
 
     if (!isValidGitHubUrl(url)) {
       return NextResponse.json(
-        { error: "Invalid GitHub URL. Use https://github.com/owner/repo" },
+        { error: "Invalid GitHub URL. Use https://github.com/owner/repo or a pull request URL." },
         { status: 400 },
       );
     }
 
     const normalizedUrl = normalizeGitHubUrl(url);
+    const analyzeRef: AnalyzeRef | undefined = parseAnalyzeRef(body?.ref);
 
     const baseCache = path.join(os.tmpdir(), "repo-metrics-git-cache");
     const cacheDir =
@@ -209,6 +208,7 @@ export async function POST(request: NextRequest) {
       useCache: true,
       cacheDir,
       githubToken,
+      ref: analyzeRef,
     });
 
     const parsed = parseGitHubUrl(normalizedUrl);
@@ -216,10 +216,14 @@ export async function POST(request: NextRequest) {
 
     let resultId: string;
     if (parsed) {
-      const suffix = commitSha
-        ? commitSha.slice(0, 12)
-        : randomUUID().replace(/-/g, "").slice(0, 12);
-      resultId = `${parsed.owner}-${parsed.repo}-${suffix}`;
+      resultId = buildAnalysisResultId({
+        owner: parsed.owner,
+        repo: parsed.repo,
+        commitSha,
+        ref: analyzeRef,
+        scope: report.source?.scope,
+        prNumber: report.source?.prNumber,
+      });
     } else {
       resultId = randomUUID();
     }

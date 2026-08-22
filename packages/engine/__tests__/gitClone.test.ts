@@ -87,4 +87,33 @@ describe("cloneOrUseCache", () => {
     },
     TEST_TIMEOUT,
   );
+
+  it(
+    "checks out a named branch into a separate cache key",
+    async () => {
+      const remote = simpleGit(remoteDir);
+      const defaultBranch = (await remote.revparse(["--abbrev-ref", "HEAD"])).trim();
+      await remote.checkoutLocalBranch("feat");
+      const featSha = await commitFile(
+        remoteDir,
+        "feat.ts",
+        "export const feat = 1;\n",
+        "feat commit",
+      );
+      await remote.checkout(defaultBranch);
+
+      const defaultPath = await cloneOrUseCache(parsed, true, cacheBase);
+      expect(existsSync(path.join(defaultPath, "feat.ts"))).toBe(false);
+
+      const featPath = await cloneOrUseCache(parsed, true, cacheBase, undefined, {
+        kind: "branch",
+        name: "feat",
+      });
+      expect(featPath).not.toBe(defaultPath);
+      expect(existsSync(path.join(featPath, "feat.ts"))).toBe(true);
+      const head = (await simpleGit(featPath).revparse(["HEAD"])).trim();
+      expect(head).toBe(featSha);
+    },
+    TEST_TIMEOUT,
+  );
 });

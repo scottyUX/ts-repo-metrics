@@ -46,19 +46,33 @@ export interface DuplicationDetectionResult {
  * unavailable rather than crashing the pipeline.
  *
  * @param repoPath - Absolute path to the repository root.
+ * @param includePaths - Optional repo-relative allow-list (PR changed files).
  * @returns Metrics plus raw duplicate entries for Phase 3 SRS weighting, or null if analysis fails.
  */
 export async function detectDuplication(
   repoPath: string,
+  includePaths?: string[],
 ): Promise<DuplicationDetectionResult | null> {
   const outputDir = path.join(repoPath, ".jscpd-report");
 
   const jscpdBin = resolveJscpdBin();
   if (!jscpdBin) return null;
 
+  if (includePaths && includePaths.length < 2) {
+    return {
+      metrics: { percentage: 0, duplicateLines: 0, cloneClusters: 0 },
+      duplicates: [],
+    };
+  }
+
+  const targets =
+    includePaths && includePaths.length > 0
+      ? includePaths.map((p) => path.resolve(repoPath, p))
+      : [repoPath];
+
   try {
     await execFileAsync(jscpdBin, [
-      repoPath,
+      ...targets,
       "--format", "typescript,tsx",
       "--reporters", "json",
       "--output", outputDir,

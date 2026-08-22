@@ -4,10 +4,9 @@ import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 import { GitFork, Github, Loader2, Star } from "lucide-react";
 import { AnalyzeRepositoryHero } from "@/components/analyze/AnalyzeRepositoryHero";
-import { runAnalyzeFromUrl } from "@/lib/runAnalyze";
+import { AnalyzeTargetPicker, type AnalyzePickerRepo } from "@/components/analyze/AnalyzeTargetPicker";
 
 type DashboardProfile = {
   login: string;
@@ -45,6 +44,7 @@ export default function ReposPage() {
   const [analyzingFullName, setAnalyzingFullName] = useState<string | null>(
     null,
   );
+  const [pickerRepo, setPickerRepo] = useState<AnalyzePickerRepo | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -89,24 +89,14 @@ export default function ReposPage() {
     };
   }, [router]);
 
-  const onRepoClick = useCallback(
-    async (repo: DashboardRepo) => {
-      if (analyzingFullName) return;
-      setAnalyzingFullName(repo.fullName);
-      try {
-        const result = await runAnalyzeFromUrl(repo.htmlUrl);
-        if (!result.ok) {
-          toast.error(result.error);
-          return;
-        }
-        toast.success("Analysis complete");
-        router.push(`/r/${encodeURIComponent(result.resultId)}`);
-      } finally {
-        setAnalyzingFullName(null);
-      }
-    },
-    [analyzingFullName, router],
-  );
+  const onRepoClick = useCallback((repo: DashboardRepo) => {
+    if (analyzingFullName) return;
+    setPickerRepo({
+      name: repo.name,
+      fullName: repo.fullName,
+      htmlUrl: repo.htmlUrl,
+    });
+  }, [analyzingFullName]);
 
   if (fetchError && !data && !loading) {
     return (
@@ -143,6 +133,7 @@ export default function ReposPage() {
     : "";
 
   return (
+    <>
     <div className="flex w-full max-w-6xl flex-col gap-10">
       <div className="mx-auto flex w-full justify-center">
         <AnalyzeRepositoryHero compact />
@@ -254,7 +245,7 @@ export default function ReposPage() {
                               Analyzing…
                             </span>
                           ) : (
-                            <span>Click to analyze</span>
+                            <span>Click to choose a PR or branch</span>
                           )}
                         </div>
                       </button>
@@ -267,5 +258,14 @@ export default function ReposPage() {
         </div>
       ) : null}
     </div>
+    <AnalyzeTargetPicker
+      repo={pickerRepo}
+      open={pickerRepo !== null}
+      onOpenChange={(open) => {
+        if (!open) setPickerRepo(null);
+      }}
+      onAnalyzingChange={setAnalyzingFullName}
+    />
+    </>
   );
 }

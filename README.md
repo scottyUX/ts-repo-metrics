@@ -182,7 +182,7 @@ repo-metrics/
 │   └── engine/                     # @repo-metrics/engine (builds to dist/)
 │       ├── src/
 │       │   ├── pipeline/           # analyzeRepo, analyzeFromGitHubUrl
-│       │   ├── collect/            # fileDiscovery, loc, duplication, gitClone, weightedRedundancy, gitMetrics, gitMetricsApi, repoMetadata, frameworkDetection
+│       │   ├── collect/            # fileDiscovery, loc, duplication, gitClone, githubPullRequest, weightedRedundancy, gitMetrics, repoMetadata, frameworkDetection
 │       │   ├── parsing/            # tsParser, tokenScanner (Halstead atoms)
 │       │   ├── extract/           # functionCount, functionMetrics, complexity, halstead, cognitiveComplexity, smells, silentFailures, testCoverageProxy, maintainabilityIndex, distributions, react/
 │       │   ├── types/              # report.ts (RepoReport, etc.)
