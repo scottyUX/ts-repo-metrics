@@ -39,12 +39,12 @@ function reportHasGitHubSource(report: RepoReport): boolean {
   return typeof u === "string" && u.includes("github.com");
 }
 
-/** Aligned with UCSC Developer Analytics tab strip (Figma). */
+/** GitHub-style underline nav for result categories. */
 const resultsTabTriggerClass = cn(
-  "inline-flex shrink-0 items-center justify-center gap-1.5 rounded-none border border-transparent px-4 py-2.5 text-sm font-medium shadow-none transition-colors",
+  "inline-flex shrink-0 items-center justify-center gap-1.5 rounded-none border-b-2 border-transparent px-3 py-2.5 text-sm font-medium shadow-none transition-colors",
   "text-muted-foreground hover:text-foreground",
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-  "data-[state=active]:z-[1] data-[state=active]:-mb-px data-[state=active]:rounded-none data-[state=active]:border-x data-[state=active]:border-t data-[state=active]:border-border data-[state=active]:border-b-transparent data-[state=active]:bg-neutral-800/30 data-[state=active]:text-foreground data-[state=active]:shadow-none dark:data-[state=active]:bg-neutral-800/30",
+  "data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none",
 );
 
 export function ResultsDashboard({ report, resultId }: ResultsDashboardProps) {
@@ -125,35 +125,32 @@ export function ResultsDashboard({ report, resultId }: ResultsDashboardProps) {
     <CoachExplainProvider value={coachExplain}>
       <div className="space-y-8">
         {courseSubmissionLabel ? (
-          <div className="rounded-lg border border-blue-200 bg-blue-50/50 px-4 py-3 text-sm dark:border-blue-900 dark:bg-blue-950/30">
-            <span className="font-medium text-blue-900 dark:text-blue-100">
+          <div className="rounded-md border border-border bg-muted px-4 py-3 text-sm">
+            <span className="font-medium text-foreground">
               Research submission
             </span>
-            <span className="ml-2 text-blue-800 dark:text-blue-200">{courseSubmissionLabel}</span>
-            <span className="ml-4 text-blue-700 dark:text-blue-300">
+            <span className="ml-2 text-muted-foreground">{courseSubmissionLabel}</span>
+            <span className="ml-4 text-muted-foreground">
               This analysis is not used to grade individual students.
             </span>
           </div>
         ) : null}
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold">Analysis Results</h1>
+            <h1 className="text-xl font-semibold tracking-tight">Analysis Results</h1>
             <p className="text-muted-foreground text-sm">Commit: {commit}</p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <Button
               onClick={handleExport}
-              variant="ghost"
-              className="h-9 gap-2 rounded-lg px-3 font-medium text-muted-foreground hover:text-foreground"
+              variant="outline"
+              className="h-8 gap-2 px-3 font-medium"
             >
               <Upload className="size-4 shrink-0" aria-hidden />
               Export JSON
             </Button>
-            <Button
-              asChild
-              className="h-9 rounded-lg border-0 bg-gradient-to-r from-primary to-[#8b5cf6] font-medium text-primary-foreground shadow-none hover:opacity-90"
-            >
-              <Link href={newAnalysisHref}>Run New Analysis</Link>
+            <Button asChild className="h-8 px-3 font-medium">
+              <Link href={newAnalysisHref}>New analysis</Link>
             </Button>
           </div>
         </div>
@@ -185,7 +182,7 @@ export function ResultsDashboard({ report, resultId }: ResultsDashboardProps) {
             <div className="w-full max-w-full overflow-x-auto [-webkit-overflow-scrolling:touch] [scrollbar-width:thin]">
               <TabsList
                 aria-label="Result categories"
-                className="flex h-12 min-h-12 w-max min-w-full flex-nowrap items-end gap-0 rounded-none border-b border-border bg-transparent p-0"
+                className="flex h-auto min-h-0 w-max min-w-full flex-nowrap items-end gap-0 rounded-none border-b border-border bg-transparent p-0"
               >
                 <TabsTrigger
                   className={resultsTabTriggerClass}

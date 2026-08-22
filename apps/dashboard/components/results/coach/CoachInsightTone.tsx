@@ -3,12 +3,12 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 
 const toneStyles = {
-  positive: "border-l-green-500 bg-green-500/5",
+  positive: "border-l-success",
   /** Highest severity opportunity framing (matches “Critical” tier). */
-  concern: "border-l-red-500 bg-red-500/5",
+  concern: "border-l-destructive",
   /** Needs-work opportunity framing — forward-looking, not punitive. */
-  opportunityModerate: "border-l-amber-500 bg-amber-500/5",
-  informational: "border-l-primary bg-primary/5",
+  opportunityModerate: "border-l-amber-500",
+  informational: "border-l-primary",
 } as const;
 
 export type CoachInsightToneKind = keyof typeof toneStyles;
@@ -34,21 +34,21 @@ export function CoachInsightTone({
       data-slot="coach-insight-tone"
       data-tone={tone}
       className={cn(
-        "rounded-[10px] border-l-[3px] py-3.5 pl-5 pr-4 sm:py-4 sm:pl-5",
+        "rounded-md border border-border border-l-4 bg-card px-4 py-4 shadow-none sm:px-5 sm:py-5",
         toneStyles[tone],
         className,
       )}
       {...props}
     >
       {title ? (
-        <p className="text-[15px] font-semibold leading-snug text-foreground sm:text-base">
+        <p className="text-base font-semibold leading-snug text-foreground">
           {title}
         </p>
       ) : null}
       <div
         className={cn(
           "text-pretty break-words text-sm leading-relaxed text-muted-foreground",
-          title && "mt-3",
+          title && "mt-2",
           bodyClassName,
         )}
       >

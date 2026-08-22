@@ -268,7 +268,7 @@ export default function CourseAnalyzePage() {
 
   const cardOuter = useMemo(
     () =>
-      "mx-auto w-full max-w-xl rounded-xl border border-border bg-card p-8 shadow-sm",
+      "mx-auto w-full max-w-xl rounded-md border border-border bg-card p-8",
     [],
   );
 
@@ -292,14 +292,12 @@ export default function CourseAnalyzePage() {
               {courseMeta ? courseMeta.term : courseIdDisplay}
             </span>
 
-            {/* Gradient title */}
+            {/* Title */}
             <div className="space-y-2">
-              <h1 className="text-5xl font-bold tracking-tight sm:text-6xl xl:text-7xl">
-                <span className="bg-gradient-to-r from-primary via-orange-400 to-amber-400 bg-clip-text text-transparent">
-                  Repo Analytics
-                </span>
+              <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+                Repo Analytics
               </h1>
-              <p className="text-xl font-semibold text-muted-foreground">
+              <p className="text-lg font-medium text-muted-foreground">
                 {courseMeta ? courseMeta.fullName : courseIdDisplay}
               </p>
             </div>
@@ -384,7 +382,7 @@ export default function CourseAnalyzePage() {
           </div>
 
           {dashUnauthorized ? (
-            <div className="flex w-full max-w-md mx-auto flex-col items-center gap-4 rounded-xl border border-border bg-card p-6 text-center shadow-sm">
+            <div className="flex w-full max-w-md mx-auto flex-col items-center gap-4 rounded-md border border-border bg-card p-6 text-center">
               <p className="text-sm text-muted-foreground">
                 Sign in with GitHub to analyze your repository. By using Repo Metrics, you agree to its{" "}
                 <a href="/license" className="underline underline-offset-4 hover:text-foreground">license</a>{" "}
@@ -430,9 +428,9 @@ export default function CourseAnalyzePage() {
             </div>
           ) : data?.profile ? (
             <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-10">
-              <aside className="lg:col-span-4">
-                <div className="flex flex-col items-center gap-4 rounded-xl border border-border bg-card p-6 text-center shadow-sm lg:items-stretch lg:text-left">
-                  <div className="mx-auto size-28 shrink-0 overflow-hidden rounded-full border border-border bg-muted lg:mx-0">
+              <aside className="lg:col-span-3">
+                <div className="flex flex-col items-center gap-3 lg:items-stretch">
+                  <div className="mx-auto size-24 shrink-0 overflow-hidden rounded-full border border-border bg-muted sm:size-28 lg:mx-0">
                     <Image
                       src={data.profile.avatarUrl}
                       alt=""
@@ -441,15 +439,15 @@ export default function CourseAnalyzePage() {
                       className="size-full object-cover"
                     />
                   </div>
-                  <div className="space-y-1">
-                    <h2 className="text-lg font-bold tracking-tight">
+                  <div className="space-y-0.5 text-center lg:text-left">
+                    <h2 className="text-lg font-semibold tracking-tight">
                       {(data.profile.name?.trim() || data.profile.login) ?? ""}
                     </h2>
                     <a
                       href={data.profile.htmlUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center justify-center gap-1 text-sm text-primary hover:underline lg:justify-start"
+                      className="inline-flex items-center justify-center gap-1 text-sm text-muted-foreground hover:text-primary hover:underline lg:justify-start"
                     >
                       <Github className="size-4 shrink-0" aria-hidden />
                       {data.profile.login}
@@ -460,14 +458,14 @@ export default function CourseAnalyzePage() {
                   </p>
                 </div>
               </aside>
-              <section className="lg:col-span-8">
-                <h2 className="mb-4 text-lg font-semibold tracking-tight">Repositories</h2>
+              <section className="lg:col-span-9">
+                <h2 className="mb-0 border-b border-border pb-2 text-sm font-semibold">Repositories</h2>
                 {data.repos.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">
+                  <p className="pt-4 text-sm text-muted-foreground">
                     No repositories returned. Try an account with repo access.
                   </p>
                 ) : (
-                  <ul className="grid gap-3 sm:grid-cols-2">
+                  <ul className="divide-y divide-border">
                     {data.repos.map((repo) => {
                       const busy = analyzingFullName === repo.fullName;
                       return (
@@ -476,11 +474,11 @@ export default function CourseAnalyzePage() {
                             type="button"
                             disabled={Boolean(analyzingFullName)}
                             onClick={() => void handleRepoClick(repo)}
-                            className="flex w-full flex-col gap-2 rounded-xl border border-border bg-card p-4 text-left shadow-sm transition-colors hover:bg-muted/50 disabled:cursor-not-allowed disabled:opacity-60"
+                            className="flex w-full flex-col gap-1.5 py-4 text-left transition-colors hover:bg-muted/40 disabled:cursor-not-allowed disabled:opacity-60"
                           >
-                            <div className="flex items-start justify-between gap-2">
-                              <span className="font-semibold text-primary">{repo.name}</span>
-                              <span className="shrink-0 rounded-full border border-border px-2 py-0.5 text-[10px] font-medium uppercase text-muted-foreground">
+                            <div className="flex items-center gap-2">
+                              <span className="truncate text-base font-semibold text-primary">{repo.name}</span>
+                              <span className="shrink-0 rounded-full border border-border px-2 py-px text-[11px] font-medium text-muted-foreground">
                                 {repo.private ? "Private" : "Public"}
                               </span>
                             </div>

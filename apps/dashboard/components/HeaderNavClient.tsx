@@ -61,8 +61,8 @@ function navLinkClass(active: boolean) {
   return cn(
     "shrink-0 whitespace-nowrap text-sm leading-5 transition-colors",
     active
-      ? "font-medium text-[#fafafa]"
-      : "text-[#a1a1a1] hover:text-[#fafafa]",
+      ? "font-semibold text-foreground"
+      : "text-muted-foreground hover:text-foreground",
   );
 }
 
@@ -96,7 +96,7 @@ function AvatarCircle({
   return (
     <span
       className={cn(
-        "flex shrink-0 items-center justify-center rounded-full bg-[#262626] text-xs font-normal text-[#fafafa]",
+        "flex shrink-0 items-center justify-center rounded-full bg-muted text-xs font-normal text-foreground",
         size === "sm" && "size-6 text-[10px]",
         size === "md" && "size-8",
         size === "lg" && "size-10 text-sm",
@@ -249,7 +249,7 @@ export function HeaderNavClient() {
             type="button"
             className={cn(
               "flex min-w-0 max-w-full shrink-0 items-center gap-2 rounded-md py-1 pr-1 text-left outline-none",
-              "hover:bg-primary/15 focus-visible:ring-2 focus-visible:ring-primary/60",
+              "hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring",
             )}
             aria-label="Account menu"
           >
@@ -258,11 +258,11 @@ export function HeaderNavClient() {
               label={accountLabel}
               size="md"
             />
-            <span className="hidden max-w-[9rem] truncate text-base font-medium text-[#fafafa] sm:inline">
+            <span className="hidden max-w-[9rem] truncate text-sm font-medium text-foreground sm:inline">
               {displayName ?? email ?? "Account"}
             </span>
             <ChevronDown
-              className="size-4 shrink-0 text-[#fafafa]"
+              className="size-4 shrink-0 text-muted-foreground"
               aria-hidden
             />
           </button>
@@ -399,17 +399,17 @@ export function HeaderNavClient() {
     <div className="flex w-full min-w-0 items-center gap-4 sm:gap-6 lg:gap-8">
       {loading ? (
         <div
-          className="h-8 w-24 shrink-0 animate-pulse rounded-md bg-[#262626]"
+          className="h-7 w-24 shrink-0 animate-pulse rounded-md bg-muted-foreground/20"
           aria-hidden
         />
-      ) : !signedIn ? (
+      ) : (
         <Link
-          href="/"
-          className="shrink-0 text-base font-medium tracking-tight text-[#fafafa] transition-colors hover:text-white"
+          href={signedIn ? "/repos" : "/"}
+          className="shrink-0 text-sm font-semibold tracking-tight text-foreground transition-colors hover:text-foreground"
         >
           Repo Metrics
         </Link>
-      ) : null}
+      )}
 
       <nav
         className="flex min-w-0 flex-1 items-center gap-x-5 gap-y-2 overflow-x-auto sm:gap-x-6 lg:gap-x-8 [&::-webkit-scrollbar]:h-1"
@@ -455,7 +455,7 @@ export function HeaderNavClient() {
 
         {!loading && !isBrowserSupabaseConfigured() ? (
           <span
-            className="max-w-[5.5rem] truncate text-right text-[10px] leading-tight text-[#a1a1a1] sm:max-w-[10rem] sm:text-xs"
+            className="max-w-[5.5rem] truncate text-right text-[10px] leading-tight text-muted-foreground sm:max-w-[10rem] sm:text-xs"
             title="Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY on the host (e.g. Vercel), then redeploy so the Sign in button appears."
           >
             Sign in unavailable
@@ -466,7 +466,7 @@ export function HeaderNavClient() {
           <button
             type="button"
             onClick={() => void signIn()}
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-[#262626] bg-[rgba(38,38,38,0.3)] px-2.5 py-2 text-xs font-medium text-[#fafafa] transition-colors hover:bg-primary/20 sm:px-3 sm:text-sm"
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-border bg-background px-2.5 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted sm:px-3 sm:text-sm"
           >
             <Github className="size-3.5 shrink-0" aria-hidden />
             <span className="hidden sm:inline">Sign in</span>

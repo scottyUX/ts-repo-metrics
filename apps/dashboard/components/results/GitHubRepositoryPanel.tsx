@@ -63,7 +63,7 @@ const MAX_LANG_INLINE = 5;
 const MAX_AVATARS = 5;
 
 function languageDotColor(name: string): string {
-  return LANGUAGE_DOT_HEX[name] ?? "#fafafa";
+  return LANGUAGE_DOT_HEX[name] ?? "#6e7781";
 }
 
 interface GitHubRepositoryPanelProps {
@@ -91,8 +91,8 @@ export function GitHubRepositoryPanel({
 
   const commitsLabel =
     totalCommits != null && totalCommits >= 0 ? (
-      <span className="shrink-0 text-sm text-[#a1a1a1]">
-        <span className="tabular-nums font-semibold text-[#fafafa]">
+      <span className="shrink-0 text-sm text-muted-foreground">
+        <span className="tabular-nums font-semibold text-foreground">
           {totalCommits}
         </span>{" "}
         commits
@@ -105,7 +105,7 @@ export function GitHubRepositoryPanel({
     <>
     <div
       className={cn(
-        "flex min-h-[7.125rem] flex-wrap items-center gap-x-4 gap-y-3 rounded-[14px] border border-[#262626] bg-[#171717] px-4 py-3 sm:gap-x-6",
+        "flex min-h-0 flex-wrap items-center gap-x-4 gap-y-3 rounded-md border border-border bg-muted px-4 py-3 sm:gap-x-6",
         metaUnavailable && "border-amber-500/35",
       )}
     >
@@ -114,7 +114,7 @@ export function GitHubRepositoryPanel({
           asChild
           variant="outline"
           size="sm"
-          className="shrink-0 border-[#262626] bg-[rgba(38,38,38,0.3)] text-[#fafafa] hover:bg-primary/15 hover:text-primary"
+          className="shrink-0"
         >
           <Link href={repoUrl} target="_blank" rel="noopener noreferrer">
             <Github className="size-4" />
@@ -139,7 +139,7 @@ export function GitHubRepositoryPanel({
                 className="flex shrink-0 items-center gap-1"
               >
                 {i > 0 ? (
-                  <span className="text-[#525252] select-none" aria-hidden>
+                  <span className="text-border select-none" aria-hidden>
                     ·
                   </span>
                 ) : null}
@@ -148,17 +148,17 @@ export function GitHubRepositoryPanel({
                   style={{ backgroundColor: languageDotColor(row.language) }}
                   aria-hidden
                 />
-                <span className="max-w-[5.5rem] truncate font-semibold text-[#fafafa] sm:max-w-none">
+                <span className="max-w-[5.5rem] truncate font-semibold text-foreground sm:max-w-none">
                   {row.language}
                 </span>
-                <span className="shrink-0 text-[#a1a1a1] tabular-nums">
+                <span className="shrink-0 text-muted-foreground tabular-nums">
                   {row.percentage.toFixed(1)}%
                 </span>
               </span>
             ))}
             {langOverflow > 0 ? (
-              <span className="shrink-0 text-[#a1a1a1]">
-                <span className="text-[#525252]" aria-hidden>
+              <span className="shrink-0 text-muted-foreground">
+                <span className="text-border" aria-hidden>
                   ·
                 </span>{" "}
                 +{langOverflow}
@@ -214,9 +214,9 @@ export function GitHubRepositoryPanel({
           <button
             type="button"
             onClick={() => setContributorsOpen(true)}
-            className="text-left text-sm text-[#a1a1a1] transition-colors hover:text-[#fafafa] hover:underline"
+            className="text-left text-sm text-muted-foreground transition-colors hover:text-foreground hover:underline"
           >
-            <span className="tabular-nums font-semibold text-[#fafafa]">
+            <span className="tabular-nums font-semibold text-foreground">
               {m.contributors.length}
             </span>{" "}
             contributor{m.contributors.length === 1 ? "" : "s"}
@@ -240,10 +240,10 @@ export function GitHubRepositoryPanel({
       <Sheet open={contributorsOpen} onOpenChange={setContributorsOpen}>
         <SheetContent
           side="right"
-          className="flex w-full flex-col border-[#262626] bg-[#171717] sm:max-w-md"
+          className="flex w-full flex-col border-border bg-background sm:max-w-md"
         >
           <SheetHeader>
-            <SheetTitle className="text-[#fafafa]">Contributors</SheetTitle>
+            <SheetTitle>Contributors</SheetTitle>
             <SheetDescription>
               {m.contributors.length} people with commits on this repository
               (GitHub).
@@ -257,7 +257,7 @@ export function GitHubRepositoryPanel({
                     href={c.htmlUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-white/5"
+                    className="flex items-center gap-3 rounded-md p-2 transition-colors hover:bg-muted"
                   >
                     <Avatar className="size-9 shrink-0">
                       <AvatarImage src={c.avatarUrl} alt="" />
@@ -266,15 +266,15 @@ export function GitHubRepositoryPanel({
                       </AvatarFallback>
                     </Avatar>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate font-medium text-[#fafafa]">
+                      <p className="truncate font-medium text-foreground">
                         {c.login}
                       </p>
                       {c.name ? (
-                        <p className="truncate text-xs text-[#a1a1a1]">
+                        <p className="truncate text-xs text-muted-foreground">
                           {c.name}
                         </p>
                       ) : null}
-                      <p className="text-xs text-[#a1a1a1]">
+                      <p className="text-xs text-muted-foreground">
                         {c.contributions} contribution
                         {c.contributions === 1 ? "" : "s"}
                       </p>

@@ -4,7 +4,7 @@ import { Github } from "lucide-react";
 export function SiteFooter() {
   return (
     <footer className="border-t border-border bg-background">
-      <div className="mx-auto max-w-6xl px-6 pt-10 pb-16 space-y-6">
+      <div className="mx-auto max-w-6xl space-y-5 px-6 py-8">
         {/* Research disclaimer */}
         <p className="text-xs leading-relaxed text-muted-foreground max-w-2xl">
           The repo analytics tool helps you reflect on your team&apos;s software engineering

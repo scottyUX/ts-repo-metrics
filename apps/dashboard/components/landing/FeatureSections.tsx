@@ -15,7 +15,7 @@ const SCATTER_LEGEND = [
 
 function ScatterChartMock() {
   return (
-    <div className="overflow-hidden rounded-xl border border-border bg-card p-4">
+    <div className="overflow-hidden rounded-md border border-border bg-card p-4">
       <p className="mb-4 text-center text-[11px] text-muted-foreground">
         Cyclomatic complexity vs three test-proximity bands (not a 0–1 scale)
       </p>
@@ -90,7 +90,7 @@ function ScatterChartMock() {
 
 function RiskProfileMock() {
   return (
-    <div className="overflow-hidden rounded-xl border border-border bg-card p-5">
+    <div className="overflow-hidden rounded-md border border-border bg-card p-5">
       <h3 className="font-semibold">Your risk profile</h3>
       <p className="mb-4 mt-0.5 text-xs text-muted-foreground">
         Structural risk from complexity + long functions versus verification density
@@ -150,7 +150,7 @@ const COMPLEXITY_STATS = [
 
 function ComplexityMock() {
   return (
-    <div className="overflow-hidden rounded-xl border border-border bg-card p-5">
+    <div className="overflow-hidden rounded-md border border-border bg-card p-5">
       <h3 className="font-semibold">Complexity Distribution</h3>
       <p className="mt-0.5 text-xs text-muted-foreground">
         Where complexity is concentrated across analyzed functions.
@@ -203,7 +203,7 @@ function slocColor(sloc: number): string {
 
 function ReactComponentsMock() {
   return (
-    <div className="overflow-hidden rounded-xl border border-border bg-card">
+    <div className="overflow-hidden rounded-md border border-border bg-card">
       <div className="flex items-start justify-between border-b border-border px-4 py-3">
         <div>
           <h3 className="font-semibold">Top Oversized Components</h3>
@@ -257,7 +257,7 @@ const AI_WEEKS = [
 
 function AIUsageMock() {
   return (
-    <div className="overflow-hidden rounded-xl border border-border bg-card p-5">
+    <div className="overflow-hidden rounded-md border border-border bg-card p-5">
       <h3 className="font-semibold">AI Usage Trends</h3>
       <p className="mt-0.5 text-xs text-muted-foreground">
         AI-assisted vs human-authored commits week over week
@@ -309,7 +309,7 @@ const REQUIRED_DOCS_PREVIEW = [
 
 function DocumentationMock() {
   return (
-    <div className="overflow-hidden rounded-xl border border-border bg-card">
+    <div className="overflow-hidden rounded-md border border-border bg-card">
       <div className="flex items-center justify-between border-b border-border px-4 py-3">
         <div>
           <h3 className="font-semibold">Required Documents</h3>

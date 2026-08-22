@@ -30,8 +30,8 @@ export interface OverviewCardItem {
 
 const tierPositive = {
   badgeClassName:
-    "border-0 bg-emerald-950 font-medium text-green-400 shadow-none",
-  scoreClassName: "text-green-400",
+    "border-transparent bg-green-100 font-medium text-green-800 dark:bg-green-950/50 dark:text-green-400",
+  scoreClassName: "text-green-700 dark:text-green-400",
 };
 
 const tierMeta: Record<
@@ -43,19 +43,16 @@ const tierMeta: Record<
   needs_work: {
     label: "Needs Work",
     badgeClassName:
-      "border-0 bg-amber-950 font-medium text-amber-400 shadow-none",
-    scoreClassName: "text-amber-400",
+      "border-transparent bg-amber-100 font-medium text-amber-800 dark:bg-amber-950/50 dark:text-amber-400",
+    scoreClassName: "text-amber-700 dark:text-amber-400",
   },
   critical: {
     label: "Critical",
     badgeClassName:
-      "border-0 bg-red-950 font-medium text-red-400 shadow-none",
-    scoreClassName: "text-red-400",
+      "border-transparent bg-red-100 font-medium text-red-800 dark:bg-red-950/50 dark:text-red-400",
+    scoreClassName: "text-red-700 dark:text-red-400",
   },
 };
-
-const detailsLinkClass =
-  "text-indigo-500 underline-offset-4 transition-colors hover:text-indigo-600 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background dark:text-indigo-400 dark:hover:text-indigo-300";
 
 interface OverviewCardProps {
   item: OverviewCardItem;
@@ -75,7 +72,7 @@ export function OverviewCard({ item, selected = false, className, onRequestTab }
           className="pointer-events-none absolute left-1/2 top-1 z-10 -translate-x-1/2 -translate-y-1/2"
           aria-hidden
         >
-          <span className="rounded-md bg-red-600 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white shadow-sm ring-1 ring-white/10">
+          <span className="rounded-md border border-red-300 bg-red-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-red-700 dark:border-red-800 dark:bg-red-950/60 dark:text-red-300">
             Start here
           </span>
         </div>
@@ -84,15 +81,10 @@ export function OverviewCard({ item, selected = false, className, onRequestTab }
       <Card
         className={cn(
           OVERVIEW_CARD_ASPECT_CLASS,
-          "group/card flex min-h-0 w-full flex-col gap-0 overflow-visible rounded-xl border py-0 shadow-sm transition-all duration-200 ease-out",
+          "group/card flex min-h-0 w-full flex-col gap-0 overflow-visible rounded-md border py-0 shadow-none",
           selected
-            ? "border-red-400 shadow-[0_0_0_1px_rgb(248_113_113/0.45)]"
-            : [
-                "border-border hover:-translate-y-0.5 hover:border-neutral-400/55 hover:shadow-md",
-                "dark:hover:border-neutral-500/60 dark:hover:shadow-lg",
-              ],
-          selected &&
-            "hover:-translate-y-0 hover:border-red-400 hover:shadow-[0_0_0_1px_rgb(248_113_113/0.55)]",
+            ? "border-red-400 dark:border-red-700"
+            : "border-border hover:border-border hover:bg-muted/30",
         )}
       >
         <CardHeader className="gap-2 space-y-0 px-5 pb-3 pt-5">
@@ -114,11 +106,11 @@ export function OverviewCard({ item, selected = false, className, onRequestTab }
               {item.score}
             </p>
           ) : (
-            <p className="text-[2rem] font-bold tabular-nums leading-none text-neutral-400 sm:text-4xl dark:text-neutral-500">
+            <p className="text-[2rem] font-bold tabular-nums leading-none text-muted-foreground sm:text-4xl">
               —
             </p>
           )}
-          <p className="text-sm leading-snug text-neutral-500 dark:text-neutral-400">
+          <p className="text-sm leading-snug text-muted-foreground">
             {item.description}
           </p>
         </CardContent>
@@ -126,8 +118,8 @@ export function OverviewCard({ item, selected = false, className, onRequestTab }
           {item.detailsHref && item.detailsTab && onRequestTab ? (
             <Button
               type="button"
-              variant="link"
-              className={cn("h-auto p-0 text-sm font-medium", detailsLinkClass)}
+              variant="success"
+              size="sm"
               onClick={() => {
                 onRequestTab(item.detailsTab!);
                 const id = item.detailsHref!.replace(/^#/, "");
@@ -142,11 +134,11 @@ export function OverviewCard({ item, selected = false, className, onRequestTab }
               {detailsLabel}
             </Button>
           ) : item.detailsHref ? (
-            <Button variant="link" className={cn("h-auto p-0 text-sm font-medium", detailsLinkClass)} asChild>
+            <Button variant="success" size="sm" asChild>
               <Link href={item.detailsHref}>{detailsLabel}</Link>
             </Button>
           ) : (
-            <span className="cursor-default text-sm text-neutral-500 transition-colors group-hover/card:text-neutral-600 dark:text-neutral-400 dark:group-hover/card:text-neutral-300">
+            <span className="cursor-default text-sm text-muted-foreground">
               {detailsLabel}
             </span>
           )}

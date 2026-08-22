@@ -112,7 +112,7 @@ export default function ReposPage() {
     return (
       <div className="flex w-full max-w-6xl flex-col items-center gap-14">
         <AnalyzeRepositoryHero compact />
-        <div className="w-full max-w-lg space-y-4 rounded-xl border border-border bg-card p-6 text-center shadow-sm">
+        <div className="w-full max-w-lg space-y-4 rounded-md border border-border bg-card p-6 text-center">
           <p className="text-sm text-destructive">{fetchError}</p>
           {(tokenErrorCode === "github_token_missing" ||
             tokenErrorCode === "github_unauthorized") && (
@@ -143,7 +143,7 @@ export default function ReposPage() {
     : "";
 
   return (
-    <div className="flex w-full max-w-6xl flex-col gap-14">
+    <div className="flex w-full max-w-6xl flex-col gap-10">
       <div className="mx-auto flex w-full justify-center">
         <AnalyzeRepositoryHero compact />
       </div>
@@ -155,9 +155,9 @@ export default function ReposPage() {
         </div>
       ) : profile ? (
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-10">
-          <aside className="lg:col-span-4">
-            <div className="flex flex-col items-center gap-4 rounded-xl border border-border bg-card p-6 text-center shadow-sm lg:items-stretch lg:text-left">
-              <div className="mx-auto size-32 shrink-0 overflow-hidden rounded-full border border-border bg-muted lg:mx-0">
+          <aside className="lg:col-span-3">
+            <div className="flex flex-col items-center gap-3 lg:items-stretch">
+              <div className="mx-auto size-24 shrink-0 overflow-hidden rounded-full border border-border bg-muted sm:size-32 lg:mx-0">
                 <Image
                   src={profile.avatarUrl}
                   alt=""
@@ -166,47 +166,47 @@ export default function ReposPage() {
                   className="size-full object-cover"
                 />
               </div>
-              <div className="space-y-1">
-                <h1 className="text-xl font-bold tracking-tight">
+              <div className="space-y-0.5 text-center lg:text-left">
+                <h1 className="text-xl font-semibold tracking-tight leading-tight">
                   {displayName}
                 </h1>
                 <a
                   href={profile.htmlUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-1 text-sm text-primary hover:underline lg:justify-start"
+                  className="inline-flex items-center justify-center gap-1 text-base text-muted-foreground hover:text-primary hover:underline lg:justify-start"
                 >
                   <Github className="size-4 shrink-0" aria-hidden />
                   {profile.login}
                 </a>
               </div>
               <p className="text-sm text-muted-foreground">
-                <span className="font-medium text-foreground">
+                <span className="font-semibold text-foreground">
                   {profile.followers}
                 </span>{" "}
                 followers ·{" "}
-                <span className="font-medium text-foreground">
+                <span className="font-semibold text-foreground">
                   {profile.following}
                 </span>{" "}
                 following
               </p>
               <p className="text-xs text-muted-foreground">
-                {profile.publicRepos} public repos on GitHub
+                {profile.publicRepos} public repositories
               </p>
             </div>
           </aside>
 
-          <section className="lg:col-span-8">
-            <h2 className="mb-4 text-lg font-semibold tracking-tight">
+          <section className="lg:col-span-9">
+            <h2 className="mb-0 border-b border-border pb-2 text-sm font-semibold">
               Repositories
             </h2>
             {repos.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
+              <p className="pt-4 text-sm text-muted-foreground">
                 No repositories returned. Try signing in with an account that
                 has repo access.
               </p>
             ) : (
-              <ul className="grid gap-3 sm:grid-cols-2">
+              <ul className="divide-y divide-border">
                 {repos.map((repo) => {
                   const busy = analyzingFullName === repo.fullName;
                   return (
@@ -215,26 +215,26 @@ export default function ReposPage() {
                         type="button"
                         disabled={Boolean(analyzingFullName)}
                         onClick={() => void onRepoClick(repo)}
-                        className="flex w-full flex-col gap-2 rounded-xl border border-border bg-card p-4 text-left shadow-sm transition-colors hover:bg-muted/50 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="flex w-full flex-col gap-1.5 py-4 text-left transition-colors hover:bg-muted/40 disabled:cursor-not-allowed disabled:opacity-60"
                       >
-                        <div className="flex items-start justify-between gap-2">
-                          <span className="font-semibold text-primary">
+                        <div className="flex items-center gap-2">
+                          <span className="truncate text-base font-semibold text-primary">
                             {repo.name}
                           </span>
-                          <span className="shrink-0 rounded-full border border-border px-2 py-0.5 text-[10px] font-medium uppercase text-muted-foreground">
+                          <span className="shrink-0 rounded-full border border-border px-2 py-px text-[11px] font-medium text-muted-foreground">
                             {repo.private ? "Private" : "Public"}
                           </span>
                         </div>
                         {repo.description ? (
-                          <p className="line-clamp-2 text-xs text-muted-foreground">
+                          <p className="line-clamp-2 text-sm text-muted-foreground">
                             {repo.description}
                           </p>
                         ) : null}
-                        <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+                        <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
                           {repo.language ? (
                             <span className="inline-flex items-center gap-1">
                               <span
-                                className="size-2 rounded-full bg-blue-500"
+                                className="size-2.5 rounded-full bg-primary/70"
                                 aria-hidden
                               />
                               {repo.language}
@@ -254,9 +254,7 @@ export default function ReposPage() {
                               Analyzing…
                             </span>
                           ) : (
-                            <span className="text-foreground">
-                              Click to analyze
-                            </span>
+                            <span>Click to analyze</span>
                           )}
                         </div>
                       </button>

@@ -7,7 +7,6 @@ import { cn } from "@/lib/utils";
 import { CoachInsightTone } from "./CoachInsightTone";
 import { CoachPointerStrip } from "./CoachPointerStrip";
 import { CoachSaysEyebrow } from "./CoachSaysEyebrow";
-import { CoachSaysSurface } from "./CoachSaysSurface";
 
 export interface CoachSaysPanelProps {
   className?: string;
@@ -40,7 +39,7 @@ export function CoachSaysPanel({
   footerLink,
 }: CoachSaysPanelProps) {
   return (
-    <CoachSaysSurface className={cn("flex flex-col gap-4 sm:gap-5", className)} showAccent={false}>
+    <div className={cn("flex w-full min-w-0 flex-col gap-3", className)}>
       {eyebrow ? <CoachSaysEyebrow>{eyebrow}</CoachSaysEyebrow> : null}
       <CoachInsightTone tone="positive" title={positive.title}>
         {positive.body}
@@ -51,25 +50,28 @@ export function CoachSaysPanel({
       >
         {concern.body}
       </CoachInsightTone>
-      {pointer ? <CoachPointerStrip>{pointer}</CoachPointerStrip> : null}
-      {footerLink ? (
-        <div>
-          {footerLink.onNavigate ? (
-            <Button
-              type="button"
-              variant="link"
-              className="h-auto p-0 text-sm font-normal text-primary"
-              onClick={footerLink.onNavigate}
-            >
-              {footerLink.label}
-            </Button>
-          ) : (
-            <Button variant="link" className="h-auto p-0 text-sm font-normal text-primary" asChild>
-              <Link href={footerLink.href}>{footerLink.label}</Link>
-            </Button>
-          )}
+      {pointer || footerLink ? (
+        <div className="flex flex-col gap-3 rounded-md border border-border bg-card px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:px-5">
+          {pointer ? <CoachPointerStrip className="min-w-0 flex-1">{pointer}</CoachPointerStrip> : null}
+          {footerLink ? (
+            footerLink.onNavigate ? (
+              <Button
+                type="button"
+                variant="success"
+                size="sm"
+                className="shrink-0 self-start sm:self-center"
+                onClick={footerLink.onNavigate}
+              >
+                {footerLink.label}
+              </Button>
+            ) : (
+              <Button variant="success" size="sm" className="shrink-0 self-start sm:self-center" asChild>
+                <Link href={footerLink.href}>{footerLink.label}</Link>
+              </Button>
+            )
+          ) : null}
         </div>
       ) : null}
-    </CoachSaysSurface>
+    </div>
   );
 }

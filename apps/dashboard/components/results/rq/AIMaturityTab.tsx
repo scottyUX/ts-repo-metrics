@@ -34,7 +34,7 @@ import {
 } from "@/components/results/rq/aiUsageSignalHelpContent";
 import { Check, CircleHelp, Copy } from "lucide-react";
 
-const aiTraceInsightSurface = "bg-card shadow-sm ring-1 ring-border/40";
+const aiTraceInsightSurface = "";
 
 const WEEKDAY_LETTERS = ["M", "T", "W", "T", "F", "S", "S"] as const;
 const WEEKDAY_NAMES = [

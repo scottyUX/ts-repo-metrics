@@ -112,7 +112,7 @@ function TestingVerificationIntro({
     return (
       <CoachInsightTone
         tone="positive"
-        className={cn("bg-card shadow-sm ring-1 ring-border/40", className)}
+        className={className}
         aria-label="Testing and verification"
         bodyClassName="text-foreground/90 font-normal"
       >
@@ -137,7 +137,7 @@ function TestingVerificationIntro({
   return (
     <CoachInsightTone
       tone="concern"
-      className={cn("bg-card shadow-sm ring-1 ring-border/40", className)}
+      className={className}
       aria-label="Testing and verification"
       bodyClassName="text-foreground/90 font-normal"
     >
@@ -189,7 +189,7 @@ function CodeQualityPanelIntro({
     return (
       <CoachInsightTone
         tone="concern"
-        className={cn("bg-card shadow-sm ring-1 ring-border/40", className)}
+        className={className}
         aria-label="Code quality"
         bodyClassName="text-foreground/90 font-normal"
       >
@@ -207,7 +207,7 @@ function CodeQualityPanelIntro({
     return (
       <CoachInsightTone
         tone="positive"
-        className={cn("bg-card shadow-sm ring-1 ring-border/40", className)}
+        className={className}
         aria-label="Code quality"
         bodyClassName="text-foreground/90 font-normal"
       >
@@ -223,7 +223,7 @@ function CodeQualityPanelIntro({
   return (
     <CoachInsightTone
       tone="informational"
-      className={cn("bg-card shadow-sm ring-1 ring-border/40", className)}
+      className={className}
       aria-label="Code quality"
       bodyClassName="text-foreground/90 font-normal"
     >
@@ -242,7 +242,7 @@ function ReactComponentsPanelIntro({ report, className }: { report: RepoReport; 
     return (
       <CoachInsightTone
         tone="informational"
-        className={cn("bg-card shadow-sm ring-1 ring-border/40", className)}
+        className={className}
         aria-label="React components"
         bodyClassName="text-foreground/90 font-normal"
       >
@@ -270,7 +270,7 @@ function ReactComponentsPanelIntro({ report, className }: { report: RepoReport; 
     return (
       <CoachInsightTone
         tone="concern"
-        className={cn("bg-card shadow-sm ring-1 ring-border/40", className)}
+        className={className}
         aria-label="React components"
         bodyClassName="text-foreground/90 font-normal"
       >
@@ -290,7 +290,7 @@ function ReactComponentsPanelIntro({ report, className }: { report: RepoReport; 
     return (
       <CoachInsightTone
         tone="positive"
-        className={cn("bg-card shadow-sm ring-1 ring-border/40", className)}
+        className={className}
         aria-label="React components"
         bodyClassName="text-foreground/90 font-normal"
       >
@@ -306,7 +306,7 @@ function ReactComponentsPanelIntro({ report, className }: { report: RepoReport; 
   return (
     <CoachInsightTone
       tone="informational"
-      className={cn("bg-card shadow-sm ring-1 ring-border/40", className)}
+      className={className}
       aria-label="React components"
       bodyClassName="text-foreground/90 font-normal"
     >
@@ -326,7 +326,7 @@ function CodeComplexityPanelIntro({ report, className }: { report: RepoReport; c
     return (
       <CoachInsightTone
         tone="informational"
-        className={cn("bg-card shadow-sm ring-1 ring-border/40", className)}
+        className={className}
         aria-label="Code complexity"
         bodyClassName="text-foreground/90 font-normal"
       >
@@ -389,7 +389,7 @@ function CodeComplexityPanelIntro({ report, className }: { report: RepoReport; c
   return (
     <CoachInsightTone
       tone={tone}
-      className={cn("bg-card shadow-sm ring-1 ring-border/40", className)}
+      className={className}
       aria-label="Code complexity"
       bodyClassName="text-foreground/90 font-normal"
     >
@@ -418,7 +418,7 @@ function AiUsagePanelIntro({ className }: { className?: string }) {
     <CoachInsightTone
       tone="informational"
       title="AI usage"
-      className={cn("bg-card shadow-sm ring-1 ring-border/40", className)}
+      className={className}
       aria-label="AI usage"
       bodyClassName="text-foreground/90 font-normal"
     >
