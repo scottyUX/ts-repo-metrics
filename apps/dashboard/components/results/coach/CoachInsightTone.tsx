@@ -2,16 +2,11 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
-const toneStyles = {
-  positive: "border-l-success",
-  /** Highest severity opportunity framing (matches “Critical” tier). */
-  concern: "border-l-destructive",
-  /** Needs-work opportunity framing — forward-looking, not punitive. */
-  opportunityModerate: "border-l-amber-500",
-  informational: "border-l-primary",
-} as const;
-
-export type CoachInsightToneKind = keyof typeof toneStyles;
+export type CoachInsightToneKind =
+  | "positive"
+  | "concern"
+  | "opportunityModerate"
+  | "informational";
 
 export interface CoachInsightToneProps extends React.ComponentProps<"div"> {
   tone: CoachInsightToneKind;
@@ -34,8 +29,7 @@ export function CoachInsightTone({
       data-slot="coach-insight-tone"
       data-tone={tone}
       className={cn(
-        "rounded-md border border-border border-l-4 bg-card px-4 py-4 shadow-none sm:px-5 sm:py-5",
-        toneStyles[tone],
+        "rounded-md border border-border bg-card px-4 py-4 shadow-none sm:px-5 sm:py-5",
         className,
       )}
       {...props}

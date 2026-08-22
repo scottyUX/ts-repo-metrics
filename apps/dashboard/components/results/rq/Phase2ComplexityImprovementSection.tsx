@@ -52,7 +52,7 @@ export function Phase2ComplexityImprovementSection({
 
       <div
         className={cn(
-          "mt-4 rounded-lg border-l-[3px] border-l-primary bg-primary/[0.07] px-4 py-3 pl-5 sm:px-5 sm:py-4",
+          "mt-4 rounded-lg border border-border bg-card px-4 py-3 sm:px-5 sm:py-4",
         )}
       >
         <p className="text-[11px] font-normal uppercase leading-normal tracking-wide text-primary">
