@@ -13,7 +13,7 @@ export function CoachSaysEyebrow({ className, children, ...props }: CoachSaysEye
     <p
       data-slot="coach-says-eyebrow"
       className={cn(
-        "text-[11px] font-semibold uppercase leading-none tracking-[0.15em] text-foreground",
+        "text-xs font-medium uppercase tracking-wide text-muted-foreground",
         className,
       )}
       {...props}

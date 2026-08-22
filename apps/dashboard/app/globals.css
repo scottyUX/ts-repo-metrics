@@ -39,6 +39,8 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
   --radius-sm: calc(var(--radius) - 2px);
   --radius-md: var(--radius);
   --radius-lg: var(--radius);
@@ -82,12 +84,14 @@
   --sidebar-accent-foreground: #0969da;
   --sidebar-border: #d0d7de;
   --sidebar-ring: #0969da;
+  --success: #1f883d;
+  --success-foreground: #ffffff;
 }
 
 .dark {
   --background: #0d1117;
   --foreground: #e6edf3;
-  --card: #0d1117;
+  --card: #161b22;
   --card-foreground: #e6edf3;
   --popover: #161b22;
   --popover-foreground: #e6edf3;
@@ -116,6 +120,8 @@
   --sidebar-accent-foreground: #4493f8;
   --sidebar-border: #30363d;
   --sidebar-ring: #4493f8;
+  --success: #238636;
+  --success-foreground: #ffffff;
 }
 
 @layer base {

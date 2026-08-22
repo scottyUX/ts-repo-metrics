@@ -54,9 +54,6 @@ const tierMeta: Record<
   },
 };
 
-const detailsLinkClass =
-  "text-primary underline-offset-4 transition-colors hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background";
-
 interface OverviewCardProps {
   item: OverviewCardItem;
   selected?: boolean;
@@ -121,8 +118,8 @@ export function OverviewCard({ item, selected = false, className, onRequestTab }
           {item.detailsHref && item.detailsTab && onRequestTab ? (
             <Button
               type="button"
-              variant="link"
-              className={cn("h-auto p-0 text-sm font-medium", detailsLinkClass)}
+              variant="success"
+              size="sm"
               onClick={() => {
                 onRequestTab(item.detailsTab!);
                 const id = item.detailsHref!.replace(/^#/, "");
@@ -137,7 +134,7 @@ export function OverviewCard({ item, selected = false, className, onRequestTab }
               {detailsLabel}
             </Button>
           ) : item.detailsHref ? (
-            <Button variant="link" className={cn("h-auto p-0 text-sm font-medium", detailsLinkClass)} asChild>
+            <Button variant="success" size="sm" asChild>
               <Link href={item.detailsHref}>{detailsLabel}</Link>
             </Button>
           ) : (

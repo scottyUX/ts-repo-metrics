@@ -4,7 +4,6 @@ import { useContext } from "react";
 import type { CoachInsightToneKind } from "@/components/results/coach/CoachInsightTone";
 import { CoachInsightTone } from "@/components/results/coach/CoachInsightTone";
 import type { RepoReport } from "@/lib/reportTypes";
-import { cn } from "@/lib/utils";
 import { CommitHabitsTabInsightContext } from "./CommitHabitsTabInsightContext";
 import { CommitHabitsPanelIntro } from "./CommitHabitsPanelIntro";
 
@@ -40,7 +39,7 @@ export function CommitHabitsTabInsightIntro({
     return (
       <CoachInsightTone
         tone="informational"
-        className={cn("bg-card shadow-sm ring-1 ring-border/40", className)}
+        className={className}
         aria-label="Commit habits"
         bodyClassName="text-muted-foreground text-sm"
       >
@@ -53,7 +52,7 @@ export function CommitHabitsTabInsightIntro({
     return (
       <CoachInsightTone
         tone={toneForTier(facts.overallTier)}
-        className={cn("bg-card shadow-sm ring-1 ring-border/40", className)}
+        className={className}
         aria-label="Commit habits"
         bodyClassName="text-foreground/90 font-normal"
       >

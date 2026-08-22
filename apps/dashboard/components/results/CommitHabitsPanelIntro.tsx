@@ -2,7 +2,6 @@
 
 import { CoachInsightTone } from "@/components/results/coach/CoachInsightTone";
 import type { RepoReport } from "@/lib/reportTypes";
-import { cn } from "@/lib/utils";
 
 /** Rule-based Commit Habits intro (fallback when tab-insight API unavailable). */
 export function CommitHabitsPanelIntro({
@@ -27,7 +26,7 @@ export function CommitHabitsPanelIntro({
     return (
       <CoachInsightTone
         tone="informational"
-        className={cn("bg-card shadow-sm ring-1 ring-border/40", className)}
+        className={className}
         aria-label="Commit habits"
         bodyClassName="text-foreground/90 font-normal"
       >
@@ -44,7 +43,7 @@ export function CommitHabitsPanelIntro({
     return (
       <CoachInsightTone
         tone="positive"
-        className={cn("bg-card shadow-sm ring-1 ring-border/40", className)}
+        className={className}
         aria-label="Commit habits"
         bodyClassName="text-foreground/90 font-normal"
       >
@@ -62,7 +61,7 @@ export function CommitHabitsPanelIntro({
     return (
       <CoachInsightTone
         tone="concern"
-        className={cn("bg-card shadow-sm ring-1 ring-border/40", className)}
+        className={className}
         aria-label="Commit habits"
         bodyClassName="text-foreground/90 font-normal"
       >
@@ -78,7 +77,7 @@ export function CommitHabitsPanelIntro({
   return (
     <CoachInsightTone
       tone="informational"
-      className={cn("bg-card shadow-sm ring-1 ring-border/40", className)}
+      className={className}
       aria-label="Commit habits"
       bodyClassName="text-foreground/90 font-normal"
     >
