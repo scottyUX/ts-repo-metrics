@@ -57,7 +57,7 @@ export function CoachSaysPanel({
             footerLink.onNavigate ? (
               <Button
                 type="button"
-                variant="success"
+                variant="default"
                 size="sm"
                 className="shrink-0 self-start sm:self-center"
                 onClick={footerLink.onNavigate}
@@ -65,7 +65,7 @@ export function CoachSaysPanel({
                 {footerLink.label}
               </Button>
             ) : (
-              <Button variant="success" size="sm" className="shrink-0 self-start sm:self-center" asChild>
+              <Button variant="default" size="sm" className="shrink-0 self-start sm:self-center" asChild>
                 <Link href={footerLink.href}>{footerLink.label}</Link>
               </Button>
             )

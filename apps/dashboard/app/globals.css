@@ -41,6 +41,10 @@
   --color-card: var(--card);
   --color-success: var(--success);
   --color-success-foreground: var(--success-foreground);
+  --color-card-hover: var(--card-hover);
+  --color-status-positive: var(--status-positive);
+  --color-status-warning: var(--status-warning);
+  --color-status-critical: var(--status-critical);
   --radius-sm: calc(var(--radius) - 2px);
   --radius-md: var(--radius);
   --radius-lg: var(--radius);
@@ -86,6 +90,10 @@
   --sidebar-ring: #0969da;
   --success: #1f883d;
   --success-foreground: #ffffff;
+  --card-hover: #f6f8fa;
+  --status-positive: #1a7f37;
+  --status-warning: #9a6700;
+  --status-critical: #cf222e;
 }
 
 .dark {
@@ -122,6 +130,10 @@
   --sidebar-ring: #4493f8;
   --success: #238636;
   --success-foreground: #ffffff;
+  --card-hover: #21262d;
+  --status-positive: #3fb950;
+  --status-warning: #d29922;
+  --status-critical: #f85149;
 }
 
 @layer base {

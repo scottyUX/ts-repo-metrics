@@ -1,9 +1,9 @@
 const PREVIEW_METRICS = [
-  { label: "Code Complexity", score: 77, rating: "Strong",     color: "text-green-700 dark:text-green-400" },
-  { label: "Commit Habits",   score: 70, rating: "Strong",     color: "text-green-700 dark:text-green-400" },
-  { label: "Testing",         score: 69, rating: "Good",       color: "text-green-700 dark:text-green-400" },
-  { label: "Code Quality",    score: 40, rating: "Needs Work", color: "text-amber-700 dark:text-amber-400" },
-  { label: "React",           score: 18, rating: "Critical",   color: "text-red-700 dark:text-red-400"   },
+  { label: "Code Complexity", score: 77, rating: "Strong",     color: "text-status-positive" },
+  { label: "Commit Habits",   score: 70, rating: "Strong",     color: "text-status-positive" },
+  { label: "Testing",         score: 69, rating: "Good",       color: "text-status-positive" },
+  { label: "Code Quality",    score: 40, rating: "Needs Work", color: "text-status-warning" },
+  { label: "React",           score: 18, rating: "Critical",   color: "text-status-critical" },
 ] as const;
 
 const PREVIEW_CARDS = [
@@ -63,7 +63,7 @@ export function DashboardPreview() {
           {PREVIEW_CARDS.map((m) => (
             <div key={m.label} className="space-y-1 rounded-lg border border-border bg-background/40 p-4">
               <p className="text-[11px] text-muted-foreground">{m.label}</p>
-              <p className={`text-[10px] font-medium ${m.rating === "Strong" ? "text-green-700 dark:text-green-400" : "text-amber-700 dark:text-amber-400"}`}>
+              <p className={`text-[10px] font-medium ${m.rating === "Strong" ? "text-status-positive" : "text-status-warning"}`}>
                 {m.rating}
               </p>
               <p className="text-2xl font-bold">{m.value}</p>
