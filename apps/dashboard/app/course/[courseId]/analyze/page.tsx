@@ -7,15 +7,14 @@
 
 import Image from "next/image";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useParams, usePathname, useRouter } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 import { toast } from "sonner";
 import { GitFork, Github, Loader2, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { DashboardPreview } from "@/components/landing/DashboardPreview";
 import { FeatureSections } from "@/components/landing/FeatureSections";
-import { writeReportToSessionStorage } from "@/lib/reportLocalCache";
-import type { RepoReport } from "@/lib/reportTypes";
+import { AnalyzeTargetPicker, type AnalyzePickerRepo } from "@/components/analyze/AnalyzeTargetPicker";
 import { createUserSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { isBrowserSupabaseConfigured } from "@/lib/supabase/browserConfigured";
 import {
@@ -74,7 +73,6 @@ function flowStorageKey(courseSlug: string): string {
 }
 
 export default function CourseAnalyzePage() {
-  const router = useRouter();
   const pathname = usePathname();
   const params = useParams();
   const courseSlugParam =
@@ -102,6 +100,7 @@ export default function CourseAnalyzePage() {
   const [analyzingFullName, setAnalyzingFullName] = useState<string | null>(
     null,
   );
+  const [pickerRepo, setPickerRepo] = useState<AnalyzePickerRepo | null>(null);
 
   const [signingIn, setSigningIn] = useState(false);
 
@@ -211,57 +210,15 @@ export default function CourseAnalyzePage() {
   };
 
   const handleRepoClick = useCallback(
-    async (repo: DashboardRepo) => {
+    (repo: DashboardRepo) => {
       if (analyzingFullName) return;
-      setAnalyzingFullName(repo.fullName);
-      try {
-        const res = await fetch("/api/analyze", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({
-            url: repo.htmlUrl,
-            course_id: courseIdDisplay || null,
-            team_name: teamName.trim(),
-          }),
-        });
-        let body: {
-          error?: string;
-          hint?: string;
-          resultId?: string;
-          report?: RepoReport;
-          code?: string;
-        } = {};
-        try {
-          body = (await res.json()) as typeof body;
-        } catch {
-          toast.error("Analysis failed.");
-          return;
-        }
-        if (!res.ok) {
-          const base = body.error ?? "Analysis failed.";
-          const msg =
-            typeof body.hint === "string" && body.hint.trim() ?
-              `${base} — ${body.hint}`
-            : base;
-          toast.error(msg);
-          return;
-        }
-        const rid = body.resultId;
-        if (!rid || typeof rid !== "string") {
-          toast.error("Invalid response.");
-          return;
-        }
-        if (body.report) {
-          writeReportToSessionStorage(rid, body.report);
-        }
-        toast.success("Analysis complete");
-        router.push(`/r/${encodeURIComponent(rid)}`);
-      } finally {
-        setAnalyzingFullName(null);
-      }
+      setPickerRepo({
+        name: repo.name,
+        fullName: repo.fullName,
+        htmlUrl: repo.htmlUrl,
+      });
     },
-    [analyzingFullName, courseIdDisplay, router, teamName],
+    [analyzingFullName],
   );
 
   const courseMeta = COURSE_META[courseIdDisplay] ?? null;
@@ -454,7 +411,7 @@ export default function CourseAnalyzePage() {
                     </a>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    Pick a repo below — analysis may take a minute.
+                    Pick a repo below, then choose a pull request, branch, or main.
                   </p>
                 </div>
               </aside>
@@ -511,7 +468,7 @@ export default function CourseAnalyzePage() {
                                   Analyzing…
                                 </span>
                               ) : (
-                                <span className="text-foreground">Click to analyze</span>
+                                <span className="text-foreground">Click to choose a PR or branch</span>
                               )}
                             </div>
                           </button>
@@ -526,6 +483,18 @@ export default function CourseAnalyzePage() {
         </div>
         </div>
       ) : null}
+      <AnalyzeTargetPicker
+        repo={pickerRepo}
+        open={pickerRepo !== null}
+        onOpenChange={(open) => {
+          if (!open) setPickerRepo(null);
+        }}
+        extra={{
+          course_id: courseIdDisplay || null,
+          team_name: teamName.trim(),
+        }}
+        onAnalyzingChange={setAnalyzingFullName}
+      />
     </div>
   );
 }

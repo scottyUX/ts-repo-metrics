@@ -11,13 +11,16 @@ export type RunAnalyzeResult =
   | { ok: true; resultId: string }
   | { ok: false; error: string };
 
-export type AnalyzeRequestBody =
-  | { url: string }
-  | {
-      url: string;
-      course_id?: string | null;
-      team_name?: string | null;
-    };
+export type AnalyzeRequestBody = {
+  url: string;
+  course_id?: string | null;
+  team_name?: string | null;
+  ref?: {
+    type: "default" | "pr" | "branch";
+    prNumber?: number;
+    branch?: string;
+  };
+};
 
 /** Re-export for UI matching 401 payloads. */
 export { ANALYZE_SIGN_IN_REQUIRED_MESSAGE };

@@ -156,14 +156,17 @@ function pickDisplayName(group: ParsedCommit[]): string {
   return best;
 }
 
-async function parseLogWithNumstat(repoPath: string): Promise<ParsedCommit[]> {
+async function parseLogWithNumstat(
+  repoPath: string,
+  revRange?: string,
+): Promise<ParsedCommit[]> {
   const git = simpleGit(repoPath);
   const isRepo = await git.checkIsRepo();
   if (!isRepo) return [];
 
   const raw = await git.raw([
     "log",
-    "--all",
+    ...(revRange ? [revRange] : ["--all"]),
     "--numstat",
     "--format=COMMIT_END%n%H%n%at%n%aE%n%aN%n%s",
   ]);
@@ -447,9 +450,10 @@ export interface GitHistoryBundle {
  */
 export async function extractGitHistoryBundle(
   repoPath: string,
+  revRange?: string,
 ): Promise<GitHistoryBundle | null> {
   try {
-    const commits = await parseLogWithNumstat(repoPath);
+    const commits = await parseLogWithNumstat(repoPath, revRange);
     if (commits.length === 0) return null;
     return {
       gitMetricsV2: buildGitMetricsV2FromCommits(commits),
@@ -468,7 +472,8 @@ export async function extractGitHistoryBundle(
  */
 export async function extractGitMetricsV2(
   repoPath: string,
+  revRange?: string,
 ): Promise<GitMetricsV2 | null> {
-  const bundle = await extractGitHistoryBundle(repoPath);
+  const bundle = await extractGitHistoryBundle(repoPath, revRange);
   return bundle?.gitMetricsV2 ?? null;
 }

@@ -2,7 +2,7 @@
 
 This document describes the module structure and data flow of `ts-repo-metrics`.
 
-For the SIP off-boarding companion, see [HANDOFF.md](HANDOFF.md). Execution-grounded LLM routing (Hecate Stage 1) lives in the sibling repo [`scottyUX/hecate`](https://github.com/scottyUX/hecate) — see that repo’s [ARCHITECTURE.md](https://github.com/scottyUX/hecate/blob/main/docs/ARCHITECTURE.md). These systems are related for research; this dashboard is **not** a live model-routing gate.
+For the SIP off-boarding companion, see [HANDOFF.md](HANDOFF.md). Execution-grounded LLM routing (Hecate Router) lives in the sibling repo [`scottyUX/hecate-router`](https://github.com/scottyUX/hecate-router) — see that repo’s [ARCHITECTURE.md](https://github.com/scottyUX/hecate-router/blob/main/docs/ARCHITECTURE.md). GCP route API tracking: [Project #6](https://github.com/users/scottyUX/projects/6). These systems are related for research; this dashboard is **not** a live model-routing gate.
 
 ## Overview: One Engine, Two Entry Points
 
@@ -25,19 +25,17 @@ flowchart TB
 ## Pipeline Overview
 
 - **CLI** (`src/cli.ts`): Parses args; for GitHub URLs calls `analyzeFromGitHubUrl`, for local paths calls `getSourceMetadata` + `analyzeRepo`; batch mode calls `batchAnalyze` (which uses `analyzeRepo` from the engine).
-- **Dashboard** (`apps/dashboard/app/api/analyze/route.ts`): Validates URL, resolves an optional Supabase session (GitHub OAuth). If the user has a stored GitHub access token, passes `githubToken` into `analyzeFromGitHubUrl` and uses a per-user `cacheDir` under `os.tmpdir()/repo-metrics-git-cache/u/<userId>/`. Guests use `…/repo-metrics-git-cache/` only. Upserts `analyses` with `user_id` when signed in (null for guests).
-- **`cloneOrUseCache`** (`packages/engine/src/collect/gitClone.ts`): Before reusing a cached folder, the engine calls **`simple-git`'s `checkIsRepo()`**. If the directory is not a valid git working tree (e.g. interrupted clone with a broken `.git`), it is **deleted** and a fresh **`git clone`** runs. Without this, analysis could see **no source files** and return **all-zero metrics**.
+- **Dashboard** (`apps/dashboard/app/api/analyze/route.ts`): Validates URL (repo, pull request, or `/tree/<branch>`), resolves an optional Supabase session (GitHub OAuth). If the user has a stored GitHub access token, passes `githubToken` into `analyzeFromGitHubUrl` and uses a per-user `cacheDir` under `os.tmpdir()/repo-metrics-git-cache/u/<userId>/`. Signed-in users only. Upserts `analyses` with `user_id`. Repo-list Analyze opens a target picker (open/closed PR, branch, or default branch). Pull-request runs analyze **changed `.ts`/`.tsx` files** at the PR head.
+- **`cloneOrUseCache`** (`packages/engine/src/collect/gitClone.ts`): Before reusing a cached folder, the engine calls **`simple-git`'s `checkIsRepo()`**. If the directory is not a valid git working tree (e.g. interrupted clone with a broken `.git`), it is **deleted** and a fresh **`git clone`** runs. Cache keys include PR number or branch name so targets do not clobber each other. Without a valid clone, analysis could see **no source files** and return **all-zero metrics**.
 
 ## GitHub URL Support
 
-- **Engine** provides `analyzeFromGitHubUrl(url, { useCache?, cacheDir?, githubToken? })`: normalizes URL, parses with `parseGitHubUrl`, clones via `cloneOrUseCache(parsed, useCache, cacheDir, githubToken?)` (HTTPS with `x-access-token` when a PAT is set), then `getSourceMetadata` + `analyzeRepo`. Per-request **`githubToken`** overrides `process.env.GITHUB_TOKEN` for clone, zipball, and REST enrichment.
+- **Engine** provides `analyzeFromGitHubUrl(url, { useCache?, cacheDir?, githubToken?, ref? })`: normalizes URL, parses with `parseGitHubUrl` (repo, `/pull/N`, or `/tree/<branch>`), clones via `cloneOrUseCache` (HTTPS with `x-access-token` when a PAT is set), checks out the requested ref, then `getSourceMetadata` + `analyzeRepo`. Per-request **`githubToken`** overrides `process.env.GITHUB_TOKEN` for clone and REST enrichment. **Git is required** — there is no zipball fallback.
 - **CLI** and **API** use this; no subprocess or tsx.
 
-### Zipball and API fallback (Vercel)
+### Deploy hosts
 
-When `cloneOrUseCache` fails because the git binary is unavailable (e.g. on Vercel), the engine calls `downloadZipball` with the same optional token. The extracted path has no `.git` directory, so `extractGitMetrics` and `extractGitMetricsV2` return null. `analyzeFromGitHubUrl` then calls `extractGitMetricsApi(parsed, token)` to populate `report.git` from the GitHub REST API. API-derived metrics are proxies (commit metadata only; no diff stats such as lines changed).
-
-Railway Docker deployments include `git` and restore full clone-based git metrics — see [`RAILWAY_DEPLOY.md`](../RAILWAY_DEPLOY.md).
+Railway Docker deployments include `git` — see [`RAILWAY_DEPLOY.md`](../RAILWAY_DEPLOY.md). Vercel serverless Analyze is retired ([`apps/dashboard/VERCEL_DEPLOY.md`](../apps/dashboard/VERCEL_DEPLOY.md)).
 
 ## Dashboard Supabase clients
 
@@ -77,15 +75,18 @@ flowchart TB
   AgentStats[agent_stats_CSV] --> DashNode
   Survey[aum_survey_analytics] -.-> Research[SIP_research_outputs]
   Supa --> Research
-  Hecate[hecate_Stage1_patches] -.->|future_quality_and_SDLC| Research
+  Bench[hecate_benchmark_GCP] -.->|bundles| Research
+  DashNode -.->|v1_client| Bench
+  Hecate[hecate_router] -.->|future_consumer| Bench
 ```
 
 | System | Role |
 |--------|------|
-| `ts-repo-metrics` | Static analyzer + dashboard; persists `report_json` / AI usage CSV |
+| `ts-repo-metrics` | Static analyzer + dashboard; persists `report_json` / AI usage CSV; v1 client for benchmark UX |
+| `hecate-benchmark` | Task-bundle capture service (GCP Cloud Run Jobs + GCS; Supabase metadata) — see that repo’s ARCHITECTURE |
 | `agent_stats` | Local Cursor / Claude Code / Codex / Gemini logs → `ai_usage_trace.csv` |
 | `aum-survey-analytics` | Qualtrics → AUM/TAM replication pipeline |
-| `hecate` | SWE-bench Lite Stage 1 patch generation; DistilBERT router is future work |
+| `hecate-router` | SWE-bench Lite Stage 1 + router training path; GCP route-only research API ([Project #6](https://github.com/users/scottyUX/projects/6)); future consumer of released bundles |
 
 ## Phase 2 (lexical / cognitive / GRAD-AI MI)
 
@@ -108,7 +109,7 @@ Longer-term ingestion into the **`RepoReport`** pipeline (git enrichment, metric
 | `packages/engine` | Pure analysis: pipeline, collect, parsing, extract, types, utils. Builds to `dist/`. Consumed by CLI and dashboard. |
 | `packages/engine/src/index.ts` | Exports `analyzeRepo`, `analyzeFromGitHubUrl`, `getSourceMetadata`, `parseGitHubUrl`, React report types, and key types. |
 | `packages/engine/src/extract/react/` | RQ3 React metrics: TSX components, hooks, JSX depth, Ferreira/Tampere-style flags, prop pass-through MVP, hook safety heuristics. |
-| `packages/engine/src/collect/gitMetricsApi.ts` | GitHub REST API fallback for git metrics when git CLI unavailable (Vercel zipball mode). |
+| `packages/engine/src/collect/githubPullRequest.ts` | Pull-request metadata and changed-file allow-list for PR-scoped analysis. |
 | `src/cli.ts` | CLI entrypoint — imports from `@repo-metrics/engine`; routes single (URL vs path) and batch. |
 | `src/batch/` | Batch analysis over multiple repos; imports `analyzeRepo` and `RepoReport` from the engine. |
 

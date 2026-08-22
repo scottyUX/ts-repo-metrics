@@ -14,7 +14,7 @@ From the repo root, after `npm install` at the root and `cd apps/dashboard && np
 
 For ongoing engine edits, run `npm run dev` inside `packages/engine` so `dist/` stays up to date.
 
-Configure optional env vars by copying [.env.example](./.env.example) to `.env.local` (see tiers there). Deploy and Supabase/GitHub OAuth: [VERCEL_DEPLOY.md](./VERCEL_DEPLOY.md).
+Configure optional env vars by copying [.env.example](./.env.example) to `.env.local` (see tiers there). Deploy and Supabase/GitHub OAuth: [RAILWAY_DEPLOY.md](../../RAILWAY_DEPLOY.md).
 
 ## Scripts
 
@@ -44,7 +44,7 @@ Dashboard logic for threshold bands is covered by root Vitest: `apps/dashboard/_
 
 ## Deploy
 
-See [VERCEL_DEPLOY.md](./VERCEL_DEPLOY.md).
+Analyze requires git. Use [Railway](../../RAILWAY_DEPLOY.md). [VERCEL_DEPLOY.md](./VERCEL_DEPLOY.md) is retired.
 
 ## Repo coach chat
 

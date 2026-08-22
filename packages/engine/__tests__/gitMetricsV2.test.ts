@@ -226,4 +226,13 @@ m
     expect(a.sourceFilesTouched).toBe(1);
     expect(a.sourcePathsTouchedList).toEqual(["src/x.ts"]);
   });
+
+  it("passes an optional rev range to git log instead of --all", async () => {
+    mockRaw.mockResolvedValue("");
+    await extractGitHistoryBundle("/tmp/repo", "abc...def");
+    expect(mockRaw).toHaveBeenCalledWith(
+      expect.arrayContaining(["log", "abc...def", "--numstat"]),
+    );
+    expect(mockRaw.mock.calls[0]![0]).not.toContain("--all");
+  });
 });

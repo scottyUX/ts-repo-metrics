@@ -295,7 +295,7 @@ npm run dev -- batch /path/to/parent --output ./reports --csv`}
                 <td className="py-2 pr-3 font-medium text-foreground">Throughput</td>
                 <td className="py-2 pr-3 font-mono text-[11px] sm:text-xs">GITHUB_TOKEN (optional)</td>
                 <td className="py-2">
-                  Raises GitHub API limits for zipball/metadata when no user PAT is attached (guest mode).
+                  Raises GitHub API limits for clone and REST metadata when no user PAT is attached.
                 </td>
               </tr>
               <tr className="align-top">
@@ -311,7 +311,7 @@ npm run dev -- batch /path/to/parent --output ./reports --csv`}
                   <code className="rounded bg-muted px-1">analyses</code> persistence, encrypted PAT storage (
                   <code className="rounded bg-muted px-1">user_github_tokens</code>) for private repos. Optional{" "}
                   <code className="rounded bg-muted px-1">APP_ORIGIN</code> for OAuth behind proxies (
-                  documented in VERCEL_DEPLOY).
+                  documented in RAILWAY_DEPLOY).
                 </td>
               </tr>
             </tbody>
@@ -378,7 +378,7 @@ function SystemMapSection() {
               <code className="mx-1 rounded bg-muted px-1">analyses</code> table rows.
             </li>
             <li>
-              <strong className="text-foreground">GitHub</strong> — clone / zipball / REST enrichment when tokens are present.
+              <strong className="text-foreground">GitHub</strong> — clone / REST enrichment when tokens are present.
             </li>
             <li>
               <strong className="text-foreground">OpenAI</strong> (optional) — streamed coach on results (
@@ -511,8 +511,7 @@ function MetricsCalculationSection() {
               <code className="text-foreground">packages/engine/src/extract/complexity.ts</code> — cyclomatic complexity
             </li>
             <li>
-              <code className="text-foreground">packages/engine/src/collect/gitMetrics.ts</code> vs{" "}
-              <code className="text-foreground">gitMetricsApi.ts</code> — local git vs GitHub API proxies
+              <code className="text-foreground">packages/engine/src/collect/gitMetrics.ts</code> — local git history (PR runs use <code className="text-foreground">base...head</code>)
             </li>
             <li>
               <code className="text-foreground">packages/engine/src/extract/react/</code> — TSX/React heuristics
@@ -574,7 +573,7 @@ function ArchitectureSection() {
               <li>Tree-sitter parsing, function metrics, smells</li>
               <li>Duplication via jscpd</li>
               <li>Maintainability index and distributions</li>
-              <li>Workflow metrics (git CLI or GitHub REST fallback)</li>
+              <li>Workflow metrics from local git (full history or PR <code className="rounded bg-muted px-1">base...head</code>)</li>
             </ul>
           </section>
           <section className="space-y-2 text-muted-foreground">
@@ -594,7 +593,7 @@ function ArchitectureSection() {
                   </tr>
                   <tr className="border-b">
                     <td className="py-2 font-mono text-xs">api</td>
-                    <td className="py-2">Zipball + GitHub REST workflow proxies</td>
+                    <td className="py-2">Legacy REST proxies from the retired zipball path (not produced by current Analyze)</td>
                   </tr>
                   <tr className="border-b">
                     <td className="py-2 font-mono text-xs">none</td>
@@ -632,20 +631,18 @@ function GitMetricsSection() {
       <Card>
         <CardHeader>
           <CardTitle>Git metrics strategy</CardTitle>
-          <CardDescription>Why API fallback exists</CardDescription>
+          <CardDescription>Git clone is required</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6 text-sm text-muted-foreground">
           <p>
-            Serverless hosts often omit the <code className="rounded bg-muted px-1">git</code> binary. Zipballs exclude{" "}
-            <code className="rounded bg-muted px-1">.git</code>, so the engine records{" "}
-            <code className="rounded bg-muted px-1">git.mode = &quot;api&quot;</code> when REST data substitutes missing history.
+            Analyze requires a <code className="rounded bg-muted px-1">git</code> binary (Railway or local). There is no zipball fallback. Pull-request analysis checks out the PR head and scores changed TypeScript files only; git metrics use <code className="rounded bg-muted px-1">base...head</code>.
           </p>
           <MermaidDiagram code={GIT_METRICS_DIAGRAM} className="my-4" />
           <section>
-            <h3 className="mb-2 font-semibold text-foreground">API-derived workflow signals</h3>
+            <h3 className="mb-2 font-semibold text-foreground">PR-scoped git signals</h3>
             <ul className="list-inside list-disc space-y-1">
-              <li>Commits per week, burst ratio, active commit days</li>
-              <li>Median inter-commit interval & median commit message length</li>
+              <li>Commit size, bursts, and churn computed on commits in the PR range</li>
+              <li>Contributor split still works when a PR has multiple authors</li>
             </ul>
           </section>
         </CardContent>

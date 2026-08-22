@@ -49,8 +49,13 @@ Tail risk indicators for research. Percentiles computed across all functions.
 |-------|------|-------------|
 | `type` | `string` | `"local"` (user-provided path) or `"git"` (cloned from URL) |
 | `url` | `string` | Clone URL for `type: "git"`, empty for `type: "local"` |
-| `commit` | `string` | HEAD commit SHA |
-| `branch` | `string` | Current branch name |
+| `commit` | `string` | HEAD commit SHA (PR head when `scope` is `"pr"`) |
+| `branch` | `string` | Current branch name (PR head ref when `scope` is `"pr"`) |
+| `scope` | `string` | `"repo"` or `"pr"` — `"pr"` means changed source files at the pull-request head. Omitted on older reports (treat as `"repo"`). |
+| `prNumber` | `number` | Pull request number when `scope` is `"pr"` |
+| `baseSha` | `string` | PR base SHA |
+| `headSha` | `string` | PR head SHA |
+| `changedFiles` | `string[]` | Repo-relative `.ts`/`.tsx` paths included in a PR-scoped run |
 
 ## `profile` — Repository Profiling
 
@@ -120,14 +125,14 @@ Returns `null` if jscpd fails or is unavailable.
 
 ## `git` — Git History (nullable)
 
-Returns `null` for non-git repos or shallow clones. When the git CLI is unavailable (e.g. Vercel zipball mode), metrics may come from the GitHub REST API fallback instead of local git.
+Returns `null` for non-git repos or shallow clones. Git CLI is required for Analyze (the Vercel zipball + REST `api` mode is retired). Older stored reports may still have `mode: "api"`.
 
 ### Data source: `mode`
 
 | Value | Source |
 |-------|--------|
 | `"local"` | Git CLI (simple-git) |
-| `"api"` | GitHub REST API (serverless fallback) |
+| `"api"` | Legacy GitHub REST fallback (retired zipball path; not produced by current Analyze) |
 | `"none"` | Neither available (with `unavailable: true`) |
 
 ### Fields

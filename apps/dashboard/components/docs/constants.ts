@@ -11,7 +11,7 @@ export const ANALYZE_ARCHITECTURE_DIAGRAM = `flowchart TB
         analyzeUrl[analyzeFromGitHubUrl]
     end
     subgraph github [GitHub]
-        ghIO[clone zipball REST APIs]
+        ghIO[clone and REST APIs]
     end
     subgraph supabaseDb [Supabase]
         analysesTable[(analyses)]
@@ -82,15 +82,9 @@ export const ENGINE_PIPELINE_DIAGRAM = `flowchart TB
 export const GIT_METRICS_DIAGRAM = `flowchart TD
     Start[GitHub URL] --> TryClone[Try git clone]
     TryClone -->|success| Local[git.mode = local]
-    TryClone -->|git unavailable| Zipball[Download zipball]
-    Zipball --> Analyze[analyzeRepo]
-    Analyze --> GitNull[git: null]
-    GitNull --> RestApi[extractGitMetricsApi]
-    RestApi -->|success| ApiMode[git.mode = api]
-    RestApi -->|fail| NoneMode[git.mode = none]
-    Local --> Done[Report ready]
-    ApiMode --> Done
-    NoneMode --> Done`;
+    TryClone -->|git missing| Fail[Error: git required]
+    Local --> Analyze[analyzeRepo]
+    Analyze --> Done[Report ready]`;
 
 /** @deprecated Use ANALYZE_ARCHITECTURE_DIAGRAM; kept for any external imports. */
 export const ARCHITECTURE_DIAGRAM = ANALYZE_ARCHITECTURE_DIAGRAM;

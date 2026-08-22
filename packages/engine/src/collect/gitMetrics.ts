@@ -25,6 +25,7 @@ const WEEKS_WINDOW = 13; // ~3 months
  */
 export async function extractGitMetrics(
   repoPath: string,
+  revRange?: string,
 ): Promise<GitMetrics | null> {
   try {
     const git = simpleGit(repoPath);
@@ -32,7 +33,10 @@ export async function extractGitMetrics(
     const isRepo = await git.checkIsRepo();
     if (!isRepo) return null;
 
-    const log = await git.log(["--numstat", "--all"]);
+    const logArgs = revRange
+      ? ["--numstat", revRange]
+      : ["--numstat", "--all"];
+    const log = await git.log(logArgs);
     if (!log.all.length) return null;
 
     const commitSizes: number[] = [];

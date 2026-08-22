@@ -4,7 +4,7 @@
 **To:** Jaisree David RaviKumar, Jacob Johnston  
 **Facilitator:** Scott  
 
-Reference companion for the handoff meeting. Architecture detail: [ARCHITECTURE.md](ARCHITECTURE.md). Execution-grounded LLM routing (Hecate) lives in [`scottyUX/hecate`](https://github.com/scottyUX/hecate) — see that repo’s [`docs/HANDOFF.md`](https://github.com/scottyUX/hecate/blob/main/docs/HANDOFF.md).
+Reference companion for the handoff meeting. Architecture detail: [ARCHITECTURE.md](ARCHITECTURE.md). Execution-grounded LLM routing (Hecate Router) lives in [`scottyUX/hecate-router`](https://github.com/scottyUX/hecate-router) — see that repo’s [`docs/HANDOFF.md`](https://github.com/scottyUX/hecate-router/blob/main/docs/HANDOFF.md). GCP route API board: [Hecate Router Project #6](https://github.com/users/scottyUX/projects/6).
 
 ---
 
@@ -18,10 +18,11 @@ It is **not** a live DistilBERT or joint semantic/structural routing gate. Hecat
 
 | Repo | Role |
 |------|------|
-| [`scottyUX/ts-repo-metrics`](https://github.com/scottyUX/ts-repo-metrics) | Engine + dashboard (this repo) |
+| [`scottyUX/ts-repo-metrics`](https://github.com/scottyUX/ts-repo-metrics) | Engine + dashboard (this repo); v1 client UX for benchmark capture |
+| [`scottyUX/hecate-benchmark`](https://github.com/scottyUX/hecate-benchmark) | Immutable task-bundle capture (GCP Cloud Run Jobs + GCS; Supabase metadata) |
 | [`scottyUX/agent_stats`](https://github.com/scottyUX/agent_stats) | Local agent logs → `ai_usage_trace.csv` |
 | [`scottyUX/aum-survey-analytics`](https://github.com/scottyUX/aum-survey-analytics) | Qualtrics survey replication pipeline |
-| [`scottyUX/hecate`](https://github.com/scottyUX/hecate) | Stage 1 patch generation for routing research |
+| [`scottyUX/hecate-router`](https://github.com/scottyUX/hecate-router) | Stage 1 patch generation + router training path; GCP `POST /v1/route` API board ([Project #6](https://github.com/users/scottyUX/projects/6)); future consumer of released bundles |
 
 ```mermaid
 flowchart TB
@@ -34,7 +35,9 @@ flowchart TB
   AgentStats[agent_stats_CSV] --> DashNode
   Survey[aum_survey_analytics] -.-> Research[SIP_research_outputs]
   Supa --> Research
-  Hecate[hecate_Stage1] -.->|future_link| Research
+  Bench[hecate_benchmark_GCP] -.->|bundles| Research
+  DashNode -.->|v1_client| Bench
+  Hecate[hecate_router] -.->|future_consumer| Bench
 ```
 
 ---
@@ -46,8 +49,8 @@ flowchart TB
 | `@repo-metrics/engine` | Production | CLI + `POST /api/analyze` |
 | Next.js dashboard | Production | Results tabs, AI Usage, doc review, course analyze flow |
 | Supabase `analyses` | Live | `report_json`, course metadata, `ai_usage_csv`, auth/RLS |
-| Git on Vercel | Degraded | Zipball + GitHub API; weaker line-level git metrics |
-| Git on Railway | Preferred for full git | Docker image includes `git` — see [`RAILWAY_DEPLOY.md`](../RAILWAY_DEPLOY.md) |
+| Git on Vercel | Retired | Zipball path removed; do not deploy Analyze here |
+| Git on Railway | Required for production Analyze | Docker image includes `git` — see [`RAILWAY_DEPLOY.md`](../RAILWAY_DEPLOY.md) |
 | JS/JSX support | Mid-flight | Branch `feat/issue-154-javascript-support` |
 | Python support | Mid-flight | Branch `feat/python-static-analysis` |
 | Pre-AI cohort re-analyze | Known gap | Some 2021 baselines previously returned 0 files — re-run before Pre/Post compare |
@@ -72,13 +75,13 @@ Schema reference: [SCHEMA.md](SCHEMA.md). AI Usage UX: [AI_USAGE_LOGS.md](AI_USA
 |---------|------|
 | GitHub | Source, Issues, Project 3, Discussions |
 | Supabase | `analyses`, `user_github_tokens`, GitHub OAuth sessions |
-| Vercel | Dashboard project `repo-metrics-dashboard` (root dir `apps/dashboard`) |
-| Railway | Docker deploy path with real git clones |
+| Vercel | Retired for Analyze (no git binary) |
+| Railway | Dashboard deploy with real git clones |
 | OpenAI | Optional doc-review / coach routes |
 | Qualtrics | Stage-aware AU/AUM/TAM survey exports |
 | OpenRouter | **Hecate only** — not used by this dashboard |
 
-Env names (dashboard): `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `GITHUB_OAUTH_ENCRYPTION_KEY`; optional `OPENAI_API_KEY`, `GITHUB_TOKEN`. See [`apps/dashboard/.env.local.sample`](../apps/dashboard/.env.local.sample) and [`apps/dashboard/VERCEL_DEPLOY.md`](../apps/dashboard/VERCEL_DEPLOY.md).
+Env names (dashboard): `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `GITHUB_OAUTH_ENCRYPTION_KEY`; optional `OPENAI_API_KEY`, `GITHUB_TOKEN`. See [`apps/dashboard/.env.local.sample`](../apps/dashboard/.env.local.sample) and [`RAILWAY_DEPLOY.md`](../RAILWAY_DEPLOY.md).
 
 ---
 
@@ -120,7 +123,7 @@ Env names (dashboard): `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KE
 
 ## 6. Systematic Literature Review
 
-PDFs and notes under [`research/papers/`](../research/papers/) (code quality, LLM routing, SWE-rebench, stage-aware AI usage). Recent additions arrived via research PRs on `main`. Hecate keeps a parallel set under `hecate/literature/`. Prefer updating both when a source is shared across routing and education metrics work.
+PDFs and notes under [`research/papers/`](../research/papers/) (code quality, LLM routing, SWE-rebench, stage-aware AI usage). Recent additions arrived via research PRs on `main`. Hecate Router keeps a parallel set under `hecate-router/literature/`. Prefer updating both when a source is shared across routing and education metrics work.
 
 ---
 
@@ -140,7 +143,7 @@ PDFs and notes under [`research/papers/`](../research/papers/) (code quality, LL
 - [ ] Vercel and/or Railway dashboard deploy access (Scott owns billing)
 - [ ] Qualtrics / survey drive + subject-ID mapping key (IRB protocol)
 - [ ] Shared docs / Slack or Discord channels
-- [ ] Cross-repo: `hecate` + **new** OpenRouter key if they also own Stage 1 (see Hecate handoff)
+- [ ] Cross-repo: `hecate-router` + **new** OpenRouter key if they also own Stage 1 (see Hecate Router handoff)
 - [ ] Cursor seat if lab-paid seats are used for extractor work
 
 **Sequencing:** Verify clone, `npm test`, and dashboard sign-in for Jaisree David RaviKumar and Jacob Johnston before revoking outgoing access (Section 9).

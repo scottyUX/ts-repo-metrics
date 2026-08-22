@@ -53,13 +53,17 @@ function flavorForFile(filePath: string): "ts" | "tsx" {
 export interface AnalyzeOptions {
   /** Pre-computed source metadata. If omitted, computed from repo path. */
   source?: SourceInfo;
+  /** Repo-relative source paths to analyze. When set, the rest of the tree is skipped. */
+  includePaths?: string[];
+  /** Optional `git log` revision range (e.g. `baseSha...headSha` for a pull request). */
+  gitRevRange?: string;
 }
 
 /**
  * Run the full analysis pipeline on a repository.
  *
  * @param repoPath - Absolute path to the repository root.
- * @param options - Optional source metadata (for cloned repos).
+ * @param options - Optional source metadata, file allow-list, and git rev range.
  * @returns A JSON-serializable report with aggregate totals and per-file breakdowns.
  */
 export async function analyzeRepo(
@@ -69,8 +73,10 @@ export async function analyzeRepo(
   const source =
     options?.source ??
     (await getSourceMetadata(repoPath, "local", ""));
-  const profile = await profileRepo(repoPath);
-  const files = await discoverSourceFiles(repoPath);
+  const includePaths = options?.includePaths;
+  const gitRevRange = options?.gitRevRange;
+  const profile = await profileRepo(repoPath, includePaths);
+  const files = await discoverSourceFiles(repoPath, includePaths);
 
   let totalFunctions = 0;
   const allFunctionDetails: FunctionDetail[] = [];
@@ -175,7 +181,7 @@ export async function analyzeRepo(
     functionMetricsSummary.averageLength,
   );
   const testCoverageProxy = computeTestCoverageProxy(profile);
-  const duplicationResult = await detectDuplication(repoPath);
+  const duplicationResult = await detectDuplication(repoPath, includePaths);
   const duplication = duplicationResult?.metrics ?? null;
   const sourceKlocDivisor = profile.sourceLOC / 1000;
   const sfd =
@@ -213,8 +219,8 @@ export async function analyzeRepo(
     monolithicComponentCount,
     reactComponentCount,
   };
-  const git = await extractGitMetrics(repoPath);
-  const gitBundle = await extractGitHistoryBundle(repoPath);
+  const git = await extractGitMetrics(repoPath, gitRevRange);
+  const gitBundle = await extractGitHistoryBundle(repoPath, gitRevRange);
   const gitMetricsV2 = gitBundle?.gitMetricsV2 ?? null;
   const contributors = gitBundle?.contributors;
   const framework = await detectFramework(repoPath);

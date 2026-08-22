@@ -1,8 +1,8 @@
 # Deploying the dashboard to Railway
 
-The app is a **Docker** deployment from the **repository root** (see [`Dockerfile`](Dockerfile)). The runner image includes **`git`** so [`analyzeFromGitHubUrl`](packages/engine/src/pipeline/analyzeFromGitHubUrl.ts) can **clone** repos instead of falling back to the zipball + GitHub API path (restoring `gitMetricsV2` and accurate commit line metrics).
+The app is a **Docker** deployment from the **repository root** (see [`Dockerfile`](Dockerfile)). The runner image includes **`git`** so [`analyzeFromGitHubUrl`](packages/engine/src/pipeline/analyzeFromGitHubUrl.ts) can **clone** repos (required — there is no zipball fallback).
 
-For Vercel-specific notes and env semantics, see [`apps/dashboard/VERCEL_DEPLOY.md`](apps/dashboard/VERCEL_DEPLOY.md) (optional cross-reference during migration).
+Environment-variable names match the former Vercel dashboard project. See [`apps/dashboard/VERCEL_DEPLOY.md`](apps/dashboard/VERCEL_DEPLOY.md) (retired host; kept as a pointer).
 
 ## Build layout
 
@@ -31,7 +31,7 @@ Set these on the **Railway service → Variables** (same semantics as production
 | `SUPABASE_ANON_KEY` | **Optional:** same as anon key; server/middleware runtime fallback |
 | `SUPABASE_SERVICE_ROLE_KEY` | Service role — server only (runtime) |
 | `GITHUB_OAUTH_ENCRYPTION_KEY` | Secret for encrypting stored GitHub OAuth tokens |
-| `GITHUB_TOKEN` | Optional — higher GitHub API limits for guests / zipball fallback |
+| `GITHUB_TOKEN` | Optional — higher GitHub API limits for REST enrichment |
 | `OPENAI_API_KEY` | Optional — required for coach/chat routes that call OpenAI |
 | `APP_ORIGIN` | **Recommended:** `https://<your-service>.up.railway.app` (no trailing slash). Ensures `/auth/callback` redirects use the public URL, not `http://0.0.0.0:8080` behind the proxy. |
 

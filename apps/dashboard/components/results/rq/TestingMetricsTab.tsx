@@ -13,6 +13,7 @@ import {
 } from "@/lib/commitHabitsScopeMetrics";
 import { filterSymbolVerificationRisksForContributor } from "@/lib/filterSymbolVerificationRisksForContributor";
 import { getTestingScopeMetricValues } from "@/lib/testingScopeMetrics";
+import { analysisTeamOptionLabel, isPrScopedReport } from "@/lib/analysisScope";
 import {
   TestingConceptCyclomaticComplexityBody,
   TestingConceptProximityBandsBody,
@@ -146,7 +147,7 @@ export function TestingMetricsTab({ report, scopeId, onScopeIdChange, onOpenCode
   }, [mv.contributorDisplayName, mv.locSource, mv.mode]);
 
   const riskProfileTitle =
-    mv.mode === "team" ? "Your risk profile" : "Your risk profile (whole repository)";
+    mv.mode === "team" ? "Your risk profile" : `Your risk profile (${isPrScopedReport(report) ? "this pull request" : "whole repository"})`;
 
   const scatterRaw = report.symbolVerificationRisks;
   const scatterUnavailable = scatterRaw === undefined;
@@ -156,7 +157,7 @@ export function TestingMetricsTab({ report, scopeId, onScopeIdChange, onOpenCode
   const proximitySummaryTooltip = symbolProximitySummary
     ? symbolRiskFilter.contributorFilterActive
       ? `Filtered to functions in source files this author touched (git numstat paths). Referenced in paired test: ${symbolProximitySummary.referencedInTest}. Paired file only: ${symbolProximitySummary.pairedFileOnly}. No static link: ${symbolProximitySummary.none}.`
-      : `Whole-repository symbol scan (same rows as the scatter/table below). Referenced in paired test: ${symbolProximitySummary.referencedInTest}. Paired file only: ${symbolProximitySummary.pairedFileOnly}. No static link: ${symbolProximitySummary.none}.`
+      : `${isPrScopedReport(report) ? "Pull-request" : "Whole-repository"} symbol scan (same rows as the scatter/table below). Referenced in paired test: ${symbolProximitySummary.referencedInTest}. Paired file only: ${symbolProximitySummary.pairedFileOnly}. No static link: ${symbolProximitySummary.none}.`
     : "";
 
   const pathScopeUnavailableForContributor =
@@ -178,7 +179,7 @@ export function TestingMetricsTab({ report, scopeId, onScopeIdChange, onOpenCode
               onChange={(e) => onScopeIdChange(e.target.value)}
               className="min-w-[220px] rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              <option value={COMMIT_HABITS_SCOPE_TEAM}>Whole repository (team)</option>
+              <option value={COMMIT_HABITS_SCOPE_TEAM}>{analysisTeamOptionLabel(report)}</option>
               {contributors.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.displayName || c.authorEmail || c.id}
@@ -200,7 +201,7 @@ export function TestingMetricsTab({ report, scopeId, onScopeIdChange, onOpenCode
           refactor ratio when git numstat is available.
         </span>{" "}
         <span className="text-foreground/90">
-          <strong>Whole repository</strong>: test coverage proxy, risk quadrant, complexity aggregates.
+          <strong>{isPrScopedReport(report) ? "This pull request" : "Whole repository"}</strong>: test coverage proxy, risk quadrant, complexity aggregates.
         </span>{" "}
         <span className="text-foreground/90">
           <strong>Symbol scatter</strong>: static analyzer scan
@@ -433,7 +434,7 @@ export function TestingMetricsTab({ report, scopeId, onScopeIdChange, onOpenCode
         ) : scatterFilteredEmpty ? (
           <p className="col-span-12 text-sm text-muted-foreground border rounded-md px-4 py-3 bg-muted/30">
             No symbol rows remain after narrowing to source files this author touched in git history (paths
-            must overlap the static analyzer&apos;s function list). Try whole repository or pick another
+            must overlap the static analyzer&apos;s function list). Try {isPrScopedReport(report) ? "this pull request" : "whole repository"} or pick another
             teammate.
           </p>
         ) : (

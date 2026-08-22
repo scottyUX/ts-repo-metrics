@@ -7,6 +7,7 @@ import {
   type CommitHabitsScopeId,
 } from "@/lib/commitHabitsScopeMetrics";
 import type { RepoReport } from "@/lib/reportTypes";
+import { analysisTeamOptionLabel, isPrScopedReport } from "@/lib/analysisScope";
 import { CommitActivityCard } from "./CommitActivityCard";
 import { CommitHabitsChurnHotspotCards, CommitHabitsContributorsTableCard } from "./CommitHabitsGitTables";
 import { CommitHabitsMomentumPanel } from "./CommitHabitsMomentumPanel";
@@ -56,7 +57,7 @@ export function CommitHabitsMetricsTab({ report, scopeId, onScopeIdChange }: Com
               onChange={(e) => onScopeIdChange(e.target.value)}
               className="min-w-[220px] rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              <option value={COMMIT_HABITS_SCOPE_TEAM}>Whole repository (team)</option>
+              <option value={COMMIT_HABITS_SCOPE_TEAM}>{analysisTeamOptionLabel(report)}</option>
               {contributors.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.displayName || c.authorEmail || c.id}
@@ -82,7 +83,7 @@ export function CommitHabitsMetricsTab({ report, scopeId, onScopeIdChange }: Com
         <h2 className="text-lg font-semibold mb-4">Where changes cluster</h2>
         {!teamOnly ? (
           <p className="text-sm text-muted-foreground mb-2 max-w-3xl">
-            Hotspots reflect <strong>full-repository</strong> history across all authors, not this
+            Hotspots reflect <strong>{isPrScopedReport(report) ? "this pull request" : "full-repository"}</strong> history across all authors, not this
             person alone.
           </p>
         ) : null}

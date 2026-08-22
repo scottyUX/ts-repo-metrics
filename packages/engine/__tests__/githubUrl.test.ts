@@ -35,13 +35,40 @@ describe("parseGitHubUrl", () => {
 
   it("returns null for non-GitHub URL", () => {
     expect(parseGitHubUrl("https://gitlab.com/owner/repo")).toBeNull();
-    expect(parseGitHubUrl("http://github.com/owner/repo")).toBeNull();
+  });
+
+  it("accepts http and www hosts by normalizing to https", () => {
+    expect(parseGitHubUrl("http://github.com/owner/repo")).toEqual({
+      owner: "owner",
+      repo: "repo",
+      url: "https://github.com/owner/repo",
+    });
   });
 
   it("returns null for invalid pattern", () => {
     expect(parseGitHubUrl("https://github.com/owner")).toBeNull();
     expect(parseGitHubUrl("not-a-url")).toBeNull();
     expect(parseGitHubUrl("")).toBeNull();
+  });
+
+  it("parses a pull request URL", () => {
+    const r = parseGitHubUrl("https://github.com/owner/repo/pull/42");
+    expect(r).toEqual({
+      owner: "owner",
+      repo: "repo",
+      url: "https://github.com/owner/repo",
+      pullNumber: 42,
+    });
+  });
+
+  it("parses a /tree/<branch> URL including slashes", () => {
+    const r = parseGitHubUrl("https://github.com/owner/repo/tree/feat/pr-scope");
+    expect(r).toEqual({
+      owner: "owner",
+      repo: "repo",
+      url: "https://github.com/owner/repo",
+      branch: "feat/pr-scope",
+    });
   });
 });
 

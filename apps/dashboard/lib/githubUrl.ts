@@ -1,10 +1,10 @@
 /**
  * GitHub URL validation for the analyze form.
- * Supports: https://github.com/owner/repo, github.com/owner/repo, owner/repo
+ * Supports: owner/repo, repo URLs, pull request URLs, and /tree/<branch> URLs.
  */
 
 const GITHUB_URL_RE =
-  /^(?:https?:\/\/)?(?:www\.)?github\.com\/([a-zA-Z0-9_.-]+)\/([a-zA-Z0-9_.-]+)(?:\/)?(?:\.[a-zA-Z]+)?$/;
+  /^(?:https?:\/\/)?(?:www\.)?github\.com\/([a-zA-Z0-9_.-]+)\/([a-zA-Z0-9_.-]+)(?:\.git)?(?:\/(?:pull\/\d+|tree\/.+))?\/?$/;
 const OWNER_REPO_RE = /^[a-zA-Z0-9_.-]+\/[a-zA-Z0-9_.-]+$/;
 
 export function isValidGitHubUrl(input: string): boolean {

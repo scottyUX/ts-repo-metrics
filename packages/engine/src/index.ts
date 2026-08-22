@@ -5,9 +5,18 @@
  */
 
 export { analyzeRepo, type AnalyzeOptions } from "./pipeline/analyzeRepo.js";
-export { analyzeFromGitHubUrl, type AnalyzeFromGitHubUrlOptions } from "./pipeline/analyzeFromGitHubUrl.js";
+export {
+  analyzeFromGitHubUrl,
+  type AnalyzeFromGitHubUrlOptions,
+  type AnalyzeRef,
+} from "./pipeline/analyzeFromGitHubUrl.js";
 export { getSourceMetadata } from "./collect/repoMetadata.js";
-export { parseGitHubUrl, isGitHubUrl, type ParsedGitHubUrl } from "./utils/githubUrl.js";
+export {
+  parseGitHubUrl,
+  isGitHubUrl,
+  sanitizeRefForKey,
+  type ParsedGitHubUrl,
+} from "./utils/githubUrl.js";
 
 export type {
   RepoReport,

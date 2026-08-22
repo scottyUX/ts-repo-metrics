@@ -1,20 +1,37 @@
 /**
  * Git clone module for GitHub public repos.
  *
- * Clones into .cache/ts-repo-metrics/<owner-repo> with full history.
+ * Clones into .cache/ts-repo-metrics/<cache-key> with full history.
  * Reuses cache unless --no-cache; reused clones are fetched and reset to the
- * remote default branch so reanalysis picks up new commits.
+ * requested ref (default branch, named branch, or pull-request head).
  */
 
 import { existsSync, mkdirSync, rmSync } from "node:fs";
 import path from "node:path";
 import { simpleGit } from "simple-git";
-import type { ParsedGitHubUrl } from "../utils/githubUrl.js";
+import {
+  sanitizeRefForKey,
+  type ParsedGitHubUrl,
+} from "../utils/githubUrl.js";
 
 const CACHE_DIR = ".cache/ts-repo-metrics";
 
-function cacheKey(parsed: ParsedGitHubUrl): string {
-  return `${parsed.owner}-${parsed.repo}`;
+export type CloneCheckout =
+  | { kind: "default" }
+  | { kind: "pr"; number: number }
+  | { kind: "branch"; name: string };
+
+function cacheKey(parsed: ParsedGitHubUrl, checkout?: CloneCheckout): string {
+  const base = `${parsed.owner}-${parsed.repo}`;
+  if (!checkout || checkout.kind === "default") return base;
+  if (checkout.kind === "pr") return `${base}-pr${checkout.number}`;
+  return `${base}-branch-${sanitizeRefForKey(checkout.name)}`;
+}
+
+function fetchRefspec(checkout?: CloneCheckout): string {
+  if (!checkout || checkout.kind === "default") return "HEAD";
+  if (checkout.kind === "pr") return `pull/${checkout.number}/head`;
+  return checkout.name;
 }
 
 function authenticatedCloneUrl(
@@ -26,46 +43,41 @@ function authenticatedCloneUrl(
 }
 
 /**
- * Sync an existing clone with the remote default branch (HEAD).
+ * Sync an existing clone with a remote ref.
  *
  * First compares the remote tip SHA (ls-remote) with the local HEAD and
  * returns without touching the tree when they match. Otherwise fetches from
  * the remote URL directly so a token rotated since the original clone still
  * works. Reset + clean rather than pull: force-pushed branches must still
  * converge, and files deleted upstream must leave the tree.
- *
- * @param repoPath - Absolute path to the cached clone.
- * @param remote - Clone URL (possibly token-authenticated; never logged).
  */
 async function syncCloneWithRemote(
   repoPath: string,
   remote: string,
+  checkout?: CloneCheckout,
 ): Promise<void> {
   const repo = simpleGit(repoPath);
-  const remoteHead = (await repo.raw(["ls-remote", remote, "HEAD"]))
+  const refspec = fetchRefspec(checkout);
+  const remoteHead = (await repo.raw(["ls-remote", remote, refspec]))
     .trim()
     .split(/\s+/)[0];
   const localHead = (await repo.revparse(["HEAD"])).trim();
   if (remoteHead && remoteHead === localHead) {
     return;
   }
-  await repo.raw(["fetch", remote, "HEAD"]);
+  await repo.raw(["fetch", remote, refspec]);
   await repo.raw(["reset", "--hard", "FETCH_HEAD"]);
   await repo.raw(["clean", "-fd"]);
 }
 
 /**
- * Clone a GitHub repo or reuse the cached clone.
- *
- * A reused clone is first synced with the remote default branch so new
- * commits are picked up; if the sync fails (unreachable remote, diverged
- * refs), the cache is discarded and the repo is cloned fresh rather than
- * returning a stale tree.
+ * Clone a GitHub repo or reuse the cached clone, then check out the requested ref.
  *
  * @param parsed - Parsed GitHub URL.
  * @param useCache - If false, clone fresh (removes cache first).
  * @param baseDir - Base directory for cache (default: cwd).
  * @param githubToken - Optional PAT for private repositories (never logged).
+ * @param checkout - Default branch, named branch, or pull-request head.
  * @returns Absolute path to the cloned repo.
  */
 export async function cloneOrUseCache(
@@ -73,8 +85,9 @@ export async function cloneOrUseCache(
   useCache: boolean,
   baseDir: string = process.cwd(),
   githubToken?: string,
+  checkout?: CloneCheckout,
 ): Promise<string> {
-  const fullPath = path.resolve(baseDir, CACHE_DIR, cacheKey(parsed));
+  const fullPath = path.resolve(baseDir, CACHE_DIR, cacheKey(parsed, checkout));
 
   const cloneRemote =
     githubToken?.trim() ? authenticatedCloneUrl(parsed, githubToken.trim()) : parsed.url;
@@ -95,7 +108,7 @@ export async function cloneOrUseCache(
 
   if (useCache && existsSync(fullPath)) {
     try {
-      await syncCloneWithRemote(fullPath, cloneRemote);
+      await syncCloneWithRemote(fullPath, cloneRemote, checkout);
       return fullPath;
     } catch {
       rmSync(fullPath, { recursive: true, force: true });
@@ -111,6 +124,10 @@ export async function cloneOrUseCache(
 
   const git = simpleGit();
   await git.clone(cloneRemote, fullPath, ["--no-single-branch"]);
+
+  if (checkout && checkout.kind !== "default") {
+    await syncCloneWithRemote(fullPath, cloneRemote, checkout);
+  }
 
   return fullPath;
 }
