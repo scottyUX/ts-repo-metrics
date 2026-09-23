@@ -9,10 +9,11 @@
 
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
+import os from "node:os";
 import path from "node:path";
 import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { readFile, rm } from "node:fs/promises";
+import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { IGNORE_PATTERNS } from "../utils/constants.js";
 import type { DuplicationMetrics } from "../types/report.js";
 import type { JscpdDuplicateJson } from "./weightedRedundancy.js";
@@ -63,8 +64,6 @@ export async function detectDuplication(
   repoPath: string,
   includePaths?: string[],
 ): Promise<DuplicationDetectionResult | null> {
-  const outputDir = path.join(repoPath, ".jscpd-report");
-
   const jscpdBin = resolveJscpdBin();
   if (!jscpdBin) {
     console.error("[duplication] jscpd binary not found");
@@ -87,7 +86,11 @@ export async function detectDuplication(
         })
       : ["."];
 
+  // The report goes to a temp folder, not the clone: a path built from repoPath
+  // is user-controlled, and a report inside the repo would sit in the scan tree.
+  let outputDir: string | undefined;
   try {
+    outputDir = await mkdtemp(path.join(os.tmpdir(), "jscpd-"));
     await execFileAsync(
       jscpdBin,
       [
@@ -147,7 +150,7 @@ export async function detectDuplication(
     return null;
   } finally {
     try {
-      await rm(outputDir, { recursive: true, force: true });
+      if (outputDir) await rm(outputDir, { recursive: true, force: true });
     } catch {
       // best-effort cleanup
     }
