@@ -402,9 +402,11 @@ export interface PythonMetrics {
 export interface EndpointDetail {
   file: string;
   handler: string;
-  /** `GET`, `POST`, … from the decorator; `ROUTE` for Flask `@app.route` without `methods`. */
+  /** `GET`, `POST`, … from the decorators; `ROUTE` for Flask `@app.route` without `methods`. */
   methods: string[];
+  /** First route path; `paths` holds every one when decorators are stacked. */
   path: string;
+  paths: string[];
   startLine: number;
   lines: number;
   cyclomaticComplexity: number;

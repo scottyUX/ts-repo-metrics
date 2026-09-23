@@ -65,14 +65,14 @@ Tail risk indicators for research. Percentiles computed across all functions.
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `totalFiles` | `number` | Analyzed source files (excluding ignored dirs) |
+| `totalFiles` | `number` | Analyzed source files (excluding ignored dirs, including generated Alembic `migrations/versions/` and `alembic/versions/`) |
 | `tsFiles` | `number` | Count of `.ts` files |
 | `tsxFiles` | `number` | Count of `.tsx` files |
 | `jsFiles` | `number` | Count of `.js`, `.mjs`, and `.cjs` files |
 | `jsxFiles` | `number` | Count of `.jsx` files |
 | `pyFiles` | `number` | Count of `.py` files. Zero on a web2py or Django skip, along with every other profile count and LOC field |
 | `notebookFiles` | `number` | Count of `.ipynb` files. Their LOC counts code-cell lines only; a malformed notebook adds 0 lines and is counted in `filesSkipped` |
-| `testFiles` | `number` | `*.test` / `*.spec` for JS and TS, plus `test_*.py`, `*_test.py`, and `conftest.py` |
+| `testFiles` | `number` | `*.test` / `*.spec` for JS and TS, plus `test_*.py`, `*_test.py`, `conftest.py`, and `tests.py` |
 | `totalLOC` | `number` | Total lines of code across all files |
 | `sourceLOC` | `number` | Lines of code in non-test files |
 | `testLOC` | `number` | Lines of code in test files |
@@ -188,9 +188,9 @@ Returns `null` for non-git repos or when no commit history is available. Epic D 
 
 ## `framework` — Framework Detection (nullable)
 
-Returns `null` when there is no `package.json` and no Python. A repo without `package.json` that has Python gets a Python-only record whose `type` is the Python backend, or `Python`.
+Returns `null` when there is no `package.json` (root or one folder down) and no Python. A repo without `package.json` that has Python gets a Python-only record whose `type` is the Python backend, or `Python`.
 
-Python detection reads `requirements.txt`, `requirements-dev.txt`, `pyproject.toml`, `Pipfile`, `setup.py`, and `setup.cfg` at the repo root and one folder down (`backend/`, `api/`, …), plus top-level imports from the scored Python files.
+JS detection reads the root `package.json` and each one a single folder down (`frontend/`, `web/`), so a monorepo's React app is found. Python detection reads `requirements.txt`, `requirements-dev.txt`, `pyproject.toml`, `Pipfile`, `setup.py`, and `setup.cfg` at the repo root and one folder down (`backend/`, `api/`, …), plus top-level imports from the scored Python files.
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -198,7 +198,7 @@ Python detection reads `requirements.txt`, `requirements-dev.txt`, `pyproject.to
 | `hasReact` | `boolean` | Whether `react` is a dependency |
 | `hasBackend` | `boolean` | Whether a JS or Python backend framework is detected |
 | `pythonBackend` | `"FastAPI" \| "Flask" \| "Starlette" \| null` | Optional. Python web framework; FastAPI wins over Starlette |
-| `pythonStack` | `string[]` | Optional. AI/ML tags: `torch`, `tensorflow`, `scikit-learn`, `xgboost`, `transformers`, `langchain`, `llama-index`, `openai`, `anthropic` |
+| `pythonStack` | `string[]` | Optional. AI/ML tags: `torch`, `tensorflow`, `scikit-learn`, `xgboost`, `transformers`, `langchain`, `llama-index`, `openai`, `anthropic`, `streamlit`, `gradio` |
 
 ## `perFile` — Per-File Entry
 
@@ -380,7 +380,7 @@ A route handler is a decorated `def` whose decorator is `@<obj>.get/post/put/del
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `endpoints` | `EndpointDetail[]` | `file`, `handler`, `methods` (`GET`…, or `ROUTE` for Flask `@app.route` without `methods`), `path`, `startLine`, `lines`, `cyclomaticComplexity`, `isAsync`, `blockingCalls` |
+| `endpoints` | `EndpointDetail[]` | `file`, `handler`, `methods` (`GET`…, or `ROUTE` for Flask `@app.route` without `methods`), `path` (first), `paths` (all, when decorators are stacked on one handler), `startLine`, `lines`, `cyclomaticComplexity`, `isAsync`, `blockingCalls` |
 | `summary.endpointCount` / `asyncEndpoints` | `number` | Handler counts |
 | `summary.fatHandlers` / `fatHandlerShare` | `number` | Handlers over 50 lines, and their share |
 | `summary.averageHandlerComplexity` / `maxHandlerComplexity` | `number` | Cyclomatic over handlers |

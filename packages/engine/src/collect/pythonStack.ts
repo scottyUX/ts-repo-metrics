@@ -34,6 +34,8 @@ const STACK: { tag: string; packages: string[]; modules: string[] }[] = [
   { tag: "llama-index", packages: ["llama-index", "llama_index"], modules: ["llama_index"] },
   { tag: "openai", packages: ["openai"], modules: ["openai"] },
   { tag: "anthropic", packages: ["anthropic"], modules: ["anthropic"] },
+  { tag: "streamlit", packages: ["streamlit"], modules: ["streamlit"] },
+  { tag: "gradio", packages: ["gradio"], modules: ["gradio"] },
 ];
 
 const DEPENDENCY_FILES = ["requirements.txt", "requirements-dev.txt", "pyproject.toml", "Pipfile", "setup.py", "setup.cfg"];

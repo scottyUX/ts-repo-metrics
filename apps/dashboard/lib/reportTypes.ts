@@ -123,6 +123,8 @@ export interface EndpointDetail {
   handler: string;
   methods: string[];
   path: string;
+  /** Every route path when decorators are stacked; absent on older reports. */
+  paths?: string[];
   startLine: number;
   lines: number;
   cyclomaticComplexity: number;

@@ -94,17 +94,21 @@ export function extractEndpoints(root: SyntaxNode, relativePath: string): Endpoi
       if (node.type !== "decorated_definition") return;
       const fnNode = node.childForFieldName("definition");
       if (fnNode?.type !== "function_definition") return;
-      const route = node.namedChildren
+      // Stacked decorators (`@bp.route("/")` over `@bp.route("/index")`) are one handler.
+      const routes = node.namedChildren
         .filter((c) => c.type === "decorator")
         .map(parseRouteDecorator)
-        .find((r): r is RouteDecorator => r !== null);
-      if (!route) return;
+        .filter((r): r is RouteDecorator => r !== null);
+      if (routes.length === 0) return;
+      const paths = [...new Set(routes.map((r) => r.path))];
+      const methods = [...new Set(routes.flatMap((r) => r.methods))];
       const isAsync = isAsyncFunction(fnNode);
       endpoints.push({
         file: relativePath,
         handler: fnNode.childForFieldName("name")?.text ?? "(anonymous)",
-        methods: route.methods,
-        path: route.path,
+        methods,
+        path: paths[0] ?? "",
+        paths,
         startLine: fnNode.startPosition.row + 1,
         lines: fnNode.endPosition.row - fnNode.startPosition.row + 1,
         cyclomaticComplexity: 1 + countCyclomaticBranchPoints(fnNode, PYTHON_PROFILE),

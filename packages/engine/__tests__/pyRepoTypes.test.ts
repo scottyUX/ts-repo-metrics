@@ -13,6 +13,8 @@ import { extractEndpoints } from "../src/extract/python/endpoints.js";
 import { computeModuleScope } from "../src/extract/python/moduleScope.js";
 import { extractNotebookSource } from "../src/parsing/notebook.js";
 import { pairedTestPathCandidates } from "../src/extract/symbolVerificationRisk.js";
+import { isAnalyzableSourcePath, isTestFilePath } from "../src/utils/constants.js";
+import { detectFramework } from "../src/collect/frameworkDetection.js";
 
 const tempDirs: string[] = [];
 
@@ -154,6 +156,15 @@ def also_not(a):
     ]);
     expect(eps[0]).toMatchObject({ isAsync: true, blockingCalls: 2 });
     expect(eps[2]?.cyclomaticComplexity).toBe(2);
+  });
+
+  it("keeps every path when route decorators are stacked on one handler", () => {
+    const eps = extractEndpoints(
+      py(`@bp.route("/", methods=["GET", "POST"])\n@bp.route("/index", methods=["GET"])\ndef index():\n    pass\n`),
+      "app/main/routes.py",
+    );
+    expect(eps).toHaveLength(1);
+    expect(eps[0]).toMatchObject({ handler: "index", path: "/", paths: ["/", "/index"], methods: ["GET", "POST"] });
   });
 
   it("summarizes endpoints and skips handlers in test files", async () => {
@@ -303,6 +314,36 @@ describe("stack detection and mixed repos", () => {
     expect(report.framework).toEqual({ type: "Express", hasReact: false, hasBackend: true });
     expect(report.python).toBeUndefined();
     expect(report.backendMetrics).toBeUndefined();
+  });
+});
+
+describe("repo layout rules from the public-repo run", () => {
+  it("skips generated Alembic revisions but keeps migrations/env.py", () => {
+    expect(isAnalyzableSourcePath("migrations/versions/8388415d2247_users.py")).toBe(false);
+    expect(isAnalyzableSourcePath("backend/app/alembic/versions/e2412789c190_init.py")).toBe(false);
+    expect(isAnalyzableSourcePath("migrations/env.py")).toBe(true);
+    expect(isAnalyzableSourcePath("src/versions/migrations.ts")).toBe(true);
+  });
+
+  it("treats a unittest-style tests.py as a test file", () => {
+    expect(isTestFilePath("tests.py")).toBe(true);
+    expect(isTestFilePath("app/tests.py")).toBe(true);
+    expect(isTestFilePath("app/tests_helpers.py")).toBe(false);
+  });
+
+  it("finds React in a monorepo subfolder package.json", async () => {
+    const repo = await writeRepo({
+      "package.json": JSON.stringify({ private: true, workspaces: ["frontend"] }),
+      "frontend/package.json": JSON.stringify({ dependencies: { react: "^18.0.0" } }),
+      "node_modules/x/package.json": JSON.stringify({ dependencies: { next: "1" } }),
+    });
+    expect(await detectFramework(repo)).toEqual({ type: "React", hasReact: true, hasBackend: false });
+  });
+
+  it("tags Streamlit apps", async () => {
+    const repo = await writeRepo({ "Home.py": "import streamlit as st\nst.title('x')\n" });
+    const report = await analyzeRepo(repo);
+    expect(report.framework?.pythonStack).toEqual(["streamlit"]);
   });
 });
 
