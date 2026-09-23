@@ -40,6 +40,16 @@ export type {
   GitHubRepositoryMeta,
   GitHubLanguageShare,
   GitHubRepoContributor,
+  FrameworkInfo,
+  UnsupportedFrameworkInfo,
+  LanguageBucket,
+  LanguageSummary,
+  ModuleScopeMetrics,
+  PythonMetrics,
+  PythonTypeHintSummary,
+  PythonModuleScopeSummary,
+  EndpointDetail,
+  BackendMetrics,
 } from "./types/report.js";
 
 export {

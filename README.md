@@ -1,6 +1,6 @@
 # ts-repo-metrics
 
-A TypeScript CLI tool that statically analyzes TypeScript and TSX repositories using [Tree-sitter](https://tree-sitter.github.io/tree-sitter/), producing a comprehensive JSON report covering repository profiling, function metrics, cyclomatic complexity, code smells, duplication, git history, extended git metrics (Epic D: commit size distribution, bursts, entropy, churn hotspots, test coupling, refactor rate), framework detection, maintainability index, test coverage proxy, **optional RQ3 React/TSX metrics** (`reactMetrics`: hooks, JSX depth, cohesion-style flags, prop pass-through MVP, hook-safety heuristics), and **optional Phase 3 pathology** (`phase3`: silent-failure density, monolithic component rate, weighted structural redundancy from jscpd).
+A TypeScript CLI tool that statically analyzes TypeScript, TSX, JavaScript, JSX, Python, and Jupyter notebook repositories using [Tree-sitter](https://tree-sitter.github.io/tree-sitter/), producing a comprehensive JSON report covering repository profiling, function metrics, cyclomatic complexity, code smells, duplication, git history, extended git metrics (Epic D: commit size distribution, bursts, entropy, churn hotspots, test coupling, refactor rate), framework detection, maintainability index, test coverage proxy, **optional RQ3 React/TSX metrics** (`reactMetrics`: hooks, JSX depth, cohesion-style flags, prop pass-through MVP, hook-safety heuristics; emitted when `.tsx` or `.jsx` files are analyzed), **Python extras** (`python`: type-hint coverage and top-level code; `backendMetrics`: Flask/FastAPI route handlers; per-language `byLanguage` summaries), and **optional Phase 3 pathology** (`phase3`: silent-failure density, monolithic component rate, weighted structural redundancy from jscpd).
 
 ## Prerequisites
 
@@ -196,7 +196,7 @@ repo-metrics/
 
 1. **Profile** — Counts files by type and computes LOC breakdowns before parsing.
 2. **Discover** — `fast-glob` finds all `.ts`/`.tsx` files, ignoring non-source directories.
-3. **Parse** — Each file is parsed into a CST using Tree-sitter (TypeScript or TSX grammar).
+3. **Parse** — Each file is parsed into a CST using Tree-sitter: the TypeScript grammar for `.ts`, the TSX grammar for `.tsx`, `.js`, `.jsx`, `.mjs`, and `.cjs`, and the Python grammar for `.py` and notebook code cells. web2py and Django repos are skipped with a message.
 4. **Extract** — Multiple extractors run on each parsed tree:
    - Function count and type breakdown
    - Per-function metrics (length, nesting depth, parameter count)

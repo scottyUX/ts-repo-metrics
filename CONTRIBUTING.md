@@ -43,7 +43,7 @@ src/
 │   ├── duplication.ts
 │   ├── gitMetrics.ts
 │   └── frameworkDetection.ts
-├── parsing/tsParser.ts             # Tree-sitter wrapper
+├── parsing/tsParser.ts             # Tree-sitter wrapper (TS/TSX grammars for JS/TS, Python grammar for .py/.ipynb)
 ├── extract/                        # AST-based extractors
 │   ├── functionCount.ts
 │   ├── functionMetrics.ts

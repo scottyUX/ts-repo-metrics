@@ -101,7 +101,11 @@ export function AnalyzeRepositoryHero({ compact }: AnalyzeRepositoryHeroProps) {
           toast.error(result.error);
           return;
         }
-        toast.success("Analysis complete");
+        if (result.analysisSkipped) {
+          toast.warning(result.analysisSkipped.message);
+        } else {
+          toast.success("Analysis complete");
+        }
         router.push(`/r/${encodeURIComponent(result.resultId)}`);
       } catch {
         setError("Analysis failed. Please try again.");
