@@ -6,7 +6,7 @@
 /*  File discovery                                                     */
 /* ------------------------------------------------------------------ */
 
-/** Glob patterns for TypeScript, JavaScript, JSX, and Python source files. */
+/** Glob patterns for TypeScript, JavaScript, JSX, Python, and notebook source files. */
 export const SOURCE_PATTERNS = [
   "**/*.ts",
   "**/*.tsx",
@@ -15,6 +15,7 @@ export const SOURCE_PATTERNS = [
   "**/*.mjs",
   "**/*.cjs",
   "**/*.py",
+  "**/*.ipynb",
 ];
 
 /**
@@ -32,6 +33,8 @@ export const IGNORE_PATTERNS = [
   "**/third_party/**",
   "**/venv/**",
   "**/__pycache__/**",
+  "**/migrations/versions/**",
+  "**/alembic/versions/**",
   "**/*.min.js",
   "**/*.min.jsx",
   "**/*.min.mjs",
@@ -64,9 +67,20 @@ const SOURCE_EXTENSIONS = new Set([
   ".mjs",
   ".cjs",
   ".py",
+  ".ipynb",
 ]);
 
 const MINIFIED_BASENAME_RE = /\.min\.(js|jsx|mjs|cjs)$/;
+
+/** Alembic / Flask-Migrate revision files are generated: `migrations/versions/`, `alembic/versions/`. */
+function isGeneratedMigrationPath(parts: string[]): boolean {
+  for (let i = 0; i + 1 < parts.length; i++) {
+    if ((parts[i] === "migrations" || parts[i] === "alembic") && parts[i + 1] === "versions") {
+      return true;
+    }
+  }
+  return false;
+}
 const CONFIG_JS_BASENAME_RE = /\.config\.(js|cjs|mjs)$/;
 
 /**
@@ -83,6 +97,7 @@ export function isAnalyzableSourcePath(relPath: string): boolean {
   if (parts.some((p) => p.startsWith(".") || BLOCKED_PATH_SEGMENTS.has(p))) {
     return false;
   }
+  if (isGeneratedMigrationPath(parts.slice(0, -1))) return false;
   const base = parts[parts.length - 1] ?? "";
   if (MINIFIED_BASENAME_RE.test(base) || CONFIG_JS_BASENAME_RE.test(base)) {
     return false;
@@ -98,10 +113,10 @@ export const TEST_FILE_RE = /\.(test|spec)\.(js|jsx|mjs|cjs|ts|tsx)$/;
 /** pytest basenames `test_*.py` or `*_test.py`. Tested against the basename only. */
 const PYTHON_TEST_BASENAME_RE = /^(?:test_[^/]*|[^/]*_test)\.py$/i;
 
-/** True for JS/TS test names, pytest module names, and `conftest.py`. */
+/** True for JS/TS test names, pytest module names, `conftest.py`, and unittest-style `tests.py`. */
 export function isTestFilePath(filePath: string): boolean {
   const base = filePath.replace(/\\/g, "/").split("/").pop() ?? "";
-  if (base === "conftest.py") return true;
+  if (base === "conftest.py" || base === "tests.py") return true;
   return TEST_FILE_RE.test(filePath) || PYTHON_TEST_BASENAME_RE.test(base);
 }
 

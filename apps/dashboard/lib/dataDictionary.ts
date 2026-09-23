@@ -98,6 +98,90 @@ export const DATA_DICTIONARY: Record<string, DataDictionaryEntry> = {
     resultsConstruct: "tbd",
     interpretation: "Filter skipped framework repos out of scored cohorts.",
   },
+  notebook_files: {
+    definition: "Count of .ipynb notebooks scored. Only code cells are parsed; outputs and markdown are ignored.",
+    unit: "count",
+    resultsConstruct: "tbd",
+    interpretation: "High: notebook-heavy ML or data work.",
+  },
+  python_backend: {
+    definition: "FastAPI, Flask, or Starlette when found in Python dependency files (root or one folder down) or imports; empty otherwise.",
+    unit: "string",
+    resultsConstruct: "tbd",
+    interpretation: "Python web framework, if any.",
+  },
+  python_stack: {
+    definition: "Semicolon-separated AI/ML libraries found in dependency files or imports, e.g. torch;openai.",
+    unit: "string",
+    resultsConstruct: "tbd",
+    interpretation: "AI/ML stack in use.",
+  },
+  avg_complexity_ecmascript: {
+    definition: "Mean cyclomatic complexity of .ts/.tsx/.js/.jsx/.mjs/.cjs functions. Present only when the repo has them.",
+    unit: "ratio",
+    resultsConstruct: "code-quality",
+    interpretation: "Compare within JS/TS only; JS counts else as a branch.",
+  },
+  avg_complexity_python: {
+    definition: "Mean cyclomatic complexity of .py functions. Present only when the repo has them.",
+    unit: "ratio",
+    resultsConstruct: "code-quality",
+    interpretation: "Compare within Python only; Python does not count else or comprehension filters.",
+  },
+  avg_complexity_notebook: {
+    definition: "Mean cyclomatic complexity of functions defined in notebook code cells.",
+    unit: "ratio",
+    resultsConstruct: "code-quality",
+    interpretation: "Notebook functions, reported apart from .py files.",
+  },
+  py_param_type_coverage: {
+    definition: "Share of Python def parameters with a type annotation (self/cls on methods excluded). -1 when there are no parameters.",
+    unit: "ratio",
+    resultsConstruct: "code-quality",
+    interpretation: "High: typed Python, as FastAPI encourages.",
+  },
+  py_return_type_coverage: {
+    definition: "Share of Python def functions with a return annotation. -1 when there are no functions.",
+    unit: "ratio",
+    resultsConstruct: "code-quality",
+    interpretation: "High: typed Python.",
+  },
+  py_top_level_files: {
+    definition: "Python files and notebooks with logic outside any function or class (scripts, training loops).",
+    unit: "count",
+    resultsConstruct: "code-quality",
+    interpretation: "High: script-style code that function metrics do not see.",
+  },
+  py_top_level_max_complexity: {
+    definition: "Highest cyclomatic complexity of any file's top-level code, scored as one unit.",
+    unit: "count",
+    resultsConstruct: "code-quality",
+    interpretation: "High: complex logic at module level.",
+  },
+  endpoint_count: {
+    definition: "Flask and FastAPI route handlers found (decorators like @app.get(\"/x\") or @bp.route(\"/x\")), excluding test files.",
+    unit: "count",
+    resultsConstruct: "code-quality",
+    interpretation: "API surface size.",
+  },
+  fat_handler_share: {
+    definition: "Share of route handlers longer than 50 lines.",
+    unit: "ratio",
+    resultsConstruct: "code-quality",
+    interpretation: "High: business logic living in route handlers.",
+  },
+  avg_handler_complexity: {
+    definition: "Mean cyclomatic complexity of route handlers.",
+    unit: "ratio",
+    resultsConstruct: "code-quality",
+    interpretation: "High: branching logic inside endpoints.",
+  },
+  blocking_calls_in_async: {
+    definition: "Blocking calls (requests.*, httpx.<verb>, time.sleep, subprocess.*) made directly inside async def route handlers.",
+    unit: "count",
+    resultsConstruct: "code-quality",
+    interpretation: "Above 0: handlers that stall the event loop.",
+  },
   total_loc: {
     definition: "Total lines of code across all TypeScript files.",
     unit: "loc",
@@ -118,7 +202,7 @@ export const DATA_DICTIONARY: Record<string, DataDictionaryEntry> = {
   },
   files_analyzed: {
     definition:
-      "Total .ts, .tsx, .js, .jsx, and .py files successfully parsed. web2py and Django repos contribute zero files.",
+      "Total .ts, .tsx, .js, .jsx, .mjs, .cjs, .py, and .ipynb files successfully parsed. web2py and Django repos contribute zero files.",
     unit: "count",
     resultsConstruct: "commit-habits",
     interpretation: "Scope of analysis.",
@@ -342,7 +426,7 @@ export const DATA_DICTIONARY: Record<string, DataDictionaryEntry> = {
   },
   phase3_sfd: {
     definition:
-      "Silent failure density: React-scoped empty/console-only catch events per 1000 non-test source lines. Python source LOC is in the denominator and Python except: pass is not an event.",
+      "Silent failure density: empty or log-only error handlers per 1000 non-test source lines. JS/TS catch blocks count in React-scope files; Python except clauses count in every .py and notebook file.",
     unit: "ratio",
     resultsConstruct: "code-quality",
     interpretation: "Higher: more swallowed or log-only error handling in UI code.",

@@ -8,7 +8,7 @@ This document describes the complete JSON report produced by `ts-repo-metrics` (
 |-------|------|----------|-------------|
 | `repoPath` | `string` | no | Absolute path to the analyzed repository |
 | `source` | `SourceInfo` | no | Origin metadata (local path vs cloned GitHub URL) |
-| `filesAnalyzed` | `number` | no | Total `.ts`, `.tsx`, `.js`, `.jsx`, `.mjs`, `.cjs`, and `.py` files successfully parsed. web2py and Django repos contribute zero |
+| `filesAnalyzed` | `number` | no | Total `.ts`, `.tsx`, `.js`, `.jsx`, `.mjs`, `.cjs`, `.py`, and `.ipynb` files successfully parsed. web2py and Django repos contribute zero |
 | `analysisSkipped` | `object` | **yes** | `{ id: "web2py" \| "django", message }` when the whole repository was skipped, including JS and TS. Absent when the repo was scored. The feature vector copies the id to `analysis_skipped` (`""` when scored) so a zero-file row is not treated as an empty repository |
 | `filesSkipped` | `number` | **yes** | Files skipped due to read or parse errors |
 | `analyzer_version` | `string` | **yes** | Analyzer package version (from `packages/engine/package.json` when run via the engine — CLI or dashboard) |
@@ -25,10 +25,13 @@ This document describes the complete JSON report produced by `ts-repo-metrics` (
 | `duplication` | `DuplicationMetrics` | **yes** | jscpd duplication analysis (null if jscpd fails) |
 | `git` | `GitMetrics` | **yes** | Commit history metrics (null for non-git repos) |
 | `gitMetricsV2` | `GitMetricsV2` | **yes** | Extended git metrics (Epic D; null for non-git repos) |
-| `framework` | `FrameworkInfo` | **yes** | Detected framework (null if no package.json) |
+| `framework` | `FrameworkInfo` | **yes** | Detected framework (null when there is no package.json and no Python) |
 | `perFile` | `PerFileEntry[]` | no | Per-file metrics |
+| `byLanguage` | `Partial<Record<LanguageBucket, LanguageSummary>>` | **yes** | Per-language aggregates; only buckets with scored files appear |
+| `python` | `PythonMetrics` | **yes** | Python type hints and top-level code; present when `.py` or `.ipynb` files were scored |
+| `backendMetrics` | `BackendMetrics` | **yes** | Flask / FastAPI route handlers; present when at least one was found |
 | `reactMetrics` | `ReactMetricsReport` | **yes** | RQ3 React/TSX static metrics (present when at least one `.tsx` file was analyzed) |
-| `phase3` | `Phase3Metrics` | **yes** | Phase 3 — silent failures (TSX), monolithic component rate, weighted jscpd redundancy |
+| `phase3` | `Phase3Metrics` | **yes** | Phase 3 — silent failures (React-scope JS/TS and all Python), monolithic component rate, weighted jscpd redundancy |
 
 ## `distributions` — Distribution Metrics (optional)
 
@@ -62,13 +65,14 @@ Tail risk indicators for research. Percentiles computed across all functions.
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `totalFiles` | `number` | Analyzed source files (excluding ignored dirs) |
+| `totalFiles` | `number` | Analyzed source files (excluding ignored dirs, including generated Alembic `migrations/versions/` and `alembic/versions/`) |
 | `tsFiles` | `number` | Count of `.ts` files |
 | `tsxFiles` | `number` | Count of `.tsx` files |
 | `jsFiles` | `number` | Count of `.js`, `.mjs`, and `.cjs` files |
 | `jsxFiles` | `number` | Count of `.jsx` files |
 | `pyFiles` | `number` | Count of `.py` files. Zero on a web2py or Django skip, along with every other profile count and LOC field |
-| `testFiles` | `number` | `*.test` / `*.spec` for JS and TS, plus `test_*.py`, `*_test.py`, and `conftest.py` |
+| `notebookFiles` | `number` | Count of `.ipynb` files. Their LOC counts code-cell lines only; a malformed notebook adds 0 lines and is counted in `filesSkipped` |
+| `testFiles` | `number` | `*.test` / `*.spec` for JS and TS, plus `test_*.py`, `*_test.py`, `conftest.py`, and `tests.py` |
 | `totalLOC` | `number` | Total lines of code across all files |
 | `sourceLOC` | `number` | Lines of code in non-test files |
 | `testLOC` | `number` | Lines of code in test files |
@@ -184,13 +188,17 @@ Returns `null` for non-git repos or when no commit history is available. Epic D 
 
 ## `framework` — Framework Detection (nullable)
 
-Returns `null` if no `package.json` is found.
+Returns `null` when there is no `package.json` (root or one folder down) and no Python. A repo without `package.json` that has Python gets a Python-only record whose `type` is the Python backend, or `Python`.
+
+JS detection reads the root `package.json` and each one a single folder down (`frontend/`, `web/`), so a monorepo's React app is found. Python detection reads `requirements.txt`, `requirements-dev.txt`, `pyproject.toml`, `Pipfile`, `setup.py`, and `setup.cfg` at the repo root and one folder down (`backend/`, `api/`, …), plus top-level imports from the scored Python files.
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `type` | `string` | Primary framework: `Next.js`, `React`, `NestJS`, `Fastify`, `Express`, or `Node` |
+| `type` | `string` | Primary framework: `Next.js`, `React`, `NestJS`, `Fastify`, `Express`, or `Node` from `package.json`; else `FastAPI`, `Flask`, `Starlette`, or `Python` |
 | `hasReact` | `boolean` | Whether `react` is a dependency |
-| `hasBackend` | `boolean` | Whether a backend framework is detected |
+| `hasBackend` | `boolean` | Whether a JS or Python backend framework is detected |
+| `pythonBackend` | `"FastAPI" \| "Flask" \| "Starlette" \| null` | Optional. Python web framework; FastAPI wins over Starlette |
+| `pythonStack` | `string[]` | Optional. AI/ML tags: `torch`, `tensorflow`, `scikit-learn`, `xgboost`, `transformers`, `langchain`, `llama-index`, `openai`, `anthropic`, `streamlit`, `gradio` |
 
 ## `perFile` — Per-File Entry
 
@@ -201,6 +209,15 @@ Returns `null` if no `package.json` is found.
 | `functionsByType` | `Record<string, number>` | Breakdown by AST node type |
 | `functionMetrics` | `FunctionDetail[]` | Per-function structural metrics |
 | `complexity` | `FunctionComplexity[]` | Per-function complexity |
+| `moduleScope` | `ModuleScopeMetrics` | Optional. Python and notebooks: top-level statements outside any function or class, scored as one unit and kept out of function totals |
+
+### `ModuleScopeMetrics`
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `cyclomaticComplexity` | `number` | 1 + branch points in top-level statements (Python rules) |
+| `maxNestingDepth` | `number` | Deepest nesting outside defs and classes |
+| `lines` | `number` | Lines spanned by top-level statements, excluding defs, classes, imports, and docstrings |
 
 ### `FunctionDetail`
 
@@ -219,6 +236,9 @@ Returns `null` if no `package.json` is found.
 | `maintainabilityIndexGradAiNorm` | `number \| null` | `max(0, MI_raw · 100 / 171)`. Null on `.py` functions |
 | `isReactComponent` | `boolean` | Heuristic: `.tsx` file and (PascalCase name or JSX in body) |
 | `isMonolithic` | `boolean` | `true` when `isReactComponent` and `lines` exceed the monolithic threshold (50 SLOC; see `constants.ts`) |
+| `notebookCell` | `number` | Optional. Notebooks: 1-based code cell holding `startLine`. `startLine` counts lines in the joined code cells |
+| `typedParameterCount` | `number` | Optional. Python `def`: parameters with an annotation, counted like `parameterCount` |
+| `hasReturnAnnotation` | `boolean` | Optional. Python `def`: has a `-> T` annotation |
 
 ### `HalsteadMetrics`
 
@@ -294,14 +314,14 @@ Present when at least one `.tsx` file was successfully parsed. Heuristic **compo
 
 ## `phase3` — AI smell / pathology (optional)
 
-Present when the analyzer build includes Phase 3. **Silent failure** events are collected from **`.tsx`** files only (empty `catch` or `catch` that only logs to console). **SRS** uses jscpd duplicate pairs with per-pair similarity (file excerpt + Levenshtein ratio when fragments are unavailable); see [METRICS_CONCEPTS.md](METRICS_CONCEPTS.md).
+Present when the analyzer build includes Phase 3. **Silent failure** events come from JS/TS files in React scope (empty `catch`, or a `catch` that only logs to console) and from every Python file and notebook (an `except` whose body is only `pass`, `...`, or `continue`, or only `print`, `logging.*`, `logger.*`, or `traceback.print_exc()`). An `except` that also raises or does other work is not an event. Including Python changes `sfd` on any repo with Python. **SRS** uses jscpd duplicate pairs with per-pair similarity (file excerpt + Levenshtein ratio when fragments are unavailable); see [METRICS_CONCEPTS.md](METRICS_CONCEPTS.md).
 
 ### `SilentFailureEvent`
 
 | Field | Type | Description |
 |-------|------|-------------|
 | `file` | `string` | Path relative to repo root |
-| `line` | `number` | 1-based line (catch keyword) |
+| `line` | `number` | 1-based line (`catch` or `except` keyword) |
 | `kind` | `string` | `empty_catch` or `console_only_catch` |
 
 ### `Phase3Metrics`
@@ -311,9 +331,57 @@ Present when the analyzer build includes Phase 3. **Silent failure** events are 
 | `sfd` | `number` | Silent failure density: `silentFailureEvents.length / (profile.sourceLOC / 1000)`; `0` if `sourceLOC === 0` |
 | `mcr` | `number \| null` | Monolithic component rate: `monolithicComponentCount / reactComponentCount`; **`null`** if `reactComponentCount === 0` |
 | `srs` | `number` | Structural redundancy score: `srsWeightedNumerator / (profile.sourceLOC / 1000)`; `0` if `sourceLOC === 0` |
-| `silentFailureEvents` | `SilentFailureEvent[]` | All TSX silent-failure events |
+| `silentFailureEvents` | `SilentFailureEvent[]` | All silent-failure events |
 | `srsWeightedNumerator` | `number` | Sum of weighted duplicate line mass (1.0 @ 100% similarity, 0.5 for similarity in (80%, 100%), 0 otherwise) |
 | `srsExactWeightedLines` | `number` | Portion of numerator from 100% matches |
 | `srsNearWeightedLines` | `number` | Portion of numerator from (80%, 100%) near-clone matches |
 | `monolithicComponentCount` | `number` | React components with `lines` > threshold |
 | `reactComponentCount` | `number` | Functions with `isReactComponent === true` |
+
+## `byLanguage` — Per-Language Aggregates (optional)
+
+Keys: `ecmascript` (`.ts` `.tsx` `.js` `.jsx` `.mjs` `.cjs`), `python` (`.py`), `notebook` (`.ipynb`). Cyclomatic rules differ by language (JS counts `else`, Python does not, and comprehension filters add nothing), so compare complexity within one bucket.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `files` | `number` | Files scored in this bucket |
+| `sourceLOC` / `testLOC` | `number` | LOC split by `isTestFilePath` |
+| `functions` | `number` | Function-like nodes |
+| `averageComplexity` / `maxComplexity` | `number` | Cyclomatic, this bucket only |
+| `highComplexityFunctions` | `number` | Functions above the high-complexity threshold |
+| `averageFunctionLength` | `number` | Mean function lines |
+| `smells` | `SmellCounts` | Smell totals for this bucket |
+
+## `python` — Python Extras (optional)
+
+### `typeHints`
+
+Over Python `def` functions; lambdas cannot be annotated and are excluded. A leading `self` / `cls` on a method is not counted.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `functions` | `number` | `def` functions |
+| `functionsWithReturnAnnotation` | `number` | With `-> T` |
+| `parameters` / `typedParameters` | `number` | Counted parameters, and those with an annotation |
+| `parameterCoverage` | `number \| null` | `typedParameters / parameters`; null with no parameters |
+| `returnCoverage` | `number \| null` | `functionsWithReturnAnnotation / functions`; null with no functions |
+
+### `moduleScope`
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `filesWithTopLevelCode` | `number` | Files with a `perFile[].moduleScope` |
+| `topLevelLines` | `number` | Sum of their `lines` |
+| `maxComplexity` / `averageComplexity` | `number` | Over those files' top-level code |
+
+## `backendMetrics` — Flask / FastAPI Routes (optional)
+
+A route handler is a decorated `def` whose decorator is `@<obj>.get/post/put/delete/patch/options/head/route/api_route/websocket(...)` with a first argument that is a string path starting with `/` (or empty). Handlers in test files are skipped, as are `mock.patch` decorators.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `endpoints` | `EndpointDetail[]` | `file`, `handler`, `methods` (`GET`…, or `ROUTE` for Flask `@app.route` without `methods`), `path` (first), `paths` (all, when decorators are stacked on one handler), `startLine`, `lines`, `cyclomaticComplexity`, `isAsync`, `blockingCalls` |
+| `summary.endpointCount` / `asyncEndpoints` | `number` | Handler counts |
+| `summary.fatHandlers` / `fatHandlerShare` | `number` | Handlers over 50 lines, and their share |
+| `summary.averageHandlerComplexity` / `maxHandlerComplexity` | `number` | Cyclomatic over handlers |
+| `summary.blockingCallsInAsync` / `asyncHandlersWithBlockingCalls` | `number` | `requests.*`, `httpx.<verb>`, `time.sleep`, and `subprocess.*` calls made directly in `async def` handlers |

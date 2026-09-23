@@ -25,12 +25,23 @@ export function pairedTestPathCandidates(relSource: string): string[] {
   const ext = path.extname(relSource).replace(/^\./, "") || "ts";
   const base = path.basename(relSource, path.extname(relSource));
   const norm = (p: string) => p.replace(/\\/g, "/");
+  if (ext === "ipynb") return [];
   if (ext === "py") {
+    // `app/api/users.py` also pairs with `tests/app/api/test_users.py` and
+    // `tests/api/test_users.py` (top package dropped), the usual Flask/FastAPI layout.
+    const segments = dir === "." ? [] : norm(dir).split("/");
+    const mirrors = [
+      segments.length > 0 ? norm(path.join("tests", ...segments, `test_${base}.py`)) : null,
+      segments.length > 1 ? norm(path.join("tests", ...segments.slice(1), `test_${base}.py`)) : null,
+    ].filter((p): p is string => p !== null);
     return [
-      norm(path.join(dir, `test_${base}.py`)),
-      norm(path.join(dir, `${base}_test.py`)),
-      norm(path.join(dir, "tests", `test_${base}.py`)),
-      norm(path.join("tests", `test_${base}.py`)),
+      ...new Set([
+        norm(path.join(dir, `test_${base}.py`)),
+        norm(path.join(dir, `${base}_test.py`)),
+        norm(path.join(dir, "tests", `test_${base}.py`)),
+        ...mirrors,
+        norm(path.join("tests", `test_${base}.py`)),
+      ]),
     ];
   }
 

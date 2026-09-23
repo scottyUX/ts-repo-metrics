@@ -17,6 +17,24 @@ import { extractGitMetrics } from "../collect/gitMetrics.js";
 import { extractGitHistoryBundle } from "../collect/gitMetricsV2.js";
 import { detectFramework } from "../collect/frameworkDetection.js";
 import { detectUnsupportedPythonFramework } from "../collect/pythonFrameworkDetection.js";
+import {
+  collectPythonImports,
+  detectPythonStack,
+  mergePythonFramework,
+} from "../collect/pythonStack.js";
+import {
+  isNotebookPath,
+  notebookCellForLine,
+  readAnalyzableSource,
+} from "../parsing/notebook.js";
+import { extractPythonSilentFailures } from "../extract/python/silentFailures.js";
+import { computeModuleScope } from "../extract/python/moduleScope.js";
+import { extractEndpoints, summarizeEndpoints } from "../extract/python/endpoints.js";
+import {
+  LanguageSummaryBuilder,
+  PythonMetricsBuilder,
+} from "../extract/languageSummary.js";
+import { countLines } from "../utils/text.js";
 import { parseSource } from "../parsing/tsParser.js";
 import { countFunctions } from "../extract/functionCount.js";
 import {
@@ -34,8 +52,12 @@ import {
 } from "../extract/react/extractReactMetrics.js";
 import { extractSilentFailures } from "../extract/silentFailures.js";
 import { computeSymbolVerificationRisks } from "../extract/symbolVerificationRisk.js";
-import { LONG_FUNCTION_THRESHOLD } from "../utils/constants.js";
-import { languageProfileForPath } from "../utils/languageProfile.js";
+import { isTestFilePath, LONG_FUNCTION_THRESHOLD } from "../utils/constants.js";
+import {
+  isPythonSourcePath,
+  languageBucketForPath,
+  languageProfileForPath,
+} from "../utils/languageProfile.js";
 import { median } from "../utils/math.js";
 import { getSourceMetadata } from "../collect/repoMetadata.js";
 import type {
@@ -51,11 +73,13 @@ import type {
   SilentFailureEvent,
   RepoProfile,
   UnsupportedFrameworkInfo,
+  EndpointDetail,
+  ModuleScopeMetrics,
 } from "../types/report.js";
 
-/** `.ts` uses the TypeScript grammar. `.py` uses Python. JS, JSX, and TSX use the TSX grammar. */
+/** `.ts` uses the TypeScript grammar. `.py` and notebooks use Python. JS, JSX, and TSX use the TSX grammar. */
 function grammarForFile(filePath: string): "ts" | "tsx" | "py" {
-  if (filePath.endsWith(".py")) return "py";
+  if (isPythonSourcePath(filePath)) return "py";
   return filePath.endsWith(".ts") ? "ts" : "tsx";
 }
 
@@ -66,6 +90,7 @@ const EMPTY_PROFILE: RepoProfile = {
   jsFiles: 0,
   jsxFiles: 0,
   pyFiles: 0,
+  notebookFiles: 0,
   testFiles: 0,
   totalLOC: 0,
   sourceLOC: 0,
@@ -205,13 +230,19 @@ export async function analyzeRepo(
   const reactMetricsByFile: ReactComponentMetrics[][] = [];
   let tsxFilesAnalyzed = 0;
   const silentFailureEvents: SilentFailureEvent[] = [];
+  const languageSummaries = new LanguageSummaryBuilder();
+  const pythonMetrics = new PythonMetricsBuilder();
+  const pythonImports = new Set<string>();
+  const endpoints: EndpointDetail[] = [];
 
   for (const filePath of files) {
     let code: string;
+    let cellStartLines: number[] | undefined;
     try {
-      code = await readFile(filePath, "utf8");
+      ({ code, cellStartLines } = await readAnalyzableSource(repoPath, filePath));
     } catch {
-      console.error(`Skipping ${path.relative(repoPath, filePath)}: could not read file`);
+      const why = isNotebookPath(filePath) ? "not a readable notebook" : "could not read file";
+      console.error(`Skipping ${path.relative(repoPath, filePath)}: ${why}`);
       filesSkipped++;
       continue;
     }
@@ -242,7 +273,27 @@ export async function analyzeRepo(
         complexity: f.cyclomaticComplexity,
       }),
     );
+    if (cellStartLines) {
+      for (const f of fnMetrics.functions) {
+        f.notebookCell = notebookCellForLine(cellStartLines, f.startLine);
+      }
+    }
     const fileSmells = detectSmells(tree.rootNode, langProfile);
+    const isTest = isTestFilePath(relFile);
+    languageSummaries.add(languageBucketForPath(filePath), {
+      loc: countLines(code),
+      isTest,
+      functions: fnMetrics.functions,
+      smells: fileSmells,
+    });
+    let moduleScope: ModuleScopeMetrics | null = null;
+    if (isPythonSourcePath(filePath)) {
+      moduleScope = computeModuleScope(tree.rootNode);
+      pythonMetrics.addFile(fnMetrics.functions, moduleScope);
+      collectPythonImports(tree.rootNode, pythonImports);
+      silentFailureEvents.push(...extractPythonSilentFailures(tree.rootNode, relFile));
+      if (!isTest) endpoints.push(...extractEndpoints(tree.rootNode, relFile));
+    }
 
     totalFunctions += fnCount.total;
     allFunctionDetails.push(...fnMetrics.functions);
@@ -258,6 +309,7 @@ export async function analyzeRepo(
       functionsByType: fnCount.byType,
       functionMetrics: fnMetrics.functions,
       complexity: fileComplexity,
+      ...(moduleScope ? { moduleScope } : {}),
     });
 
     if (inReactScope) {
@@ -345,9 +397,16 @@ export async function analyzeRepo(
   const gitBundle = await extractGitHistoryBundle(repoPath, gitRevRange);
   const gitMetricsV2 = gitBundle?.gitMetricsV2 ?? null;
   const contributors = gitBundle?.contributors;
-  const framework = await detectFramework(repoPath);
+  const hasPythonFiles = profile.pyFiles + profile.notebookFiles > 0;
+  const framework = mergePythonFramework(
+    await detectFramework(repoPath),
+    await detectPythonStack(repoPath, pythonImports),
+    hasPythonFiles,
+  );
 
   const analyzer_version = await readAnalyzerVersion();
+  const python = pythonMetrics.build();
+  const backendMetrics = summarizeEndpoints(endpoints);
 
   const reactMetrics =
     tsxFilesAnalyzed > 0
@@ -379,6 +438,9 @@ export async function analyzeRepo(
     ...(contributors && contributors.length > 0 ? { contributors } : {}),
     framework,
     perFile,
+    byLanguage: languageSummaries.build(),
+    ...(python ? { python } : {}),
+    ...(backendMetrics ? { backendMetrics } : {}),
     reactMetrics,
     phase3,
     symbolVerificationRisks,
