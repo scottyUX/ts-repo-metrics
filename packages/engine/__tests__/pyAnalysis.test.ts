@@ -2,7 +2,7 @@
  * Python scoring: functions, cyclomatic complexity, smells, and lexical nulls.
  */
 
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import path from "node:path";
 import { mkdtemp, mkdir, writeFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -136,6 +136,7 @@ describe("Python cyclomatic complexity and names", () => {
 
   it("analyzes a file of about 40,000 characters", async () => {
     const repoPath = await mkdtemp(path.join(tmpdir(), "py-large-"));
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     try {
       const code = `def big():\n    x = "${"a".repeat(40_000)}"\n    return x\n`;
       expect(code.length).toBeGreaterThan(39_000);
@@ -145,7 +146,9 @@ describe("Python cyclomatic complexity and names", () => {
       expect(report.filesSkipped).toBeUndefined();
       expect(report.totals.functions).toBe(1);
       expect(report.duplication).toBeNull();
+      expect(warn).toHaveBeenCalledWith("[duplication] jscpd wrote no report");
     } finally {
+      warn.mockRestore();
       await rm(repoPath, { recursive: true, force: true });
     }
   });

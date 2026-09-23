@@ -22,6 +22,15 @@ export type { JscpdDuplicateJson } from "./weightedRedundancy.js";
 
 const execFileAsync = promisify(execFile);
 
+function isEnoent(err: unknown): boolean {
+  return (
+    typeof err === "object" &&
+    err !== null &&
+    "code" in err &&
+    (err as { code?: unknown }).code === "ENOENT"
+  );
+}
+
 function resolveJscpdBin(): string | null {
   let dir = path.dirname(fileURLToPath(import.meta.url));
   for (let i = 0; i < 12; i++) {
@@ -97,10 +106,16 @@ export async function detectDuplication(
     );
 
     const reportPath = path.join(outputDir, "jscpd-report.json");
-    if (!existsSync(reportPath)) {
-      return null;
+    let raw: string;
+    try {
+      raw = await readFile(reportPath, "utf8");
+    } catch (err) {
+      if (isEnoent(err)) {
+        console.warn("[duplication] jscpd wrote no report");
+        return null;
+      }
+      throw err;
     }
-    const raw = await readFile(reportPath, "utf8");
     const report = JSON.parse(raw) as {
       statistics?: {
         total?: {
