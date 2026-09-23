@@ -100,7 +100,6 @@ function collectComponents(root: SyntaxNode, file: string): ReactComponentMetric
         if (
           init &&
           (init.type === "arrow_function" ||
-            init.type === "function" ||
             init.type === "function_expression")
         ) {
           visitFunction(init);

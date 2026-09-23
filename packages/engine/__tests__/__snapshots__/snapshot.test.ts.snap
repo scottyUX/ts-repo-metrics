@@ -106,8 +106,8 @@ exports[`analyzeRepo snapshot > produces stable report structure for fixture rep
       "functions": 2,
       "functionsByType": {
         "arrow_function": 0,
-        "function": 0,
         "function_declaration": 2,
+        "function_expression": 0,
         "generator_function": 0,
         "generator_function_declaration": 0,
         "method_definition": 0,
@@ -209,8 +209,8 @@ exports[`analyzeRepo snapshot > produces stable report structure for fixture rep
       "functions": 3,
       "functionsByType": {
         "arrow_function": 3,
-        "function": 0,
         "function_declaration": 0,
+        "function_expression": 0,
         "generator_function": 0,
         "generator_function_declaration": 0,
         "method_definition": 0,
@@ -283,8 +283,8 @@ exports[`analyzeRepo snapshot > produces stable report structure for fixture rep
       "functions": 2,
       "functionsByType": {
         "arrow_function": 0,
-        "function": 0,
         "function_declaration": 2,
+        "function_expression": 0,
         "generator_function": 0,
         "generator_function_declaration": 0,
         "method_definition": 0,
