@@ -29,12 +29,12 @@ export interface FunctionDetail {
   lines: number;
   maxNestingDepth: number;
   parameterCount: number;
-  /** Per-function lexical metrics; absent in older cached reports. */
+  /** Per-function lexical metrics; absent in older cached reports. Null on Python functions. */
   cyclomaticComplexity?: number;
-  halstead?: HalsteadMetrics;
-  cognitiveComplexity?: number;
-  maintainabilityIndexGradAiRaw?: number;
-  maintainabilityIndexGradAiNorm?: number;
+  halstead?: HalsteadMetrics | null;
+  cognitiveComplexity?: number | null;
+  maintainabilityIndexGradAiRaw?: number | null;
+  maintainabilityIndexGradAiNorm?: number | null;
   isReactComponent?: boolean;
   /** Phase 3: React component with SLOC above monolithic threshold. */
   isMonolithic?: boolean;
@@ -174,6 +174,11 @@ export interface RepoReport {
   };
   filesAnalyzed: number;
   filesSkipped?: number;
+  /** Set when web2py or Django caused the whole repository to be skipped. */
+  analysisSkipped?: {
+    id: "web2py" | "django";
+    message: string;
+  };
   analyzer_version?: string;
   analysis_timestamp?: string;
   distributions?: DistributionMetrics;
@@ -185,6 +190,8 @@ export interface RepoReport {
     jsFiles?: number;
     /** `.jsx`. Absent on reports saved before JSX scoring. */
     jsxFiles?: number;
+    /** `.py`. Absent on reports saved before Python scoring. */
+    pyFiles?: number;
     testFiles: number;
     totalLOC: number;
     sourceLOC: number;

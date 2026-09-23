@@ -16,7 +16,8 @@ import { computeWeightedRedundancy } from "../collect/weightedRedundancy.js";
 import { extractGitMetrics } from "../collect/gitMetrics.js";
 import { extractGitHistoryBundle } from "../collect/gitMetricsV2.js";
 import { detectFramework } from "../collect/frameworkDetection.js";
-import { parseTypeScript } from "../parsing/tsParser.js";
+import { detectUnsupportedPythonFramework } from "../collect/pythonFrameworkDetection.js";
+import { parseSource } from "../parsing/tsParser.js";
 import { countFunctions } from "../extract/functionCount.js";
 import {
   computeInReactScope,
@@ -34,6 +35,7 @@ import {
 import { extractSilentFailures } from "../extract/silentFailures.js";
 import { computeSymbolVerificationRisks } from "../extract/symbolVerificationRisk.js";
 import { LONG_FUNCTION_THRESHOLD } from "../utils/constants.js";
+import { languageProfileForPath } from "../utils/languageProfile.js";
 import { median } from "../utils/math.js";
 import { getSourceMetadata } from "../collect/repoMetadata.js";
 import type {
@@ -47,12 +49,28 @@ import type {
   ReactComponentMetrics,
   Phase3Metrics,
   SilentFailureEvent,
+  RepoProfile,
+  UnsupportedFrameworkInfo,
 } from "../types/report.js";
 
-/** `.ts` uses the TypeScript grammar. JS, JSX, and TSX use the TSX grammar. */
-function grammarForFile(filePath: string): "ts" | "tsx" {
+/** `.ts` uses the TypeScript grammar. `.py` uses Python. JS, JSX, and TSX use the TSX grammar. */
+function grammarForFile(filePath: string): "ts" | "tsx" | "py" {
+  if (filePath.endsWith(".py")) return "py";
   return filePath.endsWith(".ts") ? "ts" : "tsx";
 }
+
+const EMPTY_PROFILE: RepoProfile = {
+  totalFiles: 0,
+  tsFiles: 0,
+  tsxFiles: 0,
+  jsFiles: 0,
+  jsxFiles: 0,
+  pyFiles: 0,
+  testFiles: 0,
+  totalLOC: 0,
+  sourceLOC: 0,
+  testLOC: 0,
+};
 
 export interface AnalyzeOptions {
   /** Pre-computed source metadata. If omitted, computed from repo path. */
@@ -70,6 +88,85 @@ export interface AnalyzeOptions {
  * @param options - Optional source metadata, file allow-list, and git rev range.
  * @returns A JSON-serializable report with aggregate totals and per-file breakdowns.
  */
+async function readAnalyzerVersion(): Promise<string | undefined> {
+  try {
+    const __dirname = path.dirname(fileURLToPath(import.meta.url));
+    const packageRoot = path.join(__dirname, "..", "..");
+    const pkgPath = path.join(packageRoot, "package.json");
+    const pkg = JSON.parse(await readFile(pkgPath, "utf8")) as { version?: string };
+    return pkg.version;
+  } catch {
+    return undefined;
+  }
+}
+
+async function buildSkippedFrameworkReport(
+  repoPath: string,
+  source: SourceInfo,
+  analysisSkipped: UnsupportedFrameworkInfo,
+  gitRevRange?: string,
+): Promise<RepoReport> {
+  const git = await extractGitMetrics(repoPath, gitRevRange);
+  const gitBundle = await extractGitHistoryBundle(repoPath, gitRevRange);
+  const gitMetricsV2 = gitBundle?.gitMetricsV2 ?? null;
+  const contributors = gitBundle?.contributors;
+  const framework = await detectFramework(repoPath);
+  const analyzer_version = await readAnalyzerVersion();
+  const functionMetricsSummary: FunctionMetricsSummary = {
+    totalFunctions: 0,
+    averageLength: 0,
+    medianLength: 0,
+    maxNestingDepth: 0,
+    longFunctionPercentage: 0,
+  };
+  const complexitySummary = summarizeComplexity([]);
+  const distributions = computeDistributions([], [], []);
+  const maintainability = computeMaintainabilityIndex(0, 0, 0);
+  const testCoverageProxy = computeTestCoverageProxy(EMPTY_PROFILE);
+  const phase3: Phase3Metrics = {
+    sfd: 0,
+    mcr: null,
+    srs: 0,
+    silentFailureEvents: [],
+    srsWeightedNumerator: 0,
+    srsExactWeightedLines: 0,
+    srsNearWeightedLines: 0,
+    monolithicComponentCount: 0,
+    reactComponentCount: 0,
+  };
+
+  return {
+    repoPath,
+    source,
+    filesAnalyzed: 0,
+    analysisSkipped,
+    analyzer_version,
+    analysis_timestamp: new Date().toISOString(),
+    distributions,
+    profile: EMPTY_PROFILE,
+    totals: { functions: 0 },
+    functionMetricsSummary,
+    complexity: complexitySummary,
+    smells: {
+      longFunctions: 0,
+      deepNesting: 0,
+      longParameterLists: 0,
+      emptyCatchBlocks: 0,
+      consoleLogs: 0,
+    },
+    maintainability,
+    testCoverageProxy,
+    duplication: null,
+    git,
+    gitMetricsV2,
+    ...(contributors && contributors.length > 0 ? { contributors } : {}),
+    framework,
+    perFile: [],
+    phase3,
+    symbolVerificationRisks: [],
+  };
+}
+
 export async function analyzeRepo(
   repoPath: string,
   options?: AnalyzeOptions,
@@ -79,6 +176,17 @@ export async function analyzeRepo(
     (await getSourceMetadata(repoPath, "local", ""));
   const includePaths = options?.includePaths;
   const gitRevRange = options?.gitRevRange;
+
+  const unsupportedFramework = await detectUnsupportedPythonFramework(repoPath);
+  if (unsupportedFramework) {
+    return buildSkippedFrameworkReport(
+      repoPath,
+      source,
+      unsupportedFramework,
+      gitRevRange,
+    );
+  }
+
   const profile = await profileRepo(repoPath, includePaths);
   const files = await discoverSourceFiles(repoPath, includePaths);
 
@@ -110,19 +218,21 @@ export async function analyzeRepo(
 
     let tree;
     try {
-      tree = parseTypeScript(code, grammarForFile(filePath));
+      tree = parseSource(code, grammarForFile(filePath));
     } catch (err) {
       console.error(`Skipping ${path.relative(repoPath, filePath)}: parse error`, err instanceof Error ? err.message : err);
       filesSkipped++;
       continue;
     }
 
-    const fnCount = countFunctions(tree.rootNode);
+    const langProfile = languageProfileForPath(filePath);
+    const fnCount = countFunctions(tree.rootNode, langProfile);
     const relFile = path.relative(repoPath, filePath).replace(/\\/g, "/");
     const inReactScope = computeInReactScope(relFile, tree.rootNode);
     const fnMetrics = extractFunctionMetrics(tree.rootNode, {
       relativeFilePath: relFile,
       inReactScope,
+      languageProfile: langProfile,
     });
     const fileComplexity: FunctionComplexity[] = fnMetrics.functions.map(
       (f) => ({
@@ -132,7 +242,7 @@ export async function analyzeRepo(
         complexity: f.cyclomaticComplexity,
       }),
     );
-    const fileSmells = detectSmells(tree.rootNode);
+    const fileSmells = detectSmells(tree.rootNode, langProfile);
 
     totalFunctions += fnCount.total;
     allFunctionDetails.push(...fnMetrics.functions);
@@ -237,16 +347,7 @@ export async function analyzeRepo(
   const contributors = gitBundle?.contributors;
   const framework = await detectFramework(repoPath);
 
-  let analyzer_version: string | undefined;
-  try {
-    const __dirname = path.dirname(fileURLToPath(import.meta.url));
-    const packageRoot = path.join(__dirname, "..", "..");
-    const pkgPath = path.join(packageRoot, "package.json");
-    const pkg = JSON.parse(await readFile(pkgPath, "utf8")) as { version?: string };
-    analyzer_version = pkg.version;
-  } catch {
-    // ignore
-  }
+  const analyzer_version = await readAnalyzerVersion();
 
   const reactMetrics =
     tsxFilesAnalyzed > 0

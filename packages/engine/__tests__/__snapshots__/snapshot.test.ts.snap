@@ -305,6 +305,7 @@ exports[`analyzeRepo snapshot > produces stable report structure for fixture rep
   "profile": {
     "jsFiles": 0,
     "jsxFiles": 0,
+    "pyFiles": 0,
     "sourceLOC": 23,
     "testFiles": 1,
     "testLOC": 11,

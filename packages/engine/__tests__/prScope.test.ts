@@ -47,6 +47,9 @@ describe("isAnalyzableSourcePath", () => {
     expect(isAnalyzableSourcePath("/etc/app.js")).toBe(false);
     expect(isAnalyzableSourcePath("C:/Windows/app.js")).toBe(false);
     expect(isAnalyzableSourcePath("./src/foo.js")).toBe(true);
+    expect(isAnalyzableSourcePath("src/app.py")).toBe(true);
+    expect(isAnalyzableSourcePath("venv/lib.py")).toBe(false);
+    expect(isAnalyzableSourcePath("__pycache__/x.py")).toBe(false);
   });
 
   it("does not discover an absolute path outside the repo", async () => {

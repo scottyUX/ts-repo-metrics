@@ -13,12 +13,13 @@
  */
 
 import type { SyntaxNode } from "tree-sitter";
-import {
-  FUNCTION_NODE_TYPES,
-  COMPLEXITY_BRANCH_TYPES,
-  HIGH_COMPLEXITY_THRESHOLD,
-} from "../utils/constants.js";
+import { HIGH_COMPLEXITY_THRESHOLD } from "../utils/constants.js";
 import { walkTree } from "../utils/astWalker.js";
+import {
+  ECMASCRIPT_PROFILE,
+  type LanguageProfile,
+} from "../utils/languageProfile.js";
+import { getFunctionName } from "./functionNodes.js";
 import type { FunctionComplexity, ComplexitySummary } from "../types/report.js";
 
 export type { FunctionComplexity, ComplexitySummary } from "../types/report.js";
@@ -30,53 +31,41 @@ export type { FunctionComplexity, ComplexitySummary } from "../types/report.js";
  * @param node - Current AST node.
  * @returns Number of branch points found in the subtree.
  */
-export function countCyclomaticBranchPoints(node: SyntaxNode): number {
-  return countBranchesInner(node);
+export function countCyclomaticBranchPoints(
+  node: SyntaxNode,
+  profile: LanguageProfile = ECMASCRIPT_PROFILE,
+): number {
+  return countBranchesInner(node, profile);
 }
 
-function countBranchesInner(node: SyntaxNode): number {
+function countBranchesInner(node: SyntaxNode, profile: LanguageProfile): number {
   let count = 0;
 
-  if (COMPLEXITY_BRANCH_TYPES.has(node.type)) {
+  if (profile.complexityBranchTypes.has(node.type)) {
     count++;
   }
 
-  if (
-    node.type === "binary_expression" &&
-    node.childForFieldName("operator")
-  ) {
-    const op = node.childForFieldName("operator")!.text;
-    if (op === "&&" || op === "||") count++;
+  if (profile.language === "ecmascript") {
+    if (
+      node.type === "binary_expression" &&
+      node.childForFieldName("operator")
+    ) {
+      const op = node.childForFieldName("operator")!.text;
+      if (op === "&&" || op === "||") count++;
+    }
+  } else if (node.type === "boolean_operator") {
+    const op = node.childForFieldName("operator")?.text;
+    if (op === "and" || op === "or") count++;
   }
 
   for (let i = 0; i < node.namedChildCount; i++) {
     const child = node.namedChild(i);
-    if (child && !FUNCTION_NODE_TYPES.has(child.type)) {
-      count += countBranchesInner(child);
+    if (child && !profile.functionNodeTypes.has(child.type)) {
+      count += countBranchesInner(child, profile);
     }
   }
 
   return count;
-}
-
-/**
- * Derive a human-readable name for a function node.
- */
-function getFunctionName(node: SyntaxNode): string {
-  const nameChild = node.childForFieldName("name");
-  if (nameChild) return nameChild.text;
-
-  if (node.parent?.type === "variable_declarator") {
-    const id = node.parent.childForFieldName("name");
-    if (id) return id.text;
-  }
-
-  if (node.parent?.type === "pair") {
-    const key = node.parent.childForFieldName("key");
-    if (key) return key.text;
-  }
-
-  return "(anonymous)";
 }
 
 /**
@@ -85,13 +74,16 @@ function getFunctionName(node: SyntaxNode): string {
  * @param root - Root node of a Tree-sitter syntax tree.
  * @returns Per-function complexity entries.
  */
-export function computeComplexity(root: SyntaxNode): FunctionComplexity[] {
+export function computeComplexity(
+  root: SyntaxNode,
+  profile: LanguageProfile = ECMASCRIPT_PROFILE,
+): FunctionComplexity[] {
   const results: FunctionComplexity[] = [];
 
   walkTree(root, {
     enter(node) {
-      if (FUNCTION_NODE_TYPES.has(node.type)) {
-        const complexity = 1 + countBranchesInner(node);
+      if (profile.functionNodeTypes.has(node.type)) {
+        const complexity = 1 + countBranchesInner(node, profile);
         results.push({
           name: getFunctionName(node),
           type: node.type,

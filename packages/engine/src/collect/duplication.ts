@@ -84,7 +84,7 @@ export async function detectDuplication(
       [
         ...targets,
         "--format",
-        "typescript,tsx,javascript,jsx",
+        "typescript,tsx,javascript,jsx,python",
         "--reporters",
         "json",
         "--output",

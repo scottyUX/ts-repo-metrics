@@ -6,7 +6,7 @@
 /*  File discovery                                                     */
 /* ------------------------------------------------------------------ */
 
-/** Glob patterns for TypeScript, JavaScript, and JSX source files. */
+/** Glob patterns for TypeScript, JavaScript, JSX, and Python source files. */
 export const SOURCE_PATTERNS = [
   "**/*.ts",
   "**/*.tsx",
@@ -14,6 +14,7 @@ export const SOURCE_PATTERNS = [
   "**/*.jsx",
   "**/*.mjs",
   "**/*.cjs",
+  "**/*.py",
 ];
 
 /**
@@ -29,6 +30,8 @@ export const IGNORE_PATTERNS = [
   "**/coverage/**",
   "**/vendor/**",
   "**/third_party/**",
+  "**/venv/**",
+  "**/__pycache__/**",
   "**/*.min.js",
   "**/*.min.jsx",
   "**/*.min.mjs",
@@ -49,6 +52,8 @@ const BLOCKED_PATH_SEGMENTS = new Set([
   "coverage",
   "vendor",
   "third_party",
+  "venv",
+  "__pycache__",
 ]);
 
 const SOURCE_EXTENSIONS = new Set([
@@ -58,6 +63,7 @@ const SOURCE_EXTENSIONS = new Set([
   ".jsx",
   ".mjs",
   ".cjs",
+  ".py",
 ]);
 
 const MINIFIED_BASENAME_RE = /\.min\.(js|jsx|mjs|cjs)$/;
@@ -88,6 +94,16 @@ export function isAnalyzableSourcePath(relPath: string): boolean {
 
 /** Matches `*.test` / `*.spec` for JS and TS source extensions. */
 export const TEST_FILE_RE = /\.(test|spec)\.(js|jsx|mjs|cjs|ts|tsx)$/;
+
+/** pytest modules named `test_*.py` or `*_test.py`. */
+export const PYTHON_TEST_FILE_RE = /(?:^|[/\\])(?:test_.+|.+_test)\.py$/i;
+
+/** True for JS/TS test names, pytest module names, and `conftest.py`. */
+export function isTestFilePath(filePath: string): boolean {
+  const base = filePath.replace(/\\/g, "/").split("/").pop() ?? "";
+  if (base === "conftest.py") return true;
+  return TEST_FILE_RE.test(filePath) || PYTHON_TEST_FILE_RE.test(filePath);
+}
 
 /* ------------------------------------------------------------------ */
 /*  AST node classification                                            */

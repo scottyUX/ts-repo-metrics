@@ -9,7 +9,7 @@
 
 import path from "node:path";
 import { readFile } from "node:fs/promises";
-import { TEST_FILE_RE } from "../utils/constants.js";
+import { isTestFilePath } from "../utils/constants.js";
 import { countLines } from "../utils/text.js";
 import { discoverSourceFiles } from "./fileDiscovery.js";
 import type { RepoProfile } from "../types/report.js";
@@ -17,10 +17,10 @@ import type { RepoProfile } from "../types/report.js";
 export type { RepoProfile } from "../types/report.js";
 
 /**
- * Profile a repository's TypeScript, JavaScript, and JSX source files.
+ * Profile a repository's TypeScript, JavaScript, JSX, and Python source files.
  *
  * Discovers analyzable source files, classifies each as source or test, and
- * counts lines of code. `.mjs` and `.cjs` count as `jsFiles`.
+ * counts lines of code. `.mjs` and `.cjs` count as `jsFiles`. `.py` counts as `pyFiles`.
  *
  * @param repoPath - Absolute path to the repository root.
  * @param includePaths - Optional repo-relative allow-list (PR changed files).
@@ -36,6 +36,7 @@ export async function profileRepo(
   let tsxFiles = 0;
   let jsFiles = 0;
   let jsxFiles = 0;
+  let pyFiles = 0;
   let testFiles = 0;
   let totalLOC = 0;
   let sourceLOC = 0;
@@ -44,12 +45,13 @@ export async function profileRepo(
   for (const filePath of files) {
     const content = await readFile(filePath, "utf8");
     const lines = countLines(content);
-    const isTest = TEST_FILE_RE.test(filePath);
+    const isTest = isTestFilePath(filePath);
     const ext = path.extname(filePath);
 
     if (ext === ".tsx") tsxFiles++;
     else if (ext === ".jsx") jsxFiles++;
     else if (ext === ".js" || ext === ".mjs" || ext === ".cjs") jsFiles++;
+    else if (ext === ".py") pyFiles++;
     else tsFiles++;
 
     if (isTest) {
@@ -68,6 +70,7 @@ export async function profileRepo(
     tsxFiles,
     jsFiles,
     jsxFiles,
+    pyFiles,
     testFiles,
     totalLOC,
     sourceLOC,

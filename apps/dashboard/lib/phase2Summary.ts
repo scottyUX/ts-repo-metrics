@@ -8,7 +8,7 @@ export function hasPhase2Block(
   maintainabilityIndexGradAiNorm: number;
 } {
   return (
-    f.halstead !== undefined &&
+    f.halstead != null &&
     typeof f.cognitiveComplexity === "number" &&
     typeof f.maintainabilityIndexGradAiNorm === "number"
   );
