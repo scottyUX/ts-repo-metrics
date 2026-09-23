@@ -18,7 +18,12 @@ import {
   type LanguageProfile,
 } from "../utils/languageProfile.js";
 import { countCyclomaticBranchPoints } from "./complexity.js";
-import { countParameters, getFunctionName } from "./functionNodes.js";
+import {
+  countParameters,
+  countTypedParameters,
+  getFunctionName,
+  hasReturnAnnotation,
+} from "./functionNodes.js";
 import { computeHalsteadForFunction } from "./halstead.js";
 import { computeCognitiveComplexity } from "./cognitiveComplexity.js";
 import { calculateMIGradAiRaw, normalizeMIGradAi } from "../utils/metrics.js";
@@ -63,7 +68,11 @@ export function computeInReactScope(
   if (relativeFilePath.endsWith(".jsx") || relativeFilePath.endsWith(".tsx")) {
     return true;
   }
-  if (relativeFilePath.endsWith(".ts") || relativeFilePath.endsWith(".py")) {
+  if (
+    relativeFilePath.endsWith(".ts") ||
+    relativeFilePath.endsWith(".py") ||
+    relativeFilePath.endsWith(".ipynb")
+  ) {
     return false;
   }
   let found = false;
@@ -196,6 +205,12 @@ export function extractFunctionMetrics(
           maintainabilityIndexGradAiNorm,
           isReactComponent,
           isMonolithic,
+          ...(node.type === "function_definition"
+            ? {
+                typedParameterCount: countTypedParameters(node),
+                hasReturnAnnotation: hasReturnAnnotation(node),
+              }
+            : {}),
         });
       }
     },

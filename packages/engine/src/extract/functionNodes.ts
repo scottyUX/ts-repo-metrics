@@ -104,8 +104,18 @@ export function countParameters(
     return count;
   }
 
+  return pythonCountedParameters(node).length;
+}
+
+/**
+ * Python parameters that count toward `parameterCount`: real parameters, minus
+ * a leading `self` / `cls` on a method.
+ */
+function pythonCountedParameters(node: SyntaxNode): SyntaxNode[] {
+  const params = node.childForFieldName("parameters");
+  if (!params) return [];
   const method = isPythonMethod(node);
-  let count = 0;
+  const out: SyntaxNode[] = [];
   let first = true;
   for (let i = 0; i < params.namedChildCount; i++) {
     const child = params.namedChild(i);
@@ -117,7 +127,24 @@ export function countParameters(
         pythonParameterName(child) === "cls");
     first = false;
     if (isReceiver) continue;
-    count++;
+    out.push(child);
   }
-  return count;
+  return out;
+}
+
+/** Counted Python parameters that carry an annotation (`x: int`, `x: int = 1`, `*a: str`). */
+export function countTypedParameters(node: SyntaxNode): number {
+  return pythonCountedParameters(node).filter(
+    (p) => p.type === "typed_parameter" || p.type === "typed_default_parameter",
+  ).length;
+}
+
+/** True for a Python `def` with a `-> T` annotation. */
+export function hasReturnAnnotation(node: SyntaxNode): boolean {
+  return node.type === "function_definition" && node.childForFieldName("return_type") !== null;
+}
+
+/** True for `async def`. */
+export function isAsyncFunction(node: SyntaxNode): boolean {
+  return node.type === "function_definition" && node.child(0)?.type === "async";
 }

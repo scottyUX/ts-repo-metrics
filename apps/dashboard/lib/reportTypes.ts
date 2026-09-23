@@ -38,9 +38,15 @@ export interface FunctionDetail {
   isReactComponent?: boolean;
   /** Phase 3: React component with SLOC above monolithic threshold. */
   isMonolithic?: boolean;
+  /** Notebooks: 1-based code cell holding `startLine`. */
+  notebookCell?: number;
+  /** Python `def`: annotated parameters, counted like `parameterCount`. */
+  typedParameterCount?: number;
+  /** Python `def`: has a `-> T` return annotation. */
+  hasReturnAnnotation?: boolean;
 }
 
-/** Phase 3 — silent failure in TSX (empty or console-only catch). */
+/** Phase 3 — silent failure: empty or log-only catch (React-scope JS/TS) or except (every Python file). */
 export interface SilentFailureEvent {
   file: string;
   line: number;
@@ -73,6 +79,69 @@ export interface PerFileEntry {
   functionsByType: Record<string, number>;
   functionMetrics: FunctionDetail[];
   complexity: FunctionComplexity[];
+  /** Python and notebooks: top-level statements scored as one unit, outside function totals. */
+  moduleScope?: { cyclomaticComplexity: number; maxNestingDepth: number; lines: number };
+}
+
+export interface LanguageSummary {
+  files: number;
+  sourceLOC: number;
+  testLOC: number;
+  functions: number;
+  averageComplexity: number;
+  maxComplexity: number;
+  highComplexityFunctions: number;
+  averageFunctionLength: number;
+  smells: {
+    longFunctions: number;
+    deepNesting: number;
+    longParameterLists: number;
+    emptyCatchBlocks: number;
+    consoleLogs: number;
+  };
+}
+
+export interface PythonMetrics {
+  typeHints: {
+    functions: number;
+    functionsWithReturnAnnotation: number;
+    parameters: number;
+    typedParameters: number;
+    parameterCoverage: number | null;
+    returnCoverage: number | null;
+  };
+  moduleScope: {
+    filesWithTopLevelCode: number;
+    topLevelLines: number;
+    maxComplexity: number;
+    averageComplexity: number;
+  };
+}
+
+export interface EndpointDetail {
+  file: string;
+  handler: string;
+  methods: string[];
+  path: string;
+  startLine: number;
+  lines: number;
+  cyclomaticComplexity: number;
+  isAsync: boolean;
+  blockingCalls: number;
+}
+
+export interface BackendMetrics {
+  endpoints: EndpointDetail[];
+  summary: {
+    endpointCount: number;
+    asyncEndpoints: number;
+    fatHandlers: number;
+    fatHandlerShare: number;
+    averageHandlerComplexity: number;
+    maxHandlerComplexity: number;
+    blockingCallsInAsync: number;
+    asyncHandlersWithBlockingCalls: number;
+  };
 }
 
 /** GitHub REST sidebar-style metadata. */
@@ -192,6 +261,8 @@ export interface RepoReport {
     jsxFiles?: number;
     /** `.py`. Absent on reports saved before Python scoring. */
     pyFiles?: number;
+    /** `.ipynb`. Absent on reports saved before notebook scoring. */
+    notebookFiles?: number;
     testFiles: number;
     totalLOC: number;
     sourceLOC: number;
@@ -217,7 +288,8 @@ export interface RepoReport {
     emptyCatchBlocks: number;
     consoleLogs: number;
   };
-  maintainability?: { score: number; classification: string };
+  /** Null when `analysisSkipped` is set. */
+  maintainability?: { score: number; classification: string } | null;
   testCoverageProxy?: { ratio: number; classification: string };
   duplication?: { percentage: number; duplicateLines: number; cloneClusters: number } | null;
   git?: {
@@ -253,8 +325,20 @@ export interface RepoReport {
   } | null;
   contributors?: ContributorActivity[];
   github?: GitHubRepositoryMeta;
-  framework?: { type: string; hasReact: boolean; hasBackend: boolean } | null;
+  framework?: {
+    type: string;
+    hasReact: boolean;
+    hasBackend: boolean;
+    pythonBackend?: "FastAPI" | "Flask" | "Starlette" | null;
+    pythonStack?: string[];
+  } | null;
   perFile: PerFileEntry[];
+  /** Per-language aggregates; absent on older reports. Compare complexity within one bucket. */
+  byLanguage?: Partial<Record<"ecmascript" | "python" | "notebook", LanguageSummary>>;
+  /** Python type hints and top-level code; present when Python or notebooks were scored. */
+  python?: PythonMetrics;
+  /** Flask / FastAPI route handlers; present when at least one was found. */
+  backendMetrics?: BackendMetrics;
   /** Present when the analyzer includes optional React/TSX metrics (`reactMetrics`). */
   reactMetrics?: ReactMetricsReport;
   /** Phase 3 — AI smell / pathology metrics when the engine version supports them. */

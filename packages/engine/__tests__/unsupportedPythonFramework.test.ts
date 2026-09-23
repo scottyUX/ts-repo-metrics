@@ -55,6 +55,7 @@ describe("analyzeRepo (unsupported Python frameworks)", () => {
       jsFiles: 0,
       jsxFiles: 0,
       pyFiles: 0,
+      notebookFiles: 0,
       testFiles: 0,
       totalLOC: 0,
       sourceLOC: 0,

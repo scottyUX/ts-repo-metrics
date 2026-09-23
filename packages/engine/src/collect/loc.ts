@@ -8,10 +8,10 @@
  */
 
 import path from "node:path";
-import { readFile } from "node:fs/promises";
 import { isTestFilePath } from "../utils/constants.js";
 import { countLines } from "../utils/text.js";
 import { discoverSourceFiles } from "./fileDiscovery.js";
+import { isNotebookPath, readAnalyzableSource } from "../parsing/notebook.js";
 import type { RepoProfile } from "../types/report.js";
 
 export type { RepoProfile } from "../types/report.js";
@@ -21,6 +21,7 @@ export type { RepoProfile } from "../types/report.js";
  *
  * Discovers analyzable source files, classifies each as source or test, and
  * counts lines of code. `.mjs` and `.cjs` count as `jsFiles`. `.py` counts as `pyFiles`.
+ * `.ipynb` counts as `notebookFiles`, with LOC from code cells only; a malformed notebook adds 0 lines.
  *
  * @param repoPath - Absolute path to the repository root.
  * @param includePaths - Optional repo-relative allow-list (PR changed files).
@@ -37,14 +38,23 @@ export async function profileRepo(
   let jsFiles = 0;
   let jsxFiles = 0;
   let pyFiles = 0;
+  let notebookFiles = 0;
   let testFiles = 0;
   let totalLOC = 0;
   let sourceLOC = 0;
   let testLOC = 0;
 
   for (const filePath of files) {
-    const content = await readFile(filePath, "utf8");
-    const lines = countLines(content);
+    let lines: number;
+    if (isNotebookPath(filePath)) {
+      try {
+        lines = countLines((await readAnalyzableSource(filePath)).code);
+      } catch {
+        lines = 0;
+      }
+    } else {
+      lines = countLines((await readAnalyzableSource(filePath)).code);
+    }
     const isTest = isTestFilePath(filePath);
     const ext = path.extname(filePath);
 
@@ -52,6 +62,7 @@ export async function profileRepo(
     else if (ext === ".jsx") jsxFiles++;
     else if (ext === ".js" || ext === ".mjs" || ext === ".cjs") jsFiles++;
     else if (ext === ".py") pyFiles++;
+    else if (ext === ".ipynb") notebookFiles++;
     else tsFiles++;
 
     if (isTest) {
@@ -71,6 +82,7 @@ export async function profileRepo(
     jsFiles,
     jsxFiles,
     pyFiles,
+    notebookFiles,
     testFiles,
     totalLOC,
     sourceLOC,

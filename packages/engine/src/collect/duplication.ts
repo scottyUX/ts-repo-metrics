@@ -70,6 +70,9 @@ export async function detectDuplication(
     return null;
   }
 
+  // jscpd has no notebook format; an explicit .ipynb target would be read as text.
+  includePaths = includePaths?.filter((p) => !p.endsWith(".ipynb"));
+
   if (includePaths && includePaths.length < 2) {
     return {
       metrics: { percentage: 0, duplicateLines: 0, cloneClusters: 0 },

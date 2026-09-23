@@ -4,6 +4,25 @@ exports[`analyzeRepo snapshot > produces stable report structure for fixture rep
 {
   "analysis_timestamp": "<timestamp>",
   "analyzer_version": "0.0.0",
+  "byLanguage": {
+    "ecmascript": {
+      "averageComplexity": 1.1,
+      "averageFunctionLength": 3.9,
+      "files": 3,
+      "functions": 7,
+      "highComplexityFunctions": 0,
+      "maxComplexity": 2,
+      "smells": {
+        "consoleLogs": 0,
+        "deepNesting": 0,
+        "emptyCatchBlocks": 0,
+        "longFunctions": 0,
+        "longParameterLists": 0,
+      },
+      "sourceLOC": 23,
+      "testLOC": 11,
+    },
+  },
   "complexity": {
     "average": 1.1,
     "highComplexityFunctions": 0,
@@ -305,6 +324,7 @@ exports[`analyzeRepo snapshot > produces stable report structure for fixture rep
   "profile": {
     "jsFiles": 0,
     "jsxFiles": 0,
+    "notebookFiles": 0,
     "pyFiles": 0,
     "sourceLOC": 23,
     "testFiles": 1,

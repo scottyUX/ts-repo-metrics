@@ -57,6 +57,20 @@ export const FEATURE_SPEC: Record<
   files_analyzed: { category: "Structural", construct: "tbd" },
   files_skipped: { category: "Structural", construct: "tbd" },
   analysis_skipped: { category: "Structural", construct: "tbd" },
+  notebook_files: { category: "Structural", construct: "tbd" },
+  python_backend: { category: "Structural", construct: "tbd" },
+  python_stack: { category: "Structural", construct: "tbd" },
+  avg_complexity_ecmascript: { category: "Structural", construct: "code-quality" },
+  avg_complexity_python: { category: "Structural", construct: "code-quality" },
+  avg_complexity_notebook: { category: "Structural", construct: "code-quality" },
+  py_param_type_coverage: { category: "Structural", construct: "code-quality" },
+  py_return_type_coverage: { category: "Structural", construct: "code-quality" },
+  py_top_level_files: { category: "Structural", construct: "code-quality" },
+  py_top_level_max_complexity: { category: "Structural", construct: "code-quality" },
+  endpoint_count: { category: "Structural", construct: "code-quality" },
+  fat_handler_share: { category: "Structural", construct: "code-quality" },
+  avg_handler_complexity: { category: "Structural", construct: "code-quality" },
+  blocking_calls_in_async: { category: "Structural", construct: "code-quality" },
   p90_commit_size: { category: "Behavioral", construct: "commit-habits" },
   p50_function_length: { category: "Distribution", construct: "code-quality" },
   p75_function_length: { category: "Distribution", construct: "code-quality" },
@@ -158,6 +172,28 @@ export function buildFeatureVector(
   vec.files_analyzed = r.filesAnalyzed ?? 0;
   vec.files_skipped = r.filesSkipped ?? 0;
   vec.analysis_skipped = r.analysisSkipped?.id ?? "";
+  vec.notebook_files = r.profile?.notebookFiles ?? 0;
+  vec.python_backend = r.framework?.pythonBackend ?? "";
+  vec.python_stack = (r.framework?.pythonStack ?? []).join(";");
+
+  for (const bucket of ["ecmascript", "python", "notebook"] as const) {
+    const summary = r.byLanguage?.[bucket];
+    if (summary) vec[`avg_complexity_${bucket}`] = summary.averageComplexity;
+  }
+  if (r.python) {
+    const th = r.python.typeHints;
+    vec.py_param_type_coverage = th.parameterCoverage ?? -1;
+    vec.py_return_type_coverage = th.returnCoverage ?? -1;
+    vec.py_top_level_files = r.python.moduleScope.filesWithTopLevelCode;
+    vec.py_top_level_max_complexity = r.python.moduleScope.maxComplexity;
+  }
+  if (r.backendMetrics) {
+    const b = r.backendMetrics.summary;
+    vec.endpoint_count = b.endpointCount;
+    vec.fat_handler_share = b.fatHandlerShare;
+    vec.avg_handler_complexity = b.averageHandlerComplexity;
+    vec.blocking_calls_in_async = b.blockingCallsInAsync;
+  }
 
   vec.test_loc_ratio =
     r.profile?.sourceLOC && r.profile.sourceLOC > 0

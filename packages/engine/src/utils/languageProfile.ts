@@ -10,6 +10,8 @@ import {
   NESTING_NODE_TYPES,
 } from "./constants.js";
 
+import type { LanguageBucket } from "../types/report.js";
+
 export type SourceLanguage = "ecmascript" | "python";
 
 export interface LanguageProfile {
@@ -62,6 +64,18 @@ export const PYTHON_PROFILE: LanguageProfile = {
   complexityBranchTypes: PYTHON_COMPLEXITY_BRANCH_TYPES,
 };
 
+/** `.py` and `.ipynb` (code cells) are scored as Python. */
+export function isPythonSourcePath(filePath: string): boolean {
+  return filePath.endsWith(".py") || filePath.endsWith(".ipynb");
+}
+
 export function languageProfileForPath(filePath: string): LanguageProfile {
-  return filePath.endsWith(".py") ? PYTHON_PROFILE : ECMASCRIPT_PROFILE;
+  return isPythonSourcePath(filePath) ? PYTHON_PROFILE : ECMASCRIPT_PROFILE;
+}
+
+/** Bucket for per-language summaries. Notebooks are Python but reported apart. */
+export function languageBucketForPath(filePath: string): LanguageBucket {
+  if (filePath.endsWith(".ipynb")) return "notebook";
+  if (filePath.endsWith(".py")) return "python";
+  return "ecmascript";
 }

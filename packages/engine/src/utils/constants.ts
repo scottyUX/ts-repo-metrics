@@ -6,7 +6,7 @@
 /*  File discovery                                                     */
 /* ------------------------------------------------------------------ */
 
-/** Glob patterns for TypeScript, JavaScript, JSX, and Python source files. */
+/** Glob patterns for TypeScript, JavaScript, JSX, Python, and notebook source files. */
 export const SOURCE_PATTERNS = [
   "**/*.ts",
   "**/*.tsx",
@@ -15,6 +15,7 @@ export const SOURCE_PATTERNS = [
   "**/*.mjs",
   "**/*.cjs",
   "**/*.py",
+  "**/*.ipynb",
 ];
 
 /**
@@ -64,6 +65,7 @@ const SOURCE_EXTENSIONS = new Set([
   ".mjs",
   ".cjs",
   ".py",
+  ".ipynb",
 ]);
 
 const MINIFIED_BASENAME_RE = /\.min\.(js|jsx|mjs|cjs)$/;

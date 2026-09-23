@@ -16,6 +16,8 @@ export interface RepoProfile {
   jsxFiles: number;
   /** `.py`, including pytest modules. */
   pyFiles: number;
+  /** `.ipynb`. LOC counts code-cell lines only; outputs and markdown are ignored. */
+  notebookFiles: number;
   testFiles: number;
   totalLOC: number;
   sourceLOC: number;
@@ -64,6 +66,12 @@ export interface FunctionDetail {
   isReactComponent: boolean;
   /** Phase 3: React component with SLOC above monolithic threshold (Bollu / Tampere-style). */
   isMonolithic: boolean;
+  /** Notebooks only: 1-based code cell that holds `startLine`. */
+  notebookCell?: number;
+  /** Python `def` only: parameters with an annotation (counted the same way as `parameterCount`). */
+  typedParameterCount?: number;
+  /** Python `def` only: true when the function has a `-> T` return annotation. */
+  hasReturnAnnotation?: boolean;
 }
 
 /** Aggregated function metrics for an entire repository. */
@@ -119,6 +127,10 @@ export interface FrameworkInfo {
   type: string;
   hasReact: boolean;
   hasBackend: boolean;
+  /** Python web framework from dependency files or imports. */
+  pythonBackend?: "FastAPI" | "Flask" | "Starlette" | null;
+  /** Python AI/ML libraries from dependency files or imports, e.g. `torch`, `openai`. */
+  pythonStack?: string[];
 }
 
 /** Git history metrics derived from commit log analysis. */
@@ -328,6 +340,93 @@ export interface PerFileEntry {
   functionsByType: Record<string, number>;
   functionMetrics: FunctionDetail[];
   complexity: FunctionComplexity[];
+  /** Python and notebooks only: top-level statements outside any function or class. */
+  moduleScope?: ModuleScopeMetrics;
+}
+
+/**
+ * Top-level code scored as one unit. Kept out of function totals and averages
+ * so script-style files register without skewing function length.
+ */
+export interface ModuleScopeMetrics {
+  /** 1 + branch points in top-level statements, same Python rules as functions. */
+  cyclomaticComplexity: number;
+  maxNestingDepth: number;
+  /** Lines spanned by top-level statements, excluding defs, classes, imports, and docstrings. */
+  lines: number;
+}
+
+/** Aggregates for one language bucket. Cyclomatic rules differ by bucket; compare within one. */
+export interface LanguageSummary {
+  files: number;
+  sourceLOC: number;
+  testLOC: number;
+  functions: number;
+  averageComplexity: number;
+  maxComplexity: number;
+  highComplexityFunctions: number;
+  averageFunctionLength: number;
+  smells: SmellCounts;
+}
+
+/** `ecmascript` = .ts .tsx .js .jsx .mjs .cjs; `python` = .py; `notebook` = .ipynb. */
+export type LanguageBucket = "ecmascript" | "python" | "notebook";
+
+/** Python type-hint coverage over `def` functions (lambdas cannot be annotated). */
+export interface PythonTypeHintSummary {
+  functions: number;
+  functionsWithReturnAnnotation: number;
+  parameters: number;
+  typedParameters: number;
+  /** typedParameters / parameters, 0–1; null when there are no parameters. */
+  parameterCoverage: number | null;
+  /** functionsWithReturnAnnotation / functions, 0–1; null when there are no functions. */
+  returnCoverage: number | null;
+}
+
+export interface PythonModuleScopeSummary {
+  /** Files whose top-level statements span at least one line. */
+  filesWithTopLevelCode: number;
+  topLevelLines: number;
+  maxComplexity: number;
+  averageComplexity: number;
+}
+
+/** Python-only extras. Present when at least one .py or .ipynb file was scored. */
+export interface PythonMetrics {
+  typeHints: PythonTypeHintSummary;
+  moduleScope: PythonModuleScopeSummary;
+}
+
+/** One Flask or FastAPI route handler. */
+export interface EndpointDetail {
+  file: string;
+  handler: string;
+  /** `GET`, `POST`, … from the decorator; `ROUTE` for Flask `@app.route` without `methods`. */
+  methods: string[];
+  path: string;
+  startLine: number;
+  lines: number;
+  cyclomaticComplexity: number;
+  isAsync: boolean;
+  /** Blocking calls (requests.*, time.sleep, …) directly in an `async def` handler. */
+  blockingCalls: number;
+}
+
+export interface BackendMetrics {
+  endpoints: EndpointDetail[];
+  summary: {
+    endpointCount: number;
+    asyncEndpoints: number;
+    /** Handlers longer than LONG_FUNCTION_THRESHOLD lines. */
+    fatHandlers: number;
+    /** fatHandlers / endpointCount, 0–1. */
+    fatHandlerShare: number;
+    averageHandlerComplexity: number;
+    maxHandlerComplexity: number;
+    blockingCallsInAsync: number;
+    asyncHandlersWithBlockingCalls: number;
+  };
 }
 
 /** Distribution percentiles for function length and complexity (tail risk indicators). */
@@ -394,6 +493,10 @@ export interface UnsupportedFrameworkInfo {
 export interface SilentFailureEvent {
   file: string;
   line: number;
+  /**
+   * `empty_catch`: JS `catch {}`, or Python `except` whose body is only `pass`, `...`, or `continue`.
+   * `console_only_catch`: body only logs (`console.*`, `print`, `logging.*`, `logger.*`).
+   */
   kind: "empty_catch" | "console_only_catch";
 }
 
@@ -454,6 +557,12 @@ export interface RepoReport {
   github?: GitHubRepositoryMeta;
   framework: FrameworkInfo | null;
   perFile: PerFileEntry[];
+  /** Per-language aggregates. Only buckets with scored files appear. */
+  byLanguage?: Partial<Record<LanguageBucket, LanguageSummary>>;
+  /** Python type hints and top-level code. Present when Python or notebooks were scored. */
+  python?: PythonMetrics;
+  /** Flask / FastAPI route handlers. Present when at least one endpoint was found. */
+  backendMetrics?: BackendMetrics;
   /** React/TSX static metrics when at least one .tsx file was analyzed. */
   reactMetrics?: ReactMetricsReport;
   /** Phase 3 — silent failures, monolithic rate, weighted jscpd redundancy. */
