@@ -15,6 +15,12 @@ import {
   isAnalyzableSourcePath,
 } from "../utils/constants.js";
 
+/** False when `abs` escapes `repoPath` (the check CodeQL expects before existsSync). */
+function isInsideRepo(repoPath: string, abs: string): boolean {
+  const rel = path.relative(repoPath, abs);
+  return rel !== "" && !rel.startsWith("..") && !path.isAbsolute(rel);
+}
+
 function toRepoRelative(repoPath: string, absOrRel: string): string {
   const abs = path.isAbsolute(absOrRel)
     ? absOrRel
@@ -59,11 +65,13 @@ export async function discoverSourceFiles(
       const normalized = rel.replace(/\\/g, "/");
       if (!isAnalyzableSourcePath(normalized)) continue;
       const abs = path.resolve(repoPath, normalized);
-      if (!existsSync(abs)) continue;
+      if (!isInsideRepo(repoPath, abs) || !existsSync(abs)) continue;
       if (
-        isEmitSibling(normalized, (sibling) =>
-          existsSync(path.resolve(repoPath, sibling)),
-        )
+        isEmitSibling(normalized, (sibling) => {
+          const siblingAbs = path.resolve(repoPath, sibling);
+          if (!isInsideRepo(repoPath, siblingAbs)) return false;
+          return existsSync(siblingAbs);
+        })
       ) {
         continue;
       }

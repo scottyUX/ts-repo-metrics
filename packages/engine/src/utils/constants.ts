@@ -69,7 +69,9 @@ const CONFIG_JS_BASENAME_RE = /\.config\.(js|cjs|mjs)$/;
  * in discoverSourceFiles, after the tree is on disk.
  */
 export function isAnalyzableSourcePath(relPath: string): boolean {
-  const normalized = relPath.replace(/\\/g, "/").replace(/^\.?\//, "");
+  const slashed = relPath.replace(/\\/g, "/");
+  if (slashed.startsWith("/") || /^[A-Za-z]:/.test(slashed)) return false;
+  const normalized = slashed.replace(/^\.\//, "");
   const parts = normalized.split("/").filter(Boolean);
   if (parts.length === 0) return false;
   if (parts.some((p) => p.startsWith(".") || BLOCKED_PATH_SEGMENTS.has(p))) {
