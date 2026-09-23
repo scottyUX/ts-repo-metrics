@@ -15,12 +15,6 @@ import {
   isAnalyzableSourcePath,
 } from "../utils/constants.js";
 
-/** False when `abs` escapes `repoPath` (the check CodeQL expects before existsSync). */
-function isInsideRepo(repoPath: string, abs: string): boolean {
-  const rel = path.relative(repoPath, abs);
-  return rel !== "" && !rel.startsWith("..") && !path.isAbsolute(rel);
-}
-
 function toRepoRelative(repoPath: string, absOrRel: string): string {
   const abs = path.isAbsolute(absOrRel)
     ? absOrRel
@@ -60,16 +54,19 @@ export async function discoverSourceFiles(
   includePaths?: string[],
 ) {
   if (includePaths) {
+    // Inline prefix check: CodeQL's path-injection query does not follow a helper.
+    const root = path.resolve(repoPath) + path.sep;
     const out: string[] = [];
     for (const rel of includePaths) {
       const normalized = rel.replace(/\\/g, "/");
       if (!isAnalyzableSourcePath(normalized)) continue;
-      const abs = path.resolve(repoPath, normalized);
-      if (!isInsideRepo(repoPath, abs) || !existsSync(abs)) continue;
+      const abs = path.resolve(root, normalized);
+      if (!abs.startsWith(root)) continue;
+      if (!existsSync(abs)) continue;
       if (
         isEmitSibling(normalized, (sibling) => {
-          const siblingAbs = path.resolve(repoPath, sibling);
-          if (!isInsideRepo(repoPath, siblingAbs)) return false;
+          const siblingAbs = path.resolve(root, sibling);
+          if (!siblingAbs.startsWith(root)) return false;
           return existsSync(siblingAbs);
         })
       ) {
