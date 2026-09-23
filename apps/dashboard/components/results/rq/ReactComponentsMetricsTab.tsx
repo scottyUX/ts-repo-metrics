@@ -14,7 +14,8 @@ interface ReactComponentsMetricsTabProps {
 
 export function ReactComponentsMetricsTab({ report, onOpenCodeQualityTab }: ReactComponentsMetricsTabProps) {
   const rm = report.reactMetrics;
-  const tsxCount = report.profile?.tsxFiles ?? 0;
+  const tsxCount =
+    (report.profile?.tsxFiles ?? 0) + (report.profile?.jsxFiles ?? 0);
 
   const topBySloc = useMemo(() => {
     if (!rm?.components.length) return null;
@@ -29,6 +30,7 @@ export function ReactComponentsMetricsTab({ report, onOpenCodeQualityTab }: Reac
           {hasTsxButNoBlock ? (
             <>
               This report lists <strong>{tsxCount}</strong>{" "}
+              <code className="rounded bg-muted px-1">.jsx</code> /{" "}
               <code className="rounded bg-muted px-1">.tsx</code> file{tsxCount === 1 ? "" : "s"} in the profile, but
               there is no <code className="rounded bg-muted px-1">reactMetrics</code> block. Re-run analysis with the
               current <code className="rounded bg-muted px-1">@repo-metrics/engine</code>, or clear an outdated browser
@@ -36,7 +38,8 @@ export function ReactComponentsMetricsTab({ report, onOpenCodeQualityTab }: Reac
             </>
           ) : (
             <>
-              No React / TSX metrics: no <code className="rounded bg-muted px-1">.tsx</code> files were in scope for
+              No React metrics: no <code className="rounded bg-muted px-1">.jsx</code> or{" "}
+              <code className="rounded bg-muted px-1">.tsx</code> files, and no JSX components, were in scope for
               this run.
             </>
           )}

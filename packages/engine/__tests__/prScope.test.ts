@@ -29,12 +29,20 @@ describe("filterChangedSourcePaths", () => {
 });
 
 describe("isAnalyzableSourcePath", () => {
-  it("accepts ts/tsx and rejects ignored dirs", () => {
+  it("accepts JS and TS source and rejects ignored, minified, config, and dot paths", () => {
     expect(isAnalyzableSourcePath("src/foo.ts")).toBe(true);
     expect(isAnalyzableSourcePath("a.tsx")).toBe(true);
-    expect(isAnalyzableSourcePath("src/foo.js")).toBe(false);
+    expect(isAnalyzableSourcePath("src/foo.js")).toBe(true);
+    expect(isAnalyzableSourcePath("src/Card.jsx")).toBe(true);
+    expect(isAnalyzableSourcePath("src/mod.mjs")).toBe(true);
+    expect(isAnalyzableSourcePath("src/mod.cjs")).toBe(true);
     expect(isAnalyzableSourcePath("dist/out.ts")).toBe(false);
     expect(isAnalyzableSourcePath("node_modules/x.ts")).toBe(false);
+    expect(isAnalyzableSourcePath("static/app.min.js")).toBe(false);
+    expect(isAnalyzableSourcePath("lib/app.min.cjs")).toBe(false);
+    expect(isAnalyzableSourcePath("vendor/lib.js")).toBe(false);
+    expect(isAnalyzableSourcePath("jest.config.js")).toBe(false);
+    expect(isAnalyzableSourcePath(".storybook/main.js")).toBe(false);
   });
 });
 

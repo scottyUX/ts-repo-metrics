@@ -44,8 +44,9 @@ export function readReportFromSessionStorage(resultId: string): {
 
   try {
     const report = JSON.parse(legacy) as RepoReport;
-    const tsx = report.profile?.tsxFiles ?? 0;
-    if (tsx > 0 && !report.reactMetrics) {
+    const jsxLike =
+      (report.profile?.tsxFiles ?? 0) + (report.profile?.jsxFiles ?? 0);
+    if (jsxLike > 0 && !report.reactMetrics) {
       sessionStorage.removeItem(`${LEGACY_PREFIX}${id}`);
       return { report: null, droppedStaleCache: true };
     }

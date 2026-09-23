@@ -1,9 +1,9 @@
 /**
  * File discovery module.
  *
- * Recursively finds all .ts and .tsx source files within a given repository
- * path using fast-glob. Common non-source directories (node_modules, dist,
- * build, .next, coverage, etc.) are excluded automatically.
+ * Recursively finds TypeScript, JavaScript, and JSX source files within a
+ * repository. Common non-source directories, minified bundles, config files,
+ * and compiled emit sitting next to TypeScript are excluded.
  */
 
 import { existsSync } from "node:fs";
@@ -15,8 +15,35 @@ import {
   isAnalyzableSourcePath,
 } from "../utils/constants.js";
 
+function toRepoRelative(repoPath: string, absOrRel: string): string {
+  const abs = path.isAbsolute(absOrRel)
+    ? absOrRel
+    : path.resolve(repoPath, absOrRel);
+  return path.relative(repoPath, abs).replace(/\\/g, "/");
+}
+
 /**
- * Discover TypeScript and TSX source files in a repository.
+ * True when this JavaScript file is compiled emit next to a TypeScript source
+ * with the same stem. `foo.js` next to `foo.d.ts` is kept: that stem is `foo.d`.
+ */
+function isEmitSibling(
+  rel: string,
+  siblingExists: (siblingRel: string) => boolean,
+): boolean {
+  const normalized = rel.replace(/\\/g, "/");
+  const ext = path.posix.extname(normalized);
+  const stem = normalized.slice(0, -ext.length);
+  if (ext === ".js" || ext === ".mjs" || ext === ".cjs") {
+    return siblingExists(`${stem}.ts`) || siblingExists(`${stem}.tsx`);
+  }
+  if (ext === ".jsx") {
+    return siblingExists(`${stem}.tsx`);
+  }
+  return false;
+}
+
+/**
+ * Discover source files in a repository.
  *
  * @param repoPath - Absolute path to the repository root.
  * @param includePaths - Optional repo-relative allow-list (PR changed files).
@@ -32,13 +59,33 @@ export async function discoverSourceFiles(
       const normalized = rel.replace(/\\/g, "/");
       if (!isAnalyzableSourcePath(normalized)) continue;
       const abs = path.resolve(repoPath, normalized);
-      if (existsSync(abs)) out.push(abs);
+      if (!existsSync(abs)) continue;
+      if (
+        isEmitSibling(normalized, (sibling) =>
+          existsSync(path.resolve(repoPath, sibling)),
+        )
+      ) {
+        continue;
+      }
+      out.push(abs);
     }
     return out;
   }
-  return fg(SOURCE_PATTERNS, {
+
+  const found = await fg(SOURCE_PATTERNS, {
     cwd: repoPath,
     absolute: true,
     ignore: IGNORE_PATTERNS,
   });
+  const kept = new Set<string>();
+  for (const abs of found) {
+    const rel = toRepoRelative(repoPath, abs);
+    if (isAnalyzableSourcePath(rel)) kept.add(rel);
+  }
+  const out: string[] = [];
+  for (const rel of kept) {
+    if (isEmitSibling(rel, (sibling) => kept.has(sibling))) continue;
+    out.push(path.resolve(repoPath, rel));
+  }
+  return out;
 }

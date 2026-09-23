@@ -13,6 +13,7 @@ import path from "node:path";
 import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { readFile, rm } from "node:fs/promises";
+import { IGNORE_PATTERNS } from "../utils/constants.js";
 import type { DuplicationMetrics } from "../types/report.js";
 import type { JscpdDuplicateJson } from "./weightedRedundancy.js";
 
@@ -56,7 +57,10 @@ export async function detectDuplication(
   const outputDir = path.join(repoPath, ".jscpd-report");
 
   const jscpdBin = resolveJscpdBin();
-  if (!jscpdBin) return null;
+  if (!jscpdBin) {
+    console.error("[duplication] jscpd binary not found");
+    return null;
+  }
 
   if (includePaths && includePaths.length < 2) {
     return {
@@ -65,20 +69,32 @@ export async function detectDuplication(
     };
   }
 
+  // Repo-relative targets so ignore globs do not match ancestor dirs like `.cache`.
   const targets =
     includePaths && includePaths.length > 0
-      ? includePaths.map((p) => path.resolve(repoPath, p))
-      : [repoPath];
+      ? includePaths.map((p) => {
+          const abs = path.isAbsolute(p) ? p : path.resolve(repoPath, p);
+          return path.relative(repoPath, abs).replace(/\\/g, "/");
+        })
+      : ["."];
 
   try {
-    await execFileAsync(jscpdBin, [
-      ...targets,
-      "--format", "typescript,tsx",
-      "--reporters", "json",
-      "--output", outputDir,
-      "--ignore", "node_modules,dist,build,.next,out,coverage",
-      "--silent",
-    ], { timeout: 60_000 });
+    await execFileAsync(
+      jscpdBin,
+      [
+        ...targets,
+        "--format",
+        "typescript,tsx,javascript,jsx",
+        "--reporters",
+        "json",
+        "--output",
+        outputDir,
+        "--ignore",
+        IGNORE_PATTERNS.join(","),
+        "--silent",
+      ],
+      { cwd: repoPath, timeout: 60_000 },
+    );
 
     const reportPath = path.join(outputDir, "jscpd-report.json");
     const raw = await readFile(reportPath, "utf8");
@@ -108,7 +124,8 @@ export async function detectDuplication(
       },
       duplicates,
     };
-  } catch {
+  } catch (err) {
+    console.error("[duplication] jscpd failed:", err);
     return null;
   } finally {
     try {
