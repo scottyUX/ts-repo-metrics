@@ -4,6 +4,8 @@
  * Detection is repo-root only: backend/manage.py, Pipfile, setup.py, and
  * setup.cfg are not checked. A pyproject.toml comment containing "django"
  * does trigger the skip.
+ *
+ * Path checks are inline. CodeQL's path-injection query does not follow a helper.
  */
 
 import { access, readdir, readFile } from "node:fs/promises";
@@ -21,7 +23,10 @@ const UNSUPPORTED_MESSAGES = {
     "This repository uses Django. Static code analysis is not supported for Django projects yet.",
 } as const;
 
-async function pathExists(target: string): Promise<boolean> {
+async function pathExists(repoPath: string, rel: string): Promise<boolean> {
+  const root = path.resolve(repoPath) + path.sep;
+  const target = path.resolve(root, rel);
+  if (!target.startsWith(root)) return false;
   try {
     await access(target);
     return true;
@@ -30,46 +35,52 @@ async function pathExists(target: string): Promise<boolean> {
   }
 }
 
-async function fileContainsDjango(filePath: string): Promise<boolean> {
+async function fileContainsDjango(repoPath: string, rel: string): Promise<boolean> {
+  const root = path.resolve(repoPath) + path.sep;
+  const target = path.resolve(root, rel);
+  if (!target.startsWith(root)) return false;
   try {
-    const content = await readFile(filePath, "utf8");
+    const content = await readFile(target, "utf8");
     return /\bdjango\b/i.test(content);
   } catch {
     return false;
   }
 }
 
-async function djangoDependencyFiles(repoPath: string): Promise<string[]> {
-  const files = [
-    path.join(repoPath, "requirements.txt"),
-    path.join(repoPath, "pyproject.toml"),
-  ];
-  const requirementsDir = path.join(repoPath, "requirements");
-  if (await pathExists(requirementsDir)) {
+async function djangoDependencyRels(repoPath: string): Promise<string[]> {
+  const rels = ["requirements.txt", "pyproject.toml"];
+  const root = path.resolve(repoPath) + path.sep;
+  const requirementsDir = path.resolve(root, "requirements");
+  if (!requirementsDir.startsWith(root)) return rels;
+  try {
     const entries = await readdir(requirementsDir);
     for (const name of entries) {
-      if (name.endsWith(".txt")) {
-        files.push(path.join(requirementsDir, name));
-      }
+      if (name.includes("/") || name.includes("\\") || name.includes("..")) continue;
+      if (!name.endsWith(".txt")) continue;
+      const filePath = path.resolve(requirementsDir, name);
+      if (!filePath.startsWith(root)) continue;
+      rels.push(path.relative(path.resolve(repoPath), filePath).replace(/\\/g, "/"));
     }
+  } catch {
+    // requirements/ is optional
   }
-  return files;
+  return rels;
 }
 
 async function detectWeb2py(repoPath: string): Promise<boolean> {
   return (
-    (await pathExists(path.join(repoPath, "web2py", "gluon"))) ||
-    (await pathExists(path.join(repoPath, "web2py", "applications"))) ||
-    (await pathExists(path.join(repoPath, "web2py.py")))
+    (await pathExists(repoPath, "web2py/gluon")) ||
+    (await pathExists(repoPath, "web2py/applications")) ||
+    (await pathExists(repoPath, "web2py.py"))
   );
 }
 
 async function detectDjango(repoPath: string): Promise<boolean> {
-  if (!(await pathExists(path.join(repoPath, "manage.py")))) {
+  if (!(await pathExists(repoPath, "manage.py"))) {
     return false;
   }
-  for (const filePath of await djangoDependencyFiles(repoPath)) {
-    if (await fileContainsDjango(filePath)) {
+  for (const rel of await djangoDependencyRels(repoPath)) {
+    if (await fileContainsDjango(repoPath, rel)) {
       return true;
     }
   }

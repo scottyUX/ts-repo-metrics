@@ -121,7 +121,7 @@ async function buildSkippedFrameworkReport(
   };
   const complexitySummary = summarizeComplexity([]);
   const distributions = computeDistributions([], [], []);
-  const maintainability = computeMaintainabilityIndex(0, 0, 0);
+  const maintainability = null;
   const testCoverageProxy = computeTestCoverageProxy(EMPTY_PROFILE);
   const phase3: Phase3Metrics = {
     sfd: 0,

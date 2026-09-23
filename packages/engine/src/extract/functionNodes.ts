@@ -106,19 +106,17 @@ export function countParameters(
 
   const method = isPythonMethod(node);
   let count = 0;
-  let skippedReceiver = false;
+  let first = true;
   for (let i = 0; i < params.namedChildCount; i++) {
     const child = params.namedChild(i);
     if (!child || !PY_PARAM_TYPES.has(child.type)) continue;
-    const name = pythonParameterName(child);
-    if (
-      !skippedReceiver &&
+    const isReceiver =
+      first &&
       method &&
-      (name === "self" || name === "cls")
-    ) {
-      skippedReceiver = true;
-      continue;
-    }
+      (pythonParameterName(child) === "self" ||
+        pythonParameterName(child) === "cls");
+    first = false;
+    if (isReceiver) continue;
     count++;
   }
   return count;

@@ -23,9 +23,6 @@ export function buildReportSummary(report: RepoReport): string {
     `FILES: ${p.totalFiles} total | ${p.tsFiles} .ts | ${p.tsxFiles} .tsx | ${p.jsFiles ?? 0} .js | ${p.jsxFiles ?? 0} .jsx | ${p.pyFiles ?? 0} .py | ${p.testFiles} test`,
   );
   lines.push(
-    "SFD uses source LOC from every scored language. Silent-failure events stay React-scoped. web2py and Django repos contribute zero files.",
-  );
-  lines.push(
     `LINES: ${p.totalLOC} total LOC | ${p.sourceLOC} source | ${p.testLOC} test`,
   );
 

@@ -97,6 +97,9 @@ export async function detectDuplication(
     );
 
     const reportPath = path.join(outputDir, "jscpd-report.json");
+    if (!existsSync(reportPath)) {
+      return null;
+    }
     const raw = await readFile(reportPath, "utf8");
     const report = JSON.parse(raw) as {
       statistics?: {

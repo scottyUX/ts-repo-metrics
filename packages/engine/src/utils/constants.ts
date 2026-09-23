@@ -95,14 +95,14 @@ export function isAnalyzableSourcePath(relPath: string): boolean {
 /** Matches `*.test` / `*.spec` for JS and TS source extensions. */
 export const TEST_FILE_RE = /\.(test|spec)\.(js|jsx|mjs|cjs|ts|tsx)$/;
 
-/** pytest modules named `test_*.py` or `*_test.py`. */
-export const PYTHON_TEST_FILE_RE = /(?:^|[/\\])(?:test_.+|.+_test)\.py$/i;
+/** pytest basenames `test_*.py` or `*_test.py`. Tested against the basename only. */
+const PYTHON_TEST_BASENAME_RE = /^(?:test_[^/]*|[^/]*_test)\.py$/i;
 
 /** True for JS/TS test names, pytest module names, and `conftest.py`. */
 export function isTestFilePath(filePath: string): boolean {
   const base = filePath.replace(/\\/g, "/").split("/").pop() ?? "";
   if (base === "conftest.py") return true;
-  return TEST_FILE_RE.test(filePath) || PYTHON_TEST_FILE_RE.test(filePath);
+  return TEST_FILE_RE.test(filePath) || PYTHON_TEST_BASENAME_RE.test(base);
 }
 
 /* ------------------------------------------------------------------ */

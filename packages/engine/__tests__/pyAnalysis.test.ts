@@ -115,6 +115,16 @@ describe("Python cyclomatic complexity and names", () => {
       "def module_level(self, a, b, c, d):\n    return a\n",
     );
     expect(moduleLevel.metrics.functions[0]?.parameterCount).toBe(5);
+
+    const laterSelf = scorePython(
+      "class C:\n    def m(x, self, a, b, c, d):\n        return a\n",
+    );
+    expect(laterSelf.metrics.functions[0]?.parameterCount).toBe(6);
+
+    const staticCls = scorePython(
+      "class C:\n    @staticmethod\n    def s(a, b, c, d, cls):\n        return a\n",
+    );
+    expect(staticCls.metrics.functions[0]?.parameterCount).toBe(5);
   });
 
   it("does not treat a non-empty except as empty", () => {
@@ -134,6 +144,7 @@ describe("Python cyclomatic complexity and names", () => {
       expect(report.filesAnalyzed).toBe(1);
       expect(report.filesSkipped).toBeUndefined();
       expect(report.totals.functions).toBe(1);
+      expect(report.duplication).toBeNull();
     } finally {
       await rm(repoPath, { recursive: true, force: true });
     }

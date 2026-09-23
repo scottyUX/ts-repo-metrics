@@ -52,6 +52,7 @@ describe("analysis_skipped feature", () => {
     const vec = buildFeatureVector(skippedReport("django"));
     expect(vec.analysis_skipped).toBe("django");
     expect(vec.files_analyzed).toBe(0);
+    expect(vec.maintainability_score).not.toBe(100);
   });
 
   it("is empty when the report was scored", () => {

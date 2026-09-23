@@ -437,7 +437,8 @@ export interface RepoReport {
   functionMetricsSummary: FunctionMetricsSummary;
   complexity: ComplexitySummary;
   smells: SmellCounts;
-  maintainability: MaintainabilityResult;
+  /** Null when analysis was skipped (web2py or Django). Do not treat that as a score. */
+  maintainability: MaintainabilityResult | null;
   testCoverageProxy: TestCoverageProxy;
   duplication: DuplicationMetrics | null;
   git: GitMetrics | null;

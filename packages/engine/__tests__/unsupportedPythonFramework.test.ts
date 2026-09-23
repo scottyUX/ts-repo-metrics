@@ -45,6 +45,7 @@ describe("analyzeRepo (unsupported Python frameworks)", () => {
   it("skips static analysis for web2py", async () => {
     const report = await analyzeRepo(path.join(FIXTURES, "sample-web2py-repo"));
     expect(report.analysisSkipped?.id).toBe("web2py");
+    expect(report.maintainability).toBeNull();
     expect(report.filesAnalyzed).toBe(0);
     expect(report.perFile).toEqual([]);
     expect(report.profile).toMatchObject({

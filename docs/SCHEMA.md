@@ -20,7 +20,7 @@ This document describes the complete JSON report produced by `ts-repo-metrics` (
 | `functionMetricsSummary` | `FunctionMetricsSummary` | no | Repo-wide function structural metrics |
 | `complexity` | `ComplexitySummary` | no | Repo-wide cyclomatic complexity |
 | `smells` | `SmellCounts` | no | Aggregated code smell counts |
-| `maintainability` | `MaintainabilityResult` | no | Maintainability Index score |
+| `maintainability` | `MaintainabilityResult` | **yes** | Maintainability Index score. Null when `analysisSkipped` is set. The feature vector still writes `maintainability_score` 0 and an empty classification for that null, so filter on `analysis_skipped` before using maintainability |
 | `testCoverageProxy` | `TestCoverageProxy` | no | Test LOC / source LOC ratio |
 | `duplication` | `DuplicationMetrics` | **yes** | jscpd duplication analysis (null if jscpd fails) |
 | `git` | `GitMetrics` | **yes** | Commit history metrics (null for non-git repos) |
