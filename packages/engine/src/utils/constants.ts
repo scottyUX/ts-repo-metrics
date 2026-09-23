@@ -33,6 +33,9 @@ export const IGNORE_PATTERNS = [
   "**/*.min.jsx",
   "**/*.min.mjs",
   "**/*.min.cjs",
+  "**/*.config.js",
+  "**/*.config.cjs",
+  "**/*.config.mjs",
   "**/.*/**",
   "**/.*",
 ];

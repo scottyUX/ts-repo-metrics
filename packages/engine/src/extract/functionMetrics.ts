@@ -58,6 +58,7 @@ export function computeInReactScope(
   if (relativeFilePath.endsWith(".jsx") || relativeFilePath.endsWith(".tsx")) {
     return true;
   }
+  if (relativeFilePath.endsWith(".ts")) return false;
   let found = false;
   walkTree(root, {
     enter(node) {
@@ -157,10 +158,8 @@ function computeIsReactComponent(
   name: string,
   inReactScope: boolean,
 ): boolean {
-  return (
-    functionBodyContainsJsx(fnNode) ||
-    (isPascalCaseComponentName(name) && inReactScope)
-  );
+  if (!inReactScope) return false;
+  return functionBodyContainsJsx(fnNode) || isPascalCaseComponentName(name);
 }
 
 /**

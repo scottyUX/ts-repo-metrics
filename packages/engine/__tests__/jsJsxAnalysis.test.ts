@@ -73,6 +73,16 @@ describe("compiled emit next to TypeScript", () => {
         .map((f) => path.relative(root, f).replace(/\\/g, "/"))
         .sort();
       expect(rel).toEqual(["src/a.ts", "src/b.tsx", "src/foo.d.ts", "src/foo.js"]);
+
+      const fromPullRequest = await discoverSourceFiles(root, [
+        "src/a.js",
+        "src/a.ts",
+        "src/b.jsx",
+      ]);
+      const prRel = fromPullRequest.map((f) =>
+        path.relative(root, f).replace(/\\/g, "/"),
+      );
+      expect(prRel).toEqual(["src/a.ts"]);
     } finally {
       await rm(root, { recursive: true, force: true });
     }
