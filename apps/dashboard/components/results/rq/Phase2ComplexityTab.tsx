@@ -54,8 +54,8 @@ function initialSortDir(key: DetailSortKey): "asc" | "desc" {
 }
 
 function compareNullableNum(
-  a: number | undefined,
-  b: number | undefined,
+  a: number | null | undefined,
+  b: number | null | undefined,
   asc: boolean,
 ): number {
   const aMissing = a === undefined || a === null || Number.isNaN(a);

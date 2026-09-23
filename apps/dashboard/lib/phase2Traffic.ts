@@ -28,8 +28,11 @@ export function trafficForCognitive(c: number): Phase2Traffic {
   return "red";
 }
 
-export function phase2TrafficCellClass(value: number | undefined, kind: "mi" | "cc" | "cognitive"): string {
-  if (value === undefined || Number.isNaN(value)) {
+export function phase2TrafficCellClass(
+  value: number | null | undefined,
+  kind: "mi" | "cc" | "cognitive",
+): string {
+  if (value === undefined || value === null || Number.isNaN(value)) {
     return "text-right tabular-nums";
   }
   const t =

@@ -14,6 +14,8 @@ export interface RepoProfile {
   jsFiles: number;
   /** `.jsx`, including `.test.jsx` / `.spec.jsx`. */
   jsxFiles: number;
+  /** `.py`, including pytest modules. */
+  pyFiles: number;
   testFiles: number;
   totalLOC: number;
   sourceLOC: number;
@@ -50,14 +52,14 @@ export interface FunctionDetail {
   parameterCount: number;
   /** Cyclomatic complexity (1 + branch points + logical ops), same rule as `FunctionComplexity`. */
   cyclomaticComplexity: number;
-  /** Halstead suite when analyzable (empty body may yield zeros). */
-  halstead: HalsteadMetrics;
-  /** Sonar-style additive cognitive complexity (nested control increases contribution). */
-  cognitiveComplexity: number;
-  /** GRAD-AI-style MI from Halstead volume + cyclomatic + LOC; natural-log formula. */
-  maintainabilityIndexGradAiRaw: number;
-  /** Normalized to 0–100 for dashboards: max(0, MI_raw * 100 / 171). */
-  maintainabilityIndexGradAiNorm: number;
+  /** Halstead suite when analyzable. Null for Python; empty bodies may yield zeros. */
+  halstead: HalsteadMetrics | null;
+  /** Sonar-style additive cognitive complexity. Null for Python (unvalidated). */
+  cognitiveComplexity: number | null;
+  /** GRAD-AI-style MI from Halstead volume + cyclomatic + LOC. Null for Python. */
+  maintainabilityIndexGradAiRaw: number | null;
+  /** Normalized to 0–100 for dashboards: max(0, MI_raw * 100 / 171). Null for Python. */
+  maintainabilityIndexGradAiNorm: number | null;
   /** Heuristic: JSX in the function body, or PascalCase when the file is in React scope. */
   isReactComponent: boolean;
   /** Phase 3: React component with SLOC above monolithic threshold (Bollu / Tampere-style). */
@@ -382,6 +384,12 @@ export interface ReactMetricsReport {
   summary: ReactMetricsSummary;
 }
 
+/** Set when static analysis is skipped for web2py or Django. The whole repo is skipped, including JS and TS. */
+export interface UnsupportedFrameworkInfo {
+  id: "web2py" | "django";
+  message: string;
+}
+
 /** Phase 3 — AI smell / pathology metrics (TSX silent failures, monolithic rate, weighted redundancy). */
 export interface SilentFailureEvent {
   file: string;
@@ -416,6 +424,8 @@ export interface RepoReport {
   filesAnalyzed: number;
   /** Files skipped due to read or parse errors. */
   filesSkipped?: number;
+  /** Present when static analysis was skipped for web2py or Django. */
+  analysisSkipped?: UnsupportedFrameworkInfo;
   /** Analyzer package version (e.g. from package.json). */
   analyzer_version?: string;
   /** ISO 8601 timestamp when analysis ran. */
@@ -427,7 +437,8 @@ export interface RepoReport {
   functionMetricsSummary: FunctionMetricsSummary;
   complexity: ComplexitySummary;
   smells: SmellCounts;
-  maintainability: MaintainabilityResult;
+  /** Null when analysis was skipped (web2py or Django). Do not treat that as a score. */
+  maintainability: MaintainabilityResult | null;
   testCoverageProxy: TestCoverageProxy;
   duplication: DuplicationMetrics | null;
   git: GitMetrics | null;

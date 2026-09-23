@@ -13,10 +13,14 @@ export function buildReportSummary(report: RepoReport): string {
   const commit = report.source?.commit?.slice(0, 7) ?? "unknown";
   lines.push(`REPO: ${repoUrl} (commit: ${commit})`);
 
+  if (report.analysisSkipped) {
+    lines.push(`ANALYSIS SKIPPED: ${report.analysisSkipped.message}`);
+  }
+
   // ── Profile ──────────────────────────────────────────────────────────────
   const p = report.profile;
   lines.push(
-    `FILES: ${p.totalFiles} total | ${p.tsFiles} .ts | ${p.tsxFiles} .tsx | ${p.jsFiles ?? 0} .js | ${p.jsxFiles ?? 0} .jsx | ${p.testFiles} test`,
+    `FILES: ${p.totalFiles} total | ${p.tsFiles} .ts | ${p.tsxFiles} .tsx | ${p.jsFiles ?? 0} .js | ${p.jsxFiles ?? 0} .jsx | ${p.pyFiles ?? 0} .py | ${p.testFiles} test`,
   );
   lines.push(
     `LINES: ${p.totalLOC} total LOC | ${p.sourceLOC} source | ${p.testLOC} test`,

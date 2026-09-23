@@ -8,14 +8,17 @@
 
 import type { SyntaxNode } from "tree-sitter";
 import {
-  FUNCTION_NODE_TYPES,
-  NESTING_NODE_TYPES,
   LONG_FUNCTION_THRESHOLD,
   FERREIRA_COMPONENT_SLOC_THRESHOLD,
 } from "../utils/constants.js";
 import { SKIP, walkTree } from "../utils/astWalker.js";
 import { median } from "../utils/math.js";
+import {
+  ECMASCRIPT_PROFILE,
+  type LanguageProfile,
+} from "../utils/languageProfile.js";
 import { countCyclomaticBranchPoints } from "./complexity.js";
+import { countParameters, getFunctionName } from "./functionNodes.js";
 import { computeHalsteadForFunction } from "./halstead.js";
 import { computeCognitiveComplexity } from "./cognitiveComplexity.js";
 import { calculateMIGradAiRaw, normalizeMIGradAi } from "../utils/metrics.js";
@@ -45,6 +48,8 @@ export interface ExtractFunctionMetricsOptions {
    * Computed once per file by the caller. A `.tsx` file with no JSX is still in scope.
    */
   inReactScope?: boolean;
+  /** Defaults to the ECMAScript profile. Python leaves Halstead, MI, and cognitive null. */
+  languageProfile?: LanguageProfile;
 }
 
 /**
@@ -58,7 +63,9 @@ export function computeInReactScope(
   if (relativeFilePath.endsWith(".jsx") || relativeFilePath.endsWith(".tsx")) {
     return true;
   }
-  if (relativeFilePath.endsWith(".ts")) return false;
+  if (relativeFilePath.endsWith(".ts") || relativeFilePath.endsWith(".py")) {
+    return false;
+  }
   let found = false;
   walkTree(root, {
     enter(node) {
@@ -72,47 +79,12 @@ export function computeInReactScope(
   return found;
 }
 
-/**
- * Derive a human-readable name for a function node.
- */
-function getFunctionName(node: SyntaxNode): string {
-  const nameChild = node.childForFieldName("name");
-  if (nameChild) return nameChild.text;
-
-  if (node.parent?.type === "variable_declarator") {
-    const id = node.parent.childForFieldName("name");
-    if (id) return id.text;
-  }
-
-  if (node.parent?.type === "pair") {
-    const key = node.parent.childForFieldName("key");
-    if (key) return key.text;
-  }
-
-  return "(anonymous)";
-}
-
-function countParameters(node: SyntaxNode): number {
-  const params = node.childForFieldName("parameters");
-  if (!params) return 0;
-  let count = 0;
-  for (let i = 0; i < params.namedChildCount; i++) {
-    const child = params.namedChild(i);
-    if (
-      child &&
-      (child.type === "required_parameter" ||
-        child.type === "optional_parameter" ||
-        child.type === "rest_parameter" ||
-        child.type === "identifier")
-    ) {
-      count++;
-    }
-  }
-  return count;
-}
-
-function maxNesting(node: SyntaxNode, currentDepth: number): number {
-  const depth = NESTING_NODE_TYPES.has(node.type)
+function maxNesting(
+  node: SyntaxNode,
+  currentDepth: number,
+  profile: LanguageProfile,
+): number {
+  const depth = profile.nestingNodeTypes.has(node.type)
     ? currentDepth + 1
     : currentDepth;
 
@@ -120,7 +92,7 @@ function maxNesting(node: SyntaxNode, currentDepth: number): number {
   for (let i = 0; i < node.namedChildCount; i++) {
     const child = node.namedChild(i);
     if (child) {
-      const childMax = maxNesting(child, depth);
+      const childMax = maxNesting(child, depth, profile);
       if (childMax > max) max = childMax;
     }
   }
@@ -128,11 +100,14 @@ function maxNesting(node: SyntaxNode, currentDepth: number): number {
 }
 
 /** True if function subtree contains JSX (TSX), excluding nested functions. */
-function functionBodyContainsJsx(fnNode: SyntaxNode): boolean {
+function functionBodyContainsJsx(
+  fnNode: SyntaxNode,
+  profile: LanguageProfile,
+): boolean {
   let found = false;
   walkTree(fnNode, {
     enter(node) {
-      if (node !== fnNode && FUNCTION_NODE_TYPES.has(node.type)) {
+      if (node !== fnNode && profile.functionNodeTypes.has(node.type)) {
         return SKIP;
       }
       if (
@@ -157,9 +132,10 @@ function computeIsReactComponent(
   fnNode: SyntaxNode,
   name: string,
   inReactScope: boolean,
+  profile: LanguageProfile,
 ): boolean {
   if (!inReactScope) return false;
-  return functionBodyContainsJsx(fnNode) || isPascalCaseComponentName(name);
+  return functionBodyContainsJsx(fnNode, profile) || isPascalCaseComponentName(name);
 }
 
 /**
@@ -170,30 +146,38 @@ export function extractFunctionMetrics(
   options?: ExtractFunctionMetricsOptions,
 ): FunctionMetricsResult {
   const inReactScope = options?.inReactScope ?? false;
+  const profile = options?.languageProfile ?? ECMASCRIPT_PROFILE;
   const functions: FunctionDetail[] = [];
 
   walkTree(root, {
     enter(node) {
-      if (FUNCTION_NODE_TYPES.has(node.type)) {
+      if (profile.functionNodeTypes.has(node.type)) {
         const lines = node.endPosition.row - node.startPosition.row + 1;
         const name = getFunctionName(node);
-        const branches = countCyclomaticBranchPoints(node);
+        const branches = countCyclomaticBranchPoints(node, profile);
         const cyclomaticComplexity = 1 + branches;
-        const halstead = computeHalsteadForFunction(node);
-        const cognitiveComplexity = computeCognitiveComplexity(node);
-        const maintainabilityIndexGradAiRaw = calculateMIGradAiRaw(
-          halstead.volume,
-          cyclomaticComplexity,
-          lines,
-        );
-        const maintainabilityIndexGradAiNorm = normalizeMIGradAi(
-          maintainabilityIndexGradAiRaw,
-        );
+        const lexical = profile.language === "python"
+          ? null
+          : {
+              halstead: computeHalsteadForFunction(node),
+              cognitiveComplexity: computeCognitiveComplexity(node),
+            };
+        const maintainabilityIndexGradAiRaw = lexical
+          ? calculateMIGradAiRaw(
+              lexical.halstead.volume,
+              cyclomaticComplexity,
+              lines,
+            )
+          : null;
+        const maintainabilityIndexGradAiNorm = lexical
+          ? normalizeMIGradAi(maintainabilityIndexGradAiRaw ?? 0)
+          : null;
 
         const isReactComponent = computeIsReactComponent(
           node,
           name,
           inReactScope,
+          profile,
         );
         const isMonolithic =
           isReactComponent && lines > FERREIRA_COMPONENT_SLOC_THRESHOLD;
@@ -203,11 +187,11 @@ export function extractFunctionMetrics(
           type: node.type,
           startLine: node.startPosition.row + 1,
           lines,
-          maxNestingDepth: maxNesting(node, 0),
-          parameterCount: countParameters(node),
+          maxNestingDepth: maxNesting(node, 0, profile),
+          parameterCount: countParameters(node, profile),
           cyclomaticComplexity,
-          halstead,
-          cognitiveComplexity,
+          halstead: lexical?.halstead ?? null,
+          cognitiveComplexity: lexical?.cognitiveComplexity ?? null,
           maintainabilityIndexGradAiRaw,
           maintainabilityIndexGradAiNorm,
           isReactComponent,

@@ -9,10 +9,11 @@
 
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
+import os from "node:os";
 import path from "node:path";
 import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { readFile, rm } from "node:fs/promises";
+import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { IGNORE_PATTERNS } from "../utils/constants.js";
 import type { DuplicationMetrics } from "../types/report.js";
 import type { JscpdDuplicateJson } from "./weightedRedundancy.js";
@@ -21,6 +22,15 @@ export type { DuplicationMetrics } from "../types/report.js";
 export type { JscpdDuplicateJson } from "./weightedRedundancy.js";
 
 const execFileAsync = promisify(execFile);
+
+function isEnoent(err: unknown): boolean {
+  return (
+    typeof err === "object" &&
+    err !== null &&
+    "code" in err &&
+    (err as { code?: unknown }).code === "ENOENT"
+  );
+}
 
 function resolveJscpdBin(): string | null {
   let dir = path.dirname(fileURLToPath(import.meta.url));
@@ -54,8 +64,6 @@ export async function detectDuplication(
   repoPath: string,
   includePaths?: string[],
 ): Promise<DuplicationDetectionResult | null> {
-  const outputDir = path.join(repoPath, ".jscpd-report");
-
   const jscpdBin = resolveJscpdBin();
   if (!jscpdBin) {
     console.error("[duplication] jscpd binary not found");
@@ -78,13 +86,17 @@ export async function detectDuplication(
         })
       : ["."];
 
+  // The report goes to a temp folder, not the clone: a path built from repoPath
+  // is user-controlled, and a report inside the repo would sit in the scan tree.
+  let outputDir: string | undefined;
   try {
+    outputDir = await mkdtemp(path.join(os.tmpdir(), "jscpd-"));
     await execFileAsync(
       jscpdBin,
       [
         ...targets,
         "--format",
-        "typescript,tsx,javascript,jsx",
+        "typescript,tsx,javascript,jsx,python",
         "--reporters",
         "json",
         "--output",
@@ -97,7 +109,16 @@ export async function detectDuplication(
     );
 
     const reportPath = path.join(outputDir, "jscpd-report.json");
-    const raw = await readFile(reportPath, "utf8");
+    let raw: string;
+    try {
+      raw = await readFile(reportPath, "utf8");
+    } catch (err) {
+      if (isEnoent(err)) {
+        console.warn("[duplication] jscpd wrote no report");
+        return null;
+      }
+      throw err;
+    }
     const report = JSON.parse(raw) as {
       statistics?: {
         total?: {
@@ -129,7 +150,7 @@ export async function detectDuplication(
     return null;
   } finally {
     try {
-      await rm(outputDir, { recursive: true, force: true });
+      if (outputDir) await rm(outputDir, { recursive: true, force: true });
     } catch {
       // best-effort cleanup
     }

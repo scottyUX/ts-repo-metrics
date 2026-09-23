@@ -9,13 +9,21 @@
 
 import Parser from "tree-sitter";
 import tsLang from "tree-sitter-typescript";
+import pyLang from "tree-sitter-python";
 
 export type TsFlavor = "ts" | "tsx";
+export type SourceFlavor = TsFlavor | "py";
 
-export function parseTypeScript(code: string, flavor: TsFlavor) {
+export function parseSource(code: string, flavor: SourceFlavor) {
   const parser = new Parser();
-  parser.setLanguage(flavor === "tsx" ? tsLang.tsx : tsLang.typescript);
+  if (flavor === "py") parser.setLanguage(pyLang);
+  else parser.setLanguage(flavor === "tsx" ? tsLang.tsx : tsLang.typescript);
   // node-tree-sitter's default buffer is 32 KiB; a longer string throws
   // "Invalid argument". The buffer must be larger than the string length.
+  // code.length counts UTF-16 units, which is what the buffer uses.
   return parser.parse(code, undefined, { bufferSize: code.length + 1 });
+}
+
+export function parseTypeScript(code: string, flavor: TsFlavor) {
+  return parseSource(code, flavor);
 }

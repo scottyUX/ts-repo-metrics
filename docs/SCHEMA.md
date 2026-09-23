@@ -8,7 +8,8 @@ This document describes the complete JSON report produced by `ts-repo-metrics` (
 |-------|------|----------|-------------|
 | `repoPath` | `string` | no | Absolute path to the analyzed repository |
 | `source` | `SourceInfo` | no | Origin metadata (local path vs cloned GitHub URL) |
-| `filesAnalyzed` | `number` | no | Total `.ts`/`.tsx` files successfully parsed |
+| `filesAnalyzed` | `number` | no | Total `.ts`, `.tsx`, `.js`, `.jsx`, `.mjs`, `.cjs`, and `.py` files successfully parsed. web2py and Django repos contribute zero |
+| `analysisSkipped` | `object` | **yes** | `{ id: "web2py" \| "django", message }` when the whole repository was skipped, including JS and TS. Absent when the repo was scored. The feature vector copies the id to `analysis_skipped` (`""` when scored) so a zero-file row is not treated as an empty repository |
 | `filesSkipped` | `number` | **yes** | Files skipped due to read or parse errors |
 | `analyzer_version` | `string` | **yes** | Analyzer package version (from `packages/engine/package.json` when run via the engine — CLI or dashboard) |
 | `analysis_timestamp` | `string` | **yes** | ISO 8601 timestamp when analysis ran |
@@ -19,7 +20,7 @@ This document describes the complete JSON report produced by `ts-repo-metrics` (
 | `functionMetricsSummary` | `FunctionMetricsSummary` | no | Repo-wide function structural metrics |
 | `complexity` | `ComplexitySummary` | no | Repo-wide cyclomatic complexity |
 | `smells` | `SmellCounts` | no | Aggregated code smell counts |
-| `maintainability` | `MaintainabilityResult` | no | Maintainability Index score |
+| `maintainability` | `MaintainabilityResult` | **yes** | Maintainability Index score. Null when `analysisSkipped` is set. The feature vector still writes `maintainability_score` 0 and an empty classification for that null, so filter on `analysis_skipped` before using maintainability |
 | `testCoverageProxy` | `TestCoverageProxy` | no | Test LOC / source LOC ratio |
 | `duplication` | `DuplicationMetrics` | **yes** | jscpd duplication analysis (null if jscpd fails) |
 | `git` | `GitMetrics` | **yes** | Commit history metrics (null for non-git repos) |
@@ -55,16 +56,19 @@ Tail risk indicators for research. Percentiles computed across all functions.
 | `prNumber` | `number` | Pull request number when `scope` is `"pr"` |
 | `baseSha` | `string` | PR base SHA |
 | `headSha` | `string` | PR head SHA |
-| `changedFiles` | `string[]` | Repo-relative `.ts`/`.tsx` paths included in a PR-scoped run |
+| `changedFiles` | `string[]` | Repo-relative source paths included in a PR-scoped run (`.ts`, `.tsx`, `.js`, `.jsx`, `.mjs`, `.cjs`, `.py`) |
 
 ## `profile` — Repository Profiling
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `totalFiles` | `number` | Total `.ts` + `.tsx` files (excluding ignored dirs) |
+| `totalFiles` | `number` | Analyzed source files (excluding ignored dirs) |
 | `tsFiles` | `number` | Count of `.ts` files |
 | `tsxFiles` | `number` | Count of `.tsx` files |
-| `testFiles` | `number` | Files matching `*.test.ts`, `*.spec.ts`, etc. |
+| `jsFiles` | `number` | Count of `.js`, `.mjs`, and `.cjs` files |
+| `jsxFiles` | `number` | Count of `.jsx` files |
+| `pyFiles` | `number` | Count of `.py` files. Zero on a web2py or Django skip, along with every other profile count and LOC field |
+| `testFiles` | `number` | `*.test` / `*.spec` for JS and TS, plus `test_*.py`, `*_test.py`, and `conftest.py` |
 | `totalLOC` | `number` | Total lines of code across all files |
 | `sourceLOC` | `number` | Lines of code in non-test files |
 | `testLOC` | `number` | Lines of code in test files |
@@ -209,10 +213,10 @@ Returns `null` if no `package.json` is found.
 | `maxNestingDepth` | `number` | Deepest nesting of control flow |
 | `parameterCount` | `number` | Number of declared parameters |
 | `cyclomaticComplexity` | `number` | Cyclomatic complexity (same as `1 +` branch points + `&&`/`||`); aligns with `FunctionComplexity.complexity` |
-| `halstead` | `HalsteadMetrics` | Halstead operator/operand metrics (lexical volume) |
-| `cognitiveComplexity` | `number` | Additive cognitive score (nesting-aware; Sonar-style) |
-| `maintainabilityIndexGradAiRaw` | `number` | GRAD-AI raw MI: `171 - 5.2·ln(V) - 0.23·CC - 16.2·ln(LOC)` (natural logs); `V` = Halstead `volume`, `CC` = cyclomatic, `LOC` = `lines` |
-| `maintainabilityIndexGradAiNorm` | `number` | `max(0, MI_raw · 100 / 171)` — use for dashboards / cohort charts (0–100) |
+| `halstead` | `HalsteadMetrics \| null` | Halstead operator/operand metrics (lexical volume). Null on `.py` functions |
+| `cognitiveComplexity` | `number \| null` | Additive cognitive score (nesting-aware; Sonar-style). Null on `.py` functions |
+| `maintainabilityIndexGradAiRaw` | `number \| null` | GRAD-AI raw MI: `171 - 5.2·ln(V) - 0.23·CC - 16.2·ln(LOC)` (natural logs); `V` = Halstead `volume`, `CC` = cyclomatic, `LOC` = `lines`. Null on `.py` functions |
+| `maintainabilityIndexGradAiNorm` | `number \| null` | `max(0, MI_raw · 100 / 171)`. Null on `.py` functions |
 | `isReactComponent` | `boolean` | Heuristic: `.tsx` file and (PascalCase name or JSX in body) |
 | `isMonolithic` | `boolean` | `true` when `isReactComponent` and `lines` exceed the monolithic threshold (50 SLOC; see `constants.ts`) |
 

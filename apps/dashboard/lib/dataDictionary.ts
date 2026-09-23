@@ -91,6 +91,13 @@ export const DATA_DICTIONARY: Record<string, DataDictionaryEntry> = {
     resultsConstruct: "commit-habits",
     interpretation: "Human-readable classification of maintainability.",
   },
+  analysis_skipped: {
+    definition:
+      "Empty when the repo was scored. web2py or django when the whole repository was skipped, including any JavaScript or TypeScript in it. A files_analyzed of 0 with this set is not an empty repository.",
+    unit: "string",
+    resultsConstruct: "tbd",
+    interpretation: "Filter skipped framework repos out of scored cohorts.",
+  },
   total_loc: {
     definition: "Total lines of code across all TypeScript files.",
     unit: "loc",
@@ -110,7 +117,8 @@ export const DATA_DICTIONARY: Record<string, DataDictionaryEntry> = {
     interpretation: "Test code size.",
   },
   files_analyzed: {
-    definition: "Total .ts, .tsx, .js, and .jsx files successfully parsed.",
+    definition:
+      "Total .ts, .tsx, .js, .jsx, and .py files successfully parsed. web2py and Django repos contribute zero files.",
     unit: "count",
     resultsConstruct: "commit-habits",
     interpretation: "Scope of analysis.",
@@ -334,7 +342,7 @@ export const DATA_DICTIONARY: Record<string, DataDictionaryEntry> = {
   },
   phase3_sfd: {
     definition:
-      "Silent failure density: TSX empty/console-only catch events per 1000 non-test source lines.",
+      "Silent failure density: React-scoped empty/console-only catch events per 1000 non-test source lines. Python source LOC is in the denominator and Python except: pass is not an event.",
     unit: "ratio",
     resultsConstruct: "code-quality",
     interpretation: "Higher: more swallowed or log-only error handling in UI code.",

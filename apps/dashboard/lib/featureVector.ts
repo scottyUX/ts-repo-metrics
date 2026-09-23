@@ -56,6 +56,7 @@ export const FEATURE_SPEC: Record<
   test_loc: { category: "Structural", construct: "tbd" },
   files_analyzed: { category: "Structural", construct: "tbd" },
   files_skipped: { category: "Structural", construct: "tbd" },
+  analysis_skipped: { category: "Structural", construct: "tbd" },
   p90_commit_size: { category: "Behavioral", construct: "commit-habits" },
   p50_function_length: { category: "Distribution", construct: "code-quality" },
   p75_function_length: { category: "Distribution", construct: "code-quality" },
@@ -156,6 +157,7 @@ export function buildFeatureVector(
   vec.test_loc = r.profile?.testLOC ?? 0;
   vec.files_analyzed = r.filesAnalyzed ?? 0;
   vec.files_skipped = r.filesSkipped ?? 0;
+  vec.analysis_skipped = r.analysisSkipped?.id ?? "";
 
   vec.test_loc_ratio =
     r.profile?.sourceLOC && r.profile.sourceLOC > 0
@@ -199,7 +201,7 @@ export function buildFeatureVector(
   }
 
   const fds = flattenFunctionDetails(r);
-  const p2 = fds.filter((f) => f.halstead !== undefined);
+  const p2 = fds.filter((f) => f.halstead != null);
   if (p2.length > 0) {
     const vol = p2.map((f) => f.halstead!.volume);
     const cog = p2.map((f) => f.cognitiveComplexity ?? 0);

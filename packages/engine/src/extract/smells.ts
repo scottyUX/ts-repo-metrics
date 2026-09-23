@@ -14,13 +14,16 @@
 
 import type { SyntaxNode } from "tree-sitter";
 import {
-  FUNCTION_NODE_TYPES,
-  NESTING_NODE_TYPES,
   LONG_FUNCTION_THRESHOLD,
   DEEP_NESTING_THRESHOLD,
   LONG_PARAM_LIST_THRESHOLD,
 } from "../utils/constants.js";
 import { walkTree } from "../utils/astWalker.js";
+import {
+  ECMASCRIPT_PROFILE,
+  type LanguageProfile,
+} from "../utils/languageProfile.js";
+import { countParameters } from "./functionNodes.js";
 import type { SmellCounts } from "../types/report.js";
 
 export type { SmellCounts } from "../types/report.js";
@@ -31,11 +34,14 @@ export type { SmellCounts } from "../types/report.js";
  * @param root - Root node of a Tree-sitter syntax tree.
  * @returns Number of functions longer than LONG_FUNCTION_THRESHOLD lines.
  */
-export function detectLongFunctions(root: SyntaxNode): number {
+export function detectLongFunctions(
+  root: SyntaxNode,
+  profile: LanguageProfile = ECMASCRIPT_PROFILE,
+): number {
   let count = 0;
   walkTree(root, {
     enter(node) {
-      if (FUNCTION_NODE_TYPES.has(node.type)) {
+      if (profile.functionNodeTypes.has(node.type)) {
         const lines = node.endPosition.row - node.startPosition.row + 1;
         if (lines > LONG_FUNCTION_THRESHOLD) count++;
       }
@@ -50,25 +56,32 @@ export function detectLongFunctions(root: SyntaxNode): number {
  * @param root - Root node of a Tree-sitter syntax tree.
  * @returns Number of functions with nesting deeper than DEEP_NESTING_THRESHOLD.
  */
-function maxNestingDepth(node: SyntaxNode, depth: number): number {
-  const d = NESTING_NODE_TYPES.has(node.type) ? depth + 1 : depth;
+function maxNestingDepth(
+  node: SyntaxNode,
+  depth: number,
+  profile: LanguageProfile,
+): number {
+  const d = profile.nestingNodeTypes.has(node.type) ? depth + 1 : depth;
   let max = d;
   for (let i = 0; i < node.namedChildCount; i++) {
     const child = node.namedChild(i);
     if (child) {
-      const cm = maxNestingDepth(child, d);
+      const cm = maxNestingDepth(child, d, profile);
       if (cm > max) max = cm;
     }
   }
   return max;
 }
 
-export function detectDeepNesting(root: SyntaxNode): number {
+export function detectDeepNesting(
+  root: SyntaxNode,
+  profile: LanguageProfile = ECMASCRIPT_PROFILE,
+): number {
   let count = 0;
   walkTree(root, {
     enter(node) {
-      if (FUNCTION_NODE_TYPES.has(node.type)) {
-        if (maxNestingDepth(node, 0) > DEEP_NESTING_THRESHOLD) count++;
+      if (profile.functionNodeTypes.has(node.type)) {
+        if (maxNestingDepth(node, 0, profile) > DEEP_NESTING_THRESHOLD) count++;
       }
     },
   });
@@ -81,28 +94,15 @@ export function detectDeepNesting(root: SyntaxNode): number {
  * @param root - Root node of a Tree-sitter syntax tree.
  * @returns Number of functions with more than LONG_PARAM_LIST_THRESHOLD parameters.
  */
-export function detectLongParameterLists(root: SyntaxNode): number {
+export function detectLongParameterLists(
+  root: SyntaxNode,
+  profile: LanguageProfile = ECMASCRIPT_PROFILE,
+): number {
   let count = 0;
   walkTree(root, {
     enter(node) {
-      if (FUNCTION_NODE_TYPES.has(node.type)) {
-        const params = node.childForFieldName("parameters");
-        if (params) {
-          let pCount = 0;
-          for (let i = 0; i < params.namedChildCount; i++) {
-            const child = params.namedChild(i);
-            if (
-              child &&
-              (child.type === "required_parameter" ||
-                child.type === "optional_parameter" ||
-                child.type === "rest_parameter" ||
-                child.type === "identifier")
-            ) {
-              pCount++;
-            }
-          }
-          if (pCount > LONG_PARAM_LIST_THRESHOLD) count++;
-        }
+      if (profile.functionNodeTypes.has(node.type)) {
+        if (countParameters(node, profile) > LONG_PARAM_LIST_THRESHOLD) count++;
       }
     },
   });
@@ -115,10 +115,28 @@ export function detectLongParameterLists(root: SyntaxNode): number {
  * @param root - Root node of a Tree-sitter syntax tree.
  * @returns Number of catch clauses with an empty body.
  */
-export function detectEmptyCatchBlocks(root: SyntaxNode): number {
+function isEmptyExceptBlock(block: SyntaxNode | null): boolean {
+  if (!block) return true;
+  if (block.namedChildCount === 0) return true;
+  return (
+    block.namedChildCount === 1 &&
+    block.namedChild(0)?.type === "pass_statement"
+  );
+}
+
+export function detectEmptyCatchBlocks(
+  root: SyntaxNode,
+  profile: LanguageProfile = ECMASCRIPT_PROFILE,
+): number {
   let count = 0;
   walkTree(root, {
     enter(node) {
+      if (profile.language === "python") {
+        if (node.type !== "except_clause") return;
+        const block = node.namedChildren.find((child) => child.type === "block") ?? null;
+        if (isEmptyExceptBlock(block)) count++;
+        return;
+      }
       if (node.type === "catch_clause") {
         const body = node.childForFieldName("body");
         if (body && body.namedChildCount === 0) count++;
@@ -136,10 +154,20 @@ export function detectEmptyCatchBlocks(root: SyntaxNode): number {
  */
 const CONSOLE_METHODS = new Set(["log", "warn", "error"]);
 
-export function detectConsoleLogs(root: SyntaxNode): number {
+export function detectConsoleLogs(
+  root: SyntaxNode,
+  profile: LanguageProfile = ECMASCRIPT_PROFILE,
+): number {
   let count = 0;
   walkTree(root, {
     enter(node) {
+      if (profile.language === "python") {
+        if (node.type === "call") {
+          const fn = node.childForFieldName("function");
+          if (fn?.type === "identifier" && fn.text === "print") count++;
+        }
+        return;
+      }
       if (node.type === "call_expression") {
         const fn = node.childForFieldName("function");
         if (fn?.type === "member_expression") {
@@ -166,12 +194,15 @@ export function detectConsoleLogs(root: SyntaxNode): number {
  * @param root - Root node of a Tree-sitter syntax tree.
  * @returns Combined smell counts for the file.
  */
-export function detectSmells(root: SyntaxNode): SmellCounts {
+export function detectSmells(
+  root: SyntaxNode,
+  profile: LanguageProfile = ECMASCRIPT_PROFILE,
+): SmellCounts {
   return {
-    longFunctions: detectLongFunctions(root),
-    deepNesting: detectDeepNesting(root),
-    longParameterLists: detectLongParameterLists(root),
-    emptyCatchBlocks: detectEmptyCatchBlocks(root),
-    consoleLogs: detectConsoleLogs(root),
+    longFunctions: detectLongFunctions(root, profile),
+    deepNesting: detectDeepNesting(root, profile),
+    longParameterLists: detectLongParameterLists(root, profile),
+    emptyCatchBlocks: detectEmptyCatchBlocks(root, profile),
+    consoleLogs: detectConsoleLogs(root, profile),
   };
 }

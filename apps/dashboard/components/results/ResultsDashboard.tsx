@@ -137,6 +137,11 @@ export function ResultsDashboard({ report, resultId }: ResultsDashboardProps) {
           </div>
         ) : null}
         <AnalysisScopeBanner report={report} />
+        {report.analysisSkipped ? (
+          <div className="rounded-md border border-border bg-muted px-4 py-3 text-sm text-foreground">
+            {report.analysisSkipped.message}
+          </div>
+        ) : null}
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <h1 className="text-xl font-semibold tracking-tight">Analysis Results</h1>

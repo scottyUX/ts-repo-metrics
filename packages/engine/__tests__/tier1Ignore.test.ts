@@ -18,13 +18,14 @@ describe("tier-1 ignore patterns", () => {
     const rel = files
       .map((f) => path.relative(FIXTURE_PATH, f).replace(/\\/g, "/"))
       .sort();
-    expect(rel).toEqual(["src/app.ts"]);
+    expect(rel).toEqual(["src/app.py", "src/app.ts"]);
   });
 
   it("profiles only the TypeScript source file", async () => {
     const profile = await profileRepo(FIXTURE_PATH);
-    expect(profile.totalFiles).toBe(1);
+    expect(profile.totalFiles).toBe(2);
     expect(profile.tsFiles).toBe(1);
+    expect(profile.pyFiles).toBe(1);
     expect(profile.jsFiles).toBe(0);
     expect(profile.jsxFiles).toBe(0);
   });

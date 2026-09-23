@@ -9,7 +9,7 @@ import { discoverSourceFiles } from "../src/collect/fileDiscovery.js";
 import { filterChangedSourcePaths } from "../src/collect/githubPullRequest.js";
 import { analyzeRepo } from "../src/pipeline/analyzeRepo.js";
 import { profileRepo } from "../src/collect/loc.js";
-import { isAnalyzableSourcePath } from "../src/utils/constants.js";
+import { isAnalyzableSourcePath, isTestFilePath } from "../src/utils/constants.js";
 import { sanitizeRefForKey } from "../src/utils/githubUrl.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -47,6 +47,17 @@ describe("isAnalyzableSourcePath", () => {
     expect(isAnalyzableSourcePath("/etc/app.js")).toBe(false);
     expect(isAnalyzableSourcePath("C:/Windows/app.js")).toBe(false);
     expect(isAnalyzableSourcePath("./src/foo.js")).toBe(true);
+    expect(isAnalyzableSourcePath("src/app.py")).toBe(true);
+    expect(isAnalyzableSourcePath("venv/lib.py")).toBe(false);
+    expect(isAnalyzableSourcePath("__pycache__/x.py")).toBe(false);
+  });
+
+  it("treats only pytest basenames as Python tests", () => {
+    expect(isTestFilePath("test_data/loader.py")).toBe(false);
+    expect(isTestFilePath("src/test_helpers/db.py")).toBe(false);
+    expect(isTestFilePath("a/test_x.py")).toBe(true);
+    expect(isTestFilePath("src/utils_test.py")).toBe(true);
+    expect(isTestFilePath("conftest.py")).toBe(true);
   });
 
   it("does not discover an absolute path outside the repo", async () => {
