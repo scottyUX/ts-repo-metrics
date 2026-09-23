@@ -17,6 +17,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "packageManager": "npm@10.9.8",
   "type": "commonjs",
   "dependencies": {
     "@repo-metrics/engine": "file:packages/engine"
