@@ -6,43 +6,88 @@
 /*  File discovery                                                     */
 /* ------------------------------------------------------------------ */
 
-/** Glob patterns for TypeScript and TSX source files. */
-export const SOURCE_PATTERNS = ["**/*.ts", "**/*.tsx"];
+/** Glob patterns for TypeScript, JavaScript, and JSX source files. */
+export const SOURCE_PATTERNS = [
+  "**/*.ts",
+  "**/*.tsx",
+  "**/*.js",
+  "**/*.jsx",
+  "**/*.mjs",
+  "**/*.cjs",
+];
 
-/** Directories to exclude from all file discovery and analysis. */
+/**
+ * fast-glob and jscpd ignore globs. jscpd matches these against repo-relative
+ * paths only when its process cwd is the repo (see detectDuplication).
+ * The last two entries cover dot-directories such as .storybook and .github.
+ */
 export const IGNORE_PATTERNS = [
   "**/node_modules/**",
   "**/dist/**",
   "**/build/**",
-  "**/.next/**",
   "**/out/**",
   "**/coverage/**",
-  "**/.git/**",
+  "**/vendor/**",
+  "**/third_party/**",
+  "**/*.min.js",
+  "**/*.min.jsx",
+  "**/*.min.mjs",
+  "**/*.min.cjs",
+  "**/*.config.js",
+  "**/*.config.cjs",
+  "**/*.config.mjs",
+  "**/.*/**",
+  "**/.*",
 ];
 
-/** Path segments that match IGNORE_PATTERNS (for allow-list filtering). */
+/** Directory names excluded from analysis. Dot-directories are handled separately. */
 const BLOCKED_PATH_SEGMENTS = new Set([
   "node_modules",
   "dist",
   "build",
-  ".next",
   "out",
   "coverage",
-  ".git",
+  "vendor",
+  "third_party",
 ]);
 
+const SOURCE_EXTENSIONS = new Set([
+  ".ts",
+  ".tsx",
+  ".js",
+  ".jsx",
+  ".mjs",
+  ".cjs",
+]);
+
+const MINIFIED_BASENAME_RE = /\.min\.(js|jsx|mjs|cjs)$/;
+const CONFIG_JS_BASENAME_RE = /\.config\.(js|cjs|mjs)$/;
+
 /**
- * True when a repo-relative path is a TypeScript/TSX source file outside ignored dirs.
+ * True when a repo-relative path is source we score.
+ * Path-only: no sibling lookup. Emit files next to TypeScript are dropped later
+ * in discoverSourceFiles, after the tree is on disk.
  */
 export function isAnalyzableSourcePath(relPath: string): boolean {
-  const normalized = relPath.replace(/\\/g, "/").replace(/^\.?\//, "");
-  if (!normalized.endsWith(".ts") && !normalized.endsWith(".tsx")) return false;
+  const slashed = relPath.replace(/\\/g, "/");
+  if (slashed.startsWith("/") || /^[A-Za-z]:/.test(slashed)) return false;
+  const normalized = slashed.replace(/^\.\//, "");
   const parts = normalized.split("/").filter(Boolean);
-  return !parts.some((p) => BLOCKED_PATH_SEGMENTS.has(p));
+  if (parts.length === 0) return false;
+  if (parts.some((p) => p.startsWith(".") || BLOCKED_PATH_SEGMENTS.has(p))) {
+    return false;
+  }
+  const base = parts[parts.length - 1] ?? "";
+  if (MINIFIED_BASENAME_RE.test(base) || CONFIG_JS_BASENAME_RE.test(base)) {
+    return false;
+  }
+  const dot = base.lastIndexOf(".");
+  if (dot < 0) return false;
+  return SOURCE_EXTENSIONS.has(base.slice(dot));
 }
 
-/** Matches test files by convention: `*.test.ts`, `*.spec.ts`, `*.test.tsx`, `*.spec.tsx`. */
-export const TEST_FILE_RE = /\.(test|spec)\.(ts|tsx)$/;
+/** Matches `*.test` / `*.spec` for JS and TS source extensions. */
+export const TEST_FILE_RE = /\.(test|spec)\.(js|jsx|mjs|cjs|ts|tsx)$/;
 
 /* ------------------------------------------------------------------ */
 /*  AST node classification                                            */

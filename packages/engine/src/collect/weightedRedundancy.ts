@@ -56,13 +56,15 @@ export function levenshteinRatio(a: string, b: string): number {
   return 1 - dist / maxLen;
 }
 
-function readLineRange(
+export function readLineRange(
   repoPath: string,
   relFile: string,
   startLine: number,
   endLine: number,
 ): string {
-  const fullPath = path.join(repoPath, relFile);
+  const fullPath = path.isAbsolute(relFile)
+    ? relFile
+    : path.join(repoPath, relFile);
   const raw = readFileSync(fullPath, "utf8");
   const lines = raw.split(/\r?\n/);
   const slice = lines.slice(Math.max(0, startLine - 1), endLine);

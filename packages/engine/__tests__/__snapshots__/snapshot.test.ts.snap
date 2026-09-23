@@ -303,6 +303,8 @@ exports[`analyzeRepo snapshot > produces stable report structure for fixture rep
     "srsWeightedNumerator": 0,
   },
   "profile": {
+    "jsFiles": 0,
+    "jsxFiles": 0,
     "sourceLOC": 23,
     "testFiles": 1,
     "testLOC": 11,

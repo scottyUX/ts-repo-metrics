@@ -31,9 +31,45 @@ export type {
   FunctionMetricsResult,
 } from "../types/report.js";
 
+const JSX_NODE_TYPES = new Set([
+  "jsx_element",
+  "jsx_self_closing_element",
+  "jsx_fragment",
+]);
+
 export interface ExtractFunctionMetricsOptions {
-  /** Relative path like `src/App.tsx` — used for `isReactComponent` when `.tsx`. */
+  /** Relative path like `src/App.tsx`. */
   relativeFilePath?: string;
+  /**
+   * True for `.jsx` / `.tsx`, or when the file tree contains JSX.
+   * Computed once per file by the caller. A `.tsx` file with no JSX is still in scope.
+   */
+  inReactScope?: boolean;
+}
+
+/**
+ * File is in the React pass when its extension is JSX/TSX or its tree contains JSX.
+ * One walk for non-JSX extensions. Call once per file and reuse the boolean.
+ */
+export function computeInReactScope(
+  relativeFilePath: string,
+  root: SyntaxNode,
+): boolean {
+  if (relativeFilePath.endsWith(".jsx") || relativeFilePath.endsWith(".tsx")) {
+    return true;
+  }
+  if (relativeFilePath.endsWith(".ts")) return false;
+  let found = false;
+  walkTree(root, {
+    enter(node) {
+      if (JSX_NODE_TYPES.has(node.type)) {
+        found = true;
+        return SKIP;
+      }
+      return undefined;
+    },
+  });
+  return found;
 }
 
 /**
@@ -119,11 +155,11 @@ function isPascalCaseComponentName(name: string): boolean {
 
 function computeIsReactComponent(
   fnNode: SyntaxNode,
-  relativeFilePath: string | undefined,
   name: string,
+  inReactScope: boolean,
 ): boolean {
-  if (!relativeFilePath?.endsWith(".tsx")) return false;
-  return isPascalCaseComponentName(name) || functionBodyContainsJsx(fnNode);
+  if (!inReactScope) return false;
+  return functionBodyContainsJsx(fnNode) || isPascalCaseComponentName(name);
 }
 
 /**
@@ -133,7 +169,7 @@ export function extractFunctionMetrics(
   root: SyntaxNode,
   options?: ExtractFunctionMetricsOptions,
 ): FunctionMetricsResult {
-  const relativeFilePath = options?.relativeFilePath;
+  const inReactScope = options?.inReactScope ?? false;
   const functions: FunctionDetail[] = [];
 
   walkTree(root, {
@@ -156,8 +192,8 @@ export function extractFunctionMetrics(
 
         const isReactComponent = computeIsReactComponent(
           node,
-          relativeFilePath,
           name,
+          inReactScope,
         );
         const isMonolithic =
           isReactComponent && lines > FERREIRA_COMPONENT_SLOC_THRESHOLD;

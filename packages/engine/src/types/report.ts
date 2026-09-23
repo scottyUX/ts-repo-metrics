@@ -10,6 +10,10 @@ export interface RepoProfile {
   totalFiles: number;
   tsFiles: number;
   tsxFiles: number;
+  /** `.js`, `.mjs`, and `.cjs`, including test files of those extensions. */
+  jsFiles: number;
+  /** `.jsx`, including `.test.jsx` / `.spec.jsx`. */
+  jsxFiles: number;
   testFiles: number;
   totalLOC: number;
   sourceLOC: number;
@@ -54,7 +58,7 @@ export interface FunctionDetail {
   maintainabilityIndexGradAiRaw: number;
   /** Normalized to 0–100 for dashboards: max(0, MI_raw * 100 / 171). */
   maintainabilityIndexGradAiNorm: number;
-  /** Heuristic: `.tsx` and (PascalCase name or JSX in body). */
+  /** Heuristic: JSX in the function body, or PascalCase when the file is in React scope. */
   isReactComponent: boolean;
   /** Phase 3: React component with SLOC above monolithic threshold (Bollu / Tampere-style). */
   isMonolithic: boolean;

@@ -18,7 +18,10 @@ import { extractGitHistoryBundle } from "../collect/gitMetricsV2.js";
 import { detectFramework } from "../collect/frameworkDetection.js";
 import { parseTypeScript } from "../parsing/tsParser.js";
 import { countFunctions } from "../extract/functionCount.js";
-import { extractFunctionMetrics } from "../extract/functionMetrics.js";
+import {
+  computeInReactScope,
+  extractFunctionMetrics,
+} from "../extract/functionMetrics.js";
 import { summarizeComplexity } from "../extract/complexity.js";
 import { detectSmells } from "../extract/smells.js";
 import { computeTestCoverageProxy } from "../extract/testCoverageProxy.js";
@@ -46,8 +49,9 @@ import type {
   SilentFailureEvent,
 } from "../types/report.js";
 
-function flavorForFile(filePath: string): "ts" | "tsx" {
-  return filePath.endsWith(".tsx") ? "tsx" : "ts";
+/** `.ts` uses the TypeScript grammar. JS, JSX, and TSX use the TSX grammar. */
+function grammarForFile(filePath: string): "ts" | "tsx" {
+  return filePath.endsWith(".ts") ? "ts" : "tsx";
 }
 
 export interface AnalyzeOptions {
@@ -106,7 +110,7 @@ export async function analyzeRepo(
 
     let tree;
     try {
-      tree = parseTypeScript(code, flavorForFile(filePath));
+      tree = parseTypeScript(code, grammarForFile(filePath));
     } catch (err) {
       console.error(`Skipping ${path.relative(repoPath, filePath)}: parse error`, err instanceof Error ? err.message : err);
       filesSkipped++;
@@ -114,9 +118,11 @@ export async function analyzeRepo(
     }
 
     const fnCount = countFunctions(tree.rootNode);
-    const relFile = path.relative(repoPath, filePath);
+    const relFile = path.relative(repoPath, filePath).replace(/\\/g, "/");
+    const inReactScope = computeInReactScope(relFile, tree.rootNode);
     const fnMetrics = extractFunctionMetrics(tree.rootNode, {
       relativeFilePath: relFile,
+      inReactScope,
     });
     const fileComplexity: FunctionComplexity[] = fnMetrics.functions.map(
       (f) => ({
@@ -144,13 +150,13 @@ export async function analyzeRepo(
       complexity: fileComplexity,
     });
 
-    if (flavorForFile(filePath) === "tsx") {
+    if (inReactScope) {
       silentFailureEvents.push(
         ...extractSilentFailures(tree.rootNode, relFile),
       );
       tsxFilesAnalyzed++;
       reactMetricsByFile.push(
-        extractReactMetricsFromTsx(tree.rootNode, path.relative(repoPath, filePath)),
+        extractReactMetricsFromTsx(tree.rootNode, relFile),
       );
     }
   }
@@ -181,7 +187,13 @@ export async function analyzeRepo(
     functionMetricsSummary.averageLength,
   );
   const testCoverageProxy = computeTestCoverageProxy(profile);
-  const duplicationResult = await detectDuplication(repoPath, includePaths);
+  const discoveredRel = files.map((f) =>
+    path.relative(repoPath, f).replace(/\\/g, "/"),
+  );
+  const duplicationResult = await detectDuplication(
+    repoPath,
+    includePaths ? discoveredRel : undefined,
+  );
   const duplication = duplicationResult?.metrics ?? null;
   const sourceKlocDivisor = profile.sourceLOC / 1000;
   const sfd =

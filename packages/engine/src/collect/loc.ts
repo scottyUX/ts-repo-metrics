@@ -7,6 +7,7 @@
  * across all modules.
  */
 
+import path from "node:path";
 import { readFile } from "node:fs/promises";
 import { TEST_FILE_RE } from "../utils/constants.js";
 import { countLines } from "../utils/text.js";
@@ -16,10 +17,10 @@ import type { RepoProfile } from "../types/report.js";
 export type { RepoProfile } from "../types/report.js";
 
 /**
- * Profile a repository's TypeScript / TSX source files.
+ * Profile a repository's TypeScript, JavaScript, and JSX source files.
  *
- * Discovers all `.ts` and `.tsx` files (excluding common non-source dirs),
- * classifies each as source or test, and counts lines of code.
+ * Discovers analyzable source files, classifies each as source or test, and
+ * counts lines of code. `.mjs` and `.cjs` count as `jsFiles`.
  *
  * @param repoPath - Absolute path to the repository root.
  * @param includePaths - Optional repo-relative allow-list (PR changed files).
@@ -33,6 +34,8 @@ export async function profileRepo(
 
   let tsFiles = 0;
   let tsxFiles = 0;
+  let jsFiles = 0;
+  let jsxFiles = 0;
   let testFiles = 0;
   let totalLOC = 0;
   let sourceLOC = 0;
@@ -42,9 +45,11 @@ export async function profileRepo(
     const content = await readFile(filePath, "utf8");
     const lines = countLines(content);
     const isTest = TEST_FILE_RE.test(filePath);
-    const isTsx = filePath.endsWith(".tsx");
+    const ext = path.extname(filePath);
 
-    if (isTsx) tsxFiles++;
+    if (ext === ".tsx") tsxFiles++;
+    else if (ext === ".jsx") jsxFiles++;
+    else if (ext === ".js" || ext === ".mjs" || ext === ".cjs") jsFiles++;
     else tsFiles++;
 
     if (isTest) {
@@ -61,6 +66,8 @@ export async function profileRepo(
     totalFiles: files.length,
     tsFiles,
     tsxFiles,
+    jsFiles,
+    jsxFiles,
     testFiles,
     totalLOC,
     sourceLOC,

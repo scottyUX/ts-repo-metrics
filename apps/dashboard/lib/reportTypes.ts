@@ -181,6 +181,10 @@ export interface RepoReport {
     totalFiles: number;
     tsFiles: number;
     tsxFiles: number;
+    /** `.js`, `.mjs`, and `.cjs`. Absent on reports saved before JS scoring. */
+    jsFiles?: number;
+    /** `.jsx`. Absent on reports saved before JSX scoring. */
+    jsxFiles?: number;
     testFiles: number;
     totalLOC: number;
     sourceLOC: number;

@@ -5,6 +5,7 @@
 import { describe, it, expect } from "vitest";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { discoverSourceFiles } from "../src/collect/fileDiscovery.js";
 import { filterChangedSourcePaths } from "../src/collect/githubPullRequest.js";
 import { analyzeRepo } from "../src/pipeline/analyzeRepo.js";
 import { profileRepo } from "../src/collect/loc.js";
@@ -29,12 +30,28 @@ describe("filterChangedSourcePaths", () => {
 });
 
 describe("isAnalyzableSourcePath", () => {
-  it("accepts ts/tsx and rejects ignored dirs", () => {
+  it("accepts JS and TS source and rejects ignored, minified, config, and dot paths", () => {
     expect(isAnalyzableSourcePath("src/foo.ts")).toBe(true);
     expect(isAnalyzableSourcePath("a.tsx")).toBe(true);
-    expect(isAnalyzableSourcePath("src/foo.js")).toBe(false);
+    expect(isAnalyzableSourcePath("src/foo.js")).toBe(true);
+    expect(isAnalyzableSourcePath("src/Card.jsx")).toBe(true);
+    expect(isAnalyzableSourcePath("src/mod.mjs")).toBe(true);
+    expect(isAnalyzableSourcePath("src/mod.cjs")).toBe(true);
     expect(isAnalyzableSourcePath("dist/out.ts")).toBe(false);
     expect(isAnalyzableSourcePath("node_modules/x.ts")).toBe(false);
+    expect(isAnalyzableSourcePath("static/app.min.js")).toBe(false);
+    expect(isAnalyzableSourcePath("lib/app.min.cjs")).toBe(false);
+    expect(isAnalyzableSourcePath("vendor/lib.js")).toBe(false);
+    expect(isAnalyzableSourcePath("jest.config.js")).toBe(false);
+    expect(isAnalyzableSourcePath(".storybook/main.js")).toBe(false);
+    expect(isAnalyzableSourcePath("/etc/app.js")).toBe(false);
+    expect(isAnalyzableSourcePath("C:/Windows/app.js")).toBe(false);
+    expect(isAnalyzableSourcePath("./src/foo.js")).toBe(true);
+  });
+
+  it("does not discover an absolute path outside the repo", async () => {
+    const files = await discoverSourceFiles(FIXTURE_PATH, ["/etc/hosts.js"]);
+    expect(files).toEqual([]);
   });
 });
 
