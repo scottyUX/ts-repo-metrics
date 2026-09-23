@@ -99,7 +99,7 @@ export const FUNCTION_NODE_TYPES = new Set([
   "generator_function_declaration",
   "method_definition",
   "arrow_function",
-  "function",
+  "function_expression",
   "generator_function",
 ]);
 

@@ -48,7 +48,7 @@ function isUnderConditionalHookViolation(node: SyntaxNode): boolean {
     if (
       p.type === "arrow_function" ||
       p.type === "function_declaration" ||
-      p.type === "function"
+      p.type === "function_expression"
     ) {
       return false;
     }
@@ -80,7 +80,7 @@ function analyzeUseEffect(node: SyntaxNode): {
 
   if (
     first.type === "arrow_function" ||
-    first.type === "function"
+    first.type === "function_expression"
   ) {
     const body = first.childForFieldName("body");
     if (body?.type === "statement_block") {
@@ -98,17 +98,17 @@ function analyzeUseEffect(node: SyntaxNode): {
     return { asyncEffect, badDeps, nonPrimitiveDep };
   }
 
-  if (second.type !== "array_expression" && second.type !== "parenthesized_expression") {
+  if (second.type !== "array" && second.type !== "parenthesized_expression") {
     badDeps++;
   }
 
-  if (second.type === "array_expression") {
+  if (second.type === "array") {
     for (let i = 0; i < second.namedChildCount; i++) {
       const el = second.namedChild(i);
       if (!el) continue;
       if (
-        el.type === "object_expression" ||
-        el.type === "array_expression" ||
+        el.type === "object" ||
+        el.type === "array" ||
         el.type === "call_expression"
       ) {
         nonPrimitiveDep++;

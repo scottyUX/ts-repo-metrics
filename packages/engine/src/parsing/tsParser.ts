@@ -15,5 +15,7 @@ export type TsFlavor = "ts" | "tsx";
 export function parseTypeScript(code: string, flavor: TsFlavor) {
   const parser = new Parser();
   parser.setLanguage(flavor === "tsx" ? tsLang.tsx : tsLang.typescript);
-  return parser.parse(code);
+  // node-tree-sitter's default buffer is 32 KiB; a longer string throws
+  // "Invalid argument". The buffer must be larger than the string length.
+  return parser.parse(code, undefined, { bufferSize: code.length + 1 });
 }
