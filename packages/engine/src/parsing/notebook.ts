@@ -8,6 +8,7 @@
  */
 
 import { readFile } from "node:fs/promises";
+import path from "node:path";
 
 export interface NotebookSource {
   code: string;
@@ -71,14 +72,22 @@ export function isNotebookPath(filePath: string): boolean {
 
 /**
  * Source text as the analyzers see it: code cells for notebooks, the raw file otherwise.
+ * `filePath` must resolve inside `repoPath`; the prefix check is inline because
+ * CodeQL's path-injection query does not follow a helper.
  *
- * @throws On read errors or a malformed notebook.
+ * @throws On read errors, a path outside the repo, or a malformed notebook.
  */
-export async function readAnalyzableSource(filePath: string): Promise<{
+export async function readAnalyzableSource(
+  repoPath: string,
+  filePath: string,
+): Promise<{
   code: string;
   cellStartLines?: number[];
 }> {
-  const raw = await readFile(filePath, "utf8");
+  const root = path.resolve(repoPath) + path.sep;
+  const target = path.resolve(root, path.relative(root, filePath));
+  if (!target.startsWith(root)) throw new Error("path is outside the repository");
+  const raw = await readFile(target, "utf8");
   if (!isNotebookPath(filePath)) return { code: raw };
   return extractNotebookSource(raw);
 }

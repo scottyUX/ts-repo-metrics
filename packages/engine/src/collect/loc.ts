@@ -48,12 +48,12 @@ export async function profileRepo(
     let lines: number;
     if (isNotebookPath(filePath)) {
       try {
-        lines = countLines((await readAnalyzableSource(filePath)).code);
+        lines = countLines((await readAnalyzableSource(repoPath, filePath)).code);
       } catch {
         lines = 0;
       }
     } else {
-      lines = countLines((await readAnalyzableSource(filePath)).code);
+      lines = countLines((await readAnalyzableSource(repoPath, filePath)).code);
     }
     const isTest = isTestFilePath(filePath);
     const ext = path.extname(filePath);

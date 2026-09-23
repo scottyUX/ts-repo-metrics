@@ -239,7 +239,7 @@ export async function analyzeRepo(
     let code: string;
     let cellStartLines: number[] | undefined;
     try {
-      ({ code, cellStartLines } = await readAnalyzableSource(filePath));
+      ({ code, cellStartLines } = await readAnalyzableSource(repoPath, filePath));
     } catch {
       const why = isNotebookPath(filePath) ? "not a readable notebook" : "could not read file";
       console.error(`Skipping ${path.relative(repoPath, filePath)}: ${why}`);

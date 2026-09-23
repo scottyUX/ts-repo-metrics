@@ -27,10 +27,13 @@ const SKIPPED_DIRS = new Set(["node_modules", "dist", "build", "out", "coverage"
 
 /** Merged dependencies from every package.json found, or null when there is none. */
 async function readAllDependencies(repoPath: string): Promise<Record<string, string> | null> {
-  const root = path.resolve(repoPath) + path.sep;
+  const base = path.resolve(repoPath);
+  const root = base + path.sep;
   const dirs = [""];
   try {
-    for (const entry of await readdir(root, { withFileTypes: true })) {
+    const listing = path.resolve(base, ".");
+    if (!listing.startsWith(base)) return null;
+    for (const entry of await readdir(listing, { withFileTypes: true })) {
       if (!entry.isDirectory()) continue;
       if (entry.name.startsWith(".") || SKIPPED_DIRS.has(entry.name)) continue;
       if (entry.name.includes("/") || entry.name.includes("\\") || entry.name.includes("..")) continue;

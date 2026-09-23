@@ -70,10 +70,13 @@ function declaredPackages(text: string): Set<string> {
 }
 
 async function readDependencyPackages(repoPath: string): Promise<Set<string>> {
-  const root = path.resolve(repoPath) + path.sep;
+  const base = path.resolve(repoPath);
+  const root = base + path.sep;
   const dirs = [""];
   try {
-    for (const entry of await readdir(root, { withFileTypes: true })) {
+    const listing = path.resolve(base, ".");
+    if (!listing.startsWith(base)) return new Set();
+    for (const entry of await readdir(listing, { withFileTypes: true })) {
       if (!entry.isDirectory()) continue;
       if (entry.name.startsWith(".") || SKIPPED_DIRS.has(entry.name)) continue;
       if (entry.name.includes("/") || entry.name.includes("\\") || entry.name.includes("..")) continue;
