@@ -38,6 +38,7 @@ interface TestingMetricsTabProps {
   onScopeIdChange: (next: CommitHabitsScopeId) => void;
   /** Switch parent results tabs to Code Quality (structural metrics). */
   onOpenCodeQualityTab?: () => void;
+  prOnly?: boolean;
 }
 
 function formatNumber(n: number): string {
@@ -50,7 +51,7 @@ function capitalizeWord(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
-export function TestingMetricsTab({ report, scopeId, onScopeIdChange, onOpenCodeQualityTab }: TestingMetricsTabProps) {
+export function TestingMetricsTab({ report, scopeId, onScopeIdChange, onOpenCodeQualityTab, prOnly = false }: TestingMetricsTabProps) {
   const coachExplain = useCoachExplain();
 
   const contributors = useMemo(() => report.contributors ?? [], [report.contributors]);
@@ -154,7 +155,7 @@ export function TestingMetricsTab({ report, scopeId, onScopeIdChange, onOpenCode
 
   return (
     <div className="space-y-8">
-      {contributors.length > 0 ? (
+      {!prOnly && contributors.length > 0 ? (
         <div className="flex flex-wrap items-end gap-3">
           <div className="flex flex-col gap-1">
             <label htmlFor="testing-scope" className="text-sm font-medium text-foreground">
@@ -183,10 +184,10 @@ export function TestingMetricsTab({ report, scopeId, onScopeIdChange, onOpenCode
         aria-label="How Testing tab metrics are scoped"
       >
         <span className="font-semibold text-foreground">Data scope — </span>
-        <span className="text-foreground/90">
+        {!prOnly ? <span className="text-foreground/90">
           <strong>Per author</strong> (dropdown): test/source churn, unique paths touched, % commits touching tests,
           refactor ratio when git numstat is available.
-        </span>{" "}
+        </span> : null}{" "}
         <span className="text-foreground/90">
           <strong>{isPrScopedReport(report) ? "This pull request" : "Whole repository"}</strong>: test coverage proxy, risk quadrant, complexity aggregates.
         </span>{" "}
