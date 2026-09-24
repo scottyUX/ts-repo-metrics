@@ -1,6 +1,10 @@
 # CSE 115A: grading agent and SWE-bench task capture
 
-Status: plan, 2026-09-23. Builds on the student app in `docs/CSE115A_APP.md`.
+Status: steps 1–5 built, 2026-09-24; step 6 (Docker validation) is next.
+Builds on the student app in `docs/CSE115A_APP.md`, which documents setup and
+behavior as built. The schema is split across migrations `20260925` (submit
+once, queue), `20260926` (grades), `20260927` (benchmark, consent), and
+`20260928` (staff roles, release, regrade).
 
 ## Decisions
 
@@ -147,4 +151,5 @@ The existing `upsert` must go; it lets a student resubmit.
 
 - **Private repos.** `base_commit` is only reproducible if the benchmark user can clone the repo. For export outside the course, we need to either mirror opted-in repos to an org we control or ship a repo snapshot with each row.
 - **Hecate discussions.** The earlier plan referred to Hecate discussions that could not be found. Link them here if they carry extra requirements.
-- **Grade scale.** Each task is 10 points and a sprint score is the average of the two best tasks (from the current UI). Confirm this is the scale the grader should produce.
+- **Grade scale.** Confirmed: each task is 10 points, partial credit is half a criterion's points, and a sprint score is the average of the two best tasks.
+- **Anonymity.** Export strips emails, logins, and per-author activity from `repo_metrics`, but the spec (with its `assignee`), comments, and repo name still identify students. Decide whether to scrub these before any public release.
