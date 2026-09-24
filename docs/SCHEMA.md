@@ -147,7 +147,7 @@ Returns `null` for non-git repos or shallow clones. Git CLI is required for Anal
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `totalCommits` | `number` | Total commits in history |
+| `totalCommits` | `number` | Distinct commits across all branches and tags. A change that appears on several refs under different hashes (a rebased branch beside its old copy, "Rebase and merge" beside an undeleted feature branch, a cherry-pick) counts once: commits are keyed by author email, author time, and subject. The same rule applies to every git-derived metric, including `gitMetricsV2` and `contributors` |
 | `medianCommitSize` | `number` | Median lines changed per commit (0 in API mode) |
 | `avgLinesPerCommit` | `number` | Mean lines changed per commit (0 in API mode) |
 | `largeCommitRatio` | `number` | % of commits > 500 lines changed (0 in API mode) |

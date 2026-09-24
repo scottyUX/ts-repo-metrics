@@ -8,6 +8,7 @@
 
 import { simpleGit } from "simple-git";
 import { median, percentile } from "../utils/math.js";
+import { commitIdentityKey, uniqueCommits } from "../utils/commitIdentity.js";
 import { isTestFilePath } from "../utils/constants.js";
 import type {
   GitMetricsV2,
@@ -216,7 +217,8 @@ async function parseLogWithNumstat(
     });
   }
 
-  return commits;
+  // `--all` can list one change on several refs under different hashes.
+  return uniqueCommits(commits, (c) => commitIdentityKey(c.authorEmail, c.timestamp, c.subject));
 }
 
 function computeCommitStats(commits: ParsedCommit[]): CommitStats {

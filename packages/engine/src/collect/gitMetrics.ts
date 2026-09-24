@@ -10,6 +10,7 @@
 
 import { simpleGit } from "simple-git";
 import { median } from "../utils/math.js";
+import { commitIdentityKey, uniqueCommits } from "../utils/commitIdentity.js";
 import type { GitMetrics } from "../types/report.js";
 
 export type { GitMetrics } from "../types/report.js";
@@ -37,11 +38,16 @@ export async function extractGitMetrics(
       ? ["--numstat", revRange]
       : ["--numstat", "--all"];
     const log = await git.log(logArgs);
-    if (!log.all.length) return null;
+    // `--all` can list one change on several refs under different hashes.
+    // simple-git's `date` is the author date.
+    const all = uniqueCommits([...log.all], (c) =>
+      commitIdentityKey(c.author_email, Math.round(new Date(c.date).getTime() / 1000), c.message),
+    );
+    if (!all.length) return null;
 
     const commitSizes: number[] = [];
 
-    for (const commit of log.all) {
+    for (const commit of all) {
       const diff = (commit as unknown as { diff?: { files?: Array<{ insertions: number; deletions: number }> } }).diff;
       if (!diff?.files) continue;
 
@@ -52,7 +58,7 @@ export async function extractGitMetrics(
       commitSizes.push(linesChanged);
     }
 
-    const totalCommits = log.all.length;
+    const totalCommits = all.length;
 
     if (commitSizes.length === 0) {
       return {
@@ -73,9 +79,9 @@ export async function extractGitMetrics(
     // Anchor the window at the newest commit, not the time of analysis, so a
     // repo analyzed after its last push (a finished course project) still
     // reports the cadence it had. The commit heatmap uses the same anchor.
-    const latest = Math.max(...log.all.map((c) => new Date(c.date).getTime()));
+    const latest = Math.max(...all.map((c) => new Date(c.date).getTime()));
     const windowStart = latest - WEEKS_WINDOW * 7 * 24 * 60 * 60 * 1000;
-    const recentCommits = log.all.filter((c) => {
+    const recentCommits = all.filter((c) => {
       const d = new Date(c.date).getTime();
       return d >= windowStart;
     }).length;
