@@ -15,7 +15,7 @@ export function supabaseJobStore(db: SupabaseClient): JobStore {
     },
     async loadSubmission(id) {
       const { data, error } = await db.from("cse_assignment_submissions")
-        .select("id,status,snapshot,superseded_at").eq("id", id).maybeSingle();
+        .select("id,course_id,user_id,assignment_number,status,snapshot,superseded_at").eq("id", id).maybeSingle();
       check(error, "load the submission");
       return data as Submission | null;
     },
@@ -50,6 +50,30 @@ export function supabaseJobStore(db: SupabaseClient): JobStore {
           : { status: "failed", locked_at: null, last_error: outcome.error, updated_at: now };
       const { error } = await db.from("cse_grading_jobs").update(patch).eq("id", id);
       check(error, "finish the job");
+    },
+    async loadRepoMetrics(analysisResultId) {
+      const { data, error } = await db.from("analyses").select("report_json").eq("result_id", analysisResultId).maybeSingle();
+      check(error, "load the Repo Metrics report");
+      return data?.report_json ?? null;
+    },
+    async saveBenchmark(submission, rows) {
+      if (rows.length === 0) return;
+      const { error } = await db.from("cse_benchmark_tasks")
+        .upsert(rows.map((row) => row.instance), { onConflict: "instance_id" });
+      check(error, "save benchmark tasks");
+      const { error: sourceError } = await db.from("cse_benchmark_task_sources").upsert(
+        rows.map((row) => ({
+          instance_id: row.instance.instance_id,
+          course_id: submission.course_id,
+          user_id: submission.user_id,
+          assignment_submission_id: submission.id,
+          task_slot: row.slot,
+          flags: row.flags,
+          updated_at: new Date().toISOString(),
+        })),
+        { onConflict: "assignment_submission_id,task_slot" },
+      );
+      check(sourceError, "save benchmark sources");
     },
   };
 }

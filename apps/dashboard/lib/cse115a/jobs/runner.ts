@@ -1,13 +1,23 @@
 import type { AssignmentSubmissionStatus } from "@/lib/cse115a/server";
 import type { SubmissionSnapshot } from "@/lib/cse115a/submissionSnapshot";
 import type { TaskGrade } from "@/lib/cse115a/grader/gradeTask";
+import { buildInstance, type BenchmarkInstance, type BuildFlag } from "@/lib/cse115a/benchmark/buildInstance";
 
 // Claims queued jobs and runs them. Storage is behind JobStore so the retry
 // rules can be tested without a database.
 
 export type JobKind = "grade" | "benchmark";
 export type Job = { id: string; assignment_submission_id: string; kind: JobKind; attempts: number };
-export type Submission = { id: string; status: AssignmentSubmissionStatus; snapshot: SubmissionSnapshot; superseded_at: string | null };
+export type Submission = {
+  id: string;
+  course_id: string;
+  user_id: string;
+  assignment_number: number;
+  status: AssignmentSubmissionStatus;
+  snapshot: SubmissionSnapshot;
+  superseded_at: string | null;
+};
+export type BenchmarkSave = { slot: number; instance: BenchmarkInstance; flags: BuildFlag[] };
 
 export const MAX_ATTEMPTS = 3;
 const BASE_BACKOFF_MS = 60_000;
@@ -31,13 +41,17 @@ export interface JobStore {
   /** Writes the agent's fields only; instructor edits and release are kept. */
   saveGrades(submissionId: string, grades: TaskGrade[]): Promise<void>;
   finishJob(id: string, outcome: JobOutcome): Promise<void>;
+  /** The Repo Metrics report saved for an analysis, or null. */
+  loadRepoMetrics(analysisResultId: string): Promise<unknown>;
+  /** Upserts instances and their source rows; a source's validation status is kept. */
+  saveBenchmark(submission: Submission, rows: BenchmarkSave[]): Promise<void>;
 }
 
 export type JobHandlers = {
   grade(snapshot: SubmissionSnapshot): Promise<TaskGrade[]>;
 };
 
-export const RUNNABLE_KINDS: JobKind[] = ["grade"];
+export const RUNNABLE_KINDS: JobKind[] = ["grade", "benchmark"];
 
 export type RunResult = { jobId: string; kind: JobKind; outcome: JobOutcome } | null;
 
@@ -55,6 +69,17 @@ async function runGrade(store: JobStore, handlers: JobHandlers, job: Job): Promi
   await store.setSubmissionStatus(submission.id, "graded");
 }
 
+async function runBenchmark(store: JobStore, job: Job): Promise<void> {
+  const submission = await store.loadSubmission(job.assignment_submission_id);
+  if (!submission) throw new Error("The submission no longer exists.");
+  const rows = await Promise.all(submission.snapshot.tasks.map(async (task) => ({
+    slot: task.slot,
+    ...buildInstance(task, submission.assignment_number, await store.loadRepoMetrics(task.analysisResultId)),
+  })));
+  // Superseded attempts are still captured: the work was real, and the export filters by consent.
+  await store.saveBenchmark(submission, rows);
+}
+
 /** Claims and runs one job. Returns null when nothing is runnable. */
 export async function runNextJob(store: JobStore, handlers: JobHandlers, now: () => Date = () => new Date()): Promise<RunResult> {
   const job = await store.claim(RUNNABLE_KINDS);
@@ -66,6 +91,7 @@ export async function runNextJob(store: JobStore, handlers: JobHandlers, now: ()
   } else {
     try {
       if (job.kind === "grade") await runGrade(store, handlers, job);
+      else if (job.kind === "benchmark") await runBenchmark(store, job);
       else throw new Error(`No handler for ${job.kind} jobs.`);
       outcome = { status: "succeeded" };
     } catch (error) {

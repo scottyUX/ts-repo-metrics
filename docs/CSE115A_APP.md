@@ -19,7 +19,8 @@ service keeps its normal home page.
 
 - Apply `supabase/migrations/20260924000000_cse115a_course_submissions.sql`, then
   `20260925000000_cse115a_final_submissions.sql` (submit-once, snapshots, job queue),
-  then `20260926000000_cse115a_grading.sql` (draft grades, job claim function).
+  then `20260926000000_cse115a_grading.sql` (draft grades, job claim function),
+  then `20260927000000_cse115a_benchmark.sql` (benchmark rows, research consent).
 - Enable Google Auth in the Supabase project and configure its Google OAuth
   client ID and secret. In Google Cloud, add
   `https://walwexxczaibfojinkfi.supabase.co/auth/v1/callback` as an authorized
@@ -80,6 +81,24 @@ Environment on the service that runs the worker:
 | `OPENAI_API_KEY` | Grader calls. |
 | `CSE115A_GRADER_MODEL` | Optional; defaults to `gpt-4o`. |
 | `CSE115A_WORKER_SECRET` | Optional; enables `POST /api/cse115a/internal/jobs/tick` with header `x-cse115a-worker-secret`, which runs queued jobs on demand (`?limit=1..10`). |
+
+## Benchmark capture
+
+Each submission also queues a `benchmark` job, which turns both tasks into
+SWE-bench instances in `cse_benchmark_tasks` (the SWE-bench columns plus
+`repo_metrics`, the task's Repo Metrics report). Every task is captured,
+including superseded attempts; `cse_benchmark_task_sources` records who
+submitted it, a `validation_status`, and flags such as
+`base_commit_from_pr_base` or `no_test_patch`.
+
+- `patch` and `test_patch` split the base-tag-to-merge diff by test path
+  (`lib/cse115a/diff.ts`).
+- `FAIL_TO_PASS` holds test IDs added in `test_patch`, found statically
+  (`file::describe > it` for Jest/Vitest, `file::Class::test` for pytest).
+  They are unverified. `PASS_TO_PASS`, `image`, `eval_script`, and
+  `log_parser` stay empty until a Docker validation pass.
+- Export (`lib/cse115a/benchmark/exportJsonl.ts`) includes an instance only
+  when a student who submitted it has consented and no source is rejected.
 
 ## Before enabling student access
 

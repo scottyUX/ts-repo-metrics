@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { drainJobs, MAX_ATTEMPTS, nextJobState, runNextJob, type Job, type JobOutcome, type JobStore, type Submission } from "@/lib/cse115a/jobs/runner";
+import { drainJobs, MAX_ATTEMPTS, nextJobState, runNextJob, type BenchmarkSave, type Job, type JobOutcome, type JobStore, type Submission } from "@/lib/cse115a/jobs/runner";
 import type { TaskGrade } from "@/lib/cse115a/grader/gradeTask";
 import type { SubmissionSnapshot } from "@/lib/cse115a/submissionSnapshot";
 
@@ -8,10 +8,11 @@ const NOW = new Date("2026-10-01T00:00:00Z");
 function memoryStore(jobs: Job[], submission: Partial<Submission> = {}) {
   const state = {
     jobs: jobs.map((job) => ({ ...job, status: "queued" as string })),
-    submission: { id: "sub-1", status: "submitted", snapshot: { version: 1, capturedAt: "", tasks: [] }, superseded_at: null, ...submission } as Submission,
+    submission: { id: "sub-1", course_id: "c", user_id: "u", assignment_number: 1, status: "submitted", snapshot: { version: 1, capturedAt: "", tasks: [] }, superseded_at: null, ...submission } as Submission,
     grades: [] as TaskGrade[],
     finished: [] as Array<{ id: string; outcome: JobOutcome }>,
     statuses: [] as string[],
+    benchmark: [] as BenchmarkSave[],
   };
   const store: JobStore = {
     async claim(kinds) {
@@ -33,6 +34,8 @@ function memoryStore(jobs: Job[], submission: Partial<Submission> = {}) {
       const job = state.jobs.find((item) => item.id === id)!;
       job.status = outcome.status === "queued" ? "retry" : outcome.status;
     },
+    async loadRepoMetrics(id) { return { resultId: id }; },
+    async saveBenchmark(_submission, rows) { state.benchmark = rows; },
   };
   return { store, state };
 }
@@ -62,8 +65,9 @@ describe("runNextJob", () => {
     expect(seen).toBe(state.submission.snapshot);
     expect(state.grades).toEqual([grade]);
     expect(state.statuses).toEqual(["grading", "graded"]);
-    // Benchmark jobs wait until a handler exists.
-    expect(await runNextJob(store, { grade: async () => [grade] })).toBeNull();
+    const bench = await runNextJob(store, { grade: async () => [grade] });
+    expect(bench).toEqual({ jobId: "bench", kind: "benchmark", outcome: { status: "succeeded" } });
+    expect(state.statuses).toEqual(["grading", "graded"]);
   });
 
   it("requeues a failed attempt and gives up after the last one", async () => {
