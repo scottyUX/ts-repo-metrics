@@ -1,4 +1,4 @@
-import { createHash, randomBytes } from "node:crypto";
+import { createHash, randomInt } from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
 
 const [slug, expiresAt] = process.argv.slice(2);
@@ -21,8 +21,7 @@ if (courseError || !course) {
   process.exit(1);
 }
 const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-const bytes = randomBytes(16);
-const code = [...bytes].map((byte) => alphabet[byte % alphabet.length]).join("");
+const code = Array.from({ length: 16 }, () => alphabet[randomInt(alphabet.length)]).join("");
 const codeHash = createHash("sha256").update(code).digest("hex");
 const { error } = await db.from("cse_course_codes").insert({
   course_id: course.id,
