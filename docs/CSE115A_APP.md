@@ -99,7 +99,10 @@ submitted it, a `validation_status`, and flags such as
   They are unverified. `PASS_TO_PASS`, `image`, `eval_script`, and
   `log_parser` stay empty until a Docker validation pass.
 - Export (`lib/cse115a/benchmark/exportJsonl.ts`) includes an instance only
-  when a student who submitted it has consented and no source is rejected.
+  when a student who submitted it has consented and no source is rejected. It
+  removes per-author activity, logins, and email addresses from
+  `repo_metrics`. The spec, diff, and comments are exported as written, so
+  rows are not anonymous; the consent text says so.
 
 ## Instructor tools
 
@@ -125,6 +128,20 @@ SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... \
   and JSONL download.
 
 TAs can do everything except unlock and manage staff.
+
+## Student grade view
+
+While an assignment is submitted but not released, the dashboard shows
+**Submitted → Grading → Awaiting instructor review → Grade released** and
+polls `/api/cse115a/me` every 20 seconds. After release it shows each task's
+score and the sprint score, and the task's Results tab shows points, the
+grader's rationale, and instructor notes per criterion. `/me` returns only
+released grades of the current attempt.
+
+A research consent card appears until the student answers (`PUT
+/api/cse115a/consent`), and a **Change** link stays below the assignments.
+Preview states: `/cse115a/preview?state=draft|ready|submitted|grading|released`
+and `/cse115a/preview/results?state=released`.
 
 ## Before enabling student access
 

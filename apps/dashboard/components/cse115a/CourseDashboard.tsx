@@ -7,6 +7,8 @@ import { createUserSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { buildOAuthCallbackUrl, getOAuthRedirectOrigin, stashOAuthNextPath, stashOAuthProvider } from "@/lib/oauthRedirectOrigin";
 import { parsePullRequestUrl, type TaskSpec } from "@/lib/cse115a/taskSpec";
 import { runAnalyzeFromUrl } from "@/lib/runAnalyze";
+import { sprintScore, type StudentTaskGrade } from "@/lib/cse115a/gradeReview";
+import { CONSENT_TEXT } from "@/lib/cse115a/consent";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 type Course = { id: string; slug: string; title: string; term: string; assignment_count: number };
@@ -25,8 +27,12 @@ type Submission = {
 };
 type AssignmentSubmissionStatus = "submitted" | "grading" | "graded" | "released" | "grading_failed";
 type AssignmentSubmission = { id: string; course_id: string; assignment_number: number; attempt: number; status: AssignmentSubmissionStatus; submitted_at: string };
-export type PreviewState = "draft" | "ready" | "submitted";
-type Me = { email: string; courses: Course[]; submissions: Submission[]; assignmentSubmissions: AssignmentSubmission[] };
+export type PreviewState = "draft" | "ready" | "submitted" | "grading" | "released";
+type ReleasedGrade = StudentTaskGrade & { assignmentSubmissionId: string };
+type Consent = { course_id: string; consented: boolean; consent_version: string; updated_at: string };
+type Me = { email: string; courses: Course[]; submissions: Submission[]; assignmentSubmissions: AssignmentSubmission[]; grades: ReleasedGrade[]; consent: Consent[] };
+
+const POLL_MS = 20_000;
 
 const previewCourse: Course = { id: "preview-course", slug: "CSE115A-Fall26", title: "CSE 115A", term: "Fall 2026", assignment_count: 5 };
 const previewTask: Submission = {
@@ -39,7 +45,8 @@ const previewTask: Submission = {
 };
 
 function previewMe(state: PreviewState): Me {
-  if (state === "draft") return { email: "student@ucsc.edu", courses: [previewCourse], submissions: [previewTask], assignmentSubmissions: [] };
+  if (state === "draft") return { email: "student@ucsc.edu", courses: [previewCourse], submissions: [previewTask], assignmentSubmissions: [], grades: [], consent: [] };
+  const status: AssignmentSubmissionStatus = state === "released" ? "released" : state === "grading" ? "grading" : "submitted";
   return {
     email: "student@ucsc.edu",
     courses: [previewCourse],
@@ -49,8 +56,33 @@ function previewMe(state: PreviewState): Me {
       task_spec_json: { title: "Example task: validate the signup form", description: "Reject empty and malformed emails before the request is sent." } as TaskSpec,
       validation_json: { prMerged: true, specCommittedFirst: true, baseTagPushed: true },
     }],
-    assignmentSubmissions: state === "ready" ? [] : [{ id: "preview-submission", course_id: previewCourse.id, assignment_number: 1, attempt: 1, status: "submitted", submitted_at: new Date().toISOString() }],
+    assignmentSubmissions: state === "ready" ? [] : [{ id: "preview-submission", course_id: previewCourse.id, assignment_number: 1, attempt: 1, status, submitted_at: new Date().toISOString() }],
+    grades: state === "released" ? [8.5, 7].map((total, index) => ({
+      assignmentSubmissionId: "preview-submission", slot: index + 1, total, criteria: [], notes: "", releasedAt: new Date().toISOString(),
+    })) : [],
+    consent: [{ course_id: previewCourse.id, consented: true, consent_version: "preview", updated_at: new Date().toISOString() }],
   };
+}
+
+const STEPS = ["Submitted", "Grading", "Awaiting instructor review", "Grade released"] as const;
+const STEP_INDEX: Record<AssignmentSubmissionStatus, number> = { submitted: 0, grading: 1, graded: 2, grading_failed: 2, released: 3 };
+
+function StatusSteps({ status }: { status: AssignmentSubmissionStatus }) {
+  const current = STEP_INDEX[status];
+  return (
+    <ol className="mt-3 flex flex-wrap gap-2 text-xs font-medium" aria-label="Grading progress">
+      {STEPS.map((step, index) => (
+        <li key={step} aria-current={index === current ? "step" : undefined}
+          className={`rounded-full border px-3 py-1 ${index < current ? "border-primary/40 text-primary" : index === current ? "border-primary bg-primary text-primary-foreground" : "border-border text-muted-foreground"}`}>
+          {step}
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+function formatScore(value: number): string {
+  return String(Number(value.toFixed(2)));
 }
 
 const SUBMISSION_STATUS: Record<AssignmentSubmissionStatus, string> = {
@@ -91,10 +123,12 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
   const [connectingGithub, setConnectingGithub] = useState(false);
   const [submittingAssignment, setSubmittingAssignment] = useState(false);
   const [confirmingSubmit, setConfirmingSubmit] = useState(false);
+  const [savingConsent, setSavingConsent] = useState(false);
+  const [editingConsent, setEditingConsent] = useState(false);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async ({ quiet = false }: { quiet?: boolean } = {}) => {
     if (preview) return;
-    setLoading(true);
+    if (!quiet) setLoading(true);
     try {
       const response = await fetch("/api/cse115a/me", { credentials: "include" });
       if (response.status === 401) { router.replace("/cse115a/signin"); return; }
@@ -112,6 +146,13 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
   }, [router, preview]);
 
   useEffect(() => { void load(); }, [load]);
+  // Grades appear without a reload: poll while any submitted assignment is not yet released.
+  const waitingForGrade = Boolean(me?.assignmentSubmissions.some((item) => item.status !== "released"));
+  useEffect(() => {
+    if (preview || !waitingForGrade) return;
+    const timer = setInterval(() => { if (document.visibilityState === "visible") void load({ quiet: true }); }, POLL_MS);
+    return () => clearInterval(timer);
+  }, [preview, waitingForGrade, load]);
   useEffect(() => {
     if (preview || !me?.courses.length) return;
     void fetch("/api/cse115a/github-status", { credentials: "include" })
@@ -126,6 +167,30 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
   const assignmentSubmission = me?.assignmentSubmissions.find((item) =>
     item.course_id === course?.id && item.assignment_number === assignmentNumber);
   const locked = Boolean(assignmentSubmission);
+  const releasedGrades = assignmentSubmission?.status === "released"
+    ? (me?.grades ?? []).filter((grade) => grade.assignmentSubmissionId === assignmentSubmission.id) : [];
+  const consent = me?.consent.find((item) => item.course_id === course?.id) ?? null;
+
+  async function saveConsent(consented: boolean) {
+    if (!course) return;
+    if (preview) { setEditingConsent(false); return; }
+    setSavingConsent(true);
+    setError(null);
+    try {
+      const response = await fetch("/api/cse115a/consent", {
+        method: "PUT", headers: { "Content-Type": "application/json" }, credentials: "include",
+        body: JSON.stringify({ courseSlug: course.slug, consented }),
+      });
+      const body = await jsonResponse<{ consent: Consent }>(response);
+      if (!response.ok) throw new Error(body.error ?? "Could not save your choice.");
+      setEditingConsent(false);
+      await load({ quiet: true });
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Could not save your choice.");
+    } finally {
+      setSavingConsent(false);
+    }
+  }
 
   async function joinCourse(event: React.FormEvent) {
     event.preventDefault();
@@ -264,6 +329,18 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
             ) : null}
           </div>
 
+          {course && (!consent || editingConsent) ? (
+            <section className="rounded-2xl border border-border bg-card p-5" aria-labelledby="consent-heading">
+              <h2 id="consent-heading" className="font-semibold">Research use of your tasks</h2>
+              <p className="mt-1 max-w-3xl text-sm text-muted-foreground">{CONSENT_TEXT}</p>
+              <div className="mt-4 flex flex-wrap gap-3">
+                <button type="button" disabled={savingConsent} onClick={() => void saveConsent(true)} className={`rounded-lg px-4 py-2 text-sm font-semibold disabled:opacity-50 ${consent?.consented ? "bg-primary text-primary-foreground" : "border border-input"}`}>Yes, include my tasks</button>
+                <button type="button" disabled={savingConsent} onClick={() => void saveConsent(false)} className={`rounded-lg px-4 py-2 text-sm font-semibold disabled:opacity-50 ${consent && !consent.consented ? "bg-primary text-primary-foreground" : "border border-input"}`}>No, keep them out</button>
+                {editingConsent ? <button type="button" onClick={() => setEditingConsent(false)} className="px-2 text-sm text-muted-foreground underline">Cancel</button> : null}
+              </div>
+            </section>
+          ) : null}
+
           {githubConnected === false ? (
             <section className="rounded-2xl border border-border bg-muted p-5">
               <h2 className="font-semibold">Connect GitHub to submit tasks</h2>
@@ -302,6 +379,7 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
                             <p className="line-clamp-3 text-muted-foreground">{item.task_spec_json.description}</p>
                             <a href={item.pr_url} target="_blank" rel="noopener noreferrer" className="block text-primary underline">Merged PR #{item.pr_url.split("/").pop()}</a>
                             <p className={item.analysis_result_id ? "text-primary" : "text-muted-foreground"}>{item.analysis_result_id ? "Submitted and analyzed" : "Task imported · analysis pending"}</p>
+                            {releasedGrades.find((grade) => grade.slot === slot) ? <p className="text-base font-semibold text-foreground">Score: <span className="tabular-nums">{formatScore(releasedGrades.find((grade) => grade.slot === slot)!.total)} / 10</span></p> : null}
                             {item.analysis_result_id ? <Link href={preview ? "/cse115a/preview/results" : `/cse115a/assignments/${assignmentNumber}/tasks/${slot}/metrics`} className="inline-flex rounded-lg border border-primary px-4 py-2 font-semibold text-primary hover:bg-accent">View results</Link> : null}
                             {Object.entries(item.validation_json).filter(([, ok]) => !ok).length ? (
                               <div className="rounded-lg bg-muted p-3 text-foreground">
@@ -332,9 +410,15 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
                         ? `Submitted ${new Date(assignmentSubmission.submitted_at).toLocaleString()} · ${SUBMISSION_STATUS[assignmentSubmission.status]}`
                         : `${submissions.filter((item) => item.analysis_result_id).length} of 2 tasks analyzed. You can replace task PRs until you submit.`}
                     </p>
+                    {assignmentSubmission ? <StatusSteps status={assignmentSubmission.status} /> : null}
                   </div>
                   {assignmentSubmission ? (
-                    <span className="rounded-lg border border-border bg-muted px-4 py-2 text-sm font-medium text-foreground">Submitted</span>
+                    releasedGrades.length ? (
+                      <div className="rounded-lg border border-border bg-muted px-5 py-3 text-right">
+                        <p className="text-xs text-muted-foreground">Sprint score</p>
+                        <p className="text-2xl font-semibold tabular-nums">{formatScore(sprintScore(releasedGrades.map((grade) => grade.total)))} / 10</p>
+                      </div>
+                    ) : <span className="rounded-lg border border-border bg-muted px-4 py-2 text-sm font-medium text-foreground">Submitted</span>
                   ) : (
                     <button type="button" disabled={submittingAssignment || submissions.filter((item) => item.analysis_result_id).length !== 2}
                       onClick={() => setConfirmingSubmit(true)}
@@ -365,6 +449,9 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
                 </Dialog>
               </section>
             </>
+          ) : null}
+          {consent && !editingConsent ? (
+            <p className="text-sm text-muted-foreground">Research use: {consent.consented ? "your tasks may be included" : "your tasks are kept out"}. <button type="button" onClick={() => setEditingConsent(true)} className="text-primary underline">Change</button></p>
           ) : null}
           <p className="text-sm text-muted-foreground">Your course record is saved here. Follow your instructor’s instructions for any Canvas submission.</p>
         </>

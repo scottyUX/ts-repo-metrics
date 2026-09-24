@@ -1,5 +1,6 @@
 import type { TaskSpec } from "@/lib/cse115a/taskSpec";
-import { RUBRIC } from "@/lib/cse115a/rubric";
+import { RUBRIC, TASK_POINTS } from "@/lib/cse115a/rubric";
+import type { StudentTaskGrade } from "@/lib/cse115a/gradeReview";
 
 export type CourseTaskEvidence = {
   taskId: string;
@@ -8,7 +9,14 @@ export type CourseTaskEvidence = {
   spec: TaskSpec;
   validation: Record<string, boolean>;
   commitsEndpoint?: string;
+  /** Where grading stands for this task's assignment; the grade is present only once released. */
+  gradeStatus?: "not_submitted" | "awaiting_review" | "released";
+  grade?: StudentTaskGrade | null;
 };
+
+function points(value: number): string {
+  return String(Number(value.toFixed(2)));
+}
 
 
 const PROCESS_LABELS: Record<string, string> = {
@@ -41,6 +49,12 @@ export function AssignmentResultsTab({ task }: { task: CourseTaskEvidence }) {
   const checks = task.validation;
   const observed = Object.values(checks).filter(Boolean).length;
   const totalChecks = Object.keys(checks).length;
+  const grade = task.gradeStatus === "released" ? task.grade ?? null : null;
+  const statusLine = grade
+    ? `Grade released ${new Date(grade.releasedAt).toLocaleDateString()} · each task is worth ${TASK_POINTS} points`
+    : task.gradeStatus === "awaiting_review"
+      ? `Submitted · awaiting instructor review · each task is worth ${TASK_POINTS} points`
+      : `Rubric review pending · each task is worth ${TASK_POINTS} points`;
   return (
     <div className="space-y-6">
       <div className="rounded-xl border border-border bg-card p-6">
@@ -48,14 +62,17 @@ export function AssignmentResultsTab({ task }: { task: CourseTaskEvidence }) {
         <div className="mt-2 flex flex-wrap items-end justify-between gap-4">
           <div>
             <h2 className="text-2xl font-semibold text-foreground">{task.taskId}</h2>
-            <p className="mt-1 text-sm text-muted-foreground">Rubric review pending · each task is worth 10 points</p>
+            <p className="mt-1 text-sm text-muted-foreground">{statusLine}</p>
           </div>
           <div className="rounded-lg border border-border bg-muted px-5 py-3 text-right">
             <p className="text-xs text-muted-foreground">Awarded points</p>
-            <p className="text-2xl font-semibold tabular-nums text-foreground">— / 10</p>
+            <p className="text-2xl font-semibold tabular-nums text-foreground">{grade ? points(grade.total) : "—"} / {TASK_POINTS}</p>
           </div>
         </div>
-        <p className="mt-4 text-sm text-muted-foreground">The grader reads the task file, tests, merged PR, tags, and Scrum board. Repo Metrics provides evidence; it does not award points automatically.</p>
+        {grade?.notes ? <div className="mt-4 rounded-lg border border-border bg-muted/40 p-4"><p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Instructor notes</p><p className="mt-1 whitespace-pre-wrap text-sm text-foreground">{grade.notes}</p></div> : null}
+        <p className="mt-4 text-sm text-muted-foreground">{grade
+          ? "Points were drafted by the grading agent from your task file, diff, and CI results, then reviewed by your instructor."
+          : "The grader reads the task file, tests, merged PR, tags, and Scrum board. Repo Metrics provides evidence; it does not award points automatically."}</p>
         <div className="mt-4 flex flex-wrap gap-3 text-sm">
           <a href={task.prUrl} target="_blank" rel="noopener noreferrer" className="text-primary underline">Merged PR</a>
           <span className="font-mono text-muted-foreground">{task.taskPath}</span>
@@ -69,7 +86,7 @@ export function AssignmentResultsTab({ task }: { task: CourseTaskEvidence }) {
         </div>
         <div className="rounded-xl border border-border bg-card p-5">
           <p className="text-sm font-semibold text-foreground">Sprint score</p>
-          <p className="mt-1 text-sm text-muted-foreground">Average of the two best task scores. A missing task scores 0. The score appears after grading.</p>
+          <p className="mt-1 text-sm text-muted-foreground">Average of the two best task scores. A missing task scores 0. {grade ? "See the assignment page for your sprint score." : "The score appears after your instructor releases grades."}</p>
         </div>
       </div>
 
@@ -79,19 +96,29 @@ export function AssignmentResultsTab({ task }: { task: CourseTaskEvidence }) {
           <p className="mt-1 text-sm text-muted-foreground">Open a section to see the submitted evidence and how it is graded.</p>
         </div>
         <div className="divide-y divide-border">
-          {RUBRIC.map((row) => (
+          {RUBRIC.map((row) => {
+            const awarded = grade?.criteria.find((item) => item.name === row.name);
+            return (
             <details key={row.name} className="group">
               <summary className="grid cursor-pointer list-none gap-3 px-5 py-4 hover:bg-muted/50 md:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)_5rem] md:items-center [&::-webkit-details-marker]:hidden">
                 <div><p className="font-semibold text-foreground"><span aria-hidden className="mr-2 inline-block text-primary transition-transform group-open:rotate-90">›</span>{row.name}</p><p className="mt-1 text-xs text-muted-foreground">Evidence: {row.evidence}</p></div>
                 <p className="text-sm text-muted-foreground">{row.full}</p>
-                <p className="text-sm font-medium tabular-nums text-foreground md:text-right">— / {row.points}</p>
+                <p className="text-sm font-medium tabular-nums text-foreground md:text-right">{awarded ? points(awarded.awarded) : "—"} / {row.points}</p>
               </summary>
               <div className="space-y-5 border-t border-border bg-muted/20 px-5 py-5">
+                {awarded ? (
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-semibold text-foreground">Feedback</h4>
+                    {awarded.rationale ? <p className="text-sm leading-relaxed text-foreground">{awarded.rationale}</p> : null}
+                    {awarded.note ? <p className="text-sm leading-relaxed text-foreground"><strong>Instructor:</strong> {awarded.note}</p> : null}
+                  </div>
+                ) : null}
                 <div><h4 className="mb-3 text-sm font-semibold text-foreground">Submitted evidence</h4><SubmittedEvidence task={task} section={row.name} /></div>
                 <div className="border-t border-border pt-4"><h4 className="text-sm font-semibold text-foreground">Rubric guidance</h4><ul className="mt-2 space-y-1 text-sm text-muted-foreground"><li><strong className="text-foreground">Full:</strong> {row.full}</li><li><strong className="text-foreground">Partial:</strong> {row.partial}</li><li><strong className="text-foreground">None:</strong> {row.none}</li></ul></div>
               </div>
             </details>
-          ))}
+            );
+          })}
         </div>
       </div>
       <a href="https://github.com/scottyUX/hecate-router/blob/main/docs/cse115a-sprint-task-specifications.md" target="_blank" rel="noopener noreferrer" className="inline-block text-sm text-primary underline">Read the full assignment rubric</a>

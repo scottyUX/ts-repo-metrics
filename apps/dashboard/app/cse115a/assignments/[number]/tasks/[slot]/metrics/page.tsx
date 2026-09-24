@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { ResultsDashboard } from "@/components/results/ResultsDashboard";
-import { getCourseIdentity, getEnrolledCourse } from "@/lib/cse115a/server";
+import { getActiveAssignmentSubmission, getCourseIdentity, getEnrolledCourse } from "@/lib/cse115a/server";
+import { studentGradeView, type TaskGradeRow } from "@/lib/cse115a/gradeReview";
 import { getSupabase } from "@/lib/supabase/server";
 import { parseGitHubUrl } from "@/lib/github/parseGitHubUrl";
 import type { RepoReport } from "@/lib/reportTypes";
@@ -44,6 +45,17 @@ export default async function Cse115aTaskMetricsPage({ params }: Params) {
   if (!analysis || !report || report.source?.scope !== "pr" || report.source.prNumber !== task.pr_number ||
       !repo || `${repo.owner}/${repo.repo}`.toLowerCase() !== task.repo_full_name.toLowerCase()) notFound();
 
+  const submission = await getActiveAssignmentSubmission(task.course_id, identity.userId, assignmentNumber);
+  let grade = null;
+  if (submission?.status === "released") {
+    const { data: gradeRow } = await db.from("cse_task_grades")
+      .select("task_slot,rubric,agent_total,instructor_rubric,instructor_total,instructor_notes,released_at")
+      .eq("assignment_submission_id", submission.id).eq("task_slot", taskSlot)
+      .not("released_at", "is", null).maybeSingle();
+    grade = gradeRow ? studentGradeView(gradeRow as unknown as TaskGradeRow) : null;
+  }
+  const gradeStatus = !submission ? "not_submitted" as const : grade ? "released" as const : "awaiting_review" as const;
+
   return (
     <div className="w-full max-w-6xl space-y-5 py-6">
       <div className="flex flex-wrap items-center gap-3 text-sm">
@@ -57,6 +69,8 @@ export default async function Cse115aTaskMetricsPage({ params }: Params) {
         spec: task.task_spec_json as TaskSpec,
         validation: task.validation_json as Record<string, boolean>,
         commitsEndpoint: `/api/cse115a/assignments/${assignmentNumber}/tasks/${taskSlot}/commits`,
+        gradeStatus,
+        grade,
       }} />
     </div>
   );

@@ -4,9 +4,28 @@ import path from "node:path";
 import { notFound } from "next/navigation";
 import { ResultsDashboard } from "@/components/results/ResultsDashboard";
 import type { RepoReport } from "@/lib/reportTypes";
+import { RUBRIC } from "@/lib/cse115a/rubric";
+import type { StudentTaskGrade } from "@/lib/cse115a/gradeReview";
 
-export default async function Cse115aPreviewResultsPage() {
+const PREVIEW_GRADE: StudentTaskGrade = {
+  slot: 1,
+  total: 8.5,
+  releasedAt: new Date().toISOString(),
+  notes: "Solid spec. Next time, push the base tag before you start so the process check can confirm spec-first order.",
+  criteria: RUBRIC.map((row) => ({
+    name: row.name,
+    points: row.points,
+    awarded: row.name === "Process" ? 0.5 : row.name === "Test quality" ? 0 : row.points,
+    rationale: row.name === "Test quality"
+      ? "The test asserts only that the handler returns, so it would pass without the rejection logic."
+      : `The ${row.name.toLowerCase()} meets the full-credit description.`,
+    note: row.name === "Process" ? "Base tag was missing." : "",
+  })),
+};
+
+export default async function Cse115aPreviewResultsPage({ searchParams }: { searchParams: Promise<{ state?: string }> }) {
   if (process.env.NODE_ENV !== "development" || process.env.CSE115A_SITE !== "true") notFound();
+  const released = (await searchParams).state === "released";
 
   const reportPath = path.resolve(process.cwd(), "../../reports/ts-repo-metrics.json");
   const report = JSON.parse(await readFile(reportPath, "utf8")) as RepoReport;
@@ -32,6 +51,8 @@ export default async function Cse115aPreviewResultsPage() {
           tests: "Each acceptance criterion has a named test with setup and assertion.",
         },
         validation: { prMerged: true, specCommittedFirst: true, baseTagPushed: false, doneTagOnMergeCommit: true },
+        gradeStatus: released ? "released" : "not_submitted",
+        grade: released ? PREVIEW_GRADE : null,
       }} />
     </div>
   );

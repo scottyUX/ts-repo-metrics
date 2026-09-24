@@ -72,3 +72,23 @@ export function sprintScore(taskTotals: Array<number | null | undefined>): numbe
   while (best.length < 2) best.push(0);
   return (best[0]! + best[1]!) / 2;
 }
+
+export type StudentCriterion = { name: CriterionName; points: number; awarded: number; rationale: string; note: string };
+export type StudentTaskGrade = { slot: number; total: number; criteria: StudentCriterion[]; notes: string; releasedAt: string };
+
+/** What a student sees for a released task: instructor points where edited, the agent's rationale, and instructor notes. */
+export function studentGradeView(grade: TaskGradeRow): StudentTaskGrade | null {
+  if (!grade.released_at) return null;
+  const criteria = RUBRIC.map((row) => {
+    const agent = grade.rubric.find((item) => item.name === row.name);
+    const edited = grade.instructor_rubric?.find((item) => item.name === row.name);
+    return {
+      name: row.name,
+      points: row.points,
+      awarded: edited?.awarded ?? agent?.awarded ?? 0,
+      rationale: agent?.rationale ?? "",
+      note: edited?.note ?? "",
+    };
+  });
+  return { slot: grade.task_slot, total: effectiveTotal(grade), criteria, notes: grade.instructor_notes ?? "", releasedAt: grade.released_at };
+}

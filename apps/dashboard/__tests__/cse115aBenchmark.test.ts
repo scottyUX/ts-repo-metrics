@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { extractAddedTests, extractJsTests, extractPyTests } from "@/lib/cse115a/benchmark/extractTests";
 import { buildInstance, difficultyFor, instanceId, SWE_BENCH_FIELDS } from "@/lib/cse115a/benchmark/buildInstance";
-import { exportJsonl, isExportable, toJsonlRecord } from "@/lib/cse115a/benchmark/exportJsonl";
+import { exportJsonl, isExportable, redactPersonalData, toJsonlRecord } from "@/lib/cse115a/benchmark/exportJsonl";
 import { runNextJob, type JobStore, type BenchmarkSave } from "@/lib/cse115a/jobs/runner";
 import type { TaskSnapshot } from "@/lib/cse115a/submissionSnapshot";
 import type { TaskSpec } from "@/lib/cse115a/taskSpec";
@@ -209,6 +209,25 @@ describe("JSONL export", () => {
     expect(isExportable({ instance, sources: [{ consented: true, validationStatus: "candidate" }] }, { validatedOnly: true })).toBe(false);
     expect(exportJsonl([{ instance, sources: [{ consented: false, validationStatus: "candidate" }] }])).toBe("");
     expect(toJsonlRecord({ ...instance, created_at: null }).created_at).toBeNull();
+  });
+});
+
+describe("export redaction", () => {
+  it("drops per-author data and logins from repo_metrics and scrubs emails", () => {
+    const report = {
+      summary: { score: 80, note: "Contact a.student@ucsc.edu" },
+      contributors: [{ id: "a.student@ucsc.edu", displayName: "A. Student", authorEmail: "a.student@ucsc.edu", commitCount: 3 }],
+      githubMeta: { stargazersCount: 1, contributors: [{ login: "astudent" }] },
+      _submission: { github_login: "astudent", team_name: "alpha" },
+      files: [{ path: "src/a.ts", name: "validateEmail" }],
+    };
+    expect(redactPersonalData(report)).toEqual({
+      summary: { score: 80, note: "Contact [redacted]" },
+      githubMeta: { stargazersCount: 1 },
+      files: [{ path: "src/a.ts", name: "validateEmail" }],
+    });
+    const { instance } = buildInstance(snapshot(), 1, report);
+    expect(JSON.stringify(toJsonlRecord(instance).repo_metrics)).not.toMatch(/astudent|a\.student|A\. Student/);
   });
 });
 

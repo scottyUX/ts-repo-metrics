@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { effectiveTotal, parseInstructorRubric, releaseBlockers, sprintScore, type TaskGradeRow } from "@/lib/cse115a/gradeReview";
+import { effectiveTotal, parseInstructorRubric, releaseBlockers, sprintScore, studentGradeView, type TaskGradeRow } from "@/lib/cse115a/gradeReview";
 import { RUBRIC, type CriterionGrade } from "@/lib/cse115a/rubric";
 
 const full = () => RUBRIC.map((row) => ({ name: row.name as string, awarded: row.points as number, note: "" }));
@@ -64,5 +64,18 @@ describe("sprintScore", () => {
     expect(sprintScore([8, 6, 10])).toBe(9);
     expect(sprintScore([8, null])).toBe(4);
     expect(sprintScore([])).toBe(0);
+  });
+});
+
+describe("studentGradeView", () => {
+  it("shows nothing before release", () => {
+    expect(studentGradeView(grade(1))).toBeNull();
+  });
+
+  it("uses instructor points and notes over the agent's", () => {
+    const edited = RUBRIC.map((row) => ({ name: row.name, points: row.points, awarded: row.name === "Scope" ? 0.5 : row.points, note: row.name === "Scope" ? "Too broad." : "" }));
+    const view = studentGradeView(grade(1, { released_at: "2026-10-05T00:00:00Z", instructor_rubric: edited, instructor_total: "9.5", instructor_notes: "Nice work." }));
+    expect(view).toMatchObject({ slot: 1, total: 9.5, notes: "Nice work.", releasedAt: "2026-10-05T00:00:00Z" });
+    expect(view!.criteria[0]).toEqual({ name: "Scope", points: 1, awarded: 0.5, rationale: "", note: "Too broad." });
   });
 });
