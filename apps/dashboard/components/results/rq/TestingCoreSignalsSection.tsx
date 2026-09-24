@@ -105,7 +105,8 @@ export function TestingCoreSignalsSection({
   const churnSharePct = Math.min(100, Math.max(0, Math.round(mv.testLocRatio * 100)));
   const snapshotSharePct = churnSharePct;
 
-  const ratioTitle = fromGitChurn ? "Test churn share" : "Test coverage ratio";
+  // Test LOC ÷ source LOC. Not line coverage, so the title avoids "coverage".
+  const ratioTitle = fromGitChurn ? "Test churn share" : "Test-to-source LOC";
   const testFilesTitle = fromGitChurn ? "Test paths touched" : "Test files";
 
   const ratioDescription = (() => {
@@ -157,7 +158,7 @@ export function TestingCoreSignalsSection({
       return "No test files matched the analyzer’s patterns yet. Add a first spec or test module so verification has a foothold in the tree.";
     }
     if (filesTier === "needs_work" || filesTier === "critical") {
-      return "You have test files but they are not growing with new features. Test count should increase alongside your source code.";
+      return `Only ${mv.testFiles} test file${mv.testFiles === 1 ? "" : "s"} on the snapshot. Add tests alongside new features so the count keeps pace with your source code.`;
     }
     return `You have ${mv.testFiles} test file${mv.testFiles === 1 ? "" : "s"} on the snapshot—keep adding tests as you ship so this count tracks code growth.`;
   })();
@@ -189,7 +190,7 @@ export function TestingCoreSignalsSection({
         <SignalCard
           title={testFilesTitle}
           tier={filesTier}
-          value={`${mv.testFiles} ${fromGitChurn ? "paths" : "files"}`}
+          value={`${mv.testFiles} ${fromGitChurn ? "path" : "file"}${mv.testFiles === 1 ? "" : "s"}`}
           description={filesDescription}
         />
       </div>

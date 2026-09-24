@@ -41,6 +41,10 @@ export function pairedTestPathCandidates(relSource: string): string[] {
         norm(path.join(dir, "tests", `test_${base}.py`)),
         ...mirrors,
         norm(path.join("tests", `test_${base}.py`)),
+        // A single unittest-style `tests.py` (Flask tutorial layout) tests many
+        // modules; the symbol-name check below decides whether it covers this one.
+        norm(path.join(dir, "tests.py")),
+        "tests.py",
       ]),
     ];
   }
@@ -116,13 +120,19 @@ export async function computeSymbolVerificationRisks(
 
       let verificationScore = 0;
       let evidence: VerificationEvidence = "none";
+      let rowTestPath = pairedTestPath;
 
       if (pairedTestPath && testSource !== undefined) {
-        evidence = "paired_file_only";
-        verificationScore = 0.3;
-        if (symbolReferencedInSource(rawName, testSource)) {
+        const referenced = symbolReferencedInSource(rawName, testSource);
+        if (referenced) {
           verificationScore = 1;
           evidence = "referenced_in_test";
+        } else if (path.posix.basename(pairedTestPath) === "tests.py") {
+          // A catch-all tests.py is not a pairing on its own; only a reference counts.
+          rowTestPath = undefined;
+        } else {
+          evidence = "paired_file_only";
+          verificationScore = 0.3;
         }
       }
 
@@ -133,7 +143,7 @@ export async function computeSymbolVerificationRisks(
         cyclomaticComplexity: fn.cyclomaticComplexity,
         verificationScore,
         evidence,
-        pairedTestPath,
+        pairedTestPath: rowTestPath,
         riskScore: computeRiskScore(fn.cyclomaticComplexity, verificationScore),
       });
     }

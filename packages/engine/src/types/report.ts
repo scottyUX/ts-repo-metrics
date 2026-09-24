@@ -167,8 +167,10 @@ export interface BurstStats {
 export interface EntropyStats {
   /** Population standard deviation of gaps between consecutive commits. */
   stdDevTimeBetweenCommits: number;
-  /** Mean of those gaps (typical time from one commit to the next). */
+  /** Mean of those gaps. One long pause (a project resumed years later) dominates it. */
   meanTimeBetweenCommits: number;
+  /** Median of those gaps: the typical time from one commit to the next. */
+  medianTimeBetweenCommits: number;
 }
 
 /** D4: Top files by churn. */

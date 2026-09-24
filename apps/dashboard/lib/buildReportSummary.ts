@@ -75,7 +75,8 @@ export function buildReportSummary(report: RepoReport): string {
   if (report.gitMetricsV2) {
     const gv2 = report.gitMetricsV2;
     lines.push(
-      `GIT V2: refactor ratio ${(gv2.refactorBehavior.refactorCommitRatio * 100).toFixed(1)}% | test-coupling ${(gv2.testCoupling.pctCommitsTouchingTests * 100).toFixed(1)}% commits touch tests`,
+      // Both are already percentages (13.3 means 13.3%).
+      `GIT V2: refactor ratio ${gv2.refactorBehavior.refactorCommitRatio.toFixed(1)}% | test-coupling ${gv2.testCoupling.pctCommitsTouchingTests.toFixed(1)}% commits touch tests`,
     );
   }
 
@@ -197,7 +198,7 @@ export function buildReportSummary(report: RepoReport): string {
     lines.push("CONTRIBUTORS:");
     for (const c of report.contributors.slice(0, 5)) {
       lines.push(
-        `  ${c.displayName}: ${c.commitCount} commits | test-coupling ${(c.testCoupling.pctCommitsTouchingTests * 100).toFixed(1)}% | refactor ratio ${(c.refactorBehavior.refactorCommitRatio * 100).toFixed(1)}%`,
+        `  ${c.displayName}: ${c.commitCount} commits | test-coupling ${c.testCoupling.pctCommitsTouchingTests.toFixed(1)}% | refactor ratio ${c.refactorBehavior.refactorCommitRatio.toFixed(1)}%`,
       );
     }
   }

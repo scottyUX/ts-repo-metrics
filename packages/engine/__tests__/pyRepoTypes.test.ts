@@ -356,12 +356,29 @@ describe("Python test pairing", () => {
       "tests/app/api/test_users.py",
       "tests/api/test_users.py",
       "tests/test_users.py",
+      "app/api/tests.py",
+      "tests.py",
     ]);
     expect(pairedTestPathCandidates("main.py")).toEqual([
       "test_main.py",
       "main_test.py",
       "tests/test_main.py",
+      "tests.py",
     ]);
     expect(pairedTestPathCandidates("analysis.ipynb")).toEqual([]);
+  });
+});
+
+describe("catch-all tests.py pairing", () => {
+  it("credits only the functions tests.py references", async () => {
+    const repo = await writeRepo({
+      "app/models.py": "def set_password(u, p):\n    return p\n\ndef export_rows(rows):\n    return rows\n",
+      "tests.py": "from app.models import set_password\n\ndef test_pw():\n    assert set_password(None, 'x') == 'x'\n",
+    });
+    const report = await analyzeRepo(repo);
+    const byName = Object.fromEntries((report.symbolVerificationRisks ?? []).map((r) => [r.name, r]));
+    expect(byName.set_password).toMatchObject({ evidence: "referenced_in_test", verificationScore: 1, pairedTestPath: "tests.py" });
+    expect(byName.export_rows).toMatchObject({ evidence: "none", verificationScore: 0 });
+    expect(byName.export_rows?.pairedTestPath).toBeUndefined();
   });
 });

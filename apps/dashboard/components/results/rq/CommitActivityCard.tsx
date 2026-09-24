@@ -197,14 +197,13 @@ export function CommitActivityCard({
         ? `Most active day: ${WEEKDAY_NAMES[visualization.busiestWeekdayIndex]}`
         : null;
     const parts = [
-      `${total} commits in this view (${windowLabel})`,
+      `${total} ${total === 1 ? "commit" : "commits"} in this view (${windowLabel})`,
       cpwStr,
       busy,
     ].filter(Boolean) as string[];
     return parts.join(" · ");
   }, [git?.commitsPerWeek, scopedContributor, visualization]);
 
-  const legendMax = Math.max(visualization?.max ?? 0, 1);
   const noDataBadgeClass = coreSignalTierMeta.no_data.badgeClass;
 
   return (
@@ -282,13 +281,11 @@ export function CommitActivityCard({
             >
               <span>Less</span>
               <div className={cn("flex", GAP)}>
-                {[0.1, 0.35, 0.55, 0.8, 1].map((t, i) => (
+                {/* Fixed shares of the busiest day, so the scale shows even when that day has 1 commit. */}
+                {[10, 35, 55, 80, 100].map((pct) => (
                   <div
-                    key={i}
-                    className={cn(
-                      "size-5 rounded-[3px] sm:size-6",
-                      heatClass(Math.ceil(t * legendMax), legendMax),
-                    )}
+                    key={pct}
+                    className={cn("size-5 rounded-[3px] sm:size-6", heatClass(pct, 100))}
                   />
                 ))}
               </div>

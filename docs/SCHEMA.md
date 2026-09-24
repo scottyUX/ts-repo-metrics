@@ -147,11 +147,11 @@ Returns `null` for non-git repos or shallow clones. Git CLI is required for Anal
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `totalCommits` | `number` | Total commits in history |
+| `totalCommits` | `number` | Distinct commits across all branches and tags. A change that appears on several refs under different hashes (a rebased branch beside its old copy, "Rebase and merge" beside an undeleted feature branch, a cherry-pick) counts once: commits are keyed by author email, author time, and subject. The same rule applies to every git-derived metric, including `gitMetricsV2` and `contributors` |
 | `medianCommitSize` | `number` | Median lines changed per commit (0 in API mode) |
 | `avgLinesPerCommit` | `number` | Mean lines changed per commit (0 in API mode) |
 | `largeCommitRatio` | `number` | % of commits > 500 lines changed (0 in API mode) |
-| `commitsPerWeek` | `number` | Commits per week (last 13 weeks) |
+| `commitsPerWeek` | `number` | Commits per week in the 13 weeks before the newest commit (not before the analysis ran, so a finished project keeps its cadence). Per-contributor values use the same repo-wide window |
 | `mode` | `string` | `"local"` (git CLI), `"api"` (GitHub API), or `"none"` |
 | `unavailable` | `boolean` | True when both git CLI and API fallback failed |
 | `activeDaysLast90Days` | `number` | Unique commit dates in last 90 days (API mode) |
@@ -177,6 +177,8 @@ Returns `null` for non-git repos or when no commit history is available. Epic D 
 | `burstStats.burstRatio` | `number` | % of commits that fall in a burst |
 | `entropy` | `EntropyStats` | D3: Temporal irregularity |
 | `entropy.stdDevTimeBetweenCommits` | `number` | Std dev of time between consecutive commits (ms) |
+| `entropy.meanTimeBetweenCommits` | `number` | Mean of those gaps (ms). One long pause dominates it |
+| `entropy.medianTimeBetweenCommits` | `number` | Median of those gaps (ms): the typical time between commits. The dashboard's "Typical gap" uses it |
 | `churn` | `ChurnStats` | D4: Top files by churn |
 | `churn.topByModifications` | `ChurnHotspot[]` | Top 10 files by modification count |
 | `churn.topByLinesChanged` | `ChurnHotspot[]` | Top 10 files by lines changed |
