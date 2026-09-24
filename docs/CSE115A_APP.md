@@ -18,7 +18,8 @@ service keeps its normal home page.
 ## Backend setup
 
 - Apply `supabase/migrations/20260924000000_cse115a_course_submissions.sql`, then
-  `20260925000000_cse115a_final_submissions.sql` (submit-once, snapshots, job queue).
+  `20260925000000_cse115a_final_submissions.sql` (submit-once, snapshots, job queue),
+  then `20260926000000_cse115a_grading.sql` (draft grades, job claim function).
 - Enable Google Auth in the Supabase project and configure its Google OAuth
   client ID and secret. In Google Cloud, add
   `https://walwexxczaibfojinkfi.supabase.co/auth/v1/callback` as an authorized
@@ -54,6 +55,31 @@ Submissions are tied to the signed-in UCSC account and course membership. A
 task is marked analyzed only after its Repo Metrics result is saved and linked
 to that exact PR. The student's task description comes from the committed file,
 not text re-entered in the browser.
+
+## Grading worker
+
+Submitting queues a `grade` job. A worker claims it, grades both tasks from the
+submit-time snapshot, and saves a draft in `cse_task_grades`. Students see a
+grade only after an instructor releases it.
+
+- **Tests pass** and **Process** come from recorded evidence: CI conclusions on
+  the merge commit and the import checks. No finished CI, or a missing base
+  tag, marks the criterion for instructor review.
+- The other five criteria come from one OpenAI call per task with a strict JSON
+  schema. Each must quote the submission; a quote that is missing or not found
+  in the spec or diff marks it for review. The model and prompt version are
+  stored with the grade.
+- Failed jobs retry after 1 and 4 minutes. After the third failure the job is
+  `failed` and the submission is `grading_failed`.
+
+Environment on the service that runs the worker:
+
+| Variable | Purpose |
+|---|---|
+| `CSE115A_WORKER=true` | Start the 15-second poller from `instrumentation.ts`. Run it on one service only. |
+| `OPENAI_API_KEY` | Grader calls. |
+| `CSE115A_GRADER_MODEL` | Optional; defaults to `gpt-4o`. |
+| `CSE115A_WORKER_SECRET` | Optional; enables `POST /api/cse115a/internal/jobs/tick` with header `x-cse115a-worker-secret`, which runs queued jobs on demand (`?limit=1..10`). |
 
 ## Before enabling student access
 
