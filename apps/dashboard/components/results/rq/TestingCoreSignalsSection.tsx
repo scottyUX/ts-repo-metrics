@@ -105,7 +105,8 @@ export function TestingCoreSignalsSection({
   const churnSharePct = Math.min(100, Math.max(0, Math.round(mv.testLocRatio * 100)));
   const snapshotSharePct = churnSharePct;
 
-  const ratioTitle = fromGitChurn ? "Test churn share" : "Test coverage ratio";
+  // Test LOC ÷ source LOC. Not line coverage, so the title avoids "coverage".
+  const ratioTitle = fromGitChurn ? "Test churn share" : "Test-to-source LOC";
   const testFilesTitle = fromGitChurn ? "Test paths touched" : "Test files";
 
   const ratioDescription = (() => {

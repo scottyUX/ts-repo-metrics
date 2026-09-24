@@ -19,14 +19,10 @@ import {
   TestingConceptProximityBandsBody,
   TestingConceptRiskTierBody,
   TestingGitSourcePathsTouchedBody,
-  TestingGitTestChurnRatioBody,
   TestingGitTestLineChurnBody,
-  TestingGitTestPathsTouchedBody,
-  TestingPctCommitsTouchingTestsBody,
   TestingRefactorCommitRatioBody,
   TestingSymbolProximityScanBody,
   TestingTestCoverageProxyBody,
-  TestingTestLocRatioBody,
 } from "./metricHelpContent";
 import { ConceptHelpDialog } from "../ConceptHelpDialog";
 import { buildScatterPoints } from "@/lib/symbolRiskViz";
@@ -47,11 +43,6 @@ interface TestingMetricsTabProps {
 function formatNumber(n: number): string {
   if (Number.isInteger(n)) return String(n);
   return n.toFixed(3);
-}
-
-function formatRatio(n: number): string {
-  if (!Number.isFinite(n)) return "—";
-  return formatNumber(n);
 }
 
 function capitalizeWord(s: string): string {
@@ -126,10 +117,6 @@ export function TestingMetricsTab({ report, scopeId, onScopeIdChange, onOpenCode
   const cardProps = { metricCategory: "testing" as const, hideResearchBadge: true };
   const teamOnly = mv.mode === "team";
 
-  const pctTestTooltip =
-    mv.mode === "contributor"
-      ? "Among this author's commits, the fraction that touches at least one path detected as a test file."
-      : "Commits where any changed path is a test file.";
   const refactorTooltip =
     mv.mode === "contributor"
       ? "Among this author's commits, the fraction whose subjects match refactor-style keywords."
@@ -281,45 +268,6 @@ export function TestingMetricsTab({ report, scopeId, onScopeIdChange, onOpenCode
                 : undefined
             }
           />
-          <MetricCard
-            {...cardProps}
-            label={mv.locSource === "gitChurn" ? "Test churn / source churn" : "Test LOC ratio"}
-            value={formatRatio(mv.testLocRatio)}
-            tooltip={
-              mv.locSource === "gitChurn"
-                ? `test line churn divided by source line churn for this author. If source churn is 0 but test churn exists, ratio is shown as 0 (no comparable denominator). ${gitChurnTooltip}`
-                : `testLOC ÷ sourceLOC. ${locSnapshotTooltip}`
-            }
-            metricHelp={
-              mv.locSource === "profile"
-                ? {
-                    title: "Test LOC ratio",
-                    children: <TestingTestLocRatioBody />,
-                  }
-                : {
-                    title: "Test churn / source churn",
-                    children: <TestingGitTestChurnRatioBody />,
-                  }
-            }
-          />
-          <MetricCard
-            {...cardProps}
-            label={mv.locSource === "gitChurn" ? "Test files touched" : "Test files"}
-            value={mv.testFiles}
-            tooltip={
-              mv.locSource === "gitChurn"
-                ? `Distinct paths matching the test file pattern in this author’s commits. ${gitChurnTooltip}`
-                : `Files matching *.test.ts, *.spec.ts, etc. ${locSnapshotTooltip}`
-            }
-            metricHelp={
-              mv.locSource === "gitChurn"
-                ? {
-                    title: "Test paths touched (git)",
-                    children: <TestingGitTestPathsTouchedBody />,
-                  }
-                : undefined
-            }
-          />
           {mv.sourceFilesTouched != null ? (
             <MetricCard
               {...cardProps}
@@ -336,17 +284,8 @@ export function TestingMetricsTab({ report, scopeId, onScopeIdChange, onOpenCode
               }
             />
           ) : null}
-          <MetricCard
-            {...cardProps}
-            label="% commits touching tests"
-            value={`${Number(mv.pctCommitsTouchingTests.toFixed(1))}%`}
-            tooltip={pctTestTooltip}
-            metricHelp={{
-              title: "Percent of commits touching tests",
-              children: <TestingPctCommitsTouchingTestsBody />,
-            }}
-          />
-          {report.testCoverageProxy ? (
+          {/* Repo-wide snapshot: only adds information when the Core cards show one author's churn. */}
+          {report.testCoverageProxy && mv.locSource === "gitChurn" ? (
             <MetricCard
               {...cardProps}
               label="Test coverage proxy (snapshot)"
