@@ -1,5 +1,5 @@
 /**
- * Python scoring: functions, cyclomatic complexity, smells, and lexical nulls.
+ * Python scoring: functions, cyclomatic complexity, smells, and lexical metrics.
  */
 
 import { describe, it, expect, vi } from "vitest";
@@ -33,7 +33,7 @@ function scorePython(code: string) {
 }
 
 describe("analyzeRepo (Python)", () => {
-  it("analyzes .py files and leaves lexical metrics null", async () => {
+  it("analyzes .py files, including Halstead, cognitive, and MI", async () => {
     const report = await analyzeRepo(FIXTURE_PATH);
 
     expect(report.filesAnalyzed).toBeGreaterThan(0);
@@ -53,10 +53,10 @@ describe("analyzeRepo (Python)", () => {
 
     for (const file of report.perFile) {
       for (const fn of file.functionMetrics) {
-        expect(fn.halstead).toBeNull();
-        expect(fn.cognitiveComplexity).toBeNull();
-        expect(fn.maintainabilityIndexGradAiRaw).toBeNull();
-        expect(fn.maintainabilityIndexGradAiNorm).toBeNull();
+        expect(fn.halstead).not.toBeNull();
+        expect(fn.cognitiveComplexity).toEqual(expect.any(Number));
+        expect(fn.maintainabilityIndexGradAiRaw).toEqual(expect.any(Number));
+        expect(fn.maintainabilityIndexGradAiNorm).toEqual(expect.any(Number));
       }
     }
   }, 30_000);

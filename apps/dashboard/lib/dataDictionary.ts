@@ -359,7 +359,7 @@ export const DATA_DICTIONARY: Record<string, DataDictionaryEntry> = {
     interpretation: "High: complexity concentrated in few files; Low: spread out.",
   },
   phase2_halstead_volume_mean: {
-    definition: "Mean Halstead volume per function (lexical / operator-operand volume).",
+    definition: "Mean Halstead volume per function (lexical / operator-operand volume). Python functions use radon's narrower definition, so in a mixed repo this mean blends two scales; compare within one language.",
     unit: "count",
     resultsConstruct: "code-quality",
     interpretation: "Higher: denser operator/operand mix (Imai-style wordiness).",
@@ -377,7 +377,7 @@ export const DATA_DICTIONARY: Record<string, DataDictionaryEntry> = {
     interpretation: "Worst single-function lexical volume.",
   },
   phase2_cognitive_mean: {
-    definition: "Mean cognitive complexity (additive, nesting-aware).",
+    definition: "Mean cognitive complexity (additive, nesting-aware). Python follows complexipy's application of the Sonar spec.",
     unit: "count",
     resultsConstruct: "code-quality",
     interpretation: "Higher: harder human verification (Verification Gap narrative).",
@@ -395,7 +395,7 @@ export const DATA_DICTIONARY: Record<string, DataDictionaryEntry> = {
     interpretation: "Single worst hotspot for understandability.",
   },
   phase2_mi_norm_mean: {
-    definition: "Mean GRAD-AI normalized MI (0–100) per function.",
+    definition: "Mean GRAD-AI normalized MI (0–100) per function. Python MI uses its radon-style Halstead volume, so it runs higher than TS/JS MI for similar code; compare within one language.",
     unit: "percentage",
     resultsConstruct: "code-quality",
     interpretation: "Higher: better modeled maintainability (Gambo et al.–style).",

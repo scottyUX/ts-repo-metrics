@@ -26,6 +26,10 @@ import {
 } from "./functionNodes.js";
 import { computeHalsteadForFunction } from "./halstead.js";
 import { computeCognitiveComplexity } from "./cognitiveComplexity.js";
+import {
+  computePythonCognitiveComplexity,
+  computePythonHalstead,
+} from "./python/lexical.js";
 import { calculateMIGradAiRaw, normalizeMIGradAi } from "../utils/metrics.js";
 import type {
   FunctionDetail,
@@ -53,7 +57,7 @@ export interface ExtractFunctionMetricsOptions {
    * Computed once per file by the caller. A `.tsx` file with no JSX is still in scope.
    */
   inReactScope?: boolean;
-  /** Defaults to the ECMAScript profile. Python leaves Halstead, MI, and cognitive null. */
+  /** Defaults to the ECMAScript profile. Python uses radon-style Halstead and complexipy-style cognitive complexity. */
   languageProfile?: LanguageProfile;
 }
 
@@ -166,7 +170,10 @@ export function extractFunctionMetrics(
         const branches = countCyclomaticBranchPoints(node, profile);
         const cyclomaticComplexity = 1 + branches;
         const lexical = profile.language === "python"
-          ? null
+          ? {
+              halstead: computePythonHalstead(node),
+              cognitiveComplexity: computePythonCognitiveComplexity(node),
+            }
           : {
               halstead: computeHalsteadForFunction(node),
               cognitiveComplexity: computeCognitiveComplexity(node),

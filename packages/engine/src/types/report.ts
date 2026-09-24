@@ -54,13 +54,17 @@ export interface FunctionDetail {
   parameterCount: number;
   /** Cyclomatic complexity (1 + branch points + logical ops), same rule as `FunctionComplexity`. */
   cyclomaticComplexity: number;
-  /** Halstead suite when analyzable. Null for Python; empty bodies may yield zeros. */
+  /**
+   * Halstead suite. Python follows radon's narrower operator/operand definition,
+   * so Python values are comparable only with other Python values. Null only on
+   * reports from before Python lexical metrics.
+   */
   halstead: HalsteadMetrics | null;
-  /** Sonar-style additive cognitive complexity. Null for Python (unvalidated). */
+  /** Sonar-style additive cognitive complexity. Python follows complexipy's application of the spec. */
   cognitiveComplexity: number | null;
-  /** GRAD-AI-style MI from Halstead volume + cyclomatic + LOC. Null for Python. */
+  /** GRAD-AI-style MI from Halstead volume + cyclomatic + LOC. Python uses its radon-style volume. */
   maintainabilityIndexGradAiRaw: number | null;
-  /** Normalized to 0–100 for dashboards: max(0, MI_raw * 100 / 171). Null for Python. */
+  /** Normalized to 0–100 for dashboards: max(0, MI_raw * 100 / 171). */
   maintainabilityIndexGradAiNorm: number | null;
   /** Heuristic: JSX in the function body, or PascalCase when the file is in React scope. */
   isReactComponent: boolean;

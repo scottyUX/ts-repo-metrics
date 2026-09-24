@@ -232,10 +232,10 @@ JS detection reads the root `package.json` and each one a single folder down (`f
 | `maxNestingDepth` | `number` | Deepest nesting of control flow |
 | `parameterCount` | `number` | Number of declared parameters |
 | `cyclomaticComplexity` | `number` | Cyclomatic complexity (same as `1 +` branch points + `&&`/`||`); aligns with `FunctionComplexity.complexity` |
-| `halstead` | `HalsteadMetrics \| null` | Halstead operator/operand metrics (lexical volume). Null on `.py` functions |
-| `cognitiveComplexity` | `number \| null` | Additive cognitive score (nesting-aware; Sonar-style). Null on `.py` functions |
-| `maintainabilityIndexGradAiRaw` | `number \| null` | GRAD-AI raw MI: `171 - 5.2·ln(V) - 0.23·CC - 16.2·ln(LOC)` (natural logs); `V` = Halstead `volume`, `CC` = cyclomatic, `LOC` = `lines`. Null on `.py` functions |
-| `maintainabilityIndexGradAiNorm` | `number \| null` | `max(0, MI_raw · 100 / 171)`. Null on `.py` functions |
+| `halstead` | `HalsteadMetrics \| null` | Halstead operator/operand metrics (lexical volume). Python uses radon's definition; see below. Null only on older reports |
+| `cognitiveComplexity` | `number \| null` | Additive cognitive score (nesting-aware; Sonar-style). Python follows complexipy's application of the spec. Null only on older reports |
+| `maintainabilityIndexGradAiRaw` | `number \| null` | GRAD-AI raw MI: `171 - 5.2·ln(V) - 0.23·CC - 16.2·ln(LOC)` (natural logs); `V` = Halstead `volume`, `CC` = cyclomatic, `LOC` = `lines`. Null only on older reports |
+| `maintainabilityIndexGradAiNorm` | `number \| null` | `max(0, MI_raw · 100 / 171)`. Null only on older reports |
 | `isReactComponent` | `boolean` | Heuristic: `.tsx` file and (PascalCase name or JSX in body) |
 | `isMonolithic` | `boolean` | `true` when `isReactComponent` and `lines` exceed the monolithic threshold (50 SLOC; see `constants.ts`) |
 | `notebookCell` | `number` | Optional. Notebooks: 1-based code cell holding `startLine`. `startLine` counts lines in the joined code cells |
@@ -253,6 +253,12 @@ JS detection reads the root `package.json` and each one a single folder down (`f
 | `effort` | `number` | `difficulty * volume` |
 
 Repo-level `maintainability` (Coleman-style index from average complexity and LOC) is **separate** from per-function `maintainabilityIndexGradAi*`.
+
+**Python lexical metrics.** Each follows one reference tool so it can be validated against it (`research/validation/python/`):
+
+- **Halstead** follows radon 6.0.1. Operators are arithmetic, bitwise, boolean, comparison, unary, and augmented-assignment operators. Operands are the direct operands of those operators, keyed by name, attribute name, or literal value (so `x`, `.x`, and `"x"` are one operand), and any other expression counts as a new operand each time. Only the function body is read; nested `def`s and lambdas roll into it. This is much narrower than the TS/JS scanner, so **Python Halstead volume, and the MI built from it, are comparable only with other Python values.** Do not average them with TS/JS values.
+- **Cognitive complexity** follows complexipy 8.0.1's application of SonarSource's spec, including its nesting rules for nested `def`s and decorators. Where complexipy skips a structure the spec counts (keyword-argument values, `await`, arithmetic operands, and a few others), the spec's count is used.
+- Agreement on 1,990 functions from eight public Python repos: cognitive matches complexipy exactly on 98.2%, and on 99.85% once complexipy's skipped structures are accounted for. Halstead matches radon exactly on all 1,914 joined functions.
 
 ### `FunctionComplexity`
 
