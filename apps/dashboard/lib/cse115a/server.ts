@@ -47,3 +47,35 @@ export async function getActiveAssignmentSubmission(courseId: string, userId: st
 export function lockedAssignmentMessage(assignmentNumber: number): string {
   return `Assignment ${assignmentNumber} is already submitted, so its tasks are locked. Ask your instructor if something needs to change.`;
 }
+
+export type CourseRole = "instructor" | "ta";
+export type StaffCourse = Course & { role: CourseRole };
+
+/** Courses where this email is an instructor or TA. */
+export async function getStaffCourses(email: string): Promise<StaffCourse[]> {
+  const db = getSupabase();
+  const { data: roles, error } = await db.from("cse_course_roles").select("course_id,role").eq("email", email.toLowerCase());
+  if (error) throw new Error("Could not check course staff.");
+  if (!roles?.length) return [];
+  const { data: courses, error: courseError } = await db.from("cse_courses")
+    .select("id,slug,title,term,assignment_count,active").in("id", roles.map((row) => row.course_id));
+  if (courseError) throw new Error("Could not load courses.");
+  return (courses ?? []).map((course) => ({ ...course, role: roles.find((row) => row.course_id === course.id)!.role })) as StaffCourse[];
+}
+
+/** The course and the caller's role, or null when the caller is not staff (or not an instructor, with instructorOnly). */
+export async function requireCourseStaff(identity: CourseIdentity, slug: string, options: { instructorOnly?: boolean } = {}): Promise<StaffCourse | null> {
+  const course = (await getStaffCourses(identity.email)).find((item) => item.slug === slug);
+  if (!course || (options.instructorOnly && course.role !== "instructor")) return null;
+  return course;
+}
+
+/** The course of a submission, when the caller is staff there. */
+export async function requireSubmissionStaff(identity: CourseIdentity, submissionId: string, options: { instructorOnly?: boolean } = {}): Promise<StaffCourse | null> {
+  if (!/^[0-9a-f-]{36}$/i.test(submissionId)) return null;
+  const { data } = await getSupabase().from("cse_assignment_submissions").select("course_id").eq("id", submissionId).maybeSingle();
+  if (!data) return null;
+  const course = (await getStaffCourses(identity.email)).find((item) => item.id === data.course_id);
+  if (!course || (options.instructorOnly && course.role !== "instructor")) return null;
+  return course;
+}

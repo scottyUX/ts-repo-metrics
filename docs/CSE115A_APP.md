@@ -20,7 +20,8 @@ service keeps its normal home page.
 - Apply `supabase/migrations/20260924000000_cse115a_course_submissions.sql`, then
   `20260925000000_cse115a_final_submissions.sql` (submit-once, snapshots, job queue),
   then `20260926000000_cse115a_grading.sql` (draft grades, job claim function),
-  then `20260927000000_cse115a_benchmark.sql` (benchmark rows, research consent).
+  then `20260927000000_cse115a_benchmark.sql` (benchmark rows, research consent),
+  then `20260928000000_cse115a_instructor.sql` (staff roles, release and regrade).
 - Enable Google Auth in the Supabase project and configure its Google OAuth
   client ID and secret. In Google Cloud, add
   `https://walwexxczaibfojinkfi.supabase.co/auth/v1/callback` as an authorized
@@ -99,6 +100,31 @@ submitted it, a `validation_status`, and flags such as
   `log_parser` stay empty until a Docker validation pass.
 - Export (`lib/cse115a/benchmark/exportJsonl.ts`) includes an instance only
   when a student who submitted it has consented and no source is rejected.
+
+## Instructor tools
+
+Staff open `/cse115a/instructor` (the header shows **Instructor** only to
+staff). Seed the first instructor, then add others from the Staff page:
+
+```sh
+SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... \
+  node apps/dashboard/scripts/addCourseStaff.mjs CSE115A-Fall26 name@ucsc.edu instructor
+```
+
+- **Submissions**: every enrolled student for an assignment, with status, agent
+  and instructor totals, and a needs-review flag. Filter by status.
+- **Review**: both tasks side by side with the spec, `patch`/`test_patch`
+  diffs, CI results, the Repo Metrics report, and the agent's rationale and
+  quotes. Staff can override points (half steps) and add notes, then
+  **Release**. Release is blocked while a criterion has no points. Edits saved
+  after release are visible to the student right away.
+- **Regrade** requeues the grade job and keeps instructor edits. **Unlock**
+  (instructors only, reason required) supersedes the attempt so the student can
+  change tasks and submit again; the old attempt stays as history.
+- **Benchmark**: counts by status and consent, a preview of the newest rows,
+  and JSONL download.
+
+TAs can do everything except unlock and manage staff.
 
 ## Before enabling student access
 
