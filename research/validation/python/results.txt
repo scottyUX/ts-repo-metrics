@@ -1,0 +1,23 @@
+repo                               fns  cogJ  cogEx%  halJ  halEx%
+fastapi-realworld-example-app      170   170    98.2   170   100.0
+microblog                          100   100   100.0   100   100.0
+microblog-api                      128   128    98.4   128   100.0
+nanoGPT                             24    22    90.9    24   100.0
+rags                                72    72   100.0    72   100.0
+chat-langchain                     113   113    96.5   113   100.0
+full-stack-fastapi-template        133   133   100.0   130   100.0
+djangoproject.com                 1252  1252    98.0  1177   100.0
+TOTAL {'engine_top_fns': 1992, 'cog_joined': 1990, 'cog_exact': 1954, 'cog_gap_explained': 33, 'hal_joined': 1914, 'hal_exact': 1914, 'cog_unjoined': 2, 'baseline_file_errors': 2, 'hal_unjoined': 78}
+cognitive exact %: 98.19  pearson: 0.9964
+cognitive exact + complexipy gap explained %: 99.85
+halstead exact %: 100.0  volume pearson: 1.0
+
+unjoined samples:
+  ('nanoGPT', 'bench.py', 37, 'get_batch', [])
+  ('nanoGPT', 'data/openwebtext/prepare.py', 43, 'process', [])
+
+first cognitive mismatches:
+  ('djangoproject.com', 'accounts/views.py', 39, 'delete_profile', 6, 5)
+  ('djangoproject.com', 'releases/models.py', 336, 'clean', 11, 12)
+  ('djangoproject.com', 'releases/tests.py', 849, 'test_clearing_also_deletes_file', 7, 6)
+first halstead mismatches:

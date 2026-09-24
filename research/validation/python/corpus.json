@@ -1,0 +1,10 @@
+[
+  { "name": "fastapi-realworld-example-app", "url": "https://github.com/nsidnev/fastapi-realworld-example-app", "commit": "029eb7781c60d5f563ee8990a0cbfb79b244538c", "kind": "FastAPI" },
+  { "name": "microblog", "url": "https://github.com/miguelgrinberg/microblog", "commit": "a975ef64864354867c88e0ed3a17ba7d17dca752", "kind": "Flask" },
+  { "name": "microblog-api", "url": "https://github.com/miguelgrinberg/microblog-api", "commit": "e250d7115b47010ff0e7051d5868485fff4e32fb", "kind": "Flask API" },
+  { "name": "nanoGPT", "url": "https://github.com/karpathy/nanoGPT", "commit": "3adf61e154c3fe3fca428ad6bc3818b27a3b8291", "kind": "PyTorch scripts" },
+  { "name": "rags", "url": "https://github.com/run-llama/rags", "commit": "4bec27023950c078fe0d559e1720d757d0024c93", "kind": "LLM app (Streamlit)" },
+  { "name": "chat-langchain", "url": "https://github.com/langchain-ai/chat-langchain", "commit": "cb961f8da449b2fe618b50814498ea71d6cb0287", "kind": "LangChain + TS" },
+  { "name": "full-stack-fastapi-template", "url": "https://github.com/fastapi/full-stack-fastapi-template", "commit": "cb740b656d7a0a6c5e12c7bf8e50343ec94ee9c7", "kind": "FastAPI + React" },
+  { "name": "djangoproject.com", "url": "https://github.com/django/djangoproject.com", "commit": "901dd6b014c5f7fb55c8300ccdaf7e7e20bb36ee", "kind": "Django (skipped by reports; extractors run directly here)" }
+]
