@@ -70,8 +70,11 @@ export async function extractGitMetrics(
       (s) => s > LARGE_COMMIT_THRESHOLD,
     ).length;
 
-    const now = Date.now();
-    const windowStart = now - WEEKS_WINDOW * 7 * 24 * 60 * 60 * 1000;
+    // Anchor the window at the newest commit, not the time of analysis, so a
+    // repo analyzed after its last push (a finished course project) still
+    // reports the cadence it had. The commit heatmap uses the same anchor.
+    const latest = Math.max(...log.all.map((c) => new Date(c.date).getTime()));
+    const windowStart = latest - WEEKS_WINDOW * 7 * 24 * 60 * 60 * 1000;
     const recentCommits = log.all.filter((c) => {
       const d = new Date(c.date).getTime();
       return d >= windowStart;

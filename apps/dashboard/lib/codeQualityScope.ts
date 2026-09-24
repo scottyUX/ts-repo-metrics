@@ -73,24 +73,32 @@ export function collectPairedFunctionRows(perFile: PerFileEntry[]): {
 /**
  * UI bucket counts aligned with `HotspotTables` pairing (same row set).
  */
+/**
+ * Healthy (< 10), moderate (10–15), and high (> 15) partition every paired
+ * function; critical (> 30) is a subset of high.
+ */
 export function countUiComplexityBucketsPaired(perFile: PerFileEntry[]): {
   highGtUi: number;
   criticalGtUi: number;
+  moderateUi: number;
   healthyLtUi: number;
   totalPaired: number;
 } {
   const { complexities } = collectPairedFunctionRows(perFile);
   let highGtUi = 0;
   let criticalGtUi = 0;
+  let moderateUi = 0;
   let healthyLtUi = 0;
   for (const v of complexities) {
     if (v > UI_COMPLEXITY_CRITICAL_GT) criticalGtUi += 1;
     if (v > UI_COMPLEXITY_HIGH_GT) highGtUi += 1;
-    if (v < UI_COMPLEXITY_HEALTHY_LT) healthyLtUi += 1;
+    else if (v < UI_COMPLEXITY_HEALTHY_LT) healthyLtUi += 1;
+    else moderateUi += 1;
   }
   return {
     highGtUi,
     criticalGtUi,
+    moderateUi,
     healthyLtUi,
     totalPaired: complexities.length,
   };

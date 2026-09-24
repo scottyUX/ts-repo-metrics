@@ -102,6 +102,7 @@ chore: cleanup
       entropy: expect.objectContaining({
         stdDevTimeBetweenCommits: expect.any(Number),
         meanTimeBetweenCommits: expect.any(Number),
+        medianTimeBetweenCommits: expect.any(Number),
       }),
       churn: expect.objectContaining({
         topByModifications: expect.any(Array),
@@ -132,6 +133,8 @@ chore: cleanup
 
     // D3: gaps 5 min, 5 min, 110 min, 5 min between consecutive commits
     expect(result!.entropy.meanTimeBetweenCommits).toBe(1_875_000);
+    // The one 110-minute pause pulls the mean up; the median stays at 5 min.
+    expect(result!.entropy.medianTimeBetweenCommits).toBe(300_000);
 
     // D4: src/foo.ts modified in 4 commits (most)
     expect(result!.churn.topByModifications[0]!.file).toBe("src/foo.ts");

@@ -33,7 +33,7 @@ export function CodeQualityComplexityDistributionCard({ report }: CodeQualityCom
     report.distributions?.percent_high_complexity_in_top_10_percent_files ?? 0;
   const totalFunctions = report.totals?.functions ?? 0;
 
-  const { highGtUi, criticalGtUi, healthyLtUi, totalPaired } = useMemo(
+  const { highGtUi, criticalGtUi, moderateUi, healthyLtUi, totalPaired } = useMemo(
     () => countUiComplexityBucketsPaired(report.perFile ?? []),
     [report.perFile],
   );
@@ -116,6 +116,12 @@ export function CodeQualityComplexityDistributionCard({ report }: CodeQualityCom
               <p className="text-lg font-semibold tabular-nums text-destructive">
                 {criticalGtUi}
               </p>
+            </div>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Moderate ({UI_COMPLEXITY_HEALTHY_LT}–{UI_COMPLEXITY_HIGH_GT})
+              </p>
+              <p className="text-lg font-semibold tabular-nums">{moderateUi}</p>
             </div>
             <div>
               <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">

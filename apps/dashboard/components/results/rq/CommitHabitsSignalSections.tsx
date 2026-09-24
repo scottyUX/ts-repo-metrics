@@ -209,7 +209,7 @@ function describeBurst(pct: number, tier: CoreSignalTier, hasData: boolean): str
 }
 
 const COMMIT_SPACING_TITLE_INFO =
-  "We look at the time between each commit and the next. The large number shows how much that timing varies: if it is high, you often alternate between busy stretches and long gaps; if it is low, your commits land at a more steady pace. The line underneath is the usual gap—roughly how long you typically wait between commits. It is fine if this shifts with how your team works; use it as a rhythm check, not a grade.";
+  "We look at the time between each commit and the next. The large number shows how much that timing varies: if it is high, you often alternate between busy stretches and long gaps; if it is low, your commits land at a more steady pace. The line underneath is the usual gap—the median time between one commit and the next, so a single long pause does not inflate it. It is fine if this shifts with how your team works; use it as a rhythm check, not a grade.";
 
 const cardProps = { metricCategory: "commit-habits" as const, hideResearchBadge: true };
 

@@ -31,10 +31,18 @@ const HEATMAP_WEEK_COLUMNS = 52;
 const CPW_WINDOW_WEEKS = 13;
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
-function commitsPerWeekInRecentWindow(group: ParsedCommit[], windowWeeks: number): number {
+/**
+ * Commits per week in the `windowWeeks` before `anchorMs`. The anchor is the
+ * repo's newest commit, not the time of analysis, so a finished project keeps
+ * the cadence it had and each contributor is measured against the same window.
+ */
+function commitsPerWeekInRecentWindow(
+  group: ParsedCommit[],
+  windowWeeks: number,
+  anchorMs: number,
+): number {
   if (group.length === 0 || windowWeeks <= 0) return 0;
-  const now = Date.now();
-  const windowStartMs = now - windowWeeks * 7 * MS_PER_DAY;
+  const windowStartMs = anchorMs - windowWeeks * 7 * MS_PER_DAY;
   let n = 0;
   for (const c of group) {
     if (c.timestamp * 1000 >= windowStartMs) n++;
@@ -264,7 +272,7 @@ function computeBurstStats(commits: ParsedCommit[]): BurstStats {
 function computeEntropyStats(commits: ParsedCommit[]): EntropyStats {
   const byTime = [...commits].sort((a, b) => a.timestamp - b.timestamp);
   if (byTime.length < 2) {
-    return { stdDevTimeBetweenCommits: 0, meanTimeBetweenCommits: 0 };
+    return { stdDevTimeBetweenCommits: 0, meanTimeBetweenCommits: 0, medianTimeBetweenCommits: 0 };
   }
 
   const gaps: number[] = [];
@@ -278,6 +286,7 @@ function computeEntropyStats(commits: ParsedCommit[]): EntropyStats {
   return {
     stdDevTimeBetweenCommits: Math.round(stdDev * 10) / 10,
     meanTimeBetweenCommits: Math.round(mean * 10) / 10,
+    medianTimeBetweenCommits: Math.round(median([...gaps].sort((a, b) => a - b)) * 10) / 10,
   };
 }
 
@@ -384,6 +393,7 @@ export function buildContributorActivityFromParsedCommits(
     byKey.set(key, list);
   }
 
+  const repoLatestMs = commits.reduce((a, c) => Math.max(a, c.timestamp), 0) * 1000;
   const out: ContributorActivity[] = [];
   for (const [id, group] of byKey) {
     const displayName = pickDisplayName(group);
@@ -433,7 +443,7 @@ export function buildContributorActivityFromParsedCommits(
       testCoupling: computeTestCoupling(group),
       refactorBehavior: computeRefactorRate(group),
       commitCalendar: buildCommitCalendar(group, HEATMAP_WEEK_COLUMNS),
-      commitsPerWeek: commitsPerWeekInRecentWindow(group, CPW_WINDOW_WEEKS),
+      commitsPerWeek: commitsPerWeekInRecentWindow(group, CPW_WINDOW_WEEKS, repoLatestMs),
     });
   }
   out.sort((a, b) => b.commitCount - a.commitCount);

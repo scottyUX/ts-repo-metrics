@@ -36,7 +36,10 @@ export interface CommitHabitsMetricValues {
   burstRatio: number;
   /** Std. dev. of gaps between consecutive commits (ms). */
   entropy: number;
-  /** Mean gap between consecutive commits (ms). */
+  /**
+   * Typical gap between consecutive commits (ms): the median, or the mean on
+   * older reports that have no median. One long pause dominates the mean.
+   */
   commitSpacingMeanMs: number;
   duplication: number;
   framework: string;
@@ -65,7 +68,8 @@ export function getCommitHabitsMetricValues(
     largeCommitRatio: gv2?.commitStats?.pctOver500Loc ?? git?.largeCommitRatio ?? 0,
     burstRatio: gv2?.burstStats?.burstRatio ?? 0,
     entropy: gv2?.entropy?.stdDevTimeBetweenCommits ?? 0,
-    commitSpacingMeanMs: gv2?.entropy?.meanTimeBetweenCommits ?? 0,
+    commitSpacingMeanMs:
+      gv2?.entropy?.medianTimeBetweenCommits ?? gv2?.entropy?.meanTimeBetweenCommits ?? 0,
     duplication,
     framework,
   });
@@ -94,7 +98,7 @@ export function getCommitHabitsMetricValues(
     largeCommitRatio: c.commitStats.pctOver500Loc,
     burstRatio: c.burstStats.burstRatio,
     entropy: c.entropy.stdDevTimeBetweenCommits,
-    commitSpacingMeanMs: c.entropy.meanTimeBetweenCommits ?? 0,
+    commitSpacingMeanMs: c.entropy.medianTimeBetweenCommits ?? c.entropy.meanTimeBetweenCommits ?? 0,
     duplication,
     framework,
   };

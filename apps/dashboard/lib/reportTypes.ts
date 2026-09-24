@@ -199,7 +199,12 @@ export interface ContributorActivity {
     pctOver1000Loc: number;
   };
   burstStats: { burstCount: number; burstRatio: number };
-  entropy: { stdDevTimeBetweenCommits: number; meanTimeBetweenCommits: number };
+  entropy: {
+    stdDevTimeBetweenCommits: number;
+    meanTimeBetweenCommits: number;
+    /** Absent on reports saved before the median gap was added. */
+    medianTimeBetweenCommits?: number;
+  };
   refactorBehavior: { refactorCommitRatio: number };
   testCoupling: {
     pctCommitsTouchingTests: number;
@@ -306,7 +311,12 @@ export interface RepoReport {
   gitMetricsV2?: {
     commitStats: { medianCommitSize: number; p90CommitSize: number; pctOver500Loc: number; pctOver1000Loc: number };
     burstStats: { burstCount: number; burstRatio: number };
-    entropy: { stdDevTimeBetweenCommits: number; meanTimeBetweenCommits: number };
+    entropy: {
+    stdDevTimeBetweenCommits: number;
+    meanTimeBetweenCommits: number;
+    /** Absent on reports saved before the median gap was added. */
+    medianTimeBetweenCommits?: number;
+  };
     churn: { topByModifications: unknown[]; topByLinesChanged: unknown[] };
     refactorBehavior: { refactorCommitRatio: number };
     testCoupling: { pctCommitsTouchingTests: number; testToFeatureCommitRatio: number };
