@@ -1,5 +1,6 @@
 import "server-only";
 import { parsePullRequestUrl, parseTaskSpec, type TaskSpec } from "@/lib/cse115a/taskSpec";
+import { githubReader, tagCommitSha } from "@/lib/cse115a/githubClient";
 
 type GitHubPull = {
   title: string;
@@ -11,35 +12,6 @@ type GitHubPull = {
 
 type GitHubFile = { filename: string };
 type GitHubContent = { encoding: string; content: string; size: number };
-
-async function githubJson<T>(path: string, token: string, optional = false): Promise<T | null> {
-  const response = await fetch(`https://api.github.com${path}`, {
-    headers: {
-      Accept: "application/vnd.github+json",
-      "X-GitHub-Api-Version": "2022-11-28",
-      Authorization: `Bearer ${token}`,
-    },
-    cache: "no-store",
-  });
-  if (optional && response.status === 404) return null;
-  if (!response.ok) throw new Error(response.status === 401 || response.status === 403
-    ? "GitHub access expired or cannot read this repository. Reconnect GitHub and try again."
-    : `GitHub could not load this pull request (${response.status}).`);
-  return response.json() as Promise<T>;
-}
-
-async function tagCommitSha(owner: string, repo: string, tag: string, token: string): Promise<string | null> {
-  const ref = await githubJson<{ object: { type: string; sha: string } }>(
-    `/repos/${owner}/${repo}/git/ref/tags/${encodeURIComponent(tag)}`, token, true,
-  );
-  if (!ref) return null;
-  if (ref.object.type === "commit") return ref.object.sha;
-  if (ref.object.type !== "tag") return null;
-  const annotated = await githubJson<{ object: { type: string; sha: string } }>(
-    `/repos/${owner}/${repo}/git/tags/${ref.object.sha}`, token,
-  );
-  return annotated?.object.type === "commit" ? annotated.object.sha : null;
-}
 
 export type ImportedTask = {
   prUrl: string;
@@ -59,16 +31,17 @@ export async function importTaskFromPullRequest(
   const parsed = parsePullRequestUrl(prUrl);
   if (!parsed) throw new Error("Enter a GitHub pull request URL, such as https://github.com/team/repo/pull/12.");
   const { owner, repo, number } = parsed;
+  const gh = githubReader(token);
   const [pull, githubUser] = await Promise.all([
-    githubJson<GitHubPull>(`/repos/${owner}/${repo}/pulls/${number}`, token),
-    githubJson<{ login: string }>("/user", token),
+    gh.json<GitHubPull>(`/repos/${owner}/${repo}/pulls/${number}`),
+    gh.json<{ login: string }>("/user"),
   ]);
   if (!pull?.merged_at || !pull.merge_commit_sha) throw new Error("This pull request must be merged before submission.");
 
   const candidatePaths: string[] = [];
   for (let page = 1; page <= 3; page++) {
-    const files = await githubJson<GitHubFile[]>(
-      `/repos/${owner}/${repo}/pulls/${number}/files?per_page=100&page=${page}`, token,
+    const files = await gh.json<GitHubFile[]>(
+      `/repos/${owner}/${repo}/pulls/${number}/files?per_page=100&page=${page}`,
     );
     for (const file of files ?? []) {
       if (new RegExp(`^docs/tasks/sprint-${assignmentNumber}/[A-Za-z0-9_-]+\\.md$`, "i").test(file.filename)) {
@@ -85,8 +58,8 @@ export async function importTaskFromPullRequest(
 
   const taskPath = candidatePaths[0]!;
   const encodedPath = taskPath.split("/").map(encodeURIComponent).join("/");
-  const content = await githubJson<GitHubContent>(
-    `/repos/${owner}/${repo}/contents/${encodedPath}?ref=${encodeURIComponent(pull.merge_commit_sha)}`, token,
+  const content = await gh.json<GitHubContent>(
+    `/repos/${owner}/${repo}/contents/${encodedPath}?ref=${encodeURIComponent(pull.merge_commit_sha)}`,
   );
   if (!content || content.encoding !== "base64" || content.size > 65536) {
     throw new Error("The task file could not be imported from the merged PR.");
@@ -98,14 +71,14 @@ export async function importTaskFromPullRequest(
   if (spec.sprint !== assignmentNumber) throw new Error(`The task file sprint must be ${assignmentNumber}.`);
 
   const [baseSha, doneSha, commits] = await Promise.all([
-    tagCommitSha(owner, repo, `${spec.id}-base`, token),
-    tagCommitSha(owner, repo, `${spec.id}-done`, token),
-    githubJson<Array<{ sha: string }>>(`/repos/${owner}/${repo}/pulls/${number}/commits?per_page=1&page=1`, token),
+    tagCommitSha(gh, owner, repo, `${spec.id}-base`),
+    tagCommitSha(gh, owner, repo, `${spec.id}-done`),
+    gh.json<Array<{ sha: string }>>(`/repos/${owner}/${repo}/pulls/${number}/commits?per_page=1&page=1`),
   ]);
   let specCommittedFirst = false;
   if (baseSha && commits?.[0]?.sha === baseSha) {
-    const first = await githubJson<{ files?: Array<{ filename: string }> }>(
-      `/repos/${owner}/${repo}/commits/${baseSha}`, token,
+    const first = await gh.json<{ files?: Array<{ filename: string }> }>(
+      `/repos/${owner}/${repo}/commits/${baseSha}`,
     );
     specCommittedFirst = first?.files?.length === 1 && first.files[0]?.filename === taskPath;
   }

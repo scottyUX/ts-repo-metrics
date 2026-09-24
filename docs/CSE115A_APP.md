@@ -17,7 +17,8 @@ service keeps its normal home page.
 
 ## Backend setup
 
-- Apply `supabase/migrations/20260924000000_cse115a_course_submissions.sql`.
+- Apply `supabase/migrations/20260924000000_cse115a_course_submissions.sql`, then
+  `20260925000000_cse115a_final_submissions.sql` (submit-once, snapshots, job queue).
 - Enable Google Auth in the Supabase project and configure its Google OAuth
   client ID and secret. In Google Cloud, add
   `https://walwexxczaibfojinkfi.supabase.co/auth/v1/callback` as an authorized

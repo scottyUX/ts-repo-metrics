@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSupabase, isSupabaseConfigured } from "@/lib/supabase/server";
-import { getCourseIdentity } from "@/lib/cse115a/server";
+import { ASSIGNMENT_SUBMISSION_COLUMNS, getCourseIdentity } from "@/lib/cse115a/server";
 
 export const runtime = "nodejs";
 
@@ -23,8 +23,8 @@ export async function GET() {
       .select("id,course_id,assignment_number,task_slot,task_id,pr_url,task_path,task_spec_json,validation_json,analysis_result_id,updated_at")
       .eq("user_id", identity.userId).in("course_id", courseIds)
       .order("assignment_number").order("task_slot"),
-    db.from("cse_assignment_submissions").select("course_id,assignment_number,submitted_at")
-      .eq("user_id", identity.userId).in("course_id", courseIds),
+    db.from("cse_assignment_submissions").select(ASSIGNMENT_SUBMISSION_COLUMNS)
+      .eq("user_id", identity.userId).in("course_id", courseIds).is("superseded_at", null),
   ]);
   if (coursesResult.error || submissionsResult.error || assignmentResult.error) {
     return NextResponse.json({ error: "Could not load assignments." }, { status: 500 });

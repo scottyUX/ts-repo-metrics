@@ -28,3 +28,22 @@ export async function getEnrolledCourse(userId: string, slug: string): Promise<C
     .maybeSingle();
   return membership ? course as Course : null;
 }
+
+export type AssignmentSubmissionStatus = "submitted" | "grading" | "graded" | "released" | "grading_failed";
+export const ASSIGNMENT_SUBMISSION_COLUMNS = "id,course_id,assignment_number,attempt,status,submitted_at";
+
+/** The student's current final submission for an assignment, if any. While it exists the tasks are locked. */
+export async function getActiveAssignmentSubmission(courseId: string, userId: string, assignmentNumber: number) {
+  const { data, error } = await getSupabase()
+    .from("cse_assignment_submissions")
+    .select(ASSIGNMENT_SUBMISSION_COLUMNS)
+    .eq("course_id", courseId).eq("user_id", userId).eq("assignment_number", assignmentNumber)
+    .is("superseded_at", null)
+    .maybeSingle();
+  if (error) throw new Error("Could not check the assignment submission.");
+  return data as { id: string; course_id: string; assignment_number: number; attempt: number; status: AssignmentSubmissionStatus; submitted_at: string } | null;
+}
+
+export function lockedAssignmentMessage(assignmentNumber: number): string {
+  return `Assignment ${assignmentNumber} is already submitted, so its tasks are locked. Ask your instructor if something needs to change.`;
+}

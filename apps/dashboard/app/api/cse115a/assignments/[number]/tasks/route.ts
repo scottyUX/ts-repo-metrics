@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSupabase, isSupabaseConfigured } from "@/lib/supabase/server";
-import { getCourseIdentity, getEnrolledCourse } from "@/lib/cse115a/server";
+import { getActiveAssignmentSubmission, getCourseIdentity, getEnrolledCourse, lockedAssignmentMessage } from "@/lib/cse115a/server";
 import { getDecryptedGitHubTokenForUser } from "@/lib/userGitHubToken";
 import { importTaskFromPullRequest } from "@/lib/cse115a/githubTaskImport";
 import { parseGitHubUrl } from "@/lib/github/parseGitHubUrl";
@@ -9,6 +9,16 @@ export const runtime = "nodejs";
 
 type Params = { params: Promise<{ number: string }> };
 type SubmissionBody = { courseSlug?: unknown; slot?: unknown; prUrl?: unknown; resultId?: unknown };
+
+function lockedResponse(assignmentNumber: number) {
+  return NextResponse.json({ error: lockedAssignmentMessage(assignmentNumber), code: "already_submitted" }, { status: 409 });
+}
+
+// The database trigger rejects task changes after the final submission, which
+// covers a submit that lands between our check and the write.
+function isLockedError(error: { message?: string } | null): boolean {
+  return Boolean(error?.message?.includes("assignment_locked"));
+}
 
 async function context(params: Params, body: SubmissionBody) {
   const identity = await getCourseIdentity();
@@ -23,6 +33,9 @@ async function context(params: Params, body: SubmissionBody) {
   }
   const slot = Number(body.slot);
   if (slot !== 1 && slot !== 2) return { error: NextResponse.json({ error: "Choose task 1 or task 2." }, { status: 400 }) };
+  if (await getActiveAssignmentSubmission(course.id, identity.userId, assignmentNumber)) {
+    return { error: lockedResponse(assignmentNumber) };
+  }
   return { identity, course, assignmentNumber, slot };
 }
 
@@ -61,10 +74,8 @@ export async function POST(request: Request, params: Params) {
     }, { onConflict: "course_id,user_id,assignment_number,task_slot" })
     .select("id,course_id,assignment_number,task_slot,task_id,pr_url,task_path,task_spec_json,validation_json,analysis_result_id,updated_at")
     .single();
+  if (isLockedError(error)) return lockedResponse(assignmentNumber);
   if (error) return NextResponse.json({ error: error.code === "23505" ? "This task ID or PR is already submitted in another slot." : "Could not save the task submission." }, { status: error.code === "23505" ? 409 : 500 });
-  const { error: invalidateError } = await getSupabase().from("cse_assignment_submissions").delete()
-    .eq("course_id", course.id).eq("user_id", identity.userId).eq("assignment_number", assignmentNumber);
-  if (invalidateError) return NextResponse.json({ error: "Task saved, but assignment status could not be reset. Try again." }, { status: 500 });
   return NextResponse.json({ submission: data });
 }
 
@@ -98,6 +109,7 @@ export async function PATCH(request: Request, params: Params) {
     .eq("id", submission.id).eq("user_id", identity.userId)
     .select("id,course_id,assignment_number,task_slot,task_id,pr_url,task_path,task_spec_json,validation_json,analysis_result_id,updated_at")
     .single();
+  if (isLockedError(error)) return lockedResponse(assignmentNumber);
   if (error) return NextResponse.json({ error: "Could not save the analysis result." }, { status: 500 });
   return NextResponse.json({ submission: data });
 }

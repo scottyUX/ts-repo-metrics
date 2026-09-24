@@ -7,6 +7,7 @@ import { createUserSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { buildOAuthCallbackUrl, getOAuthRedirectOrigin, stashOAuthNextPath, stashOAuthProvider } from "@/lib/oauthRedirectOrigin";
 import { parsePullRequestUrl, type TaskSpec } from "@/lib/cse115a/taskSpec";
 import { runAnalyzeFromUrl } from "@/lib/runAnalyze";
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 type Course = { id: string; slug: string; title: string; term: string; assignment_count: number };
 type Submission = {
@@ -22,22 +23,42 @@ type Submission = {
   analysis_result_id: string | null;
   updated_at: string;
 };
-type AssignmentSubmission = { course_id: string; assignment_number: number; submitted_at: string };
+type AssignmentSubmissionStatus = "submitted" | "grading" | "graded" | "released" | "grading_failed";
+type AssignmentSubmission = { id: string; course_id: string; assignment_number: number; attempt: number; status: AssignmentSubmissionStatus; submitted_at: string };
+export type PreviewState = "draft" | "ready" | "submitted";
 type Me = { email: string; courses: Course[]; submissions: Submission[]; assignmentSubmissions: AssignmentSubmission[] };
 
 const previewCourse: Course = { id: "preview-course", slug: "CSE115A-Fall26", title: "CSE 115A", term: "Fall 2026", assignment_count: 5 };
-const previewMe: Me = {
-  email: "student@ucsc.edu",
-  courses: [previewCourse],
-  submissions: [{
-    id: "preview-task", course_id: previewCourse.id, assignment_number: 1, task_slot: 1,
-    task_id: "task-01", pr_url: "https://github.com/example/team-project/pull/12",
-    task_path: "docs/tasks/sprint-1/task-01.md",
-    task_spec_json: { title: "Example task: improve route handling", description: "Define the behavior, acceptance criteria, and tests before implementation." } as TaskSpec,
-    validation_json: { prMerged: true, specCommittedFirst: true, baseTagPushed: false },
-    analysis_result_id: "preview-result", updated_at: new Date().toISOString(),
-  }],
-  assignmentSubmissions: [],
+const previewTask: Submission = {
+  id: "preview-task", course_id: previewCourse.id, assignment_number: 1, task_slot: 1,
+  task_id: "task-01", pr_url: "https://github.com/example/team-project/pull/12",
+  task_path: "docs/tasks/sprint-1/task-01.md",
+  task_spec_json: { title: "Example task: improve route handling", description: "Define the behavior, acceptance criteria, and tests before implementation." } as TaskSpec,
+  validation_json: { prMerged: true, specCommittedFirst: true, baseTagPushed: false },
+  analysis_result_id: "preview-result", updated_at: new Date().toISOString(),
+};
+
+function previewMe(state: PreviewState): Me {
+  if (state === "draft") return { email: "student@ucsc.edu", courses: [previewCourse], submissions: [previewTask], assignmentSubmissions: [] };
+  return {
+    email: "student@ucsc.edu",
+    courses: [previewCourse],
+    submissions: [previewTask, {
+      ...previewTask, id: "preview-task-2", task_slot: 2, task_id: "task-02",
+      pr_url: "https://github.com/example/team-project/pull/15", task_path: "docs/tasks/sprint-1/task-02.md",
+      task_spec_json: { title: "Example task: validate the signup form", description: "Reject empty and malformed emails before the request is sent." } as TaskSpec,
+      validation_json: { prMerged: true, specCommittedFirst: true, baseTagPushed: true },
+    }],
+    assignmentSubmissions: state === "ready" ? [] : [{ id: "preview-submission", course_id: previewCourse.id, assignment_number: 1, attempt: 1, status: "submitted", submitted_at: new Date().toISOString() }],
+  };
+}
+
+const SUBMISSION_STATUS: Record<AssignmentSubmissionStatus, string> = {
+  submitted: "Waiting for grading",
+  grading: "Grading in progress",
+  graded: "Awaiting instructor review",
+  grading_failed: "Awaiting instructor review",
+  released: "Grade released",
 };
 
 const CHECK_LABELS: Record<string, string> = {
@@ -55,9 +76,9 @@ async function jsonResponse<T>(response: Response): Promise<T & { error?: string
   return response.json() as Promise<T & { error?: string }>;
 }
 
-export function CourseDashboard({ preview = false }: { preview?: boolean }) {
+export function CourseDashboard({ preview = false, previewState = "draft" }: { preview?: boolean; previewState?: PreviewState }) {
   const router = useRouter();
-  const [me, setMe] = useState<Me | null>(preview ? previewMe : null);
+  const [me, setMe] = useState<Me | null>(preview ? previewMe(previewState) : null);
   const [loading, setLoading] = useState(!preview);
   const [error, setError] = useState<string | null>(null);
   const [joinCode, setJoinCode] = useState("");
@@ -69,6 +90,7 @@ export function CourseDashboard({ preview = false }: { preview?: boolean }) {
   const [githubConnected, setGithubConnected] = useState<boolean | null>(preview ? true : null);
   const [connectingGithub, setConnectingGithub] = useState(false);
   const [submittingAssignment, setSubmittingAssignment] = useState(false);
+  const [confirmingSubmit, setConfirmingSubmit] = useState(false);
 
   const load = useCallback(async () => {
     if (preview) return;
@@ -103,6 +125,7 @@ export function CourseDashboard({ preview = false }: { preview?: boolean }) {
     item.course_id === course?.id && item.assignment_number === assignmentNumber), [me, course, assignmentNumber]);
   const assignmentSubmission = me?.assignmentSubmissions.find((item) =>
     item.course_id === course?.id && item.assignment_number === assignmentNumber);
+  const locked = Boolean(assignmentSubmission);
 
   async function joinCourse(event: React.FormEvent) {
     event.preventDefault();
@@ -189,6 +212,7 @@ export function CourseDashboard({ preview = false }: { preview?: boolean }) {
     if (preview) return;
     if (!course) return;
     setSubmittingAssignment(true);
+    setConfirmingSubmit(false);
     setError(null);
     try {
       const response = await fetch(`/api/cse115a/assignments/${assignmentNumber}/submit`, {
@@ -255,8 +279,9 @@ export function CourseDashboard({ preview = false }: { preview?: boolean }) {
               <nav className="flex flex-wrap gap-2" aria-label="Assignments">
                 {Array.from({ length: course.assignment_count }, (_, index) => index + 1).map((number) => {
                   const complete = (me.submissions ?? []).filter((item) => item.course_id === course.id && item.assignment_number === number && item.analysis_result_id).length;
+                  const submitted = me.assignmentSubmissions.some((item) => item.course_id === course.id && item.assignment_number === number);
                   return <button key={number} type="button" onClick={() => setAssignmentNumber(number)} className={`rounded-lg border px-4 py-2 text-sm font-medium ${number === assignmentNumber ? "border-primary bg-primary text-primary-foreground" : "border-input bg-card text-foreground"}`}>
-                    Assignment {number} <span className="ml-1 opacity-70">{complete}/2</span>
+                    Assignment {number} <span className="ml-1 opacity-70">{submitted ? "Submitted" : `${complete}/2`}</span>
                   </button>;
                 })}
               </nav>
@@ -288,11 +313,13 @@ export function CourseDashboard({ preview = false }: { preview?: boolean }) {
                             ) : null}
                           </div>
                         ) : <p className="mt-3 text-sm text-muted-foreground">No pull request submitted yet.</p>}
+                        {locked ? <p className="mt-5 text-sm text-muted-foreground">Locked after the assignment was submitted.</p> : <>
                         <label htmlFor={`pr-${slot}`} className="mt-5 block text-sm font-medium">Merged pull request URL</label>
                         <input id={`pr-${slot}`} type="url" value={prInputs[slot] ?? ""} onChange={(event) => setPrInputs((previous) => ({ ...previous, [slot]: event.target.value }))} placeholder="https://github.com/team/repo/pull/12" className="mt-2 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground" />
                         <button type="button" disabled={preview || Boolean(phase[slot]) || githubConnected === false} onClick={() => void submitTask(slot)} className="mt-3 w-full rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50">
                           {phase[slot] || (item?.analysis_result_id ? "Replace task PR" : item ? "Retry analysis" : "Submit task")}
                         </button>
+                        </>}
                       </div>
                     );
                   })}
@@ -302,16 +329,40 @@ export function CourseDashboard({ preview = false }: { preview?: boolean }) {
                     <h3 className="font-semibold">Assignment {assignmentNumber} submission</h3>
                     <p className="mt-1 text-sm text-muted-foreground">
                       {assignmentSubmission
-                        ? `Submitted ${new Date(assignmentSubmission.submitted_at).toLocaleString()}`
-                        : `${submissions.filter((item) => item.analysis_result_id).length} of 2 tasks analyzed`}
+                        ? `Submitted ${new Date(assignmentSubmission.submitted_at).toLocaleString()} · ${SUBMISSION_STATUS[assignmentSubmission.status]}`
+                        : `${submissions.filter((item) => item.analysis_result_id).length} of 2 tasks analyzed. You can replace task PRs until you submit.`}
                     </p>
                   </div>
-                  <button type="button" disabled={preview || submittingAssignment || submissions.filter((item) => item.analysis_result_id).length !== 2}
-                    onClick={() => void submitAssignment()}
-                    className="rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50">
-                    {submittingAssignment ? "Submitting…" : assignmentSubmission ? "Resubmit assignment" : `Submit Assignment ${assignmentNumber}`}
-                  </button>
+                  {assignmentSubmission ? (
+                    <span className="rounded-lg border border-border bg-muted px-4 py-2 text-sm font-medium text-foreground">Submitted</span>
+                  ) : (
+                    <button type="button" disabled={submittingAssignment || submissions.filter((item) => item.analysis_result_id).length !== 2}
+                      onClick={() => setConfirmingSubmit(true)}
+                      className="rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50">
+                      {submittingAssignment ? "Submitting…" : `Submit Assignment ${assignmentNumber}`}
+                    </button>
+                  )}
                 </div>
+                <Dialog open={confirmingSubmit} onOpenChange={setConfirmingSubmit}>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Submit Assignment {assignmentNumber}?</DialogTitle>
+                      <DialogDescription>You can submit each assignment once. After you submit, these task PRs are locked and sent for grading.</DialogDescription>
+                    </DialogHeader>
+                    <ul className="space-y-2 text-sm">
+                      {[...submissions].sort((a, b) => a.task_slot - b.task_slot).map((item) => (
+                        <li key={item.id} className="rounded-lg border border-border p-3">
+                          <p className="font-medium">Task {item.task_slot}: {item.task_id}</p>
+                          <p className="text-muted-foreground">{item.pr_url}</p>
+                        </li>
+                      ))}
+                    </ul>
+                    <DialogFooter>
+                      <DialogClose className="rounded-lg border border-input px-4 py-2 text-sm font-medium">Keep editing</DialogClose>
+                      <button type="button" onClick={() => void submitAssignment()} className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">Submit</button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
               </section>
             </>
           ) : null}
