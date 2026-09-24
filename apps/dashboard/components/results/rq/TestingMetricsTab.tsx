@@ -339,7 +339,7 @@ export function TestingMetricsTab({ report, scopeId, onScopeIdChange, onOpenCode
           <MetricCard
             {...cardProps}
             label="% commits touching tests"
-            value={`${formatNumber(mv.pctCommitsTouchingTests)}%`}
+            value={`${Number(mv.pctCommitsTouchingTests.toFixed(1))}%`}
             tooltip={pctTestTooltip}
             metricHelp={{
               title: "Percent of commits touching tests",
