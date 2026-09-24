@@ -18,7 +18,8 @@ export const OVERVIEW_CARD_ASPECT_CLASS = "aspect-[258/324]";
 export interface OverviewCardItem {
   id: string;
   title: string;
-  tier: "strong" | "good" | "needs_work" | "critical";
+  /** `no_data` pairs with `score: null` when the metric was not measured. */
+  tier: "strong" | "good" | "needs_work" | "critical" | "no_data";
   score: number | null;
   description: string;
   /** Accessible name for the card action. Defaults to “View {title} details”. */
@@ -51,6 +52,11 @@ const tierMeta: Record<
     badgeClassName:
       "border-transparent bg-status-critical/12 font-medium text-status-critical",
     scoreClassName: "text-status-critical",
+  },
+  no_data: {
+    label: "Not measured",
+    badgeClassName: "border-transparent bg-muted font-medium text-muted-foreground",
+    scoreClassName: "text-muted-foreground",
   },
 };
 

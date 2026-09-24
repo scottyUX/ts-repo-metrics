@@ -18,6 +18,7 @@ import { GlobalCoachSays } from "./coach";
 import { GitHubRepositoryPanel } from "./GitHubRepositoryPanel";
 import { OverviewCardsStrip } from "./OverviewCardsStrip";
 import { AnalysisScopeBanner } from "./AnalysisScopeBanner";
+import { AnalyzedLanguagesSummary } from "./AnalyzedLanguagesSummary";
 import { buildOverviewScoreStrip } from "@/lib/buildOverviewCards";
 import { hasReactUiScope } from "@/lib/hasReactUiScope";
 import type { RepoReport } from "@/lib/reportTypes";
@@ -27,7 +28,12 @@ import { RepoChat } from "@/components/chat/RepoChat";
 import { CoachExplainProvider } from "@/lib/repoCoachContext";
 import { ResultsTabPanelIntro } from "./ResultsTabPanelIntro";
 import { CommitHabitsTabInsightProvider } from "./CommitHabitsTabInsightContext";
-import { RESULTS_TAB, type ResultsTabId } from "@/lib/resultsNavigation";
+import {
+  RESULTS_TAB,
+  availableResultsTabs,
+  formatTabList,
+  type ResultsTabId,
+} from "@/lib/resultsNavigation";
 import { COMMIT_HABITS_SCOPE_TEAM, type CommitHabitsScopeId } from "@/lib/commitHabitsScopeMetrics";
 
 interface ResultsDashboardProps {
@@ -55,11 +61,26 @@ export function ResultsDashboard({ report, resultId }: ResultsDashboardProps) {
   const courseSubmissionLabel =
     courseIdTrim ? `${courseIdTrim}${teamTrim ? ` · ${teamTrim}` : ""}` : null;
 
-  const showReact = hasReactUiScope(report);
+  const analysisSkipped = Boolean(report.analysisSkipped);
+  const showReact = !analysisSkipped && hasReactUiScope(report);
+  const availableTabs = useMemo(
+    () => availableResultsTabs({ analysisSkipped, showReact }),
+    [analysisSkipped, showReact],
+  );
+  const hasTab = (tab: ResultsTabId) => availableTabs.includes(tab);
   const commit = report?.source?.commit?.slice(0, 7) ?? "—";
   const exportFilename = `repo-metrics-${resultId}-${commit}.json`;
   const [newAnalysisHref, setNewAnalysisHref] = useState("/");
-  const [resultsTab, setResultsTab] = useState<ResultsTabId>(RESULTS_TAB.commitHabits);
+  const [resultsTab, setResultsTabState] = useState<ResultsTabId>(RESULTS_TAB.commitHabits);
+  /** Ignores requests (coach, overview cards) for tabs this report doesn't show. */
+  const setResultsTab = useCallback(
+    (tab: ResultsTabId) => {
+      if (availableTabs.includes(tab)) setResultsTabState(tab);
+    },
+    [availableTabs],
+  );
+  /** Falls back to Commit Habits if the selected tab is not shown for this report. */
+  const activeTab = availableTabs.includes(resultsTab) ? resultsTab : RESULTS_TAB.commitHabits;
   const [commitHabitsScopeId, setCommitHabitsScopeId] = useState<CommitHabitsScopeId>(
     COMMIT_HABITS_SCOPE_TEAM,
   );
@@ -88,17 +109,11 @@ export function ResultsDashboard({ report, resultId }: ResultsDashboardProps) {
   }, []);
 
   useEffect(() => {
-    setResultsTab(RESULTS_TAB.commitHabits);
+    setResultsTabState(RESULTS_TAB.commitHabits);
     setCommitHabitsScopeId(COMMIT_HABITS_SCOPE_TEAM);
     setTestingScopeId(COMMIT_HABITS_SCOPE_TEAM);
     setCodeQualityScopeId(COMMIT_HABITS_SCOPE_TEAM);
   }, [resultId, report.analysis_timestamp, report.source?.commit]);
-
-  useEffect(() => {
-    if (!showReact && resultsTab === RESULTS_TAB.reactComponents) {
-      setResultsTab(RESULTS_TAB.commitHabits);
-    }
-  }, [showReact, resultsTab]);
 
   const handleExport = useCallback(() => {
     const blob = new Blob([JSON.stringify(report, null, 2)], {
@@ -139,13 +154,17 @@ export function ResultsDashboard({ report, resultId }: ResultsDashboardProps) {
         <AnalysisScopeBanner report={report} />
         {report.analysisSkipped ? (
           <div className="rounded-md border border-border bg-muted px-4 py-3 text-sm text-foreground">
-            {report.analysisSkipped.message}
+            <p>{report.analysisSkipped.message}</p>
+            <p className="mt-1 text-muted-foreground">
+              Only {formatTabList(availableTabs)} are available for this analysis.
+            </p>
           </div>
         ) : null}
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <h1 className="text-xl font-semibold tracking-tight">Analysis Results</h1>
             <p className="text-muted-foreground text-sm">Commit: {commit}</p>
+            <AnalyzedLanguagesSummary report={report} />
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <Button
@@ -182,10 +201,10 @@ export function ResultsDashboard({ report, resultId }: ResultsDashboardProps) {
 
         <CommitHabitsTabInsightProvider
           report={report}
-          enabled={resultsTab === RESULTS_TAB.commitHabits}
+          enabled={activeTab === RESULTS_TAB.commitHabits}
           commitHabitsScopeId={commitHabitsScopeId}
         >
-          <Tabs value={resultsTab} onValueChange={(v) => setResultsTab(v as ResultsTabId)} className="w-full">
+          <Tabs value={activeTab} onValueChange={(v) => setResultsTab(v as ResultsTabId)} className="w-full">
             <div className="w-full max-w-full overflow-x-auto [-webkit-overflow-scrolling:touch] [scrollbar-width:thin]">
               <TabsList
                 aria-label="Result categories"
@@ -198,21 +217,25 @@ export function ResultsDashboard({ report, resultId }: ResultsDashboardProps) {
                 >
                   Commit Habits
                 </TabsTrigger>
-                <TabsTrigger
-                  className={resultsTabTriggerClass}
-                  value={RESULTS_TAB.testing}
-                  title="Testing and verification — test density, commits touching tests, structural risk signals"
-                >
-                  Testing
-                </TabsTrigger>
-                <TabsTrigger
-                  className={resultsTabTriggerClass}
-                  value={RESULTS_TAB.codeQuality}
-                  title="Code quality — complexity, maintainability, duplication"
-                >
-                  Code Quality
-                </TabsTrigger>
-                {showReact ? (
+                {hasTab(RESULTS_TAB.testing) ? (
+                  <TabsTrigger
+                    className={resultsTabTriggerClass}
+                    value={RESULTS_TAB.testing}
+                    title="Testing and verification — test density, commits touching tests, structural risk signals"
+                  >
+                    Testing
+                  </TabsTrigger>
+                ) : null}
+                {hasTab(RESULTS_TAB.codeQuality) ? (
+                  <TabsTrigger
+                    className={resultsTabTriggerClass}
+                    value={RESULTS_TAB.codeQuality}
+                    title="Code quality — complexity, maintainability, duplication"
+                  >
+                    Code Quality
+                  </TabsTrigger>
+                ) : null}
+                {hasTab(RESULTS_TAB.reactComponents) ? (
                   <TabsTrigger
                     className={resultsTabTriggerClass}
                     value={RESULTS_TAB.reactComponents}
@@ -221,13 +244,15 @@ export function ResultsDashboard({ report, resultId }: ResultsDashboardProps) {
                     React Components
                   </TabsTrigger>
                 ) : null}
-                <TabsTrigger
-                  className={resultsTabTriggerClass}
-                  value={RESULTS_TAB.codeComplexity}
-                  title="Code complexity — Halstead and cognitive complexity, maintainability index (per function)"
-                >
-                  Code Complexity
-                </TabsTrigger>
+                {hasTab(RESULTS_TAB.codeComplexity) ? (
+                  <TabsTrigger
+                    className={resultsTabTriggerClass}
+                    value={RESULTS_TAB.codeComplexity}
+                    title="Code complexity — Halstead and cognitive complexity, maintainability index (per function)"
+                  >
+                    Code Complexity
+                  </TabsTrigger>
+                ) : null}
                 <TabsTrigger
                   className={resultsTabTriggerClass}
                   value={RESULTS_TAB.aiUsage}
@@ -252,7 +277,7 @@ export function ResultsDashboard({ report, resultId }: ResultsDashboardProps) {
               </TabsList>
             </div>
             <div className="mt-4">
-              <ResultsTabPanelIntro activeTab={resultsTab} report={report} codeQualityScopeId={codeQualityScopeId} testingScopeId={testingScopeId} />
+              <ResultsTabPanelIntro activeTab={activeTab} report={report} codeQualityScopeId={codeQualityScopeId} testingScopeId={testingScopeId} />
             </div>
             <TabsContent
               value={RESULTS_TAB.commitHabits}
@@ -265,25 +290,29 @@ export function ResultsDashboard({ report, resultId }: ResultsDashboardProps) {
                 onScopeIdChange={setCommitHabitsScopeId}
               />
             </TabsContent>
-            <TabsContent value={RESULTS_TAB.testing} className="mt-6">
-              <div id="testing-panel" className="scroll-mt-8 space-y-8">
-                <TestingMetricsTab
+            {hasTab(RESULTS_TAB.testing) ? (
+              <TabsContent value={RESULTS_TAB.testing} className="mt-6">
+                <div id="testing-panel" className="scroll-mt-8 space-y-8">
+                  <TestingMetricsTab
+                    report={report}
+                    scopeId={testingScopeId}
+                    onScopeIdChange={setTestingScopeId}
+                    onOpenCodeQualityTab={() => setResultsTab(RESULTS_TAB.codeQuality)}
+                  />
+                </div>
+              </TabsContent>
+            ) : null}
+            {hasTab(RESULTS_TAB.codeQuality) ? (
+              <TabsContent value={RESULTS_TAB.codeQuality} id="code-quality-panel" className="mt-6 scroll-mt-8">
+                <CodeQualityMetricsTab
                   report={report}
-                  scopeId={testingScopeId}
-                  onScopeIdChange={setTestingScopeId}
-                  onOpenCodeQualityTab={() => setResultsTab(RESULTS_TAB.codeQuality)}
+                  scopeId={codeQualityScopeId}
+                  onScopeIdChange={setCodeQualityScopeId}
+                  onOpenTestingTab={() => setResultsTab(RESULTS_TAB.testing)}
                 />
-              </div>
-            </TabsContent>
-            <TabsContent value={RESULTS_TAB.codeQuality} id="code-quality-panel" className="mt-6 scroll-mt-8">
-              <CodeQualityMetricsTab
-                report={report}
-                scopeId={codeQualityScopeId}
-                onScopeIdChange={setCodeQualityScopeId}
-                onOpenTestingTab={() => setResultsTab(RESULTS_TAB.testing)}
-              />
-            </TabsContent>
-            {showReact ? (
+              </TabsContent>
+            ) : null}
+            {hasTab(RESULTS_TAB.reactComponents) ? (
               <TabsContent
                 value={RESULTS_TAB.reactComponents}
                 id="react-components-panel"
@@ -295,16 +324,18 @@ export function ResultsDashboard({ report, resultId }: ResultsDashboardProps) {
                 />
               </TabsContent>
             ) : null}
-            <TabsContent
-              value={RESULTS_TAB.codeComplexity}
-              id="code-complexity-panel"
-              className="mt-6 scroll-mt-8"
-            >
-              <Phase2ComplexityTab
-                report={report}
-                onOpenCodeQualityTab={() => setResultsTab(RESULTS_TAB.codeQuality)}
-              />
-            </TabsContent>
+            {hasTab(RESULTS_TAB.codeComplexity) ? (
+              <TabsContent
+                value={RESULTS_TAB.codeComplexity}
+                id="code-complexity-panel"
+                className="mt-6 scroll-mt-8"
+              >
+                <Phase2ComplexityTab
+                  report={report}
+                  onOpenCodeQualityTab={() => setResultsTab(RESULTS_TAB.codeQuality)}
+                />
+              </TabsContent>
+            ) : null}
             <TabsContent value={RESULTS_TAB.aiUsage} id="ai-usage-panel" className="mt-6 scroll-mt-8">
               <AIMaturityTab resultId={resultId} />
             </TabsContent>
