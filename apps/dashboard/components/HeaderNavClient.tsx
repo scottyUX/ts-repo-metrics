@@ -27,6 +27,7 @@ import {
   buildOAuthCallbackUrl,
   getOAuthRedirectOrigin,
   stashOAuthNextPath,
+  stashOAuthProvider,
 } from "@/lib/oauthRedirectOrigin";
 import { cn } from "@/lib/utils";
 
@@ -107,7 +108,7 @@ function AvatarCircle({
   );
 }
 
-export function HeaderNavClient() {
+export function HeaderNavClient({ cse115aSite = false }: { cse115aSite?: boolean }) {
   const pathname = usePathname();
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
@@ -227,6 +228,7 @@ export function HeaderNavClient() {
     const supabase = createUserSupabaseBrowserClient();
     const origin = getOAuthRedirectOrigin();
     stashOAuthNextPath("/repos");
+    stashOAuthProvider("github");
     await supabase.auth.signInWithOAuth({
       provider: "github",
       options: {
@@ -407,7 +409,7 @@ export function HeaderNavClient() {
           href={signedIn ? "/repos" : "/"}
           className="shrink-0 text-sm font-semibold tracking-tight text-foreground transition-colors hover:text-foreground"
         >
-          Repo Metrics
+          {cse115aSite ? "CSE 115A Repo Metrics" : "Repo Metrics"}
         </Link>
       )}
 

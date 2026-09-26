@@ -1,9 +1,9 @@
-"use client";
-
 /**
  * Main landing page — hero + dashboard preview + feature sections.
  */
 
+import { connection } from "next/server";
+import { redirect } from "next/navigation";
 import { AnalyzeRepositoryHero } from "@/components/analyze/AnalyzeRepositoryHero";
 import { DashboardPreview } from "@/components/landing/DashboardPreview";
 import { FeatureSections } from "@/components/landing/FeatureSections";
@@ -12,7 +12,11 @@ import { FeatureSections } from "@/components/landing/FeatureSections";
 // Page
 // ---------------------------------------------------------------------------
 
-export default function HomePage() {
+export default async function HomePage() {
+  await connection();
+  if (process.env.CSE115A_SITE === "true") {
+    redirect("/cse115a");
+  }
   return (
     <div className="w-full pb-16">
       {/* Hero */}

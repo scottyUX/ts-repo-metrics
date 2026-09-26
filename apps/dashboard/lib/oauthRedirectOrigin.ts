@@ -1,5 +1,6 @@
 /** Cookie name for post-OAuth redirect path (avoids ?next= on redirectTo URL). */
 export const OAUTH_NEXT_COOKIE = "repo_metrics_oauth_next";
+export const OAUTH_PROVIDER_COOKIE = "repo_metrics_oauth_provider";
 
 const OAUTH_NEXT_MAX_AGE_SEC = 600;
 
@@ -44,6 +45,17 @@ export function stashOAuthNextPath(nextPath: string): void {
   document.cookie = `${OAUTH_NEXT_COOKIE}=${value}; path=/; max-age=${OAUTH_NEXT_MAX_AGE_SEC}; SameSite=Lax`;
 }
 
+export function stashOAuthProvider(provider: "github" | "google"): void {
+  if (typeof document === "undefined") return;
+  document.cookie = `${OAUTH_PROVIDER_COOKIE}=${provider}; path=/; max-age=${OAUTH_NEXT_MAX_AGE_SEC}; SameSite=Lax`;
+}
+
+export function readOAuthProviderFromCookie(cookieHeader: string | null): "github" | "google" | null {
+  if (!cookieHeader) return null;
+  const match = cookieHeader.match(new RegExp(`(?:^|;\\s*)${OAUTH_PROVIDER_COOKIE}=([^;]*)`));
+  return match?.[1] === "github" || match?.[1] === "google" ? match[1] : null;
+}
+
 export function readOAuthNextPathFromCookie(cookieHeader: string | null): string {
   if (!cookieHeader) return "/repos";
   const match = cookieHeader.match(
@@ -60,4 +72,8 @@ export function readOAuthNextPathFromCookie(cookieHeader: string | null): string
 
 export function clearOAuthNextCookieHeader(): string {
   return `${OAUTH_NEXT_COOKIE}=; path=/; max-age=0; SameSite=Lax`;
+}
+
+export function clearOAuthProviderCookieHeader(): string {
+  return `${OAUTH_PROVIDER_COOKIE}=; path=/; max-age=0; SameSite=Lax`;
 }

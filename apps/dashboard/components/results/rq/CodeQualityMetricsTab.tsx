@@ -36,6 +36,7 @@ interface CodeQualityMetricsTabProps {
   scopeId: CommitHabitsScopeId;
   onScopeIdChange: (next: CommitHabitsScopeId) => void;
   onOpenTestingTab?: () => void;
+  prOnly?: boolean;
 }
 
 function formatNumber(n: number): string {
@@ -48,6 +49,7 @@ export function CodeQualityMetricsTab({
   scopeId,
   onScopeIdChange,
   onOpenTestingTab,
+  prOnly = false,
 }: CodeQualityMetricsTabProps) {
   const contributors = useMemo(() => report.contributors ?? [], [report.contributors]);
 
@@ -101,7 +103,7 @@ export function CodeQualityMetricsTab({
 
   return (
     <div className="space-y-8">
-      {contributors.length > 0 ? (
+      {!prOnly && contributors.length > 0 ? (
         <div className="flex flex-wrap items-end gap-3">
           <div className="flex flex-col gap-1">
             <label htmlFor="code-quality-scope" className="text-sm font-medium text-foreground">
