@@ -98,11 +98,20 @@ submitted it, a `validation_status`, and flags such as
   (`file::describe > it` for Jest/Vitest, `file::Class::test` for pytest).
   They are unverified. `PASS_TO_PASS`, `image`, `eval_script`, and
   `log_parser` stay empty until a Docker validation pass.
+- Personal information is removed before a row is stored
+  (`lib/cse115a/benchmark/scrubPii.ts`). The spec's `assignee`, the PR and
+  comment authors, and the student's email are collected for each task. They
+  are replaced in `problem_statement`, `hints_text`, and `repo_metrics`, along
+  with any email address or @mention. Per-author data is dropped from
+  `repo_metrics`. In `patch` and `test_patch` only added lines are changed,
+  so the patch still applies. Known names become `student`, logins become
+  `anon`, and UCSC or known emails become `student@example.com`. Rows changed
+  this way get the `pii_scrubbed_from_patch` flag, because a test's meaning
+  may have changed. `repo` and `instance_id` still name the team's
+  repository.
 - Export (`lib/cse115a/benchmark/exportJsonl.ts`) includes an instance only
-  when a student who submitted it has consented and no source is rejected. It
-  removes per-author activity, logins, and email addresses from
-  `repo_metrics`. The spec, diff, and comments are exported as written, so
-  rows are not anonymous; the consent text says so.
+  when a student who submitted it said yes to the current, approved consent
+  wording and no source is rejected.
 
 ## Instructor tools
 
@@ -140,6 +149,11 @@ released grades of the current attempt.
 
 A research consent card appears until the student answers (`PUT
 /api/cse115a/consent`), and a **Change** link stays below the assignments.
+The wording lives in `lib/cse115a/consent.ts` and is a placeholder for now.
+To go live, paste the IRB-approved text, set `CONSENT_VERSION` to its
+identifier, and set `CONSENT_APPROVED = true`. Until then JSONL export is
+off. Answers to older wording don't count, so students are asked again when
+the version changes.
 Preview states: `/cse115a/preview?state=draft|ready|submitted|grading|released`
 and `/cse115a/preview/results?state=released`.
 

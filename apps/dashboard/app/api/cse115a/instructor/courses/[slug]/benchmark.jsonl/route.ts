@@ -3,6 +3,7 @@ import { getSupabase } from "@/lib/supabase/server";
 import { guardCourse } from "@/lib/cse115a/instructorApi";
 import { loadExportCandidates } from "@/lib/cse115a/benchmark/loadCourseBenchmark";
 import { exportJsonl } from "@/lib/cse115a/benchmark/exportJsonl";
+import { CONSENT_APPROVED } from "@/lib/cse115a/consent";
 
 export const runtime = "nodejs";
 
@@ -13,6 +14,9 @@ export async function GET(request: Request, { params }: Params) {
   const { slug } = await params;
   const guard = await guardCourse(slug);
   if ("response" in guard) return guard.response;
+  if (!CONSENT_APPROVED) {
+    return NextResponse.json({ error: "Export is off until the IRB-approved consent wording is in lib/cse115a/consent.ts." }, { status: 409 });
+  }
   const validatedOnly = new URL(request.url).searchParams.get("validated") === "1";
   let body;
   try {

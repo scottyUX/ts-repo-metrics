@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { extractAddedTests, extractJsTests, extractPyTests } from "@/lib/cse115a/benchmark/extractTests";
 import { buildInstance, difficultyFor, instanceId, SWE_BENCH_FIELDS } from "@/lib/cse115a/benchmark/buildInstance";
-import { exportJsonl, isExportable, redactPersonalData, toJsonlRecord } from "@/lib/cse115a/benchmark/exportJsonl";
+import { exportJsonl, isExportable, toJsonlRecord } from "@/lib/cse115a/benchmark/exportJsonl";
+import { identifiersFor, redactPersonalData, scrubPatch, scrubSpec, scrubText } from "@/lib/cse115a/benchmark/scrubPii";
 import { runNextJob, type JobStore, type BenchmarkSave } from "@/lib/cse115a/jobs/runner";
 import type { TaskSnapshot } from "@/lib/cse115a/submissionSnapshot";
 import type { TaskSpec } from "@/lib/cse115a/taskSpec";
@@ -222,12 +223,78 @@ describe("export redaction", () => {
       files: [{ path: "src/a.ts", name: "validateEmail" }],
     };
     expect(redactPersonalData(report)).toEqual({
-      summary: { score: 80, note: "Contact [redacted]" },
+      summary: { score: 80, note: "Contact [email]" },
       githubMeta: { stargazersCount: 1 },
       files: [{ path: "src/a.ts", name: "validateEmail" }],
     });
     const { instance } = buildInstance(snapshot(), 1, report);
     expect(JSON.stringify(toJsonlRecord(instance).repo_metrics)).not.toMatch(/astudent|a\.student|A\. Student/);
+  });
+});
+
+describe("PII scrubbing before storage", () => {
+  const spec = `---
+id: US-3-T-1
+sprint: 3
+assignee: Jane Doe
+estimate_hours: 2
+---
+# Reject bad email
+
+Pairing with @kim-lee. Jane will demo. Questions to jane.doe@ucsc.edu.
+`;
+  const task = snapshot({
+    specMarkdown: spec,
+    spec: { id: "US-3-T-1", assignee: "Jane Doe", estimateHours: 2 } as TaskSpec,
+    pr: { title: "US-3-T-1", body: "Closes the card. cc @janedoe99 and @kim-lee", headRef: "x", author: "janedoe99", mergedAt: "2026-10-01T12:00:00Z", baseSha: "b", mergeCommitSha: "m" },
+    comments: [{ kind: "review", author: "kimlee", body: "LGTM kimlee here, ping jane.doe@ucsc.edu", createdAt: null }],
+    diff: `diff --git a/src/__tests__/email.test.ts b/src/__tests__/email.test.ts
+--- /dev/null
++++ b/src/__tests__/email.test.ts
+@@ -0,0 +1,6 @@
++// Written by Jane Doe (janedoe99)
++it("rejects jane.doe@ucsc.edu without a domain check", () => {
++  expect(validateEmail("a@b.co")).toBe(true);
++  expect(validateEmail("jane.doe@ucsc.edu")).toBe(true);
++});
++@pytest.mark.slow
+`,
+  });
+
+  it("collects the assignee, PR and comment authors, and the student's email", () => {
+    expect(identifiersFor(task, "Jane.Doe@ucsc.edu")).toEqual({
+      names: ["Jane Doe", "Jane", "Doe"],
+      logins: ["janedoe99", "jane.doe", "kimlee"],
+      emails: ["jane.doe@ucsc.edu"],
+    });
+  });
+
+  it("scrubs the spec, hints, and test names in the stored row", () => {
+    const { instance, flags } = buildInstance(task, 3, { contributors: [{ id: "jane.doe@ucsc.edu" }], summary: { note: "by janedoe99" } }, "jane.doe@ucsc.edu");
+    expect(instance.problem_statement).toContain("assignee: [student]");
+    expect(instance.problem_statement).toContain("Pairing with @[user]. [student] will demo. Questions to [email].");
+    expect(instance.hints_text).toBe("Closes the card. cc @[user] and @[user]\n\nLGTM [user] here, ping [email]");
+    expect(instance.repo_metrics).toEqual({ summary: { note: "by [user]" } });
+    expect(instance.FAIL_TO_PASS).toEqual(["src/__tests__/email.test.ts::rejects student@example.com without a domain check"]);
+    expect(instance.test_patch).toContain("+// Written by student (anon)");
+    expect(instance.test_patch).toContain('validateEmail("a@b.co")');
+    expect(instance.test_patch).toContain('validateEmail("student@example.com")');
+    expect(instance.test_patch).toContain("+@pytest.mark.slow");
+    expect(flags).toContain("pii_scrubbed_from_patch");
+    expect(JSON.stringify(instance)).not.toMatch(/jane|janedoe99|kimlee|kim-lee|Doe/i);
+  });
+
+  it("leaves context and removed lines alone so the patch still applies", () => {
+    const ids = identifiersFor(task, "jane.doe@ucsc.edu");
+    const patch = "--- a/x.ts\n+++ b/x.ts\n@@ -1,2 +1,2 @@\n const owner = \"janedoe99\";\n-const a = \"Jane\";\n+const a = \"Jane\";\n";
+    expect(scrubPatch(patch, ids)).toEqual({ patch: patch.replace('+const a = "Jane"', '+const a = "student"'), changed: true });
+    expect(scrubPatch("+const x = 1;\n", ids)).toEqual({ patch: "+const x = 1;\n", changed: false });
+  });
+
+  it("does not touch ordinary words that are not known identifiers", () => {
+    const ids = identifiersFor(task, null);
+    expect(scrubText("Jane's test and Doe-eyed deer", ids)).toBe("[student]'s test and [student]-eyed deer");
+    expect(scrubSpec("---\nid: X-1\n---\n# Title\n\nNo assignee here.", { names: [], logins: [], emails: [] })).toBe("---\nid: X-1\n---\n# Title\n\nNo assignee here.");
   });
 });
 
@@ -244,6 +311,7 @@ describe("benchmark job", () => {
       saveGrades: async () => {},
       finishJob: async () => {},
       loadRepoMetrics: async (id) => ({ id }),
+      loadStudentEmail: async () => "jane.doe@ucsc.edu",
       saveBenchmark: async (_submission, rows) => { saved = rows; },
     };
     const result = await runNextJob(store, { grade: async () => [] });

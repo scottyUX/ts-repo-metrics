@@ -8,7 +8,7 @@ import { buildOAuthCallbackUrl, getOAuthRedirectOrigin, stashOAuthNextPath, stas
 import { parsePullRequestUrl, type TaskSpec } from "@/lib/cse115a/taskSpec";
 import { runAnalyzeFromUrl } from "@/lib/runAnalyze";
 import { sprintScore, type StudentTaskGrade } from "@/lib/cse115a/gradeReview";
-import { CONSENT_TEXT } from "@/lib/cse115a/consent";
+import { CONSENT_TEXT, CONSENT_VERSION } from "@/lib/cse115a/consent";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 type Course = { id: string; slug: string; title: string; term: string; assignment_count: number };
@@ -60,7 +60,7 @@ function previewMe(state: PreviewState): Me {
     grades: state === "released" ? [8.5, 7].map((total, index) => ({
       assignmentSubmissionId: "preview-submission", slot: index + 1, total, criteria: [], notes: "", releasedAt: new Date().toISOString(),
     })) : [],
-    consent: [{ course_id: previewCourse.id, consented: true, consent_version: "preview", updated_at: new Date().toISOString() }],
+    consent: [{ course_id: previewCourse.id, consented: true, consent_version: CONSENT_VERSION, updated_at: new Date().toISOString() }],
   };
 }
 
@@ -169,7 +169,9 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
   const locked = Boolean(assignmentSubmission);
   const releasedGrades = assignmentSubmission?.status === "released"
     ? (me?.grades ?? []).filter((grade) => grade.assignmentSubmissionId === assignmentSubmission.id) : [];
-  const consent = me?.consent.find((item) => item.course_id === course?.id) ?? null;
+  // An answer to older wording does not count, so the card asks again.
+  const storedConsent = me?.consent.find((item) => item.course_id === course?.id) ?? null;
+  const consent = storedConsent?.consent_version === CONSENT_VERSION ? storedConsent : null;
 
   async function saveConsent(consented: boolean) {
     if (!course) return;

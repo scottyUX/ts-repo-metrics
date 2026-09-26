@@ -2,6 +2,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { BenchmarkInstance } from "./buildInstance";
 import type { ExportCandidate } from "./exportJsonl";
+import { countsAsConsent } from "@/lib/cse115a/consent";
 
 const PAGE = 500;
 
@@ -31,10 +32,11 @@ export async function loadCourseSources(db: SupabaseClient, courseId: string) {
     allRows<SourceRow>((from, to) => db.from("cse_benchmark_task_sources")
       .select("instance_id,user_id,assignment_submission_id,task_slot,validation_status,flags,created_at")
       .eq("course_id", courseId).order("created_at").range(from, to)),
-    allRows<{ user_id: string; consented: boolean }>((from, to) => db.from("cse_research_consent")
-      .select("user_id,consented").eq("course_id", courseId).range(from, to)),
+    allRows<{ user_id: string; consented: boolean; consent_version: string }>((from, to) => db.from("cse_research_consent")
+      .select("user_id,consented,consent_version").eq("course_id", courseId).range(from, to)),
   ]);
-  const consented = new Set(consent.filter((row) => row.consented).map((row) => row.user_id));
+  // Only a yes to the current, approved wording counts.
+  const consented = new Set(consent.filter(countsAsConsent).map((row) => row.user_id));
   return { sources, consented };
 }
 

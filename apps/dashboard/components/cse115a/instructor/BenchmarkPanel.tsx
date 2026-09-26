@@ -21,6 +21,7 @@ type Summary = {
   course: StaffCourse;
   counts: { sources: number; instances: number; candidate: number; validated: number; rejected: number; consented: number; flagged: number };
   preview: Preview[];
+  exportEnabled: boolean;
 };
 
 export function BenchmarkPanel({ slug }: { slug: string }) {
@@ -47,7 +48,7 @@ export function BenchmarkPanel({ slug }: { slug: string }) {
       <div>
         <p className="text-xs font-semibold uppercase tracking-wide text-primary">{course.title} · {course.term}</p>
         <h1 className="mt-1 text-2xl font-semibold">Benchmark</h1>
-        <p className="mt-1 max-w-3xl text-sm text-muted-foreground">Every final task is captured as a SWE-bench instance. Export includes only students who opted into research use, and skips rejected rows. FAIL_TO_PASS is parsed from the tests and is not yet verified by a test run.</p>
+        <p className="mt-1 max-w-3xl text-sm text-muted-foreground">Every final task is captured as a SWE-bench instance, with emails, logins, and known names removed before it is stored. Export includes only students who consented to the current wording, and skips rejected rows. FAIL_TO_PASS is parsed from the tests and is not yet verified by a test run.</p>
       </div>
       <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
         {stats.map(([label, value]) => (
@@ -57,7 +58,8 @@ export function BenchmarkPanel({ slug }: { slug: string }) {
           </div>
         ))}
       </dl>
-      <div className="flex flex-wrap gap-3">
+      {!summary.exportEnabled ? <p className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-sm">Export is off until the IRB-approved consent wording replaces the placeholder. Tasks are still captured, with personal information removed.</p> : null}
+      <div className={`flex flex-wrap gap-3 ${summary.exportEnabled ? "" : "pointer-events-none opacity-50"}`} aria-disabled={!summary.exportEnabled}>
         <a href={exportUrl} className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">Download JSONL</a>
         <a href={`${exportUrl}?validated=1`} className="rounded-lg border border-input px-4 py-2 text-sm font-medium">Validated only</a>
       </div>

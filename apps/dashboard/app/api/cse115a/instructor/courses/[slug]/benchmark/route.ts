@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase/server";
 import { guardCourse } from "@/lib/cse115a/instructorApi";
 import { loadCourseSources } from "@/lib/cse115a/benchmark/loadCourseBenchmark";
+import { CONSENT_APPROVED } from "@/lib/cse115a/consent";
 
 export const runtime = "nodejs";
 
@@ -49,5 +50,5 @@ export async function GET(_request: Request, { params }: Params) {
       } : null,
     };
   });
-  return NextResponse.json({ course: guard.course, counts, preview });
+  return NextResponse.json({ course: guard.course, counts, preview, exportEnabled: CONSENT_APPROVED });
 }

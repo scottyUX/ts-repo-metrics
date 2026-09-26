@@ -43,6 +43,8 @@ export interface JobStore {
   finishJob(id: string, outcome: JobOutcome): Promise<void>;
   /** The Repo Metrics report saved for an analysis, or null. */
   loadRepoMetrics(analysisResultId: string): Promise<unknown>;
+  /** The submitting student's UCSC email, used to strip their identifiers from benchmark rows. */
+  loadStudentEmail(courseId: string, userId: string): Promise<string | null>;
   /** Upserts instances and their source rows; a source's validation status is kept. */
   saveBenchmark(submission: Submission, rows: BenchmarkSave[]): Promise<void>;
 }
@@ -72,9 +74,10 @@ async function runGrade(store: JobStore, handlers: JobHandlers, job: Job): Promi
 async function runBenchmark(store: JobStore, job: Job): Promise<void> {
   const submission = await store.loadSubmission(job.assignment_submission_id);
   if (!submission) throw new Error("The submission no longer exists.");
+  const studentEmail = await store.loadStudentEmail(submission.course_id, submission.user_id);
   const rows = await Promise.all(submission.snapshot.tasks.map(async (task) => ({
     slot: task.slot,
-    ...buildInstance(task, submission.assignment_number, await store.loadRepoMetrics(task.analysisResultId)),
+    ...buildInstance(task, submission.assignment_number, await store.loadRepoMetrics(task.analysisResultId), studentEmail),
   })));
   // Superseded attempts are still captured: the work was real, and the export filters by consent.
   await store.saveBenchmark(submission, rows);

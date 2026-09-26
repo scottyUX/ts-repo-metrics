@@ -56,6 +56,12 @@ export function supabaseJobStore(db: SupabaseClient): JobStore {
       check(error, "load the Repo Metrics report");
       return data?.report_json ?? null;
     },
+    async loadStudentEmail(courseId, userId) {
+      const { data, error } = await db.from("cse_course_memberships")
+        .select("ucsc_email").eq("course_id", courseId).eq("user_id", userId).maybeSingle();
+      check(error, "load the student's email");
+      return (data?.ucsc_email as string | undefined) ?? null;
+    },
     async saveBenchmark(submission, rows) {
       if (rows.length === 0) return;
       const { error } = await db.from("cse_benchmark_tasks")

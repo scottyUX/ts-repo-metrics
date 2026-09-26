@@ -35,6 +35,7 @@ function memoryStore(jobs: Job[], submission: Partial<Submission> = {}) {
       job.status = outcome.status === "queued" ? "retry" : outcome.status;
     },
     async loadRepoMetrics(id) { return { resultId: id }; },
+    async loadStudentEmail() { return "s@ucsc.edu"; },
     async saveBenchmark(_submission, rows) { state.benchmark = rows; },
   };
   return { store, state };
