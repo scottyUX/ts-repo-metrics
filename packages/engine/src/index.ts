@@ -6,6 +6,19 @@
 
 export { analyzeRepo, type AnalyzeOptions } from "./pipeline/analyzeRepo.js";
 export {
+  analyzeStructure,
+  assertRepoRelativePath,
+  StructurePathError,
+  type AnalyzeStructureOptions,
+  type StructureFileMetrics,
+  type StructureReport,
+} from "./pipeline/analyzeStructure.js";
+export {
+  checkoutCommit,
+  type CheckoutCommitOptions,
+  type CheckoutCommitResult,
+} from "./collect/checkoutCommit.js";
+export {
   analyzeFromGitHubUrl,
   type AnalyzeFromGitHubUrlOptions,
   type AnalyzeRef,
