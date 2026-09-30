@@ -7,9 +7,9 @@ import { AssignmentResultsTab } from "./AssignmentResultsTab";
 
 type Section = "summary" | "commits" | "checks" | "files";
 const SECTIONS: { id: Section; label: string }[] = [
-  { id: "summary", label: "Summary" },
+  { id: "summary", label: "Grade" },
   { id: "commits", label: "Commits" },
-  { id: "checks", label: "Checks" },
+  { id: "checks", label: "Metrics" },
   { id: "files", label: "Files changed" },
 ];
 type CommitRow = { sha: string; url: string; title: string; body: string; author: string; date: string };

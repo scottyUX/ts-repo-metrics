@@ -6,6 +6,8 @@ import { Header } from "@/components/Header";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { SiteFooter } from "@/components/SiteFooter";
 import { Cse115aMain } from "@/components/cse115a/Cse115aMain";
+import { Cse115aFooter } from "@/components/cse115a/Cse115aFooter";
+import { HideOnCse115aLanding } from "@/components/cse115a/HideOnCse115aLanding";
 import "./globals.css";
 
 const geistMono = Geist_Mono({
@@ -42,7 +44,9 @@ export default function RootLayout({
         className={`${geistMono.variable} font-sans antialiased min-h-screen flex flex-col`}
       >
         <ThemeProvider>
-          <Header />
+          <HideOnCse115aLanding>
+            <Header />
+          </HideOnCse115aLanding>
           {cse115aSite ? (
             <Cse115aMain><TooltipProvider>{children}</TooltipProvider></Cse115aMain>
           ) : (
@@ -50,11 +54,12 @@ export default function RootLayout({
               <TooltipProvider>{children}</TooltipProvider>
             </main>
           )}
-          {cse115aSite ? (
-            <footer className="border-t border-slate-200 bg-white px-6 py-6 text-center text-xs text-slate-500">
-              CSE 115A Repo Metrics · <a href="/privacy" className="underline">Privacy</a> · <a href="/terms" className="underline">Terms</a>
-            </footer>
-          ) : <SiteFooter />}
+          {cse115aSite ? null : (
+            <HideOnCse115aLanding>
+              <SiteFooter />
+            </HideOnCse115aLanding>
+          )}
+          <Cse115aFooter />
           <Toaster richColors position="top-center" />
         </ThemeProvider>
       </body>

@@ -1,4 +1,7 @@
 import "server-only";
+import { splitPatch } from "@/lib/cse115a/diff";
+import { summarizeCi, type TaskFacts } from "@/lib/cse115a/processChecklist";
+import { readCommitChecks } from "@/lib/cse115a/submissionSnapshot";
 import { parsePullRequestUrl, parseTaskSpec, type TaskSpec } from "@/lib/cse115a/taskSpec";
 import { githubReader, tagCommitSha } from "@/lib/cse115a/githubClient";
 
@@ -6,6 +9,7 @@ type GitHubPull = {
   title: string;
   merged_at: string | null;
   merge_commit_sha: string | null;
+  base: { sha: string };
   head: { ref: string };
   user: { login: string } | null;
 };
@@ -21,6 +25,7 @@ export type ImportedTask = {
   markdown: string;
   spec: TaskSpec;
   validation: Record<string, boolean>;
+  facts: TaskFacts;
 };
 
 export async function importTaskFromPullRequest(
@@ -70,11 +75,20 @@ export async function importTaskFromPullRequest(
   if (spec.id !== filenameId) throw new Error("The task ID in the file must match its filename.");
   if (spec.sprint !== assignmentNumber) throw new Error(`The task file sprint must be ${assignmentNumber}.`);
 
-  const [baseSha, doneSha, commits] = await Promise.all([
+  const encodedFolder = `docs/tasks/sprint-${assignmentNumber}`.split("/").map(encodeURIComponent).join("/");
+  const [baseSha, doneSha, commits, folder] = await Promise.all([
     tagCommitSha(gh, owner, repo, `${spec.id}-base`),
     tagCommitSha(gh, owner, repo, `${spec.id}-done`),
     gh.json<Array<{ sha: string }>>(`/repos/${owner}/${repo}/pulls/${number}/commits?per_page=1&page=1`),
+    gh.json<Array<{ name: string; type: string }>>(
+      `/repos/${owner}/${repo}/contents/${encodedFolder}?ref=${encodeURIComponent(pull.merge_commit_sha)}`,
+      { optional: true },
+    ),
   ]);
+  const filename = taskPath.split("/").pop()!;
+  if (!Array.isArray(folder) || !folder.some((entry) => entry.type === "file" && entry.name === filename)) {
+    throw new Error(`The task file is not in docs/tasks/sprint-${assignmentNumber}/ on the merge commit.`);
+  }
   let specCommittedFirst = false;
   if (baseSha && commits?.[0]?.sha === baseSha) {
     const first = await gh.json<{ files?: Array<{ filename: string }> }>(
@@ -82,6 +96,27 @@ export async function importTaskFromPullRequest(
     );
     specCommittedFirst = first?.files?.length === 1 && first.files[0]?.filename === taskPath;
   }
+  const mergeSha = pull.merge_commit_sha;
+  const checks = await readCommitChecks(gh, owner, repo, mergeSha);
+  let testFileCount: number | null = null;
+  try {
+    const baseCommit = baseSha ?? pull.base?.sha;
+    if (baseCommit) {
+      const diff = await gh.text(
+        `/repos/${owner}/${repo}/compare/${baseCommit}...${mergeSha}`,
+        "application/vnd.github.diff",
+      );
+      testFileCount = splitPatch(diff).testFiles.length;
+    }
+  } catch {
+    testFileCount = null;
+  }
+  const facts: TaskFacts = {
+    ci: summarizeCi(checks),
+    testFileCount,
+    mergeSha,
+    firstCommitSha: commits?.[0]?.sha ?? null,
+  };
   return {
     prUrl: parsed.url,
     repoFullName: `${owner}/${repo}`,
@@ -97,5 +132,6 @@ export async function importTaskFromPullRequest(
       doneTagOnMergeCommit: doneSha === pull.merge_commit_sha,
       estimateAtLeastTwoHours: spec.estimateHours >= 2,
     },
+    facts,
   };
 }

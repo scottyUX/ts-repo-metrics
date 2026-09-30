@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSupabase, isSupabaseConfigured } from "@/lib/supabase/server";
-import { getActiveAssignmentSubmission, getCourseIdentity, getEnrolledCourse, lockedAssignmentMessage } from "@/lib/cse115a/server";
+import { getActiveAssignmentSubmission, getCourseIdentity, getEnrolledCourse, lockedAssignmentMessage, TASK_SUBMISSION_COLUMNS } from "@/lib/cse115a/server";
 import { getDecryptedGitHubTokenForUser } from "@/lib/userGitHubToken";
 import { importTaskFromPullRequest } from "@/lib/cse115a/githubTaskImport";
 import { parseGitHubUrl } from "@/lib/github/parseGitHubUrl";
@@ -8,7 +8,7 @@ import { parseGitHubUrl } from "@/lib/github/parseGitHubUrl";
 export const runtime = "nodejs";
 
 type Params = { params: Promise<{ number: string }> };
-type SubmissionBody = { courseSlug?: unknown; slot?: unknown; prUrl?: unknown; resultId?: unknown };
+type SubmissionBody = { courseSlug?: unknown; slot?: unknown; prUrl?: unknown; resultId?: unknown; scrumBoard?: unknown };
 
 function lockedResponse(assignmentNumber: number) {
   return NextResponse.json({ error: lockedAssignmentMessage(assignmentNumber), code: "already_submitted" }, { status: 409 });
@@ -55,7 +55,13 @@ export async function POST(request: Request, params: Params) {
   } catch (error) {
     return NextResponse.json({ error: error instanceof Error ? error.message : "Could not import this task." }, { status: 422 });
   }
-  const { data, error } = await getSupabase().from("cse_task_submissions")
+  const db = getSupabase();
+  const { data: existing } = await db.from("cse_task_submissions")
+    .select("pr_url,analysis_result_id")
+    .eq("course_id", course.id).eq("user_id", identity.userId)
+    .eq("assignment_number", assignmentNumber).eq("task_slot", slot)
+    .maybeSingle();
+  const { data, error } = await db.from("cse_task_submissions")
     .upsert({
       course_id: course.id,
       user_id: identity.userId,
@@ -69,10 +75,11 @@ export async function POST(request: Request, params: Params) {
       task_spec_markdown: imported.markdown,
       task_spec_json: imported.spec,
       validation_json: imported.validation,
-      analysis_result_id: null,
+      facts_json: imported.facts,
+      analysis_result_id: existing?.pr_url === imported.prUrl ? existing.analysis_result_id : null,
       updated_at: new Date().toISOString(),
     }, { onConflict: "course_id,user_id,assignment_number,task_slot" })
-    .select("id,course_id,assignment_number,task_slot,task_id,pr_url,task_path,task_spec_json,validation_json,analysis_result_id,updated_at")
+    .select(TASK_SUBMISSION_COLUMNS)
     .single();
   if (isLockedError(error)) return lockedResponse(assignmentNumber);
   if (error) return NextResponse.json({ error: error.code === "23505" ? "This task ID or PR is already submitted in another slot." : "Could not save the task submission." }, { status: error.code === "23505" ? 409 : 500 });
@@ -86,9 +93,20 @@ export async function PATCH(request: Request, params: Params) {
   const access = await context(params, body);
   if ("error" in access) return access.error;
   const { identity, course, assignmentNumber, slot } = access;
+  const db = getSupabase();
+  if (typeof body.scrumBoard === "boolean") {
+    const { data, error } = await db.from("cse_task_submissions")
+      .update({ scrum_board: body.scrumBoard, updated_at: new Date().toISOString() })
+      .eq("course_id", course.id).eq("user_id", identity.userId)
+      .eq("assignment_number", assignmentNumber).eq("task_slot", slot)
+      .select(TASK_SUBMISSION_COLUMNS)
+      .single();
+    if (isLockedError(error)) return lockedResponse(assignmentNumber);
+    if (error) return NextResponse.json({ error: "Could not save the Scrum board confirmation." }, { status: 500 });
+    if (body.resultId == null || body.resultId === "") return NextResponse.json({ submission: data });
+  }
   const resultId = typeof body.resultId === "string" ? body.resultId.trim() : "";
   if (!resultId) return NextResponse.json({ error: "Missing analysis result." }, { status: 400 });
-  const db = getSupabase();
   const [submissionResult, analysisResult] = await Promise.all([
     db.from("cse_task_submissions").select("id,pr_number,repo_full_name")
       .eq("course_id", course.id).eq("user_id", identity.userId)
@@ -107,7 +125,7 @@ export async function PATCH(request: Request, params: Params) {
   const { data, error } = await db.from("cse_task_submissions")
     .update({ analysis_result_id: resultId, updated_at: new Date().toISOString() })
     .eq("id", submission.id).eq("user_id", identity.userId)
-    .select("id,course_id,assignment_number,task_slot,task_id,pr_url,task_path,task_spec_json,validation_json,analysis_result_id,updated_at")
+    .select(TASK_SUBMISSION_COLUMNS)
     .single();
   if (isLockedError(error)) return lockedResponse(assignmentNumber);
   if (error) return NextResponse.json({ error: "Could not save the analysis result." }, { status: 500 });
