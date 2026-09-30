@@ -80,6 +80,19 @@ function comment(kind: SnapshotComment["kind"], item: Comment): SnapshotComment 
   };
 }
 
+export async function readCommitChecks(gh: GitHubReader, owner: string, repo: string, sha: string): Promise<SnapshotCheck[]> {
+  const base = `/repos/${owner}/${repo}`;
+  const [checkRuns, statuses] = await Promise.all([
+    gh.json<{ check_runs: Array<{ name: string; status: string; conclusion: string | null }> }>(
+      `${base}/commits/${sha}/check-runs?per_page=100`, { optional: true }),
+    gh.json<{ statuses: Array<{ context: string; state: string }> }>(`${base}/commits/${sha}/status`, { optional: true }),
+  ]);
+  return [
+    ...(checkRuns?.check_runs ?? []).map((run) => ({ source: "check_run" as const, name: run.name, status: run.status, conclusion: run.conclusion })),
+    ...(statuses?.statuses ?? []).map((status) => ({ source: "status" as const, name: status.context, status: "completed", conclusion: status.state })),
+  ];
+}
+
 export async function captureTaskSnapshot(gh: GitHubReader, task: SubmittedTaskRow): Promise<TaskSnapshot> {
   const [owner, repo] = task.repo_full_name.split("/") as [string, string];
   const base = `/repos/${owner}/${repo}`;
@@ -87,14 +100,12 @@ export async function captureTaskSnapshot(gh: GitHubReader, task: SubmittedTaskR
   if (!pull?.merged_at || !pull.merge_commit_sha) throw new Error(`Task ${task.task_slot}: the pull request is no longer merged.`);
   const mergeSha = pull.merge_commit_sha;
 
-  const [baseTagSha, issueComments, reviews, reviewComments, checkRuns, statuses] = await Promise.all([
+  const [baseTagSha, issueComments, reviews, reviewComments, checks] = await Promise.all([
     tagCommitSha(gh, owner, repo, `${task.task_id}-base`),
     gh.json<Comment[]>(`${base}/issues/${task.pr_number}/comments?per_page=100`),
     gh.json<Comment[]>(`${base}/pulls/${task.pr_number}/reviews?per_page=100`),
     gh.json<Comment[]>(`${base}/pulls/${task.pr_number}/comments?per_page=100`),
-    gh.json<{ check_runs: Array<{ name: string; status: string; conclusion: string | null }> }>(
-      `${base}/commits/${mergeSha}/check-runs?per_page=100`, { optional: true }),
-    gh.json<{ statuses: Array<{ context: string; state: string }> }>(`${base}/commits/${mergeSha}/status`, { optional: true }),
+    readCommitChecks(gh, owner, repo, mergeSha),
   ]);
   const baseCommit = baseTagSha ?? pull.base.sha;
 
@@ -116,11 +127,6 @@ export async function captureTaskSnapshot(gh: GitHubReader, task: SubmittedTaskR
     ...(reviews ?? []).map((item) => comment("review", item)),
     ...(reviewComments ?? []).map((item) => comment("review_comment", item)),
   ].filter((item): item is SnapshotComment => item !== null).slice(0, MAX_COMMENTS);
-
-  const checks: SnapshotCheck[] = [
-    ...(checkRuns?.check_runs ?? []).map((run) => ({ source: "check_run" as const, name: run.name, status: run.status, conclusion: run.conclusion })),
-    ...(statuses?.statuses ?? []).map((status) => ({ source: "status" as const, name: status.context, status: "completed", conclusion: status.state })),
-  ];
 
   return {
     slot: task.task_slot,

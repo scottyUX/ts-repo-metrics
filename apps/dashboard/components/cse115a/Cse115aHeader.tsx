@@ -39,10 +39,8 @@ export function Cse115aHeader() {
         <Link href="/cse115a" className="text-base font-bold tracking-tight">CSE 115A <span className={resultsPage ? "text-primary" : "text-emerald-700"}>Repo Metrics</span></Link>
         <nav className="flex items-center gap-4 text-sm font-medium" aria-label="Account">
           {signedIn ? (
-            <><Link href="/cse115a/dashboard" className="hover:text-emerald-700">Assignments</Link>{staff ? <Link href="/cse115a/instructor" className="hover:text-emerald-700">Instructor</Link> : null}<button type="button" onClick={() => void signOut()} className="hover:text-emerald-700">Sign out</button></>
-          ) : (
-            <><Link href="/cse115a/signin" className="hover:text-emerald-700">Sign in</Link><Link href="/cse115a/signup" className="rounded-lg bg-emerald-700 px-4 py-2 text-white hover:bg-emerald-800">Sign up</Link></>
-          )}
+            <><Link href="/cse115a/dashboard" className="hover:text-emerald-700">Sprints</Link>{staff ? <Link href="/cse115a/instructor" className="hover:text-emerald-700">Instructor</Link> : null}<button type="button" onClick={() => void signOut()} className="hover:text-emerald-700">Sign out</button></>
+          ) : null}
         </nav>
       </div>
     </header>

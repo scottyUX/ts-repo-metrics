@@ -44,8 +44,10 @@ export async function getActiveAssignmentSubmission(courseId: string, userId: st
   return data as { id: string; course_id: string; assignment_number: number; attempt: number; status: AssignmentSubmissionStatus; submitted_at: string } | null;
 }
 
+export const TASK_SUBMISSION_COLUMNS = "id,course_id,assignment_number,task_slot,task_id,pr_url,task_path,task_spec_json,validation_json,facts_json,scrum_board,analysis_result_id,updated_at";
+
 export function lockedAssignmentMessage(assignmentNumber: number): string {
-  return `Assignment ${assignmentNumber} is already submitted, so its tasks are locked. Ask your instructor if something needs to change.`;
+  return `Sprint ${assignmentNumber} is submitted, so its tasks are locked. Choose Change submission to edit them before the sprint closes.`;
 }
 
 export type CourseRole = "instructor" | "ta";

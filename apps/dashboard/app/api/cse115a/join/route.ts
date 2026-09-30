@@ -11,7 +11,7 @@ export async function POST(request: Request) {
   if (!identity) return NextResponse.json({ error: "Sign in with a verified UCSC Google account." }, { status: 401 });
   const body = await request.json().catch(() => null) as { code?: unknown } | null;
   const code = typeof body?.code === "string" ? body.code.toUpperCase().replace(/[\s-]/g, "") : "";
-  if (!/^[A-Z2-9]{12,24}$/.test(code)) {
+  if (!/^[A-Z2-9]{8,24}$/.test(code)) {
     return NextResponse.json({ error: "Enter the course code from your instructor." }, { status: 400 });
   }
   const hash = createHash("sha256").update(code).digest("hex");

@@ -453,7 +453,7 @@ export function HeaderNavClient({ cse115aSite = false }: { cse115aSite?: boolean
           id="repo-coach-header-slot"
           className="inline-flex min-w-0 empty:hidden"
         />
-        <ThemeToggle variant="nav" />
+        {pathname.startsWith("/cse115a") ? null : <ThemeToggle variant="nav" />}
 
         {!loading && !isBrowserSupabaseConfigured() ? (
           <span
@@ -464,7 +464,7 @@ export function HeaderNavClient({ cse115aSite = false }: { cse115aSite?: boolean
           </span>
         ) : null}
 
-        {!loading && isBrowserSupabaseConfigured() && !signedIn ? (
+        {!loading && isBrowserSupabaseConfigured() && !signedIn && !pathname.startsWith("/cse115a") ? (
           <button
             type="button"
             onClick={() => void signIn()}

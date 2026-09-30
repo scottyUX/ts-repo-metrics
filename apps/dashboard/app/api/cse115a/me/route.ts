@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSupabase, isSupabaseConfigured } from "@/lib/supabase/server";
-import { ASSIGNMENT_SUBMISSION_COLUMNS, getCourseIdentity } from "@/lib/cse115a/server";
-import { studentGradeView, type TaskGradeRow } from "@/lib/cse115a/gradeReview";
+import { ASSIGNMENT_SUBMISSION_COLUMNS, getCourseIdentity, TASK_SUBMISSION_COLUMNS } from "@/lib/cse115a/server";
+import { sprintScore, studentGradeView, type TaskGradeRow } from "@/lib/cse115a/gradeReview";
 
 export const runtime = "nodejs";
 
@@ -18,18 +18,19 @@ export async function GET() {
   if (membershipError) return NextResponse.json({ error: "Could not load courses." }, { status: 500 });
   const courseIds = (memberships ?? []).map((row) => row.course_id as string);
   if (courseIds.length === 0) return NextResponse.json({ email: identity.email, courses: [], submissions: [], assignmentSubmissions: [], grades: [], consent: [] });
-  const [coursesResult, submissionsResult, assignmentResult, consentResult] = await Promise.all([
+  const [coursesResult, submissionsResult, assignmentResult, consentResult, sprintResult] = await Promise.all([
     db.from("cse_courses").select("id,slug,title,term,assignment_count,active").in("id", courseIds).eq("active", true),
     db.from("cse_task_submissions")
-      .select("id,course_id,assignment_number,task_slot,task_id,pr_url,task_path,task_spec_json,validation_json,analysis_result_id,updated_at")
+      .select(TASK_SUBMISSION_COLUMNS)
       .eq("user_id", identity.userId).in("course_id", courseIds)
       .order("assignment_number").order("task_slot"),
     db.from("cse_assignment_submissions").select(ASSIGNMENT_SUBMISSION_COLUMNS)
       .eq("user_id", identity.userId).in("course_id", courseIds).is("superseded_at", null),
     db.from("cse_research_consent").select("course_id,consented,consent_version,updated_at")
       .eq("user_id", identity.userId).in("course_id", courseIds),
+    db.from("cse_sprints").select("course_id,number,due_at").in("course_id", courseIds),
   ]);
-  if (coursesResult.error || submissionsResult.error || assignmentResult.error || consentResult.error) {
+  if (coursesResult.error || submissionsResult.error || assignmentResult.error || consentResult.error || sprintResult.error) {
     return NextResponse.json({ error: "Could not load assignments." }, { status: 500 });
   }
   // Only released grades of the current attempts reach the student.
@@ -41,11 +42,20 @@ export async function GET() {
     : { data: [], error: null };
   if (gradeError) return NextResponse.json({ error: "Could not load grades." }, { status: 500 });
   const grades = (gradeRows ?? []).map((row) => ({ assignmentSubmissionId: row.assignment_submission_id as string, ...studentGradeView(row as unknown as TaskGradeRow)! }));
+  const sprints = sprintResult.data ?? [];
+  const courses = (coursesResult.data ?? []).map((course) => ({
+    ...course,
+    sprints: sprints.filter((sprint) => sprint.course_id === course.id).map((sprint) => ({ number: sprint.number, due_at: sprint.due_at })),
+  }));
+  const assignmentSubmissions = (assignmentResult.data ?? []).map((row) => {
+    const totals = grades.filter((grade) => grade.assignmentSubmissionId === row.id).map((grade) => grade.total);
+    return { ...row, releasedScore: row.status === "released" && totals.length ? sprintScore(totals) : null };
+  });
   return NextResponse.json({
     email: identity.email,
-    courses: coursesResult.data,
+    courses,
     submissions: submissionsResult.data,
-    assignmentSubmissions: assignmentResult.data,
+    assignmentSubmissions,
     grades,
     consent: consentResult.data,
   });
