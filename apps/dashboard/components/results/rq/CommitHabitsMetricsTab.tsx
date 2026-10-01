@@ -21,9 +21,10 @@ interface CommitHabitsMetricsTabProps {
   report: RepoReport;
   scopeId: CommitHabitsScopeId;
   onScopeIdChange: (next: CommitHabitsScopeId) => void;
+  prOnly?: boolean;
 }
 
-export function CommitHabitsMetricsTab({ report, scopeId, onScopeIdChange }: CommitHabitsMetricsTabProps) {
+export function CommitHabitsMetricsTab({ report, scopeId, onScopeIdChange, prOnly = false }: CommitHabitsMetricsTabProps) {
   const contributors = useMemo(() => report.contributors ?? [], [report.contributors]);
   const mv = useMemo(() => getCommitHabitsMetricValues(report, scopeId), [report, scopeId]);
   const signalQuality = useMemo(() => resolveCommitHabitsSignalQuality(report), [report]);
@@ -45,7 +46,7 @@ export function CommitHabitsMetricsTab({ report, scopeId, onScopeIdChange }: Com
 
   return (
     <div className="space-y-8">
-      {contributors.length > 0 ? (
+      {!prOnly && contributors.length > 0 ? (
         <div className="flex flex-wrap items-end gap-3">
           <div className="flex flex-col gap-1">
             <label htmlFor="commit-habits-scope" className="text-sm font-medium text-foreground">
@@ -71,9 +72,9 @@ export function CommitHabitsMetricsTab({ report, scopeId, onScopeIdChange }: Com
       <CommitHabitsCoreSignalsSection mv={mv} />
       <CommitHabitsAdditionalSignalsSection mv={mv} quality={signalQuality} />
 
-      <CommitActivityCard report={report} scopeId={scopeId} />
+      <CommitActivityCard report={report} scopeId={scopeId} focusWeeks={prOnly ? 3 : undefined} />
 
-      {contributors.length > 0 ? (
+      {!prOnly && contributors.length > 0 ? (
         <section>
           <CommitHabitsContributorsTableCard contributors={contributors} />
         </section>

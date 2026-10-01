@@ -27,6 +27,7 @@ type AnalyzeTargetPickerProps = {
   onOpenChange: (open: boolean) => void;
   extra?: Omit<AnalyzeRequestBody, "url" | "ref">;
   onAnalyzingChange?: (fullName: string | null) => void;
+  mergedPullsOnly?: boolean;
 };
 
 export function AnalyzeTargetPicker({
@@ -35,6 +36,7 @@ export function AnalyzeTargetPicker({
   onOpenChange,
   extra,
   onAnalyzingChange,
+  mergedPullsOnly = false,
 }: AnalyzeTargetPickerProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -113,8 +115,10 @@ export function AnalyzeTargetPicker({
         <DialogHeader>
           <DialogTitle>Choose what to analyze</DialogTitle>
           <DialogDescription>
-            {repo
-              ? `${repo.fullName} — a pull request uses changed files only; a branch analyzes the full tree.`
+            {mergedPullsOnly
+              ? `Select the merged pull request for one completed task in ${repo?.fullName ?? "your team repository"}. Run Repo Metrics once for each of your two tasks.`
+              : repo
+              ? `${repo.fullName} — a pull request scores only the source files it changed (TypeScript, JavaScript, Python, notebooks); a branch analyzes the full tree.`
               : "Select a pull request or branch."}
           </DialogDescription>
         </DialogHeader>
@@ -128,7 +132,7 @@ export function AnalyzeTargetPicker({
           <p className="text-sm text-destructive">{error}</p>
         ) : targets ? (
           <div className="space-y-6">
-            <div>
+            {!mergedPullsOnly && <div>
               <Button
                 type="button"
                 className="w-full"
@@ -136,9 +140,9 @@ export function AnalyzeTargetPicker({
               >
                 Analyze {defaultBranch} (full repository)
               </Button>
-            </div>
+            </div>}
 
-            <TargetList
+            {!mergedPullsOnly && <TargetList
               title="Open pull requests"
               empty="No open pull requests."
               icon={<GitPullRequest className="size-3.5" aria-hidden />}
@@ -151,14 +155,14 @@ export function AnalyzeTargetPicker({
                   onClick={() => void start({ type: "pr", prNumber: p.number })}
                 />
               ))}
-            </TargetList>
+            </TargetList>}
 
             <TargetList
-              title="Closed pull requests"
-              empty="No closed pull requests."
+              title={mergedPullsOnly ? "Merged pull requests" : "Closed pull requests"}
+              empty={mergedPullsOnly ? "No merged pull requests found." : "No closed pull requests."}
               icon={<GitPullRequest className="size-3.5" aria-hidden />}
             >
-              {targets.closedPulls.map((p) => (
+              {targets.closedPulls.filter((p) => !mergedPullsOnly || p.mergedAt).map((p) => (
                 <TargetRow
                   key={`closed-${p.number}`}
                   label={`#${p.number} ${p.title}`}
@@ -168,7 +172,7 @@ export function AnalyzeTargetPicker({
               ))}
             </TargetList>
 
-            <TargetList
+            {!mergedPullsOnly && <TargetList
               title="Other branches"
               empty="No other branches."
               icon={<GitBranch className="size-3.5" aria-hidden />}
@@ -180,7 +184,7 @@ export function AnalyzeTargetPicker({
                   onClick={() => void start({ type: "branch", branch: b.name })}
                 />
               ))}
-            </TargetList>
+            </TargetList>}
           </div>
         ) : null}
       </DialogContent>

@@ -24,13 +24,25 @@ export default function PrivacyPage() {
         <p className="leading-relaxed text-muted-foreground">
           This tool is operated as part of research on AI-assisted software engineering
           education. Repository-level metrics from analyses may be used in anonymized, aggregate
-          research. <strong className="text-foreground">No individual student is identified or
-          graded based on data collected through this tool.</strong>
+          research. Course enrollment and task submissions identify a student to
+          support the class workflow; research outputs use anonymized, aggregate
+          data. <strong className="text-foreground">Repo Metrics scores are not used to grade individual students.</strong>
         </p>
       </section>
 
       <section className="space-y-4">
         <h2 className="text-xl font-semibold">Data we collect</h2>
+
+        <div className="space-y-3">
+          <h3 className="font-semibold">CSE 115A account and assignments</h3>
+          <p className="leading-relaxed text-muted-foreground">
+            The CSE 115A app uses Google sign-in to verify your UCSC email address.
+            It stores that address with your course membership. When you submit a
+            task PR, it stores the PR link, the committed task specification,
+            process-check results, and the linked Repo Metrics analysis. Course
+            codes are stored as hashes rather than plain text.
+          </p>
+        </div>
 
         <div className="space-y-3">
           <h3 className="font-semibold">GitHub account information</h3>

@@ -14,6 +14,8 @@ import { Phase2ComplexityTab } from "./rq/Phase2ComplexityTab";
 import { AIMaturityTab } from "./rq/AIMaturityTab";
 import { DocReviewTab } from "./rq/DocReviewTab";
 import { DatasetTab } from "./dataset/DatasetTab";
+import type { CourseTaskEvidence } from "@/components/cse115a/AssignmentResultsTab";
+import { CoursePrOverview } from "@/components/cse115a/CoursePrOverview";
 import { GlobalCoachSays } from "./coach";
 import { GitHubRepositoryPanel } from "./GitHubRepositoryPanel";
 import { OverviewCardsStrip } from "./OverviewCardsStrip";
@@ -39,6 +41,7 @@ import { COMMIT_HABITS_SCOPE_TEAM, type CommitHabitsScopeId } from "@/lib/commit
 interface ResultsDashboardProps {
   report: RepoReport;
   resultId: string;
+  courseTask?: CourseTaskEvidence;
 }
 
 function reportHasGitHubSource(report: RepoReport): boolean {
@@ -54,7 +57,7 @@ const resultsTabTriggerClass = cn(
   "data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none",
 );
 
-export function ResultsDashboard({ report, resultId }: ResultsDashboardProps) {
+export function ResultsDashboard({ report, resultId, courseTask }: ResultsDashboardProps) {
   const submission = report._submission;
   const courseIdTrim = submission?.course_id?.trim();
   const teamTrim = submission?.team_name?.trim();
@@ -64,8 +67,8 @@ export function ResultsDashboard({ report, resultId }: ResultsDashboardProps) {
   const analysisSkipped = Boolean(report.analysisSkipped);
   const showReact = !analysisSkipped && hasReactUiScope(report);
   const availableTabs = useMemo(
-    () => availableResultsTabs({ analysisSkipped, showReact }),
-    [analysisSkipped, showReact],
+    () => availableResultsTabs({ analysisSkipped, showReact, courseTask: Boolean(courseTask) }),
+    [analysisSkipped, showReact, courseTask],
   );
   const hasTab = (tab: ResultsTabId) => availableTabs.includes(tab);
   const commit = report?.source?.commit?.slice(0, 7) ?? "—";
@@ -140,7 +143,7 @@ export function ResultsDashboard({ report, resultId }: ResultsDashboardProps) {
   return (
     <CoachExplainProvider value={coachExplain}>
       <div className="space-y-8">
-        {courseSubmissionLabel ? (
+        {courseSubmissionLabel && !courseTask ? (
           <div className="rounded-md border border-border bg-muted px-4 py-3 text-sm">
             <span className="font-medium text-foreground">
               Research submission
@@ -151,8 +154,8 @@ export function ResultsDashboard({ report, resultId }: ResultsDashboardProps) {
             </span>
           </div>
         ) : null}
-        <AnalysisScopeBanner report={report} />
-        {report.analysisSkipped ? (
+        {!courseTask ? <AnalysisScopeBanner report={report} /> : null}
+        {!courseTask && report.analysisSkipped ? (
           <div className="rounded-md border border-border bg-muted px-4 py-3 text-sm text-foreground">
             <p>{report.analysisSkipped.message}</p>
             <p className="mt-1 text-muted-foreground">
@@ -160,13 +163,13 @@ export function ResultsDashboard({ report, resultId }: ResultsDashboardProps) {
             </p>
           </div>
         ) : null}
-        <div className="flex flex-wrap items-center justify-between gap-4">
+        {!courseTask ? <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <h1 className="text-xl font-semibold tracking-tight">Analysis Results</h1>
             <p className="text-muted-foreground text-sm">Commit: {commit}</p>
             <AnalyzedLanguagesSummary report={report} />
           </div>
-          <div className="flex flex-wrap items-center gap-2">
+          {!courseTask ? <div className="flex flex-wrap items-center gap-2">
             <Button
               onClick={handleExport}
               variant="outline"
@@ -178,10 +181,10 @@ export function ResultsDashboard({ report, resultId }: ResultsDashboardProps) {
             <Button asChild className="h-8 px-3 font-medium">
               <Link href={newAnalysisHref}>New analysis</Link>
             </Button>
-          </div>
-        </div>
+          </div> : null}
+        </div> : null}
 
-        {reportHasGitHubSource(report) ? (
+        {reportHasGitHubSource(report) && !courseTask ? (
           <GitHubRepositoryPanel
             meta={report.github ?? null}
             repoUrl={report.source?.url}
@@ -189,29 +192,30 @@ export function ResultsDashboard({ report, resultId }: ResultsDashboardProps) {
           />
         ) : null}
 
-        <GlobalCoachSays report={report} setResultsTab={setResultsTab} />
+        {!courseTask ? <GlobalCoachSays report={report} setResultsTab={setResultsTab} /> : null}
 
-        <section aria-label="Score overview">
+        {!courseTask ? <section aria-label="Score overview">
           <OverviewCardsStrip
             items={overviewCards}
             selectedId={weakestCardId}
             onRequestTab={setResultsTab}
           />
-        </section>
+        </section> : null}
 
         <CommitHabitsTabInsightProvider
           report={report}
           enabled={activeTab === RESULTS_TAB.commitHabits}
           commitHabitsScopeId={commitHabitsScopeId}
         >
-          <Tabs value={activeTab} onValueChange={(v) => setResultsTab(v as ResultsTabId)} className="w-full">
+          <CoursePrOverview task={courseTask} report={report}>
+          <Tabs value={activeTab} onValueChange={(v) => setResultsTab(v as ResultsTabId)} className={courseTask ? "grid gap-6 lg:grid-cols-[220px_minmax(0,1fr)]" : "w-full"}>
             <div className="w-full max-w-full overflow-x-auto [-webkit-overflow-scrolling:touch] [scrollbar-width:thin]">
               <TabsList
                 aria-label="Result categories"
-                className="flex h-auto min-h-0 w-max min-w-full flex-nowrap items-end gap-0 rounded-none border-b border-border bg-transparent p-0"
+                className={courseTask ? "flex h-auto w-full flex-col items-stretch gap-1 rounded-lg border border-border bg-card p-2" : "flex h-auto min-h-0 w-max min-w-full flex-nowrap items-end gap-0 rounded-none border-b border-border bg-transparent p-0"}
               >
                 <TabsTrigger
-                  className={resultsTabTriggerClass}
+                  className={courseTask ? `${resultsTabTriggerClass} w-full justify-start border-b-0 border-l-2` : resultsTabTriggerClass}
                   value={RESULTS_TAB.commitHabits}
                   title="Commit cadence, size, bursts, and churn — engineering habits from git history"
                 >
@@ -219,7 +223,7 @@ export function ResultsDashboard({ report, resultId }: ResultsDashboardProps) {
                 </TabsTrigger>
                 {hasTab(RESULTS_TAB.testing) ? (
                   <TabsTrigger
-                    className={resultsTabTriggerClass}
+                    className={courseTask ? `${resultsTabTriggerClass} w-full justify-start border-b-0 border-l-2` : resultsTabTriggerClass}
                     value={RESULTS_TAB.testing}
                     title="Testing and verification — test density, commits touching tests, structural risk signals"
                   >
@@ -228,7 +232,7 @@ export function ResultsDashboard({ report, resultId }: ResultsDashboardProps) {
                 ) : null}
                 {hasTab(RESULTS_TAB.codeQuality) ? (
                   <TabsTrigger
-                    className={resultsTabTriggerClass}
+                    className={courseTask ? `${resultsTabTriggerClass} w-full justify-start border-b-0 border-l-2` : resultsTabTriggerClass}
                     value={RESULTS_TAB.codeQuality}
                     title="Code quality — complexity, maintainability, duplication"
                   >
@@ -237,7 +241,7 @@ export function ResultsDashboard({ report, resultId }: ResultsDashboardProps) {
                 ) : null}
                 {hasTab(RESULTS_TAB.reactComponents) ? (
                   <TabsTrigger
-                    className={resultsTabTriggerClass}
+                    className={courseTask ? `${resultsTabTriggerClass} w-full justify-start border-b-0 border-l-2` : resultsTabTriggerClass}
                     value={RESULTS_TAB.reactComponents}
                     title="React and TSX — hooks, JSX depth, component cohesion heuristics"
                   >
@@ -246,36 +250,37 @@ export function ResultsDashboard({ report, resultId }: ResultsDashboardProps) {
                 ) : null}
                 {hasTab(RESULTS_TAB.codeComplexity) ? (
                   <TabsTrigger
-                    className={resultsTabTriggerClass}
+                    className={courseTask ? `${resultsTabTriggerClass} w-full justify-start border-b-0 border-l-2` : resultsTabTriggerClass}
                     value={RESULTS_TAB.codeComplexity}
                     title="Code complexity — Halstead and cognitive complexity, maintainability index (per function)"
                   >
                     Code Complexity
                   </TabsTrigger>
                 ) : null}
-                <TabsTrigger
+                {!courseTask ? <TabsTrigger
                   className={resultsTabTriggerClass}
                   value={RESULTS_TAB.aiUsage}
                   title="AI usage — upload ai_usage_trace.csv from agent_stats to inspect student-facing AI workflow metrics"
                 >
                   AI Usage
-                </TabsTrigger>
-                <TabsTrigger
+                </TabsTrigger> : null}
+                {!courseTask ? <TabsTrigger
                   className={resultsTabTriggerClass}
                   value={RESULTS_TAB.documentation}
                   title="Documentation review — classify and review planning docs against course rubrics"
                 >
                   Documentation
-                </TabsTrigger>
-                <TabsTrigger
+                </TabsTrigger> : null}
+                {!courseTask ? <TabsTrigger
                   className={resultsTabTriggerClass}
                   value={RESULTS_TAB.dataset}
                   title="Export analysis fields for research or downstream tools"
                 >
                   Dataset
-                </TabsTrigger>
+                </TabsTrigger> : null}
               </TabsList>
             </div>
+            <div className="min-w-0">
             <div className="mt-4">
               <ResultsTabPanelIntro activeTab={activeTab} report={report} codeQualityScopeId={codeQualityScopeId} testingScopeId={testingScopeId} />
             </div>
@@ -288,6 +293,7 @@ export function ResultsDashboard({ report, resultId }: ResultsDashboardProps) {
                 report={report}
                 scopeId={commitHabitsScopeId}
                 onScopeIdChange={setCommitHabitsScopeId}
+                prOnly={Boolean(courseTask)}
               />
             </TabsContent>
             {hasTab(RESULTS_TAB.testing) ? (
@@ -298,6 +304,7 @@ export function ResultsDashboard({ report, resultId }: ResultsDashboardProps) {
                     scopeId={testingScopeId}
                     onScopeIdChange={setTestingScopeId}
                     onOpenCodeQualityTab={() => setResultsTab(RESULTS_TAB.codeQuality)}
+                    prOnly={Boolean(courseTask)}
                   />
                 </div>
               </TabsContent>
@@ -309,6 +316,7 @@ export function ResultsDashboard({ report, resultId }: ResultsDashboardProps) {
                   scopeId={codeQualityScopeId}
                   onScopeIdChange={setCodeQualityScopeId}
                   onOpenTestingTab={() => setResultsTab(RESULTS_TAB.testing)}
+                  prOnly={Boolean(courseTask)}
                 />
               </TabsContent>
             ) : null}
@@ -336,28 +344,30 @@ export function ResultsDashboard({ report, resultId }: ResultsDashboardProps) {
                 />
               </TabsContent>
             ) : null}
-            <TabsContent value={RESULTS_TAB.aiUsage} id="ai-usage-panel" className="mt-6 scroll-mt-8">
+            {!courseTask ? <TabsContent value={RESULTS_TAB.aiUsage} id="ai-usage-panel" className="mt-6 scroll-mt-8">
               <AIMaturityTab resultId={resultId} />
-            </TabsContent>
-            <TabsContent
+            </TabsContent> : null}
+            {!courseTask ? <TabsContent
               value={RESULTS_TAB.documentation}
               id="documentation-panel"
               className="mt-6 scroll-mt-8"
             >
               <DocReviewTab resultId={resultId} report={report} />
-            </TabsContent>
-            <TabsContent value={RESULTS_TAB.dataset} className="mt-6">
+            </TabsContent> : null}
+            {!courseTask ? <TabsContent value={RESULTS_TAB.dataset} className="mt-6">
               <DatasetTab report={report} resultId={resultId} />
-            </TabsContent>
+            </TabsContent> : null}
+            </div>
           </Tabs>
+          </CoursePrOverview>
         </CommitHabitsTabInsightProvider>
 
-        <RepoChat
+        {!courseTask ? <RepoChat
           report={report}
           onRegisterCoachSend={(fn) => {
             coachSendRef.current = fn;
           }}
-        />
+        /> : null}
       </div>
     </CoachExplainProvider>
   );

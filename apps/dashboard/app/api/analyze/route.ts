@@ -28,6 +28,8 @@ import { devStoreReport } from "@/lib/devReportStore";
 import { isValidGitHubUrl, normalizeGitHubUrl } from "@/lib/github/parseGitHubUrl";
 import { parseAnalyzeRef } from "@/lib/github/analyzeRef";
 import { buildAnalysisResultId } from "@/lib/analysisResultId";
+import { CSE115A_FALL_COURSE_IDS, verifiedUcscGoogleEmail } from "@/lib/courseUcscAuth";
+import { getEnrolledCourse } from "@/lib/cse115a/server";
 
 export const runtime = "nodejs";
 
@@ -67,6 +69,7 @@ const ANALYSES_MIGRATION_HINT =
 // ---------------------------------------------------------------------------
 const ALLOWED_COURSE_IDS = new Set([
   "CSE115A-Summer26",
+  "CSE115A-Fall26",
   "CSE115A-Fall26-S01",
   "CSE115A-Fall26-S02",
   "CSE115A-Winter26",
@@ -163,7 +166,10 @@ export async function POST(request: NextRequest) {
 
     // Reject unknown course IDs — only allow-listed sections may tag submissions.
     // Submissions with no course_id (plain /analyze usage) pass through unchanged.
-    if (courseIdVal !== null && !ALLOWED_COURSE_IDS.has(courseIdVal)) {
+    const managedCourse = courseIdVal && /^CSE115A-(?:Winter|Spring|Summer|Fall)\d{2}$/.test(courseIdVal)
+      ? await getEnrolledCourse(authUser.id, courseIdVal)
+      : null;
+    if (courseIdVal !== null && !ALLOWED_COURSE_IDS.has(courseIdVal) && !managedCourse) {
       return NextResponse.json(
         {
           error: `"${courseIdVal}" is not a recognised course section. Check the link you were given and try again.`,
@@ -171,6 +177,18 @@ export async function POST(request: NextRequest) {
           code: "invalid_course_id",
         },
         { status: 400 },
+      );
+    }
+    if (courseIdVal === "CSE115A-Fall26" && !managedCourse) {
+      return NextResponse.json(
+        { error: "Join CSE 115A with your course code before analyzing an assignment.", code: "course_membership_required" },
+        { status: 403 },
+      );
+    }
+    if (courseIdVal && (managedCourse || CSE115A_FALL_COURSE_IDS.has(courseIdVal)) && !verifiedUcscGoogleEmail(authUser)) {
+      return NextResponse.json(
+        { error: "Sign in with your UCSC Google account before analyzing this assignment.", code: "ucsc_google_required" },
+        { status: 403 },
       );
     }
 
