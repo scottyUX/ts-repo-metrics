@@ -21,6 +21,7 @@ export type CourseSetupProps = {
   joinError?: string | null;
   onConnectGithub: () => void;
   connectingGithub: boolean;
+  githubError?: string | null;
   disabled?: boolean;
 };
 
@@ -115,6 +116,11 @@ export function CourseSetup(props: CourseSetupProps) {
                         {props.connectingGithub ? "Opening GitHub…" : "Connect GitHub"}
                       </Button>
                     )}
+                    {props.githubError ? (
+                      <p role="alert" className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                        {props.githubError}
+                      </p>
+                    ) : null}
                     <p className="text-xs">
                       Team repo in a GitHub organization? On GitHub’s screen, click <strong className="font-semibold text-foreground">Grant</strong> next
                       to it. If you see <strong className="font-semibold text-foreground">Request</strong>, ask a repo owner to approve Repo Metrics.

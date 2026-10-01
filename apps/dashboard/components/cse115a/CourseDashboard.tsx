@@ -10,6 +10,7 @@ import { runAnalyzeFromUrl } from "@/lib/runAnalyze";
 import { sprintScore, type StudentTaskGrade } from "@/lib/cse115a/gradeReview";
 import { RUBRIC } from "@/lib/cse115a/rubric";
 import { CONSENT_TEXT, CONSENT_VERSION } from "@/lib/cse115a/consent";
+import { oauthHashError } from "@/lib/cse115a/oauthError";
 import {
   firstOpenSprint,
   processChecklist,
@@ -164,6 +165,7 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
   const [phase, setPhase] = useState<Record<number, string>>({});
   const [githubConnected, setGithubConnected] = useState<boolean | null>(preview ? previewState !== "joined" : null);
   const [connectingGithub, setConnectingGithub] = useState(false);
+  const [githubError, setGithubError] = useState<string | null>(null);
   const [submittingAssignment, setSubmittingAssignment] = useState(false);
   const [confirmingSubmit, setConfirmingSubmit] = useState(false);
   const [confirmingChange, setConfirmingChange] = useState(false);
@@ -197,6 +199,14 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
   }, [router, preview]);
 
   useEffect(() => { void load(); }, [load]);
+  // A failed GitHub link comes back as #error=... in the URL; show it and clean the URL.
+  useEffect(() => {
+    if (preview) return;
+    const message = oauthHashError(window.location.hash);
+    if (!message) return;
+    setGithubError(message);
+    window.history.replaceState(null, "", window.location.pathname + window.location.search);
+  }, [preview]);
   // Grades appear without a reload: poll while any submitted assignment is not yet released.
   const waitingForGrade = Boolean(me?.assignmentSubmissions.some((item) => item.status !== "released"));
   useEffect(() => {
@@ -295,6 +305,7 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
     if (preview) return;
     setConnectingGithub(true);
     setError(null);
+    setGithubError(null);
     try {
       const supabase = createUserSupabaseBrowserClient();
       const { data: { user } } = await supabase.auth.getUser();
@@ -306,7 +317,9 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
         : await supabase.auth.linkIdentity({ provider: "github", options });
       if (result.error) throw result.error;
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Could not connect GitHub.");
+      const message = caught instanceof Error ? caught.message : "Could not connect GitHub.";
+      setGithubError(message);
+      setError(message);
     } finally {
       setConnectingGithub(false);
     }
@@ -444,6 +457,7 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
           joinError={joinError}
           onConnectGithub={() => void connectGithub()}
           connectingGithub={connectingGithub}
+          githubError={githubError}
           disabled={preview}
         />
       ) : course ? (
