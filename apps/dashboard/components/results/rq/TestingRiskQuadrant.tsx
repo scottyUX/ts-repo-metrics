@@ -6,6 +6,7 @@ import { Maximize2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { RiskProfileHelpBody } from "./metricHelpContent";
@@ -399,6 +400,7 @@ export function TestingRiskQuadrant({
             "data-[state=open]:zoom-in-100 data-[state=closed]:zoom-out-100 sm:max-w-none",
           )}
         >
+          <DialogTitle className="sr-only">{sectionTitle}</DialogTitle>
           <div className={cn(shell, "border-[#262626] m-4 rounded-[14px] border sm:m-6 sm:p-8")}>
             <TestingRiskQuadrantInner
               sectionTitle={sectionTitle}
