@@ -5,6 +5,8 @@ export type TaskFacts = {
   testFileCount: number | null;
   mergeSha: string;
   firstCommitSha: string | null;
+  /** Whether the PR's first commit changes only the task file. Missing on tasks saved before #266. */
+  firstCommitTaskOnly?: boolean | null;
 };
 
 export type ChecklistLine = {
@@ -71,13 +73,19 @@ export function processChecklist(
     : !titleOk
       ? "Edit the PR title on GitHub, then Re-check."
       : "Can't be fixed on this PR.";
+  // A missing or misplaced base tag fails this check too, but only a spec that wasn't first can't be fixed (#266).
+  const specFirstDetail = facts?.firstCommitTaskOnly !== true
+    ? "Can't be fixed on this PR. The spec must come first; use a new task."
+    : !validation.baseTagPushed
+      ? "Push the base tag, then Re-check."
+      : `git tag -f ${id}-base ${first} && git push -f origin ${id}-base`;
 
   return [
     {
       key: "specCommittedFirst",
       ok: Boolean(validation.specCommittedFirst),
       label: "Task file committed alone, first",
-      detail: validation.specCommittedFirst ? null : "Can't be fixed on this PR. The spec must come first; use a new task.",
+      detail: validation.specCommittedFirst ? null : specFirstDetail,
     },
     {
       key: "baseTagPushed",
