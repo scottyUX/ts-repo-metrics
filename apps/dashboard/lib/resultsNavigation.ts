@@ -68,8 +68,10 @@ export function isStaticAnalysisTab(tab: ResultsTabId): boolean {
 export function availableResultsTabs(opts: {
   analysisSkipped: boolean;
   showReact: boolean;
+  courseTask?: boolean;
 }): ResultsTabId[] {
   return RESULTS_TAB_ORDER.map((t) => t.id).filter((id) => {
+    if (opts.courseTask && (id === RESULTS_TAB.aiUsage || id === RESULTS_TAB.documentation || id === RESULTS_TAB.dataset)) return false;
     if (opts.analysisSkipped && isStaticAnalysisTab(id)) return false;
     if (!opts.showReact && id === RESULTS_TAB.reactComponents) return false;
     return true;

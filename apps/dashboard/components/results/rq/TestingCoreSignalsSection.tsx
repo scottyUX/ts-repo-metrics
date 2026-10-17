@@ -9,6 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import type { RepoReport } from "@/lib/reportTypes";
+import { isPrScopedReport } from "@/lib/analysisScope";
 import type { TestingScopeMetricValues } from "@/lib/testingScopeMetrics";
 import {
   findContributorForScope,
@@ -22,7 +23,7 @@ interface TestingCoreSignalsSectionProps {
   testingScopeId: CommitHabitsScopeId;
 }
 
-type SignalTier = "strong" | "good" | "needs_work" | "critical";
+type SignalTier = "strong" | "good" | "needs_work" | "critical" | "no_data";
 
 const tierMeta: Record<SignalTier, { label: string; badgeClass: string }> = {
   strong: {
@@ -41,9 +42,14 @@ const tierMeta: Record<SignalTier, { label: string; badgeClass: string }> = {
     label: "Critical",
     badgeClass: "border-0 bg-red-950 font-medium text-red-400 shadow-none",
   },
+  no_data: {
+    label: "No data",
+    badgeClass: "border-0 bg-muted font-medium text-muted-foreground shadow-none",
+  },
 };
 
 function tierForTestLocRatio(ratio: number, sourceLoc: number): SignalTier {
+  if (sourceLoc <= 0) return "no_data";
   if (sourceLoc > 0 && ratio <= 0) return "critical";
   if (ratio < 0.08) return "critical";
   if (ratio < 0.15) return "needs_work";
@@ -102,24 +108,31 @@ export function TestingCoreSignalsSection({
     ? Math.round(mv.pctCommitsTouchingTests)
     : 0;
 
-  const churnSharePct = Math.min(100, Math.max(0, Math.round(mv.testLocRatio * 100)));
+  // Test ÷ source (lines or churn) compares two separate totals, so it can exceed 100%; don't cap it.
+  const churnSharePct = Math.max(0, Math.round(mv.testLocRatio * 100));
   const snapshotSharePct = churnSharePct;
+  const prScoped = isPrScopedReport(report);
 
   // Test LOC ÷ source LOC. Not line coverage, so the title avoids "coverage".
   const ratioTitle = fromGitChurn ? "Test churn share" : "Test-to-source LOC";
   const testFilesTitle = fromGitChurn ? "Test paths touched" : "Test files";
 
   const ratioDescription = (() => {
+    if (ratioTier === "no_data") {
+      return fromGitChurn
+        ? "No source-path churn for this author to compare test-path churn against."
+        : "No source code in the snapshot to compare test code against.";
+    }
     if (fromGitChurn) {
       if (ratioTier === "strong" || ratioTier === "good") {
-        return `About ${churnSharePct}% of this author’s line churn (add + delete) landed on test paths—a healthy share for this git-history proxy. Keep pairing production edits with test updates when behavior changes.`;
+        return `Test-path churn (lines added + deleted) is about ${churnSharePct}% of source-path churn for this author—a healthy ratio for this git-history proxy. Keep pairing production edits with test updates when behavior changes.`;
       }
-      return `Only about ${churnSharePct}% of this author’s line churn is on test paths. Aim to raise the share of test-path edits as features stabilize—same threshold idea as snapshot test/source ratio, but from numstat history.`;
+      return `Test-path churn (lines added + deleted) is only about ${churnSharePct}% of source-path churn for this author. Aim to raise the share of test-path edits as features stabilize—same threshold idea as the snapshot test/source ratio, but from numstat history.`;
     }
     if (ratioTier === "strong" || ratioTier === "good") {
-      return `Test code is about ${snapshotSharePct}% of source in the snapshot—within a healthy band for this proxy. Keep pairing new features with tests so the ratio does not slip.`;
+      return `Test code is about ${snapshotSharePct}% of source ${prScoped ? "across the files in this PR" : "in the snapshot"}—within a healthy band for this proxy. Keep pairing new features with tests so the ratio does not slip.`;
     }
-    return `Test code is ${snapshotSharePct}% of source in the snapshot. Many teams aim for roughly 20–30% by LOC proxy; growing test files alongside features closes the gap.`;
+    return `Test code is ${snapshotSharePct}% of source ${prScoped ? "across the files in this PR" : "in the snapshot"}. Many teams aim for roughly 20–30% by LOC proxy; growing test files alongside features closes the gap.`;
   })();
 
   const commitsDescription = (() => {
@@ -158,9 +171,9 @@ export function TestingCoreSignalsSection({
       return "No test files matched the analyzer’s patterns yet. Add a first spec or test module so verification has a foothold in the tree.";
     }
     if (filesTier === "needs_work" || filesTier === "critical") {
-      return `Only ${mv.testFiles} test file${mv.testFiles === 1 ? "" : "s"} on the snapshot. Add tests alongside new features so the count keeps pace with your source code.`;
+      return `Only ${mv.testFiles} test file${mv.testFiles === 1 ? "" : "s"} ${prScoped ? "in this PR" : "on the snapshot"}. Add tests alongside new features so the count keeps pace with your source code.`;
     }
-    return `You have ${mv.testFiles} test file${mv.testFiles === 1 ? "" : "s"} on the snapshot—keep adding tests as you ship so this count tracks code growth.`;
+    return `You have ${mv.testFiles} test file${mv.testFiles === 1 ? "" : "s"} ${prScoped ? "in this PR" : "on the snapshot"}—keep adding tests as you ship so this count tracks code growth.`;
   })();
 
   return (
@@ -178,7 +191,7 @@ export function TestingCoreSignalsSection({
         <SignalCard
           title={ratioTitle}
           tier={ratioTier}
-          value={formatRatioAsPercent(mv.testLocRatio)}
+          value={ratioTier === "no_data" ? "—" : formatRatioAsPercent(mv.testLocRatio)}
           description={ratioDescription}
         />
         <SignalCard

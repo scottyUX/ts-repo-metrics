@@ -21,6 +21,7 @@ import {
   buildOAuthCallbackUrl,
   getOAuthRedirectOrigin,
   stashOAuthNextPath,
+  stashOAuthProvider,
 } from "@/lib/oauthRedirectOrigin";
 
 const EXAMPLE_GITHUB_REPO = "https://github.com/scottyUX/ts-repo-metrics";
@@ -71,6 +72,7 @@ export function AnalyzeRepositoryHero({ compact }: AnalyzeRepositoryHeroProps) {
       const supabase = createUserSupabaseBrowserClient();
       const origin = getOAuthRedirectOrigin();
       stashOAuthNextPath(signInHrefPath);
+      stashOAuthProvider("github");
       await supabase.auth.signInWithOAuth({
         provider: "github",
         options: {

@@ -137,9 +137,11 @@ const GAP = "gap-1 sm:gap-1.5";
 export function CommitActivityCard({
   report,
   scopeId,
+  focusWeeks = COMMIT_ACTIVITY_FOCUS_WEEKS,
 }: {
   report: RepoReport;
   scopeId: CommitHabitsScopeId;
+  focusWeeks?: number;
 }) {
   const rawCal = useMemo(() => resolveCalendar(report, scopeId), [report, scopeId]);
   const cal = useMemo(() => (isDisplayableCalendar(rawCal) ? rawCal : null), [rawCal]);
@@ -152,7 +154,7 @@ export function CommitActivityCard({
 
   const visualization = useMemo(() => {
     if (!cal) return null;
-    const focused = focusCalendarOnLatestWeeks(cal, COMMIT_ACTIVITY_FOCUS_WEEKS);
+    const focused = focusCalendarOnLatestWeeks(cal, focusWeeks);
     let maxC = 0;
     for (const row of focused.grid) {
       for (const c of row) {
@@ -165,7 +167,7 @@ export function CommitActivityCard({
       max: maxC,
       busiestWeekdayIndex: focused.busiestWeekdayIndex,
     };
-  }, [cal]);
+  }, [cal, focusWeeks]);
 
   const monthLabels = useMemo(
     () => (visualization ? monthTickLabels(visualization.columnWeekStarts) : []),
@@ -176,8 +178,9 @@ export function CommitActivityCard({
 
   const footerLine = useMemo(() => {
     if (!visualization) return null;
-    const cpwRaw =
-      scopedContributor != null ? scopedContributor.commitsPerWeek : git?.commitsPerWeek;
+    const cpwRaw = focusWeeks === COMMIT_ACTIVITY_FOCUS_WEEKS
+      ? scopedContributor != null ? scopedContributor.commitsPerWeek : git?.commitsPerWeek
+      : null;
     const cpwStr =
       typeof cpwRaw === "number" && cpwRaw > 0
         ? scopedContributor != null
@@ -187,8 +190,8 @@ export function CommitActivityCard({
     const total = sumGrid(visualization.grid);
     const cols = visualization.grid[0]?.length ?? 0;
     const windowLabel =
-      cols >= COMMIT_ACTIVITY_FOCUS_WEEKS
-        ? "latest ~6 months"
+      cols >= focusWeeks
+        ? focusWeeks === 1 ? "latest week" : focusWeeks === COMMIT_ACTIVITY_FOCUS_WEEKS ? "latest ~6 months" : `latest ${focusWeeks} weeks`
         : "all weeks available in this analysis";
     const busy =
       visualization.busiestWeekdayIndex != null &&
@@ -202,7 +205,7 @@ export function CommitActivityCard({
       busy,
     ].filter(Boolean) as string[];
     return parts.join(" · ");
-  }, [git?.commitsPerWeek, scopedContributor, visualization]);
+  }, [focusWeeks, git?.commitsPerWeek, scopedContributor, visualization]);
 
   const noDataBadgeClass = coreSignalTierMeta.no_data.badgeClass;
 
@@ -218,8 +221,7 @@ export function CommitActivityCard({
               Commit Activity
             </h2>
             <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
-              Heatmap highlights the latest weeks (up to about six months), ending on your most recent
-              commit week.
+              {focusWeeks === COMMIT_ACTIVITY_FOCUS_WEEKS ? "Heatmap highlights the latest weeks (up to about six months), ending on your most recent commit week." : `Commit activity in the most recent ${focusWeeks} weeks of this PR analysis.`}
             </p>
           </div>
         </div>
@@ -247,7 +249,7 @@ export function CommitActivityCard({
               <div
                 className={cn("inline-flex min-w-0 flex-col", GAP)}
                 role="img"
-                aria-label="Commit activity heatmap: most recent six months by weekday and week"
+                aria-label={focusWeeks === COMMIT_ACTIVITY_FOCUS_WEEKS ? "Commit activity heatmap: most recent six months by weekday and week" : `Commit activity heatmap: most recent ${focusWeeks} weeks by weekday and week`}
               >
                 <div className={cn("flex", GAP)}>
                   <div className={cn(LABEL_COL, "shrink-0")} />

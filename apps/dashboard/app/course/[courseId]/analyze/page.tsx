@@ -21,7 +21,9 @@ import {
   buildOAuthCallbackUrl,
   getOAuthRedirectOrigin,
   stashOAuthNextPath,
+  stashOAuthProvider,
 } from "@/lib/oauthRedirectOrigin";
+import { verifiedUcscGoogleEmail } from "@/lib/courseUcscAuth";
 
 type DashboardProfile = {
   login: string;
@@ -56,6 +58,7 @@ type DashboardPayload = {
 
 const COURSE_META: Record<string, { fullName: string; term: string; description?: string }> = {
   "CSE115A-Summer26":    { fullName: "CSE 115A",             term: "Summer 2026" },
+  "CSE115A-Fall26":      { fullName: "CSE 115A",             term: "Fall 2026" },
   "CSE115A-Fall26-S01":  { fullName: "CSE 115A — Section 01", term: "Fall 2026" },
   "CSE115A-Fall26-S02":  { fullName: "CSE 115A — Section 02", term: "Fall 2026" },
   "CSE115A-Winter26":    { fullName: "CSE 115A",             term: "Winter 2026" },
@@ -63,6 +66,9 @@ const COURSE_META: Record<string, { fullName: string; term: string; description?
   "CSE115B-Winter26":    { fullName: "CSE 115B",             term: "Winter 2026" },
   "CSE115C-Spring26":    { fullName: "CSE 115C",             term: "Spring 2026" },
 };
+
+const FALL_2026_SECTIONS = new Set(["CSE115A-Fall26", "CSE115A-Fall26-S01", "CSE115A-Fall26-S02"]);
+const ASSIGNMENT_URL = "https://github.com/scottyUX/hecate-router/blob/main/docs/cse115a-sprint-task-specifications.md";
 
 type StepNum = 1 | 2 | 3;
 
@@ -80,6 +86,7 @@ export default function CourseAnalyzePage() {
   const courseIdDisplay = courseSlugParam
     ? decodeURIComponent(courseSlugParam)
     : "";
+  const isFall115A = FALL_2026_SECTIONS.has(courseIdDisplay);
 
   const oauthNextPath =
     pathname?.startsWith("/course/") && pathname.endsWith("/analyze") ?
@@ -103,6 +110,8 @@ export default function CourseAnalyzePage() {
   const [pickerRepo, setPickerRepo] = useState<AnalyzePickerRepo | null>(null);
 
   const [signingIn, setSigningIn] = useState(false);
+  const [courseAuthStatus, setCourseAuthStatus] = useState<"checking" | "needs_google" | "ready">("checking");
+  const [ucscEmail, setUcscEmail] = useState<string | null>(null);
 
   /** Restore progress after OAuth (sessionStorage). */
   useEffect(() => {
@@ -173,9 +182,52 @@ export default function CourseAnalyzePage() {
   }, []);
 
   useEffect(() => {
-    if (step !== 3) return;
-    void loadDashboard();
-  }, [step, loadDashboard]);
+    if (step === 1) return;
+    if (!isFall115A) {
+      if (step === 3) void loadDashboard();
+      return;
+    }
+    if (!isBrowserSupabaseConfigured()) {
+      setCourseAuthStatus("needs_google");
+      return;
+    }
+    let cancelled = false;
+    void (async () => {
+      const supabase = createUserSupabaseBrowserClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (cancelled) return;
+      const email = verifiedUcscGoogleEmail(user);
+      setUcscEmail(email);
+      setCourseAuthStatus(email ? "ready" : "needs_google");
+      if (email && step === 3) void loadDashboard();
+    })();
+    return () => { cancelled = true; };
+  }, [step, isFall115A, loadDashboard]);
+
+  const handleGoogleOAuth = useCallback(async () => {
+    if (!isBrowserSupabaseConfigured()) {
+      toast.error("Sign-in is not configured on this host.");
+      return;
+    }
+    setSigningIn(true);
+    try {
+      const supabase = createUserSupabaseBrowserClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      const origin = getOAuthRedirectOrigin();
+      stashOAuthNextPath(oauthNextPath);
+      stashOAuthProvider("google");
+      const options = {
+        redirectTo: buildOAuthCallbackUrl(origin),
+        queryParams: { hd: "ucsc.edu", prompt: "select_account" },
+      };
+      const { error } = user
+        ? await supabase.auth.linkIdentity({ provider: "google", options })
+        : await supabase.auth.signInWithOAuth({ provider: "google", options });
+      if (error) toast.error(error.message);
+    } finally {
+      setSigningIn(false);
+    }
+  }, [oauthNextPath]);
 
   const handleGitHubOAuth = useCallback(async () => {
     if (!isBrowserSupabaseConfigured()) {
@@ -185,19 +237,20 @@ export default function CourseAnalyzePage() {
     setSigningIn(true);
     try {
       const supabase = createUserSupabaseBrowserClient();
+      const { data: { user } } = await supabase.auth.getUser();
       const origin = getOAuthRedirectOrigin();
       stashOAuthNextPath(oauthNextPath);
-      await supabase.auth.signInWithOAuth({
-        provider: "github",
-        options: {
-          redirectTo: buildOAuthCallbackUrl(origin),
-          scopes: "read:user user:email repo",
-        },
-      });
+      stashOAuthProvider("github");
+      const options = { redirectTo: buildOAuthCallbackUrl(origin), scopes: "read:user user:email repo" };
+      const hasGithubIdentity = user?.identities?.some((identity) => identity.provider === "github");
+      const { error } = isFall115A && user && !hasGithubIdentity
+        ? await supabase.auth.linkIdentity({ provider: "github", options })
+        : await supabase.auth.signInWithOAuth({ provider: "github", options });
+      if (error) toast.error(error.message);
     } finally {
       setSigningIn(false);
     }
-  }, [oauthNextPath]);
+  }, [oauthNextPath, isFall115A]);
 
   const goTeamContinue = () => {
     const t = teamName.trim();
@@ -252,7 +305,7 @@ export default function CourseAnalyzePage() {
             {/* Title */}
             <div className="space-y-2">
               <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-                Repo Analytics
+                {isFall115A ? "CSE 115A Repo Metrics" : "Repo Analytics"}
               </h1>
               <p className="text-lg font-medium text-muted-foreground">
                 {courseMeta ? courseMeta.fullName : courseIdDisplay}
@@ -261,13 +314,21 @@ export default function CourseAnalyzePage() {
 
             {/* Description */}
             <p className="mx-auto max-w-xl text-base text-muted-foreground">
-              {courseMeta
+              {isFall115A
+                ? "For each sprint task, write the spec before implementation, merge its pull request, then run Repo Metrics on that merged PR. Analyze both of your tasks separately before submitting their PR links on Canvas."
+                : courseMeta
                 ? `Repo Analytics helps ${courseMeta.fullName} teams reflect on their software engineering process. After selecting your project repository, the tool summarizes development activity, code structure, testing signals, and maintainability.`
                 : "The repo analytics tool helps you reflect on your team's software engineering process. After selecting your project repository, the tool will summarize repository-level patterns such as development activity, code structure, testing signals, and maintainability."}
             </p>
 
+            {isFall115A ? (
+              <a href={ASSIGNMENT_URL} target="_blank" rel="noopener noreferrer" className="text-sm text-primary underline underline-offset-4 hover:no-underline">
+                Read the CSE 115A sprint task assignment
+              </a>
+            ) : null}
+
             <Button className="w-full max-w-xs" onClick={() => setStep(2)} type="button">
-              Get started
+              {isFall115A ? "Submit your assignment" : "Get started"}
             </Button>
           </div>
 
@@ -286,7 +347,32 @@ export default function CourseAnalyzePage() {
       {/* Step 2 */}
       {step === 2 ? (
         <div className="mx-auto w-full max-w-4xl py-8">
-        <div className={cardOuter}>
+        {isFall115A ? (
+          <section className="mx-auto mb-6 max-w-xl rounded-md border border-border bg-card p-6 text-sm">
+            <h2 className="font-semibold">Before you analyze</h2>
+            <ol className="mt-3 list-inside list-decimal space-y-2 text-muted-foreground">
+              <li>Complete two different tasks this sprint, each with its own spec in <code>docs/tasks/sprint-N/</code>.</li>
+              <li>Commit each spec before implementation and push its <code>&lt;id&gt;-base</code> tag.</li>
+              <li>Commit tests for every acceptance criterion, merge each task PR, and push its <code>&lt;id&gt;-done</code> tag.</li>
+              <li>Run Repo Metrics on each merged PR. Submit the two PR links on Canvas.</li>
+            </ol>
+            <p className="mt-3 text-muted-foreground">Your team name is recorded in Repo Metrics only; it is not part of your Canvas submission.</p>
+          </section>
+        ) : null}
+        {isFall115A && courseAuthStatus !== "ready" ? (
+          <div className={`${cardOuter} space-y-4 text-center`}>
+            <h2 className="text-lg font-semibold">Sign in with your UCSC account</h2>
+            <p className="text-sm text-muted-foreground">Use Google to confirm your <code>@ucsc.edu</code> account before submitting your assignment.</p>
+            {courseAuthStatus === "checking" ? (
+              <Loader2 className="mx-auto size-5 animate-spin" aria-label="Checking sign-in" />
+            ) : (
+              <Button type="button" disabled={signingIn} onClick={() => void handleGoogleOAuth()}>
+                {signingIn ? <Loader2 className="mr-2 size-4 animate-spin" aria-hidden /> : null}
+                Sign in with UCSC Google
+              </Button>
+            )}
+          </div>
+        ) : <div className={cardOuter}>
           <h2 className="text-lg font-semibold">Enter your team name</h2>
           <label className="mt-4 block text-sm font-medium" htmlFor="team-name-field">
             Team or project name *
@@ -313,7 +399,7 @@ export default function CourseAnalyzePage() {
               Continue
             </Button>
           </div>
-        </div>
+        </div>}
         </div>
       ) : null}
 
@@ -338,10 +424,25 @@ export default function CourseAnalyzePage() {
             </button>
           </div>
 
-          {dashUnauthorized ? (
+          {isFall115A && courseAuthStatus !== "ready" ? (
+            <div className="flex w-full max-w-md mx-auto flex-col items-center gap-4 rounded-md border border-border bg-card p-6 text-center">
+              <h2 className="text-lg font-semibold">Sign in with your UCSC account</h2>
+              <p className="text-sm text-muted-foreground">
+                Use Google to confirm your <code>@ucsc.edu</code> account. You will connect GitHub next to choose your team repository.
+              </p>
+              {courseAuthStatus === "checking" ? (
+                <Loader2 className="size-5 animate-spin" aria-label="Checking sign-in" />
+              ) : (
+                <Button type="button" disabled={signingIn} onClick={() => void handleGoogleOAuth()}>
+                  {signingIn ? <Loader2 className="mr-2 size-4 animate-spin" aria-hidden /> : null}
+                  Sign in with UCSC Google
+                </Button>
+              )}
+            </div>
+          ) : dashUnauthorized ? (
             <div className="flex w-full max-w-md mx-auto flex-col items-center gap-4 rounded-md border border-border bg-card p-6 text-center">
               <p className="text-sm text-muted-foreground">
-                Sign in with GitHub to analyze your repository. By using Repo Metrics, you agree to its{" "}
+                {isFall115A ? `Signed in as ${ucscEmail}. Connect GitHub to choose your team repository. ` : "Sign in with GitHub to analyze your repository. "}By using Repo Metrics, you agree to its{" "}
                 <a href="/license" className="underline underline-offset-4 hover:text-foreground">license</a>{" "}
                 and{" "}
                 <a href="/privacy" className="underline underline-offset-4 hover:text-foreground">privacy statement</a>.
@@ -357,7 +458,7 @@ export default function CourseAnalyzePage() {
                 ) : (
                   <Github className="size-4" aria-hidden />
                 )}
-                Sign in with GitHub
+                {isFall115A ? "Connect GitHub" : "Sign in with GitHub"}
               </Button>
             </div>
           ) : dashLoading ? (
@@ -371,7 +472,7 @@ export default function CourseAnalyzePage() {
               {(tokenErrorCode === "github_token_missing" ||
                 tokenErrorCode === "github_unauthorized") && (
                 <p className="mt-2 text-xs text-muted-foreground">
-                  Your GitHub token has expired. Please sign out and sign in again.
+                  {isFall115A ? "Connect or reconnect GitHub to continue." : "Your GitHub token has expired. Please sign out and sign in again."}
                 </p>
               )}
               <div className="mt-4 flex flex-wrap gap-3">
@@ -381,6 +482,9 @@ export default function CourseAnalyzePage() {
                 <Button type="button" onClick={() => void loadDashboard()}>
                   Retry
                 </Button>
+                {isFall115A && (tokenErrorCode === "github_token_missing" || tokenErrorCode === "github_unauthorized") ? (
+                  <Button type="button" onClick={() => void handleGitHubOAuth()}>Connect GitHub</Button>
+                ) : null}
               </div>
             </div>
           ) : data?.profile ? (
@@ -411,7 +515,9 @@ export default function CourseAnalyzePage() {
                     </a>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    Pick a repo below, then choose a pull request, branch, or main.
+                    {isFall115A
+                      ? "Pick your team repository, then select one of your merged task pull requests. Repeat for your second task."
+                      : "Pick a repo below, then choose a pull request, branch, or main."}
                   </p>
                 </div>
               </aside>
@@ -494,6 +600,7 @@ export default function CourseAnalyzePage() {
           team_name: teamName.trim(),
         }}
         onAnalyzingChange={setAnalyzingFullName}
+        mergedPullsOnly={isFall115A}
       />
     </div>
   );

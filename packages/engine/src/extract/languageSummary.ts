@@ -33,18 +33,29 @@ interface Bucket {
 export class LanguageSummaryBuilder {
   private readonly buckets = new Map<LanguageBucket, Bucket>();
 
-  add(
-    bucket: LanguageBucket,
-    file: { loc: number; isTest: boolean; functions: FunctionDetail[]; smells: SmellCounts },
-  ): void {
+  private bucketFor(bucket: LanguageBucket): Bucket {
     let b = this.buckets.get(bucket);
     if (!b) {
       b = { files: 0, sourceLOC: 0, testLOC: 0, complexities: [], lengths: [], smells: emptySmells() };
       this.buckets.set(bucket, b);
     }
+    return b;
+  }
+
+  /** Test files add LOC only. Their functions and smells stay out of the summary. */
+  addTestFile(bucket: LanguageBucket, loc: number): void {
+    const b = this.bucketFor(bucket);
     b.files++;
-    if (file.isTest) b.testLOC += file.loc;
-    else b.sourceLOC += file.loc;
+    b.testLOC += loc;
+  }
+
+  add(
+    bucket: LanguageBucket,
+    file: { loc: number; functions: FunctionDetail[]; smells: SmellCounts },
+  ): void {
+    const b = this.bucketFor(bucket);
+    b.files++;
+    b.sourceLOC += file.loc;
     for (const f of file.functions) {
       b.complexities.push(f.cyclomaticComplexity);
       b.lengths.push(f.lines);

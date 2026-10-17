@@ -7,6 +7,7 @@ import type { Phase2DeepDiveId } from "./Phase2MetricDeepDiveDialog";
 interface Phase2CodeComplexityCoreSignalsProps {
   summary: Phase2Summary;
   onOpenDeepDive?: (id: Phase2DeepDiveId) => void;
+  prScoped?: boolean;
 }
 
 function formatMiMean(m: number): string {
@@ -48,6 +49,7 @@ function tierHalsteadMean(m: number): CoreSignalTier {
 export function Phase2CodeComplexityCoreSignals({
   summary,
   onOpenDeepDive,
+  prScoped,
 }: Phase2CodeComplexityCoreSignalsProps) {
   const mi = summary.miNormMean;
   const cog = summary.cognitiveMean;
@@ -60,7 +62,7 @@ export function Phase2CodeComplexityCoreSignals({
 
   const descMi = (() => {
     if (tMi === "strong" || tMi === "good") {
-      return `Above 65 is considered maintainable. Your codebase average is ${formatMiMean(mi)}—protect this by keeping complexity in check.`;
+      return `Above 65 is considered maintainable. ${prScoped ? "The average for this pull request's files" : "Your codebase average"} is ${formatMiMean(mi)}—protect this by keeping complexity in check.`;
     }
     return `Mean MI_norm ${formatMiMean(mi)} sits below the maintainable band for many functions—prioritize outliers in the tables below.`;
   })();
