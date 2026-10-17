@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCourseIdentity, getEnrolledCourse } from "@/lib/cse115a/server";
 import { getSupabase, isSupabaseConfigured } from "@/lib/supabase/server";
-import { getDecryptedGitHubTokenForUser } from "@/lib/userGitHubToken";
+import { CourseRepoAccessError, courseRepoToken } from "@/lib/cse115a/githubApp";
 
 export const runtime = "nodejs";
 
@@ -44,10 +44,15 @@ export async function GET(_request: Request, { params }: Params) {
   if (!course || !await getEnrolledCourse(identity.userId, course.slug)) {
     return NextResponse.json({ error: "Task not found." }, { status: 404 });
   }
-  const token = await getDecryptedGitHubTokenForUser(identity.userId);
-  if (!token) return NextResponse.json({ error: "Reconnect GitHub to view this PR’s commits." }, { status: 403 });
   const [owner, repo] = String(task.repo_full_name).split("/");
   if (!owner || !repo) return NextResponse.json({ error: "Invalid repository." }, { status: 500 });
+  let token: string;
+  try {
+    token = await courseRepoToken(identity.githubLogin, owner, repo);
+  } catch (error) {
+    if (error instanceof CourseRepoAccessError) return NextResponse.json({ error: error.message, code: error.code }, { status: 403 });
+    return NextResponse.json({ error: "Could not check your access to this repository." }, { status: 502 });
+  }
 
   const commits: Array<{ sha: string; url: string; title: string; body: string; author: string; date: string }> = [];
   try {
@@ -62,7 +67,7 @@ export async function GET(_request: Request, { params }: Params) {
         headers: { Accept: "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28", Authorization: `Bearer ${token}` },
         cache: "no-store",
       });
-      if (!response.ok) return NextResponse.json({ error: "GitHub could not load this PR’s commits. Reconnect GitHub and try again." }, { status: 502 });
+      if (!response.ok) return NextResponse.json({ error: "GitHub could not load this PR’s commits. Try again in a moment." }, { status: 502 });
       const batch = await response.json() as GitHubCommit[];
       commits.push(...batch.map((item) => {
         const [title, ...body] = item.commit.message.split("\n");

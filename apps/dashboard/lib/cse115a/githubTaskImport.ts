@@ -3,7 +3,7 @@ import { splitPatch } from "@/lib/cse115a/diff";
 import { summarizeCi, type TaskFacts } from "@/lib/cse115a/processChecklist";
 import { readCommitChecks } from "@/lib/cse115a/submissionSnapshot";
 import { parsePullRequestUrl, parseTaskSpec, type TaskSpec } from "@/lib/cse115a/taskSpec";
-import { githubReader, tagCommitSha } from "@/lib/cse115a/githubClient";
+import { tagCommitSha, type GitHubReader } from "@/lib/cse115a/githubClient";
 
 type GitHubPull = {
   title: string;
@@ -28,19 +28,17 @@ export type ImportedTask = {
   facts: TaskFacts;
 };
 
+/** Imports a merged task PR. `githubLogin` is the submitting student's linked GitHub account. */
 export async function importTaskFromPullRequest(
   prUrl: string,
   assignmentNumber: number,
-  token: string,
+  gh: GitHubReader,
+  githubLogin: string,
 ): Promise<ImportedTask> {
   const parsed = parsePullRequestUrl(prUrl);
   if (!parsed) throw new Error("Enter a GitHub pull request URL, such as https://github.com/team/repo/pull/12.");
   const { owner, repo, number } = parsed;
-  const gh = githubReader(token);
-  const [pull, githubUser] = await Promise.all([
-    gh.json<GitHubPull>(`/repos/${owner}/${repo}/pulls/${number}`),
-    gh.json<{ login: string }>("/user"),
-  ]);
+  const pull = await gh.json<GitHubPull>(`/repos/${owner}/${repo}/pulls/${number}`);
   if (!pull?.merged_at || !pull.merge_commit_sha) throw new Error("This pull request must be merged before submission.");
 
   const candidatePaths: string[] = [];
@@ -124,7 +122,7 @@ export async function importTaskFromPullRequest(
     taskPath, markdown, spec,
     validation: {
       prMerged: true,
-      prAuthoredByStudent: pull.user?.login.toLowerCase() === githubUser?.login.toLowerCase(),
+      prAuthoredByStudent: pull.user?.login.toLowerCase() === githubLogin.toLowerCase(),
       prTitleHasTaskId: pull.title.includes(spec.id),
       branchHasTaskId: pull.head.ref.includes(spec.id),
       baseTagPushed: Boolean(baseSha),

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSupabase, isSupabaseConfigured } from "@/lib/supabase/server";
 import { getActiveAssignmentSubmission, getCourseIdentity, getEnrolledCourse, lockedAssignmentMessage, TASK_SUBMISSION_COLUMNS } from "@/lib/cse115a/server";
-import { getDecryptedGitHubTokenForUser } from "@/lib/userGitHubToken";
+import { CourseRepoAccessError, courseRepoReader } from "@/lib/cse115a/githubApp";
 import { importTaskFromPullRequest } from "@/lib/cse115a/githubTaskImport";
 import { parseGitHubUrl } from "@/lib/github/parseGitHubUrl";
 
@@ -46,13 +46,13 @@ export async function POST(request: Request, params: Params) {
   const access = await context(params, body);
   if ("error" in access) return access.error;
   const { identity, course, assignmentNumber, slot } = access;
-  const token = await getDecryptedGitHubTokenForUser(identity.userId);
-  if (!token) return NextResponse.json({ error: "Connect GitHub before submitting a pull request.", code: "github_token_missing" }, { status: 403 });
+  if (!identity.githubLogin) return NextResponse.json({ error: "Connect GitHub before submitting a pull request.", code: "github_not_linked" }, { status: 403 });
   const prUrl = typeof body.prUrl === "string" ? body.prUrl.trim() : "";
   let imported;
   try {
-    imported = await importTaskFromPullRequest(prUrl, assignmentNumber, token);
+    imported = await importTaskFromPullRequest(prUrl, assignmentNumber, courseRepoReader(identity.githubLogin), identity.githubLogin);
   } catch (error) {
+    if (error instanceof CourseRepoAccessError) return NextResponse.json({ error: error.message, code: error.code }, { status: 403 });
     return NextResponse.json({ error: error instanceof Error ? error.message : "Could not import this task." }, { status: 422 });
   }
   const db = getSupabase();

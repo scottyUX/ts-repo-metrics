@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSupabase, isSupabaseConfigured } from "@/lib/supabase/server";
 import { getActiveAssignmentSubmission, getCourseIdentity, getEnrolledCourse, lockedAssignmentMessage } from "@/lib/cse115a/server";
-import { getDecryptedGitHubTokenForUser } from "@/lib/userGitHubToken";
-import { githubReader } from "@/lib/cse115a/githubClient";
+import { CourseRepoAccessError, courseRepoReader } from "@/lib/cse115a/githubApp";
 import { captureSubmissionSnapshot, type SubmittedTaskRow } from "@/lib/cse115a/submissionSnapshot";
 
 export const runtime = "nodejs";
@@ -36,12 +35,12 @@ export async function POST(request: Request, { params }: { params: Promise<{ num
     return NextResponse.json({ error: "Submit and analyze two different merged task PRs first." }, { status: 400 });
   }
 
-  const token = await getDecryptedGitHubTokenForUser(identity.userId);
-  if (!token) return NextResponse.json({ error: "Reconnect GitHub before submitting.", code: "github_token_missing" }, { status: 403 });
+  if (!identity.githubLogin) return NextResponse.json({ error: "Connect GitHub before submitting.", code: "github_not_linked" }, { status: 403 });
   let snapshot;
   try {
-    snapshot = await captureSubmissionSnapshot(githubReader(token), tasks as SubmittedTaskRow[]);
+    snapshot = await captureSubmissionSnapshot(courseRepoReader(identity.githubLogin), tasks as SubmittedTaskRow[]);
   } catch (error) {
+    if (error instanceof CourseRepoAccessError) return NextResponse.json({ error: error.message, code: error.code }, { status: 403 });
     return NextResponse.json({ error: error instanceof Error ? error.message : "Could not read your pull requests from GitHub." }, { status: 502 });
   }
 

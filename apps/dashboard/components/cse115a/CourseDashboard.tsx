@@ -164,6 +164,8 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
   const [changing, setChanging] = useState<Record<number, boolean>>({});
   const [phase, setPhase] = useState<Record<number, string>>({});
   const [githubConnected, setGithubConnected] = useState<boolean | null>(preview ? previewState !== "joined" : null);
+  const [githubLogin, setGithubLogin] = useState<string | null>(null);
+  const [githubInstallUrl, setGithubInstallUrl] = useState<string | null>(null);
   const [connectingGithub, setConnectingGithub] = useState(false);
   const [githubError, setGithubError] = useState<string | null>(null);
   const [submittingAssignment, setSubmittingAssignment] = useState(false);
@@ -218,7 +220,11 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
     if (preview || !me?.courses.length) return;
     void fetch("/api/cse115a/github-status", { credentials: "include" })
       .then((response) => response.json())
-      .then((body: { connected?: boolean }) => setGithubConnected(Boolean(body.connected)))
+      .then((body: { connected?: boolean; login?: string | null; installUrl?: string | null }) => {
+        setGithubConnected(Boolean(body.connected));
+        setGithubLogin(body.login ?? null);
+        setGithubInstallUrl(body.installUrl ?? null);
+      })
       .catch(() => setGithubConnected(false));
   }, [me?.courses.length, preview]);
 
@@ -306,7 +312,8 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
       const { data: { user } } = await supabase.auth.getUser();
       stashOAuthNextPath("/cse115a/dashboard");
       stashOAuthProvider("github");
-      const options = { redirectTo: buildOAuthCallbackUrl(getOAuthRedirectOrigin()), scopes: "read:user user:email repo" };
+      // GitHub only confirms who the student is here; repository access comes from the course GitHub App.
+      const options = { redirectTo: buildOAuthCallbackUrl(getOAuthRedirectOrigin()) };
       const result = user?.identities?.some((identity) => identity.provider === "github")
         ? await supabase.auth.signInWithOAuth({ provider: "github", options })
         : await supabase.auth.linkIdentity({ provider: "github", options });
@@ -445,6 +452,8 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
           email={me?.email ?? null}
           courseLabel={me?.courses.length ? courseLabel : null}
           githubConnected={me?.courses.length ? githubConnected : false}
+          githubLogin={githubLogin}
+          githubInstallUrl={githubInstallUrl}
           joinCode={joinCode}
           onJoinCodeChange={(value) => { setJoinCode(value); setJoinError(null); }}
           onJoin={() => void joinCourse()}
@@ -580,6 +589,12 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
                       <>
                         <label htmlFor={`pr-${slot}`} className="mt-5 block text-sm font-medium">Merged pull request URL</label>
                         <input id={`pr-${slot}`} type="url" value={prInputs[slot] ?? ""} onChange={(event) => setPrInputs((previous) => ({ ...previous, [slot]: event.target.value }))} placeholder="https://github.com/team/repo/pull/12" className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+                        {githubInstallUrl ? (
+                          <p className="mt-2 text-xs text-slate-600">
+                            The course GitHub App must be installed on your team’s repository.{" "}
+                            <a href={githubInstallUrl} target="_blank" rel="noreferrer" className="font-medium underline underline-offset-2">Install or check it</a>
+                          </p>
+                        ) : null}
                         <button type="button" disabled={preview || Boolean(phase[slot])} onClick={() => void savePullRequest(slot, "add")} className="mt-3 w-full rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
                           {phase[slot] || "Add PR"}
                         </button>
