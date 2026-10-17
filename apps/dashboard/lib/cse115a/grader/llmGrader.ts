@@ -8,7 +8,7 @@ import type { TaskSnapshot } from "@/lib/cse115a/submissionSnapshot";
 // submission (or no quote at all) marks the criterion for instructor review.
 
 // Bump whenever the prompt or the rubric text in lib/cse115a/rubric.ts changes.
-export const GRADER_PROMPT_VERSION = "cse115a-grader-v2";
+export const GRADER_PROMPT_VERSION = "cse115a-grader-v3";
 export const DEFAULT_GRADER_MODEL = "gpt-4o";
 
 const MAX_SPEC_CHARS = 20_000;
@@ -31,7 +31,6 @@ const KEYS: Record<LlmCriterion, string> = {
   "Scope": "scope",
   "Specs": "specs",
   "Acceptance criteria": "acceptance_criteria",
-  "Tests section": "tests_section",
   "Test quality": "test_quality",
 };
 

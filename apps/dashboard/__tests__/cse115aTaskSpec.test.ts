@@ -22,11 +22,6 @@ Use the existing handler.
 
 ## Acceptance criteria
 1. Reject a non-university email.
-
-## Tests
-| Test | Asserts | Criterion |
-|---|---|---|
-| US-1-T-1 rejects email | HTTP 400 | 1 |
 `;
 
 describe("CSE 115A task import", () => {
@@ -36,11 +31,6 @@ describe("CSE 115A task import", () => {
       title: "Reject a non-university email on login",
       description: "Serves US-1. Successful login is out of scope.",
     });
-  });
-
-  it("rejects a missing tests section", () => {
-    expect(() => parseTaskSpec(valid.replace("## Tests", "## Test notes")))
-      .toThrow(/Tests/);
   });
 
   it("accepts only full GitHub pull request URLs", () => {
