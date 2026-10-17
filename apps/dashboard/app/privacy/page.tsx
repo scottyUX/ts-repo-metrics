@@ -37,10 +37,11 @@ export default function PrivacyPage() {
           <h3 className="font-semibold">CSE 115A account and assignments</h3>
           <p className="leading-relaxed text-muted-foreground">
             The CSE 115A app uses Google sign-in to verify your UCSC email address.
-            It stores that address with your course membership. When you submit a
+            It stores that address with your course membership. When you add a
             task PR, it stores the PR link, the committed task specification,
-            process-check results, and the linked Repo Metrics analysis. Course
-            codes are stored as hashes rather than plain text.
+            the pull request&apos;s diff (source and test files), review comments,
+            CI results (if any), process-check results, and the linked Repo Metrics
+            analysis. Course codes are stored as hashes rather than plain text.
           </p>
         </div>
 
@@ -51,7 +52,7 @@ export default function PrivacyPage() {
             URL, and email address via OAuth. We use this to authenticate you and associate your
             analyses with your account. We also request <code className="rounded bg-muted px-1 text-xs">repo</code> scope
             so the analyzer can read your private repositories during analysis — we do not store
-            repository source code.
+            repository source code outside CSE 115A task submissions.
           </p>
         </div>
 
@@ -60,8 +61,8 @@ export default function PrivacyPage() {
           <p className="leading-relaxed text-muted-foreground">
             When you run an analysis, we store the repository URL, the commit SHA analyzed,
             and the computed metrics output (complexity scores, commit patterns, test proximity
-            data, React component stats, AI usage signals). We do not store raw source code
-            or commit diffs.
+            data, React component stats, AI usage signals). Outside CSE 115A task submissions,
+            we do not store raw source code or commit diffs.
           </p>
         </div>
 
@@ -116,8 +117,10 @@ export default function PrivacyPage() {
             </a>.
           </li>
           <li>
-            <strong className="text-foreground">OpenAI</strong> — documentation review text is
-            sent to the OpenAI API for rubric assessment. Subject to{" "}
+            <strong className="text-foreground">OpenAI</strong> — documentation review text,
+            and for CSE 115A tasks the task specification (with your name removed) and the
+            pull request&apos;s source and test diffs, are sent to the OpenAI API for rubric
+            assessment. Subject to{" "}
             <a href="https://openai.com/policies/privacy-policy"
               className="text-primary underline-offset-4 hover:underline" target="_blank" rel="noopener noreferrer">
               OpenAI&apos;s Privacy Policy

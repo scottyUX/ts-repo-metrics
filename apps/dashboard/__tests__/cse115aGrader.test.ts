@@ -145,6 +145,13 @@ describe("Process", () => {
 });
 
 describe("LLM grader", () => {
+  it("blanks the assignee name before the spec is sent", () => {
+    const spec = "---\nid: US-1-T-1\nassignee: A. Student\nestimate_hours: 3\n---\n\n# Title\n";
+    const input = graderInput(snapshot({ specMarkdown: spec }));
+    expect(input.specMarkdown).toContain("assignee: [student]");
+    expect(input.specMarkdown).not.toContain("A. Student");
+    expect(input.specMarkdown).toContain("estimate_hours: 3");
+  });
   it("sends a strict JSON schema and fences student content", async () => {
     const client = fakeClient(GOOD);
     await gradeTask(client, snapshot(), "test-model");
