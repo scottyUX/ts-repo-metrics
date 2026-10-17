@@ -263,8 +263,11 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
   const action = submitAction(submissions.length, readyCount, assignmentNumber);
   const setupDone = Boolean(me?.courses.length) && githubConnected === true;
 
+  // Typed URLs and messages belong to the sprint they were typed in.
   function openSprint(number: number) {
     setAssignmentNumber(number);
+    setPrInputs({});
+    setSlotError({});
   }
 
   async function signOut() {
