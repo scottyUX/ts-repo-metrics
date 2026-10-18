@@ -14,6 +14,7 @@ import {
 import { filterSymbolVerificationRisksForContributor } from "@/lib/filterSymbolVerificationRisksForContributor";
 import { getTestingScopeMetricValues } from "@/lib/testingScopeMetrics";
 import { analysisTeamOptionLabel, isPrScopedReport } from "@/lib/analysisScope";
+import { summarizeStaticTestLinks } from "@/lib/staticTestLinkSummary";
 import {
   TestingConceptCyclomaticComplexityBody,
   TestingConceptProximityBandsBody,
@@ -78,20 +79,10 @@ export function TestingMetricsTab({ report, scopeId, onScopeIdChange, onOpenCode
     [symbolRiskRowsScoped],
   );
 
-  const symbolProximitySummary = useMemo(() => {
-    const rows = symbolRiskRowsScoped;
-    if (!rows.length) return null;
-    let referencedInTest = 0;
-    let pairedFileOnly = 0;
-    let none = 0;
-    for (const r of rows) {
-      if (r.evidence === "referenced_in_test") referencedInTest++;
-      else if (r.evidence === "paired_file_only") pairedFileOnly++;
-      else none++;
-    }
-    const withSignal = referencedInTest + pairedFileOnly;
-    return { total: rows.length, referencedInTest, pairedFileOnly, none, withSignal };
-  }, [symbolRiskRowsScoped]);
+  const symbolProximitySummary = useMemo(
+    () => summarizeStaticTestLinks(symbolRiskRowsScoped, isPrScopedReport(report) ? report.source?.changedFiles : null),
+    [symbolRiskRowsScoped, report],
+  );
 
   const complexity = report.complexity;
   const smells = report.smells;
@@ -152,7 +143,7 @@ export function TestingMetricsTab({ report, scopeId, onScopeIdChange, onOpenCode
   const proximitySummaryTooltip = symbolProximitySummary
     ? symbolRiskFilter.contributorFilterActive
       ? `Filtered to functions in source files this author touched (git numstat paths). Referenced in paired test: ${symbolProximitySummary.referencedInTest}. Paired file only: ${symbolProximitySummary.pairedFileOnly}. No static link: ${symbolProximitySummary.none}.`
-      : `${isPrScopedReport(report) ? "Pull-request" : "Whole-repository"} symbol scan (same rows as the scatter/table below). Referenced in paired test: ${symbolProximitySummary.referencedInTest}. Paired file only: ${symbolProximitySummary.pairedFileOnly}. No static link: ${symbolProximitySummary.none}.`
+      : `${isPrScopedReport(report) ? "Pull-request" : "Whole-repository"} symbol scan (same rows as the scatter/table below). Referenced in paired test: ${symbolProximitySummary.referencedInTest}. Paired file only: ${symbolProximitySummary.pairedFileOnly}. No static link: ${symbolProximitySummary.none}.${symbolProximitySummary.withSignalInPr === null ? "" : ` Paired tests may live anywhere in the repository; ${symbolProximitySummary.withSignalInPr} of the linked functions pair with a test file changed in this PR.`}`
     : "";
 
   const pathScopeUnavailableForContributor =
@@ -310,6 +301,7 @@ export function TestingMetricsTab({ report, scopeId, onScopeIdChange, onOpenCode
               {...cardProps}
               label="Functions with static test link"
               value={`${symbolProximitySummary.withSignal} / ${symbolProximitySummary.total}`}
+              description={symbolProximitySummary.withSignalInPr === null ? undefined : `${symbolProximitySummary.withSignalInPr} linked to a test file in this PR; the rest pair with tests elsewhere in the repository.`}
               tooltip={proximitySummaryTooltip}
               metricHelp={{
                 title: "Static test linkage (summary)",
