@@ -371,16 +371,19 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
     }
   }
 
+  function showScrumBoard(slot: number, checked: boolean) {
+    setMe((current) => current && ({
+      ...current,
+      submissions: current.submissions.map((item) =>
+        item.task_slot === slot && item.assignment_number === assignmentNumber ? { ...item, scrum_board: checked } : item),
+    }));
+  }
+
   async function setScrumBoard(slot: number, checked: boolean) {
     if (!course) return;
-    if (preview) {
-      setMe((current) => current && ({
-        ...current,
-        submissions: current.submissions.map((item) =>
-          item.task_slot === slot && item.assignment_number === assignmentNumber ? { ...item, scrum_board: checked } : item),
-      }));
-      return;
-    }
+    // Tick the box right away; the save catches up, and a failure puts it back (#257).
+    showScrumBoard(slot, checked);
+    if (preview) return;
     setSlotError((previous) => ({ ...previous, [slot]: "" }));
     try {
       const response = await fetch(`/api/cse115a/assignments/${assignmentNumber}/tasks`, {
@@ -391,6 +394,7 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
       if (!response.ok) throw new Error(body.error ?? "Could not save the Scrum board confirmation.");
       await load();
     } catch (caught) {
+      showScrumBoard(slot, !checked);
       setSlotError((previous) => ({ ...previous, [slot]: caught instanceof Error ? caught.message : "Could not save the Scrum board confirmation." }));
     }
   }
