@@ -268,6 +268,7 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
     setAssignmentNumber(number);
     setPrInputs({});
     setSlotError({});
+    setChanging({});
   }
 
   async function signOut() {
