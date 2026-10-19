@@ -89,13 +89,17 @@ export async function importTaskFromPullRequest(
   if (!Array.isArray(folder) || !folder.some((entry) => entry.type === "file" && entry.name === filename)) {
     throw new Error(`The task file is not in docs/tasks/sprint-${assignmentNumber}/ on the merge commit.`);
   }
-  let specCommittedFirst = false;
-  if (baseSha && commits?.[0]?.sha === baseSha) {
+  // Check the PR's first commit even when the base tag is missing or elsewhere,
+  // so the checklist can tell a fixable tag from a spec that wasn't first (#266).
+  const firstSha = commits?.[0]?.sha ?? null;
+  let firstCommitTaskOnly: boolean | null = null;
+  if (firstSha) {
     const first = await gh.json<{ files?: Array<{ filename: string }> }>(
-      `/repos/${owner}/${repo}/commits/${baseSha}`,
+      `/repos/${owner}/${repo}/commits/${firstSha}`,
     );
-    specCommittedFirst = first?.files?.length === 1 && first.files[0]?.filename === taskPath;
+    firstCommitTaskOnly = first?.files?.length === 1 && first.files[0]?.filename === taskPath;
   }
+  const specCommittedFirst = firstCommitTaskOnly === true && baseSha === firstSha;
   const mergeSha = pull.merge_commit_sha;
   const checks = await readCommitChecks(gh, owner, repo, mergeSha);
   let testFileCount: number | null = null;
@@ -116,6 +120,7 @@ export async function importTaskFromPullRequest(
     testFileCount,
     mergeSha,
     firstCommitSha: commits?.[0]?.sha ?? null,
+    firstCommitTaskOnly,
   };
   return {
     prUrl: parsed.url,
