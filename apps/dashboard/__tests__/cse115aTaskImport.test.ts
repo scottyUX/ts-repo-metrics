@@ -62,7 +62,7 @@ describe("CSE 115A task import: spec committed first (#266)", () => {
   it.each([
     ["task file only", "tag on it", "first", [TASK], true, null],
     ["task file only", "tag missing", null, [TASK], false, "Push the base tag, then Re-check."],
-    ["task file only", "tag on the squash commit", "squash", [TASK], false, "git tag -f US-1-T-1-base first && git push -f origin US-1-T-1-base"],
+    ["task file only", "tag on the squash commit", "squash", [TASK], false, "git fetch origin pull/1/head && git tag -f US-1-T-1-base first && git push -f origin US-1-T-1-base"],
     ["task file and code", "tag missing", null, [TASK, "app.js"], false, UNFIXABLE],
     ["task file and code", "tag on it", "first", [TASK, "app.js"], false, UNFIXABLE],
   ])("first commit has the %s, %s", async (_files, _tag, baseTag, firstCommitFiles, ok, detail) => {

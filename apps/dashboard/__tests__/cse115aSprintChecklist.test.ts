@@ -26,13 +26,14 @@ const facts: TaskFacts = {
   testFileCount: 0,
   mergeSha: "9f3c2a1",
   firstCommitSha: "a1b2c3d",
+  prNumber: 7,
 };
 
 describe("sprint checklist", () => {
   it("renders each process check with a fix or a new-PR explanation", () => {
     const cases: Array<{ key: keyof typeof passing; detail: string }> = [
       { key: "specCommittedFirst", detail: "use a new task" },
-      { key: "baseTagPushed", detail: "git tag US-4-T-2-base a1b2c3d && git push origin US-4-T-2-base" },
+      { key: "baseTagPushed", detail: "git fetch origin pull/7/head && git tag US-4-T-2-base a1b2c3d && git push origin US-4-T-2-base" },
       { key: "doneTagOnMergeCommit", detail: "git fetch origin && git tag US-4-T-2-done 9f3c2a1 && git push origin US-4-T-2-done" },
       { key: "prAuthoredByStudent", detail: "Can't be fixed on this PR." },
       { key: "prTitleHasTaskId", detail: "Edit the PR title on GitHub, then Re-check." },
