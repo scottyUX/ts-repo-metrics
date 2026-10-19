@@ -439,7 +439,10 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
     }
   }
 
-  if (loading && !me) return <p className="py-16 text-center text-slate-600">Loading your course…</p>;
+  // Keep the loading line up until the GitHub status is known, so a joined student
+  // never sees the setup card flash on refresh (#297).
+  const checkingGithub = Boolean(me?.courses.length) && githubConnected === null;
+  if ((loading && !me) || checkingGithub) return <p className="py-16 text-center text-slate-600">Loading your course…</p>;
 
   const courseLabel = course ? `${course.title} · ${course.term}` : null;
   return (
