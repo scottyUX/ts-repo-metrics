@@ -5,6 +5,8 @@ export type TaskFacts = {
   testFileCount: number | null;
   mergeSha: string;
   firstCommitSha: string | null;
+  /** The PR number, so tag commands can fetch the PR's commits first (#292). */
+  prNumber?: number | null;
   /** Whether the PR's first commit changes only the task file. Missing on tasks saved before #266. */
   firstCommitTaskOnly?: boolean | null;
 };
@@ -66,6 +68,7 @@ export function processChecklist(
   const id = taskId || "TASK";
   const merge = facts?.mergeSha ?? "";
   const first = facts?.firstCommitSha ?? "";
+  const fetchFirst = facts?.prNumber ? `git fetch origin pull/${facts.prNumber}/head && ` : "";
   const titleOk = Boolean(validation.prTitleHasTaskId);
   const branchOk = Boolean(validation.branchHasTaskId);
   const titleBranchDetail = !titleOk && !branchOk
@@ -78,7 +81,7 @@ export function processChecklist(
     ? "Can't be fixed on this PR. The spec must come first; use a new task."
     : !validation.baseTagPushed
       ? "Push the base tag, then Re-check."
-      : `git tag -f ${id}-base ${first} && git push -f origin ${id}-base`;
+      : `${fetchFirst}git tag -f ${id}-base ${first} && git push -f origin ${id}-base`;
 
   return [
     {
@@ -92,7 +95,7 @@ export function processChecklist(
       ok: Boolean(validation.baseTagPushed),
       label: `${id}-base tag pushed`,
       detail: validation.baseTagPushed ? null : (first
-        ? `git tag ${id}-base ${first} && git push origin ${id}-base`
+        ? `${fetchFirst}git tag ${id}-base ${first} && git push origin ${id}-base`
         : "Push the base tag, then Re-check."),
     },
     {

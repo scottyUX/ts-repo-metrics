@@ -121,6 +121,7 @@ export async function importTaskFromPullRequest(
     mergeSha,
     firstCommitSha: commits?.[0]?.sha ?? null,
     firstCommitTaskOnly,
+    prNumber: number,
   };
   return {
     prUrl: parsed.url,
