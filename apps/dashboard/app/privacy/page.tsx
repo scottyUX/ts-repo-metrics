@@ -39,9 +39,11 @@ export default function PrivacyPage() {
             The CSE 115A app uses Google sign-in to verify your UCSC email address.
             It stores that address with your course membership. When you add a
             task PR, it stores the PR link, the committed task specification,
-            the pull request&apos;s diff (source and test files), review comments,
-            CI results (if any), process-check results, and the linked Repo Metrics
-            analysis. Course codes are stored as hashes rather than plain text.
+            process-check results, a summary of CI results (if any), and the linked
+            Repo Metrics analysis. When you submit an assignment, it also stores the
+            pull request&apos;s title, description, author, diff (source and test
+            files), comments and reviews, and CI check results. Course codes are
+            stored as hashes rather than plain text.
           </p>
         </div>
 
