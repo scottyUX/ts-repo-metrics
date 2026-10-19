@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import path from "node:path";
-import { mkdir, writeFile, rm } from "node:fs/promises";
+import { mkdir, mkdtemp, writeFile, rm } from "node:fs/promises";
+import os from "node:os";
 import { fileURLToPath } from "node:url";
 import {
   pairedTestPathCandidates,
@@ -110,6 +111,37 @@ test("r", () => expect(risky(1)).toBe(2));
     expect(rows[0]!.verificationScore).toBe(1);
     expect(rows[0]!.pairedTestPath).toBe("src/math.test.ts");
 
+    await rm(tmp, { recursive: true, force: true });
+  });
+});
+
+
+describe("pairedTestPathCandidates: top-level test folders (#321)", () => {
+  it("mirrors the source path under tests/, test/ and spec/ after the colocated candidates", () => {
+    const c = pairedTestPathCandidates("src/api/cart.ts");
+    expect(c[0]).toBe("src/api/cart.test.ts");
+    expect(c).toContain("tests/cart.test.ts");
+    expect(c).toContain("tests/api/cart.test.ts");
+    expect(c).toContain("tests/src/api/cart.test.ts");
+    expect(c).toContain("test/cart.test.ts");
+    expect(c).toContain("spec/cart.spec.ts");
+    expect(new Set(c).size).toBe(c.length);
+  });
+
+  it("links a function to tests/<name>.test.ts", async () => {
+    const tmp = await mkdtemp(path.join(os.tmpdir(), "symbol-risk-"));
+    await mkdir(path.join(tmp, "src"), { recursive: true });
+    await mkdir(path.join(tmp, "tests"), { recursive: true });
+    await writeFile(path.join(tmp, "src", "math.ts"), "export function risky(a: number): number {\n  return a * 2;\n}\n", "utf8");
+    await writeFile(path.join(tmp, "tests", "math.test.ts"), 'import { risky } from "../src/math";\ntest("r", () => expect(risky(1)).toBe(2));\n', "utf8");
+    const perFile: PerFileEntry[] = [{
+      file: "src/math.ts", functions: 1, functionsByType: {},
+      functionMetrics: [minimalFunction("risky", 1, 3)],
+      complexity: [{ name: "risky", type: "function_declaration", startLine: 1, complexity: 3 }],
+    }];
+    const rows = await computeSymbolVerificationRisks(tmp, perFile);
+    expect(rows[0]!.evidence).toBe("referenced_in_test");
+    expect(rows[0]!.pairedTestPath).toBe("tests/math.test.ts");
     await rm(tmp, { recursive: true, force: true });
   });
 });

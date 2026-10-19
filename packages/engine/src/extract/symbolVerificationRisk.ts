@@ -58,7 +58,17 @@ export function pairedTestPathCandidates(relSource: string): string[] {
     norm(path.join(dir, "__tests__", `${base}.test.${ext}`)),
     norm(path.join(dir, "__tests__", `${base}.spec.${ext}`)),
   ];
-  return [...sameDir, ...underTests];
+  // `src/api/cart.ts` also pairs with `tests/cart.test.ts`, `tests/api/cart.test.ts` and
+  // `tests/src/api/cart.test.ts` (also under `test/` and `spec/`), the usual Mocha/Vitest layout.
+  const segments = dir === "." ? [] : norm(dir).split("/");
+  const mirrored: string[] = [];
+  for (const root of ["tests", "test", "spec"]) {
+    for (const sub of [[], segments, segments.slice(1)]) {
+      mirrored.push(norm(path.join(root, ...sub, `${base}.test.${ext}`)));
+      mirrored.push(norm(path.join(root, ...sub, `${base}.spec.${ext}`)));
+    }
+  }
+  return [...new Set([...sameDir, ...underTests, ...mirrored])];
 }
 
 export function escapeRegExp(s: string): string {
