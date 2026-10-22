@@ -34,14 +34,14 @@ Use the existing handler.
 `;
 
 /** A squash-merged PR. Its first commit is "first"; the squash commit on main is "squash". */
-function stubGitHub(baseTag: string | null, firstCommitFiles: string[]) {
-  const routes: Record<string, unknown> = {
+function stubGitHub(baseTag: string | null, firstCommitFiles: string[], prFiles: Array<{ filename: string; status?: string }> = [{ filename: TASK }, { filename: "app.js" }]) {
+    const routes: Record<string, unknown> = {
     "/repos/team/repo/pulls/1": {
       merged_at: "2026-10-14T00:00:00Z", merge_commit_sha: "squash", title: "US-1-T-1: Reject",
       user: { login: "student" }, head: { ref: "task/US-1-T-1" }, base: { sha: "main0" },
     },
     "/user": { login: "student" },
-    "/repos/team/repo/pulls/1/files?per_page=100&page=1": [{ filename: TASK }, { filename: "app.js" }],
+    "/repos/team/repo/pulls/1/files?per_page=100&page=1": prFiles,
     [`/repos/team/repo/contents/${TASK}?ref=squash`]: { encoding: "base64", size: SPEC.length, content: Buffer.from(SPEC).toString("base64") },
     "/repos/team/repo/pulls/1/commits?per_page=1&page=1": [{ sha: "first" }],
     "/repos/team/repo/contents/docs/tasks/sprint-1?ref=squash": [{ name: "US-1-T-1.md", type: "file" }],
@@ -72,5 +72,23 @@ describe("CSE 115A task import: spec committed first (#266)", () => {
     expect(task.facts.firstCommitTaskOnly).toBe(firstCommitFiles.length === 1);
     expect(line?.ok).toBe(ok);
     expect(line?.detail).toBe(detail);
+  });
+});
+
+
+describe("CSE 115A task import: which task file is this PR's", () => {
+  afterEach(() => vi.unstubAllGlobals());
+  const OTHER = "docs/tasks/sprint-1/US-1-T-2.md";
+
+  it("uses the task file the PR adds when it also edits an earlier task's file", async () => {
+    stubGitHub("first", [TASK], [{ filename: TASK, status: "added" }, { filename: OTHER, status: "modified" }]);
+    const task = await importTaskFromPullRequest("https://github.com/team/repo/pull/1", 1, "token");
+    expect(task.taskPath).toBe(TASK);
+  });
+
+  it("names the task files when the PR adds more than one", async () => {
+    stubGitHub("first", [TASK], [{ filename: TASK, status: "added" }, { filename: OTHER, status: "added" }]);
+    await expect(importTaskFromPullRequest("https://github.com/team/repo/pull/1", 1, "token"))
+      .rejects.toThrow("This PR adds or changes 2 task files: US-1-T-1.md, US-1-T-2.md. A task PR adds only its own task file.");
   });
 });

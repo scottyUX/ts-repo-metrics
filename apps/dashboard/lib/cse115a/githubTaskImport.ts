@@ -14,7 +14,7 @@ type GitHubPull = {
   user: { login: string } | null;
 };
 
-type GitHubFile = { filename: string };
+type GitHubFile = { filename: string; status?: string };
 type GitHubContent = { encoding: string; content: string; size: number };
 
 export type ImportedTask = {
@@ -43,25 +43,29 @@ export async function importTaskFromPullRequest(
   ]);
   if (!pull?.merged_at || !pull.merge_commit_sha) throw new Error("This pull request must be merged before submission.");
 
-  const candidatePaths: string[] = [];
+  const candidatePaths: GitHubFile[] = [];
   for (let page = 1; page <= 3; page++) {
     const files = await gh.json<GitHubFile[]>(
       `/repos/${owner}/${repo}/pulls/${number}/files?per_page=100&page=${page}`,
     );
     for (const file of files ?? []) {
       if (new RegExp(`^docs/tasks/sprint-${assignmentNumber}/[A-Za-z0-9_-]+\\.md$`, "i").test(file.filename)) {
-        candidatePaths.push(file.filename);
+        candidatePaths.push(file);
       }
     }
     if ((files?.length ?? 0) < 100) break;
   }
-  if (candidatePaths.length !== 1) {
-    throw new Error(candidatePaths.length === 0
+  // A PR may also edit an earlier task's file (say, to update its test paths); its own task file is the one it adds.
+  const added = candidates.filter((file) => file.status === "added");
+  const own = candidates.length === 1 ? candidates : added;
+  if (own.length !== 1) {
+    const names = candidates.map((file) => file.filename.split("/").pop()).join(", ");
+    throw new Error(candidates.length === 0
       ? `No task file was found in docs/tasks/sprint-${assignmentNumber}/ in this PR.`
-      : "This PR changes multiple task files. Submit one task per pull request.");
+      : `This PR adds or changes ${candidates.length} task files: ${names}. A task PR adds only its own task file.`);
   }
 
-  const taskPath = candidatePaths[0]!;
+  const taskPath = own[0]!.filename;
   const encodedPath = taskPath.split("/").map(encodeURIComponent).join("/");
   const content = await gh.json<GitHubContent>(
     `/repos/${owner}/${repo}/contents/${encodedPath}?ref=${encodeURIComponent(pull.merge_commit_sha)}`,
