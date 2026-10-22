@@ -43,14 +43,14 @@ export async function importTaskFromPullRequest(
   ]);
   if (!pull?.merged_at || !pull.merge_commit_sha) throw new Error("This pull request must be merged before submission.");
 
-  const candidatePaths: GitHubFile[] = [];
+  const candidates: GitHubFile[] = [];
   for (let page = 1; page <= 3; page++) {
     const files = await gh.json<GitHubFile[]>(
       `/repos/${owner}/${repo}/pulls/${number}/files?per_page=100&page=${page}`,
     );
     for (const file of files ?? []) {
       if (new RegExp(`^docs/tasks/sprint-${assignmentNumber}/[A-Za-z0-9_-]+\\.md$`, "i").test(file.filename)) {
-        candidatePaths.push(file);
+        candidates.push(file);
       }
     }
     if ((files?.length ?? 0) < 100) break;
