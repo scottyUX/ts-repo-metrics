@@ -114,7 +114,7 @@ describe("diff splitting", () => {
     const notTests = [
       // Source code whose name only contains "test"
       "src/testing.ts", "src/contest.py", "latest/x.ts", "src/testimonials.ts", "src/contest-utils.ts",
-            // App code in a quiz or exam app: "test" is the app's subject, not a test helper
+      // App code in a quiz or exam app: "test" is the app's subject, not a test helper
       "src/components/test-card.tsx", "src/components/Test-Results.tsx", "src/api/tests-api.ts",
       // Setup code that isn't a test runner's, and fixtures, which can be app data
       "src/db.setup.ts", "fixtures/books.json",
