@@ -100,12 +100,26 @@ describe("diff splitting", () => {
   });
 
   it("recognizes TS/JS and Python test paths", () => {
-    for (const path of ["a/b.test.ts", "c.spec.jsx", "src/__tests__/x.ts", "test/x.js", "pkg/test_x.py", "x_test.py", "conftest.py", "tests/util.py"]) {
-      expect(isTestPath(path), path).toBe(true);
-    }
-    for (const path of ["src/testing.ts", "src/contest.py", "latest/x.ts", "docs/tasks/sprint-1/US-1-T-1.md"]) {
-      expect(isTestPath(path), path).toBe(false);
-    }
+    const tests = [
+      // Named like a test: *.test.*, *.spec.*, test_*.py, *_test.py, conftest.py
+      "a/b.test.ts", "c.spec.jsx", "pkg/test_x.py", "x_test.py", "conftest.py",
+      // Inside a test folder: __tests__/, __mocks__/, test/, tests/, spec/
+      "src/__tests__/x.ts", "src/__mocks__/axios.ts", "test/x.js", "tests/util.py", "spec/x.ts",
+      // JS/TS helpers named test-* or test_*, in any folder (#333)
+      "src/test-utils.tsx", "backend_tests/test-utils.ts", "frontend_tests/test-utilities.ts", "test-setup.js",
+      // Test runner setup files (#333)
+      "src/setupTests.ts", "vitest.setup.ts", "jest.setup.js",
+    ];
+    const notTests = [
+      // Source code whose name only contains "test"
+      "src/testing.ts", "src/contest.py", "latest/x.ts", "src/testimonials.ts", "src/contest-utils.ts",
+      // Setup code that isn't a test runner's, and fixtures, which can be app data
+      "src/db.setup.ts", "fixtures/books.json",
+      // Task files are docs
+      "docs/tasks/sprint-1/US-1-T-1.md",
+    ];
+    for (const path of tests) expect(isTestPath(path), path).toBe(true);
+    for (const path of notTests) expect(isTestPath(path), path).toBe(false);
   });
 
   it("returns nothing for an empty diff", () => {

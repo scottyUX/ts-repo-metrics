@@ -17,12 +17,17 @@ export function parseDiffFiles(diff: string): DiffFile[] {
   return files;
 }
 
-const TEST_DIR = /(^|\/)(__tests__|tests?|spec)\//i;
+const TEST_DIR = /(^|\/)(__tests__|__mocks__|tests?|spec)\//i;
 const JS_TEST_FILE = /\.(test|spec)\.[cm]?[jt]sx?$/i;
 const PY_TEST_FILE = /(^|\/)(test_[^/]*\.py|[^/]*_test\.py|conftest\.py)$/i;
+/** JS/TS helpers named like `test-utils.ts` or `test_helpers.ts`, in any folder. */
+const JS_TEST_HELPER_FILE = /(^|\/)tests?[-_][^/]*\.[cm]?[jt]sx?$/i;
+/** Test runner setup files: Create React App's `setupTests`, and `vitest.setup` / `jest.setup`. */
+const JS_TEST_SETUP_FILE = /(^|\/)(setupTests|vitest\.setup|jest\.setup)\.[cm]?[jt]sx?$/i;
 
 export function isTestPath(path: string): boolean {
-  return JS_TEST_FILE.test(path) || PY_TEST_FILE.test(path) || TEST_DIR.test(path);
+  return JS_TEST_FILE.test(path) || JS_TEST_HELPER_FILE.test(path) || JS_TEST_SETUP_FILE.test(path)
+    || PY_TEST_FILE.test(path) || TEST_DIR.test(path);
 }
 
 export type SplitPatch = { patch: string; testPatch: string; sourceFiles: string[]; testFiles: string[] };
