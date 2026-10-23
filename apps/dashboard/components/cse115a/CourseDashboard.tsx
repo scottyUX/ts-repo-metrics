@@ -345,6 +345,8 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
       if (!response.ok) throw new Error(imported.error ?? "Could not import the task spec.");
       setChanging((previous) => ({ ...previous, [slot]: false }));
       setPrInputs((previous) => ({ ...previous, [slot]: "" }));
+      // Show the saved PR now; the analysis below takes about a minute.
+      await load({ quiet: true });
       const shouldAnalyze = mode === "add" || !imported.submission.analysis_result_id;
       if (shouldAnalyze) {
         setPhase((previous) => ({ ...previous, [slot]: "Keep this tab open, this takes about a minute." }));
