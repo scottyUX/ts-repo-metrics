@@ -82,7 +82,6 @@ const GOOD = {
   scope: { level: "full", rationale: "Clear outcome.", evidence_quotes: ["Signup rejects malformed email addresses."] },
   specs: { level: "partial", rationale: "Few edge cases.", evidence_quotes: ['validateEmail(input) returns false for "a@"'] },
   acceptance_criteria: { level: "full", rationale: "Checkable.", evidence_quotes: ['validateEmail("a@") returns false'] },
-  tests_section: { level: "full", rationale: "Mapped.", evidence_quotes: ["src/__tests__/email.test.ts covers both cases."] },
   test_quality: { level: "partial", rationale: "One case only.", evidence_quotes: ['expect(validateEmail("a@")).toBe(false);'] },
 };
 
@@ -169,10 +168,10 @@ describe("LLM grader", () => {
     const grade = await gradeTask(fakeClient(GOOD), snapshot(), "m");
     expect(grade.rubric.map((row) => row.name)).toEqual(RUBRIC.map((row) => row.name));
     expect(TASK_POINTS).toBe(10);
-    // Scope 1 + Specs 1 + AC 2 + Tests section 1 + Test quality 0.5 + Tests pass 2 + Process 1
-    expect(grade.agentTotal).toBe(8.5);
+    // Scope 1 + Specs 1 + AC 2 + Test quality 1 + Tests pass 2 + Process 1
+    expect(grade.agentTotal).toBe(8);
     expect(grade.needsReview).toBe(false);
-    expect(grade.promptVersion).toBe("cse115a-grader-v2");
+    expect(grade.promptVersion).toBe("cse115a-grader-v3");
   });
 
   it("flags criteria whose quotes are missing or invented", async () => {
