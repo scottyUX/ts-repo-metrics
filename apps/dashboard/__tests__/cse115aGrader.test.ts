@@ -105,14 +105,17 @@ describe("diff splitting", () => {
       "a/b.test.ts", "c.spec.jsx", "pkg/test_x.py", "x_test.py", "conftest.py",
       // Inside a test folder: __tests__/, __mocks__/, test/, tests/, spec/
       "src/__tests__/x.ts", "src/__mocks__/axios.ts", "test/x.js", "tests/util.py", "spec/x.ts",
-      // JS/TS helpers named test-* or test_*, in any folder (#333)
+      // JS/TS test helpers by name or helper folder, anywhere (#333)
       "src/test-utils.tsx", "backend_tests/test-utils.ts", "frontend_tests/test-utilities.ts", "test-setup.js",
+      "src/testUtils.ts", "src/test_helpers.ts", "src/test-utils/index.tsx",
       // Test runner setup files (#333)
       "src/setupTests.ts", "vitest.setup.ts", "jest.setup.js",
     ];
     const notTests = [
       // Source code whose name only contains "test"
       "src/testing.ts", "src/contest.py", "latest/x.ts", "src/testimonials.ts", "src/contest-utils.ts",
+            // App code in a quiz or exam app: "test" is the app's subject, not a test helper
+      "src/components/test-card.tsx", "src/components/Test-Results.tsx", "src/api/tests-api.ts",
       // Setup code that isn't a test runner's, and fixtures, which can be app data
       "src/db.setup.ts", "fixtures/books.json",
       // Task files are docs

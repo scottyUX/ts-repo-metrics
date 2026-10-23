@@ -17,11 +17,15 @@ export function parseDiffFiles(diff: string): DiffFile[] {
   return files;
 }
 
-const TEST_DIR = /(^|\/)(__tests__|__mocks__|tests?|spec)\//i;
+/** Test folders: __tests__/, __mocks__/, test/, tests/, spec/, and helper folders like test-utils/ or testHelpers/. */
+const TEST_DIR = /(^|\/)(__tests__|__mocks__|tests?|spec|tests?[-_]?(utils?|utilities|helpers?|support))\//i;
 const JS_TEST_FILE = /\.(test|spec)\.[cm]?[jt]sx?$/i;
 const PY_TEST_FILE = /(^|\/)(test_[^/]*\.py|[^/]*_test\.py|conftest\.py)$/i;
-/** JS/TS helpers named like `test-utils.ts` or `test_helpers.ts`, in any folder. */
-const JS_TEST_HELPER_FILE = /(^|\/)tests?[-_][^/]*\.[cm]?[jt]sx?$/i;
+/**
+ * JS/TS test helpers by name, in any folder: test-utils, testUtils, test_helpers, test-setup, test-support.
+ * Only these helper words, so app code like test-card.tsx in a quiz app stays source.
+ */
+const JS_TEST_HELPER_FILE = /(^|\/)tests?[-_]?(utils?|utilities|helpers?|setup|support)\.[cm]?[jt]sx?$/i;
 /** Test runner setup files: Create React App's `setupTests`, and `vitest.setup` / `jest.setup`. */
 const JS_TEST_SETUP_FILE = /(^|\/)(setupTests|vitest\.setup|jest\.setup)\.[cm]?[jt]sx?$/i;
 
