@@ -9,6 +9,8 @@ export type TaskFacts = {
   prNumber?: number | null;
   /** Whether the PR's first commit changes only the task file. Missing on tasks saved before #266. */
   firstCommitTaskOnly?: boolean | null;
+  /** Whether the base tag's commit has the same author as the PR's first commit. Null when not checked. */
+  baseTagSameAuthor?: boolean | null;
 };
 
 export type ChecklistLine = {
@@ -81,7 +83,9 @@ export function processChecklist(
     ? "Can't be fixed on this PR. The spec must come first; use a new task."
     : !validation.baseTagPushed
       ? "Push the base tag, then Re-check."
-      : `${fetchFirst}git tag -f ${id}-base ${first} && git push -f origin ${id}-base`;
+      : facts?.baseTagSameAuthor === false
+        ? "This tag is on someone else's commit, maybe a teammate's task with the same ID. Don't move it; ask a TA."
+        : `${fetchFirst}git tag -f ${id}-base ${first} && git push -f origin ${id}-base`;
 
   return [
     {
