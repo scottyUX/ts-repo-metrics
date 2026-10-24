@@ -14,6 +14,7 @@ export type CourseSetupProps = {
   courseLabel: string | null;
   githubConnected: boolean | null;
   githubLogin?: string | null;
+  githubInstallUrl?: string | null;
   joinCode: string;
   onJoinCodeChange: (value: string) => void;
   onJoin: () => void;
@@ -109,7 +110,10 @@ export function CourseSetup(props: CourseSetupProps) {
 
                 {state === "current" && step.key === "github" ? (
                   <div className="mt-2 space-y-3 text-sm text-muted-foreground">
-                    <p>Repo Metrics reads your team’s repository to check your task PRs. It never pushes code or changes your repo.</p>
+                    <p>
+                      Connect your GitHub account so we know which pull requests are yours. This only shares your GitHub
+                      username; it gives no access to your repositories.
+                    </p>
                     {props.githubConnected === null ? <p role="status">Checking GitHub…</p> : (
                       <Button type="button" onClick={props.onConnectGithub} disabled={props.connectingGithub || props.disabled}>
                         <Github aria-hidden />
@@ -122,8 +126,13 @@ export function CourseSetup(props: CourseSetupProps) {
                       </p>
                     ) : null}
                     <p className="text-xs">
-                      Team repo in a GitHub organization? On GitHub’s screen, click <strong className="font-semibold text-foreground">Grant</strong> next
-                      to it. If you see <strong className="font-semibold text-foreground">Request</strong>, ask a repo owner to approve Repo Metrics.
+                      Your team also installs the course GitHub App on its repository, once per team. It can only read that one
+                      repository and never changes it.{" "}
+                      {props.githubInstallUrl ? (
+                        <a href={props.githubInstallUrl} target="_blank" rel="noreferrer" className="font-medium text-foreground underline underline-offset-2">
+                          Install the GitHub App
+                        </a>
+                      ) : null}
                     </p>
                   </div>
                 ) : null}
