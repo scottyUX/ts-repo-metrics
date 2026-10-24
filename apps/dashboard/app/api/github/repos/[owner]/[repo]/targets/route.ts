@@ -32,6 +32,7 @@ function mapPull(raw: {
   state: string;
   head?: { ref?: string };
   base?: { ref?: string };
+  merged_at?: string | null;
 }): RepoTargetPull {
   return {
     number: raw.number,
@@ -39,6 +40,7 @@ function mapPull(raw: {
     state: raw.state === "open" ? "open" : "closed",
     headRef: raw.head?.ref ?? "",
     baseRef: raw.base?.ref ?? "",
+    mergedAt: raw.merged_at ?? null,
   };
 }
 
@@ -59,6 +61,7 @@ async function fetchPulls(
     state: string;
     head?: { ref?: string };
     base?: { ref?: string };
+    merged_at?: string | null;
   }>;
   return batch.slice(0, MAX_PULLS).map(mapPull);
 }
