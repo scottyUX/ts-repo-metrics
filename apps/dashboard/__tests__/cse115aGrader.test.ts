@@ -159,6 +159,13 @@ describe("Process", () => {
   it("flags a missing base tag for review instead of scoring zero", () => {
     expect(gradeProcess({ ...all, baseTagPushed: false, specCommittedFirst: false })).toMatchObject({ level: "partial", awarded: 0.5, needsReview: true });
   });
+  it("sends a base tag that isn't on the spec-first commit to review, with the likely reason (#342)", () => {
+    const misplaced = { ...all, specCommittedFirst: false };
+    expect(gradeProcess(misplaced, { sameAuthor: false })).toMatchObject({ level: "none", awarded: 0, needsReview: true });
+    expect(gradeProcess(misplaced, { sameAuthor: false }).rationale).toContain("another author");
+    expect(gradeProcess(misplaced, { sameAuthor: true }).rationale).toContain("own older commit");
+    expect(gradeProcess(misplaced)).toMatchObject({ needsReview: false });
+  });
 });
 
 describe("LLM grader", () => {
@@ -190,6 +197,13 @@ describe("LLM grader", () => {
     expect(grade.agentTotal).toBe(8.5);
     expect(grade.needsReview).toBe(false);
     expect(grade.promptVersion).toBe("cse115a-grader-v2");
+  });
+
+  it("sends Process to review when the snapshot diffed from the PR's first commit (#342)", async () => {
+    const validation = { prMerged: true, baseTagPushed: true, specCommittedFirst: false, doneTagOnMergeCommit: true };
+    const grade = await gradeTask(fakeClient(GOOD), snapshot({ validation, baseCommitSource: "first_commit", baseTagSameAuthor: false }), "m");
+    expect(grade.rubric.find((row) => row.name === "Process")).toMatchObject({ awarded: 0, needsReview: true });
+    expect(grade.needsReview).toBe(true);
   });
 
   it("flags criteria whose quotes are missing or invented", async () => {

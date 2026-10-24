@@ -18,7 +18,7 @@ function task(slot: number, taskId: string, prNumber: number): SubmittedTaskRow 
   };
 }
 
-function fakeGitHub(overrides: { baseTag?: boolean; diff?: string | Error; merged?: boolean; firstSha?: string; firstFiles?: string[] } = {}) {
+function fakeGitHub(overrides: { baseTag?: boolean; diff?: string | Error; merged?: boolean; firstSha?: string; firstFiles?: string[]; tagAuthor?: string } = {}) {
   const calls: string[] = [];
   const reader: GitHubReader = {
     async json<T>(path: string) {
@@ -30,7 +30,10 @@ function fakeGitHub(overrides: { baseTag?: boolean; diff?: string | Error; merge
         } as T;
       }
       if (path.includes("/commits?per_page=1")) return [{ sha: overrides.firstSha ?? "basetag" }] as T;
-      if (/\/commits\/[^/]+$/.test(path)) return { files: (overrides.firstFiles ?? ["docs/tasks/sprint-1/US-1-T-1.md"]).map((filename) => ({ filename })) } as T;
+      if (/\/commits\/[^/]+$/.test(path)) {
+        const email = path.endsWith("/basetag") ? overrides.tagAuthor ?? "student@ucsc.edu" : "student@ucsc.edu";
+        return { files: (overrides.firstFiles ?? ["docs/tasks/sprint-1/US-1-T-1.md"]).map((filename) => ({ filename })), commit: { author: { email } } } as T;
+      }
       if (path.includes("/git/ref/tags/")) return (overrides.baseTag === false ? null : { object: { type: "commit", sha: "basetag" } }) as T;
       if (path.includes("/issues/")) return [{ body: "Looks good", user: { login: "ta" }, created_at: "2026-10-01T01:00:00Z" }, { body: "  " }] as T;
       if (path.includes("/reviews")) return [{ body: "Approved", user: { login: "teammate" }, submitted_at: "2026-10-01T02:00:00Z" }] as T;
@@ -106,6 +109,13 @@ describe("captureSubmissionSnapshot", () => {
     const { reader } = fakeGitHub({ baseTag: false, firstSha: "first1" });
     const snapshot = await captureSubmissionSnapshot(reader, [task(1, "US-1-T-1", 12)]);
     expect(snapshot.tasks[0]).toMatchObject({ baseCommit: "first1", baseCommitSource: "first_commit" });
+  });
+
+  it("records whether a misplaced base tag is on another author's commit (#342)", async () => {
+    const other = await captureSubmissionSnapshot(fakeGitHub({ firstSha: "first1", tagAuthor: "teammate@ucsc.edu" }).reader, [task(1, "US-1-T-1", 12)]);
+    expect(other.tasks[0]).toMatchObject({ baseCommitSource: "first_commit", baseTagSameAuthor: false });
+    const own = await captureSubmissionSnapshot(fakeGitHub({ firstSha: "first1", tagAuthor: "Student@ucsc.edu" }).reader, [task(1, "US-1-T-1", 12)]);
+    expect(own.tasks[0]).toMatchObject({ baseCommitSource: "first_commit", baseTagSameAuthor: true });
   });
 
   it("records a diff failure instead of blocking the submission", async () => {
