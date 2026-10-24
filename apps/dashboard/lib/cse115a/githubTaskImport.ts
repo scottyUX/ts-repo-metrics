@@ -135,8 +135,8 @@ export async function importTaskFromPullRequest(
     validation: {
       prMerged: true,
       prAuthoredByStudent: pull.user?.login.toLowerCase() === githubUser?.login.toLowerCase(),
-      prTitleHasTaskId: pull.title.includes(spec.id),
-      branchHasTaskId: pull.head.ref.includes(spec.id),
+      prTitleHasTaskId: pull.title.toLowerCase().includes(spec.id.toLowerCase()),
+      branchHasTaskId: pull.head.ref.toLowerCase().includes(spec.id.toLowerCase()),
       baseTagPushed: Boolean(baseSha),
       specCommittedFirst,
       doneTagOnMergeCommit: doneSha === pull.merge_commit_sha,
