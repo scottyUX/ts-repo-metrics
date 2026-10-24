@@ -35,7 +35,7 @@ export const SWE_BENCH_FIELDS = [
   "eval_type", "image", "eval_script", "log_parser", "difficulty", "repo_metrics",
 ] as const satisfies readonly (keyof BenchmarkInstance)[];
 
-export type BuildFlag = "base_commit_from_pr_base" | "diff_missing" | "diff_truncated" | "no_test_patch" | "no_source_patch" | "no_tests_found" | "pii_scrubbed_from_patch";
+export type BuildFlag = "base_commit_from_pr_base" | "base_commit_from_first_commit" | "diff_missing" | "diff_truncated" | "no_test_patch" | "no_source_patch" | "no_tests_found" | "pii_scrubbed_from_patch";
 
 /** SWE-bench Verified difficulty labels, from the student's estimate. */
 export function difficultyFor(estimateHours: number | undefined): string | null {
@@ -63,7 +63,8 @@ export function buildInstance(task: TaskSnapshot, assignmentNumber: number, repo
   const testPatch = scrubPatch(split.testPatch, ids);
   const failToPass = extractAddedTests(testPatch.patch);
   const flags: BuildFlag[] = [];
-  if (task.baseCommitSource !== "base_tag") flags.push("base_commit_from_pr_base");
+  if (task.baseCommitSource === "pr_base") flags.push("base_commit_from_pr_base");
+  if (task.baseCommitSource === "first_commit") flags.push("base_commit_from_first_commit");
   if (task.diffError || !task.diff) flags.push("diff_missing");
   if (task.diffTruncated) flags.push("diff_truncated");
   if (!split.testPatch) flags.push("no_test_patch");

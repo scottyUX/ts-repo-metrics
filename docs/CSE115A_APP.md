@@ -92,6 +92,10 @@ including superseded attempts; `cse_benchmark_task_sources` records who
 submitted it, a `validation_status`, and flags such as
 `base_commit_from_pr_base` or `no_test_patch`.
 
+The diff starts at the base tag only when the tag is on the PR's first
+commit; otherwise it starts at the PR's first commit when that commit is the
+task file alone (`base_commit_from_first_commit`), or at the PR base.
+
 - `patch` and `test_patch` split the base-tag-to-merge diff by test path
   (`lib/cse115a/diff.ts`).
 - `FAIL_TO_PASS` holds test IDs added in `test_patch`, found statically
