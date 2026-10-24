@@ -18,7 +18,7 @@ function task(slot: number, taskId: string, prNumber: number): SubmittedTaskRow 
   };
 }
 
-function fakeGitHub(overrides: { baseTag?: boolean; diff?: string | Error; merged?: boolean } = {}) {
+function fakeGitHub(overrides: { baseTag?: boolean; diff?: string | Error; merged?: boolean; firstSha?: string; firstFiles?: string[] } = {}) {
   const calls: string[] = [];
   const reader: GitHubReader = {
     async json<T>(path: string) {
@@ -29,6 +29,8 @@ function fakeGitHub(overrides: { baseTag?: boolean; diff?: string | Error; merge
           merge_commit_sha: "merge123", base: { sha: "prbase" }, head: { ref: "US-1-T-1-branch" }, user: { login: "student" },
         } as T;
       }
+      if (path.includes("/commits?per_page=1")) return [{ sha: overrides.firstSha ?? "basetag" }] as T;
+      if (/\/commits\/[^/]+$/.test(path)) return { files: (overrides.firstFiles ?? ["docs/tasks/sprint-1/US-1-T-1.md"]).map((filename) => ({ filename })) } as T;
       if (path.includes("/git/ref/tags/")) return (overrides.baseTag === false ? null : { object: { type: "commit", sha: "basetag" } }) as T;
       if (path.includes("/issues/")) return [{ body: "Looks good", user: { login: "ta" }, created_at: "2026-10-01T01:00:00Z" }, { body: "  " }] as T;
       if (path.includes("/reviews")) return [{ body: "Approved", user: { login: "teammate" }, submitted_at: "2026-10-01T02:00:00Z" }] as T;
@@ -86,11 +88,24 @@ describe("captureSubmissionSnapshot", () => {
     ]);
   });
 
-  it("falls back to the PR base when the base tag is missing", async () => {
-    const { reader, calls } = fakeGitHub({ baseTag: false });
+  it("falls back to the PR base when the base tag is missing and the first commit isn't the task file alone", async () => {
+    const { reader, calls } = fakeGitHub({ baseTag: false, firstSha: "first1", firstFiles: ["docs/tasks/sprint-1/US-1-T-1.md", "src/a.ts"] });
     const snapshot = await captureSubmissionSnapshot(reader, [task(1, "US-1-T-1", 12)]);
     expect(snapshot.tasks[0]).toMatchObject({ baseCommit: "prbase", baseCommitSource: "pr_base" });
     expect(calls).toContain("/repos/team/proj/compare/prbase...merge123");
+  });
+
+  it("ignores a base tag that isn't on this PR's first commit and diffs from that commit (#342)", async () => {
+    const { reader, calls } = fakeGitHub({ firstSha: "first1" });
+    const snapshot = await captureSubmissionSnapshot(reader, [task(1, "US-1-T-1", 12)]);
+    expect(snapshot.tasks[0]).toMatchObject({ baseCommit: "first1", baseCommitSource: "first_commit" });
+    expect(calls).toContain("/repos/team/proj/compare/first1...merge123");
+  });
+
+  it("uses the PR's first commit when the base tag is missing (#342)", async () => {
+    const { reader } = fakeGitHub({ baseTag: false, firstSha: "first1" });
+    const snapshot = await captureSubmissionSnapshot(reader, [task(1, "US-1-T-1", 12)]);
+    expect(snapshot.tasks[0]).toMatchObject({ baseCommit: "first1", baseCommitSource: "first_commit" });
   });
 
   it("records a diff failure instead of blocking the submission", async () => {
