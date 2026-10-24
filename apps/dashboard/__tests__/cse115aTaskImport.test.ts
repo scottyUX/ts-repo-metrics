@@ -45,7 +45,9 @@ function stubGitHub(baseTag: string | null, firstCommitFiles: string[], prFiles:
     [`/repos/team/repo/contents/${TASK}?ref=squash`]: { encoding: "base64", size: SPEC.length, content: Buffer.from(SPEC).toString("base64") },
     "/repos/team/repo/pulls/1/commits?per_page=1&page=1": [{ sha: "first" }],
     "/repos/team/repo/contents/docs/tasks/sprint-1?ref=squash": [{ name: "US-1-T-1.md", type: "file" }],
-    "/repos/team/repo/commits/first": { files: firstCommitFiles.map((filename) => ({ filename })) },
+    "/repos/team/repo/commits/first": { files: firstCommitFiles.map((filename) => ({ filename })), commit: { author: { email: "student@ucsc.edu" } } },
+    "/repos/team/repo/commits/squash": { commit: { author: { email: "Student@ucsc.edu" } } },
+    "/repos/team/repo/commits/teammate": { commit: { author: { email: "teammate@ucsc.edu" } } },
   };
   if (baseTag) routes["/repos/team/repo/git/ref/tags/US-1-T-1-base"] = { object: { type: "commit", sha: baseTag } };
   vi.stubGlobal("fetch", vi.fn(async (url: string) => {
@@ -55,6 +57,7 @@ function stubGitHub(baseTag: string | null, firstCommitFiles: string[], prFiles:
 }
 
 const UNFIXABLE = "Can't be fixed on this PR. The spec must come first; use a new task.";
+const TEAMMATE_TAG = "This tag is on someone else's commit, maybe a teammate's task with the same ID. Don't move it; ask a TA.";
 
 describe("CSE 115A task import: spec committed first (#266)", () => {
   afterEach(() => vi.unstubAllGlobals());
@@ -63,6 +66,7 @@ describe("CSE 115A task import: spec committed first (#266)", () => {
     ["task file only", "tag on it", "first", [TASK], true, null],
     ["task file only", "tag missing", null, [TASK], false, "Push the base tag, then Re-check."],
     ["task file only", "tag on the squash commit", "squash", [TASK], false, "git fetch origin pull/1/head && git tag -f US-1-T-1-base first && git push -f origin US-1-T-1-base"],
+    ["task file only", "tag on a teammate's commit", "teammate", [TASK], false, TEAMMATE_TAG],
     ["task file and code", "tag missing", null, [TASK, "app.js"], false, UNFIXABLE],
     ["task file and code", "tag on it", "first", [TASK, "app.js"], false, UNFIXABLE],
   ])("first commit has the %s, %s", async (_files, _tag, baseTag, firstCommitFiles, ok, detail) => {

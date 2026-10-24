@@ -97,13 +97,24 @@ export async function importTaskFromPullRequest(
   // so the checklist can tell a fixable tag from a spec that wasn't first (#266).
   const firstSha = commits?.[0]?.sha ?? null;
   let firstCommitTaskOnly: boolean | null = null;
+  let firstAuthor: string | null = null;
   if (firstSha) {
-    const first = await gh.json<{ files?: Array<{ filename: string }> }>(
+    const first = await gh.json<{ files?: Array<{ filename: string }>; commit?: { author?: { email?: string } } }>(
       `/repos/${owner}/${repo}/commits/${firstSha}`,
     );
     firstCommitTaskOnly = first?.files?.length === 1 && first.files[0]?.filename === taskPath;
+    firstAuthor = first?.commit?.author?.email ?? null;
   }
   const specCommittedFirst = firstCommitTaskOnly === true && baseSha === firstSha;
+  // A base tag on another author's commit may belong to a teammate's task with the same ID; moving it breaks theirs.
+  let baseTagSameAuthor: boolean | null = null;
+  if (firstCommitTaskOnly && baseSha && baseSha !== firstSha && firstAuthor) {
+    const tagged = await gh.json<{ commit?: { author?: { email?: string } } }>(
+      `/repos/${owner}/${repo}/commits/${baseSha}`, { optional: true },
+    );
+    const taggedAuthor = tagged?.commit?.author?.email;
+    if (taggedAuthor) baseTagSameAuthor = taggedAuthor.toLowerCase() === firstAuthor.toLowerCase();
+  }
   const mergeSha = pull.merge_commit_sha;
   const checks = await readCommitChecks(gh, owner, repo, mergeSha);
   let testFileCount: number | null = null;
@@ -125,6 +136,7 @@ export async function importTaskFromPullRequest(
     mergeSha,
     firstCommitSha: commits?.[0]?.sha ?? null,
     firstCommitTaskOnly,
+    baseTagSameAuthor,
     prNumber: number,
   };
   return {
