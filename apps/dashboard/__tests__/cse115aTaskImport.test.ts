@@ -92,3 +92,20 @@ describe("CSE 115A task import: which task file is this PR's", () => {
       .rejects.toThrow("This PR adds or changes 2 task files: US-1-T-1.md, US-1-T-2.md. A task PR adds only its own task file.");
   });
 });
+
+describe("CSE 115A task import: task ID in the PR title and branch (#324)", () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("finds the task ID in any letter case", async () => {
+    stubGitHub("first", [TASK]);
+    const github = globalThis.fetch;
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => {
+      const response = await github(url);
+      if (!url.endsWith("/pulls/1")) return response;
+      return new Response(JSON.stringify({ ...await response.json(), title: "us-1-t-1: Reject", head: { ref: "task/us-1-t-1" } }));
+    }));
+    const task = await importTaskFromPullRequest("https://github.com/team/repo/pull/1", 1, "token");
+    expect(task.validation.prTitleHasTaskId).toBe(true);
+    expect(task.validation.branchHasTaskId).toBe(true);
+  });
+});
