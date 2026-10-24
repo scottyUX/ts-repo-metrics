@@ -92,13 +92,18 @@ function fence(tag: string, text: string): string {
 
 export type GraderInput = { specMarkdown: string; testPatch: string; patch: string; notes: string[] };
 
+/** The grader doesn't need the student's name, so the spec's assignee field is blanked before it is sent (#269). */
+export function blankAssignee(markdown: string): string {
+  return markdown.replace(/^(---\s*\n[\s\S]*?^assignee:)[^\n]*$/m, "$1 [student]");
+}
+
 export function graderInput(task: TaskSnapshot): GraderInput {
   const split = splitPatch(task.diff);
   const notes: string[] = [];
   if (task.diffError) notes.push(`The diff could not be loaded: ${task.diffError}`);
   if (task.diffTruncated) notes.push("The diff was over 1 MB and was cut off.");
   if (!split.testPatch) notes.push("The diff has no test files.");
-  return { specMarkdown: task.specMarkdown, testPatch: split.testPatch, patch: split.patch, notes };
+  return { specMarkdown: blankAssignee(task.specMarkdown), testPatch: split.testPatch, patch: split.patch, notes };
 }
 
 export function buildMessages(input: GraderInput) {
