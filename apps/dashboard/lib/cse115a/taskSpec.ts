@@ -9,10 +9,9 @@ export type TaskSpec = {
   specs: string;
   requirements: string;
   acceptanceCriteria: string;
-  tests: string;
 };
 
-const REQUIRED_SECTIONS = ["Description", "Specs", "Requirements", "Acceptance criteria", "Tests"] as const;
+const REQUIRED_SECTIONS = ["Description", "Specs", "Requirements", "Acceptance criteria"] as const;
 
 export function parseTaskSpec(markdown: string): TaskSpec {
   if (markdown.length > 65536) throw new Error("The task file is too large to import.");
@@ -50,7 +49,6 @@ export function parseTaskSpec(markdown: string): TaskSpec {
     specs: sections.get("Specs")!,
     requirements: sections.get("Requirements")!,
     acceptanceCriteria: sections.get("Acceptance criteria")!,
-    tests: sections.get("Tests")!,
   };
 }
 

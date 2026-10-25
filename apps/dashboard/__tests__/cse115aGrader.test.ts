@@ -82,7 +82,6 @@ const GOOD = {
   scope: { level: "full", rationale: "Clear outcome.", evidence_quotes: ["Signup rejects malformed email addresses."] },
   specs: { level: "partial", rationale: "Few edge cases.", evidence_quotes: ['validateEmail(input) returns false for "a@"'] },
   acceptance_criteria: { level: "full", rationale: "Checkable.", evidence_quotes: ['validateEmail("a@") returns false'] },
-  tests_section: { level: "full", rationale: "Mapped.", evidence_quotes: ["src/__tests__/email.test.ts covers both cases."] },
   test_quality: { level: "partial", rationale: "One case only.", evidence_quotes: ['expect(validateEmail("a@")).toBe(false);'] },
 };
 
@@ -100,12 +99,29 @@ describe("diff splitting", () => {
   });
 
   it("recognizes TS/JS and Python test paths", () => {
-    for (const path of ["a/b.test.ts", "c.spec.jsx", "src/__tests__/x.ts", "test/x.js", "pkg/test_x.py", "x_test.py", "conftest.py", "tests/util.py"]) {
-      expect(isTestPath(path), path).toBe(true);
-    }
-    for (const path of ["src/testing.ts", "src/contest.py", "latest/x.ts", "docs/tasks/sprint-1/US-1-T-1.md"]) {
-      expect(isTestPath(path), path).toBe(false);
-    }
+    const tests = [
+      // Named like a test: *.test.*, *.spec.*, test_*.py, *_test.py, conftest.py
+      "a/b.test.ts", "c.spec.jsx", "pkg/test_x.py", "x_test.py", "conftest.py",
+      // Inside a test folder: __tests__/, __mocks__/, test/, tests/, spec/
+      "src/__tests__/x.ts", "src/__mocks__/axios.ts", "test/x.js", "tests/util.py", "spec/x.ts",
+      // JS/TS test helpers by name or helper folder, anywhere (#333)
+      "src/test-utils.tsx", "backend_tests/test-utils.ts", "frontend_tests/test-utilities.ts", "test-setup.js",
+      "src/testUtils.ts", "src/test_helpers.ts", "src/test-utils/index.tsx",
+      // Test runner setup files (#333)
+      "src/setupTests.ts", "vitest.setup.ts", "jest.setup.js",
+    ];
+    const notTests = [
+      // Source code whose name only contains "test"
+      "src/testing.ts", "src/contest.py", "latest/x.ts", "src/testimonials.ts", "src/contest-utils.ts",
+      // App code in a quiz or exam app: "test" is the app's subject, not a test helper
+      "src/components/test-card.tsx", "src/components/Test-Results.tsx", "src/api/tests-api.ts",
+      // Setup code that isn't a test runner's, and fixtures, which can be app data
+      "src/db.setup.ts", "fixtures/books.json",
+      // Task files are docs
+      "docs/tasks/sprint-1/US-1-T-1.md",
+    ];
+    for (const path of tests) expect(isTestPath(path), path).toBe(true);
+    for (const path of notTests) expect(isTestPath(path), path).toBe(false);
   });
 
   it("returns nothing for an empty diff", () => {
@@ -142,6 +158,13 @@ describe("Process", () => {
   it("flags a missing base tag for review instead of scoring zero", () => {
     expect(gradeProcess({ ...all, baseTagPushed: false, specCommittedFirst: false })).toMatchObject({ level: "partial", awarded: 0.5, needsReview: true });
   });
+  it("sends a base tag that isn't on the spec-first commit to review, with the likely reason (#342)", () => {
+    const misplaced = { ...all, specCommittedFirst: false };
+    expect(gradeProcess(misplaced, { sameAuthor: false })).toMatchObject({ level: "none", awarded: 0, needsReview: true });
+    expect(gradeProcess(misplaced, { sameAuthor: false }).rationale).toContain("another author");
+    expect(gradeProcess(misplaced, { sameAuthor: true }).rationale).toContain("own older commit");
+    expect(gradeProcess(misplaced)).toMatchObject({ needsReview: false });
+  });
 });
 
 describe("LLM grader", () => {
@@ -169,10 +192,17 @@ describe("LLM grader", () => {
     const grade = await gradeTask(fakeClient(GOOD), snapshot(), "m");
     expect(grade.rubric.map((row) => row.name)).toEqual(RUBRIC.map((row) => row.name));
     expect(TASK_POINTS).toBe(10);
-    // Scope 1 + Specs 1 + AC 2 + Tests section 1 + Test quality 0.5 + Tests pass 2 + Process 1
-    expect(grade.agentTotal).toBe(8.5);
+    // Scope 1 + Specs 1 + AC 2 + Test quality 1 + Tests pass 2 + Process 1
+    expect(grade.agentTotal).toBe(8);
     expect(grade.needsReview).toBe(false);
-    expect(grade.promptVersion).toBe("cse115a-grader-v2");
+    expect(grade.promptVersion).toBe("cse115a-grader-v3");
+  });
+
+  it("sends Process to review when the snapshot diffed from the PR's first commit (#342)", async () => {
+    const validation = { prMerged: true, baseTagPushed: true, specCommittedFirst: false, doneTagOnMergeCommit: true };
+    const grade = await gradeTask(fakeClient(GOOD), snapshot({ validation, baseCommitSource: "first_commit", baseTagSameAuthor: false }), "m");
+    expect(grade.rubric.find((row) => row.name === "Process")).toMatchObject({ awarded: 0, needsReview: true });
+    expect(grade.needsReview).toBe(true);
   });
 
   it("flags criteria whose quotes are missing or invented", async () => {

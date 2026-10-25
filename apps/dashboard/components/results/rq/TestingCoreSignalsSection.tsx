@@ -147,7 +147,7 @@ export function TestingCoreSignalsSection({
       return `About ${commitsRounded}% of ${phrase} touch tests—solid habit. Watch for regressions if complexity grows without new checks.`;
     }
     const n = totalCommits;
-    const commitPhrase = n != null ? `${n} commit${n === 1 ? "" : "s"}` : "your commits";
+    const commitPhrase = n != null ? `${n} commit${n === 1 ? "" : "s"}` : "commits";
     if (pctTier === "critical" && mv.pctCommitsTouchingTests <= 0) {
       return `None of your ${commitPhrase} included test file changes. Every feature shipped without a test is a future risk. This is the most important habit to build.`;
     }

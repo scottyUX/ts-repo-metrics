@@ -269,8 +269,12 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
   const action = submitAction(submissions.length, readyCount, assignmentNumber);
   const setupDone = Boolean(me?.courses.length) && githubConnected === true;
 
+  // Typed URLs and messages belong to the sprint they were typed in.
   function openSprint(number: number) {
     setAssignmentNumber(number);
+    setPrInputs({});
+    setSlotError({});
+    setChanging({});
   }
 
   async function signOut() {
@@ -348,6 +352,8 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
       if (!response.ok) throw new Error(imported.error ?? "Could not import the task spec.");
       setChanging((previous) => ({ ...previous, [slot]: false }));
       setPrInputs((previous) => ({ ...previous, [slot]: "" }));
+      // Show the saved PR now; the analysis below takes about a minute.
+      await load({ quiet: true });
       const shouldAnalyze = mode === "add" || !imported.submission.analysis_result_id;
       if (shouldAnalyze) {
         setPhase((previous) => ({ ...previous, [slot]: "Keep this tab open, this takes about a minute." }));
@@ -374,16 +380,19 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
     }
   }
 
+  function showScrumBoard(slot: number, checked: boolean) {
+    setMe((current) => current && ({
+      ...current,
+      submissions: current.submissions.map((item) =>
+        item.task_slot === slot && item.assignment_number === assignmentNumber ? { ...item, scrum_board: checked } : item),
+    }));
+  }
+
   async function setScrumBoard(slot: number, checked: boolean) {
     if (!course) return;
-    if (preview) {
-      setMe((current) => current && ({
-        ...current,
-        submissions: current.submissions.map((item) =>
-          item.task_slot === slot && item.assignment_number === assignmentNumber ? { ...item, scrum_board: checked } : item),
-      }));
-      return;
-    }
+    // Tick the box right away; the save catches up, and a failure puts it back (#257).
+    showScrumBoard(slot, checked);
+    if (preview) return;
     setSlotError((previous) => ({ ...previous, [slot]: "" }));
     try {
       const response = await fetch(`/api/cse115a/assignments/${assignmentNumber}/tasks`, {
@@ -394,6 +403,7 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
       if (!response.ok) throw new Error(body.error ?? "Could not save the Scrum board confirmation.");
       await load();
     } catch (caught) {
+      showScrumBoard(slot, !checked);
       setSlotError((previous) => ({ ...previous, [slot]: caught instanceof Error ? caught.message : "Could not save the Scrum board confirmation." }));
     }
   }
@@ -438,7 +448,10 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
     }
   }
 
-  if (loading && !me) return <p className="py-16 text-center text-slate-600">Loading your course…</p>;
+  // Keep the loading line up until the GitHub status is known, so a joined student
+  // never sees the setup card flash on refresh (#297).
+  const checkingGithub = Boolean(me?.courses.length) && githubConnected === null;
+  if ((loading && !me) || checkingGithub) return <p className="py-16 text-center text-slate-600">Loading your course…</p>;
 
   const courseLabel = course ? `${course.title} · ${course.term}` : null;
   return (

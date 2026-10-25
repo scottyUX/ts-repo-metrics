@@ -16,7 +16,7 @@ How it works (`apps/dashboard/lib/cse115a/githubApp.ts`):
 3. When a student adds a pull request, submits a sprint, opens a PR's commits, or runs a course analysis, the server:
    - looks up the app's installation on that repository (`GET /repos/{owner}/{repo}/installation`);
    - checks the student's linked account has **write** access (`GET /repos/{owner}/{repo}/collaborators/{login}/permission` returns `admin` or `write`);
-   - reads the repository with an installation token scoped to that one repository.
+   - reads the repository with an installation token scoped to that one repository and capped at read access for contents, pull requests, checks, and commit statuses.
 
 Two details behind the access check:
 
@@ -34,7 +34,7 @@ When a check fails, the student sees an error with a code they can act on:
 
 ## 1. Create the GitHub App
 
-Under the organization that will own it: **Settings → Developer settings → GitHub Apps → New GitHub App**.
+Create it on the **UXlySoftware** organization: **Settings → Developer settings → GitHub Apps → New GitHub App**. Do not create it on a personal account. An app there can only be managed by that one user.
 
 - **Callback URL:** your Supabase callback, `https://<project-ref>.supabase.co/auth/v1/callback`.
 - **Expire user authorization tokens:** leave on. The site doesn't keep user tokens.
@@ -49,7 +49,7 @@ After creating it, note the **App ID** and **Client ID**, generate a **client se
 
 ## 2. Point Supabase's GitHub provider at the app
 
-In Supabase, go to **Authentication → Sign In / Providers → GitHub** and replace the client ID and secret with the app's. Keep **Allow manual linking** on, because students link GitHub to the account they signed in with.
+In Supabase, go to **Authentication → Sign In / Providers → GitHub** and replace the client ID and secret with the app's. Keep **Allow manual linking** on, because students link GitHub to the account they signed in with. Remove the `repo` scope from the provider. The dashboard no longer sends it, but GitHub still shows whatever scopes are saved on the provider. If `repo` remains, students are asked for read and write access to every repository they can reach.
 
 Students who linked GitHub through the old OAuth app stay linked. GitHub identifies them by the same user, so they don't need to connect again.
 
@@ -69,7 +69,7 @@ Base64 is the easiest to paste into hosts that take single-line values:
 base64 -w0 your-app.private-key.pem   # macOS: base64 -i your-app.private-key.pem
 ```
 
-The auth callback stops storing GitHub user tokens when `CSE115A_SITE=true`, because the course site no longer uses them. On a deployment without `CSE115A_SITE=true`, the main Repo Metrics pages keep storing and using user tokens as before. Rows already in `user_github_tokens` can be deleted once the OAuth app is retired.
+When `CSE115A_SITE=true`, the auth callback does not store GitHub user tokens, and the server does not read `user_github_tokens`. Leave those rows in place when this Supabase project also serves the main dashboard. On a deployment without `CSE115A_SITE=true`, the main Repo Metrics pages keep storing and using user tokens as before.
 
 **Check:** after signing in, each pull request field on the dashboard shows an **Install or check it** link. If it's missing, `GITHUB_APP_SLUG` isn't set.
 

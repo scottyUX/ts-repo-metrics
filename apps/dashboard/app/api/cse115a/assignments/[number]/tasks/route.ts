@@ -4,6 +4,7 @@ import { getActiveAssignmentSubmission, getCourseIdentity, getEnrolledCourse, lo
 import { CourseRepoAccessError, courseRepoReader } from "@/lib/cse115a/githubApp";
 import { importTaskFromPullRequest } from "@/lib/cse115a/githubTaskImport";
 import { parseGitHubUrl } from "@/lib/github/parseGitHubUrl";
+import { duplicateTaskMessage } from "@/lib/cse115a/duplicateTask";
 
 export const runtime = "nodejs";
 
@@ -56,6 +57,15 @@ export async function POST(request: Request, params: Params) {
     return NextResponse.json({ error: error instanceof Error ? error.message : "Could not import this task." }, { status: 422 });
   }
   const db = getSupabase();
+  // Each PR, and each task ID within a repository, belongs to one student (#336). The ilike only narrows
+  // the rows (a "_" in a repo name can match more, never fewer); duplicateTaskMessage compares exactly.
+  const { data: others, error: othersError } = await db.from("cse_task_submissions")
+    .select("repo_full_name,pr_number,task_id")
+    .eq("course_id", course.id).neq("user_id", identity.userId)
+    .ilike("repo_full_name", imported.repoFullName);
+  if (othersError) return NextResponse.json({ error: "Could not check this task against other students' tasks." }, { status: 500 });
+  const duplicate = duplicateTaskMessage(others ?? [], { repoFullName: imported.repoFullName, prNumber: imported.prNumber, taskId: imported.spec.id });
+  if (duplicate) return NextResponse.json({ error: duplicate, code: "taken_by_another_student" }, { status: 409 });
   const { data: existing } = await db.from("cse_task_submissions")
     .select("pr_url,analysis_result_id")
     .eq("course_id", course.id).eq("user_id", identity.userId)

@@ -77,7 +77,10 @@ export async function repoInstallationToken(
   const created = await fetchImpl(`${API}/app/installations/${installation.id}/access_tokens`, {
     method: "POST",
     headers: { ...auth, "Content-Type": "application/json" },
-    body: JSON.stringify({ repositories: [repo] }),
+    body: JSON.stringify({
+      repositories: [repo],
+      permissions: { contents: "read", pull_requests: "read", checks: "read", statuses: "read" },
+    }),
     cache: "no-store",
   });
   if (!created.ok) throw new Error(`GitHub could not issue a token for ${owner}/${repo} (${created.status}).`);

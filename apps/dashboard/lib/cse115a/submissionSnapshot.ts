@@ -37,7 +37,10 @@ export type TaskSnapshot = {
   analysisResultId: string;
   pr: { title: string; body: string; headRef: string; author: string | null; mergedAt: string | null; baseSha: string; mergeCommitSha: string };
   baseCommit: string;
-  baseCommitSource: "base_tag" | "pr_base";
+  /** Where the diff starts: the base tag, the PR's first commit when the tag isn't on it (#342), or the PR base. */
+  baseCommitSource: "base_tag" | "first_commit" | "pr_base";
+  /** With a first_commit base: whether the base tag's commit has the same author as the PR's first commit. Null when unknown (#342). */
+  baseTagSameAuthor?: boolean | null;
   diff: string;
   diffBytes: number;
   diffTruncated: boolean;
@@ -100,14 +103,37 @@ export async function captureTaskSnapshot(gh: GitHubReader, task: SubmittedTaskR
   if (!pull?.merged_at || !pull.merge_commit_sha) throw new Error(`Task ${task.task_slot}: the pull request is no longer merged.`);
   const mergeSha = pull.merge_commit_sha;
 
-  const [baseTagSha, issueComments, reviews, reviewComments, checks] = await Promise.all([
+  const [baseTagSha, commits, issueComments, reviews, reviewComments, checks] = await Promise.all([
     tagCommitSha(gh, owner, repo, `${task.task_id}-base`),
+    gh.json<Array<{ sha: string }>>(`${base}/pulls/${task.pr_number}/commits?per_page=1&page=1`),
     gh.json<Comment[]>(`${base}/issues/${task.pr_number}/comments?per_page=100`),
     gh.json<Comment[]>(`${base}/pulls/${task.pr_number}/reviews?per_page=100`),
     gh.json<Comment[]>(`${base}/pulls/${task.pr_number}/comments?per_page=100`),
     readCommitChecks(gh, owner, repo, mergeSha),
   ]);
-  const baseCommit = baseTagSha ?? pull.base.sha;
+  // Use the base tag only when it is on this PR's first commit, so a tag moved onto another
+  // student's commit can't change this student's diff (#342).
+  const firstSha = commits?.[0]?.sha ?? null;
+  let baseCommit = pull.base.sha;
+  let baseCommitSource: TaskSnapshot["baseCommitSource"] = "pr_base";
+  let baseTagSameAuthor: boolean | null = null;
+  if (baseTagSha && baseTagSha === firstSha) {
+    baseCommit = baseTagSha;
+    baseCommitSource = "base_tag";
+  } else if (firstSha) {
+    const first = await gh.json<{ files?: Array<{ filename: string }>; commit?: { author?: { email?: string } } }>(`${base}/commits/${firstSha}`);
+    if (first?.files?.length === 1 && first.files[0]?.filename === task.task_path) {
+      baseCommit = firstSha;
+      baseCommitSource = "first_commit";
+      // A tag on another author's commit is likely a teammate's task with the same ID; the Process grade says so.
+      const firstAuthor = first.commit?.author?.email;
+      if (baseTagSha && firstAuthor) {
+        const tagged = await gh.json<{ commit?: { author?: { email?: string } } }>(`${base}/commits/${baseTagSha}`, { optional: true });
+        const taggedAuthor = tagged?.commit?.author?.email;
+        if (taggedAuthor) baseTagSameAuthor = taggedAuthor.toLowerCase() === firstAuthor.toLowerCase();
+      }
+    }
+  }
 
   let diff = "";
   let diffBytes = 0;
@@ -149,7 +175,8 @@ export async function captureTaskSnapshot(gh: GitHubReader, task: SubmittedTaskR
       mergeCommitSha: mergeSha,
     },
     baseCommit,
-    baseCommitSource: baseTagSha ? "base_tag" : "pr_base",
+    baseCommitSource,
+    baseTagSameAuthor,
     diff, diffBytes, diffTruncated, diffError,
     comments,
     checks,

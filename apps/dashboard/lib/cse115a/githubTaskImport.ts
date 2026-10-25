@@ -14,7 +14,7 @@ type GitHubPull = {
   user: { login: string } | null;
 };
 
-type GitHubFile = { filename: string };
+type GitHubFile = { filename: string; status?: string };
 type GitHubContent = { encoding: string; content: string; size: number };
 
 export type ImportedTask = {
@@ -41,25 +41,29 @@ export async function importTaskFromPullRequest(
   const pull = await gh.json<GitHubPull>(`/repos/${owner}/${repo}/pulls/${number}`);
   if (!pull?.merged_at || !pull.merge_commit_sha) throw new Error("This pull request must be merged before submission.");
 
-  const candidatePaths: string[] = [];
+  const candidates: GitHubFile[] = [];
   for (let page = 1; page <= 3; page++) {
     const files = await gh.json<GitHubFile[]>(
       `/repos/${owner}/${repo}/pulls/${number}/files?per_page=100&page=${page}`,
     );
     for (const file of files ?? []) {
       if (new RegExp(`^docs/tasks/sprint-${assignmentNumber}/[A-Za-z0-9_-]+\\.md$`, "i").test(file.filename)) {
-        candidatePaths.push(file.filename);
+        candidates.push(file);
       }
     }
     if ((files?.length ?? 0) < 100) break;
   }
-  if (candidatePaths.length !== 1) {
-    throw new Error(candidatePaths.length === 0
+  // A PR may also edit an earlier task's file (say, to update its test paths); its own task file is the one it adds.
+  const added = candidates.filter((file) => file.status === "added");
+  const own = candidates.length === 1 ? candidates : added;
+  if (own.length !== 1) {
+    const names = candidates.map((file) => file.filename.split("/").pop()).join(", ");
+    throw new Error(candidates.length === 0
       ? `No task file was found in docs/tasks/sprint-${assignmentNumber}/ in this PR.`
-      : "This PR changes multiple task files. Submit one task per pull request.");
+      : `This PR adds or changes ${candidates.length} task files: ${names}. A task PR adds only its own task file.`);
   }
 
-  const taskPath = candidatePaths[0]!;
+  const taskPath = own[0]!.filename;
   const encodedPath = taskPath.split("/").map(encodeURIComponent).join("/");
   const content = await gh.json<GitHubContent>(
     `/repos/${owner}/${repo}/contents/${encodedPath}?ref=${encodeURIComponent(pull.merge_commit_sha)}`,
@@ -87,12 +91,27 @@ export async function importTaskFromPullRequest(
   if (!Array.isArray(folder) || !folder.some((entry) => entry.type === "file" && entry.name === filename)) {
     throw new Error(`The task file is not in docs/tasks/sprint-${assignmentNumber}/ on the merge commit.`);
   }
-  let specCommittedFirst = false;
-  if (baseSha && commits?.[0]?.sha === baseSha) {
-    const first = await gh.json<{ files?: Array<{ filename: string }> }>(
-      `/repos/${owner}/${repo}/commits/${baseSha}`,
+  // Check the PR's first commit even when the base tag is missing or elsewhere,
+  // so the checklist can tell a fixable tag from a spec that wasn't first (#266).
+  const firstSha = commits?.[0]?.sha ?? null;
+  let firstCommitTaskOnly: boolean | null = null;
+  let firstAuthor: string | null = null;
+  if (firstSha) {
+    const first = await gh.json<{ files?: Array<{ filename: string }>; commit?: { author?: { email?: string } } }>(
+      `/repos/${owner}/${repo}/commits/${firstSha}`,
     );
-    specCommittedFirst = first?.files?.length === 1 && first.files[0]?.filename === taskPath;
+    firstCommitTaskOnly = first?.files?.length === 1 && first.files[0]?.filename === taskPath;
+    firstAuthor = first?.commit?.author?.email ?? null;
+  }
+  const specCommittedFirst = firstCommitTaskOnly === true && baseSha === firstSha;
+  // A base tag on another author's commit may belong to a teammate's task with the same ID; moving it breaks theirs.
+  let baseTagSameAuthor: boolean | null = null;
+  if (firstCommitTaskOnly && baseSha && baseSha !== firstSha && firstAuthor) {
+    const tagged = await gh.json<{ commit?: { author?: { email?: string } } }>(
+      `/repos/${owner}/${repo}/commits/${baseSha}`, { optional: true },
+    );
+    const taggedAuthor = tagged?.commit?.author?.email;
+    if (taggedAuthor) baseTagSameAuthor = taggedAuthor.toLowerCase() === firstAuthor.toLowerCase();
   }
   const mergeSha = pull.merge_commit_sha;
   const checks = await readCommitChecks(gh, owner, repo, mergeSha);
@@ -114,6 +133,9 @@ export async function importTaskFromPullRequest(
     testFileCount,
     mergeSha,
     firstCommitSha: commits?.[0]?.sha ?? null,
+    firstCommitTaskOnly,
+    baseTagSameAuthor,
+    prNumber: number,
   };
   return {
     prUrl: parsed.url,
@@ -123,8 +145,8 @@ export async function importTaskFromPullRequest(
     validation: {
       prMerged: true,
       prAuthoredByStudent: pull.user?.login.toLowerCase() === githubLogin.toLowerCase(),
-      prTitleHasTaskId: pull.title.includes(spec.id),
-      branchHasTaskId: pull.head.ref.includes(spec.id),
+      prTitleHasTaskId: pull.title.toLowerCase().includes(spec.id.toLowerCase()),
+      branchHasTaskId: pull.head.ref.toLowerCase().includes(spec.id.toLowerCase()),
       baseTagPushed: Boolean(baseSha),
       specCommittedFirst,
       doneTagOnMergeCommit: doneSha === pull.merge_commit_sha,

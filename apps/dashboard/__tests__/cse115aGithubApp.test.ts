@@ -83,7 +83,10 @@ describe("repository access", () => {
     expect(await repoInstallationToken("Team", "Cached", config, fetchImpl)).toBe("ghs_cached");
     expect(calls).toHaveLength(2);
     expect(calls[0]!.auth).toMatch(/^Bearer [\w-]+\.[\w-]+\.[\w-]+$/);
-    expect(JSON.parse(calls[1]!.body!)).toEqual({ repositories: ["cached"] });
+    expect(JSON.parse(calls[1]!.body!)).toEqual({
+      repositories: ["cached"],
+      permissions: { contents: "read", pull_requests: "read", checks: "read", statuses: "read" },
+    });
   });
 
   it("only gives a token to accounts that can push to the repository", async () => {
