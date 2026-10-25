@@ -4,7 +4,7 @@
 
 export const KPI_DEFINITIONS: Record<string, string> = {
   filesAnalyzed:
-    "Total .ts, .tsx, .js, .jsx, .mjs, .cjs, .py, and .ipynb files parsed and analyzed. web2py and Django repos contribute zero files. Silent-failure density counts JS/TS catch blocks in React-scope files and Python except clauses in every Python file.",
+    "Total .ts, .tsx, .js, .jsx, .mjs, .cjs, .py, and .ipynb files parsed and analyzed. Test files are not counted. web2py and Django repos contribute zero files. Silent-failure density counts JS/TS catch blocks in React-scope files and Python except clauses in every non-test Python file.",
   totalFunctions: "Count of function-like AST nodes (functions, methods, arrow functions).",
   avgFunctionLength: "Mean line count across all functions.",
   maxFunctionLength: "Longest function by line count in the repo.",

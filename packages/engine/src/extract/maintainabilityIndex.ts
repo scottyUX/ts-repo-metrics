@@ -22,7 +22,7 @@ export type { MaintainabilityResult } from "../types/report.js";
  * Compute the Maintainability Index from pre-computed metrics.
  *
  * @param avgComplexity - Average cyclomatic complexity across all functions.
- * @param totalLOC - Total lines of code in the repository.
+ * @param totalLOC - Non-test source lines of code in the repository.
  * @param avgFunctionLength - Average function length in lines.
  * @returns Normalized MI score (0–100) and classification.
  */

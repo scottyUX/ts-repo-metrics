@@ -7,8 +7,11 @@ import {
 } from "@/lib/githubTokenCrypto";
 import {
   clearOAuthNextCookieHeader,
+  clearOAuthProviderCookieHeader,
+  readOAuthProviderFromCookie,
   readOAuthNextPathFromCookie,
 } from "@/lib/oauthRedirectOrigin";
+import { verifiedUcscGoogleEmail } from "@/lib/courseUcscAuth";
 import { getSupabase, isSupabaseConfigured } from "@/lib/supabase/server";
 import {
   supabaseAnonKeyNode,
@@ -19,6 +22,7 @@ import { getPublicOriginFromRequest } from "@/lib/publicOrigin";
 function redirectWithClearedNextCookie(origin: string, path: string): NextResponse {
   const response = NextResponse.redirect(`${origin}${path}`);
   response.headers.append("Set-Cookie", clearOAuthNextCookieHeader());
+  response.headers.append("Set-Cookie", clearOAuthProviderCookieHeader());
   return response;
 }
 
@@ -27,6 +31,7 @@ export async function GET(request: Request) {
   const origin = getPublicOriginFromRequest(request);
   const code = searchParams.get("code");
   const cookieHeader = request.headers.get("cookie");
+  const oauthProvider = readOAuthProviderFromCookie(cookieHeader);
   const nextPath =
     searchParams.get("next") ??
     readOAuthNextPathFromCookie(cookieHeader);
@@ -74,8 +79,16 @@ export async function GET(request: Request) {
 
   const providerToken = data.session.provider_token;
   const userId = data.session.user.id;
+  if ((nextPath.startsWith("/course/CSE115A-Fall26") || nextPath.startsWith("/cse115a")) && !verifiedUcscGoogleEmail(data.session.user)) {
+    await supabase.auth.signOut();
+    return redirectWithClearedNextCookie(origin, `${nextPath}?auth_error=ucsc_google_required`);
+  }
 
+  // Only a GitHub sign-in's provider token is a GitHub token; Google tokens are never stored.
+  // The course site reads repositories through its GitHub App, so it keeps no GitHub user tokens either.
+  const isGitHubToken = oauthProvider !== "google" && process.env.CSE115A_SITE !== "true";
   if (
+    isGitHubToken &&
     providerToken &&
     isSupabaseConfigured() &&
     isGitHubTokenEncryptionConfigured()
@@ -93,7 +106,7 @@ export async function GET(request: Request) {
     } catch (err) {
       console.error("[auth/callback] Failed to persist GitHub token:", err);
     }
-  } else if (providerToken && !isGitHubTokenEncryptionConfigured()) {
+  } else if (isGitHubToken && providerToken && !isGitHubTokenEncryptionConfigured()) {
     console.warn(
       "[auth/callback] GITHUB_OAUTH_ENCRYPTION_KEY not set; GitHub token not stored.",
     );

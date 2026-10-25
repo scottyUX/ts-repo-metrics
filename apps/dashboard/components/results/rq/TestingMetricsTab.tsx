@@ -14,6 +14,7 @@ import {
 import { filterSymbolVerificationRisksForContributor } from "@/lib/filterSymbolVerificationRisksForContributor";
 import { getTestingScopeMetricValues } from "@/lib/testingScopeMetrics";
 import { analysisTeamOptionLabel, isPrScopedReport } from "@/lib/analysisScope";
+import { summarizeStaticTestLinks } from "@/lib/staticTestLinkSummary";
 import {
   TestingConceptCyclomaticComplexityBody,
   TestingConceptProximityBandsBody,
@@ -38,6 +39,7 @@ interface TestingMetricsTabProps {
   onScopeIdChange: (next: CommitHabitsScopeId) => void;
   /** Switch parent results tabs to Code Quality (structural metrics). */
   onOpenCodeQualityTab?: () => void;
+  prOnly?: boolean;
 }
 
 function formatNumber(n: number): string {
@@ -50,7 +52,7 @@ function capitalizeWord(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
-export function TestingMetricsTab({ report, scopeId, onScopeIdChange, onOpenCodeQualityTab }: TestingMetricsTabProps) {
+export function TestingMetricsTab({ report, scopeId, onScopeIdChange, onOpenCodeQualityTab, prOnly = false }: TestingMetricsTabProps) {
   const coachExplain = useCoachExplain();
 
   const contributors = useMemo(() => report.contributors ?? [], [report.contributors]);
@@ -77,42 +79,37 @@ export function TestingMetricsTab({ report, scopeId, onScopeIdChange, onOpenCode
     [symbolRiskRowsScoped],
   );
 
-  const symbolProximitySummary = useMemo(() => {
-    const rows = symbolRiskRowsScoped;
-    if (!rows.length) return null;
-    let referencedInTest = 0;
-    let pairedFileOnly = 0;
-    let none = 0;
-    for (const r of rows) {
-      if (r.evidence === "referenced_in_test") referencedInTest++;
-      else if (r.evidence === "paired_file_only") pairedFileOnly++;
-      else none++;
-    }
-    const withSignal = referencedInTest + pairedFileOnly;
-    return { total: rows.length, referencedInTest, pairedFileOnly, none, withSignal };
-  }, [symbolRiskRowsScoped]);
+  const symbolProximitySummary = useMemo(
+    () => summarizeStaticTestLinks(symbolRiskRowsScoped, isPrScopedReport(report) ? report.source?.changedFiles : null),
+    [symbolRiskRowsScoped, report],
+  );
 
   const complexity = report.complexity;
   const smells = report.smells;
   const profile = report.profile;
   const testLocRatioForQuadrant =
-    profile && profile.sourceLOC > 0 ? profile.testLOC / profile.sourceLOC : 0;
+    profile && profile.sourceLOC > 0 ? profile.testLOC / profile.sourceLOC : Number.NaN;
 
   const { riskIndex, verificationIndex, riskLabel, verificationLabel } = useMemo(() => {
     const highComplexityCount = complexity?.highComplexityFunctions ?? 0;
     const longFunctionCount = smells?.longFunctions ?? 0;
-    const riskRaw = highComplexityCount + longFunctionCount;
+    // Older reports don't have the distinct count, so they keep the old sum.
+    const riskRaw = report.highComplexityOrLongFunctions ?? highComplexityCount + longFunctionCount;
     const riskIndex = Math.min(1, riskRaw / 20);
     const verificationIndex = Math.min(1, testLocRatioForQuadrant * 5);
     const riskLabel: "Low" | "High" = riskRaw >= 10 ? "High" : "Low";
-    const verificationLabel: "Low" | "High" = testLocRatioForQuadrant >= 0.1 ? "High" : "Low";
+    const verificationLabel: "Low" | "High" | null = !Number.isFinite(testLocRatioForQuadrant)
+      ? null
+      : testLocRatioForQuadrant >= 0.1
+        ? "High"
+        : "Low";
     return {
       riskIndex,
       verificationIndex,
       riskLabel,
       verificationLabel,
     };
-  }, [complexity?.highComplexityFunctions, smells?.longFunctions, testLocRatioForQuadrant]);
+  }, [complexity?.highComplexityFunctions, smells?.longFunctions, report.highComplexityOrLongFunctions, testLocRatioForQuadrant]);
 
   const cardProps = { metricCategory: "testing" as const, hideResearchBadge: true };
   const teamOnly = mv.mode === "team";
@@ -122,7 +119,9 @@ export function TestingMetricsTab({ report, scopeId, onScopeIdChange, onOpenCode
       ? "Among this author's commits, the fraction whose subjects match refactor-style keywords."
       : "Commits whose subject matches refactor-style keywords.";
   const locSnapshotTooltip =
-    "Counted across the entire repository snapshot (not split by contributor).";
+    isPrScopedReport(report)
+      ? "Counted across the files in this pull request (not split by contributor)."
+      : "Counted across the entire repository snapshot (not split by contributor).";
   const gitChurnTooltip =
     "Sum of lines added + deleted (git numstat) on paths in this author’s commits, split by test vs non-test file patterns—historical churn, not current tree size.";
 
@@ -144,7 +143,7 @@ export function TestingMetricsTab({ report, scopeId, onScopeIdChange, onOpenCode
   const proximitySummaryTooltip = symbolProximitySummary
     ? symbolRiskFilter.contributorFilterActive
       ? `Filtered to functions in source files this author touched (git numstat paths). Referenced in paired test: ${symbolProximitySummary.referencedInTest}. Paired file only: ${symbolProximitySummary.pairedFileOnly}. No static link: ${symbolProximitySummary.none}.`
-      : `${isPrScopedReport(report) ? "Pull-request" : "Whole-repository"} symbol scan (same rows as the scatter/table below). Referenced in paired test: ${symbolProximitySummary.referencedInTest}. Paired file only: ${symbolProximitySummary.pairedFileOnly}. No static link: ${symbolProximitySummary.none}.`
+      : `${isPrScopedReport(report) ? "Pull-request" : "Whole-repository"} symbol scan (same rows as the scatter/table below). Referenced in paired test: ${symbolProximitySummary.referencedInTest}. Paired file only: ${symbolProximitySummary.pairedFileOnly}. No static link: ${symbolProximitySummary.none}.${symbolProximitySummary.withSignalInPr === null ? "" : ` Paired tests may live anywhere in the repository; ${symbolProximitySummary.withSignalInPr} of the linked functions pair with a test file changed in this PR.`}`
     : "";
 
   const pathScopeUnavailableForContributor =
@@ -154,7 +153,7 @@ export function TestingMetricsTab({ report, scopeId, onScopeIdChange, onOpenCode
 
   return (
     <div className="space-y-8">
-      {contributors.length > 0 ? (
+      {!prOnly && contributors.length > 0 ? (
         <div className="flex flex-wrap items-end gap-3">
           <div className="flex flex-col gap-1">
             <label htmlFor="testing-scope" className="text-sm font-medium text-foreground">
@@ -183,10 +182,10 @@ export function TestingMetricsTab({ report, scopeId, onScopeIdChange, onOpenCode
         aria-label="How Testing tab metrics are scoped"
       >
         <span className="font-semibold text-foreground">Data scope — </span>
-        <span className="text-foreground/90">
+        {!prOnly ? <span className="text-foreground/90">
           <strong>Per author</strong> (dropdown): test/source churn, unique paths touched, % commits touching tests,
           refactor ratio when git numstat is available.
-        </span>{" "}
+        </span> : null}{" "}
         <span className="text-foreground/90">
           <strong>{isPrScopedReport(report) ? "This pull request" : "Whole repository"}</strong>: test coverage proxy, risk quadrant, complexity aggregates.
         </span>{" "}
@@ -212,8 +211,8 @@ export function TestingMetricsTab({ report, scopeId, onScopeIdChange, onOpenCode
           <>
             <p className="text-sm text-muted-foreground max-w-3xl">
               The first metrics in this section use per-author git churn (test vs
-              non-test paths) for your selection. Complexity and the quadrant still describe the whole
-              repository scan.
+              non-test paths) for your selection. Complexity and the quadrant still describe the{" "}
+              {isPrScopedReport(report) ? "pull-request" : "whole repository"} scan.
             </p>
             <p className="text-sm font-medium text-foreground max-w-3xl">
               Note: <strong>% commits touching tests</strong> and{" "}
@@ -290,10 +289,10 @@ export function TestingMetricsTab({ report, scopeId, onScopeIdChange, onOpenCode
               {...cardProps}
               label="Test coverage proxy (snapshot)"
               value={`${formatNumber(report.testCoverageProxy.ratio * 100)}% · ${capitalizeWord(report.testCoverageProxy.classification)}`}
-              tooltip={`Static test LOC ÷ source LOC on the full tree, bucketed low (&lt;10%), moderate (10–30%), high (&gt;30%). Same snapshot for every scope—not author churn. ${locSnapshotTooltip}`}
+              tooltip={`Static test LOC ÷ source LOC on ${isPrScopedReport(report) ? "the files in this PR" : "the full tree"}, bucketed low (&lt;10%), moderate (10–30%), high (&gt;30%). Same snapshot for every scope—not author churn. ${locSnapshotTooltip}`}
               metricHelp={{
                 title: "Test coverage proxy",
-                children: <TestingTestCoverageProxyBody />,
+                children: <TestingTestCoverageProxyBody prScoped={isPrScopedReport(report)} />,
               }}
             />
           ) : null}
@@ -302,6 +301,7 @@ export function TestingMetricsTab({ report, scopeId, onScopeIdChange, onOpenCode
               {...cardProps}
               label="Functions with static test link"
               value={`${symbolProximitySummary.withSignal} / ${symbolProximitySummary.total}`}
+              description={symbolProximitySummary.withSignalInPr === null ? undefined : `${symbolProximitySummary.withSignalInPr} linked to a test file in this PR; the rest pair with tests elsewhere in the repository.`}
               tooltip={proximitySummaryTooltip}
               metricHelp={{
                 title: "Static test linkage (summary)",
@@ -400,8 +400,10 @@ export function TestingMetricsTab({ report, scopeId, onScopeIdChange, onOpenCode
           structuralRiskSignals={{
             highComplexityFunctions: complexity?.highComplexityFunctions ?? 0,
             longFunctions: smells?.longFunctions ?? 0,
+            highComplexityOrLongFunctions: report.highComplexityOrLongFunctions,
           }}
           testLocShare={testLocRatioForQuadrant}
+          prScoped={isPrScopedReport(report)}
         />
       </section>
 

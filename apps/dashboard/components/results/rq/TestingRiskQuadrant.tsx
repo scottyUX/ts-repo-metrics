@@ -19,16 +19,21 @@ interface TestingRiskQuadrantProps {
   riskIndex: number;
   verificationIndex: number;
   riskLabel: "Low" | "High";
-  verificationLabel: "Low" | "High";
+  /** Null when there is no source code to measure verification against. */
+  verificationLabel: "Low" | "High" | null;
   /** When true, show that indices come from the whole-repository scan (contributor dropdown does not apply). */
   wholeRepositoryNote?: boolean;
   /** Repo-wide counts backing structural risk (same basis as quadrant). */
   structuralRiskSignals?: {
     highComplexityFunctions: number;
     longFunctions: number;
+    /** Functions in either count, each counted once; absent in older reports. */
+    highComplexityOrLongFunctions?: number;
   };
   /** Snapshot test LOC ÷ source LOC (0–1), same basis as verification score. */
   testLocShare?: number;
+  /** True when the report covers only the files in one pull request */
+  prScoped?: boolean;
 }
 
 const QUADRANT_COPY: Record<
@@ -72,8 +77,9 @@ const indexValueClass =
 
 function activePosition(
   riskLabel: "Low" | "High",
-  verificationLabel: "Low" | "High",
-): QuadrantPosition {
+  verificationLabel: "Low" | "High" | null,
+): QuadrantPosition | null {
+  if (verificationLabel === null) return null;
   const lowRisk = riskLabel === "Low";
   const lowVer = verificationLabel === "Low";
   if (lowRisk && lowVer) return "tl";
@@ -82,7 +88,10 @@ function activePosition(
   return "br";
 }
 
-function narrativeForActive(pos: QuadrantPosition): string {
+function narrativeForActive(pos: QuadrantPosition | null): string {
+  if (pos === null) {
+      return "There is no source code in the snapshot, so verification density (test LOC ratio) can't be measured or placed on this chart.";
+  }
   switch (pos) {
     case "tl":
       return "Structural risk is low, but verification density (test LOC ratio) is also low. You have runway—add tests before complexity climbs.";
@@ -95,7 +104,7 @@ function narrativeForActive(pos: QuadrantPosition): string {
   }
 }
 
-function cell(position: QuadrantPosition, active: QuadrantPosition, roomy: boolean) {
+function cell(position: QuadrantPosition, active: QuadrantPosition | null, roomy: boolean) {
   const { title, description } = QUADRANT_COPY[position];
   const isHere = active === position;
   const isIdeal = position === "tr";
@@ -107,7 +116,17 @@ function cell(position: QuadrantPosition, active: QuadrantPosition, roomy: boole
         ? "border border-[rgba(34,197,94,0.3)] bg-[rgba(34,197,94,0.08)]"
         : position === "bl"
           ? "border border-[rgba(239,68,68,0.25)] bg-[rgba(239,68,68,0.15)]"
-          : "border border-[#eab308] bg-[rgba(234,179,8,0.15)]";
+          : "border border-[rgba(234,179,8,0.3)] bg-[rgba(234,179,8,0.15)]";
+
+  const badge = isIdeal ? (isHere ? "Ideal · You are here" : "Ideal") : isHere ? "You are here" : null;
+  const badgeClass =
+    position === "tl"
+      ? "border-[#a1a1a1] bg-[rgba(161,161,161,0.15)] text-[#fafafa]"
+      : position === "tr"
+        ? "border-[#22c55e] bg-[rgba(34,197,94,0.15)] text-[#22c55e]"
+        : position === "bl"
+          ? "border-[#ef4444] bg-[rgba(239,68,68,0.15)] text-[#ef4444]"
+          : "border-[#eab308] bg-[rgba(234,179,8,0.15)] text-[#eab308]";
 
   const titleClass =
     position === "tr"
@@ -130,24 +149,15 @@ function cell(position: QuadrantPosition, active: QuadrantPosition, roomy: boole
       )}
     >
       <div className="flex flex-wrap items-center gap-2">
-        {isIdeal ? (
+        {badge ? (
           <span
             className={cn(
-              "inline-flex h-[22px] items-center rounded-full border border-[#22c55e] bg-[rgba(34,197,94,0.15)] px-2",
-              "text-[11px] font-medium leading-none text-[#22c55e]",
+              "inline-flex h-[22px] items-center rounded-full border px-2",
+              "text-[11px] font-medium leading-none",
+              badgeClass,
             )}
           >
-            Ideal
-          </span>
-        ) : null}
-        {isHere && !isIdeal ? (
-          <span
-            className={cn(
-              "inline-flex h-[22px] items-center rounded-full border border-[#eab308] bg-[rgba(234,179,8,0.15)] px-2",
-              "text-[11px] font-medium leading-none text-[#eab308]",
-            )}
-          >
-            You are here
+            {badge}
           </span>
         ) : null}
       </div>
@@ -163,12 +173,15 @@ interface TestingRiskQuadrantInnerProps {
   riskIndex: number;
   verificationIndex: number;
   riskLabel: "Low" | "High";
-  verificationLabel: "Low" | "High";
+  verificationLabel: "Low" | "High" | null;
   structuralRiskSignals?: {
     highComplexityFunctions: number;
     longFunctions: number;
+    /** Functions in either count, each counted once; absent in older reports. */
+    highComplexityOrLongFunctions?: number;
   };
   testLocShare?: number;
+  prScoped?: boolean;
   roomy: boolean;
   headerTrailing: ReactNode;
 }
@@ -188,6 +201,7 @@ function TestingRiskQuadrantInner({
   structuralRiskSignals,
   testLocShare,
   roomy,
+  prScoped,
   headerTrailing,
 }: TestingRiskQuadrantInnerProps) {
   const active = activePosition(riskLabel, verificationLabel);
@@ -196,7 +210,8 @@ function TestingRiskQuadrantInner({
 
   const riskRaw =
     structuralRiskSignals != null
-      ? structuralRiskSignals.highComplexityFunctions + structuralRiskSignals.longFunctions
+      ? (structuralRiskSignals.highComplexityOrLongFunctions ??
+        structuralRiskSignals.highComplexityFunctions + structuralRiskSignals.longFunctions)
       : null;
   const riskFootnote =
     structuralRiskSignals != null && riskRaw != null ? (
@@ -204,8 +219,9 @@ function TestingRiskQuadrantInner({
         From <span className="tabular-nums text-[#a1a1a1]">{structuralRiskSignals.highComplexityFunctions}</span>{" "}
         high-complexity +{" "}
         <span className="tabular-nums text-[#a1a1a1]">{structuralRiskSignals.longFunctions}</span> long functions (
-        <span className="tabular-nums text-[#a1a1a1]">{riskRaw}</span> combined). Score is that count ÷ 20, capped
-        at 100%.
+        <span className="tabular-nums text-[#a1a1a1]">{riskRaw}</span>{" "}
+        {structuralRiskSignals.highComplexityOrLongFunctions != null ? "distinct" : "combined"}). Score is that count ÷
+        20, capped at 100%.
       </p>
     ) : null;
 
@@ -216,7 +232,8 @@ function TestingRiskQuadrantInner({
   const verificationFootnote =
     sharePct != null ? (
       <p className="mt-1.5 text-[11px] font-normal leading-snug text-[#737373]">
-        Test code is <span className="tabular-nums text-[#a1a1a1]">{sharePct}%</span> of source LOC (repo snapshot).
+        Test code is <span className="tabular-nums text-[#a1a1a1]">{sharePct}%</span> of source LOC
+        ({prScoped ? "files in this PR" : "repo snapshot"}).
         Score is 5× that share, capped at 100% (reaches max when test share is at least 20%).
       </p>
     ) : null;
@@ -234,7 +251,7 @@ function TestingRiskQuadrantInner({
           </p>
           {wholeRepositoryNote ? (
             <p className="text-xs font-medium text-amber-200/90">
-              Based on the whole-repository scan; unchanged when you pick a contributor above.
+              Based on the {prScoped ? "pull-request" : "whole-repository"} scan; unchanged when you pick a contributor above.
             </p>
           ) : null}
         </div>
@@ -306,7 +323,11 @@ function TestingRiskQuadrantInner({
               <span
                 className={cn(
                   indexValueClass,
-                  verificationLabel === "High" ? "text-[#22c55e]" : "text-[#eab308]",
+                  verificationLabel === "High"
+                   ? "text-[#22c55e]"
+                   : verificationLabel === "Low"
+                    ? "text-[#eab308]"
+                    : "text-[#a1a1a1]",
                 )}
               >
                 {formatScorePercent(verificationIndex)}
@@ -316,10 +337,12 @@ function TestingRiskQuadrantInner({
                   "inline-flex h-5 items-center rounded-lg px-2 text-[10px] font-medium leading-[15px]",
                   verificationLabel === "High"
                     ? "bg-[rgba(34,197,94,0.08)] text-[#22c55e]"
-                    : "border border-[#eab308]/50 bg-[rgba(234,179,8,0.08)] text-[#eab308]",
+                    : verificationLabel === "Low"
+                      ? "border border-[#eab308]/50 bg-[rgba(234,179,8,0.08)] text-[#eab308]"
+                      : "bg-[#262626] text-[#a1a1a1]",
                 )}
               >
-                {verificationLabel} band
+                {verificationLabel ? `${verificationLabel} band` : "No data"}
               </span>
             </div>
             {verificationFootnote}
@@ -358,6 +381,7 @@ export function TestingRiskQuadrant({
   wholeRepositoryNote = false,
   structuralRiskSignals,
   testLocShare,
+  prScoped,
 }: TestingRiskQuadrantProps) {
   const [fullOpen, setFullOpen] = useState(false);
 
@@ -370,6 +394,7 @@ export function TestingRiskQuadrant({
     verificationLabel,
     structuralRiskSignals,
     testLocShare,
+    prScoped,
     roomy: false,
     headerTrailing: (
       <Button
@@ -409,6 +434,7 @@ export function TestingRiskQuadrant({
               verificationLabel={verificationLabel}
               structuralRiskSignals={structuralRiskSignals}
               testLocShare={testLocShare}
+              prScoped={prScoped}
               roomy
               headerTrailing={null}
             />

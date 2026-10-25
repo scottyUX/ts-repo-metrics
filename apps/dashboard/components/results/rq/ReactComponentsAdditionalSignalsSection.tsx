@@ -14,10 +14,12 @@ import {
 
 interface ReactComponentsAdditionalSignalsSectionProps {
   reactMetrics: ReactMetricsReport;
+  prScoped?: boolean;
 }
 
 export function ReactComponentsAdditionalSignalsSection({
   reactMetrics,
+  prScoped,
 }: ReactComponentsAdditionalSignalsSectionProps) {
   const s = reactMetrics.summary;
 
@@ -47,7 +49,7 @@ export function ReactComponentsAdditionalSignalsSection({
           description="Worst nested JSX depth in any component in this run."
           tooltip="Worst nested JSX depth in any component."
           metricHelp={{
-            title: "Maximum JSX depth (repository)",
+            title: prScoped ? "Maximum JSX depth (this pull request)" : "Maximum JSX depth (repository)",
             children: <ReactComponentsMaxJsxDepthRepoBody />,
           }}
         />

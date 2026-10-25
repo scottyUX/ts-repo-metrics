@@ -6,6 +6,7 @@ export type RepoTargetPull = {
   state: "open" | "closed";
   headRef: string;
   baseRef: string;
+  mergedAt: string | null;
 };
 
 export type RepoTargetBranch = {

@@ -9,6 +9,7 @@ import {
   type Phase2FunctionRow,
 } from "@/lib/phase2Summary";
 import type { RepoReport, FunctionDetail } from "@/lib/reportTypes";
+import { isPrScopedReport } from "@/lib/analysisScope";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -26,6 +27,7 @@ import {
 import { Phase2ThresholdLegend } from "./Phase2ThresholdLegend";
 import { phase2TrafficCellClass } from "@/lib/phase2Traffic";
 import { hasReactUiScope } from "@/lib/hasReactUiScope";
+import { functionLabel } from "@/lib/functionLabel";
 import { Phase2WhatMetricsMeasure } from "./Phase2WhatMetricsMeasure";
 import { Phase2CodeComplexityCoreSignals } from "./Phase2CodeComplexityCoreSignals";
 import { Phase2AdditionalSignalsSection } from "./Phase2AdditionalSignalsSection";
@@ -226,7 +228,7 @@ export function Phase2ComplexityTab({ report, onOpenCodeQualityTab }: Phase2Comp
         showReact={showReact}
         onOpenDeepDive={setDeepDive}
       />
-      <Phase2CodeComplexityCoreSignals summary={summary} onOpenDeepDive={setDeepDive} />
+      <Phase2CodeComplexityCoreSignals summary={summary} onOpenDeepDive={setDeepDive} prScoped={isPrScopedReport(report)} />
       <Phase2AdditionalSignalsSection summary={summary} showReact={showReact} />
       <Phase2TopComplexityOutliersTable
         sortedOutliers={sortedOutliers}
@@ -369,7 +371,7 @@ export function Phase2ComplexityTab({ report, onOpenCodeQualityTab }: Phase2Comp
                         {rank}
                       </TableCell>
                       <TableCell className="max-w-[140px] truncate font-mono text-xs">{file}</TableCell>
-                      <TableCell className="font-mono text-sm">{fn.name}</TableCell>
+                      <TableCell className="font-mono text-sm">{functionLabel(fn.name, fn.startLine)}</TableCell>
                       <TableCell className={phase2TrafficCellClass(fn.cyclomaticComplexity, "cc")}>
                         {fn.cyclomaticComplexity ?? "—"}
                       </TableCell>

@@ -548,6 +548,8 @@ export interface RepoReport {
   functionMetricsSummary: FunctionMetricsSummary;
   complexity: ComplexitySummary;
   smells: SmellCounts;
+  /** Functions that are high-complexity, long, or both, each counted once. */
+  highComplexityOrLongFunctions: number;
   /** Null when analysis was skipped (web2py or Django). Do not treat that as a score. */
   maintainability: MaintainabilityResult | null;
   testCoverageProxy: TestCoverageProxy;
