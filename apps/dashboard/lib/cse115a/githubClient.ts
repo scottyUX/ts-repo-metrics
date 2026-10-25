@@ -5,13 +5,14 @@ export type GitHubReader = {
 
 function githubError(status: number, what: string): Error {
   return new Error(status === 401 || status === 403
-    ? "GitHub access expired or cannot read this repository. Reconnect GitHub and try again."
+    ? "GitHub cannot read this repository. Check that the course GitHub App is still installed on it, then try again."
     : `GitHub could not load ${what} (${status}).`);
 }
 
-export function githubReader(token: string): GitHubReader {
-  const request = (path: string, accept: string) => fetch(`https://api.github.com${path}`, {
-    headers: { Accept: accept, "X-GitHub-Api-Version": "2022-11-28", Authorization: `Bearer ${token}` },
+/** Reads the GitHub API with a fixed token, or with a token looked up for each request path. */
+export function githubReader(token: string | ((path: string) => Promise<string>), fetchImpl: typeof fetch = fetch): GitHubReader {
+  const request = async (path: string, accept: string) => fetchImpl(`https://api.github.com${path}`, {
+    headers: { Accept: accept, "X-GitHub-Api-Version": "2022-11-28", Authorization: `Bearer ${typeof token === "string" ? token : await token(path)}` },
     cache: "no-store",
   });
   return {

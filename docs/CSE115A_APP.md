@@ -9,7 +9,9 @@ service keeps its normal home page.
 1. Sign up or sign in with a verified `@ucsc.edu` Google account.
 2. Enter the quarter's course code once. The code selects the course; students
    do not choose a section.
-3. Connect GitHub so the app can read the team's repository and private PRs.
+3. Connect GitHub so the site knows their username. One teammate installs the course
+   GitHub App on the team repository. That install is what lets the site read the
+   repository. See [CSE115A_GITHUB_APP.md](CSE115A_GITHUB_APP.md).
 4. Open Assignment 1, 2, 3, and so on. Submit two merged task PR URLs. The app
    imports `docs/tasks/sprint-N/<task-id>.md` from each PR's merge commit,
    records process checks, and analyzes the PR's changed source files. Once
@@ -31,11 +33,14 @@ service keeps its normal home page.
   hint improves the chooser, while the server checks the verified Google
   identity's email.
 - Enable **manual identity linking** in Supabase Auth settings. Students sign
-  in with Google, then link GitHub to the same Supabase account so the existing
-  encrypted GitHub token store works.
-- Set `CSE115A_SITE=true` on the separate Railway service. Copy the dashboard's
-  Supabase and GitHub token encryption settings to that service. Do not put
-  secrets in this repository.
+  in with Google, then link GitHub to the same Supabase account so the site
+  knows their GitHub username. Repository reads use the course GitHub App, not
+  a stored user token. See [CSE115A_GITHUB_APP.md](CSE115A_GITHUB_APP.md).
+- Set `CSE115A_SITE=true` on the separate Railway service, plus `GITHUB_APP_ID`,
+  `GITHUB_APP_SLUG`, and `GITHUB_APP_PRIVATE_KEY`. Copy the dashboard's Supabase
+  settings. Do not put secrets in this repository. With `CSE115A_SITE=true` the
+  service ignores `user_github_tokens`, so those rows can stay when this
+  Supabase project also serves the main dashboard.
 - Create a code for each quarter after adding that quarter to `cse_courses`:
 
   ```sh

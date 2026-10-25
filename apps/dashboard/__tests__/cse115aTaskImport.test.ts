@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { githubReader } from "@/lib/cse115a/githubClient";
 import { importTaskFromPullRequest } from "@/lib/cse115a/githubTaskImport";
 import { processChecklist } from "@/lib/cse115a/processChecklist";
 
@@ -71,7 +72,7 @@ describe("CSE 115A task import: spec committed first (#266)", () => {
     ["task file and code", "tag on it", "first", [TASK, "app.js"], false, UNFIXABLE],
   ])("first commit has the %s, %s", async (_files, _tag, baseTag, firstCommitFiles, ok, detail) => {
     stubGitHub(baseTag, firstCommitFiles);
-    const task = await importTaskFromPullRequest("https://github.com/team/repo/pull/1", 1, "token");
+    const task = await importTaskFromPullRequest("https://github.com/team/repo/pull/1", 1, githubReader("token"), "student");
     const line = processChecklist(task.validation, task.facts, "US-1-T-1").find((entry) => entry.key === "specCommittedFirst");
     expect(task.facts.firstCommitTaskOnly).toBe(firstCommitFiles.length === 1);
     expect(line?.ok).toBe(ok);
@@ -86,13 +87,13 @@ describe("CSE 115A task import: which task file is this PR's", () => {
 
   it("uses the task file the PR adds when it also edits an earlier task's file", async () => {
     stubGitHub("first", [TASK], [{ filename: TASK, status: "added" }, { filename: OTHER, status: "modified" }]);
-    const task = await importTaskFromPullRequest("https://github.com/team/repo/pull/1", 1, "token");
+    const task = await importTaskFromPullRequest("https://github.com/team/repo/pull/1", 1, githubReader("token"), "student");
     expect(task.taskPath).toBe(TASK);
   });
 
   it("names the task files when the PR adds more than one", async () => {
     stubGitHub("first", [TASK], [{ filename: TASK, status: "added" }, { filename: OTHER, status: "added" }]);
-    await expect(importTaskFromPullRequest("https://github.com/team/repo/pull/1", 1, "token"))
+    await expect(importTaskFromPullRequest("https://github.com/team/repo/pull/1", 1, githubReader("token"), "student"))
       .rejects.toThrow("This PR adds or changes 2 task files: US-1-T-1.md, US-1-T-2.md. A task PR adds only its own task file.");
   });
 });
@@ -108,7 +109,7 @@ describe("CSE 115A task import: task ID in the PR title and branch (#324)", () =
       if (!url.endsWith("/pulls/1")) return response;
       return new Response(JSON.stringify({ ...await response.json(), title: "us-1-t-1: Reject", head: { ref: "task/us-1-t-1" } }));
     }));
-    const task = await importTaskFromPullRequest("https://github.com/team/repo/pull/1", 1, "token");
+    const task = await importTaskFromPullRequest("https://github.com/team/repo/pull/1", 1, githubReader("token"), "student");
     expect(task.validation.prTitleHasTaskId).toBe(true);
     expect(task.validation.branchHasTaskId).toBe(true);
   });

@@ -84,8 +84,11 @@ export async function GET(request: Request) {
     return redirectWithClearedNextCookie(origin, `${nextPath}?auth_error=ucsc_google_required`);
   }
 
+  // Only a GitHub sign-in's provider token is a GitHub token; Google tokens are never stored.
+  // The course site reads repositories through its GitHub App, so it keeps no GitHub user tokens either.
+  const isGitHubToken = oauthProvider !== "google" && process.env.CSE115A_SITE !== "true";
   if (
-    oauthProvider !== "google" &&
+    isGitHubToken &&
     providerToken &&
     isSupabaseConfigured() &&
     isGitHubTokenEncryptionConfigured()
@@ -103,7 +106,7 @@ export async function GET(request: Request) {
     } catch (err) {
       console.error("[auth/callback] Failed to persist GitHub token:", err);
     }
-  } else if (oauthProvider !== "google" && providerToken && !isGitHubTokenEncryptionConfigured()) {
+  } else if (isGitHubToken && providerToken && !isGitHubTokenEncryptionConfigured()) {
     console.warn(
       "[auth/callback] GITHUB_OAUTH_ENCRYPTION_KEY not set; GitHub token not stored.",
     );
