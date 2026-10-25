@@ -22,6 +22,7 @@ import {
   isUserSupabaseConfigured,
 } from "@/lib/supabase/server-user";
 import { getDecryptedGitHubTokenForUser } from "@/lib/userGitHubToken";
+import { CourseRepoAccessError, courseRepoToken, githubLoginOf } from "@/lib/cse115a/githubApp";
 import { ANALYZE_SIGN_IN_REQUIRED_MESSAGE } from "@/lib/analyzeConstants";
 import type { RepoReport as DashboardRepoReport } from "@/lib/reportTypes";
 import { devStoreReport } from "@/lib/devReportStore";
@@ -217,6 +218,19 @@ export async function POST(request: NextRequest) {
 
     const normalizedUrl = normalizeGitHubUrl(url);
     const analyzeRef: AnalyzeRef | undefined = parseAnalyzeRef(body?.ref);
+
+    // Course analyses read the team repository through the course GitHub App, never a stored user token.
+    if (managedCourse) {
+      const target = parseGitHubUrl(normalizedUrl);
+      try {
+        githubToken = target ? await courseRepoToken(githubLoginOf(authUser), target.owner, target.repo) : undefined;
+      } catch (error) {
+        if (error instanceof CourseRepoAccessError) {
+          return NextResponse.json({ error: error.message, status: "failed", code: error.code }, { status: 403 });
+        }
+        throw error;
+      }
+    }
 
     const baseCache = path.join(os.tmpdir(), "repo-metrics-git-cache");
     const cacheDir =
