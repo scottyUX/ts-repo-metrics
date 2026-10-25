@@ -48,7 +48,6 @@ export default async function Cse115aPreviewResultsPage({ searchParams }: { sear
           specs: "A non-UCSC email returns HTTP 400 without creating a session.",
           requirements: "Use the existing login handler; add no runtime dependency.",
           acceptanceCriteria: "Reject a non-university email; set no session cookie; accept case-insensitive UCSC domains.",
-          tests: "Each acceptance criterion has a named test with setup and assertion.",
         },
         validation: { prMerged: true, specCommittedFirst: true, baseTagPushed: false, doneTagOnMergeCommit: true },
         gradeStatus: released ? "released" : "not_submitted",
