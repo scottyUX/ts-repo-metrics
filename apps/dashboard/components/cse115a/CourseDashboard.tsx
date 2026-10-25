@@ -29,6 +29,12 @@ import { SprintChecklistDialog } from "@/components/cse115a/SprintChecklistDialo
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 type SprintDue = { number: number; due_at: string | null };
+// Fall 2026 students submit sprints 2–4. Sprint 1 and Sprint 5 stay in the course record.
+const HIDDEN_STUDENT_SPRINTS = new Set([1, 5]);
+
+function studentSprintNumbers(count: number): number[] {
+  return Array.from({ length: count }, (_, index) => index + 1).filter((number) => !HIDDEN_STUDENT_SPRINTS.has(number));
+}
 type Course = { id: string; slug: string; title: string; term: string; assignment_count: number; sprints?: SprintDue[] };
 type Submission = {
   id: string;
@@ -159,7 +165,7 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
   const [joinError, setJoinError] = useState<string | null>(null);
   const [checklistSlot, setChecklistSlot] = useState<number | null>(null);
   const [selectedSlug, setSelectedSlug] = useState<string | null>(preview ? previewCourse.slug : null);
-  const [assignmentNumber, setAssignmentNumber] = useState(preview && previewState === "needs-fixes" ? 2 : 1);
+  const [assignmentNumber, setAssignmentNumber] = useState(2);
   const [prInputs, setPrInputs] = useState<Record<number, string>>({});
   const [changing, setChanging] = useState<Record<number, boolean>>({});
   const [phase, setPhase] = useState<Record<number, string>>({});
@@ -190,8 +196,11 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
       if (!openedSprint.current && body.courses[0]) {
         openedSprint.current = true;
         const course = body.courses[0];
-        setAssignmentNumber(firstOpenSprint(course.assignment_count, (number) =>
-          body.assignmentSubmissions.some((item) => item.course_id === course.id && item.assignment_number === number)));
+        const visible = studentSprintNumbers(course.assignment_count);
+        setAssignmentNumber(visible.find((number) =>
+          !body.assignmentSubmissions.some((item) => item.course_id === course.id && item.assignment_number === number))
+          ?? visible[visible.length - 1]
+          ?? firstOpenSprint(course.assignment_count, () => true));
       }
       setError(null);
     } catch (caught) {
@@ -490,7 +499,7 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
       ) : course ? (
         <>
           <nav className="flex flex-wrap gap-2" aria-label="Sprints">
-            {Array.from({ length: course.assignment_count }, (_, index) => index + 1).map((number) => {
+            {studentSprintNumbers(course.assignment_count).map((number) => {
               const submission = me?.assignmentSubmissions.find((item) => item.course_id === course.id && item.assignment_number === number);
               const label = sprintTabLabel(number, {
                 submitted: Boolean(submission),
