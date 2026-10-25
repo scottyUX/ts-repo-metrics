@@ -166,6 +166,7 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
   const [githubConnected, setGithubConnected] = useState<boolean | null>(preview ? previewState !== "joined" : null);
   const [githubLogin, setGithubLogin] = useState<string | null>(null);
   const [githubInstallUrl, setGithubInstallUrl] = useState<string | null>(null);
+  const [installPromptOpen, setInstallPromptOpen] = useState(false);
   const [connectingGithub, setConnectingGithub] = useState(false);
   const [githubError, setGithubError] = useState<string | null>(null);
   const [submittingAssignment, setSubmittingAssignment] = useState(false);
@@ -234,6 +235,15 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
   const assignmentSubmission = me?.assignmentSubmissions.find((item) =>
     item.course_id === course?.id && item.assignment_number === assignmentNumber);
   const locked = Boolean(assignmentSubmission);
+  useEffect(() => {
+    if (preview || !githubInstallUrl || locked || submissions.length >= 2) return;
+    if (window.sessionStorage.getItem("cse115a-github-app-install-seen") === "1") return;
+    setInstallPromptOpen(true);
+  }, [preview, githubInstallUrl, locked, submissions.length]);
+  const handleDismissInstallPrompt = () => {
+    window.sessionStorage.setItem("cse115a-github-app-install-seen", "1");
+    setInstallPromptOpen(false);
+  };
   const releasedGrades = assignmentSubmission?.status === "released"
     ? (me?.grades ?? []).filter((grade) => grade.assignmentSubmissionId === assignmentSubmission.id) : [];
   // An answer to older wording does not count, so the card asks again.
@@ -532,6 +542,12 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
                 </div>
               </section>
             ) : null}
+            {githubInstallUrl && !locked ? (
+              <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-900 bg-slate-900 px-5 py-4 text-white">
+                <p className="text-sm">One teammate installs the course GitHub App on your repository. Then anyone who can push can add a pull request.</p>
+                <a href={githubInstallUrl} target="_blank" rel="noreferrer" className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-slate-900">Install the GitHub App</a>
+              </div>
+            ) : null}
             <div className="grid gap-4 md:grid-cols-2">
               {[1, 2].map((slot) => {
                 const item = submissions.find((submission) => submission.task_slot === slot);
@@ -602,12 +618,6 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
                       <>
                         <label htmlFor={`pr-${slot}`} className="mt-5 block text-sm font-medium">Merged pull request URL</label>
                         <input id={`pr-${slot}`} type="url" value={prInputs[slot] ?? ""} onChange={(event) => setPrInputs((previous) => ({ ...previous, [slot]: event.target.value }))} placeholder="https://github.com/team/repo/pull/12" className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
-                        {githubInstallUrl ? (
-                          <p className="mt-2 text-xs text-slate-600">
-                            The course GitHub App must be installed on your team’s repository.{" "}
-                            <a href={githubInstallUrl} target="_blank" rel="noreferrer" className="font-medium underline underline-offset-2">Install or check it</a>
-                          </p>
-                        ) : null}
                         <button type="button" disabled={preview || Boolean(phase[slot])} onClick={() => void savePullRequest(slot, "add")} className="mt-3 w-full rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
                           {phase[slot] || "Add PR"}
                         </button>
@@ -638,6 +648,22 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
                 </button>
               </div>
             ) : null}
+            <Dialog open={installPromptOpen} onOpenChange={(open) => { if (!open) handleDismissInstallPrompt(); }}>
+              <DialogContent className="sm:max-w-lg">
+                <DialogHeader>
+                  <DialogTitle>Install the course GitHub App</DialogTitle>
+                  <DialogDescription>
+                    One teammate installs it on your team repository. It can only read that repository, and it never changes the code. After that, anyone who can push can add pull requests.
+                  </DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                  <button type="button" onClick={handleDismissInstallPrompt} className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium">Not now</button>
+                  {githubInstallUrl ? (
+                    <a href={githubInstallUrl} target="_blank" rel="noreferrer" onClick={handleDismissInstallPrompt} className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white">Install the GitHub App</a>
+                  ) : null}
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
             <Dialog open={confirmingChange} onOpenChange={setConfirmingChange}>
               <DialogContent className="sm:max-w-lg">
                 <DialogHeader>
