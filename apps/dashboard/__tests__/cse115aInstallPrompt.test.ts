@@ -2,18 +2,13 @@ import { describe, expect, it } from "vitest";
 import { needsCourseInstallPrompt, repoFullNameFromPullRequest } from "@/lib/cse115a/installPrompt";
 
 describe("course GitHub App install prompt (#353)", () => {
-  it("asks before any task has been saved", () => {
-    expect(needsCourseInstallPrompt({ savedRepos: [], uninstalledRepos: [] })).toBe(true);
+  it("stays quiet when the student opens the course, including after a repository was already read", () => {
+    expect(needsCourseInstallPrompt({ uninstalledRepos: [] })).toBe(false);
   });
 
-  it("stays quiet once a repository has been read, including on a later empty sprint", () => {
-    expect(needsCourseInstallPrompt({ savedRepos: ["team/app"], uninstalledRepos: [] })).toBe(false);
-    expect(needsCourseInstallPrompt({ savedRepos: ["team/app", "team/other"], uninstalledRepos: [] })).toBe(false);
-  });
-
-  it("asks again when a check cannot read a repository, including a second one", () => {
-    expect(needsCourseInstallPrompt({ savedRepos: ["team/app"], uninstalledRepos: ["team/other"] })).toBe(true);
-    expect(needsCourseInstallPrompt({ savedRepos: ["team/app"], uninstalledRepos: ["team/app"] })).toBe(true);
+  it("asks when a check cannot read a repository, including a second one", () => {
+    expect(needsCourseInstallPrompt({ uninstalledRepos: ["team/other"] })).toBe(true);
+    expect(needsCourseInstallPrompt({ uninstalledRepos: ["team/app"] })).toBe(true);
   });
 
   it("reads the repository from a pull request URL", () => {

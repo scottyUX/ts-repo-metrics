@@ -10,7 +10,7 @@ import { runAnalyzeFromUrl } from "@/lib/runAnalyze";
 import { sprintScore, type StudentTaskGrade } from "@/lib/cse115a/gradeReview";
 import { RUBRIC } from "@/lib/cse115a/rubric";
 import { CONSENT_TEXT, CONSENT_VERSION } from "@/lib/cse115a/consent";
-import { INSTALL_PROMPT_SEEN_KEY, needsCourseInstallPrompt, repoFullNameFromPullRequest } from "@/lib/cse115a/installPrompt";
+import { needsCourseInstallPrompt, repoFullNameFromPullRequest } from "@/lib/cse115a/installPrompt";
 import { oauthHashError } from "@/lib/cse115a/oauthError";
 import {
   firstOpenSprint,
@@ -246,23 +246,9 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
   const assignmentSubmission = me?.assignmentSubmissions.find((item) =>
     item.course_id === course?.id && item.assignment_number === assignmentNumber);
   const locked = Boolean(assignmentSubmission);
-  const savedRepos = useMemo(() => {
-    const names = new Set<string>();
-    for (const item of me?.submissions ?? []) {
-      if (item.course_id !== course?.id) continue;
-      const repo = repoFullNameFromPullRequest(item.pr_url);
-      if (repo) names.add(repo);
-    }
-    return [...names];
-  }, [me, course]);
-  const offerInstall = Boolean(githubInstallUrl) && !locked && needsCourseInstallPrompt({ savedRepos, uninstalledRepos });
-  useEffect(() => {
-    if (preview || !offerInstall || savedRepos.length > 0) return;
-    if (window.sessionStorage.getItem(INSTALL_PROMPT_SEEN_KEY) === "1") return;
-    setInstallPromptOpen(true);
-  }, [preview, offerInstall, savedRepos.length]);
+  const offerInstall = Boolean(githubInstallUrl) && !locked && needsCourseInstallPrompt({ uninstalledRepos });
+  const installTarget = uninstalledRepos.length > 1 ? "those repositories" : "that repository";
   const handleDismissInstallPrompt = () => {
-    window.sessionStorage.setItem(INSTALL_PROMPT_SEEN_KEY, "1");
     setInstallPromptOpen(false);
   };
   const rememberInstallResult = (url: string, installed: boolean) => {
@@ -578,9 +564,14 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
             ) : null}
             {offerInstall && githubInstallUrl ? (
               <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-900 bg-slate-900 px-5 py-4 text-white">
-                <p className="text-sm">One teammate installs the course GitHub App on your repository. Then anyone who can push can add a pull request.</p>
+                <p className="text-sm">The course GitHub App cannot read {uninstalledRepos.join(", ")}. One teammate installs it on {installTarget}, then you can add the pull request.</p>
                 <a href={githubInstallUrl} target="_blank" rel="noreferrer" className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-slate-900">Install the GitHub App</a>
               </div>
+            ) : githubInstallUrl && !locked ? (
+              <p className="text-sm text-slate-600">
+                One teammate installs the course GitHub App on each repository you submit from. A task can use a different repository than one you already added.{" "}
+                <a href={githubInstallUrl} target="_blank" rel="noreferrer" className="font-medium text-slate-900 underline">Install the GitHub App</a>
+              </p>
             ) : null}
             <div className="grid gap-4 md:grid-cols-2">
               {[1, 2].map((slot) => {
@@ -651,6 +642,7 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
                     {showInput ? (
                       <>
                         <label htmlFor={`pr-${slot}`} className="mt-5 block text-sm font-medium">Merged pull request URL</label>
+                        {item ? <p className="mt-1 text-sm text-slate-600">Paste a pull request from this repository or a different one.</p> : null}
                         <input id={`pr-${slot}`} type="url" value={prInputs[slot] ?? ""} onChange={(event) => setPrInputs((previous) => ({ ...previous, [slot]: event.target.value }))} placeholder="https://github.com/team/repo/pull/12" className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
                         <button type="button" disabled={preview || Boolean(phase[slot])} onClick={() => void savePullRequest(slot, "add")} className="mt-3 w-full rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
                           {phase[slot] || "Add PR"}
@@ -687,7 +679,7 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
                 <DialogHeader>
                   <DialogTitle>Install the course GitHub App</DialogTitle>
                   <DialogDescription>
-                    One teammate installs it on your team repository. It can only read that repository, and it never changes the code. After that, anyone who can push can add pull requests.
+                    The course GitHub App cannot read {uninstalledRepos.join(", ") || "this repository"}. One teammate installs it on {installTarget}. It can only read the repository, and it never changes the code.
                   </DialogDescription>
                 </DialogHeader>
                 <DialogFooter>
