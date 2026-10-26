@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 // student opens a sprint they have not started. Ticks are a personal to-do list
 // kept in this browser only; the app's own checks on each PR are what count.
 
-const INSTRUCTIONS_URL = "https://github.com/scottyUX/hecate-router/blob/main/docs/cse115a-sprint-task-specifications.md";
+const INSTRUCTIONS_URL = "https://github.com/scottyUX/AI-Augmented-Software-Engineering/blob/main/resources/cse115a-sprint-task-specifications.md";
 
 type Item = { key: string; title: string; detail: React.ReactNode };
 type Group = { title: string; items: Item[] };

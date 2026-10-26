@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 
-const INSTRUCTIONS = "https://github.com/scottyUX/hecate-router/blob/main/docs/cse115a-sprint-task-specifications.md";
+const INSTRUCTIONS = "https://github.com/scottyUX/AI-Augmented-Software-Engineering/blob/main/resources/cse115a-sprint-task-specifications.md";
 
 export function Cse115aStudentBar({
   courseLabel,

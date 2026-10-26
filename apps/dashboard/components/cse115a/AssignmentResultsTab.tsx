@@ -120,7 +120,7 @@ export function AssignmentResultsTab({ task }: { task: CourseTaskEvidence }) {
           })}
         </div>
       </div>
-      <a href="https://github.com/scottyUX/hecate-router/blob/main/docs/cse115a-sprint-task-specifications.md" target="_blank" rel="noopener noreferrer" className="inline-block text-sm text-primary underline">Read the full assignment rubric</a>
+      <a href="https://github.com/scottyUX/AI-Augmented-Software-Engineering/blob/main/resources/cse115a-sprint-task-specifications.md" target="_blank" rel="noopener noreferrer" className="inline-block text-sm text-primary underline">Read the full assignment rubric</a>
     </div>
   );
 }
