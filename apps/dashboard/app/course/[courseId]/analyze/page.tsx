@@ -68,7 +68,7 @@ const COURSE_META: Record<string, { fullName: string; term: string; description?
 };
 
 const FALL_2026_SECTIONS = new Set(["CSE115A-Fall26", "CSE115A-Fall26-S01", "CSE115A-Fall26-S02"]);
-const ASSIGNMENT_URL = "https://github.com/scottyUX/hecate-router/blob/main/docs/cse115a-sprint-task-specifications.md";
+const ASSIGNMENT_URL = "https://github.com/scottyUX/AI-Augmented-Software-Engineering/blob/main/resources/cse115a-sprint-task-specifications.md";
 
 type StepNum = 1 | 2 | 3;
 

@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-const HANDOUT = "https://github.com/scottyUX/hecate-router/blob/main/docs/cse115a-sprint-task-specifications.md";
+const HANDOUT = "https://github.com/scottyUX/AI-Augmented-Software-Engineering/blob/main/resources/cse115a-sprint-task-specifications.md";
 
 const STEPS = [
   { href: "#sign-in", label: "Sign in" },

@@ -1,5 +1,5 @@
 // The CSE 115A task rubric, shared by the results page and the grading agent.
-// Source: hecate-router docs/cse115a-sprint-task-specifications.md.
+// Source: AI-Augmented-Software-Engineering resources/cse115a-sprint-task-specifications.md.
 
 export const RUBRIC = [
   { name: "Scope", points: 1, full: "Specific outcome, clear out-of-scope, real constraints", partial: "Vague title or missing scope", none: "Missing, or copied between fields", evidence: "Task title, Description, Requirements" },
