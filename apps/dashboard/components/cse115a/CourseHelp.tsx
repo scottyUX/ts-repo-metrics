@@ -5,6 +5,7 @@ const HANDOUT = "https://github.com/scottyUX/AI-Augmented-Software-Engineering/b
 const STEPS = [
   { href: "#sign-in", label: "Sign in" },
   { href: "#install", label: "Install the app" },
+  { href: "#uninstall", label: "Remove the app" },
   { href: "#another-repo", label: "Another repository" },
   { href: "#task-file", label: "Task file" },
   { href: "#pull-request", label: "Pull request" },
@@ -15,11 +16,15 @@ const STEPS = [
 const FAQS = [
   {
     q: "Why is the install box still on the page after I installed the app?",
-    a: "The box is the way to install the app on a repository. It stays so you can add a second repository later. It is not asking again. The popup opens only when a pull request check cannot read the repository you pasted.",
+    a: "The box stays so you can add the app to another repository, or remove it. The button says Install or manage. The popup opens only when a pull request check cannot read the repository you pasted.",
   },
   {
     q: "Does every teammate install the GitHub App?",
     a: "No. One teammate installs AIAugmentedSWE on the team repository. After that, anyone with write access can add a pull request. Each person still connects their own GitHub account so the site knows which pull requests are theirs.",
+  },
+  {
+    q: "How do I uninstall the app?",
+    a: "Click Install or manage. On GitHub, choose the account that says Configure. Open that installation and choose Uninstall. Signing in again does not show a popup. The next Add PR or Re-check on that repository asks you to install it again.",
   },
   {
     q: "I installed it on my personal account, and my team repository still fails.",
@@ -111,7 +116,7 @@ const InstallFigure = () => (
   <div className="space-y-3" aria-hidden>
     <div className="flex items-center justify-between gap-3 rounded-xl bg-slate-900 px-4 py-3 text-white">
       <p className="text-xs">One teammate installs the course GitHub App on your repository.</p>
-      <span className="shrink-0 rounded-md bg-white px-2 py-1 text-[11px] font-semibold text-slate-900">Install the GitHub App</span>
+      <span className="shrink-0 rounded-md bg-white px-2 py-1 text-[11px] font-semibold text-slate-900">Install or manage</span>
     </div>
     <div className="overflow-hidden rounded-xl border border-slate-700 bg-slate-950 text-slate-100">
       <p className="border-b border-slate-800 px-4 py-3 text-sm font-semibold">Install AIAugmentedSWE</p>
@@ -185,7 +190,7 @@ const CourseHelp = () => (
       <div className="space-y-3">
         <h2 className="text-xl font-semibold">2. Install the GitHub App</h2>
         <ol className="list-decimal space-y-2 pl-5 text-sm leading-6 text-slate-700">
-          <li>On the sprint page, click the black <strong>Install the GitHub App</strong> box. The app on GitHub is named AIAugmentedSWE.</li>
+          <li>On the sprint page, click <strong>Install or manage</strong> in the black box. The app on GitHub is named AIAugmentedSWE.</li>
           <li>Choose the GitHub account that owns the team repository. <strong>Configure</strong> means it is already installed there. An arrow means it is not.</li>
           <li>Select that repository. The app can only read it, and it never changes the code.</li>
           <li>Come back to the sprint page and paste a merged pull request. One install covers every teammate who can push to that repository.</li>
@@ -194,10 +199,21 @@ const CourseHelp = () => (
       <InstallFigure />
     </section>
 
-    <section id="another-repo" className="space-y-3">
-      <h2 className="text-xl font-semibold">3. Use a different repository</h2>
+    <section id="uninstall" className="space-y-3">
+      <h2 className="text-xl font-semibold">3. Remove the app</h2>
       <ol className="list-decimal space-y-2 pl-5 text-sm leading-6 text-slate-700">
-        <li>Click <strong>Install the GitHub App</strong> again and choose the other account or repository.</li>
+        <li>On the sprint page, click <strong>Install or manage</strong>.</li>
+        <li>On GitHub, choose the account that says <strong>Configure</strong>. That means the app is installed there.</li>
+        <li>Open the installation and choose <strong>Uninstall</strong>. This removes the app from the repositories you had selected on that account.</li>
+        <li>Sign in to the course again. The sprint page looks the same, and no popup appears. The site does not check GitHub until you add or re-check a pull request.</li>
+        <li>The next <strong>Add PR</strong> or <strong>Re-check</strong> on a repository that no longer has the app opens the install window for that repository.</li>
+      </ol>
+    </section>
+
+    <section id="another-repo" className="space-y-3">
+      <h2 className="text-xl font-semibold">4. Use a different repository</h2>
+      <ol className="list-decimal space-y-2 pl-5 text-sm leading-6 text-slate-700">
+        <li>Click <strong>Install or manage</strong> again and choose the other account or repository.</li>
         <li>On the task card, click <strong>Change PR</strong>.</li>
         <li>Paste the merged pull request from the new repository and click <strong>Add PR</strong>.</li>
         <li>If that repository does not have the app, the install window opens once for that repository. Install it, then click <strong>Re-check</strong>.</li>
@@ -206,7 +222,7 @@ const CourseHelp = () => (
 
     <section id="task-file" className="grid gap-6 md:grid-cols-2 md:items-start">
       <div className="space-y-3">
-        <h2 className="text-xl font-semibold">4. Write the task file</h2>
+        <h2 className="text-xl font-semibold">5. Write the task file</h2>
         <ol className="list-decimal space-y-2 pl-5 text-sm leading-6 text-slate-700">
           <li>Create <code className="rounded bg-slate-100 px-1">docs/tasks/sprint-2/YOUR-ID.md</code>. Use the sprint number you are submitting.</li>
           <li>Put <code className="rounded bg-slate-100 px-1">id</code>, <code className="rounded bg-slate-100 px-1">story</code>, <code className="rounded bg-slate-100 px-1">sprint</code>, <code className="rounded bg-slate-100 px-1">assignee</code>, and <code className="rounded bg-slate-100 px-1">estimate_hours</code> at the top. The estimate must be at least 2.</li>
@@ -219,7 +235,7 @@ const CourseHelp = () => (
 
     <section id="pull-request" className="grid gap-6 md:grid-cols-2 md:items-center">
       <div className="space-y-3">
-        <h2 className="text-xl font-semibold">5. Open the pull request and add it here</h2>
+        <h2 className="text-xl font-semibold">6. Open the pull request and add it here</h2>
         <ol className="list-decimal space-y-2 pl-5 text-sm leading-6 text-slate-700">
           <li>From an up-to-date main branch, start <code className="rounded bg-slate-100 px-1">task/YOUR-ID</code>.</li>
           <li>Commit only the task file, tag it <code className="rounded bg-slate-100 px-1">YOUR-ID-base</code>, and push the branch and the tag before you write code.</li>
@@ -232,7 +248,7 @@ const CourseHelp = () => (
     </section>
 
     <section id="submit" className="space-y-3">
-      <h2 className="text-xl font-semibold">6. Submit the sprint</h2>
+      <h2 className="text-xl font-semibold">7. Submit the sprint</h2>
       <ol className="list-decimal space-y-2 pl-5 text-sm leading-6 text-slate-700">
         <li>Add both tasks. Each one shows Ready when the process checks pass.</li>
         <li>Click <strong>Submit Sprint 2</strong> (or 3, or 4). Both tasks lock.</li>

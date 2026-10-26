@@ -567,9 +567,9 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
                 <p className="max-w-2xl text-sm">
                   {offerInstall
                     ? `The course GitHub App cannot read ${uninstalledRepos.join(", ")}. One teammate installs it on ${installTarget}, then you can add the pull request.`
-                    : "One teammate installs the course GitHub App on each repository you submit from. A task can use a different repository than one you already added."}
+                    : "One teammate installs the course GitHub App on each repository you submit from. The same button adds it to another repository, or removes it."}
                 </p>
-                <a href={githubInstallUrl} target="_blank" rel="noreferrer" className="shrink-0 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-slate-900">Install the GitHub App</a>
+                <a href={githubInstallUrl} target="_blank" rel="noreferrer" className="shrink-0 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-slate-900">{offerInstall ? "Install the GitHub App" : "Install or manage"}</a>
               </div>
             ) : null}
             <div className="grid gap-4 md:grid-cols-2">
