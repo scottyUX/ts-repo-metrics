@@ -130,7 +130,7 @@ export function CourseSetup(props: CourseSetupProps) {
                       repository and never changes it.{" "}
                       {props.githubInstallUrl ? (
                         <a href={props.githubInstallUrl} target="_blank" rel="noreferrer" className="font-medium text-foreground underline underline-offset-2">
-                          Install the GitHub App
+                          Install or manage the GitHub App
                         </a>
                       ) : null}
                     </p>
