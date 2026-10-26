@@ -31,7 +31,7 @@ function groups(sprint: number): Group[] {
       title: "Before you code",
       items: [
         { key: "spec", title: "Write your task file", detail: <>
-          <p>Create <Code>{path}</Code> with the six fields: Title, Description, Specs, Requirements, Acceptance criteria, and Tests.</p>
+          <p>Create <Code>{path}</Code> with a title and the sections Description, Specs, Requirements, and Acceptance criteria. A Tests section is optional. The tests that count are the test files in the pull request.</p>
           <p className="mt-2">Copy the worked example so the front matter and headings match exactly. <Code>sprint:</Code> must be {sprint}, and <Code>estimate_hours</Code> must be at least 2.</p>
         </> },
         { key: "board", title: "Put it on the Scrum board", detail: <p>Add a card for the task to your team’s board, for example GitHub Projects. The app can’t see your board, so this one is up to you.</p> },
