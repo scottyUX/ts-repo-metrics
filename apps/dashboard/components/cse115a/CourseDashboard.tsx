@@ -10,6 +10,7 @@ import { runAnalyzeFromUrl } from "@/lib/runAnalyze";
 import { sprintScore, type StudentTaskGrade } from "@/lib/cse115a/gradeReview";
 import { RUBRIC } from "@/lib/cse115a/rubric";
 import { CONSENT_TEXT, CONSENT_VERSION } from "@/lib/cse115a/consent";
+import { INSTALL_PROMPT_SEEN_KEY, needsCourseInstallPrompt, repoFullNameFromPullRequest } from "@/lib/cse115a/installPrompt";
 import { oauthHashError } from "@/lib/cse115a/oauthError";
 import {
   firstOpenSprint,
@@ -173,6 +174,7 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
   const [githubLogin, setGithubLogin] = useState<string | null>(null);
   const [githubInstallUrl, setGithubInstallUrl] = useState<string | null>(null);
   const [installPromptOpen, setInstallPromptOpen] = useState(false);
+  const [uninstalledRepos, setUninstalledRepos] = useState<string[]>([]);
   const [connectingGithub, setConnectingGithub] = useState(false);
   const [githubError, setGithubError] = useState<string | null>(null);
   const [submittingAssignment, setSubmittingAssignment] = useState(false);
@@ -244,14 +246,33 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
   const assignmentSubmission = me?.assignmentSubmissions.find((item) =>
     item.course_id === course?.id && item.assignment_number === assignmentNumber);
   const locked = Boolean(assignmentSubmission);
+  const savedRepos = useMemo(() => {
+    const names = new Set<string>();
+    for (const item of me?.submissions ?? []) {
+      if (item.course_id !== course?.id) continue;
+      const repo = repoFullNameFromPullRequest(item.pr_url);
+      if (repo) names.add(repo);
+    }
+    return [...names];
+  }, [me, course]);
+  const offerInstall = Boolean(githubInstallUrl) && !locked && needsCourseInstallPrompt({ savedRepos, uninstalledRepos });
   useEffect(() => {
-    if (preview || !githubInstallUrl || locked || submissions.length >= 2) return;
-    if (window.sessionStorage.getItem("cse115a-github-app-install-seen") === "1") return;
+    if (preview || !offerInstall || savedRepos.length > 0) return;
+    if (window.sessionStorage.getItem(INSTALL_PROMPT_SEEN_KEY) === "1") return;
     setInstallPromptOpen(true);
-  }, [preview, githubInstallUrl, locked, submissions.length]);
+  }, [preview, offerInstall, savedRepos.length]);
   const handleDismissInstallPrompt = () => {
-    window.sessionStorage.setItem("cse115a-github-app-install-seen", "1");
+    window.sessionStorage.setItem(INSTALL_PROMPT_SEEN_KEY, "1");
     setInstallPromptOpen(false);
+  };
+  const rememberInstallResult = (url: string, installed: boolean) => {
+    const repo = repoFullNameFromPullRequest(url);
+    if (!repo) return;
+    setUninstalledRepos((previous) => {
+      if (installed) return previous.includes(repo) ? previous.filter((item) => item !== repo) : previous;
+      return previous.includes(repo) ? previous : [...previous, repo];
+    });
+    if (!installed) setInstallPromptOpen(true);
   };
   const releasedGrades = assignmentSubmission?.status === "released"
     ? (me?.grades ?? []).filter((grade) => grade.assignmentSubmissionId === assignmentSubmission.id) : [];
@@ -367,8 +388,12 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
         method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include",
         body: JSON.stringify({ courseSlug: course.slug, slot, prUrl }),
       });
-      const imported = await jsonResponse<{ submission: Submission }>(response);
-      if (!response.ok) throw new Error(imported.error ?? "Could not import the task spec.");
+      const imported = await jsonResponse<{ submission: Submission; code?: string }>(response);
+      if (!response.ok) {
+        if (imported.code === "github_app_not_installed") rememberInstallResult(prUrl, false);
+        throw new Error(imported.error ?? "Could not import the task spec.");
+      }
+      rememberInstallResult(imported.submission.pr_url, true);
       setChanging((previous) => ({ ...previous, [slot]: false }));
       setPrInputs((previous) => ({ ...previous, [slot]: "" }));
       // Show the saved PR now; the analysis below takes about a minute.
@@ -551,7 +576,7 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
                 </div>
               </section>
             ) : null}
-            {githubInstallUrl && !locked ? (
+            {offerInstall && githubInstallUrl ? (
               <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-900 bg-slate-900 px-5 py-4 text-white">
                 <p className="text-sm">One teammate installs the course GitHub App on your repository. Then anyone who can push can add a pull request.</p>
                 <a href={githubInstallUrl} target="_blank" rel="noreferrer" className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-slate-900">Install the GitHub App</a>
