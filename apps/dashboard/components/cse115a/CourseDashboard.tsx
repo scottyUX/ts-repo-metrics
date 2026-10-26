@@ -562,16 +562,15 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
                 </div>
               </section>
             ) : null}
-            {offerInstall && githubInstallUrl ? (
+            {githubInstallUrl && !locked ? (
               <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-900 bg-slate-900 px-5 py-4 text-white">
-                <p className="text-sm">The course GitHub App cannot read {uninstalledRepos.join(", ")}. One teammate installs it on {installTarget}, then you can add the pull request.</p>
-                <a href={githubInstallUrl} target="_blank" rel="noreferrer" className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-slate-900">Install the GitHub App</a>
+                <p className="max-w-2xl text-sm">
+                  {offerInstall
+                    ? `The course GitHub App cannot read ${uninstalledRepos.join(", ")}. One teammate installs it on ${installTarget}, then you can add the pull request.`
+                    : "One teammate installs the course GitHub App on each repository you submit from. A task can use a different repository than one you already added."}
+                </p>
+                <a href={githubInstallUrl} target="_blank" rel="noreferrer" className="shrink-0 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-slate-900">Install the GitHub App</a>
               </div>
-            ) : githubInstallUrl && !locked ? (
-              <p className="text-sm text-slate-600">
-                One teammate installs the course GitHub App on each repository you submit from. A task can use a different repository than one you already added.{" "}
-                <a href={githubInstallUrl} target="_blank" rel="noreferrer" className="font-medium text-slate-900 underline">Install the GitHub App</a>
-              </p>
             ) : null}
             <div className="grid gap-4 md:grid-cols-2">
               {[1, 2].map((slot) => {
