@@ -179,7 +179,7 @@ Consider another bump so the two are distinguishable.
 |---|---|
 | `research/cohort_regen/reports/*.json` | the six-repo cohort — CsLife, Lens, SlugSync, VeriFi, alexandria, wayfinder |
 | `research/cohort_regen/reports/self_ts-repo-metrics.json` | self-analysis |
-| `research/cohort_regen/batch_output/SlugSync.json` | batch-mode output |
+| `research/cohort_regen/batch_output/SlugSync.json` | batch-mode output
 | `report.json`, `reports/ts-repo-metrics.json` | root self-analysis reports |
 | `data/analyses_rows.csv` | dashboard data (85 MB) |
 | `research/datasets/samples/post_ai/*.json` (4), `pre_ai/*.json` (4) | pre/post-AI sample reports |
