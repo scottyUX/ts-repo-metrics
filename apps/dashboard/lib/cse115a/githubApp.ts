@@ -5,8 +5,8 @@ import { githubReader, type GitHubReader } from "@/lib/cse115a/githubClient";
 
 // Course repository access through the course's GitHub App. Each team installs the app on its own
 // repository with read-only permissions; the server reads that repository with a short-lived
-// installation token. Students only link their GitHub account to prove who they are, and may read
-// a repository only when that account can push to it. No student GitHub token is stored.
+// installation token. Students link their GitHub account so the site knows which pull requests are
+// theirs; any linked student may read a repository the app is installed on. No student GitHub token is stored.
 
 const API = "https://api.github.com";
 const HEADERS = { Accept: "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28" };
@@ -35,7 +35,7 @@ export function githubAppJwt(config: GitHubAppConfig, now = Date.now()): string 
   return `${unsigned}.${createSign("RSA-SHA256").update(unsigned).sign(config.privateKey, "base64url")}`;
 }
 
-export type CourseRepoAccessCode = "github_app_unconfigured" | "github_not_linked" | "github_app_not_installed" | "github_not_collaborator";
+export type CourseRepoAccessCode = "github_app_unconfigured" | "github_not_linked" | "github_app_not_installed";
 
 /** A problem the student can fix (or report), with a message that says how. */
 export class CourseRepoAccessError extends Error {
@@ -90,31 +90,18 @@ export async function repoInstallationToken(
 }
 
 /**
- * An installation token for the repository, after checking the student's linked GitHub account can push to it.
- * Write access is the test: every team member needs it to push task branches, while on a public repository
- * anyone can read. The permission endpoint counts organization owners and team members; GitHub's plain
- * collaborator check, with an installation token, only counts people added to the repository directly.
+ * An installation token for the repository, for a student with a linked GitHub account. Teammates don't need
+ * write access: installing the app on the repository is what lets the site read it.
  */
 export async function courseRepoToken(
   githubLogin: string | null, owner: string, repo: string,
   config: GitHubAppConfig | null = githubAppConfig(), fetchImpl: Fetch = fetch,
 ): Promise<string> {
-  if (!githubLogin) throw new CourseRepoAccessError("Connect GitHub first, so we can check you are on this repository’s team.", "github_not_linked");
-  const token = await repoInstallationToken(owner, repo, config, fetchImpl);
-  const response = await fetchImpl(
-    `${API}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/collaborators/${encodeURIComponent(githubLogin)}/permission`,
-    { headers: { ...HEADERS, Authorization: `Bearer ${token}` }, cache: "no-store" },
-  );
-  if (!response.ok && response.status !== 404) throw new Error(`GitHub could not check your access to ${owner}/${repo} (${response.status}).`);
-  const permission = response.ok ? (await response.json() as { permission?: string }).permission : null;
-  if (permission === "admin" || permission === "write") return token;
-  throw new CourseRepoAccessError(
-    `Your GitHub account @${githubLogin} cannot push to ${owner}/${repo}. Submit pull requests from your own team’s repository, and ask its owner to give you write access.`,
-    "github_not_collaborator",
-  );
+  if (!githubLogin) throw new CourseRepoAccessError("Connect GitHub first, so we know which pull requests are yours.", "github_not_linked");
+  return repoInstallationToken(owner, repo, config, fetchImpl);
 }
 
-/** A GitHub reader for `/repos/{owner}/{repo}/...` paths that uses the right repository's token, checking access once per repository. */
+/** A GitHub reader for `/repos/{owner}/{repo}/...` paths that uses the right repository's token, looked up once per repository. */
 export function courseRepoReader(githubLogin: string | null, config: GitHubAppConfig | null = githubAppConfig(), fetchImpl: Fetch = fetch): GitHubReader {
   const tokens = new Map<string, Promise<string>>();
   return githubReader((path) => {

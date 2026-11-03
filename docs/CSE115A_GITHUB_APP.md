@@ -15,13 +15,10 @@ How it works (`apps/dashboard/lib/cse115a/githubApp.ts`):
 2. One member of each team installs the app on the team repository.
 3. When a student adds a pull request, submits a sprint, opens a PR's commits, or runs a course analysis, the server:
    - looks up the app's installation on that repository (`GET /repos/{owner}/{repo}/installation`);
-   - checks the student's linked account has **write** access (`GET /repos/{owner}/{repo}/collaborators/{login}/permission` returns `admin` or `write`);
+   - checks the student has linked a GitHub account;
    - reads the repository with an installation token scoped to that one repository and capped at read access for contents, pull requests, checks, and commit statuses.
 
-Two details behind the access check:
-
-- **Why write access:** on a public repository, everyone has read access, so read access doesn't tell team members apart. Every team member needs write access anyway, to push task branches.
-- **Why not the plain collaborator check:** with an installation token, `GET /repos/{owner}/{repo}/collaborators/{login}` only counts people added to the repository directly. It returns 404 for organization owners and team members, which is why the code asks for the permission instead.
+Students don't need write access to the repository. Installing the app on it is what lets the site read it, so a teammate with read access, or none, can still add the team's pull requests. The site records whether the submitting student authored each pull request (`prAuthoredByStudent`) for the instructor to review.
 
 When a check fails, the student sees an error with a code they can act on:
 
@@ -29,7 +26,6 @@ When a check fails, the student sees an error with a code they can act on:
 | --- | --- |
 | `github_not_linked` | The student hasn't connected GitHub. |
 | `github_app_not_installed` | The app isn't installed on that repository; the message includes the install link. |
-| `github_not_collaborator` | The student's GitHub account can't push to that repository. |
 | `github_app_unconfigured` | The `GITHUB_APP_*` settings are missing on the server. |
 
 ## 1. Create the GitHub App
@@ -78,5 +74,5 @@ When `CSE115A_SITE=true`, the auth callback does not store GitHub user tokens, a
 One team member who manages the repository opens `https://github.com/apps/<slug>/installations/new`, picks the account that owns the team repository, chooses **Only select repositories**, selects it, and clicks **Install**.
 
 - **Organization repositories:** a student who isn't an owner sees **Request** instead of **Install**. An organization owner approves it under the organization's **Settings → GitHub Apps**.
-- **Write access:** every student who submits needs write access to the team repository, through a collaborator invite or an organization team.
+- **Who can install:** the owner of the account that owns the repository. On an organization, an owner (or a repository admin, when the organization allows it); other members can only send a request.
 - **Forks:** pull requests must come from the team repository that has the app installed. The app can't read forks it isn't installed on.
