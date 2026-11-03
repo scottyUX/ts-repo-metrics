@@ -20,7 +20,7 @@ const FAQS = [
   },
   {
     q: "Does every teammate install the GitHub App?",
-    a: "No. One teammate installs AIAugmentedSWE on the team repository. After that, anyone with write access can add a pull request. Each person still connects their own GitHub account so the site knows which pull requests are theirs.",
+    a: "No. One teammate installs AIAugmentedSWE on the team repository. After that, every teammate can add pull requests from that repository. Each person still connects their own GitHub account so the site knows which pull requests are theirs.",
   },
   {
     q: "How do I uninstall the app?",
@@ -37,10 +37,6 @@ const FAQS = [
   {
     q: "I got a 404.",
     a: "A red message that says GitHub could not load this pull request (404) means GitHub could not see that pull request or a file in it. Check the URL, and check that the app is installed on that repository. When the app is missing, the page says so in words and does not show the number 404.",
-  },
-  {
-    q: "The page says my GitHub account cannot push.",
-    a: "The account you connected needs write access on that repository. Ask the repository owner to add you, then click Re-check. A personal install of the app does not grant you write access.",
   },
   {
     q: "Do I need a Tests section in the task file?",
@@ -193,7 +189,7 @@ const CourseHelp = () => (
           <li>On the sprint page, click <strong>Install or manage</strong> in the black box. The app on GitHub is named AIAugmentedSWE.</li>
           <li>Choose the GitHub account that owns the team repository. <strong>Configure</strong> means it is already installed there. An arrow means it is not.</li>
           <li>Select that repository. The app can only read it, and it never changes the code.</li>
-          <li>Come back to the sprint page and paste a merged pull request. One install covers every teammate who can push to that repository.</li>
+          <li>Come back to the sprint page and paste a merged pull request. One install covers every teammate.</li>
         </ol>
       </div>
       <InstallFigure />

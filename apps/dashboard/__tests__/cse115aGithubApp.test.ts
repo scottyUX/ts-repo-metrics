@@ -89,32 +89,23 @@ describe("repository access", () => {
     });
   });
 
-  it("only gives a token to accounts that can push to the repository", async () => {
-    const { fetchImpl } = fakeGitHub({
+  it("gives any linked account a token, without checking write access", async () => {
+    const { fetchImpl, calls } = fakeGitHub({
       "GET /repos/team/project/installation": { status: 200, body: { id: 5 } },
       "POST /app/installations/5/access_tokens": { status: 201, body: { token: "ghs_project", expires_at: inOneHour() } },
-      "GET /repos/team/project/collaborators/member/permission": { status: 200, body: { permission: "write" } },
-      "GET /repos/team/project/collaborators/owner/permission": { status: 200, body: { permission: "admin" } },
-      // Anyone can read a public repository, so read access does not make someone a team member.
-      "GET /repos/team/project/collaborators/reader/permission": { status: 200, body: { permission: "read" } },
     });
-    expect(await courseRepoToken("member", "team", "project", config, fetchImpl)).toBe("ghs_project");
-    expect(await courseRepoToken("owner", "team", "project", config, fetchImpl)).toBe("ghs_project");
-    const reader = await courseRepoToken("reader", "team", "project", config, fetchImpl).catch((caught) => caught);
-    expect(reader.code).toBe("github_not_collaborator");
-    const outsider = await courseRepoToken("outsider", "team", "project", config, fetchImpl).catch((caught) => caught);
-    expect(outsider.code).toBe("github_not_collaborator");
+    expect(await courseRepoToken("reader", "team", "project", config, fetchImpl)).toBe("ghs_project");
+    expect(calls.filter((call) => call.url.includes("/collaborators/"))).toHaveLength(0);
     const unlinked = await courseRepoToken(null, "team", "project", config, fetchImpl).catch((caught) => caught);
     expect(unlinked.code).toBe("github_not_linked");
     const unconfigured = await courseRepoToken("member", "team", "project", null, fetchImpl).catch((caught) => caught);
     expect(unconfigured.code).toBe("github_app_unconfigured");
   });
 
-  it("reads each repository with its own token, checking access once", async () => {
+  it("reads each repository with its own token, looked up once", async () => {
     const { fetchImpl, calls } = fakeGitHub({
       "GET /repos/team/reader/installation": { status: 200, body: { id: 9 } },
       "POST /app/installations/9/access_tokens": { status: 201, body: { token: "ghs_reader", expires_at: inOneHour() } },
-      "GET /repos/team/reader/collaborators/member/permission": { status: 200, body: { permission: "write" } },
       "GET /repos/team/reader/pulls/1": { status: 200, body: { number: 1 } },
       "GET /repos/team/reader/pulls/2": { status: 200, body: { number: 2 } },
     });
@@ -123,6 +114,6 @@ describe("repository access", () => {
     expect(await gh.json("/repos/team/reader/pulls/2")).toEqual({ number: 2 });
     const reads = calls.filter((call) => call.url.includes("/pulls/"));
     expect(reads.map((call) => call.auth)).toEqual(["Bearer ghs_reader", "Bearer ghs_reader"]);
-    expect(calls.filter((call) => call.url.includes("/collaborators/"))).toHaveLength(1);
+    expect(calls.filter((call) => call.url.endsWith("/installation"))).toHaveLength(1);
   });
 });
