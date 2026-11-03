@@ -566,8 +566,8 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
               <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-900 bg-slate-900 px-5 py-4 text-white">
                 <p className="max-w-2xl text-sm">
                   {offerInstall
-                    ? `The course GitHub App cannot read ${uninstalledRepos.join(", ")}. One teammate installs it on ${installTarget}, then you can add the pull request.`
-                    : "One teammate installs the course GitHub App on each repository you submit from. The same button adds it to another repository, or removes it."}
+                    ? `The course GitHub App cannot read ${uninstalledRepos.join(", ")}. Ask the repository owner (or an owner of its organization) to install it on ${installTarget}, then add the pull request.`
+                    : "The repository owner installs the course GitHub App once, on the team repository; teammates don't install anything. The same button adds it to another repository, or removes it."}
                 </p>
                 <a href={githubInstallUrl} target="_blank" rel="noreferrer" className="shrink-0 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-slate-900">{offerInstall ? "Install the GitHub App" : "Install or manage"}</a>
               </div>
@@ -678,7 +678,7 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
                 <DialogHeader>
                   <DialogTitle>Install the course GitHub App</DialogTitle>
                   <DialogDescription>
-                    The course GitHub App cannot read {uninstalledRepos.join(", ") || "this repository"}. One teammate installs it on {installTarget}. It can only read the repository, and it never changes the code.
+                    The course GitHub App cannot read {uninstalledRepos.join(", ") || "this repository"}. Ask the repository owner (or an owner of its organization) to install it on {installTarget}. Only they can. It can only read the repository, and it never changes the code.
                   </DialogDescription>
                 </DialogHeader>
                 <DialogFooter>

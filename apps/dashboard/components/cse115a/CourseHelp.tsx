@@ -20,7 +20,7 @@ const FAQS = [
   },
   {
     q: "Does every teammate install the GitHub App?",
-    a: "No. One teammate installs AIAugmentedSWE on the team repository. After that, every teammate can add pull requests from that repository. Each person still connects their own GitHub account so the site knows which pull requests are theirs.",
+    a: "No. Only the repository owner installs AIAugmentedSWE, once, on the team repository. If the repository belongs to an organization, an organization owner installs it or approves the request. After that, every teammate can add pull requests from that repository. Each person still connects their own GitHub account so the site knows which pull requests are theirs.",
   },
   {
     q: "How do I uninstall the app?",
@@ -111,7 +111,7 @@ const SignInFigure = () => (
 const InstallFigure = () => (
   <div className="space-y-3" aria-hidden>
     <div className="flex items-center justify-between gap-3 rounded-xl bg-slate-900 px-4 py-3 text-white">
-      <p className="text-xs">One teammate installs the course GitHub App on your repository.</p>
+      <p className="text-xs">The repository owner installs the course GitHub App on your repository.</p>
       <span className="shrink-0 rounded-md bg-white px-2 py-1 text-[11px] font-semibold text-slate-900">Install or manage</span>
     </div>
     <div className="overflow-hidden rounded-xl border border-slate-700 bg-slate-950 text-slate-100">
@@ -186,6 +186,7 @@ const CourseHelp = () => (
       <div className="space-y-3">
         <h2 className="text-xl font-semibold">2. Install the GitHub App</h2>
         <ol className="list-decimal space-y-2 pl-5 text-sm leading-6 text-slate-700">
+          <li>Only the repository owner does this, once per team. If the repository belongs to an organization and you see <strong>Request</strong>, an organization owner approves it.</li>
           <li>On the sprint page, click <strong>Install or manage</strong> in the black box. The app on GitHub is named AIAugmentedSWE.</li>
           <li>Choose the GitHub account that owns the team repository. <strong>Configure</strong> means it is already installed there. An arrow means it is not.</li>
           <li>Select that repository. The app can only read it, and it never changes the code.</li>
