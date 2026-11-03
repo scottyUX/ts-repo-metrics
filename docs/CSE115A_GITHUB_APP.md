@@ -12,7 +12,7 @@ The course site reads each team's repository through a GitHub App instead of a G
 How it works (`apps/dashboard/lib/cse115a/githubApp.ts`):
 
 1. **Connect GitHub** on the dashboard now only proves the student's GitHub username. Supabase's GitHub provider uses the app's OAuth credentials.
-2. One member of each team installs the app on the team repository.
+2. The owner of each team repository (or an owner of its organization) installs the app on it.
 3. When a student adds a pull request, submits a sprint, opens a PR's commits, or runs a course analysis, the server:
    - looks up the app's installation on that repository (`GET /repos/{owner}/{repo}/installation`);
    - checks the student has linked a GitHub account;
@@ -69,9 +69,9 @@ When `CSE115A_SITE=true`, the auth callback does not store GitHub user tokens, a
 
 **Check:** after signing in, each pull request field on the dashboard shows an **Install or check it** link. If it's missing, `GITHUB_APP_SLUG` isn't set.
 
-## 4. Students install the app (once per team)
+## 4. The repository owner installs the app (once per team)
 
-One team member who manages the repository opens `https://github.com/apps/<slug>/installations/new`, picks the account that owns the team repository, chooses **Only select repositories**, selects it, and clicks **Install**.
+The repository owner (for an organization repository, an organization owner) opens `https://github.com/apps/<slug>/installations/new`, picks the account that owns the team repository, chooses **Only select repositories**, selects it, and clicks **Install**.
 
 - **Organization repositories:** a student who isn't an owner sees **Request** instead of **Install**. An organization owner approves it under the organization's **Settings → GitHub Apps**.
 - **Who can install:** the owner of the account that owns the repository. On an organization, an owner (or a repository admin, when the organization allows it); other members can only send a request.

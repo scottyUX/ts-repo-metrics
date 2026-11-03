@@ -126,7 +126,7 @@ export function CourseSetup(props: CourseSetupProps) {
                       </p>
                     ) : null}
                     <p className="text-xs">
-                      Your team also installs the course GitHub App on its repository, once per team. It can only read that one
+                      The owner of your team repository also installs the course GitHub App on it, once per team. It can only read that one
                       repository and never changes it.{" "}
                       {props.githubInstallUrl ? (
                         <a href={props.githubInstallUrl} target="_blank" rel="noreferrer" className="font-medium text-foreground underline underline-offset-2">
