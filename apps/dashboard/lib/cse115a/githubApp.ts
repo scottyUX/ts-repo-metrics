@@ -67,7 +67,7 @@ export async function repoInstallationToken(
   const found = await fetchImpl(`${API}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/installation`, { headers: auth, cache: "no-store" });
   if (found.status === 404) {
     throw new CourseRepoAccessError(
-      `The course GitHub App is not installed on ${owner}/${repo}. Install it on your team’s repository: ${githubAppInstallUrl(config)}`,
+      `The course GitHub App is not installed on ${owner}/${repo}. Ask the repository owner (or an owner of its organization) to install it: ${githubAppInstallUrl(config)}`,
       "github_app_not_installed",
     );
   }
