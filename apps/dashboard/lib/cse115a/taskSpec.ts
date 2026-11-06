@@ -1,3 +1,11 @@
+/** A task ID: letters and digits in two or more parts joined by "-" or "." (US-1-T-1, US-2.3-T-2). */
+export const TASK_ID_PATTERN = "[A-Za-z0-9]+(?:[-.][A-Za-z0-9]+)+";
+
+/** Whether a path is a task file for this sprint: docs/tasks/sprint-N/<task ID>.md. */
+export function isTaskFilePath(path: string, sprint: number): boolean {
+  return new RegExp(`^docs/tasks/sprint-${sprint}/${TASK_ID_PATTERN}\\.md$`, "i").test(path);
+}
+
 export type TaskSpec = {
   id: string;
   story: string;
@@ -40,7 +48,7 @@ export function parseTaskSpec(markdown: string): TaskSpec {
   const sprint = Number(fields.get("sprint"));
   const assignee = fields.get("assignee") ?? "";
   const estimateHours = Number(fields.get("estimate_hours"));
-  if (!/^[A-Za-z0-9]+(?:-[A-Za-z0-9]+)+$/.test(id) || !story || !Number.isInteger(sprint) || sprint < 1 || !assignee || !Number.isFinite(estimateHours)) {
+  if (!new RegExp(`^${TASK_ID_PATTERN}$`).test(id) || !story || !Number.isInteger(sprint) || sprint < 1 || !assignee || !Number.isFinite(estimateHours)) {
     throw new Error("The task file has missing or invalid id, story, sprint, assignee, or estimate_hours fields.");
   }
   return {
