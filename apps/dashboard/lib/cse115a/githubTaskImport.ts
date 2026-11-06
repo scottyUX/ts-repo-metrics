@@ -2,7 +2,7 @@ import "server-only";
 import { splitPatch } from "@/lib/cse115a/diff";
 import { summarizeCi, type TaskFacts } from "@/lib/cse115a/processChecklist";
 import { readCommitChecks } from "@/lib/cse115a/submissionSnapshot";
-import { parsePullRequestUrl, parseTaskSpec, type TaskSpec } from "@/lib/cse115a/taskSpec";
+import { isTaskFilePath, parsePullRequestUrl, parseTaskSpec, type TaskSpec } from "@/lib/cse115a/taskSpec";
 import { tagCommitSha, type GitHubReader } from "@/lib/cse115a/githubClient";
 
 type GitHubPull = {
@@ -47,7 +47,7 @@ export async function importTaskFromPullRequest(
       `/repos/${owner}/${repo}/pulls/${number}/files?per_page=100&page=${page}`,
     );
     for (const file of files ?? []) {
-      if (new RegExp(`^docs/tasks/sprint-${assignmentNumber}/[A-Za-z0-9_-]+\\.md$`, "i").test(file.filename)) {
+      if (isTaskFilePath(file.filename, assignmentNumber)) {
         candidates.push(file);
       }
     }
