@@ -8,6 +8,7 @@ import { spawn } from "node:child_process";
 import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { signals, type Signals } from "@/lib/cse115a/benchmark/validation/census";
 import { detectEnvironment } from "@/lib/cse115a/benchmark/validation/environment";
 import { DockerSuiteRunner } from "@/lib/cse115a/benchmark/validation/runner";
 import { filesInPatch, modifiedAcrossFiles, unsupportedResult, validateTask, type TaskRow, type ValidationResult } from "@/lib/cse115a/benchmark/validation/validateTask";
@@ -156,9 +157,18 @@ export async function validateRow(options: ValidateRowOptions): Promise<Validati
     const testFiles = filesInPatch(row.test_patch);
     // The environment comes from the finished tree: the student's test script and dependencies
     // usually arrive with the fix, since package.json is not a test file.
-    const env = await withPatchedWorktree(repoDir, row.base_commit, [row.test_patch, row.patch], (dir) =>
-      detectEnvironment({ testFiles, read: (path) => fileIn(dir, path) }));
-    if (!env.supported) return unsupportedResult(row, env);
+    const { env, needs } = await withPatchedWorktree(repoDir, row.base_commit, [row.test_patch, row.patch], async (dir) => {
+      const env = await detectEnvironment({ testFiles, read: (path) => fileIn(dir, path) });
+      const packageDir = env.supported ? env.packageDir : "";
+      const workflowNames = (await run("git", ["ls-files", ".github/workflows"], dir).catch(() => "")).split("\n").filter(Boolean);
+      const needs: Signals = signals({
+        packageJson: await fileIn(dir, packageDir ? `${packageDir}/package.json` : "package.json"),
+        workflows: (await Promise.all(workflowNames.map((n) => fileIn(dir, n)))).join("\n"),
+        testSources: (await Promise.all(testFiles.map((f) => fileIn(dir, f)))).join("\n"),
+      });
+      return { env, needs };
+    });
+    if (!env.supported) return { ...unsupportedResult(row, env), signals: needs };
 
     const baseSources = new Map<string, string | null>();
     for (const file of testFiles) baseSources.set(file, await fileAt(repoDir, row.base_commit, file));
@@ -173,6 +183,11 @@ export async function validateRow(options: ValidateRowOptions): Promise<Validati
     log(`Environment: ${env.packageManager} + ${env.runners.join("+")} in ${env.packageDir || "."}, image ${env.image}. Running three states, twice each; logs in ${options.logDir}`);
     const { runs, ...result } = await validateTask({ row, repoDir, env, modified, runner: new DockerSuiteRunner(options.logDir, options.cacheDir), timeoutSeconds: options.timeoutSeconds });
     void runs;
+    result.signals = needs;
+    // A row that proved nothing in a repository whose tests want a service: say so, instead of a bare reason.
+    if (result.validation_status === "rejected" && result.reason === "no_fail_to_pass" && needs.database.length > 0) {
+      result.detail = `no test passed in any state and the tests appear to need a database (${needs.database.join(", ")}); database services are not supported yet`;
+    }
     return result;
   } finally {
     await resetCheckout(repoDir, row.base_commit).catch(() => undefined);

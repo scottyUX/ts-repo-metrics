@@ -1,0 +1,56 @@
+// Writes a batch's verdicts to Supabase with the service-role key: the unattended version of
+// writeback.sql, for the VM. Run from the repo root:
+//
+//   SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... npx tsx --tsconfig apps/dashboard/tsconfig.json apps/dashboard/scripts/writebackValidation.ts --batch DIR [--only id,id] [--dry-run]
+//
+// Reads DIR/results/*.json. Validated rows get verified FAIL_TO_PASS (with ABSENT_TO_PASS folded in),
+// PASS_TO_PASS, image (digest when known), eval_script, log_parser and validation_status = validated.
+// Rejected rows get validation_status = rejected and a validation_reason:<reason> flag. env_error rows
+// are skipped (they stay candidate). --dry-run prints the plan and touches nothing.
+
+import { readdir, readFile } from "node:fs/promises";
+import { join, resolve } from "node:path";
+import { applyWriteback, writebackPlan, type WritebackClient } from "@/lib/cse115a/benchmark/validation/writeback";
+import type { ValidationResult } from "@/lib/cse115a/benchmark/validation/validateTask";
+
+function parseArgs(argv: string[]) {
+  const args = { batch: "", only: [] as string[], dryRun: false };
+  for (let i = 0; i < argv.length; i++) {
+    const arg = argv[i];
+    if (arg === "--batch") args.batch = argv[++i] ?? "";
+    else if (arg === "--only") args.only = (argv[++i] ?? "").split(",").map((s) => s.trim()).filter(Boolean);
+    else if (arg === "--dry-run") args.dryRun = true;
+    else throw new Error(`Unexpected argument: ${arg}`);
+  }
+  if (!args.batch) throw new Error("Usage: writebackValidation.ts --batch DIR [--only id,id] [--dry-run]");
+  return args;
+}
+
+async function main() {
+  const args = parseArgs(process.argv.slice(2));
+  const resultsDir = join(resolve(args.batch), "results");
+  const names = (await readdir(resultsDir)).filter((n) => n.endsWith(".json")).sort();
+  const results: ValidationResult[] = [];
+  for (const name of names) {
+    const r = JSON.parse(await readFile(join(resultsDir, name), "utf8")) as ValidationResult;
+    if (args.only.length === 0 || args.only.includes(r.instance_id)) results.push(r);
+  }
+  const ops = writebackPlan(results);
+  console.error(`${results.length} result(s), ${ops.length} to write (${results.length - ops.length} env_error skipped)`);
+  if (args.dryRun) {
+    for (const op of ops) console.log(`${op.instance_id}: ${op.validation_status}${op.reasonFlag ? ` (${op.reasonFlag})` : ""}${op.task ? ` F2P=${op.task.FAIL_TO_PASS.length} P2P=${op.task.PASS_TO_PASS.length} image=${op.task.image}` : ""}`);
+    console.error("Dry run: nothing written.");
+    return;
+  }
+  const url = process.env.SUPABASE_URL?.trim() || process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
+  if (!url || !key) throw new Error("Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY (or use --dry-run).");
+  const { createClient } = await import("@supabase/supabase-js");
+  const client = createClient(url, key, { auth: { persistSession: false } }) as unknown as WritebackClient;
+  for (const line of await applyWriteback(client, ops)) console.log(line);
+}
+
+main().catch((error) => {
+  console.error(error instanceof Error ? error.message : String(error));
+  process.exit(1);
+});

@@ -89,6 +89,8 @@ export type ValidationResult = {
   /** Set by the batch: the exact image bytes (`node:24-bookworm@sha256:…`) and the snapshot bundle path. */
   image_digest?: string | null;
   snapshot_bundle?: string | null;
+  /** What the repository's tests seem to need beyond Node (from the census rules); informational. */
+  signals?: { database: string[]; browser: string[]; otherRunners: string[] };
 };
 
 /** The result for a repository the validator cannot run (bun, jest, no package.json). */
