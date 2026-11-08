@@ -53,7 +53,9 @@ export type ValidationResult = {
   instance_id: string;
   image: string | null;
   eval_script: string | null;
-  log_parser: "vitest-json" | null;
+  /** Which report formats the runs produced. */
+  log_parser: string | null;
+  package_dir: string | null;
   test_files: string[];
   FAIL_TO_PASS: string[];
   ABSENT_TO_PASS: string[];
@@ -77,7 +79,7 @@ export type ValidationResult = {
 export function unsupportedResult(row: TaskRow, env: Unsupported): ValidationResult {
   return {
     instance_id: row.instance_id,
-    image: null, eval_script: null, log_parser: null,
+    image: null, eval_script: null, log_parser: null, package_dir: null,
     test_files: filesInPatch(row.test_patch),
     FAIL_TO_PASS: [], ABSENT_TO_PASS: [], PASS_TO_PASS: [], FAIL_TO_FAIL: [],
     regressions: [], regression_skips: [], flaky: [], skipped: [], judged_from_base: [],
@@ -104,8 +106,11 @@ export async function validateTask(input: ValidateInput): Promise<ValidationResu
     baseCommit: row.base_commit,
     patch: row.patch,
     testPatch: row.test_patch,
+    installDir: env.installDir,
     installCommand: env.installCommand,
-    testCommand: env.testCommand,
+    packageDir: env.packageDir,
+    testSteps: env.testSteps.map((step) => step.command),
+    env: env.env,
     image: env.image,
     timeoutSeconds: input.timeoutSeconds,
   };
@@ -117,7 +122,8 @@ export async function validateTask(input: ValidateInput): Promise<ValidationResu
     instance_id: row.instance_id,
     image: env.image,
     eval_script: containerScript(plan, "r2"),
-    log_parser: "vitest-json",
+    log_parser: env.runners.map((r) => (r === "vitest" ? "vitest-json" : "node-test-json")).join("+"),
+    package_dir: env.packageDir,
     test_files: filesInPatch(row.test_patch),
     FAIL_TO_PASS: comparison.failToPass,
     ABSENT_TO_PASS: comparison.absentToPass,

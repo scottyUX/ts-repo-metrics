@@ -9,15 +9,13 @@
 // so the course App's installation token can be used. Docker must be running.
 
 import { spawn } from "node:child_process";
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
-import { detectEnvironment, type RepoFiles } from "@/lib/cse115a/benchmark/validation/environment";
+import { detectEnvironment } from "@/lib/cse115a/benchmark/validation/environment";
 import { DockerSuiteRunner } from "@/lib/cse115a/benchmark/validation/runner";
 import { filesInPatch, modifiedAcrossFiles, unsupportedResult, validateTask, type TaskRow } from "@/lib/cse115a/benchmark/validation/validateTask";
 import { githubAppConfig, repoInstallationToken } from "@/lib/cse115a/githubAppToken";
-
-const LOCKFILES = ["package-lock.json", "pnpm-lock.yaml", "yarn.lock", "bun.lockb", "bun.lock"] as const;
 
 function parseArgs(argv: string[]) {
   const args = { rowPath: "", repoDir: "", out: "", timeoutSeconds: 900 };
@@ -80,27 +78,31 @@ async function ensureCommit(repoDir: string, commit: string): Promise<void> {
   }
 }
 
-/** The test files as they are at base + test_patch, read from a throwaway worktree. */
-async function patchedSources(repoDir: string, base: string, testPatch: string, files: string[]): Promise<Map<string, string | null>> {
+/** Runs `fn` with a throwaway worktree at `base` plus the given patches applied in order. */
+async function withPatchedWorktree<T>(repoDir: string, base: string, patches: string[], fn: (dir: string) => Promise<T>): Promise<T> {
   const worktree = await mkdtemp(join(tmpdir(), "hecate-patched-"));
-  const patchFile = join(worktree, "..", `hecate-test-${Date.now()}.diff`);
-  const sources = new Map<string, string | null>();
+  const patchFile = join(tmpdir(), `hecate-patch-${process.pid}-${Date.now()}.diff`);
   try {
     await run("git", ["worktree", "add", "--detach", "--quiet", worktree, base], repoDir);
-    await writeFile(patchFile, testPatch);
-    await run("git", ["apply", "--whitespace=nowarn", patchFile], worktree);
-    for (const file of files) {
-      try {
-        sources.set(file, await readFile(join(worktree, file), "utf8"));
-      } catch {
-        sources.set(file, null);
-      }
+    for (const patch of patches) {
+      if (!patch.trim()) continue;
+      await writeFile(patchFile, patch);
+      await run("git", ["apply", "--whitespace=nowarn", patchFile], worktree);
     }
+    return await fn(worktree);
   } finally {
     await run("git", ["worktree", "remove", "--force", worktree], repoDir).catch(() => rm(worktree, { recursive: true, force: true }));
     await rm(patchFile, { force: true });
   }
-  return sources;
+}
+
+/** Reads a file under `dir`, or null when it does not exist. */
+async function fileIn(dir: string, path: string): Promise<string | null> {
+  try {
+    return await readFile(join(dir, path), "utf8");
+  } catch {
+    return null;
+  }
 }
 
 async function main() {
@@ -125,23 +127,28 @@ async function main() {
 }
 
 async function validate(args: ReturnType<typeof parseArgs>, row: TaskRow, repoDir: string) {
-  const files: RepoFiles = { packageJson: await fileAt(repoDir, row.base_commit, "package.json"), lockfiles: [] };
-  for (const lock of LOCKFILES) {
-    if ((await fileAt(repoDir, row.base_commit, lock)) !== null) files.lockfiles.push(lock);
-  }
-  const env = detectEnvironment(files);
+  const testFiles = filesInPatch(row.test_patch);
+  // The environment comes from the finished tree (base + both patches): the student's test script
+  // and dependencies usually arrive with the fix, since package.json is not a test file.
+  const env = await withPatchedWorktree(repoDir, row.base_commit, [row.test_patch, row.patch], (dir) =>
+    detectEnvironment({ testFiles, read: (path) => fileIn(dir, path) }));
 
   let result;
   if (!env.supported) {
     result = unsupportedResult(row, env);
   } else {
-    const testFiles = filesInPatch(row.test_patch);
     const baseSources = new Map<string, string | null>();
     for (const file of testFiles) baseSources.set(file, await fileAt(repoDir, row.base_commit, file));
-    const patched = await patchedSources(repoDir, row.base_commit, row.test_patch, testFiles);
+    const patched = await withPatchedWorktree(repoDir, row.base_commit, [row.test_patch], async (dir) => {
+      const sources = new Map<string, string | null>();
+      for (const file of testFiles) sources.set(file, await fileIn(dir, file));
+      return sources;
+    });
     const modified = modifiedAcrossFiles(testFiles, baseSources, patched);
-    console.error(`Environment: ${env.packageManager} + vitest in ${env.image}. Running three states, twice each...`);
-    const { runs, ...rest } = await validateTask({ row, repoDir, env, modified, runner: new DockerSuiteRunner(), timeoutSeconds: args.timeoutSeconds });
+    const logDir = join(tmpdir(), "hecate-validate-logs", row.instance_id);
+    await mkdir(logDir, { recursive: true });
+    console.error(`Environment: ${env.packageManager} + ${env.runners.join("+")} in ${env.packageDir || "."}, image ${env.image}. Running three states, twice each; logs in ${logDir}`);
+    const { runs, ...rest } = await validateTask({ row, repoDir, env, modified, runner: new DockerSuiteRunner(logDir), timeoutSeconds: args.timeoutSeconds });
     void runs;
     result = rest;
   }

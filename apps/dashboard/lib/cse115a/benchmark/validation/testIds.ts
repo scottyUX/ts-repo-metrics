@@ -46,6 +46,16 @@ function toStatus(status: string): TestStatus {
 }
 
 /** Static ids (from the diff) that no run reported: a name the regex misread, or a test that never loaded. */
+/** The {id: status} map our node --test reporter writes; ids carry absolute container paths. */
+export function parseNodeTestReport(report: Record<string, string>, mountPrefix = "/work/"): RunResults {
+  const results: RunResults = {};
+  for (const [id, status] of Object.entries(report)) {
+    const key = id.startsWith(mountPrefix) ? id.slice(mountPrefix.length) : id;
+    results[key] = status === "failed" ? "failed" : status === "skipped" ? "skipped" : "passed";
+  }
+  return results;
+}
+
 export function unmatchedStaticIds(staticIds: string[], runs: RunResults[]): string[] {
   const seen = new Set(runs.flatMap((run) => Object.keys(run)));
   return staticIds.filter((id) => !seen.has(id)).sort();

@@ -7,8 +7,10 @@ const plan: RunPlan = {
   baseCommit: "abc123",
   patch: "diff --git a/src/login.ts b/src/login.ts\n",
   testPatch: "diff --git a/tests/login.test.ts b/tests/login.test.ts\n",
+  installDir: "",
   installCommand: "npm ci",
-  testCommand: "npx vitest run --reporter=json --outputFile=$REPORT",
+  packageDir: "server",
+  testSteps: ["pnpm build", "npx vitest run --reporter=json --outputFile=$REPORT_DIR/vitest-1.json"],
 };
 
 describe("runThreeStates", () => {
@@ -57,11 +59,39 @@ describe("containerScript", () => {
     expect(r2.indexOf("test.diff")).toBeLessThan(r2.indexOf("fix.diff"));
   });
 
-  it("checks out the base commit, installs, and never fails the script on a red suite", () => {
+  it("checks out the base commit, applies patches, installs, runs the steps in the package dir, and never fails the script on a red suite", () => {
     const script = containerScript(plan, "r1");
     expect(script).toContain("git checkout -q -f abc123");
-    expect(script).toContain("npm ci");
-    expect(script).toContain("export REPORT=/patches/report.json\nnpx vitest run --reporter=json --outputFile=$REPORT || true");
-    expect(script.indexOf("npm ci")).toBeLessThan(script.indexOf("git apply"));
+    expect(script).toContain("git apply --whitespace=nowarn /patches/test.diff\ncd /work\nnpm ci\n");
+    expect(script).toContain("export REPORT_DIR=/patches/reports\ncd /work/server\npnpm build || true\nnpx vitest run --reporter=json --outputFile=$REPORT_DIR/vitest-1.json || true");
+    expect(script.indexOf("git apply")).toBeLessThan(script.indexOf("npm ci"));
+    expect(script.indexOf("npm ci")).toBeLessThan(script.indexOf("cd /work/server"));
+  });
+
+  it("installs in the package dir when it is not a workspace", () => {
+    const script = containerScript({ ...plan, installDir: "server" }, "r0");
+    expect(script).toContain("git clean -fdq\ncd /work/server\nnpm ci\n");
+  });
+});
+
+describe("readReports", () => {
+  it("merges Vitest JSON and node --test reports from one directory, stripping the mount prefix", async () => {
+    const { mkdtemp, writeFile, rm } = await import("node:fs/promises");
+    const { tmpdir } = await import("node:os");
+    const { join } = await import("node:path");
+    const { readReports } = await import("@/lib/cse115a/benchmark/validation/runner");
+    const dir = await mkdtemp(join(tmpdir(), "hecate-reports-"));
+    try {
+      await writeFile(join(dir, "vitest-0.json"), JSON.stringify({ testResults: [{ name: "/work/src/a.test.ts", assertionResults: [{ ancestorTitles: [], title: "vitest one", status: "passed" }] }] }));
+      await writeFile(join(dir, "node-2.json"), JSON.stringify({ "/work/server/tests/b.test.mjs::group > node one": "failed", "/work/server/tests/b.test.mjs::todo": "skipped" }));
+      expect(await readReports(dir)).toEqual({
+        "src/a.test.ts::vitest one": "passed",
+        "server/tests/b.test.mjs::group > node one": "failed",
+        "server/tests/b.test.mjs::todo": "skipped",
+      });
+      expect(await readReports(join(dir, "missing"))).toEqual({});
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
   });
 });

@@ -29,9 +29,9 @@ const row: TaskRow = {
 };
 
 const env: Environment = {
-  supported: true, runner: "vitest", packageManager: "npm", installCommand: "npm ci",
-  testCommand: "npx vitest run --reporter=json --outputFile=$REPORT --passWithNoTests",
-  dockerfile: "FROM node:22-bookworm", image: "node:22-bookworm",
+  supported: true, runners: ["vitest"], packageManager: "npm", packageDir: "", installDir: "", installCommand: "npm ci",
+  testSteps: [{ kind: "vitest", command: "npx vitest run --reporter=json --outputFile=$REPORT_DIR/vitest-0.json --passWithNoTests" }],
+  env: { CI: "true" }, dockerfile: "FROM node:22-bookworm", image: "node:22-bookworm",
 };
 
 describe("filesInPatch", () => {
@@ -71,6 +71,7 @@ describe("validateTask", () => {
     expect(result.test_files).toEqual(["src/sum.test.ts"]);
     expect(result.image).toBe("node:22-bookworm");
     expect(result.log_parser).toBe("vitest-json");
+    expect(result.package_dir).toBe("");
     expect(result.eval_script).toContain("git apply --whitespace=nowarn /patches/fix.diff");
     expect(runner.calls).toHaveLength(6);
     expect(Object.keys(result.timings)).toHaveLength(6);

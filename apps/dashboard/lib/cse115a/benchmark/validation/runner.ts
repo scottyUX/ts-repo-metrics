@@ -4,11 +4,12 @@
 // Rules are in docs/CSE115A_BENCHMARK_VALIDATION.md, "The three states".
 
 import { spawn } from "node:child_process";
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { RunResults, StateRuns } from "@/lib/cse115a/benchmark/validation/compareRuns";
-import { parseVitestReport, type VitestReport } from "@/lib/cse115a/benchmark/validation/testIds";
+import { NODE_TEST_REPORTER_SOURCE } from "@/lib/cse115a/benchmark/validation/nodeTestReporter";
+import { parseNodeTestReport, parseVitestReport, type VitestReport } from "@/lib/cse115a/benchmark/validation/testIds";
 
 /** Which repository state to run: base; base + test_patch; base + test_patch + patch. */
 export type State = "r0" | "r1" | "r2";
@@ -20,10 +21,16 @@ export type RunPlan = {
   baseCommit: string;
   patch: string;
   testPatch: string;
+  /** Where `installCommand` runs, relative to the repo root; "" for the root. */
+  installDir: string;
   /** Shell to install dependencies, e.g. `npm ci`. */
   installCommand: string;
-  /** Shell to run the suite and write a Vitest JSON report to $REPORT, e.g. `npx vitest run --reporter=json --outputFile=$REPORT`. */
-  testCommand: string;
+  /** Directory of the package under test, relative to the repo root; "" for the root. */
+  packageDir: string;
+  /** Shell lines run in `packageDir`, each allowed to fail. Reports go to $REPORT_DIR. */
+  testSteps: string[];
+  /** Environment variables for the container. */
+  env?: Record<string, string>;
   /** Docker image; defaults to node:22-bookworm. */
   image?: string;
   /** Seconds before one suite run is killed. */
@@ -54,63 +61,95 @@ export async function runThreeStates(plan: RunPlan, runner: SuiteRunner): Promis
 
 /** The shell script run inside the container for one state. Exported so tests can read it. */
 export function containerScript(plan: RunPlan, state: State): string {
+  const sub = (dir: string) => (dir ? `cd /work/${dir}` : "cd /work");
   const lines = [
     "set -e",
     "cd /work",
     `git checkout -q -f ${plan.baseCommit}`,
     "git clean -fdq",
-    plan.installCommand,
   ];
+  // Patches go on before the install, so a dependency or lockfile the student added is installed.
   if (state !== "r0") lines.push("git apply --whitespace=nowarn /patches/test.diff");
   if (state === "r2") lines.push("git apply --whitespace=nowarn /patches/fix.diff");
-  // The suite may fail (that is the point in R1); the report is what matters. REPORT is
-  // exported on its own line so the test command can use it in a redirect or pipeline.
-  lines.push("export REPORT=/patches/report.json", `${plan.testCommand} || true`);
+  lines.push(sub(plan.installDir), plan.installCommand);
+  // Each step may fail (that is the point in R1); the reports are what matter. REPORT_DIR is
+  // exported on its own line so the steps can use it in a redirect or pipeline.
+  lines.push("mkdir -p /patches/reports", "export REPORT_DIR=/patches/reports", sub(plan.packageDir));
+  for (const step of plan.testSteps) lines.push(`${step} || true`);
   return lines.join("\n") + "\n";
 }
 
 /** Runs `docker run` with the repo mounted at /work and the patches at /patches. */
 export class DockerSuiteRunner implements SuiteRunner {
-  async runSuite(plan: RunPlan, state: State): Promise<RunResults> {
+  /** Directory for one log per run (`<state><attempt>.log`); nothing is kept when unset. */
+  constructor(private readonly logDir?: string) {}
+
+  async runSuite(plan: RunPlan, state: State, attempt: 1 | 2): Promise<RunResults> {
     const patches = await mkdtemp(join(tmpdir(), "hecate-validate-"));
     try {
       await writeFile(join(patches, "test.diff"), plan.testPatch);
       await writeFile(join(patches, "fix.diff"), plan.patch);
       await writeFile(join(patches, "run.sh"), containerScript(plan, state));
+      await writeFile(join(patches, "reporter.mjs"), NODE_TEST_REPORTER_SOURCE);
       const image = plan.image ?? "node:22-bookworm";
-      await exec("docker", [
-        "run", "--rm",
-        "-v", `${plan.repoDir}:/work`,
-        "-v", `${patches}:/patches`,
-        "-w", "/work",
-        image, "bash", "/patches/run.sh",
-      ], (plan.timeoutSeconds ?? 900) * 1000);
-      let text: string;
+      const logFile = this.logDir ? join(this.logDir, `${state}${attempt === 1 ? "a" : "b"}.log`) : null;
       try {
-        text = await readFile(join(patches, "report.json"), "utf8");
-      } catch {
-        // No report at all: the suite never started (install failed, no vitest). Nothing ran.
-        return {};
+        const output = await exec("docker", [
+          "run", "--rm",
+          ...Object.entries(plan.env ?? {}).flatMap(([k, v]) => ["-e", `${k}=${v}`]),
+          "-v", `${plan.repoDir}:/work`,
+          "-v", `${patches}:/patches`,
+          "-w", "/work",
+          image, "bash", "/patches/run.sh",
+        ], (plan.timeoutSeconds ?? 900) * 1000);
+        if (logFile) await writeFile(logFile, output);
+      } catch (error) {
+        if (logFile) await writeFile(logFile, error instanceof Error ? error.message : String(error));
+        throw error;
       }
-      return parseVitestReport(JSON.parse(text) as VitestReport);
+      return readReports(join(patches, "reports"));
     } finally {
       await rm(patches, { recursive: true, force: true });
     }
   }
 }
 
-/** Spawns a process; rejects on a non-zero exit or on timeout, with stderr in the message. */
-function exec(command: string, args: string[], timeoutMs: number): Promise<void> {
+/** Merges every report in the directory: `vitest-*.json` (Vitest JSON) and `node-*.json` (our reporter). */
+export async function readReports(dir: string): Promise<RunResults> {
+  let names: string[];
+  try {
+    names = (await readdir(dir)).filter((n) => n.endsWith(".json")).sort();
+  } catch {
+    // No reports at all: the steps never ran (install failed). Nothing ran.
+    return {};
+  }
+  const results: RunResults = {};
+  for (const name of names) {
+    const text = await readFile(join(dir, name), "utf8");
+    const parsed = name.startsWith("node-")
+      ? parseNodeTestReport(JSON.parse(text) as Record<string, string>)
+      : parseVitestReport(JSON.parse(text) as VitestReport);
+    Object.assign(results, parsed);
+  }
+  return results;
+}
+
+/**
+ * Spawns a process and returns its combined output; rejects on a non-zero exit or on timeout with
+ * the tail of that output in the message.
+ */
+function exec(command: string, args: string[], timeoutMs: number): Promise<string> {
   return new Promise((resolve, reject) => {
-    const child = spawn(command, args, { stdio: ["ignore", "ignore", "pipe"] });
-    let stderr = "";
-    child.stderr.on("data", (chunk: Buffer) => { stderr += chunk.toString(); });
-    const timer = setTimeout(() => { child.kill("SIGKILL"); reject(new Error(`${command} timed out after ${timeoutMs} ms`)); }, timeoutMs);
+    const child = spawn(command, args, { stdio: ["ignore", "pipe", "pipe"] });
+    let output = "";
+    child.stdout.on("data", (chunk: Buffer) => { output += chunk.toString(); });
+    child.stderr.on("data", (chunk: Buffer) => { output += chunk.toString(); });
+    const timer = setTimeout(() => { child.kill("SIGKILL"); reject(new Error(`${command} timed out after ${timeoutMs} ms\n${output.trim().slice(-3000)}`)); }, timeoutMs);
     child.on("error", (error) => { clearTimeout(timer); reject(error); });
     child.on("close", (code) => {
       clearTimeout(timer);
-      if (code === 0) resolve();
-      else reject(new Error(`${command} ${args[0]} exited ${code}: ${stderr.trim().slice(-2000)}`));
+      if (code === 0) resolve(output);
+      else reject(new Error(`${command} ${args[0]} exited ${code}:\n${output.trim().slice(-3000)}`));
     });
   });
 }
