@@ -14,7 +14,7 @@
 
 import { access, mkdir, readFile, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
-import { parseRows, preflight, rejectedWithoutRun, summarize, summaryMarkdown } from "@/lib/cse115a/benchmark/validation/batch";
+import { parseRows, preflight, rejectedWithoutRun, summarize, summaryMarkdown, writebackSql } from "@/lib/cse115a/benchmark/validation/batch";
 import { assertRow, bundleRepo, cloneRepo, ensureCommit, imageDigest, validateRow } from "@/lib/cse115a/benchmark/validation/runRow";
 import type { ValidationResult } from "@/lib/cse115a/benchmark/validation/validateTask";
 
@@ -115,6 +115,7 @@ async function main() {
   const summary = summarize(results);
   await writeFile(join(out, "summary.json"), JSON.stringify(summary, null, 2) + "\n");
   await writeFile(join(out, "summary.md"), summaryMarkdown(summary));
+  await writeFile(join(out, "writeback.sql"), writebackSql(results));
   console.log(summaryMarkdown(summary));
   log(`Done in ${Math.round((Date.now() - startedAt) / 1000)} s. Dry run, nothing written to the database.`);
 }

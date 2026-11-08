@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseRows, preflight, rejectedWithoutRun, summarize, summaryMarkdown } from "@/lib/cse115a/benchmark/validation/batch";
+import { parseRows, preflight, rejectedWithoutRun, summarize, summaryMarkdown, writebackSql } from "@/lib/cse115a/benchmark/validation/batch";
 import type { TaskRow, ValidationResult } from "@/lib/cse115a/benchmark/validation/validateTask";
 
 const row = (overrides: Partial<TaskRow> = {}): TaskRow => ({
@@ -46,5 +46,37 @@ describe("summarize", () => {
     const md = summaryMarkdown(summarize([validated, rejected]));
     expect(md.split("\n")[0]).toBe("1 validated, 1 rejected of 2 (no_source_patch: 1)");
     expect(md).toContain("| org__repo-T-2 | rejected | no_source_patch | 0 | 0 | 0 | 0 | 0 | 0 |");
+  });
+});
+
+describe("writebackSql", () => {
+  it("updates lists, image and status for a validated row, and only status plus a reason flag for a rejected one", () => {
+    const validated: ValidationResult = {
+      ...rejectedWithoutRun(row(), "env_error", ""), validation_status: "validated", reason: null, detail: null,
+      FAIL_TO_PASS: ["a.test.ts::x"], ABSENT_TO_PASS: ["a.test.ts::y"], PASS_TO_PASS: ["a.test.ts::z"],
+      image: "node:24-bookworm", image_digest: "node:24-bookworm@sha256:abc", eval_script: "set -e\necho $REPORT_DIR\n", log_parser: "node-test-json",
+    };
+    const rejected = rejectedWithoutRun(row({ instance_id: "org__repo-T-2", patch: "" }), "no_source_patch", "x");
+    const sql = writebackSql([validated, rejected]);
+    expect(sql).toContain(`"FAIL_TO_PASS" = $hecate$["a.test.ts::x","a.test.ts::y"]$hecate$::jsonb`);
+    expect(sql).toContain("image = $hecate$node:24-bookworm@sha256:abc$hecate$");
+    expect(sql).toContain("eval_script = $hecate$set -e\necho $REPORT_DIR\n$hecate$");
+    expect(sql).toContain("validation_status = $hecate$validated$hecate$");
+    expect(sql).toContain("|| array[$hecate$validation_reason:no_source_patch$hecate$]");
+    expect(sql.match(/update public.cse_benchmark_tasks/g)).toHaveLength(1);
+    expect(sql.match(/update public.cse_benchmark_task_sources/g)).toHaveLength(2);
+    expect(sql.startsWith("-- Generated")).toBe(true);
+    expect(sql.trim().endsWith("commit;")).toBe(true);
+  });
+
+  it("leaves env_error rows alone", () => {
+    const sql = writebackSql([rejectedWithoutRun(row(), "env_error", "docker died")]);
+    expect(sql).toContain("skipped: env_error is not a verdict");
+    expect(sql).not.toContain("update public.");
+  });
+
+  it("picks a dollar-quote tag the text cannot contain", () => {
+    const r = rejectedWithoutRun(row({ instance_id: "weird$hecate$id", patch: "" }), "no_source_patch", "x");
+    expect(writebackSql([r])).toContain("$hecatex$weird$hecate$id$hecatex$");
   });
 });
