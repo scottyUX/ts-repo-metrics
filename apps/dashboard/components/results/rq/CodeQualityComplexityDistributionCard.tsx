@@ -10,6 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import type { RepoReport } from "@/lib/reportTypes";
+import { isPrScopedReport } from "@/lib/analysisScope";
 import {
   UI_COMPLEXITY_CRITICAL_GT,
   UI_COMPLEXITY_HEALTHY_LT,
@@ -75,8 +76,8 @@ export function CodeQualityComplexityDistributionCard({ report }: CodeQualityCom
           <div className="col-span-12 space-y-4 text-sm leading-relaxed text-muted-foreground lg:col-span-5">
             {concentrated ? (
               <p>
-                This is actually good news: the hardest functions are not spread evenly across the
-                whole tree — they cluster in a smaller set of files. That means focused refactors on a
+                This is actually good news: the hardest functions are not spread evenly across the{" "}
+                {isPrScopedReport(report) ? "files in this pull request" : "whole tree"} — they cluster in a smaller set of files. That means focused refactors on a
                 handful of hotspots can move the needle quickly.
               </p>
             ) : (

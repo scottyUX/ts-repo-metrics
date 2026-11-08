@@ -165,6 +165,21 @@ function pickDisplayName(group: ParsedCommit[]): string {
   return best;
 }
 
+/**
+ * Turn a path from `git log --numstat` into the file's new path.
+ * Git writes renames as `dir/{old.ts => new.ts}` or `old/a.ts => new/b.ts`.
+ */
+export function resolveNumstatPath(raw: string): string {
+  const braced = raw.match(/^(.*)\{(.*) => (.*)\}(.*)$/);
+  if (braced) {
+    const [, before = "", , to = "", after = ""] = braced;
+    return `${before}${to}${after}`.replace(/\/{2,}/g, "/");
+  }
+  const arrow = raw.indexOf(" => ");
+  if (arrow !== -1) return raw.slice(arrow + 4);
+  return raw;
+}
+
 async function parseLogWithNumstat(
   repoPath: string,
   revRange?: string,
@@ -200,7 +215,7 @@ async function parseLogWithNumstat(
       if (parts.length < 3) continue;
       const add = parseInt(parts[0] ?? "0", 10) || 0;
       const del = parseInt(parts[1] ?? "0", 10) || 0;
-      const filePath = parts[2] ?? "";
+      const filePath = resolveNumstatPath(parts[2] ?? "");
       if (filePath === "-" || !filePath.trim()) continue;
       files.push({ path: filePath, add, del });
       totalLines += add + del;

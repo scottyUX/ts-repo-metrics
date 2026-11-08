@@ -2,6 +2,7 @@
 
 import { CoachInsightTone } from "@/components/results/coach/CoachInsightTone";
 import type { RepoReport } from "@/lib/reportTypes";
+import { isPrScopedReport } from "@/lib/analysisScope";
 
 /** Rule-based Commit Habits intro (fallback when tab-insight API unavailable). */
 export function CommitHabitsPanelIntro({
@@ -48,7 +49,7 @@ export function CommitHabitsPanelIntro({
         bodyClassName="text-foreground/90 font-normal"
       >
         <p>
-          Commit habits look healthy in this snapshot—about{" "}
+          Commit habits look healthy in {isPrScopedReport(report) ? "this pull request" : "this snapshot"}—about{" "}
           <strong className="text-foreground">{cpw.toFixed(1)}</strong> commits per week with{" "}
           <strong className="text-foreground">{tc}</strong> commits in parsed history. Use Core signals
           below to watch for drift on the next analysis.

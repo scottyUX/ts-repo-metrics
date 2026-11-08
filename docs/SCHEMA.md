@@ -8,7 +8,7 @@ This document describes the complete JSON report produced by `ts-repo-metrics` (
 |-------|------|----------|-------------|
 | `repoPath` | `string` | no | Absolute path to the analyzed repository |
 | `source` | `SourceInfo` | no | Origin metadata (local path vs cloned GitHub URL) |
-| `filesAnalyzed` | `number` | no | Total `.ts`, `.tsx`, `.js`, `.jsx`, `.mjs`, `.cjs`, `.py`, and `.ipynb` files successfully parsed. web2py and Django repos contribute zero |
+| `filesAnalyzed` | `number` | no | Total `.ts`, `.tsx`, `.js`, `.jsx`, `.mjs`, `.cjs`, `.py`, and `.ipynb` files successfully parsed. Test files (see `profile.testFiles`) count toward LOC only and are not parsed. web2py and Django repos contribute zero |
 | `analysisSkipped` | `object` | **yes** | `{ id: "web2py" \| "django", message }` when the whole repository was skipped, including JS and TS. Absent when the repo was scored. The feature vector copies the id to `analysis_skipped` (`""` when scored) so a zero-file row is not treated as an empty repository |
 | `filesSkipped` | `number` | **yes** | Files skipped due to read or parse errors |
 | `analyzer_version` | `string` | **yes** | Analyzer package version (from `packages/engine/package.json` when run via the engine — CLI or dashboard) |
@@ -20,18 +20,19 @@ This document describes the complete JSON report produced by `ts-repo-metrics` (
 | `functionMetricsSummary` | `FunctionMetricsSummary` | no | Repo-wide function structural metrics |
 | `complexity` | `ComplexitySummary` | no | Repo-wide cyclomatic complexity |
 | `smells` | `SmellCounts` | no | Aggregated code smell counts |
+| `highComplexityOrLongFunctions` | `number` | no | Functions with complexity > 10, more than 50 lines, or both, each counted once |
 | `maintainability` | `MaintainabilityResult` | **yes** | Maintainability Index score. Null when `analysisSkipped` is set. The feature vector still writes `maintainability_score` 0 and an empty classification for that null, so filter on `analysis_skipped` before using maintainability |
 | `testCoverageProxy` | `TestCoverageProxy` | no | Test LOC / source LOC ratio |
 | `duplication` | `DuplicationMetrics` | **yes** | jscpd duplication analysis (null if jscpd fails) |
 | `git` | `GitMetrics` | **yes** | Commit history metrics (null for non-git repos) |
 | `gitMetricsV2` | `GitMetricsV2` | **yes** | Extended git metrics (Epic D; null for non-git repos) |
 | `framework` | `FrameworkInfo` | **yes** | Detected framework (null when there is no package.json and no Python) |
-| `perFile` | `PerFileEntry[]` | no | Per-file metrics |
+| `perFile` | `PerFileEntry[]` | no | Per-file metrics for non-test source files |
 | `byLanguage` | `Partial<Record<LanguageBucket, LanguageSummary>>` | **yes** | Per-language aggregates; only buckets with scored files appear |
 | `python` | `PythonMetrics` | **yes** | Python type hints and top-level code; present when `.py` or `.ipynb` files were scored |
 | `backendMetrics` | `BackendMetrics` | **yes** | Flask / FastAPI route handlers; present when at least one was found |
 | `reactMetrics` | `ReactMetricsReport` | **yes** | RQ3 React/TSX static metrics (present when at least one `.tsx` file was analyzed) |
-| `phase3` | `Phase3Metrics` | **yes** | Phase 3 — silent failures (React-scope JS/TS and all Python), monolithic component rate, weighted jscpd redundancy |
+| `phase3` | `Phase3Metrics` | **yes** | Phase 3 — silent failures (React-scope JS/TS and non-test Python), monolithic component rate, weighted jscpd redundancy |
 
 ## `distributions` — Distribution Metrics (optional)
 
@@ -107,7 +108,9 @@ Tail risk indicators for research. Percentiles computed across all functions.
 
 ## `maintainability` — Maintainability Index
 
-Formula: `MI = max(0, 171 - 5.2·ln(avgComplexity) - 0.23·ln(totalLOC) - 16.2·ln(avgFnLength)) × 100/171`
+Formula: `MI = max(0, 171 - 5.2·ln(avgComplexity) - 0.23·ln(sourceLOC) - 16.2·ln(avgFnLength)) × 100/171`
+
+Test files are excluded from every input.
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -322,7 +325,7 @@ Present when at least one `.tsx` file was successfully parsed. Heuristic **compo
 
 ## `phase3` — AI smell / pathology (optional)
 
-Present when the analyzer build includes Phase 3. **Silent failure** events come from JS/TS files in React scope (empty `catch`, or a `catch` that only logs to console) and from every Python file and notebook (an `except` whose body is only `pass`, `...`, or `continue`, or only `print`, `logging.*`, `logger.*`, or `traceback.print_exc()`). An `except` that also raises or does other work is not an event. Including Python changes `sfd` on any repo with Python. **SRS** uses jscpd duplicate pairs with per-pair similarity (file excerpt + Levenshtein ratio when fragments are unavailable); see [METRICS_CONCEPTS.md](METRICS_CONCEPTS.md).
+Present when the analyzer build includes Phase 3. **Silent failure** events come from JS/TS files in React scope (empty `catch`, or a `catch` that only logs to console) and from every non-test Python file and notebook (an `except` whose body is only `pass`, `...`, or `continue`, or only `print`, `logging.*`, `logger.*`, or `traceback.print_exc()`). An `except` that also raises or does other work is not an event. Including Python changes `sfd` on any repo with Python. **SRS** uses jscpd duplicate pairs with per-pair similarity (file excerpt + Levenshtein ratio when fragments are unavailable); see [METRICS_CONCEPTS.md](METRICS_CONCEPTS.md).
 
 ### `SilentFailureEvent`
 

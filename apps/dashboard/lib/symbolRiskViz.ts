@@ -31,10 +31,9 @@ export function laneFromEvidence(evidence: SymbolVerificationRisk["evidence"]): 
  */
 export function tierFromRisk(r: SymbolVerificationRisk): RiskTier {
   const rs = r.riskScore;
-  const cc = r.cyclomaticComplexity;
-  if (rs >= 28 || cc >= 28) return "critical";
-  if (rs >= 14 || cc >= 18) return "high";
-  if (rs >= 6 || cc >= 12) return "medium";
+  if (rs >= 28) return "critical";
+  if (rs >= 14) return "high";
+  if (rs >= 6) return "medium";
   return "low";
 }
 

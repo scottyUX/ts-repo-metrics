@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { Info } from "lucide-react";
 import { CoachInsightTone } from "@/components/results/coach/CoachInsightTone";
 import type { RepoReport } from "@/lib/reportTypes";
+import { isPrScopedReport } from "@/lib/analysisScope";
 import { tryGetPhase2Summary } from "@/lib/phase2Summary";
 import { RESULTS_TAB, type ResultsTabId } from "@/lib/resultsNavigation";
 import { cn } from "@/lib/utils";
@@ -78,7 +79,9 @@ function TestingVerificationIntro({
       ? `${totalCommits} commit${totalCommits === 1 ? "" : "s"}`
       : "your commits";
 
-  const needsTestingFocus = pct < 10 || testLocRatio < 0.12;
+  // With no source code, the test/source ratio can't be measured, so only commit coupling counts.
+  const hasSource = mv.sourceLoc > 0;
+  const needsTestingFocus = pct < 10 || (hasSource && testLocRatio < 0.12);
 
   const detailSentence = (() => {
     if (fromGitChurn) {
@@ -100,7 +103,7 @@ function TestingVerificationIntro({
       return `The snapshot lists ${snapshotTestFiles} test file${snapshotTestFiles === 1 ? "" : "s"}, and about ${Math.round(pct)}% of ${commitsNoun} touch tests.`;
     }
     if (snapshotTestFiles === 0 && pct <= 0) {
-      return `The snapshot shows no test files yet, and none of ${commitsNoun} include test-path changes.`;
+      return `${isPrScopedReport(report) ? "This PR has" : "The snapshot shows"} no test files yet, and none of ${commitsNoun} include test-path changes.`;
     }
     if (pct <= 0) {
       return `You have ${snapshotTestFiles} test file${snapshotTestFiles === 1 ? "" : "s"} but none of ${commitsNoun} are actively adding to them.`;
@@ -119,14 +122,16 @@ function TestingVerificationIntro({
         <p>
           {isContributor ? (
             <>
-              For <strong>{scopeLabel}</strong>, verification signals look healthy on this analysis: their
-              test-activity proxy and share of commits touching tests are in a solid range. Use Core
-              signals below for detail (tree-wide scans still apply where noted).
-            </>
+              For <strong>{scopeLabel}</strong>, verification signals look healthy on this analysis: their{" "}
+              {hasSource
+                ? "test-activity proxy and share of commits touching tests are"
+                : "share of commits touching tests is"}{" "}
+              in a solid range. Use Core signals below for detail (tree-wide scans still apply where noted).            </>
           ) : (
             <>
-              Verification looks healthy relative to this snapshot: test share and commits touching tests are
-              in a solid range. Use Core signals below to spot drift over the next analyses.
+              Verification looks healthy relative to {isPrScopedReport(report) ? "this pull request" : "this snapshot"}:{" "}
+              {hasSource ? "test share and commits touching tests are" : "commits touching tests are"} in a
+              solid range. Use Core signals below to spot drift over the next analyses.
             </>
           )}
         </p>
@@ -194,7 +199,7 @@ function CodeQualityPanelIntro({
         bodyClassName="text-foreground/90 font-normal"
       >
         <p>
-          Structural risk is elevated in this snapshot—either maintainability is low, duplication or
+          Structural risk is elevated in {isPrScopedReport(report) ? "this pull request" : "this snapshot"}—either maintainability is low, duplication or
           peak complexity is high, or many functions exceed the engine&apos;s high-complexity
           threshold. Prioritize the hotspot tables below, then re-run analysis to confirm the
           distribution tightens.

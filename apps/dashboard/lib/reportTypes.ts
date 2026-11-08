@@ -46,7 +46,7 @@ export interface FunctionDetail {
   hasReturnAnnotation?: boolean;
 }
 
-/** Phase 3 — silent failure: empty or log-only catch (React-scope JS/TS) or except (every Python file). */
+/** Phase 3 — silent failure: empty or log-only catch (React-scope JS/TS) or except (every non-test Python file). */
 export interface SilentFailureEvent {
   file: string;
   line: number;
@@ -295,6 +295,8 @@ export interface RepoReport {
     emptyCatchBlocks: number;
     consoleLogs: number;
   };
+  /** Functions that are high-complexity, long, or both, each counted once; absent in older reports. */
+  highComplexityOrLongFunctions?: number;
   /** Null when `analysisSkipped` is set. */
   maintainability?: { score: number; classification: string } | null;
   testCoverageProxy?: { ratio: number; classification: string };

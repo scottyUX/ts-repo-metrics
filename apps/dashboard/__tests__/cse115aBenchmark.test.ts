@@ -156,6 +156,7 @@ describe("buildInstance", () => {
 
   it("flags a PR base commit, a missing diff, and a diff without tests", () => {
     expect(buildInstance(snapshot({ baseCommitSource: "pr_base", baseCommit: "prbase" }), 1, null).flags).toEqual(["base_commit_from_pr_base"]);
+    expect(buildInstance(snapshot({ baseCommitSource: "first_commit", baseCommit: "first1" }), 1, null).flags).toEqual(["base_commit_from_first_commit"]);
     expect(buildInstance(snapshot({ diff: "", diffError: "404" }), 2, null).flags).toEqual(["diff_missing", "no_test_patch", "no_source_patch"]);
     const onlySource = TS_DIFF.slice(0, TS_DIFF.indexOf("diff --git a/src/__tests__"));
     expect(buildInstance(snapshot({ diff: onlySource }), 1, null).flags).toEqual(["no_test_patch"]);

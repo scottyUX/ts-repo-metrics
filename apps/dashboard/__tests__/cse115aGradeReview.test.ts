@@ -47,7 +47,7 @@ describe("release rules", () => {
 
   it("needs points for criteria the agent left unscored, unless an instructor edited the task", () => {
     const unscored = grade(2);
-    unscored.rubric[5] = { ...unscored.rubric[5]!, awarded: null, level: null, needsReview: true };
+    unscored.rubric[4] = { ...unscored.rubric[4]!, awarded: null, level: null, needsReview: true };
     expect(releaseBlockers([grade(1), unscored])).toEqual(["Task 2: enter points for Tests pass."]);
     expect(releaseBlockers([grade(1), { ...unscored, instructor_rubric: [] }])).toEqual([]);
   });

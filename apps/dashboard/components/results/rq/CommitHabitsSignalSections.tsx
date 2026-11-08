@@ -264,9 +264,11 @@ export function CommitHabitsCoreSignalsSection({
 export function CommitHabitsAdditionalSignalsSection({
   mv,
   quality,
+  prScoped,
 }: {
   mv: CommitHabitsMetricValues;
   quality: CommitHabitsSignalQuality;
+  prScoped?: boolean;
 }) {
   const medTier = tierMedianCommitSize(mv.medianCommitSize, quality.median);
   const entTier = tierEntropy(mv.entropy, quality.entropy);
@@ -310,7 +312,9 @@ export function CommitHabitsAdditionalSignalsSection({
         />
       </div>
 
-      <h3 className="text-sm font-medium text-muted-foreground pt-2">Repository profile</h3>
+      <h3 className="text-sm font-medium text-muted-foreground pt-2">
+        {prScoped ? "Pull request profile" : "Repository profile"}
+      </h3>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <MetricCard
           {...cardProps}
@@ -326,10 +330,14 @@ export function CommitHabitsAdditionalSignalsSection({
           {...cardProps}
           label="Duplication %"
           value={`${formatNumber(mv.duplication)}%`}
-          tooltip="Repository-wide duplicate-line share from jscpd (same scan as elsewhere in this app)."
+          tooltip={
+            prScoped
+              ? "Duplicate-line share across the files in this pull request, from jscpd (same scan as elsewhere in this app)."
+              : "Repository-wide duplicate-line share from jscpd (same scan as elsewhere in this app)."
+          }
           metricHelp={{
             title: "Duplication percentage",
-            children: <CommitHabitsDuplicationPercentBody />,
+            children: <CommitHabitsDuplicationPercentBody prScoped={prScoped} />,
           }}
         />
         <MetricCard

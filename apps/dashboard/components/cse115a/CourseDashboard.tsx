@@ -10,6 +10,7 @@ import { runAnalyzeFromUrl } from "@/lib/runAnalyze";
 import { sprintScore, type StudentTaskGrade } from "@/lib/cse115a/gradeReview";
 import { RUBRIC } from "@/lib/cse115a/rubric";
 import { CONSENT_TEXT, CONSENT_VERSION } from "@/lib/cse115a/consent";
+import { needsCourseInstallPrompt, repoFullNameFromPullRequest } from "@/lib/cse115a/installPrompt";
 import { oauthHashError } from "@/lib/cse115a/oauthError";
 import {
   firstOpenSprint,
@@ -29,6 +30,12 @@ import { SprintChecklistDialog } from "@/components/cse115a/SprintChecklistDialo
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 type SprintDue = { number: number; due_at: string | null };
+// Fall 2026 students submit sprints 2–4. Sprint 1 and Sprint 5 stay in the course record.
+const HIDDEN_STUDENT_SPRINTS = new Set([1, 5]);
+
+function studentSprintNumbers(count: number): number[] {
+  return Array.from({ length: count }, (_, index) => index + 1).filter((number) => !HIDDEN_STUDENT_SPRINTS.has(number));
+}
 type Course = { id: string; slug: string; title: string; term: string; assignment_count: number; sprints?: SprintDue[] };
 type Submission = {
   id: string;
@@ -157,13 +164,17 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
   const [joinCode, setJoinCode] = useState("");
   const [joining, setJoining] = useState(false);
   const [joinError, setJoinError] = useState<string | null>(null);
-  const [checklistOpen, setChecklistOpen] = useState(false);
+  const [checklistSlot, setChecklistSlot] = useState<number | null>(null);
   const [selectedSlug, setSelectedSlug] = useState<string | null>(preview ? previewCourse.slug : null);
-  const [assignmentNumber, setAssignmentNumber] = useState(preview && previewState === "needs-fixes" ? 2 : 1);
+  const [assignmentNumber, setAssignmentNumber] = useState(2);
   const [prInputs, setPrInputs] = useState<Record<number, string>>({});
   const [changing, setChanging] = useState<Record<number, boolean>>({});
   const [phase, setPhase] = useState<Record<number, string>>({});
   const [githubConnected, setGithubConnected] = useState<boolean | null>(preview ? previewState !== "joined" : null);
+  const [githubLogin, setGithubLogin] = useState<string | null>(null);
+  const [githubInstallUrl, setGithubInstallUrl] = useState<string | null>(null);
+  const [installPromptOpen, setInstallPromptOpen] = useState(false);
+  const [uninstalledRepos, setUninstalledRepos] = useState<string[]>([]);
   const [connectingGithub, setConnectingGithub] = useState(false);
   const [githubError, setGithubError] = useState<string | null>(null);
   const [submittingAssignment, setSubmittingAssignment] = useState(false);
@@ -187,8 +198,11 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
       if (!openedSprint.current && body.courses[0]) {
         openedSprint.current = true;
         const course = body.courses[0];
-        setAssignmentNumber(firstOpenSprint(course.assignment_count, (number) =>
-          body.assignmentSubmissions.some((item) => item.course_id === course.id && item.assignment_number === number)));
+        const visible = studentSprintNumbers(course.assignment_count);
+        setAssignmentNumber(visible.find((number) =>
+          !body.assignmentSubmissions.some((item) => item.course_id === course.id && item.assignment_number === number))
+          ?? visible[visible.length - 1]
+          ?? firstOpenSprint(course.assignment_count, () => true));
       }
       setError(null);
     } catch (caught) {
@@ -218,7 +232,11 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
     if (preview || !me?.courses.length) return;
     void fetch("/api/cse115a/github-status", { credentials: "include" })
       .then((response) => response.json())
-      .then((body: { connected?: boolean }) => setGithubConnected(Boolean(body.connected)))
+      .then((body: { connected?: boolean; login?: string | null; installUrl?: string | null }) => {
+        setGithubConnected(Boolean(body.connected));
+        setGithubLogin(body.login ?? null);
+        setGithubInstallUrl(body.installUrl ?? null);
+      })
       .catch(() => setGithubConnected(false));
   }, [me?.courses.length, preview]);
 
@@ -228,6 +246,20 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
   const assignmentSubmission = me?.assignmentSubmissions.find((item) =>
     item.course_id === course?.id && item.assignment_number === assignmentNumber);
   const locked = Boolean(assignmentSubmission);
+  const offerInstall = Boolean(githubInstallUrl) && !locked && needsCourseInstallPrompt({ uninstalledRepos });
+  const installTarget = uninstalledRepos.length > 1 ? "those repositories" : "that repository";
+  const handleDismissInstallPrompt = () => {
+    setInstallPromptOpen(false);
+  };
+  const rememberInstallResult = (url: string, installed: boolean) => {
+    const repo = repoFullNameFromPullRequest(url);
+    if (!repo) return;
+    setUninstalledRepos((previous) => {
+      if (installed) return previous.includes(repo) ? previous.filter((item) => item !== repo) : previous;
+      return previous.includes(repo) ? previous : [...previous, repo];
+    });
+    if (!installed) setInstallPromptOpen(true);
+  };
   const releasedGrades = assignmentSubmission?.status === "released"
     ? (me?.grades ?? []).filter((grade) => grade.assignmentSubmissionId === assignmentSubmission.id) : [];
   // An answer to older wording does not count, so the card asks again.
@@ -263,13 +295,12 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
   const action = submitAction(submissions.length, readyCount, assignmentNumber);
   const setupDone = Boolean(me?.courses.length) && githubConnected === true;
 
-  // Opening a sprint the student has not started shows its checklist, every time.
+  // Typed URLs and messages belong to the sprint they were typed in.
   function openSprint(number: number) {
     setAssignmentNumber(number);
-    if (!course || !me) return;
-    const started = me.assignmentSubmissions.some((item) => item.course_id === course.id && item.assignment_number === number)
-      || me.submissions.some((item) => item.course_id === course.id && item.assignment_number === number);
-    if (!started) setChecklistOpen(true);
+    setPrInputs({});
+    setSlotError({});
+    setChanging({});
   }
 
   async function signOut() {
@@ -311,7 +342,8 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
       const { data: { user } } = await supabase.auth.getUser();
       stashOAuthNextPath("/cse115a/dashboard");
       stashOAuthProvider("github");
-      const options = { redirectTo: buildOAuthCallbackUrl(getOAuthRedirectOrigin()), scopes: "read:user user:email repo" };
+      // GitHub only confirms who the student is here; repository access comes from the course GitHub App.
+      const options = { redirectTo: buildOAuthCallbackUrl(getOAuthRedirectOrigin()) };
       const result = user?.identities?.some((identity) => identity.provider === "github")
         ? await supabase.auth.signInWithOAuth({ provider: "github", options })
         : await supabase.auth.linkIdentity({ provider: "github", options });
@@ -342,10 +374,16 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
         method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include",
         body: JSON.stringify({ courseSlug: course.slug, slot, prUrl }),
       });
-      const imported = await jsonResponse<{ submission: Submission }>(response);
-      if (!response.ok) throw new Error(imported.error ?? "Could not import the task spec.");
+      const imported = await jsonResponse<{ submission: Submission; code?: string }>(response);
+      if (!response.ok) {
+        if (imported.code === "github_app_not_installed") rememberInstallResult(prUrl, false);
+        throw new Error(imported.error ?? "Could not import the task spec.");
+      }
+      rememberInstallResult(imported.submission.pr_url, true);
       setChanging((previous) => ({ ...previous, [slot]: false }));
       setPrInputs((previous) => ({ ...previous, [slot]: "" }));
+      // Show the saved PR now; the analysis below takes about a minute.
+      await load({ quiet: true });
       const shouldAnalyze = mode === "add" || !imported.submission.analysis_result_id;
       if (shouldAnalyze) {
         setPhase((previous) => ({ ...previous, [slot]: "Keep this tab open, this takes about a minute." }));
@@ -372,16 +410,19 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
     }
   }
 
+  function showScrumBoard(slot: number, checked: boolean) {
+    setMe((current) => current && ({
+      ...current,
+      submissions: current.submissions.map((item) =>
+        item.task_slot === slot && item.assignment_number === assignmentNumber ? { ...item, scrum_board: checked } : item),
+    }));
+  }
+
   async function setScrumBoard(slot: number, checked: boolean) {
     if (!course) return;
-    if (preview) {
-      setMe((current) => current && ({
-        ...current,
-        submissions: current.submissions.map((item) =>
-          item.task_slot === slot && item.assignment_number === assignmentNumber ? { ...item, scrum_board: checked } : item),
-      }));
-      return;
-    }
+    // Tick the box right away; the save catches up, and a failure puts it back (#257).
+    showScrumBoard(slot, checked);
+    if (preview) return;
     setSlotError((previous) => ({ ...previous, [slot]: "" }));
     try {
       const response = await fetch(`/api/cse115a/assignments/${assignmentNumber}/tasks`, {
@@ -392,6 +433,7 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
       if (!response.ok) throw new Error(body.error ?? "Could not save the Scrum board confirmation.");
       await load();
     } catch (caught) {
+      showScrumBoard(slot, !checked);
       setSlotError((previous) => ({ ...previous, [slot]: caught instanceof Error ? caught.message : "Could not save the Scrum board confirmation." }));
     }
   }
@@ -436,7 +478,10 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
     }
   }
 
-  if (loading && !me) return <p className="py-16 text-center text-slate-600">Loading your course…</p>;
+  // Keep the loading line up until the GitHub status is known, so a joined student
+  // never sees the setup card flash on refresh (#297).
+  const checkingGithub = Boolean(me?.courses.length) && githubConnected === null;
+  if ((loading && !me) || checkingGithub) return <p className="py-16 text-center text-slate-600">Loading your course…</p>;
 
   const courseLabel = course ? `${course.title} · ${course.term}` : null;
   return (
@@ -450,6 +495,8 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
           email={me?.email ?? null}
           courseLabel={me?.courses.length ? courseLabel : null}
           githubConnected={me?.courses.length ? githubConnected : false}
+          githubLogin={githubLogin}
+          githubInstallUrl={githubInstallUrl}
           joinCode={joinCode}
           onJoinCodeChange={(value) => { setJoinCode(value); setJoinError(null); }}
           onJoin={() => void joinCourse()}
@@ -463,7 +510,7 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
       ) : course ? (
         <>
           <nav className="flex flex-wrap gap-2" aria-label="Sprints">
-            {Array.from({ length: course.assignment_count }, (_, index) => index + 1).map((number) => {
+            {studentSprintNumbers(course.assignment_count).map((number) => {
               const submission = me?.assignmentSubmissions.find((item) => item.course_id === course.id && item.assignment_number === number);
               const label = sprintTabLabel(number, {
                 submitted: Boolean(submission),
@@ -486,7 +533,7 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
                     ? `Graded ${formatWhen(releasedGrades[0]!.releasedAt)} · the average of your two tasks`
                     : assignmentSubmission
                       ? `Submitted ${formatWhen(assignmentSubmission.submitted_at)}. Your grade appears here after instructor review.`
-                      : "Add two merged task PRs. We check each one against the submission checklist."}
+                      : "Add two merged task PRs. We check each one against its checklist."}
                 </p>
                 {released ? <p className="mt-1 text-sm text-slate-600">Questions about this grade? Ask your TA.</p> : null}
                 {assignmentSubmission && !released ? <StatusSteps status={assignmentSubmission.status} /> : null}
@@ -515,6 +562,16 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
                 </div>
               </section>
             ) : null}
+            {githubInstallUrl && !locked ? (
+              <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-900 bg-slate-900 px-5 py-4 text-white">
+                <p className="max-w-2xl text-sm">
+                  {offerInstall
+                    ? `The course GitHub App cannot read ${uninstalledRepos.join(", ")}. Ask the repository owner (or an owner of its organization) to install it on ${installTarget}, then add the pull request.`
+                    : "The repository owner installs the course GitHub App once, on the team repository; teammates don't install anything. The same button adds it to another repository, or removes it."}
+                </p>
+                <a href={githubInstallUrl} target="_blank" rel="noreferrer" className="shrink-0 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-slate-900">{offerInstall ? "Install the GitHub App" : "Install or manage"}</a>
+              </div>
+            ) : null}
             <div className="grid gap-4 md:grid-cols-2">
               {[1, 2].map((slot) => {
                 const item = submissions.find((submission) => submission.task_slot === slot);
@@ -527,7 +584,7 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
                 return (
                   <div key={slot} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                     <div className="flex items-start justify-between gap-3">
-                      <h2 className="text-lg font-semibold">Task {slot}{item ? <span className="font-normal text-slate-500"> · {item.task_id}</span> : null}</h2>
+                      <h2 className="text-lg font-semibold">Task {slot}{item ? <span className="font-normal text-slate-500"> · {item.task_id}</span> : null} <button type="button" onClick={() => setChecklistSlot(slot)} className="ml-2 text-sm font-normal text-blue-700 underline">Checklist</button></h2>
                       {grade ? <span className="text-lg font-semibold tabular-nums">{formatScore(grade.total)}<span className="text-sm font-normal text-slate-500"> / 10</span></span>
                         : item && !locked ? <span className={`text-sm font-semibold ${fixCount === 0 ? "text-emerald-700" : "text-amber-700"}`}>{fixCount === 0 ? "Ready" : `${fixCount} to fix`}</span> : null}
                     </div>
@@ -584,6 +641,7 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
                     {showInput ? (
                       <>
                         <label htmlFor={`pr-${slot}`} className="mt-5 block text-sm font-medium">Merged pull request URL</label>
+                        {item ? <p className="mt-1 text-sm text-slate-600">Paste a pull request from this repository or a different one.</p> : null}
                         <input id={`pr-${slot}`} type="url" value={prInputs[slot] ?? ""} onChange={(event) => setPrInputs((previous) => ({ ...previous, [slot]: event.target.value }))} placeholder="https://github.com/team/repo/pull/12" className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
                         <button type="button" disabled={preview || Boolean(phase[slot])} onClick={() => void savePullRequest(slot, "add")} className="mt-3 w-full rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
                           {phase[slot] || "Add PR"}
@@ -615,6 +673,22 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
                 </button>
               </div>
             ) : null}
+            <Dialog open={installPromptOpen} onOpenChange={(open) => { if (!open) handleDismissInstallPrompt(); }}>
+              <DialogContent className="sm:max-w-lg">
+                <DialogHeader>
+                  <DialogTitle>Install the course GitHub App</DialogTitle>
+                  <DialogDescription>
+                    The course GitHub App cannot read {uninstalledRepos.join(", ") || "this repository"}. Ask the repository owner (or an owner of its organization) to install it on {installTarget}. Only they can. It can only read the repository, and it never changes the code.
+                  </DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                  <button type="button" onClick={handleDismissInstallPrompt} className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium">Not now</button>
+                  {githubInstallUrl ? (
+                    <a href={githubInstallUrl} target="_blank" rel="noreferrer" onClick={handleDismissInstallPrompt} className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white">Install the GitHub App</a>
+                  ) : null}
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
             <Dialog open={confirmingChange} onOpenChange={setConfirmingChange}>
               <DialogContent className="sm:max-w-lg">
                 <DialogHeader>
@@ -651,7 +725,7 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
           {consent && !editingConsent ? (
             <p className="text-sm text-slate-600">Research use: {consent.consented ? "your tasks may be included" : "your tasks are kept out"}. <button type="button" onClick={() => setEditingConsent(true)} className="text-blue-700 underline">Change</button></p>
           ) : null}
-          <SprintChecklistDialog open={checklistOpen} onOpenChange={setChecklistOpen} courseSlug={course.slug} sprint={assignmentNumber} />
+          <SprintChecklistDialog open={checklistSlot !== null} onOpenChange={(open) => { if (!open) setChecklistSlot(null); }} courseSlug={course.slug} sprint={assignmentNumber} slot={checklistSlot ?? 1} />
         </>
       ) : null}
     </div>

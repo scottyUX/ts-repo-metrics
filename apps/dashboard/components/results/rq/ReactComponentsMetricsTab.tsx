@@ -6,6 +6,7 @@ import { ReactComponentsCoreSignalsSection } from "./ReactComponentsCoreSignalsS
 import { ReactComponentsImprovementSection } from "./ReactComponentsImprovementSection";
 import { ReactComponentsOversizedTable } from "./ReactComponentsOversizedTable";
 import type { RepoReport } from "@/lib/reportTypes";
+import { isPrScopedReport } from "@/lib/analysisScope";
 
 interface ReactComponentsMetricsTabProps {
   report: RepoReport;
@@ -51,7 +52,7 @@ export function ReactComponentsMetricsTab({ report, onOpenCodeQualityTab }: Reac
   return (
     <div className="space-y-8">
       <ReactComponentsCoreSignalsSection reactMetrics={rm} />
-      <ReactComponentsAdditionalSignalsSection reactMetrics={rm} />
+      <ReactComponentsAdditionalSignalsSection reactMetrics={rm} prScoped={isPrScopedReport(report)} />
       <ReactComponentsOversizedTable components={rm.components} />
       <ReactComponentsImprovementSection
         topComponent={topBySloc}

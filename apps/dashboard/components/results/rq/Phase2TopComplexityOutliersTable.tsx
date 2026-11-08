@@ -23,6 +23,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { MetricHelpButton } from "./MetricGlossary";
+import { functionLabel } from "@/lib/functionLabel";
 import type { Phase2FunctionRow, Phase2Summary } from "@/lib/phase2Summary";
 import {
   phase2HalsteadVolumeCellClass,
@@ -117,7 +118,11 @@ export function Phase2TopComplexityOutliersTable({
                           className="cursor-pointer"
                           onClick={() => setSelected(row)}
                         >
-                          <TableCell className="max-w-[160px] font-medium">{fn.name}</TableCell>
+                          <TableCell
+                            className="max-w-[160px] font-medium"
+                          >
+                            {functionLabel(fn.name, fn.startLine)}
+                          </TableCell>
                           <TableCell
                             className="max-w-[220px] truncate font-mono text-xs text-muted-foreground"
                             title={row.file}

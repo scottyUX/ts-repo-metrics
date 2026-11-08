@@ -16,6 +16,7 @@ export default async function Cse115aLanding() {
         </h1>
         <p className="mx-auto max-w-2xl text-lg leading-relaxed text-slate-600">Paste two merged PRs per sprint. We read your task spec, check your tags and tests, and show you the rubric and Repo Metrics results.</p>
         <UcscGoogleButton />
+        <p className="text-sm text-slate-500">Works best on desktop. Mobile support is limited.</p>
       </div>
     </div>
   );

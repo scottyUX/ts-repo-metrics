@@ -24,7 +24,8 @@ const ANALYZABLE = [
 describe("JavaScript and JSX analysis", () => {
   it("scores a pull-request allow-list of JS and JSX files", async () => {
     const report = await analyzeRepo(FIXTURE_PATH, { includePaths: ANALYZABLE });
-    expect(report.filesAnalyzed).toBe(4);
+    // plain.test.js counts as test LOC but is not scored.
+    expect(report.filesAnalyzed).toBe(3);
     expect(report.totals.functions).toBeGreaterThan(0);
 
     const card = report.perFile.find((f) => f.file.endsWith("Card.js"));

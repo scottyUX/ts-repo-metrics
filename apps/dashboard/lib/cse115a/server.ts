@@ -2,15 +2,17 @@ import "server-only";
 import { createUserSupabaseServerClient } from "@/lib/supabase/server-user";
 import { getSupabase } from "@/lib/supabase/server";
 import { verifiedUcscGoogleEmail } from "@/lib/courseUcscAuth";
+import { githubLoginOf } from "@/lib/cse115a/githubApp";
 
-export type CourseIdentity = { userId: string; email: string };
+/** A signed-in course user; `githubLogin` is the GitHub account they linked, if any. */
+export type CourseIdentity = { userId: string; email: string; githubLogin: string | null };
 export type Course = { id: string; slug: string; title: string; term: string; assignment_count: number; active: boolean };
 
 export async function getCourseIdentity(): Promise<CourseIdentity | null> {
   const supabase = await createUserSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
   const email = verifiedUcscGoogleEmail(user);
-  return user && email ? { userId: user.id, email } : null;
+  return user && email ? { userId: user.id, email, githubLogin: githubLoginOf(user) } : null;
 }
 
 export async function getEnrolledCourse(userId: string, slug: string): Promise<Course | null> {

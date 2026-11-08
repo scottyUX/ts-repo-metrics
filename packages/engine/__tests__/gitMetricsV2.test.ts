@@ -8,6 +8,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import {
   extractGitMetricsV2,
   extractGitHistoryBundle,
+  resolveNumstatPath,
 } from "../src/collect/gitMetricsV2.js";
 
 const mockRaw = vi.fn();
@@ -239,3 +240,45 @@ m
     expect(mockRaw.mock.calls[0]![0]).not.toContain("--all");
   });
 });
+
+describe("test coupling with renamed files", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockCheckIsRepo.mockResolvedValue(true);
+  });
+
+  it("counts a commit that renames a source file into a test file", async () => {
+    const t0 = 1700000000;
+    mockRaw.mockResolvedValue(
+      [
+        `COMMIT_END\nc1\n${t0}\na@example.com\nA\nAdd fixture\n1301\t0\tsrc/complexity-fixture.ts`,
+        `COMMIT_END\nc2\n${t0 + 60}\na@example.com\nA\nMove into a test file\n1\t1\tsrc/{complexity-fixture.ts => complexity-heavy.test.ts}`,
+      ].join("\n"),
+    );
+    const result = await extractGitMetricsV2("/tmp/repo");
+    expect(result?.testCoupling.pctCommitsTouchingTests).toBe(50);
+  });
+});
+
+describe("resolveNumstatPath", () => {
+  it("leaves ordinary paths unchanged", () => {
+    expect(resolveNumstatPath("src/login.ts")).toBe("src/login.ts");
+  });
+
+  it("resolves a rename within the same folder", () => {
+    expect(resolveNumstatPath("src/{fixture.ts => fixture.test.ts}")).toBe("src/fixture.test.ts");
+  });
+
+  it("resolves a rename into a subfolder", () => {
+    expect(resolveNumstatPath("src/{x.ts => tests/x.test.ts}")).toBe("src/tests/x.test.ts");
+  });
+
+  it("resolves a move with an empty side in the braces", () => {
+    expect(resolveNumstatPath("src/{ => tests}/login.test.ts")).toBe("src/tests/login.test.ts");
+  });
+
+  it("resolves a rename with no shared folder", () => {
+    expect(resolveNumstatPath("src/fixture.ts => tests/fixture.test.ts")).toBe("tests/fixture.test.ts");
+  });
+});
+

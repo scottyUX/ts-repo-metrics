@@ -39,7 +39,7 @@ export function SprintChecklistPreview() {
       </nav>
       <h1 className="text-2xl font-semibold">Sprint {sprint.number}</h1>
       <p className="text-sm text-muted-foreground">{sprint.submitted ? "Submitted." : `${sprint.tasksAdded} of 2 tasks added.`}</p>
-      <SprintChecklistDialog open={open} onOpenChange={setOpen} courseSlug={COURSE} sprint={sprint.number} />
+      <SprintChecklistDialog open={open} onOpenChange={setOpen} courseSlug={COURSE} sprint={sprint.number} slot={1} />
     </div>
   );
 }

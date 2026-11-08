@@ -70,7 +70,7 @@ export function CommitHabitsMetricsTab({ report, scopeId, onScopeIdChange, prOnl
       ) : null}
 
       <CommitHabitsCoreSignalsSection mv={mv} />
-      <CommitHabitsAdditionalSignalsSection mv={mv} quality={signalQuality} />
+      <CommitHabitsAdditionalSignalsSection mv={mv} quality={signalQuality} prScoped={isPrScopedReport(report)}/>
 
       <CommitActivityCard report={report} scopeId={scopeId} focusWeeks={prOnly ? 3 : undefined} />
 

@@ -1,0 +1,78 @@
+# Course GitHub App: setup
+
+The course site reads each team's repository through a GitHub App instead of a GitHub OAuth app.
+
+| | OAuth app | GitHub App |
+| --- | --- | --- |
+| What a student approves | Read and write access to every repository they can reach (`repo` scope) | Their GitHub username |
+| Repositories the site can read | All of the student's repositories | Only repositories a team installed the app on |
+| Access | Read and write | Read-only: contents, pull requests, checks, commit statuses |
+| Tokens stored | Each student's GitHub token, encrypted | None; the server asks GitHub for a one-hour token when it needs one |
+
+How it works (`apps/dashboard/lib/cse115a/githubApp.ts`):
+
+1. **Connect GitHub** on the dashboard now only proves the student's GitHub username. Supabase's GitHub provider uses the app's OAuth credentials.
+2. The owner of each team repository (or an owner of its organization) installs the app on it.
+3. When a student adds a pull request, submits a sprint, opens a PR's commits, or runs a course analysis, the server:
+   - looks up the app's installation on that repository (`GET /repos/{owner}/{repo}/installation`);
+   - checks the student has linked a GitHub account;
+   - reads the repository with an installation token scoped to that one repository and capped at read access for contents, pull requests, checks, and commit statuses.
+
+Students don't need write access to the repository. Installing the app on it is what lets the site read it, so a teammate with read access, or none, can still add the team's pull requests. The site records whether the submitting student authored each pull request (`prAuthoredByStudent`) for the instructor to review.
+
+When a check fails, the student sees an error with a code they can act on:
+
+| Code | Shown when |
+| --- | --- |
+| `github_not_linked` | The student hasn't connected GitHub. |
+| `github_app_not_installed` | The app isn't installed on that repository; the message includes the install link. |
+| `github_app_unconfigured` | The `GITHUB_APP_*` settings are missing on the server. |
+
+## 1. Create the GitHub App
+
+Create it on the **UXlySoftware** organization: **Settings → Developer settings → GitHub Apps → New GitHub App**. Do not create it on a personal account. An app there can only be managed by that one user.
+
+- **Callback URL:** your Supabase callback, `https://<project-ref>.supabase.co/auth/v1/callback`.
+- **Expire user authorization tokens:** leave on. The site doesn't keep user tokens.
+- **Request user authorization (OAuth) during installation:** off. **Device flow:** off.
+- **Setup URL** (optional): the dashboard URL, with **Redirect on update** checked, so students return there after installing.
+- **Webhook:** off.
+- **Repository permissions,** all read-only: **Contents**, **Pull requests**, **Checks**, **Commit statuses**. **Metadata** read-only is required by GitHub.
+- **Account permissions:** **Email addresses**, read-only. Without it, Supabase can't read the GitHub account's email, and linking fails with "Error getting user email from external provider".
+- **Where can this GitHub App be installed?** **Any account**, because team repositories belong to students' accounts and organizations.
+
+After creating it, note the **App ID** and **Client ID**, generate a **client secret**, and generate a **private key** (`.pem`).
+
+## 2. Point Supabase's GitHub provider at the app
+
+In Supabase, go to **Authentication → Sign In / Providers → GitHub** and replace the client ID and secret with the app's. Keep **Allow manual linking** on, because students link GitHub to the account they signed in with. Remove the `repo` scope from the provider. The dashboard no longer sends it, but GitHub still shows whatever scopes are saved on the provider. If `repo` remains, students are asked for read and write access to every repository they can reach.
+
+Students who linked GitHub through the old OAuth app stay linked. GitHub identifies them by the same user, so they don't need to connect again.
+
+## 3. Server settings
+
+Set these on the web app (the grading worker doesn't read GitHub):
+
+| Variable | Value |
+| --- | --- |
+| `GITHUB_APP_ID` | the App ID |
+| `GITHUB_APP_SLUG` | the app's slug, from `github.com/apps/<slug>`; used for the install link |
+| `GITHUB_APP_PRIVATE_KEY` | the private key, as a secret: the PEM, the PEM with `\n` escapes, or base64 of the PEM |
+
+Base64 is the easiest to paste into hosts that take single-line values:
+
+```bash
+base64 -w0 your-app.private-key.pem   # macOS: base64 -i your-app.private-key.pem
+```
+
+When `CSE115A_SITE=true`, the auth callback does not store GitHub user tokens, and the server does not read `user_github_tokens`. Leave those rows in place when this Supabase project also serves the main dashboard. On a deployment without `CSE115A_SITE=true`, the main Repo Metrics pages keep storing and using user tokens as before.
+
+**Check:** after signing in, each pull request field on the dashboard shows an **Install or check it** link. If it's missing, `GITHUB_APP_SLUG` isn't set.
+
+## 4. The repository owner installs the app (once per team)
+
+The repository owner (for an organization repository, an organization owner) opens `https://github.com/apps/<slug>/installations/new`, picks the account that owns the team repository, chooses **Only select repositories**, selects it, and clicks **Install**.
+
+- **Organization repositories:** a student who isn't an owner sees **Request** instead of **Install**. An organization owner approves it under the organization's **Settings → GitHub Apps**.
+- **Who can install:** the owner of the account that owns the repository. On an organization, an owner (or a repository admin, when the organization allows it); other members can only send a request.
+- **Forks:** pull requests must come from the team repository that has the app installed. The app can't read forks it isn't installed on.
