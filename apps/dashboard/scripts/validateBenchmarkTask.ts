@@ -112,9 +112,19 @@ async function main() {
   row.FAIL_TO_PASS ??= [];
   row.PASS_TO_PASS ??= [];
 
-  const repoDir = args.repoDir ? resolve(args.repoDir) : await cloneRepo(row.repo);
+  const cloned = !args.repoDir;
+  const repoDir = cloned ? await cloneRepo(row.repo) : resolve(args.repoDir);
   await ensureCommit(repoDir, row.base_commit);
+  try {
+    await validate(args, row, repoDir);
+  } finally {
+    // The last container run leaves the checkout at base + both patches. Put it back, or drop the clone.
+    if (cloned) await rm(repoDir, { recursive: true, force: true });
+    else await run("git", ["checkout", "-q", "-f", row.base_commit], repoDir).then(() => run("git", ["clean", "-fdq"], repoDir)).catch(() => undefined);
+  }
+}
 
+async function validate(args: ReturnType<typeof parseArgs>, row: TaskRow, repoDir: string) {
   const files: RepoFiles = { packageJson: await fileAt(repoDir, row.base_commit, "package.json"), lockfiles: [] };
   for (const lock of LOCKFILES) {
     if ((await fileAt(repoDir, row.base_commit, lock)) !== null) files.lockfiles.push(lock);
