@@ -104,3 +104,10 @@ describe("modifiedTests", () => {
     expect(modifiedTests("tests/login.test.ts", baseFile, patched)).toEqual(["tests/login.test.ts::login > rejects an empty email"]);
   });
 });
+
+describe("parseVitestReport: a file that failed to load", () => {
+  it("reports the load pseudo-id when a file failed with no assertion results", () => {
+    const report = { testResults: [{ name: "/work/src/broken.test.ts", status: "failed", assertionResults: [] }] };
+    expect(parseVitestReport(report)).toEqual({ "src/broken.test.ts::(load)": "failed" });
+  });
+});

@@ -6,6 +6,8 @@
 // This module is pure: it takes already-parsed results and never touches Docker or files.
 
 /** Result of one test in one run. A test missing from a run is "absent". */
+import { LOAD_FAILURE_SUFFIX } from "@/lib/cse115a/benchmark/validation/testIds";
+
 export type TestStatus = "passed" | "failed" | "skipped";
 
 /** One run of the suite: test id -> status. Ids are `file::describe > test` (see extractTests.ts). */
@@ -38,6 +40,8 @@ export type Comparison = {
   skipped: string[];
   /** Pre-existing tests R1 had no result for; their "before" status came from R0. */
   judgedFromBase: string[];
+  /** `state file` for every test file that failed to load in a state; its tests count as failed there. */
+  loadFailures: string[];
   validationStatus: "validated" | "rejected";
   reason: "regressions" | "regression_skip" | "no_fail_to_pass" | null;
 };
@@ -71,9 +75,23 @@ function mergeState([a, b]: StateRuns, flaky: Set<string>): Map<string, MergedSt
 export function compareRuns(input: CompareInput): Comparison {
   const modified = input.modified ?? new Set<string>();
   const flaky = new Set<string>();
-  const r0 = mergeState(input.r0, flaky);
-  const r1 = mergeState(input.r1, flaky);
-  const r2 = mergeState(input.r2, flaky);
+  const states = { r0: mergeState(input.r0, flaky), r1: mergeState(input.r1, flaky), r2: mergeState(input.r2, flaky) };
+  const loadFailures: string[] = [];
+  const failedFiles = { r0: new Set<string>(), r1: new Set<string>(), r2: new Set<string>() };
+  for (const name of ["r0", "r1", "r2"] as const) {
+    for (const [id, status] of states[name]) {
+      if (!id.endsWith(LOAD_FAILURE_SUFFIX)) continue;
+      if (status === "failed") {
+        const file = id.slice(0, -LOAD_FAILURE_SUFFIX.length);
+        failedFiles[name].add(file);
+        loadFailures.push(`${name} ${file}`);
+      }
+    }
+  }
+  /** A test absent from a state whose file failed to load there did fail there. */
+  const statusIn = (name: keyof typeof states, id: string): MergedStatus =>
+    states[name].get(id) ?? (failedFiles[name].has(id.slice(0, id.indexOf("::"))) ? "failed" : "absent");
+  const { r0, r1, r2 } = states;
 
   const failToPass: string[] = [];
   const absentToPass: string[] = [];
@@ -85,11 +103,12 @@ export function compareRuns(input: CompareInput): Comparison {
   const judgedFromBase: string[] = [];
 
   for (const id of new Set([...r0.keys(), ...r1.keys(), ...r2.keys()])) {
-    if (flaky.has(id)) continue;
-    const inR1 = r1.get(id) ?? "absent";
-    const fromBase = r0.has(id) && (inR1 === "skipped" || (inR1 === "absent" && !modified.has(id)));
-    const before = fromBase ? r0.get(id)! : inR1;
-    const after = r2.get(id) ?? "absent";
+    if (flaky.has(id) || id.endsWith(LOAD_FAILURE_SUFFIX)) continue;
+    const inR1 = statusIn("r1", id);
+    const inR0 = statusIn("r0", id);
+    const fromBase = inR0 !== "absent" && (inR1 === "skipped" || (inR1 === "absent" && !modified.has(id)));
+    const before = fromBase ? inR0 : inR1;
+    const after = statusIn("r2", id);
     if (fromBase) judgedFromBase.push(id);
 
     if (before === "skipped") skipped.push(id);
@@ -108,9 +127,10 @@ export function compareRuns(input: CompareInput): Comparison {
     failToFail: sort(failToFail),
     regressions: sort(regressions),
     regressionSkips: sort(regressionSkips),
-    flaky: sort([...flaky]),
+    flaky: sort([...flaky].filter((id) => !id.endsWith(LOAD_FAILURE_SUFFIX))),
     skipped: sort(skipped),
     judgedFromBase: sort(judgedFromBase),
+    loadFailures: sort(loadFailures),
   };
   const proven = result.failToPass.length + result.absentToPass.length > 0;
   const reason = result.regressions.length > 0 ? "regressions" : result.regressionSkips.length > 0 ? "regression_skip" : proven ? null : "no_fail_to_pass";

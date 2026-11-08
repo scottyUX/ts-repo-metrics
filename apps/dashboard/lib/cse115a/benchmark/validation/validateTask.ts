@@ -66,6 +66,8 @@ export type ValidationResult = {
   flaky: string[];
   skipped: string[];
   judged_from_base: string[];
+  /** `state file` for test files that failed to load in a state (tests of that file count as failed there). */
+  load_failures: string[];
   modified_tests: string[];
   /** Ids the row's static extraction listed that no run ever reported. */
   unmatched_static_ids: string[];
@@ -82,7 +84,7 @@ export function unsupportedResult(row: TaskRow, env: Unsupported): ValidationRes
     image: null, eval_script: null, log_parser: null, package_dir: null,
     test_files: filesInPatch(row.test_patch),
     FAIL_TO_PASS: [], ABSENT_TO_PASS: [], PASS_TO_PASS: [], FAIL_TO_FAIL: [],
-    regressions: [], regression_skips: [], flaky: [], skipped: [], judged_from_base: [],
+    regressions: [], regression_skips: [], flaky: [], skipped: [], judged_from_base: [], load_failures: [],
     modified_tests: [], unmatched_static_ids: [],
     validation_status: "rejected", reason: env.reason, detail: env.detail, timings: {},
   };
@@ -134,6 +136,7 @@ export async function validateTask(input: ValidateInput): Promise<ValidationResu
     flaky: comparison.flaky,
     skipped: comparison.skipped,
     judged_from_base: comparison.judgedFromBase,
+    load_failures: comparison.loadFailures,
     modified_tests: [...input.modified].sort(),
     unmatched_static_ids: unmatchedStaticIds(staticIds, allRuns),
     validation_status: comparison.validationStatus,

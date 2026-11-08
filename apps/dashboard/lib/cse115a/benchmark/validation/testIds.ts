@@ -10,6 +10,9 @@ import type { RunResults, TestStatus } from "@/lib/cse115a/benchmark/validation/
 export type VitestReport = {
   testResults: Array<{
     name: string;
+    /** Vitest's per-file status; "failed" with no assertion results means the file did not load. */
+    status?: string;
+    message?: string;
     assertionResults: Array<{
       ancestorTitles: string[];
       title: string;
@@ -17,6 +20,14 @@ export type VitestReport = {
     }>;
   }>;
 };
+
+/**
+ * Suffix of the pseudo-id a run reports when a test file failed to load (an import that does not
+ * exist yet, a syntax error). `compareRuns` treats every test of that file as failed in that state
+ * and never classifies the pseudo-id itself.
+ */
+export const LOAD_FAILURE_SUFFIX = "::(load)";
+export const loadFailureId = (file: string) => `${file}${LOAD_FAILURE_SUFFIX}`;
 
 /** Builds the id used everywhere in the validator. */
 export function testId(file: string, ancestors: string[], title: string): string {
@@ -35,6 +46,7 @@ export function parseVitestReport(report: VitestReport, mountPrefix = "/work/"):
     for (const test of fileResult.assertionResults) {
       results[testId(file, test.ancestorTitles, test.title)] = toStatus(test.status);
     }
+    if (fileResult.status === "failed" && fileResult.assertionResults.length === 0) results[loadFailureId(file)] = "failed";
   }
   return results;
 }

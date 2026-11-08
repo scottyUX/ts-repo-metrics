@@ -219,3 +219,27 @@ describe("compareRuns flakiness", () => {
     expect(result.passToPass).toEqual([]);
   });
 });
+
+describe("compareRuns: a test file that failed to load", () => {
+  it("counts the file's tests as failed in that state and never classifies the load pseudo-id", () => {
+    const r0: StateRuns = [{}, {}];
+    const r1: StateRuns = [{ "tests/x.test.mjs::(load)": "failed" }, { "tests/x.test.mjs::(load)": "failed" }];
+    const r2: StateRuns = [{ "tests/x.test.mjs::a": "passed", "tests/x.test.mjs::b": "passed" }, { "tests/x.test.mjs::a": "passed", "tests/x.test.mjs::b": "passed" }];
+    const result = compareRuns({ r0, r1, r2 });
+    expect(result.failToPass).toEqual(["tests/x.test.mjs::a", "tests/x.test.mjs::b"]);
+    expect(result.absentToPass).toEqual([]);
+    expect(result.regressions).toEqual([]);
+    expect(result.loadFailures).toEqual(["r1 tests/x.test.mjs"]);
+    expect(result.validationStatus).toBe("validated");
+  });
+
+  it("treats a file that loads before and fails to load after as a regression of its tests", () => {
+    const ok = { "tests/y.test.ts::a": "passed" as const };
+    const r1: StateRuns = [ok, ok];
+    const r2: StateRuns = [{ "tests/y.test.ts::(load)": "failed" }, { "tests/y.test.ts::(load)": "failed" }];
+    const result = compareRuns({ r0: [ok, ok], r1, r2 });
+    expect(result.regressions).toEqual(["tests/y.test.ts::a"]);
+    expect(result.loadFailures).toEqual(["r2 tests/y.test.ts"]);
+    expect(result.reason).toBe("regressions");
+  });
+});
