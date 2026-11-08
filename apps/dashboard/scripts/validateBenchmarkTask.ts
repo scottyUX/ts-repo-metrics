@@ -4,18 +4,16 @@
 //   npx tsx --tsconfig apps/dashboard/tsconfig.json apps/dashboard/scripts/validateBenchmarkTask.ts ROW.json [--repo-dir DIR] [--out RESULT.json] [--timeout SECONDS]
 //
 // ROW.json holds the row's instance_id, repo, base_commit, patch, test_patch, FAIL_TO_PASS and
-// PASS_TO_PASS. Without --repo-dir the repository is cloned into a temp folder; a private
-// repository needs GITHUB_APP_ID, GITHUB_APP_SLUG and GITHUB_APP_PRIVATE_KEY in the environment
-// so the course App's installation token can be used. Docker must be running.
+// PASS_TO_PASS. Without --repo-dir the repository is cloned into a temp folder and deleted after; a
+// private repository needs GITHUB_APP_ID, GITHUB_APP_SLUG and GITHUB_APP_PRIVATE_KEY in the environment
+// so the course App's installation token can be used. Docker must be running. For many rows, use
+// validateBenchmarkBatch.ts.
 
-import { spawn } from "node:child_process";
-import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
-import { detectEnvironment } from "@/lib/cse115a/benchmark/validation/environment";
-import { DockerSuiteRunner } from "@/lib/cse115a/benchmark/validation/runner";
-import { filesInPatch, modifiedAcrossFiles, unsupportedResult, validateTask, type TaskRow } from "@/lib/cse115a/benchmark/validation/validateTask";
-import { githubAppConfig, repoInstallationToken } from "@/lib/cse115a/githubAppToken";
+import { assertRow, cloneRepo, ensureCommit, validateRow } from "@/lib/cse115a/benchmark/validation/runRow";
+import type { TaskRow } from "@/lib/cse115a/benchmark/validation/validateTask";
 
 function parseArgs(argv: string[]) {
   const args = { rowPath: "", repoDir: "", out: "", timeoutSeconds: 900 };
@@ -31,132 +29,25 @@ function parseArgs(argv: string[]) {
   return args;
 }
 
-/** Runs a command, returns stdout, throws on a non-zero exit. */
-function run(cmd: string, args: string[], cwd?: string): Promise<string> {
-  return new Promise((resolvePromise, reject) => {
-    const child = spawn(cmd, args, { cwd, stdio: ["ignore", "pipe", "pipe"] });
-    let out = "";
-    let err = "";
-    child.stdout.on("data", (chunk) => { out += chunk; });
-    child.stderr.on("data", (chunk) => { err += chunk; });
-    child.on("error", reject);
-    child.on("close", (code) => {
-      if (code === 0) resolvePromise(out);
-      else reject(new Error(`${cmd} ${args.join(" ")} exited ${code}\n${err.trim()}`));
-    });
-  });
-}
-
-/** File contents at a commit, or null when the path does not exist there. */
-async function fileAt(repoDir: string, commit: string, path: string): Promise<string | null> {
-  try {
-    return await run("git", ["show", `${commit}:${path}`], repoDir);
-  } catch {
-    return null;
-  }
-}
-
-async function cloneRepo(fullName: string): Promise<string> {
-  const [owner, name] = fullName.split("/");
-  const config = githubAppConfig();
-  const token = config ? await repoInstallationToken(owner, name, config) : null;
-  const url = token ? `https://x-access-token:${token}@github.com/${fullName}.git` : `https://github.com/${fullName}.git`;
-  const dir = await mkdtemp(join(tmpdir(), "hecate-repo-"));
-  console.error(`Cloning ${fullName}${token ? " with the course App token" : ""}...`);
-  await run("git", ["clone", "--quiet", url, dir]);
-  // Drop the token from the remote so it never lands in the mounted checkout.
-  await run("git", ["remote", "set-url", "origin", `https://github.com/${fullName}.git`], dir);
-  return dir;
-}
-
-async function ensureCommit(repoDir: string, commit: string): Promise<void> {
-  try {
-    await run("git", ["cat-file", "-e", `${commit}^{commit}`], repoDir);
-  } catch {
-    console.error(`Fetching ${commit}...`);
-    await run("git", ["fetch", "--quiet", "origin", commit], repoDir);
-  }
-}
-
-/** Runs `fn` with a throwaway worktree at `base` plus the given patches applied in order. */
-async function withPatchedWorktree<T>(repoDir: string, base: string, patches: string[], fn: (dir: string) => Promise<T>): Promise<T> {
-  const worktree = await mkdtemp(join(tmpdir(), "hecate-patched-"));
-  const patchFile = join(tmpdir(), `hecate-patch-${process.pid}-${Date.now()}.diff`);
-  try {
-    await run("git", ["worktree", "add", "--detach", "--quiet", worktree, base], repoDir);
-    for (const patch of patches) {
-      if (!patch.trim()) continue;
-      await writeFile(patchFile, patch);
-      await run("git", ["apply", "--whitespace=nowarn", patchFile], worktree);
-    }
-    return await fn(worktree);
-  } finally {
-    await run("git", ["worktree", "remove", "--force", worktree], repoDir).catch(() => rm(worktree, { recursive: true, force: true }));
-    await rm(patchFile, { force: true });
-  }
-}
-
-/** Reads a file under `dir`, or null when it does not exist. */
-async function fileIn(dir: string, path: string): Promise<string | null> {
-  try {
-    return await readFile(join(dir, path), "utf8");
-  } catch {
-    return null;
-  }
-}
-
 async function main() {
   const args = parseArgs(process.argv.slice(2));
-  const row = JSON.parse(await readFile(args.rowPath, "utf8")) as TaskRow;
-  for (const key of ["instance_id", "repo", "base_commit", "patch", "test_patch"] as const) {
-    if (typeof row[key] !== "string") throw new Error(`Row is missing "${key}"`);
-  }
-  row.FAIL_TO_PASS ??= [];
-  row.PASS_TO_PASS ??= [];
+  const row = JSON.parse(await readFile(args.rowPath, "utf8")) as Partial<TaskRow>;
+  assertRow(row);
+  const log = (line: string) => console.error(line);
 
   const cloned = !args.repoDir;
-  const repoDir = cloned ? await cloneRepo(row.repo) : resolve(args.repoDir);
-  await ensureCommit(repoDir, row.base_commit);
+  const repoDir = cloned ? await cloneRepo(row.repo, undefined, log) : resolve(args.repoDir);
+  await ensureCommit(repoDir, row.base_commit, log);
   try {
-    await validate(args, row, repoDir);
-  } finally {
-    // The last container run leaves the checkout at base + both patches. Put it back, or drop the clone.
-    if (cloned) await rm(repoDir, { recursive: true, force: true });
-    else await run("git", ["checkout", "-q", "-f", row.base_commit], repoDir).then(() => run("git", ["clean", "-fdq"], repoDir)).catch(() => undefined);
-  }
-}
-
-async function validate(args: ReturnType<typeof parseArgs>, row: TaskRow, repoDir: string) {
-  const testFiles = filesInPatch(row.test_patch);
-  // The environment comes from the finished tree (base + both patches): the student's test script
-  // and dependencies usually arrive with the fix, since package.json is not a test file.
-  const env = await withPatchedWorktree(repoDir, row.base_commit, [row.test_patch, row.patch], (dir) =>
-    detectEnvironment({ testFiles, read: (path) => fileIn(dir, path) }));
-
-  let result;
-  if (!env.supported) {
-    result = unsupportedResult(row, env);
-  } else {
-    const baseSources = new Map<string, string | null>();
-    for (const file of testFiles) baseSources.set(file, await fileAt(repoDir, row.base_commit, file));
-    const patched = await withPatchedWorktree(repoDir, row.base_commit, [row.test_patch], async (dir) => {
-      const sources = new Map<string, string | null>();
-      for (const file of testFiles) sources.set(file, await fileIn(dir, file));
-      return sources;
-    });
-    const modified = modifiedAcrossFiles(testFiles, baseSources, patched);
     const logDir = join(tmpdir(), "hecate-validate-logs", row.instance_id);
-    await mkdir(logDir, { recursive: true });
-    console.error(`Environment: ${env.packageManager} + ${env.runners.join("+")} in ${env.packageDir || "."}, image ${env.image}. Running three states, twice each; logs in ${logDir}`);
-    const { runs, ...rest } = await validateTask({ row, repoDir, env, modified, runner: new DockerSuiteRunner(logDir), timeoutSeconds: args.timeoutSeconds });
-    void runs;
-    result = rest;
+    const result = await validateRow({ row, repoDir, logDir, timeoutSeconds: args.timeoutSeconds, log });
+    const json = JSON.stringify(result, null, 2);
+    if (args.out) await writeFile(args.out, json + "\n");
+    console.log(json);
+    console.error(`${result.validation_status}${result.reason ? ` (${result.reason})` : ""} — dry run, nothing written to the database.`);
+  } finally {
+    if (cloned) await rm(repoDir, { recursive: true, force: true });
   }
-
-  const json = JSON.stringify(result, null, 2);
-  if (args.out) await writeFile(args.out, json + "\n");
-  console.log(json);
-  console.error(`${result.validation_status}${result.reason ? ` (${result.reason})` : ""} — dry run, nothing written to the database.`);
 }
 
 main().catch((error) => {

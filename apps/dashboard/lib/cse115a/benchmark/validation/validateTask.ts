@@ -49,6 +49,17 @@ export function modifiedAcrossFiles(
   return modified;
 }
 
+/** Every reason a row can be rejected. The first three come from the runs, the rest from before them. */
+export type ValidationReason =
+  | Comparison["reason"]
+  | "env_unsupported"
+  /** The row has an empty `patch`: nothing to validate. */
+  | "no_source_patch"
+  /** The row has an empty `test_patch`: nothing can prove the fix. */
+  | "no_test_patch"
+  /** A container run or the git plumbing failed; the environment, not the student. */
+  | "env_error";
+
 export type ValidationResult = {
   instance_id: string;
   image: string | null;
@@ -72,9 +83,12 @@ export type ValidationResult = {
   /** Ids the row's static extraction listed that no run ever reported. */
   unmatched_static_ids: string[];
   validation_status: "validated" | "rejected";
-  reason: Comparison["reason"] | "env_unsupported";
+  reason: ValidationReason;
   detail: string | null;
   timings: Record<string, number>;
+  /** Set by the batch: the exact image bytes (`node:24-bookworm@sha256:…`) and the snapshot bundle path. */
+  image_digest?: string | null;
+  snapshot_bundle?: string | null;
 };
 
 /** The result for a repository the validator cannot run (bun, jest, no package.json). */

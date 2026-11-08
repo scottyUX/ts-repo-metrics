@@ -80,9 +80,23 @@ export function containerScript(plan: RunPlan, state: State): string {
 }
 
 /** Runs `docker run` with the repo mounted at /work and the patches at /patches. */
+/**
+ * Environment that points npm, pnpm, yarn and corepack at one mounted folder, so a batch downloads
+ * each package once instead of once per run. The folder is shared by every run and every repository.
+ */
+export const PACKAGE_CACHE_ENV: Record<string, string> = {
+  npm_config_cache: "/cache/npm",
+  npm_config_store_dir: "/cache/pnpm-store",
+  YARN_CACHE_FOLDER: "/cache/yarn",
+  COREPACK_HOME: "/cache/corepack",
+};
+
 export class DockerSuiteRunner implements SuiteRunner {
-  /** Directory for one log per run (`<state><attempt>.log`); nothing is kept when unset. */
-  constructor(private readonly logDir?: string) {}
+  /**
+   * `logDir`: one log per run (`<state><attempt>.log`); nothing is kept when unset.
+   * `cacheDir`: a host folder mounted at /cache as the shared package cache; none when unset.
+   */
+  constructor(private readonly logDir?: string, private readonly cacheDir?: string) {}
 
   async runSuite(plan: RunPlan, state: State, attempt: 1 | 2): Promise<RunResults> {
     const patches = await mkdtemp(join(tmpdir(), "hecate-validate-"));
@@ -92,20 +106,32 @@ export class DockerSuiteRunner implements SuiteRunner {
       await writeFile(join(patches, "run.sh"), containerScript(plan, state));
       await writeFile(join(patches, "reporter.mjs"), NODE_TEST_REPORTER_SOURCE);
       const image = plan.image ?? "node:22-bookworm";
-      const logFile = this.logDir ? join(this.logDir, `${state}${attempt === 1 ? "a" : "b"}.log`) : null;
-      try {
-        const output = await exec("docker", [
-          "run", "--rm",
-          ...Object.entries(plan.env ?? {}).flatMap(([k, v]) => ["-e", `${k}=${v}`]),
-          "-v", `${plan.repoDir}:/work`,
-          "-v", `${patches}:/patches`,
-          "-w", "/work",
-          image, "bash", "/patches/run.sh",
-        ], (plan.timeoutSeconds ?? 900) * 1000);
-        if (logFile) await writeFile(logFile, output);
-      } catch (error) {
-        if (logFile) await writeFile(logFile, error instanceof Error ? error.message : String(error));
-        throw error;
+      const name = `${state}${attempt === 1 ? "a" : "b"}`;
+      const cacheEnv = this.cacheDir ? PACKAGE_CACHE_ENV : {};
+      const args = [
+        "run", "--rm",
+        ...Object.entries({ ...(plan.env ?? {}), ...cacheEnv }).flatMap(([k, v]) => ["-e", `${k}=${v}`]),
+        ...(this.cacheDir ? ["-v", `${this.cacheDir}:/cache`] : []),
+        "-v", `${plan.repoDir}:/work`,
+        "-v", `${patches}:/patches`,
+        "-w", "/work",
+        image, "bash", "/patches/run.sh",
+      ];
+      const timeoutMs = (plan.timeoutSeconds ?? 900) * 1000;
+      // A run that dies (a registry connection refused mid-install, a Docker hiccup) gets one retry
+      // after a pause; a timeout does not, since it would only double the wait.
+      for (let tryNumber = 1; ; tryNumber++) {
+        try {
+          const output = await exec("docker", args, timeoutMs);
+          if (this.logDir) await writeFile(join(this.logDir, `${name}.log`), output);
+          break;
+        } catch (error) {
+          const message = error instanceof Error ? error.message : String(error);
+          const retry = tryNumber === 1 && !(error instanceof ExecError && error.timedOut);
+          if (this.logDir) await writeFile(join(this.logDir, `${name}${retry ? ".attempt1" : ""}.log`), message);
+          if (!retry) throw error;
+          await new Promise((r) => setTimeout(r, 15_000));
+        }
       }
       return readReports(join(patches, "reports"));
     } finally {
@@ -134,9 +160,16 @@ export async function readReports(dir: string): Promise<RunResults> {
   return results;
 }
 
+/** Thrown by `exec`; `timedOut` tells a hung run from one that died. */
+export class ExecError extends Error {
+  constructor(message: string, readonly timedOut: boolean) {
+    super(message);
+  }
+}
+
 /**
- * Spawns a process and returns its combined output; rejects on a non-zero exit or on timeout with
- * the tail of that output in the message.
+ * Spawns a process and returns its combined output; rejects with an ExecError on a non-zero exit or
+ * on timeout, with the tail of that output in the message.
  */
 function exec(command: string, args: string[], timeoutMs: number): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -144,12 +177,12 @@ function exec(command: string, args: string[], timeoutMs: number): Promise<strin
     let output = "";
     child.stdout.on("data", (chunk: Buffer) => { output += chunk.toString(); });
     child.stderr.on("data", (chunk: Buffer) => { output += chunk.toString(); });
-    const timer = setTimeout(() => { child.kill("SIGKILL"); reject(new Error(`${command} timed out after ${timeoutMs} ms\n${output.trim().slice(-3000)}`)); }, timeoutMs);
+    const timer = setTimeout(() => { child.kill("SIGKILL"); reject(new ExecError(`${command} timed out after ${timeoutMs} ms\n${output.trim().slice(-3000)}`, true)); }, timeoutMs);
     child.on("error", (error) => { clearTimeout(timer); reject(error); });
     child.on("close", (code) => {
       clearTimeout(timer);
       if (code === 0) resolve(output);
-      else reject(new Error(`${command} ${args[0]} exited ${code}:\n${output.trim().slice(-3000)}`));
+      else reject(new ExecError(`${command} ${args[0]} exited ${code}:\n${output.trim().slice(-3000)}`, false));
     });
   });
 }
