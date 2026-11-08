@@ -57,7 +57,7 @@ export function containerScript(plan: RunPlan, state: State): string {
   const lines = [
     "set -e",
     "cd /work",
-    `git checkout -q ${plan.baseCommit}`,
+    `git checkout -q -f ${plan.baseCommit}`,
     "git clean -fdq",
     plan.installCommand,
   ];

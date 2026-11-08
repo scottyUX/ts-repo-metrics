@@ -59,7 +59,7 @@ describe("containerScript", () => {
 
   it("checks out the base commit, installs, and never fails the script on a red suite", () => {
     const script = containerScript(plan, "r1");
-    expect(script).toContain("git checkout -q abc123");
+    expect(script).toContain("git checkout -q -f abc123");
     expect(script).toContain("npm ci");
     expect(script).toContain("export REPORT=/patches/report.json\nnpx vitest run --reporter=json --outputFile=$REPORT || true");
     expect(script.indexOf("npm ci")).toBeLessThan(script.indexOf("git apply"));
