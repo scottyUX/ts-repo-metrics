@@ -1,5 +1,5 @@
 // Classifies tests by comparing their results across the three validation states
-// (R0 base, R1 base + test_patch, R2 base + test_patch + patch), each run twice.
+// (R0 base, R1 base + test_patch, R2 base + test_patch + patch), each run RUNS_PER_STATE times.
 // failToPass is observed (the test ran and failed without the fix); absentToPass is not (its file
 // did not load without the fix). Both prove the fix; the SWE-bench export folds them into one list.
 // Rules are in docs/CSE115A_BENCHMARK_VALIDATION.md, "How tests are classified".
@@ -13,8 +13,16 @@ export type TestStatus = "passed" | "failed" | "skipped";
 /** One run of the suite: test id -> status. Ids are `file::describe > test` (see extractTests.ts). */
 export type RunResults = Record<string, TestStatus>;
 
-/** The two runs of one state. */
-export type StateRuns = [RunResults, RunResults];
+/**
+ * How many times each state is run. A test must give the same result in every run of a state to be
+ * classified; one disagreement makes it flaky and excludes it. Three runs catch an intermittent test
+ * that two would miss about a third of the time (a test that flips with probability p is caught with
+ * probability 1-p^2-(1-p)^2 at two runs, more at three).
+ */
+export const RUNS_PER_STATE = 3;
+
+/** The runs of one state, RUNS_PER_STATE of them in production; tests may pass fewer. */
+export type StateRuns = RunResults[];
 
 export type CompareInput = {
   r0: StateRuns;
@@ -49,16 +57,16 @@ export type Comparison = {
 type MergedStatus = TestStatus | "absent";
 
 /**
- * Merges the two runs of one state. A test whose status differs between the runs
- * (including present in one and absent from the other) is flaky and is added to `flaky`.
+ * Merges the runs of one state. A test whose status differs between any two runs
+ * (including present in one and absent from another) is flaky and is added to `flaky`.
  */
-function mergeState([a, b]: StateRuns, flaky: Set<string>): Map<string, MergedStatus> {
+function mergeState(runs: StateRuns, flaky: Set<string>): Map<string, MergedStatus> {
   const merged = new Map<string, MergedStatus>();
-  for (const id of new Set([...Object.keys(a), ...Object.keys(b)])) {
-    const sa = a[id] ?? "absent";
-    const sb = b[id] ?? "absent";
-    if (sa !== sb) flaky.add(id);
-    else merged.set(id, sa);
+  if (runs.length === 0) return merged;
+  for (const id of new Set(runs.flatMap((run) => Object.keys(run)))) {
+    const statuses = runs.map((run) => run[id] ?? "absent");
+    if (statuses.some((status) => status !== statuses[0])) flaky.add(id);
+    else merged.set(id, statuses[0]!);
   }
   return merged;
 }

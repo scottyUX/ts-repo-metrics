@@ -28,8 +28,9 @@ state and uses it to reject PRs whose tests behave abnormally across the three. 
 runs the base state for the same reason: a test that passed at base but produced no result once
 the test patch was applied can only be judged against base (see the fallback rule below).
 
-Each state is run twice. A test whose result differs between the two runs of the same state is
-flaky: it is excluded from every list and reported separately. Repeat counts in the family range
+Each state is run three times (`RUNS_PER_STATE` in `compareRuns.ts`). A test whose result differs
+between any two runs of the same state is flaky: it is excluded from every list and reported
+separately. Repeat counts in the family range
 from one (SWE-bench, A.1; Multi-SWE-bench, which states no repeats) to "several" (SWE-bench Pro,
 arXiv:2509.16941, §4.3), "multiple" (SWE-rebench, Appendix B.5; ProgramBench, arXiv:2605.03546,
 Appendix A.3.4), three (SWE-rebench V2, §3.3), and five or ten (SWE-bench Multimodal,

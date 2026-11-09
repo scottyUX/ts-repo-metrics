@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { compareRuns } from "@/lib/cse115a/benchmark/validation/compareRuns";
+import { compareRuns, RUNS_PER_STATE } from "@/lib/cse115a/benchmark/validation/compareRuns";
 import { containerScript, FakeSuiteRunner, runThreeStates, type RunPlan } from "@/lib/cse115a/benchmark/validation/runner";
 
 const plan: RunPlan = {
@@ -14,31 +14,33 @@ const plan: RunPlan = {
 };
 
 describe("runThreeStates", () => {
-  it("runs each state twice, in order, and hands the six results to compareRuns", async () => {
+  it("runs each state RUNS_PER_STATE times, in order, and hands every result to compareRuns", async () => {
     const runner = new FakeSuiteRunner({
       r0: { "tests/smoke.test.ts::ok": "passed" },
       r1: { "tests/smoke.test.ts::ok": "passed", "tests/login.test.ts::rejects": "failed" },
       r2: { "tests/smoke.test.ts::ok": "passed", "tests/login.test.ts::rejects": "passed" },
     });
     const states = await runThreeStates(plan, runner);
+    expect(RUNS_PER_STATE).toBe(3);
     expect(runner.calls).toEqual([
-      { state: "r0", attempt: 1 }, { state: "r0", attempt: 2 },
-      { state: "r1", attempt: 1 }, { state: "r1", attempt: 2 },
-      { state: "r2", attempt: 1 }, { state: "r2", attempt: 2 },
+      { state: "r0", attempt: 1 }, { state: "r0", attempt: 2 }, { state: "r0", attempt: 3 },
+      { state: "r1", attempt: 1 }, { state: "r1", attempt: 2 }, { state: "r1", attempt: 3 },
+      { state: "r2", attempt: 1 }, { state: "r2", attempt: 2 }, { state: "r2", attempt: 3 },
     ]);
-    expect(Object.keys(states.timings).sort()).toEqual(["r0a", "r0b", "r1a", "r1b", "r2a", "r2b"]);
+    expect(Object.keys(states.timings).sort()).toEqual(["r0a", "r0b", "r0c", "r1a", "r1b", "r1c", "r2a", "r2b", "r2c"]);
+    expect(states.r1).toHaveLength(RUNS_PER_STATE);
     const result = compareRuns(states);
     expect(result.failToPass).toEqual(["tests/login.test.ts::rejects"]);
     expect(result.passToPass).toEqual(["tests/smoke.test.ts::ok"]);
     expect(result.validationStatus).toBe("validated");
   });
 
-  it("lets the two attempts of one state differ, which compareRuns reports as flaky", async () => {
+  it("marks a test flaky when any one of a state's runs disagrees with the others", async () => {
     const runner = new FakeSuiteRunner({
       r0: {},
       r1: { "t::a": "failed" },
-      r2a: { "t::a": "passed" },
-      r2b: { "t::a": "failed" },
+      r2: { "t::a": "passed" },
+      r2c: { "t::a": "failed" },
     });
     const result = compareRuns(await runThreeStates(plan, runner));
     expect(result.flaky).toEqual(["t::a"]);

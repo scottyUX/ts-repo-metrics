@@ -1,5 +1,5 @@
-// Runs a repository's test suite in the three validation states, twice each, and returns the
-// six Vitest reports as RunResults. The container work is behind `SuiteRunner` so the
+// Runs a repository's test suite in the three validation states, RUNS_PER_STATE times each, and
+// returns every run's report as RunResults. The container work is behind `SuiteRunner` so the
 // orchestration (checkout, patches, repeats) is tested with a fake and never needs Docker.
 // Rules are in docs/CSE115A_BENCHMARK_VALIDATION.md, "The three states".
 
@@ -7,7 +7,7 @@ import { spawn } from "node:child_process";
 import { mkdtemp, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import type { RunResults, StateRuns } from "@/lib/cse115a/benchmark/validation/compareRuns";
+import { RUNS_PER_STATE, type RunResults, type StateRuns } from "@/lib/cse115a/benchmark/validation/compareRuns";
 import { NODE_TEST_REPORTER_SOURCE } from "@/lib/cse115a/benchmark/validation/nodeTestReporter";
 import { parseNodeTestReport, parseVitestReport, type VitestReport } from "@/lib/cse115a/benchmark/validation/testIds";
 
@@ -37,24 +37,29 @@ export type RunPlan = {
   timeoutSeconds?: number;
 };
 
-/** One run of the suite in one state. Implemented by Docker, or by a fake in tests. */
+/** One run of the suite in one state. Implemented by Docker, or by a fake in tests. `attempt` is 1-based. */
 export interface SuiteRunner {
-  runSuite(plan: RunPlan, state: State, attempt: 1 | 2): Promise<RunResults>;
+  runSuite(plan: RunPlan, state: State, attempt: number): Promise<RunResults>;
 }
 
 export type ThreeStates = { r0: StateRuns; r1: StateRuns; r2: StateRuns; timings: Record<string, number> };
 
-/** Runs each state twice, in order, and returns the six results plus elapsed ms per run. */
+/** `r0` + attempt 1 → `r0a`; the key used for timings and log file names. */
+export function runName(state: State, attempt: number): string {
+  return `${state}${String.fromCharCode(96 + attempt)}`;
+}
+
+/** Runs each state RUNS_PER_STATE times, in order, and returns every result plus elapsed ms per run. */
 export async function runThreeStates(plan: RunPlan, runner: SuiteRunner): Promise<ThreeStates> {
   const timings: Record<string, number> = {};
   const runState = async (state: State): Promise<StateRuns> => {
     const results: RunResults[] = [];
-    for (const attempt of [1, 2] as const) {
+    for (let attempt = 1; attempt <= RUNS_PER_STATE; attempt++) {
       const started = Date.now();
       results.push(await runner.runSuite(plan, state, attempt));
-      timings[`${state}${attempt === 1 ? "a" : "b"}`] = Date.now() - started;
+      timings[runName(state, attempt)] = Date.now() - started;
     }
-    return [results[0]!, results[1]!];
+    return results;
   };
   return { r0: await runState("r0"), r1: await runState("r1"), r2: await runState("r2"), timings };
 }
@@ -98,7 +103,7 @@ export class DockerSuiteRunner implements SuiteRunner {
    */
   constructor(private readonly logDir?: string, private readonly cacheDir?: string) {}
 
-  async runSuite(plan: RunPlan, state: State, attempt: 1 | 2): Promise<RunResults> {
+  async runSuite(plan: RunPlan, state: State, attempt: number): Promise<RunResults> {
     const patches = await mkdtemp(join(tmpdir(), "hecate-validate-"));
     try {
       await writeFile(join(patches, "test.diff"), plan.testPatch);
@@ -106,7 +111,7 @@ export class DockerSuiteRunner implements SuiteRunner {
       await writeFile(join(patches, "run.sh"), containerScript(plan, state));
       await writeFile(join(patches, "reporter.mjs"), NODE_TEST_REPORTER_SOURCE);
       const image = plan.image ?? "node:22-bookworm";
-      const name = `${state}${attempt === 1 ? "a" : "b"}`;
+      const name = runName(state, attempt);
       const cacheEnv = this.cacheDir ? PACKAGE_CACHE_ENV : {};
       const args = [
         "run", "--rm",
@@ -187,12 +192,15 @@ function exec(command: string, args: string[], timeoutMs: number): Promise<strin
   });
 }
 
-/** A runner for tests: returns scripted results per state and attempt, and records the calls. */
+/**
+ * A runner for tests: returns scripted results per state (`r1`) or per run (`r1b`), and records
+ * the calls. A run with no script of its own uses the state's.
+ */
 export class FakeSuiteRunner implements SuiteRunner {
-  calls: Array<{ state: State; attempt: 1 | 2 }> = [];
-  constructor(private readonly scripted: Partial<Record<`${State}${"a" | "b"}`, RunResults>> & Partial<Record<State, RunResults>>) {}
-  async runSuite(_plan: RunPlan, state: State, attempt: 1 | 2): Promise<RunResults> {
+  calls: Array<{ state: State; attempt: number }> = [];
+  constructor(private readonly scripted: Partial<Record<string, RunResults>>) {}
+  async runSuite(_plan: RunPlan, state: State, attempt: number): Promise<RunResults> {
     this.calls.push({ state, attempt });
-    return this.scripted[`${state}${attempt === 1 ? "a" : "b"}`] ?? this.scripted[state] ?? {};
+    return this.scripted[runName(state, attempt)] ?? this.scripted[state] ?? {};
   }
 }

@@ -4,6 +4,7 @@
 // GITHUB_APP_SLUG and GITHUB_APP_PRIVATE_KEY so the course App's installation token can be used.
 // Writes nothing to Supabase.
 
+import { RUNS_PER_STATE } from "@/lib/cse115a/benchmark/validation/compareRuns";
 import { spawn } from "node:child_process";
 import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -180,7 +181,7 @@ export async function validateRow(options: ValidateRowOptions): Promise<Validati
     const modified = modifiedAcrossFiles(testFiles, baseSources, patched);
 
     await mkdir(options.logDir, { recursive: true });
-    log(`Environment: ${env.packageManager} + ${env.runners.join("+")} in ${env.packageDir || "."}, image ${env.image}. Running three states, twice each; logs in ${options.logDir}`);
+    log(`Environment: ${env.packageManager} + ${env.runners.join("+")} in ${env.packageDir || "."}, image ${env.image}. Running three states, ${RUNS_PER_STATE} times each; logs in ${options.logDir}`);
     const { runs, ...result } = await validateTask({ row, repoDir, env, modified, runner: new DockerSuiteRunner(options.logDir, options.cacheDir), timeoutSeconds: options.timeoutSeconds });
     void runs;
     result.signals = needs;

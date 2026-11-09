@@ -6,6 +6,7 @@ const SMOKE = "tests/smoke.test.ts::existing behavior > accepts a ucsc.edu email
 
 /** Both runs of a state identical: the normal, non-flaky case. */
 const twice = (run: RunResults): StateRuns => [run, { ...run }];
+const thrice = (run: RunResults): StateRuns => [run, { ...run }, { ...run }];
 
 describe("compareRuns on the email-check fixture", () => {
   const r0: RunResults = { [SMOKE]: "passed" };
@@ -208,6 +209,26 @@ describe("compareRuns does not use R0 for a test the test patch modified", () =>
 });
 
 describe("compareRuns flakiness", () => {
+  it("classifies from three agreeing runs exactly as from two", () => {
+    const r0: RunResults = { "a::old": "passed" };
+    const r1: RunResults = { "a::old": "passed", "a::new": "failed" };
+    const r2: RunResults = { "a::old": "passed", "a::new": "passed" };
+    expect(compareRuns({ r0: thrice(r0), r1: thrice(r1), r2: thrice(r2) })).toEqual(compareRuns({ r0: twice(r0), r1: twice(r1), r2: twice(r2) }));
+  });
+
+  it("excludes a test when one of three runs disagrees, even if the other two agree", () => {
+    const steady: RunResults = { "a::new": "passed", "a::old": "passed" };
+    const result = compareRuns({
+      r0: thrice({ "a::old": "passed" }),
+      r1: thrice({ "a::old": "passed", "a::new": "failed" }),
+      r2: [steady, steady, { "a::new": "failed", "a::old": "passed" }],
+    });
+    expect(result.flaky).toEqual(["a::new"]);
+    expect(result.failToPass).toEqual([]);
+    expect(result.passToPass).toEqual(["a::old"]);
+    expect(result.reason).toBe("no_fail_to_pass");
+  });
+
   it("excludes a test whose two runs of the same state disagree, in any state", () => {
     const result = compareRuns({
       r0: [{ a: "passed" }, { a: "failed" }],

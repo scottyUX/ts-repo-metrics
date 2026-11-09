@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { RUNS_PER_STATE } from "@/lib/cse115a/benchmark/validation/compareRuns";
 import { FakeSuiteRunner } from "@/lib/cse115a/benchmark/validation/runner";
 import type { Environment, Unsupported } from "@/lib/cse115a/benchmark/validation/environment";
 import { filesInPatch, modifiedAcrossFiles, unsupportedResult, validateTask, type TaskRow } from "@/lib/cse115a/benchmark/validation/validateTask";
@@ -73,8 +74,8 @@ describe("validateTask", () => {
     expect(result.log_parser).toBe("vitest-json");
     expect(result.package_dir).toBe("");
     expect(result.eval_script).toContain("git apply --whitespace=nowarn /patches/fix.diff");
-    expect(runner.calls).toHaveLength(6);
-    expect(Object.keys(result.timings)).toHaveLength(6);
+    expect(runner.calls).toHaveLength(3 * RUNS_PER_STATE);
+    expect(Object.keys(result.timings)).toHaveLength(3 * RUNS_PER_STATE);
   });
 
   it("rejects when the fix breaks a pre-existing test", async () => {
