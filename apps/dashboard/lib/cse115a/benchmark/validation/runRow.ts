@@ -113,10 +113,22 @@ export async function withPatchedWorktree<T>(repoDir: string, base: string, patc
 export async function imageDigest(image: string): Promise<string | null> {
   try {
     const out = (await run("docker", ["inspect", "--format", "{{index .RepoDigests 0}}", image])).trim();
-    return out && out !== "<no value>" ? out : null;
+    return out && out !== "<no value>" ? pinnedImage(image, out) : null;
   } catch {
     return null;
   }
+}
+
+/**
+ * `node:24-bookworm` + `node@sha256:abc` → `node:24-bookworm@sha256:abc`. Docker's RepoDigests drop the
+ * tag; keeping it lets a reader see the Node major without resolving the digest, and Docker accepts the
+ * combined form (the digest wins when pulling). An image already given by digest is returned as is.
+ */
+export function pinnedImage(image: string, repoDigest: string): string {
+  const at = repoDigest.indexOf("@");
+  if (at < 0) return repoDigest;
+  if (image.includes("@")) return image;
+  return image + repoDigest.slice(at);
 }
 
 /**

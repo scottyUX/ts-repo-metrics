@@ -1,10 +1,19 @@
 import { describe, expect, it } from "vitest";
 import { parseRows, preflight, rejectedWithoutRun, summarize, summaryMarkdown, writebackSql } from "@/lib/cse115a/benchmark/validation/batch";
+import { pinnedImage } from "@/lib/cse115a/benchmark/validation/runRow";
 import type { TaskRow, ValidationResult } from "@/lib/cse115a/benchmark/validation/validateTask";
 
 const row = (overrides: Partial<TaskRow> = {}): TaskRow => ({
   instance_id: "org__repo-T-1", repo: "org/repo", base_commit: "abc", patch: "diff --git a/x b/x\n", test_patch: "diff --git a/x.test.ts b/x.test.ts\n",
   FAIL_TO_PASS: [], PASS_TO_PASS: [], ...overrides,
+});
+
+describe("pinnedImage", () => {
+  it("keeps the tag the validator ran with and adds the digest Docker reports (#367)", () => {
+    expect(pinnedImage("node:24-bookworm", "node@sha256:abc")).toBe("node:24-bookworm@sha256:abc");
+    expect(pinnedImage("node:22-bookworm@sha256:old", "node@sha256:abc")).toBe("node:22-bookworm@sha256:old");
+    expect(pinnedImage("node:24-bookworm", "weird-output")).toBe("weird-output");
+  });
 });
 
 describe("parseRows", () => {
