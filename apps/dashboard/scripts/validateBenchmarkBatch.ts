@@ -12,7 +12,7 @@
 // recorded as rejected / env_error with the message, and the batch continues.
 // Private repositories need GITHUB_APP_ID, GITHUB_APP_SLUG and GITHUB_APP_PRIVATE_KEY.
 
-import { access, mkdir, readFile, writeFile } from "node:fs/promises";
+import { access, mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { parseRows, preflight, rejectedWithoutRun, summarize, summaryMarkdown, writebackSql } from "@/lib/cse115a/benchmark/validation/batch";
 import { assertRow, bundleRepo, cloneRepo, ensureCommit, imageDigest, validateRow } from "@/lib/cse115a/benchmark/validation/runRow";
@@ -112,12 +112,22 @@ async function main() {
     log(`  ${result.validation_status}${result.reason ? ` (${result.reason})` : ""}`);
   }
 
-  const summary = summarize(results);
+  // The summary and writeback.sql cover every result in the folder, not only the rows this invocation
+  // ran, so a --only or --redo pass never shrinks them to the rows it touched.
+  const allResults = await readAllResults(join(out, "results"));
+  const summary = summarize(allResults);
   await writeFile(join(out, "summary.json"), JSON.stringify(summary, null, 2) + "\n");
   await writeFile(join(out, "summary.md"), summaryMarkdown(summary));
-  await writeFile(join(out, "writeback.sql"), writebackSql(results));
+  await writeFile(join(out, "writeback.sql"), writebackSql(allResults));
+  if (allResults.length !== results.length) log(`Summary covers all ${allResults.length} result(s) in the folder; ${results.length} ran or were checked this time.`);
   console.log(summaryMarkdown(summary));
   log(`Done in ${Math.round((Date.now() - startedAt) / 1000)} s. Dry run, nothing written to the database.`);
+}
+
+/** Every results/*.json in the folder, sorted by file name. */
+async function readAllResults(dir: string): Promise<ValidationResult[]> {
+  const names = (await readdir(dir)).filter((n) => n.endsWith(".json")).sort();
+  return Promise.all(names.map(async (n) => JSON.parse(await readFile(join(dir, n), "utf8")) as ValidationResult));
 }
 
 main().catch((error) => {
