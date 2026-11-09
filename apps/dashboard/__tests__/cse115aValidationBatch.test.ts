@@ -63,6 +63,10 @@ describe("writebackSql", () => {
     expect(sql).toContain("eval_script = $hecate$set -e\necho $REPORT_DIR\n$hecate$");
     expect(sql).toContain("validation_status = $hecate$validated$hecate$");
     expect(sql).toContain("|| array[$hecate$validation_reason:no_source_patch$hecate$]");
+    expect(sql).toContain("f not like 'validation_reason:%' and f <> 'proof_outside_test_patch'");
+    const flagged = writebackSql([{ ...validated, proof_outside_test_patch: ["a.test.ts::y"] }, { ...rejected, proof_outside_test_patch: ["z::z"] }]);
+    expect(flagged).toContain("|| array[$hecate$proof_outside_test_patch$hecate$]");
+    expect(flagged).toContain("|| array[$hecate$validation_reason:no_source_patch$hecate$, $hecate$proof_outside_test_patch$hecate$]");
     expect(sql.match(/update public.cse_benchmark_tasks/g)).toHaveLength(1);
     expect(sql.match(/update public.cse_benchmark_task_sources/g)).toHaveLength(2);
     expect(sql.startsWith("-- Generated")).toBe(true);

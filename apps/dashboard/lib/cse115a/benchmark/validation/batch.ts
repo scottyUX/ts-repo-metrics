@@ -2,6 +2,7 @@
 // summarizing results. The script around it does the cloning and Docker.
 
 import type { TaskRow, ValidationReason, ValidationResult } from "@/lib/cse115a/benchmark/validation/validateTask";
+import { managedFlags, PROOF_OUTSIDE_FLAG, REASON_FLAG_PREFIX } from "@/lib/cse115a/benchmark/validation/writeback";
 
 /** Parses a JSON array (Supabase `json_agg`) or JSON Lines (one row per line). */
 export function parseRows(text: string): TaskRow[] {
@@ -26,7 +27,7 @@ export function rejectedWithoutRun(row: TaskRow, reason: ValidationReason, detai
     test_files: [],
     FAIL_TO_PASS: [], ABSENT_TO_PASS: [], PASS_TO_PASS: [], FAIL_TO_FAIL: [],
     regressions: [], regression_skips: [], flaky: [], skipped: [], judged_from_base: [], load_failures: [],
-    modified_tests: [], unmatched_static_ids: [],
+    modified_tests: [], unmatched_static_ids: [], proof_outside_test_patch: [],
     validation_status: "rejected", reason, detail, timings: {},
   };
 }
@@ -84,9 +85,10 @@ function quote(text: string): string {
 /**
  * The write-back as SQL, one statement pair per row, for the Supabase SQL editor (or psql). Verified
  * lists replace the static ones; `image` carries the digest when known; the reason lives in
- * `cse_benchmark_task_sources.flags` as `validation_reason:<reason>` until the schema has a column.
+ * `cse_benchmark_task_sources.flags` as `validation_reason:<reason>` until the schema has a column,
+ * and `proof_outside_test_patch` is set when the result lists any such test (see `managedFlags`).
  * `env_error` rows are left untouched (still `candidate`). Rolling back is `validation_status =
- * 'candidate'` plus removing that flag.
+ * 'candidate'` plus removing those flags.
  */
 export function writebackSql(results: ValidationResult[]): string {
   const lines = [
@@ -95,7 +97,7 @@ export function writebackSql(results: ValidationResult[]): string {
   ];
   for (const r of results) {
     const id = quote(r.instance_id);
-    const reason = r.validation_status === "rejected" ? `validation_reason:${r.reason}` : null;
+    const flags = managedFlags(r);
     lines.push("");
     lines.push(`-- ${r.instance_id}: ${r.validation_status}${r.reason ? ` (${r.reason})` : ""}`);
     if (r.reason === "env_error") {
@@ -120,8 +122,8 @@ export function writebackSql(results: ValidationResult[]): string {
     lines.push(
       "update public.cse_benchmark_task_sources",
       `   set validation_status = ${quote(r.validation_status)},`,
-      "       flags = array_remove(array(select f from unnest(flags) as f where f not like 'validation_reason:%'), null)" +
-        (reason ? ` || array[${quote(reason)}]` : "") + ",",
+      `       flags = array_remove(array(select f from unnest(flags) as f where f not like '${REASON_FLAG_PREFIX}%' and f <> '${PROOF_OUTSIDE_FLAG}'), null)` +
+        (flags.length ? ` || array[${flags.map(quote).join(", ")}]` : "") + ",",
       "       updated_at = now()",
       ` where instance_id = ${id};`,
     );

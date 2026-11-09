@@ -32,6 +32,18 @@ export function filesInPatch(patch: string): string[] {
   return files;
 }
 
+/** The file part of a test id (`file::describe > test` → `file`). */
+export function fileOfTestId(id: string): string {
+  const at = id.indexOf("::");
+  return at < 0 ? id : id.slice(0, at);
+}
+
+/** Proving ids (F2P + A2P) whose file is not one the test patch writes. */
+export function proofOutsideTestPatch(proving: string[], testFiles: string[]): string[] {
+  const touched = new Set(testFiles);
+  return proving.filter((id) => !touched.has(fileOfTestId(id))).sort();
+}
+
 /**
  * Ids of pre-existing tests whose body the test patch changed, across every file it touches.
  * A file with no base source is new, so nothing in it is "modified".
@@ -82,6 +94,12 @@ export type ValidationResult = {
   modified_tests: string[];
   /** Ids the row's static extraction listed that no run ever reported. */
   unmatched_static_ids: string[];
+  /**
+   * FAIL_TO_PASS and ABSENT_TO_PASS ids whose file the test patch did not touch: the fix also made a
+   * pre-existing failing test pass. Diagnostic, not a rejection; the write-back carries it as the
+   * `proof_outside_test_patch` flag so a reviewer can check the task is not proven only by accident.
+   */
+  proof_outside_test_patch: string[];
   validation_status: "validated" | "rejected";
   reason: ValidationReason;
   detail: string | null;
@@ -101,7 +119,7 @@ export function unsupportedResult(row: TaskRow, env: Unsupported): ValidationRes
     test_files: filesInPatch(row.test_patch),
     FAIL_TO_PASS: [], ABSENT_TO_PASS: [], PASS_TO_PASS: [], FAIL_TO_FAIL: [],
     regressions: [], regression_skips: [], flaky: [], skipped: [], judged_from_base: [], load_failures: [],
-    modified_tests: [], unmatched_static_ids: [],
+    modified_tests: [], unmatched_static_ids: [], proof_outside_test_patch: [],
     validation_status: "rejected", reason: env.reason, detail: env.detail, timings: {},
   };
 }
@@ -136,13 +154,14 @@ export async function validateTask(input: ValidateInput): Promise<ValidationResu
   const comparison = compareRuns({ r0: runs.r0, r1: runs.r1, r2: runs.r2, modified: input.modified });
   const allRuns = [...runs.r0, ...runs.r1, ...runs.r2];
   const staticIds = [...new Set([...row.FAIL_TO_PASS, ...row.PASS_TO_PASS])];
+  const testFiles = filesInPatch(row.test_patch);
   return {
     instance_id: row.instance_id,
     image: env.image,
     eval_script: containerScript(plan, "r2"),
     log_parser: env.runners.map((r) => (r === "vitest" ? "vitest-json" : "node-test-json")).join("+"),
     package_dir: env.packageDir,
-    test_files: filesInPatch(row.test_patch),
+    test_files: testFiles,
     FAIL_TO_PASS: comparison.failToPass,
     ABSENT_TO_PASS: comparison.absentToPass,
     PASS_TO_PASS: comparison.passToPass,
@@ -155,6 +174,7 @@ export async function validateTask(input: ValidateInput): Promise<ValidationResu
     load_failures: comparison.loadFailures,
     modified_tests: [...input.modified].sort(),
     unmatched_static_ids: unmatchedStaticIds(staticIds, allRuns),
+    proof_outside_test_patch: proofOutsideTestPatch([...comparison.failToPass, ...comparison.absentToPass], testFiles),
     validation_status: comparison.validationStatus,
     reason: comparison.reason,
     detail: null,

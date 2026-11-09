@@ -5,6 +5,22 @@
 import type { ValidationResult } from "@/lib/cse115a/benchmark/validation/validateTask";
 
 export const REASON_FLAG_PREFIX = "validation_reason:";
+/** Set on a row whose proving tests include one outside the files the test patch touched. */
+export const PROOF_OUTSIDE_FLAG = "proof_outside_test_patch";
+
+/** Whether a flag is one the validator owns (and so replaces on every write-back). */
+export function isManagedFlag(flag: string): boolean {
+  return flag.startsWith(REASON_FLAG_PREFIX) || flag === PROOF_OUTSIDE_FLAG;
+}
+
+/** The validator-owned flags a result produces: the reason flag when rejected, the proof flag when it applies. */
+export function managedFlags(r: ValidationResult): string[] {
+  const flags: string[] = [];
+  if (r.validation_status === "rejected") flags.push(`${REASON_FLAG_PREFIX}${r.reason}`);
+  // `?? []`: result files written before this field existed are still readable.
+  if ((r.proof_outside_test_patch ?? []).length > 0) flags.push(PROOF_OUTSIDE_FLAG);
+  return flags;
+}
 
 export type TaskUpdate = {
   FAIL_TO_PASS: string[];
@@ -21,6 +37,8 @@ export type WritebackOp = {
   validation_status: "validated" | "rejected";
   /** The reason flag to carry, or null to carry none (validated). */
   reasonFlag: string | null;
+  /** Every validator-owned flag to carry (the reason flag plus any diagnostic flags). */
+  flags: string[];
 };
 
 /** One op per result; `env_error` rows produce none (our run failed, the row stays a candidate). */
@@ -41,15 +59,17 @@ export function writebackPlan(results: ValidationResult[]): WritebackOp[] {
         : null,
       validation_status: r.validation_status,
       reasonFlag: r.validation_status === "rejected" ? `${REASON_FLAG_PREFIX}${r.reason}` : null,
+      flags: managedFlags(r),
     });
   }
   return ops;
 }
 
-/** The row's flags with any old reason flag removed and the new one (if any) appended. */
-export function mergeFlags(existing: string[], reasonFlag: string | null): string[] {
-  const kept = existing.filter((f) => !f.startsWith(REASON_FLAG_PREFIX));
-  return reasonFlag ? [...kept, reasonFlag] : kept;
+/** The row's flags with every validator-owned flag removed and the new ones (if any) appended. */
+export function mergeFlags(existing: string[], flags: string[] | string | null): string[] {
+  const kept = existing.filter((f) => !isManagedFlag(f));
+  const added = flags == null ? [] : typeof flags === "string" ? [flags] : flags;
+  return [...kept, ...added];
 }
 
 /** The slice of the Supabase client the write-back uses, so a test can hand in a fake. */
@@ -70,10 +90,11 @@ export async function applyWriteback(client: WritebackClient, ops: WritebackOp[]
     }
     const { data, error } = await client.from("cse_benchmark_task_sources").select("flags").eq("instance_id", op.instance_id);
     if (error) throw new Error(`${op.instance_id}: read flags: ${error.message}`);
-    const flags = mergeFlags(data?.[0]?.flags ?? [], op.reasonFlag);
+    const flags = mergeFlags(data?.[0]?.flags ?? [], op.flags);
     const result = await client.from("cse_benchmark_task_sources").update({ validation_status: op.validation_status, flags, updated_at: now() }).eq("instance_id", op.instance_id);
     if (result.error) throw new Error(`${op.instance_id}: cse_benchmark_task_sources: ${result.error.message}`);
-    lines.push(`${op.instance_id}: ${op.validation_status}${op.reasonFlag ? ` (${op.reasonFlag.slice(REASON_FLAG_PREFIX.length)})` : ""}${op.task ? `, ${op.task.FAIL_TO_PASS.length} F2P / ${op.task.PASS_TO_PASS.length} P2P written` : ""}`);
+    const proof = op.flags.includes(PROOF_OUTSIDE_FLAG) ? `, flagged ${PROOF_OUTSIDE_FLAG}` : "";
+    lines.push(`${op.instance_id}: ${op.validation_status}${op.reasonFlag ? ` (${op.reasonFlag.slice(REASON_FLAG_PREFIX.length)})` : ""}${op.task ? `, ${op.task.FAIL_TO_PASS.length} F2P / ${op.task.PASS_TO_PASS.length} P2P written` : ""}${proof}`);
   }
   return lines;
 }

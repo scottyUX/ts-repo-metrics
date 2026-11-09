@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { RUNS_PER_STATE } from "@/lib/cse115a/benchmark/validation/compareRuns";
 import { FakeSuiteRunner } from "@/lib/cse115a/benchmark/validation/runner";
 import type { Environment, Unsupported } from "@/lib/cse115a/benchmark/validation/environment";
-import { filesInPatch, modifiedAcrossFiles, unsupportedResult, validateTask, type TaskRow } from "@/lib/cse115a/benchmark/validation/validateTask";
+import { filesInPatch, modifiedAcrossFiles, proofOutsideTestPatch, unsupportedResult, validateTask, type TaskRow } from "@/lib/cse115a/benchmark/validation/validateTask";
 
 const testPatch = [
   "diff --git a/src/sum.test.ts b/src/sum.test.ts",
@@ -41,6 +41,14 @@ describe("filesInPatch", () => {
   });
 });
 
+describe("proofOutsideTestPatch", () => {
+  it("keeps only proving ids whose file the test patch did not write", () => {
+    expect(proofOutsideTestPatch(["src/sum.test.ts::adds negatives", "src/other.test.ts::was failing", "lone"], ["src/sum.test.ts"]))
+      .toEqual(["lone", "src/other.test.ts::was failing"]);
+    expect(proofOutsideTestPatch([], ["src/sum.test.ts"])).toEqual([]);
+  });
+});
+
 describe("modifiedAcrossFiles", () => {
   it("finds tests whose body changed and ignores new files", () => {
     const base = new Map<string, string | null>([
@@ -73,9 +81,22 @@ describe("validateTask", () => {
     expect(result.image).toBe("node:22-bookworm");
     expect(result.log_parser).toBe("vitest-json");
     expect(result.package_dir).toBe("");
+    expect(result.proof_outside_test_patch).toEqual([]);
     expect(result.eval_script).toContain("git apply --whitespace=nowarn /patches/fix.diff");
     expect(runner.calls).toHaveLength(3 * RUNS_PER_STATE);
     expect(Object.keys(result.timings)).toHaveLength(3 * RUNS_PER_STATE);
+  });
+
+  it("lists proving tests outside the test patch as a diagnostic without rejecting", async () => {
+    const runner = new FakeSuiteRunner({
+      r0: { "src/sum.test.ts::adds": "passed", "src/other.test.ts::was failing": "failed" },
+      r1: { "src/sum.test.ts::adds": "passed", "src/sum.test.ts::adds negatives": "failed", "src/other.test.ts::was failing": "failed" },
+      r2: { "src/sum.test.ts::adds": "passed", "src/sum.test.ts::adds negatives": "passed", "src/other.test.ts::was failing": "passed" },
+    });
+    const result = await validateTask({ row, repoDir: "/tmp/repo", env, modified: new Set(), runner });
+    expect(result.validation_status).toBe("validated");
+    expect(result.FAIL_TO_PASS).toEqual(["src/other.test.ts::was failing", "src/sum.test.ts::adds negatives"]);
+    expect(result.proof_outside_test_patch).toEqual(["src/other.test.ts::was failing"]);
   });
 
   it("rejects when the fix breaks a pre-existing test", async () => {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { rejectedWithoutRun } from "@/lib/cse115a/benchmark/validation/batch";
-import { applyWriteback, mergeFlags, writebackPlan, type WritebackClient } from "@/lib/cse115a/benchmark/validation/writeback";
+import { applyWriteback, managedFlags, mergeFlags, PROOF_OUTSIDE_FLAG, writebackPlan, type WritebackClient } from "@/lib/cse115a/benchmark/validation/writeback";
 import type { TaskRow, ValidationResult } from "@/lib/cse115a/benchmark/validation/validateTask";
 
 const row = (id: string): TaskRow => ({ instance_id: id, repo: "o/r", base_commit: "c", patch: "p", test_patch: "t", FAIL_TO_PASS: [], PASS_TO_PASS: [] });
@@ -15,8 +15,9 @@ describe("writebackPlan", () => {
   it("writes lists only for validated rows, flags for rejected ones, nothing for env_error", () => {
     const ops = writebackPlan([validated, rejected, crashed]);
     expect(ops.map((o) => o.instance_id)).toEqual(["v-1", "r-1"]);
-    expect(ops[0]).toMatchObject({ validation_status: "validated", reasonFlag: null, task: { FAIL_TO_PASS: ["a::x", "a::y"], PASS_TO_PASS: ["a::z"], image: "node@sha256:1", log_parser: "node-test-json" } });
-    expect(ops[1]).toMatchObject({ validation_status: "rejected", reasonFlag: "validation_reason:no_test_patch", task: null });
+    expect(ops[0]).toMatchObject({ validation_status: "validated", reasonFlag: null, flags: [], task: { FAIL_TO_PASS: ["a::x", "a::y"], PASS_TO_PASS: ["a::z"], image: "node@sha256:1", log_parser: "node-test-json" } });
+    expect(ops[1]).toMatchObject({ validation_status: "rejected", reasonFlag: "validation_reason:no_test_patch", flags: ["validation_reason:no_test_patch"], task: null });
+    expect(writebackPlan([{ ...validated, proof_outside_test_patch: ["b::q"] }])[0]!.flags).toEqual([PROOF_OUTSIDE_FLAG]);
   });
 });
 
@@ -24,6 +25,14 @@ describe("mergeFlags", () => {
   it("replaces an old reason flag and keeps the others", () => {
     expect(mergeFlags(["no_test_patch", "validation_reason:old"], "validation_reason:new")).toEqual(["no_test_patch", "validation_reason:new"]);
     expect(mergeFlags(["validation_reason:old"], null)).toEqual([]);
+  });
+
+  it("owns the proof_outside_test_patch flag too: dropped when the result no longer has it, added when it does", () => {
+    expect(mergeFlags(["no_test_patch", PROOF_OUTSIDE_FLAG, "validation_reason:old"], [])).toEqual(["no_test_patch"]);
+    expect(mergeFlags(["no_test_patch"], [PROOF_OUTSIDE_FLAG])).toEqual(["no_test_patch", PROOF_OUTSIDE_FLAG]);
+    expect(managedFlags({ ...validated, proof_outside_test_patch: ["b::q"] })).toEqual([PROOF_OUTSIDE_FLAG]);
+    expect(managedFlags({ ...rejected, proof_outside_test_patch: ["b::q"] })).toEqual(["validation_reason:no_test_patch", PROOF_OUTSIDE_FLAG]);
+    expect(managedFlags(validated)).toEqual([]);
   });
 });
 
