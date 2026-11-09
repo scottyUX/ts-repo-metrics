@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Environment } from "@/lib/cse115a/benchmark/validation/environment";
-import { buildHarborTask, harborTaskName } from "@/lib/cse115a/benchmark/validation/harbor";
+import { buildHarborTask, GIT_REINIT_LAYER, harborTaskName } from "@/lib/cse115a/benchmark/validation/harbor";
 import { rejectedWithoutRun } from "@/lib/cse115a/benchmark/validation/batch";
 import type { TaskRow, ValidationResult } from "@/lib/cse115a/benchmark/validation/validateTask";
 
@@ -38,6 +38,21 @@ describe("buildHarborTask", () => {
     expect(dockerfile).toContain("git -C /app checkout -q 28e92a1");
     expect(dockerfile).toContain("RUN cd /app && corepack enable && pnpm install --frozen-lockfile");
     expect(dockerfile).toContain("ENV DATABASE_URL=");
+  });
+
+  it("drops the cloned history and re-creates the checkout as one anonymous commit before installing", () => {
+    const dockerfile = files.get("environment/Dockerfile")!;
+    expect(dockerfile).toContain(GIT_REINIT_LAYER);
+    expect(GIT_REINIT_LAYER).toContain("rm -rf .git && git init -q");
+    expect(GIT_REINIT_LAYER).toContain("commit -qm base");
+    expect(GIT_REINIT_LAYER).not.toMatch(/github|scottyUX|CSE115a/i);
+    const lines = dockerfile.split("\n");
+    const clone = lines.findIndex((l) => l.includes("git clone"));
+    const reinit = lines.indexOf(GIT_REINIT_LAYER);
+    const install = lines.findIndex((l) => l.includes("pnpm install"));
+    expect(clone).toBeGreaterThanOrEqual(0);
+    expect(reinit).toBeGreaterThan(clone);
+    expect(install).toBeGreaterThan(reinit);
   });
 
   it("grades F2P plus A2P and P2P, with the reporter path moved to /tests", () => {

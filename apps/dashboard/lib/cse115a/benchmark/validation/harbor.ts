@@ -31,6 +31,14 @@ export function harborTaskName(instanceId: string): string {
 
 const toml = (value: string) => JSON.stringify(value);
 
+/**
+ * Dockerfile line that throws away the cloned history and re-creates the checkout as a single
+ * commit with a fixed author and message. Exported so the test and the docs can quote it.
+ */
+export const GIT_REINIT_LAYER =
+  "RUN cd /app && rm -rf .git && git init -q && git -c user.name=hecate -c user.email=hecate@localhost add -A" +
+  " && git -c user.name=hecate -c user.email=hecate@localhost commit -qm base";
+
 export function buildHarborTask(input: HarborInput): Map<string, string> {
   const { row, result, env } = input;
   const name = input.name ?? harborTaskName(row.instance_id);
@@ -87,6 +95,11 @@ export function buildHarborTask(input: HarborInput): Map<string, string> {
     "WORKDIR /app",
     `COPY ${input.bundleFile} /tmp/repo.bundle`,
     `RUN git clone -q -b hecate-snapshot /tmp/repo.bundle /app && rm /tmp/repo.bundle && git -C /app checkout -q ${row.base_commit} && git -C /app branch -D hecate-snapshot`,
+    // The bundle holds only what the base commit reaches (the fix is never in it), but the history
+    // before base is still a hint channel: commit messages, author names, the remote's branch names.
+    // Replace it with one anonymous commit, so the agent sees the files and nothing else, while
+    // solve.sh and test.sh can still `git apply` against a repository.
+    GIT_REINIT_LAYER,
     `RUN ${sub(env.installDir)} && ${env.installCommand}`,
     "",
   ].join("\n"));
