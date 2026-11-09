@@ -350,6 +350,5 @@ Where each claim above about another benchmark comes from, with section numbers,
 
 ## Not yet
 
-Python projects, repository snapshots, writing results back to
-`cse_benchmark_tasks` and `cse_benchmark_task_sources`, and scheduled runs after each sprint.
-Each is a separate change once the dry run is trusted.
+Python projects and scheduled runs after each sprint. Each is a separate change once the dry
+run is trusted.
