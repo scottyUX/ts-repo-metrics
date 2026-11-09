@@ -91,8 +91,10 @@ async function main() {
           if (!digests.has(result.image)) digests.set(result.image, await imageDigest(result.image));
           result.image_digest = digests.get(result.image) ?? null;
         }
+        // A bundle from an earlier run of this row is still valid (the base commit does not change), so
+        // it is recorded even without --snapshots; the flag only decides whether to create a new one.
+        const bundle = join("snapshots", `${row.instance_id}.bundle`);
         if (args.snapshots) {
-          const bundle = join("snapshots", `${row.instance_id}.bundle`);
           try {
             await bundleRepo(repoDir, row.base_commit, join(out, bundle));
             result.snapshot_bundle = bundle;
@@ -100,6 +102,8 @@ async function main() {
             result.snapshot_bundle = null;
             log(`  snapshot failed: ${firstLine(error)}`);
           }
+        } else if (await exists(join(out, bundle))) {
+          result.snapshot_bundle = bundle;
         }
       }
     } catch (error) {
