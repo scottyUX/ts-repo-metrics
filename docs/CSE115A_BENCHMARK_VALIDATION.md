@@ -350,5 +350,6 @@ Where each claim above about another benchmark comes from, with section numbers,
 
 ## Not yet
 
-Python projects and scheduled runs after each sprint. Each is a separate change once the dry
+Postgres or other services for tests that need them, browser and end-to-end runners, Bun,
+Python projects, and scheduled runs after each sprint. Each is a separate change once the dry
 run is trusted.
