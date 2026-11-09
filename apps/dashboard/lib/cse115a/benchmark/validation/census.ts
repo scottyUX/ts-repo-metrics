@@ -29,7 +29,7 @@ export function signals(files: CensusFiles): Signals {
     ...(/DATABASE_URL|TEST_DATABASE|bookworm_test|createConnection|new Pool\(/.test(files.testSources) ? ["tests-use-db"] : []),
   ];
   const browser = [...has("@playwright/test", "playwright", "cypress", "puppeteer", "selenium-webdriver", "jsdom", "happy-dom")];
-  const otherRunners = [...has("jest", "mocha", "ava", "jasmine", "uvu", "tap")];
+  const otherRunners = [...has("mocha", "ava", "jasmine", "uvu", "tap")];
   return { database: [...new Set(database)], browser, otherRunners };
 }
 
