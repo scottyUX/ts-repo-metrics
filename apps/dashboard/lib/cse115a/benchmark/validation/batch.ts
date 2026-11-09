@@ -32,13 +32,46 @@ export function rejectedWithoutRun(row: TaskRow, reason: ValidationReason, detai
   };
 }
 
+/** One step of the funnel: how many rows got this far, and how many fell out here. */
+export type FunnelStage = { stage: string; reached: number; dropped: number };
+
 export type Summary = {
   total: number;
   validated: number;
   rejected: number;
   byReason: Record<string, number>;
-  rows: Array<{ instance_id: string; status: string; reason: string; f2p: number; a2p: number; p2p: number; regressions: number; flaky: number; seconds: number }>;
+  /** Rows with at least one proving test outside the test patch's files (diagnostic). */
+  proofOutsideTestPatch: number;
+  funnel: FunnelStage[];
+  rows: Array<{ instance_id: string; status: string; reason: string; f2p: number; a2p: number; p2p: number; regressions: number; flaky: number; outside: number; seconds: number }>;
 };
+
+/**
+ * The stages a row passes through, in order, each as a test on its result. A row is counted at a
+ * stage only if it passed every earlier one, so the counts can only go down and the last stage's
+ * `reached` equals the validated count. `env_error` rows drop at "ran" (ours to rerun, not the
+ * student's fault), which is why "ran" is a stage of its own.
+ */
+const FUNNEL: Array<[stage: string, passes: (r: ValidationResult) => boolean]> = [
+  ["captured", () => true],
+  ["has both patches", (r) => r.reason !== "no_source_patch" && r.reason !== "no_test_patch"],
+  ["environment supported", (r) => r.reason !== "env_unsupported"],
+  ["ran", (r) => r.reason !== "env_error"],
+  ["has a proving test", (r) => r.FAIL_TO_PASS.length + r.ABSENT_TO_PASS.length > 0],
+  ["no regressions", (r) => r.regressions.length === 0 && r.regression_skips.length === 0],
+  ["validated", (r) => r.validation_status === "validated"],
+];
+
+export function funnel(results: ValidationResult[]): FunnelStage[] {
+  let remaining = results;
+  const stages: FunnelStage[] = [];
+  for (const [stage, passes] of FUNNEL) {
+    const next = remaining.filter(passes);
+    stages.push({ stage, reached: next.length, dropped: remaining.length - next.length });
+    remaining = next;
+  }
+  return stages;
+}
 
 export function summarize(results: ValidationResult[]): Summary {
   const byReason: Record<string, number> = {};
@@ -50,7 +83,8 @@ export function summarize(results: ValidationResult[]): Summary {
       status: r.validation_status,
       reason: r.reason ?? "",
       f2p: r.FAIL_TO_PASS.length, a2p: r.ABSENT_TO_PASS.length, p2p: r.PASS_TO_PASS.length,
-      regressions: r.regressions.length + r.regression_skips.length, flaky: r.flaky.length, seconds,
+      regressions: r.regressions.length + r.regression_skips.length, flaky: r.flaky.length,
+      outside: (r.proof_outside_test_patch ?? []).length, seconds,
     };
   });
   return {
@@ -58,19 +92,26 @@ export function summarize(results: ValidationResult[]): Summary {
     validated: results.filter((r) => r.validation_status === "validated").length,
     rejected: results.filter((r) => r.validation_status === "rejected").length,
     byReason,
+    proofOutsideTestPatch: results.filter((r) => (r.proof_outside_test_patch ?? []).length > 0).length,
+    funnel: funnel(results),
     rows,
   };
 }
 
-/** The summary as a Markdown table, ready for a Slack message or the deliverable note. */
+/** The summary as Markdown: headline, funnel table, per-row table. Ready for Slack or the deliverable note. */
 export function summaryMarkdown(summary: Summary): string {
   const lines = [
     `${summary.validated} validated, ${summary.rejected} rejected of ${summary.total}` +
-      (Object.keys(summary.byReason).length ? ` (${Object.entries(summary.byReason).map(([k, v]) => `${k}: ${v}`).join(", ")})` : ""),
+      (Object.keys(summary.byReason).length ? ` (${Object.entries(summary.byReason).map(([k, v]) => `${k}: ${v}`).join(", ")})` : "") +
+      (summary.proofOutsideTestPatch ? `; ${summary.proofOutsideTestPatch} flagged proof_outside_test_patch` : ""),
     "",
-    "| instance_id | status | reason | F2P | A2P | P2P | regressions | flaky | seconds |",
-    "|---|---|---|---|---|---|---|---|---|",
-    ...summary.rows.map((r) => `| ${r.instance_id} | ${r.status} | ${r.reason} | ${r.f2p} | ${r.a2p} | ${r.p2p} | ${r.regressions} | ${r.flaky} | ${r.seconds} |`),
+    "| stage | reached | dropped |",
+    "|---|---|---|",
+    ...summary.funnel.map((f) => `| ${f.stage} | ${f.reached} | ${f.dropped} |`),
+    "",
+    "| instance_id | status | reason | F2P | A2P | P2P | regressions | flaky | outside | seconds |",
+    "|---|---|---|---|---|---|---|---|---|---|",
+    ...summary.rows.map((r) => `| ${r.instance_id} | ${r.status} | ${r.reason} | ${r.f2p} | ${r.a2p} | ${r.p2p} | ${r.regressions} | ${r.flaky} | ${r.outside} | ${r.seconds} |`),
   ];
   return lines.join("\n") + "\n";
 }

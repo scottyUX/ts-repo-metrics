@@ -42,10 +42,34 @@ describe("summarize", () => {
     expect(summary.rows[0]).toMatchObject({ instance_id: "org__repo-T-1", status: "validated", f2p: 2, p2p: 1, seconds: 4 });
   });
 
-  it("renders a Markdown table with the headline first", () => {
+  it("renders the headline, the funnel, then the row table", () => {
     const md = summaryMarkdown(summarize([validated, rejected]));
     expect(md.split("\n")[0]).toBe("1 validated, 1 rejected of 2 (no_source_patch: 1)");
-    expect(md).toContain("| org__repo-T-2 | rejected | no_source_patch | 0 | 0 | 0 | 0 | 0 | 0 |");
+    expect(md).toContain("| stage | reached | dropped |\n|---|---|---|\n| captured | 2 | 0 |\n| has both patches | 1 | 1 |");
+    expect(md).toContain("| org__repo-T-2 | rejected | no_source_patch | 0 | 0 | 0 | 0 | 0 | 0 | 0 |");
+    expect(md.indexOf("| stage |")).toBeLessThan(md.indexOf("| instance_id |"));
+  });
+
+  it("builds a funnel whose counts only go down and end at the validated count", () => {
+    const unsupported = rejectedWithoutRun(row({ instance_id: "T-4" }), "env_unsupported", "jest");
+    const crashed = rejectedWithoutRun(row({ instance_id: "T-5" }), "env_error", "docker died");
+    const unproven = { ...rejectedWithoutRun(row({ instance_id: "T-6" }), "no_fail_to_pass", ""), PASS_TO_PASS: ["c"] };
+    const regressed = { ...rejectedWithoutRun(row({ instance_id: "T-7" }), "regressions", ""), FAIL_TO_PASS: ["a"], regressions: ["c"] };
+    const flagged = { ...validated, instance_id: "T-8", proof_outside_test_patch: ["b"] };
+    const summary = summarize([validated, rejected, unsupported, crashed, unproven, regressed, flagged]);
+    expect(summary.funnel).toEqual([
+      { stage: "captured", reached: 7, dropped: 0 },
+      { stage: "has both patches", reached: 6, dropped: 1 },
+      { stage: "environment supported", reached: 5, dropped: 1 },
+      { stage: "ran", reached: 4, dropped: 1 },
+      { stage: "has a proving test", reached: 3, dropped: 1 },
+      { stage: "no regressions", reached: 2, dropped: 1 },
+      { stage: "validated", reached: 2, dropped: 0 },
+    ]);
+    expect(summary.funnel.at(-1)!.reached).toBe(summary.validated);
+    expect(summary.proofOutsideTestPatch).toBe(1);
+    expect(summaryMarkdown(summary).split("\n")[0]).toContain("; 1 flagged proof_outside_test_patch");
+    expect(summary.rows.find((r) => r.instance_id === "T-8")!.outside).toBe(1);
   });
 });
 
