@@ -147,7 +147,7 @@ export function buildHarborTask(input: HarborInput): Map<string, string> {
 }
 
 /**
- * Source of tests/check.mjs: merges the run's reports (Vitest JSON and the node --test reporter's JSON)
+ * Source of tests/check.mjs: merges the run's reports (Vitest or Jest JSON, and the node --test reporter's JSON)
  * into test id → status, strips the mount prefix, and writes reward 1 to the given file iff every
  * expected id passed.
  * Plain Node, no dependencies, because it runs inside the task image.
@@ -171,7 +171,7 @@ for (const name of names) {
       const path = strip(file.name ?? "");
       for (const t of file.assertionResults ?? []) {
         const id = path + "::" + [...(t.ancestorTitles ?? []), t.title].join(" > ");
-        results[id] = t.status === "passed" ? "passed" : t.status === "failed" ? "failed" : "skipped";
+        results[id] = t.status === "passed" || t.status === "focused" ? "passed" : t.status === "failed" ? "failed" : "skipped";
       }
     }
   }

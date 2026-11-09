@@ -145,7 +145,7 @@ export class DockerSuiteRunner implements SuiteRunner {
   }
 }
 
-/** Merges every report in the directory: `vitest-*.json` (Vitest JSON) and `node-*.json` (our reporter). */
+/** Merges every report in the directory: `vitest-*.json` and `jest-*.json` (same JSON shape) and `node-*.json` (our reporter). */
 export async function readReports(dir: string): Promise<RunResults> {
   let names: string[];
   try {

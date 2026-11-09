@@ -255,6 +255,22 @@ container mount prefix removed, so observed results can be matched against the r
 IDs. Static IDs that match no observed test are reported as `unmatched_static_ids`, never
 dropped silently.
 
+The runner follows the package's own `test` script, split on `&&`; segments that are not a
+runner (a build, a typecheck) run as written. Three runners are supported:
+
+| Runner | Command | `log_parser` |
+|---|---|---|
+| Vitest | `npx vitest run --reporter=json --outputFile=$REPORT_DIR/vitest-<i>.json --passWithNoTests` | `vitest-json` |
+| Jest | `npx jest --ci --json --outputFile=$REPORT_DIR/jest-<i>.json --passWithNoTests`, plus the script's own arguments after `jest` (`--config`, test paths) minus `--watch`, `--watchAll`, `--coverage` and `--silent`; leading `NAME=value` assignments are kept | `jest-json` |
+| `node --test` | the script's command with `--test-reporter` set to our reporter | `node-test-json` |
+
+With no runner in the script, a `vitest` dependency (else a `jest` one) runs with the default
+command above. Jest's `--json` output has the same `testResults[].assertionResults[]` shape as
+Vitest's, so both go through one reader; Jest's `pending`, `todo`, `skipped` and `disabled`
+count as skipped and `focused` as passed. A file that fails to load (status `failed`, no
+assertion results) is recorded as `file::(load)` for either runner. Any other runner is
+`env_unsupported`.
+
 The commands used become the row's `eval_script`, the container definition its `image`, and
 the JSON reader its `log_parser`. Those three column names and meanings are SWE-bench's, from
 its task format (`task.yaml` with `image` and `log_parser`, plus the generated `eval.sh`); the
@@ -334,6 +350,6 @@ Where each claim above about another benchmark comes from, with section numbers,
 
 ## Not yet
 
-Jest and pnpm projects, Python projects, repository snapshots, writing results back to
+pnpm projects, Python projects, repository snapshots, writing results back to
 `cse_benchmark_tasks` and `cse_benchmark_task_sources`, and scheduled runs after each sprint.
 Each is a separate change once the dry run is trusted.

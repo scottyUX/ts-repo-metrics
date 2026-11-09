@@ -40,6 +40,46 @@ describe("parseVitestReport", () => {
   it("reads an empty report as no results (a file that failed to load reports nothing)", () => {
     expect(parseVitestReport({ testResults: [] })).toEqual({});
   });
+
+  it("reads Jest's --json report: pending and todo are skips, a suite that failed to run is a load failure", () => {
+    // Trimmed from `jest --ci --json` (Jest 29.7.0) on a two-file scratch project.
+    const jest: VitestReport = {
+      testResults: [
+        {
+          name: "/work/tests/broken.test.js",
+          status: "failed",
+          message: "  ● Test suite failed to run\n\n    Cannot find module './does-not-exist' from 'tests/broken.test.js'",
+          assertionResults: [],
+        },
+        {
+          name: "/work/tests/sum.test.js",
+          status: "failed",
+          message: "  ● sum › fails\n\n    expect(received).toBe(expected) // Object.is equality",
+          assertionResults: [
+            { ancestorTitles: ["sum", "nested"], title: "adds", status: "passed" },
+            { ancestorTitles: ["sum"], title: "fails", status: "failed" },
+            { ancestorTitles: ["sum"], title: "skipped one", status: "pending" },
+            { ancestorTitles: ["sum"], title: "later", status: "todo" },
+          ],
+        },
+      ],
+    };
+    expect(parseVitestReport(jest)).toEqual({
+      "tests/broken.test.js::(load)": "failed",
+      "tests/sum.test.js::sum > nested > adds": "passed",
+      "tests/sum.test.js::sum > fails": "failed",
+      "tests/sum.test.js::sum > skipped one": "skipped",
+      "tests/sum.test.js::sum > later": "skipped",
+    });
+  });
+
+  it("maps Jest's disabled to skipped and focused to passed", () => {
+    const results = parseVitestReport({ testResults: [{ name: "a.test.js", assertionResults: [
+      { ancestorTitles: [], title: "off", status: "disabled" },
+      { ancestorTitles: [], title: "only", status: "focused" },
+    ] }] });
+    expect(results).toEqual({ "a.test.js::off": "skipped", "a.test.js::only": "passed" });
+  });
 });
 
 describe("unmatchedStaticIds", () => {

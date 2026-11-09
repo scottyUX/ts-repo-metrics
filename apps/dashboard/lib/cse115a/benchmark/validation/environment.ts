@@ -1,11 +1,11 @@
 // Decides how to install and test a student repository: which package holds the tests (students
 // often keep them in `server/` or `apps/api/` inside a workspace), which package manager, which
-// Node, and what the package's own `test` script does. Supported runners are Vitest and Node's
-// built-in `node --test`; anything else is `env_unsupported` with a one-line detail so the batch
+// Node, and what the package's own `test` script does. Supported runners are Vitest, Jest, and
+// Node's built-in `node --test`; anything else is `env_unsupported` with a one-line detail so the batch
 // lists it instead of guessing. Pure: reads files through the `read` callback, touches nothing.
 // Rules are in docs/CSE115A_BENCHMARK_VALIDATION.md, "Environment".
 
-export type Runner = "vitest" | "node-test";
+export type Runner = "vitest" | "node-test" | "jest";
 
 /** One line of the test phase, run from the package directory. Reports land in $REPORT_DIR. */
 export type TestStep = { kind: Runner | "prep"; command: string };
@@ -107,18 +107,45 @@ export function nodeMajorFrom(nvmrc: string | null, engines: unknown): number | 
   return null;
 }
 
+/** Jest flags we drop from a script: watchers never exit, coverage and silence change nothing we read, and the rest are ours. */
+const JEST_DROPPED_FLAG = /^--(watch|watchAll|coverage|silent|ci|json|outputFile|passWithNoTests)(=.*)?$/;
+const ENV_ASSIGNMENT = /^[A-Za-z_][A-Za-z0-9_]*=/;
+
 /**
- * Turns the package's `test` script into steps. `a && b && c` runs as three lines: a `vitest`
- * segment becomes our Vitest JSON command, a `node --test` segment gets our reporter, and anything
- * else (a build, a typecheck) runs as written so the tests see what they expect.
+ * A `jest` segment as our Jest JSON command, or null when the segment does not run Jest. Keeps
+ * leading `NAME=value` assignments (ESM projects need `NODE_OPTIONS=--experimental-vm-modules`)
+ * and the arguments after `jest` (`--config`, test paths), minus the flags in JEST_DROPPED_FLAG.
  */
-export function stepsFromTestScript(script: string | null, hasVitest: boolean): TestStep[] {
+function jestCommand(segment: string, i: number): string | null {
+  const tokens = segment.split(/\s+/);
+  const at = tokens.findIndex((t) => t === "jest" || t.endsWith("/jest") || t.endsWith("/jest.js"));
+  if (at < 0) return null;
+  const env = tokens.slice(0, at).filter((t) => ENV_ASSIGNMENT.test(t));
+  const args = tokens.slice(at + 1).filter((t) => !JEST_DROPPED_FLAG.test(t));
+  return [...env, `npx jest --ci --json --outputFile=$REPORT_DIR/jest-${i}.json --passWithNoTests`, ...args].join(" ");
+}
+
+const DEFAULT_COMMANDS: Record<"vitest" | "jest", TestStep> = {
+  vitest: { kind: "vitest", command: "npx vitest run --reporter=json --outputFile=$REPORT_DIR/vitest-0.json --passWithNoTests" },
+  jest: { kind: "jest", command: "npx jest --ci --json --outputFile=$REPORT_DIR/jest-0.json --passWithNoTests" },
+};
+
+/**
+ * Turns the package's `test` script into steps. `a && b && c` runs as three lines: a `vitest` or
+ * `jest` segment becomes our JSON-reporting command, a `node --test` segment gets our reporter,
+ * and anything else (a build, a typecheck) runs as written so the tests see what they expect.
+ * `defaultRunner` (the package's vitest or jest dependency) runs when the script names no runner.
+ */
+export function stepsFromTestScript(script: string | null, defaultRunner: "vitest" | "jest" | null): TestStep[] {
   const isDefault = !script || /no test specified/.test(script);
   const segments = isDefault ? [] : script!.split(/\s*&&\s*/).map((s) => s.trim()).filter(Boolean);
   const steps: TestStep[] = [];
   segments.forEach((segment, i) => {
+    const jest = jestCommand(segment, i);
     if (/\bvitest\b/.test(segment) && !/\bwatch\b/.test(segment)) {
       steps.push({ kind: "vitest", command: `npx vitest run --reporter=json --outputFile=$REPORT_DIR/vitest-${i}.json --passWithNoTests` });
+    } else if (jest) {
+      steps.push({ kind: "jest", command: jest });
     } else if (/\bnode\b[^|;]*\s--test(\s|$)/.test(segment)) {
       const command = segment.replace(/\s--test(?=\s|$)/, ` --test --test-reporter=${NODE_TEST_REPORTER_PATH}`);
       steps.push({ kind: "node-test", command: `REPORT=$REPORT_DIR/node-${i}.json ${command}` });
@@ -126,9 +153,7 @@ export function stepsFromTestScript(script: string | null, hasVitest: boolean): 
       steps.push({ kind: "prep", command: segment });
     }
   });
-  if (!steps.some((s) => s.kind !== "prep") && hasVitest) {
-    steps.push({ kind: "vitest", command: "npx vitest run --reporter=json --outputFile=$REPORT_DIR/vitest-0.json --passWithNoTests" });
-  }
+  if (!steps.some((s) => s.kind !== "prep") && defaultRunner) steps.push({ ...DEFAULT_COMMANDS[defaultRunner] });
   return steps;
 }
 
@@ -178,13 +203,13 @@ export async function detectEnvironment(probe: RepoProbe): Promise<Environment |
   // Test steps from the package's own script.
   const scripts = (pkg.scripts && typeof pkg.scripts === "object" ? pkg.scripts : {}) as Record<string, unknown>;
   const testScript = typeof scripts.test === "string" ? scripts.test : null;
-  const testSteps = stepsFromTestScript(testScript, hasDependency(pkg, "vitest"));
+  const defaultRunner = hasDependency(pkg, "vitest") ? "vitest" : hasDependency(pkg, "jest") ? "jest" : null;
+  const testSteps = stepsFromTestScript(testScript, defaultRunner);
   const runners = [...new Set(testSteps.map((s) => s.kind).filter((k): k is Runner => k !== "prep"))];
   if (runners.length === 0) {
     const where = packageDir || "the repository root";
-    if (hasDependency(pkg, "jest")) return unsupported(`jest in ${where}; only vitest and node --test are supported`);
-    if (testScript && !/no test specified/.test(testScript)) return unsupported(`test script in ${where} uses neither vitest nor node --test: ${testScript}`);
-    return unsupported(`no vitest dependency and no test script in ${where}`);
+    if (testScript && !/no test specified/.test(testScript)) return unsupported(`test script in ${where} uses none of vitest, jest, or node --test: ${testScript}`);
+    return unsupported(`no vitest or jest dependency and no test script in ${where}`);
   }
 
   // Node version.

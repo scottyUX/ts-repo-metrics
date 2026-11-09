@@ -37,13 +37,50 @@ describe("detectEnvironment: single package at the root", () => {
     expect(await detectEnvironment({ testFiles: ["a.test.ts"], read: repo({ "package.json": { ...vitestPkg, engines: { node: ">=20" } } }) })).toMatchObject({ image: "node:20-bookworm" });
   });
 
-  it("rejects jest, bun, a missing package.json, bad JSON, and a script with no known runner", async () => {
-    expect(await detectEnvironment({ testFiles: ["a.test.ts"], read: repo({ "package.json": { devDependencies: { jest: "^29" } }, "package-lock.json": "" }) })).toMatchObject({ supported: false, detail: expect.stringContaining("jest") });
+  it("rejects bun, a missing package.json, bad JSON, and a script with no known runner", async () => {
     expect(await detectEnvironment({ testFiles: ["a.test.ts"], read: repo({ "package.json": vitestPkg, "bun.lockb": "" }) })).toMatchObject({ supported: false, detail: expect.stringContaining("bun") });
     expect(await detectEnvironment({ testFiles: ["a.test.ts"], read: repo({}) })).toMatchObject({ supported: false, detail: "no package.json above the test files or at the repository root" });
     expect(await detectEnvironment({ testFiles: ["a.test.ts"], read: repo({ "package.json": "{not json" }) })).toMatchObject({ supported: false, detail: "package.json is not valid JSON" });
     expect(await detectEnvironment({ testFiles: ["a.test.ts"], read: repo({ "package.json": { scripts: { test: "mocha" } } }) })).toMatchObject({ supported: false, detail: expect.stringContaining("mocha") });
-    expect(await detectEnvironment({ testFiles: ["a.test.ts"], read: repo({ "package.json": {} }) })).toMatchObject({ supported: false, detail: "no vitest dependency and no test script in the repository root" });
+    expect(await detectEnvironment({ testFiles: ["a.test.ts"], read: repo({ "package.json": {} }) })).toMatchObject({ supported: false, detail: "no vitest or jest dependency and no test script in the repository root" });
+  });
+});
+
+describe("detectEnvironment: jest", () => {
+  const jestStep = (i: number) => `npx jest --ci --json --outputFile=$REPORT_DIR/jest-${i}.json --passWithNoTests`;
+
+  it("turns a bare jest script into one jest step", async () => {
+    const pkg = { scripts: { test: "jest" }, devDependencies: { jest: "^29.7.0" } };
+    const env = await detectEnvironment({ testFiles: ["a.test.ts"], read: repo({ "package.json": pkg, "package-lock.json": "{}" }) });
+    expect(env).toMatchObject({ supported: true, runners: ["jest"] });
+    if (env.supported) expect(env.testSteps).toEqual([{ kind: "jest", command: jestStep(0) }]);
+  });
+
+  it("keeps --config and test paths, drops --coverage, --watch and --silent", async () => {
+    const pkg = { scripts: { test: "jest --config jest.config.ts --coverage" }, devDependencies: { jest: "^29.7.0" } };
+    const env = await detectEnvironment({ testFiles: ["a.test.ts"], read: repo({ "package.json": pkg }) });
+    if (!env.supported) throw new Error(env.detail);
+    expect(env.testSteps).toEqual([{ kind: "jest", command: `${jestStep(0)} --config jest.config.ts` }]);
+    expect(stepsFromTestScript("tsc && jest --watch --silent tests/", null)).toEqual([{ kind: "prep", command: "tsc" }, { kind: "jest", command: `${jestStep(1)} tests/` }]);
+  });
+
+  it("keeps leading NAME=value assignments, so ESM projects keep NODE_OPTIONS", () => {
+    expect(stepsFromTestScript("NODE_OPTIONS=--experimental-vm-modules npx jest", null)).toEqual([{ kind: "jest", command: `NODE_OPTIONS=--experimental-vm-modules ${jestStep(0)}` }]);
+  });
+
+  it("falls back to jest when there is a jest dependency and no test script", async () => {
+    const env = await detectEnvironment({ testFiles: ["a.test.ts"], read: repo({ "package.json": { devDependencies: { jest: "^29" } }, "package-lock.json": "" }) });
+    expect(env).toMatchObject({ supported: true, runners: ["jest"], testSteps: [{ kind: "jest", command: jestStep(0) }] });
+  });
+
+  it("still picks vitest for a vitest package", async () => {
+    expect(await detectEnvironment({ testFiles: ["a.test.ts"], read: repo({ "package.json": vitestPkg }) })).toMatchObject({ runners: ["vitest"] });
+  });
+
+  it("handles heather-loll/115a-restroom-app: an Expo app in client/ with jest-expo and no root package.json", async () => {
+    const pkg = { scripts: { start: "expo start", lint: "expo lint", test: "jest" }, devDependencies: { jest: "~30.5.2", "jest-expo": "~58.0.12" }, jest: { preset: "jest-expo" } };
+    const env = await detectEnvironment({ testFiles: ["client/src/components/BottomNav.test.tsx"], read: repo({ "client/package.json": pkg, "client/package-lock.json": "{}" }) });
+    expect(env).toMatchObject({ supported: true, runners: ["jest"], packageDir: "client", installDir: "client", installCommand: "npm ci", testSteps: [{ kind: "jest", command: jestStep(0) }] });
   });
 });
 
@@ -87,9 +124,9 @@ describe("detectEnvironment: nested package and node --test (the PocketWatch sha
 
 describe("stepsFromTestScript and nodeMajorFrom", () => {
   it("keeps prep segments as written and only rewrites the runners", () => {
-    expect(stepsFromTestScript("tsc && vitest run --coverage && node --test dist/tests", false).map((s) => s.kind)).toEqual(["prep", "vitest", "node-test"]);
-    expect(stepsFromTestScript(null, true)).toHaveLength(1);
-    expect(stepsFromTestScript(null, false)).toEqual([]);
+    expect(stepsFromTestScript("tsc && vitest run --coverage && node --test dist/tests", null).map((s) => s.kind)).toEqual(["prep", "vitest", "node-test"]);
+    expect(stepsFromTestScript(null, "vitest")).toHaveLength(1);
+    expect(stepsFromTestScript(null, null)).toEqual([]);
   });
 
   it("parses Node majors and ignores what it cannot read", () => {

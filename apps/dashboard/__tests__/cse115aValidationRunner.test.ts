@@ -96,4 +96,23 @@ describe("readReports", () => {
       await rm(dir, { recursive: true, force: true });
     }
   });
+
+  it("merges a Jest report alongside a node --test report", async () => {
+    const { mkdtemp, writeFile, rm } = await import("node:fs/promises");
+    const { tmpdir } = await import("node:os");
+    const { join } = await import("node:path");
+    const { readReports } = await import("@/lib/cse115a/benchmark/validation/runner");
+    const dir = await mkdtemp(join(tmpdir(), "hecate-reports-"));
+    try {
+      await writeFile(join(dir, "jest-0.json"), JSON.stringify({ success: false, testResults: [{ name: "/work/client/src/a.test.tsx", status: "passed", message: "", assertionResults: [{ ancestorTitles: ["A"], title: "renders", status: "passed" }, { ancestorTitles: ["A"], title: "later", status: "todo" }] }] }));
+      await writeFile(join(dir, "node-1.json"), JSON.stringify({ "/work/server/b.test.mjs::node one": "failed" }));
+      expect(await readReports(dir)).toEqual({
+        "client/src/a.test.tsx::A > renders": "passed",
+        "client/src/a.test.tsx::A > later": "skipped",
+        "server/b.test.mjs::node one": "failed",
+      });
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
 });

@@ -1,4 +1,4 @@
-// Test ids for the validation pass: reading a Vitest JSON report into RunResults, and finding
+// Test ids for the validation pass: reading a Vitest or Jest JSON report into RunResults, and finding
 // pre-existing tests whose body the test patch changed (compareRuns's `modified` set).
 // Ids are `file::describe > test`, the same shape extractTests.ts produces statically, so the
 // verified lists line up with the row's unverified FAIL_TO_PASS. Pure: no Docker, no files.
@@ -6,7 +6,7 @@
 import ts from "typescript";
 import type { RunResults, TestStatus } from "@/lib/cse115a/benchmark/validation/compareRuns";
 
-/** The parts of Vitest's `--reporter=json` output the validator reads. */
+/** The parts of Vitest's `--reporter=json` output the validator reads; Jest's `--json` has the same shape. */
 export type VitestReport = {
   testResults: Array<{
     name: string;
@@ -35,9 +35,10 @@ export function testId(file: string, ancestors: string[], title: string): string
 }
 
 /**
- * Turns one Vitest JSON report into test id -> status. `mountPrefix` is the directory the repo
- * was mounted at in the container (`/work/`); it is stripped so ids match repo-relative paths.
- * Vitest reports `passed`, `failed`, `skipped`, `pending` and `todo`; the last three are skips.
+ * Turns one Vitest or Jest JSON report into test id -> status. `mountPrefix` is the directory the
+ * repo was mounted at in the container (`/work/`); it is stripped so ids match repo-relative paths.
+ * Vitest reports `passed`, `failed`, `skipped`, `pending` and `todo`; Jest adds `disabled` (a skip)
+ * and `focused` (an `it.only` that ran and passed). Everything but passed, failed and focused is a skip.
  */
 export function parseVitestReport(report: VitestReport, mountPrefix = "/work/"): RunResults {
   const results: RunResults = {};
@@ -52,7 +53,7 @@ export function parseVitestReport(report: VitestReport, mountPrefix = "/work/"):
 }
 
 function toStatus(status: string): TestStatus {
-  if (status === "passed") return "passed";
+  if (status === "passed" || status === "focused") return "passed";
   if (status === "failed") return "failed";
   return "skipped";
 }

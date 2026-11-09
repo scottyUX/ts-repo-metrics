@@ -111,7 +111,7 @@ export type ValidationResult = {
   signals?: { database: string[]; browser: string[]; otherRunners: string[] };
 };
 
-/** The result for a repository the validator cannot run (bun, jest, no package.json). */
+/** The result for a repository the validator cannot run (bun, mocha, no package.json). */
 export function unsupportedResult(row: TaskRow, env: Unsupported): ValidationResult {
   return {
     instance_id: row.instance_id,
@@ -159,7 +159,7 @@ export async function validateTask(input: ValidateInput): Promise<ValidationResu
     instance_id: row.instance_id,
     image: env.image,
     eval_script: containerScript(plan, "r2"),
-    log_parser: env.runners.map((r) => (r === "vitest" ? "vitest-json" : "node-test-json")).join("+"),
+    log_parser: env.runners.map((r) => ({ vitest: "vitest-json", jest: "jest-json", "node-test": "node-test-json" })[r]).join("+"),
     package_dir: env.packageDir,
     test_files: testFiles,
     FAIL_TO_PASS: comparison.failToPass,
