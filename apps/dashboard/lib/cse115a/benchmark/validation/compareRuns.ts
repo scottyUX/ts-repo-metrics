@@ -79,6 +79,10 @@ function mergeState(runs: StateRuns, flaky: Set<string>): Map<string, MergedStat
  * a test in `modified` that is absent from R1 is judged from R1, because its R0 result
  * belongs to the old body. (A modified test R1 reports as skipped was still disabled, so
  * the fallback applies and the skip counts against a test that passed at base.)
+ * Only results a run reported count for the fallback: a status implied by a load failure is
+ * not one. So when a test's file fails to load at R1, an unmodified test with an R0 result is
+ * still judged from R0, and only a test with none (new, rewritten, or unloadable at R0 too)
+ * counts as failed at R1 by the load rule.
  */
 export function compareRuns(input: CompareInput): Comparison {
   const modified = input.modified ?? new Set<string>();
@@ -112,10 +116,11 @@ export function compareRuns(input: CompareInput): Comparison {
 
   for (const id of new Set([...r0.keys(), ...r1.keys(), ...r2.keys()])) {
     if (flaky.has(id) || id.endsWith(LOAD_FAILURE_SUFFIX)) continue;
-    const inR1 = statusIn("r1", id);
-    const inR0 = statusIn("r0", id);
-    const fromBase = inR0 !== "absent" && (inR1 === "skipped" || (inR1 === "absent" && !modified.has(id)));
-    const before = fromBase ? inR0 : inR1;
+    // Real results: what a run reported. statusIn adds what a load failure implies.
+    const reportedR1 = r1.get(id);
+    const reportedR0 = r0.get(id);
+    const fromBase = reportedR0 !== undefined && (reportedR1 === "skipped" || (reportedR1 === undefined && !modified.has(id)));
+    const before = fromBase ? reportedR0 : statusIn("r1", id);
     const after = statusIn("r2", id);
     if (fromBase) judgedFromBase.push(id);
 

@@ -41,8 +41,11 @@ export filter possible later. Two runs is the minimum that can detect a disagree
 count changes only the runner and the `StateRuns` type.
 
 Each test has one of four statuses per run: `passed`, `failed`, `skipped`, or `absent` (it did
-not appear in the report, because its file did not exist in that state or failed to load). The
-family has no single word for the last case: Multi-SWE-bench calls it `NONE` (§3.1.4), the
+not appear in the report, because its file did not exist in that state or was not collected). A
+test file that fails to load (an import that does not resolve, a syntax error) is reported as the
+pseudo-id `file::(load)`, recorded in `load_failures`, and its tests count as `failed` in that
+state, subject to the base fallback below; the pseudo-id itself is never classified. The
+family has no single word for the absent case: Multi-SWE-bench calls it `NONE` (§3.1.4), the
 SWE-bench paper says a "missing" test counts as a failure (Appendix A.4), its harness has no name
 for it and grades a test that is not in the results as failed (`swebench/harness/grading.py`),
 and ProgramBench's evaluator records `not_run` (`src/programbench/eval/eval.py`). `skipped` is
@@ -52,31 +55,43 @@ tracked as its own status, as Multi-SWE-bench does and the SWE-bench harness doe
 ## How tests are classified
 
 Each test is placed in one list by its status before the fix and after it. "After" is R2.
-"Before" is R1, with one fallback: when R1 has no result for a test (absent or skipped) and the
-test existed at base, its R0 status stands in. The fallback is what the base state is for. A
-pre-existing test whose file stops loading once the test patch is applied, and then fails with
-the fix, is a regression hidden from a pure R1 → R2 comparison; this is the transition
-Multi-SWE-bench names as abnormal and discards (PASSED→NONE/SKIPPED→FAILED, §3.1.4). A test that
-R1 does report is judged from R1, so a pre-existing test the test patch modified still counts as
-`FAIL_TO_PASS` when it fails without the fix and passes with it, as in SWE-bench.
+"Before" is worked out in this order (`compareRuns.ts`):
+
+1. If R1 reported a result for the test, that result. (If it reported `skipped` and R0 reported a
+   result, R0 stands in; see the skip rules below.)
+2. Else, if R0 reported a result for the test and the test patch did not modify it, the R0
+   result, and the test is listed in `judged_from_base`. This applies even when the test's file
+   failed to load at R1.
+3. Else, if the test's file failed to load at R1, `failed` (the load rule).
+4. Else `absent`.
+
+"Reported" means a status a run produced, not one implied by a load failure. The fallback in
+step 2 is what the base state is for. A pre-existing test whose file stops loading once the test
+patch is applied, and then fails with the fix, is a regression hidden from a pure R1 → R2
+comparison; this is the transition Multi-SWE-bench names as abnormal and discards
+(PASSED→NONE/SKIPPED→FAILED, §3.1.4). Step 2 comes before step 3 so that an untouched old test in
+such a file is judged by how it really behaved at base, not counted as a failure it never had. A
+test that R1 does report is judged from R1, so a pre-existing test the test patch modified still
+counts as `FAIL_TO_PASS` when it fails without the fix and passes with it, as in SWE-bench.
 
 The fallback has one condition: R0's result is evidence about the test only if the test patch
 did not change that test's body. The validator compares each pre-existing test's source text at
 base and at base + `test_patch` (the test files are identical in R1 and R2, since `diff.ts`
-splits the two patches by path); a test whose text changed is in `modified`, and when such a
-test is absent from R1 it is judged from R1 like a new test: absent→passed is `ABSENT_TO_PASS`,
-absent→failed is `FAIL_TO_FAIL`. Without this condition a rewritten test that passed at base in
-its old form would be `PASS_TO_PASS` on a result that belongs to a different body. A modified
-test that R1 reports as skipped still takes the fallback: it was observed disabled, and a
-disabled test that passed at base is a regression whatever else changed in it. Every test whose
+splits the two patches by path); a test whose text changed is in `modified`, and when R1 has no
+result for such a test it is judged from R1 like a new test: by the load rule when its file failed
+to load (failed→passed is `FAIL_TO_PASS`, failed→failed `FAIL_TO_FAIL`), otherwise as absent
+(absent→passed is `ABSENT_TO_PASS`, absent→failed `FAIL_TO_FAIL`). Without this condition a
+rewritten test that passed at base in its old form would be `PASS_TO_PASS` on a result that
+belongs to a different body. A modified test that R1 reports as skipped still takes the
+fallback: it was observed disabled, and a disabled test that passed at base is a regression whatever else changed in it. Every test whose
 "before" status came from R0 is listed in `judged_from_base`, and every test in `modified` is
 listed in `modified_tests`, so a reviewer can see which classifications rest on the fallback
 rather than on an observed R1 result.
 
 | Before | After (R2) | List | Meaning |
 |---|---|---|---|
-| failed | passed | `FAIL_TO_PASS` | ran and failed without the fix, passes with it; proves the fix |
-| absent | passed | `ABSENT_TO_PASS` | its file loads only with the fix, so its failure was never observed; proves the fix |
+| failed | passed | `FAIL_TO_PASS` | failed without the fix (ran and failed, or its file could not load), passes with it; proves the fix |
+| absent | passed | `ABSENT_TO_PASS` | no result before the fix although nothing failed to load (not collected, or defined only when the fix is present); proves the fix |
 | passed | passed | `PASS_TO_PASS` | unaffected by the fix; must keep passing |
 | passed | failed, absent, or skipped | regression | the change broke, removed, or disabled a passing test |
 | failed | absent or skipped | regression | the change broke or disabled a test instead of fixing it |
@@ -85,9 +100,13 @@ rather than on an observed R1 result.
 | run a ≠ run b | | flaky | unreliable; excluded |
 
 `FAIL_TO_PASS` and `ABSENT_TO_PASS` are kept apart because they are different evidence. A test
-in the first ran without the fix and failed; a test in the second belongs to a file that could not
-load without the fix, so every test in that file flips, including any that would pass against a
-stub. In Vitest a file stops loading when it imports a module file the fix creates ("Cannot find
+in the first failed without the fix: either it ran and failed, or its file could not load and the
+test had no base result to fall back on (a new test, or one the test patch rewrote). The second
+kind is recorded in `load_failures` (`r1 <file>`), so a reader can tell a test seen failing from
+one whose file never loaded; for the second kind every such test in the file flips, including
+any that would pass against a stub. A test in `ABSENT_TO_PASS` had no result before the fix and
+no load failure explains it: its file was not collected at R1, or the test is defined only when
+the fix is present. In Vitest a file stops loading when it imports a module file the fix creates ("Cannot find
 module"), or when a statement at the top level of the file calls something the fix adds. A named
 import of a function that does not exist yet in an existing module does not stop the file: the
 import resolves to `undefined`, the test runs, and it fails with a TypeError, which is an
@@ -95,13 +114,14 @@ observed failure and ordinary `FAIL_TO_PASS` (checked with Vitest 4.1.9, the ver
 branch: a file importing a missing module reports status `failed` with no `assertionResults`
 and the error in `message`; a file importing a missing name reports every test, the one calling
 it as `failed`). Python behaves differently: `from m import name` raises ImportError at import
-time, so in SWE-bench a test importing a name the fix adds is the common collection error that
-Appendix A.3 discards, while for Vitest the same situation is an observed failure. Both lists
-count as proof of the fix for the verdict, and the
-SWE-bench-format export folds them into one `FAIL_TO_PASS` column. This is
-Multi-SWE-bench's design: FAILED→PASSED and NONE→PASSED are separate buckets (`f2p_tests`,
-`n2p_tests`, `report.py` lines 133–138) and either satisfies its "fix something" check. The
-SWE-bench harness folds them (absent-before is failed-before: `grading.py` at `b4a4050`,
+time, so the file fails to collect (`file::(load)`), and in SWE-bench a test importing a name the
+fix adds is the common collection error that Appendix A.3 discards; for Vitest the same situation
+is an observed failure. Both lists count as proof of the fix for the verdict, and the
+SWE-bench-format export folds them into one `FAIL_TO_PASS` column. Multi-SWE-bench keeps
+FAILED→PASSED and NONE→PASSED as separate buckets (`f2p_tests`, `n2p_tests`, `report.py` lines
+133–138) and either satisfies its "fix something" check; its NONE→PASSED includes tests whose file
+did not load, which the validator places in `FAIL_TO_PASS` with the load failure recorded. The
+SWE-bench harness folds them too (absent-before is failed-before: `grading.py` at `b4a4050`,
 `test_failed`), but SWE-bench's validation discards any instance whose before-fix log shows an
 ImportError or AttributeError (Appendix A.3; `has_attribute_or_import_error`, applied in
 `tutorials/validation.ipynb`), and SWE-rebench's benchmark subset requires the same (Appendix
@@ -109,7 +129,7 @@ H). Their reason is that a scraped issue rarely names the new interface a test i
 tests reject valid solutions. The course removes that reason: the handout requires the Specs
 section to name every function, file and endpoint the tests touch, and the rubric grades it, so
 a test importing a name the spec states is fair. The validator therefore keeps these rows and
-keeps the distinction visible instead of discarding them.
+keeps the distinction visible, in `load_failures`, instead of discarding them.
 
 ### Worked example: one file, three tests
 
@@ -121,16 +141,18 @@ at the top of the file, rewrites **B** to check the new behavior, and adds a new
 | Run | What happens | A | B | C |
 |---|---|---|---|---|
 | R0 | file loads against the old code | passed | passed (old body) | doesn't exist |
-| R1 | `src/partner.ts` doesn't exist, the import fails, the file never loads | absent | absent | absent |
+| R1 | `src/partner.ts` doesn't exist, the import fails, the file never loads (`tests/email.test.ts::(load)`) | no result | no result | no result |
 | R2 | file loads | passed | passed | passed |
 
-R1 and R2 are identical for all three. What is actually known about each without the fix:
+R1 and R2 are identical for all three: no test in the file reported anything at R1, and the load
+failure is recorded as `r1 tests/email.test.ts` in `load_failures`. What is actually known about
+each without the fix:
 
-| Test | Known without the fix | Label |
-|---|---|---|
-| **A** untouched old test | it passes: R0 ran this exact code and it passed | `PASS_TO_PASS`, a requirement, not proof |
-| **B** rewritten old test | nothing: R0 ran a different body; the new body never ran without the fix | `ABSENT_TO_PASS`, proof |
-| **C** new test | nothing: it did not exist without the fix | `ABSENT_TO_PASS`, proof |
+| Test | Known without the fix | Rule | Label |
+|---|---|---|---|
+| **A** untouched old test | it passes: R0 ran this exact code and it passed | 2, base result; in `judged_from_base` | `PASS_TO_PASS`, a requirement, not proof |
+| **B** rewritten old test | its file could not load; R0 ran a different body, so it does not count | 3, load rule | `FAIL_TO_PASS`, proof |
+| **C** new test | its file could not load; it did not exist at base | 3, load rule | `FAIL_TO_PASS`, proof |
 
 C is the normal case; A and B are the two edge cases, and R0 is the only column that separates
 them. A is not proof because it was passing before the task existed; counting it would let a
@@ -138,24 +160,27 @@ test patch that adds only the import line, and no tests, validate on A alone, an
 resolve that row by creating an empty `src/partner.ts`. With A as `PASS_TO_PASS` that row has no
 proof and is rejected with `no_fail_to_pass`. For an agent being graded nothing changes: A must
 pass under either label. The fallback is per test, not per file: the new tests in the same file
-have no R0 entry and are judged from R1. An untouched old test that fails in R2 is
-passed→failed by the fallback, a regression; judged from R1 alone it would be absent→failed,
-`FAIL_TO_FAIL`, and the break would be invisible. B's failing variant (absent→failed with the
-body changed) is `FAIL_TO_FAIL`, flagged at write-back as task-touched, like a new test that
-never passes.
+have no R0 entry and take the load rule. An untouched old test that fails in R2 is
+passed→failed by the fallback, a regression; judged by the load rule alone it would be
+failed→failed, `FAIL_TO_FAIL`, and the break would be invisible. Likewise an untouched old test
+that failed at base and passes with the fix is `FAIL_TO_PASS` from its base result. B's failing
+variant (load rule failed→failed with the body changed) is `FAIL_TO_FAIL`, flagged at write-back
+as task-touched, like a new test that never passes. If the file cannot load at R0 either, no test
+in it has a base result, and every test takes the load rule at R1.
 
 What the family does with this file: Multi-SWE-bench labels A, B and C all NONE→PASSED
 (`n2p_tests`), counts each as fixed, and accepts a PR on `n2p` alone (`report.py` lines
 107–117), so the import-only test patch becomes a valid instance there; SWE-bench and
 SWE-rebench discard the instance on the import error; the two-state benchmarks that know only
-"passed" (Pro, SWE-rebench V2, SWE-Cycle) fold A into fail-to-pass. The validator keeps the row
-and labels the old tests from the evidence that exists. Details and the "three questions asked
+"passed" (Pro, SWE-rebench V2, SWE-Cycle) fold A into fail-to-pass. The validator keeps the row,
+labels B and C as failures it can account for (the load failure is on record), and labels A from
+the evidence that exists. Details and the "three questions asked
 of R0" are in `docs/planning/BENCHMARK_VALIDATION_SURVEY.md`, section 6.
 
 Tests are matched by id (`file::describe > test`), so a renamed existing test appears as one
 removed test and one added test: the old id is passed (R0) → absent, a regression by the fallback,
 and the new id is judged from its own runs (passed→passed, `PASS_TO_PASS`, when the file loads
-at R1; absent→passed, `ABSENT_TO_PASS`, when it does not). The row is rejected with the
+at R1; failed→passed by the load rule, `FAIL_TO_PASS`, when it does not). The row is rejected with the
 regression visible for review rather than guessed to be a rename, because a deleted passing test
 looks the same in the logs and is what the rule exists to catch. Every benchmark in the family
 matches by name, but none compares against base and none flags a vanished test, so a rename
@@ -348,38 +373,44 @@ Where each claim above about another benchmark comes from, with section numbers,
   row rejected) plus new name labeled from its own runs. A deleted test looks identical in the
   logs, and the rule exists to catch deletions, so the validator does not guess. Cost: a rejected
   row a reviewer resolves in seconds, with both names side by side.
-- **Unobserved proof is weaker than observed proof.** Every test in a file that only loads with
-  the fix counts as `ABSENT_TO_PASS`, including a trivial one that would pass against a stub.
-  That is why the two lists stay separate. A row whose only proof is `ABSENT_TO_PASS` has never
-  had a test seen failing; write-back should flag it for review (does the spec name the new
-  module, do the tests assert behavior). Same exposure as Multi-SWE-bench's `n2p`, minus A.
+- **Unobserved proof is weaker than observed proof.** Every new or rewritten test in a file that
+  only loads with the fix counts as `FAIL_TO_PASS` by the load rule, including a trivial one that
+  would pass against a stub; so does every test in `ABSENT_TO_PASS`. Neither was seen failing.
+  The load-rule cases are visible through `load_failures` (`r1 <file>`), the others through the
+  separate list. A row whose only proof is of these kinds should be flagged at write-back for
+  review (does the spec name the new module, do the tests assert behavior); that flag does not
+  exist yet. Same exposure as Multi-SWE-bench's `n2p`, minus A.
 - **The modification check cannot see dynamic tests.** `it.each`, titles built from variables,
   tests generated in loops: no static id, no body comparison. Treated as unchanged, so the
   fallback applies and a rewritten one is under-claimed. Visible in `judged_from_base`.
-- **Two runs catch loud flakiness only.** A test that fails one time in twenty passes both runs
-  and gets a label. The family uses one to twenty runs; the count is one constant.
+- **Three runs catch loud flakiness only.** A test that fails one time in twenty usually passes
+  all three runs and gets a label. The family uses one to twenty runs; the count is one constant.
 - **Dependency changes live in `patch`, not `test_patch`.** `diff.ts` splits by path, so a new
-  dev dependency in `package.json` is part of the fix. If the tests import it, the file cannot
-  load at R1: every new test is `ABSENT_TO_PASS`, every old one is in `judged_from_base`. The
-  lists show it; whether the Docker runner re-installs per state is a step-3 decision.
-- **"Absent" is a property of the file.** Imports belong to a file, so when one import needs the
-  fix, every test in the file is absent at R1, including new tests that check old behavior
-  ("still accepts ucsc" next to "accepts partner"). Those would pass without the fix but become
-  `ABSENT_TO_PASS`: a pass→pass test counted as proof. R0 recovers this for tests that existed at
-  base (test A in the worked example), not for new ones. Grading an agent is unaffected, since
-  every listed test must pass either way. Two things downstream are misled: the verdict, where a
-  row whose only `ABSENT_TO_PASS` tests are of this kind looks proven when nothing checks the new
-  behavior (caught by the unobserved-proof flag at write-back); and the labels, where proof counts
-  are inflated, which matters for the router, since it trains on them. Seen on a real row: a task
-  PR moved an earlier task's test file next to a helper counted as part of the fix, so all of the
-  earlier task's tests became `ABSENT_TO_PASS` for the later task.
-- **The Specs guarantee is a rubric, not a check.** `ABSENT_TO_PASS` is fair only because the
-  spec names the new module. A row with a low Specs grade and all-unobserved proof is the case
+  dev dependency in `package.json` (or `requirements.txt`) is part of the fix. If the tests
+  import it, the file cannot load at R1: every new or rewritten test is `FAIL_TO_PASS` by the
+  load rule, every untouched old one is in `judged_from_base`. The runner installs after applying
+  each state's patches, so R2 has the dependency and R1 does not.
+- **A load failure is a property of the file.** Imports belong to a file, so when one import
+  needs the fix, every test in the file fails to load at R1, including new tests that check old
+  behavior ("still accepts ucsc" next to "accepts partner"). Those would pass without the fix but
+  become `FAIL_TO_PASS` by the load rule: a pass→pass test counted as proof. R0 recovers this for
+  untouched tests that existed at base (test A in the worked example), not for new or rewritten
+  ones. Grading an agent is unaffected, since every listed test must pass either way. Two things
+  downstream are misled: the verdict, where a row whose only proof is of this kind looks proven
+  when nothing checks the new behavior (the unobserved-proof review above); and the labels, where
+  proof counts are inflated, which matters for the router, since it trains on them. Seen on a
+  real row: a task PR moved an earlier task's test file next to a helper counted as part of the
+  fix; at its new path every test has a new id with no base result, so all of the earlier task's
+  tests became proof for the later task.
+- **The Specs guarantee is a rubric, not a check.** Proof from a file that cannot load without the
+  fix is fair only because the spec names the new module. A row with a low Specs grade and all-unobserved proof is the case
   SWE-bench discards; write-back can cross-check the grade.
-- **Until the modification check lands**, `modified` is empty and every old test takes the
-  fallback: a rewritten old test in an unloadable file is under-claimed as `PASS_TO_PASS`, and
-  the row is rejected only if that test was its sole proof. Never a row validated on borrowed
-  evidence.
+- **The modification check reads source, it does not run it.** JavaScript and TypeScript tests
+  are compared through the TypeScript compiler, Python tests by indentation. A Python file the
+  indentation reader cannot parse (unbalanced quotes or brackets, mixed tab and space indents)
+  has every test treated as modified, so none of them takes the base fallback: an untouched one
+  in a file that fails to load at R1 is then `FAIL_TO_PASS` by the load rule rather than
+  `PASS_TO_PASS`. Visible in `modified_tests`.
 
 ## Not yet
 

@@ -264,3 +264,56 @@ describe("compareRuns: a test file that failed to load", () => {
     expect(result.reason).toBe("regressions");
   });
 });
+
+describe("compareRuns: the base run takes priority over the load-failure rule for unmodified old tests", () => {
+  // The doc's worked example: tests/email.test.ts gains an import of a module the fix creates, so the
+  // file cannot load at R1. A is an old untouched test, B an old test the patch rewrote, C a new one.
+  const F = "tests/email.test.ts";
+  const LOAD = { [`${F}::(load)`]: "failed" } as RunResults;
+  const A = `${F}::A`, B = `${F}::B`, C = `${F}::C`;
+
+  it("worked example: A is PASS_TO_PASS from base; B and C are FAIL_TO_PASS with the load failure recorded", () => {
+    const result = compareRuns({
+      r0: thrice({ [A]: "passed", [B]: "passed" }),
+      r1: thrice(LOAD),
+      r2: thrice({ [A]: "passed", [B]: "passed", [C]: "passed" }),
+      modified: new Set([B]),
+    });
+    expect(result.passToPass).toEqual([A]);
+    expect(result.judgedFromBase).toEqual([A]);
+    expect(result.failToPass).toEqual([B, C]);
+    expect(result.absentToPass).toEqual([]);
+    expect(result.loadFailures).toEqual([`r1 ${F}`]);
+    expect(result.validationStatus).toBe("validated");
+  });
+
+  it("rejects a test patch that only breaks the file's load: A alone proves nothing", () => {
+    const result = compareRuns({ r0: thrice({ [A]: "passed" }), r1: thrice(LOAD), r2: thrice({ [A]: "passed" }) });
+    expect(result.passToPass).toEqual([A]);
+    expect(result.failToPass).toEqual([]);
+    expect(result.validationStatus).toBe("rejected");
+    expect(result.reason).toBe("no_fail_to_pass");
+  });
+
+  it("keeps the hidden regression visible: passed at base, file unloadable at R1, failing with the fix", () => {
+    const result = compareRuns({ r0: thrice({ [A]: "passed" }), r1: thrice(LOAD), r2: thrice({ [A]: "failed", [C]: "passed" }) });
+    expect(result.regressions).toEqual([A]);
+    expect(result.judgedFromBase).toEqual([A]);
+    expect(result.failToPass).toEqual([C]);
+    expect(result.reason).toBe("regressions");
+  });
+
+  it("an old test that failed at base and passes with the fix is FAIL_TO_PASS from base", () => {
+    const result = compareRuns({ r0: thrice({ [A]: "failed" }), r1: thrice(LOAD), r2: thrice({ [A]: "passed" }) });
+    expect(result.failToPass).toEqual([A]);
+    expect(result.judgedFromBase).toEqual([A]);
+    expect(result.validationStatus).toBe("validated");
+  });
+
+  it("a file that fails to load at R0 too has no real base result, so the load rule applies at R1", () => {
+    const result = compareRuns({ r0: thrice(LOAD), r1: thrice(LOAD), r2: thrice({ [A]: "passed" }) });
+    expect(result.failToPass).toEqual([A]);
+    expect(result.judgedFromBase).toEqual([]);
+    expect(result.loadFailures).toEqual([`r0 ${F}`, `r1 ${F}`]);
+  });
+});
