@@ -255,14 +255,17 @@ container mount prefix removed, so observed results can be matched against the r
 IDs. Static IDs that match no observed test are reported as `unmatched_static_ids`, never
 dropped silently.
 
-The runner follows the package's own `test` script, split on `&&`; segments that are not a
-runner (a build, a typecheck) run as written. Three runners are supported:
+For JavaScript, the runner follows the package's own `test` script, split on `&&`; segments that
+are not a runner (a build, a typecheck) run as written. A row whose test files are all Python runs
+pytest (below); one whose test files mix Python and JavaScript is `env_unsupported`. Four runners
+are supported:
 
 | Runner | Command | `log_parser` |
 |---|---|---|
 | Vitest | `npx vitest run --reporter=json --outputFile=$REPORT_DIR/vitest-<i>.json --passWithNoTests` | `vitest-json` |
 | Jest | `npx jest --ci --json --outputFile=$REPORT_DIR/jest-<i>.json --passWithNoTests`, plus the script's own arguments after `jest` (`--config`, test paths) minus `--watch`, `--watchAll`, `--coverage` and `--silent`; leading `NAME=value` assignments are kept | `jest-json` |
 | `node --test` | the script's command with `--test-reporter` set to our reporter | `node-test-json` |
+| pytest | `python -m pytest -p hecate_pytest_reporter -p no:cacheprovider --continue-on-collection-errors`, with `PYTHONPATH=/patches` and `REPORT=$REPORT_DIR/pytest-0.json`; through `uv run --no-sync` or `poetry run` when that manager owns the environment | `pytest-json` |
 
 With no runner in the script, a `vitest` dependency (else a `jest` one) runs with the default
 command above. Jest's `--json` output has the same `testResults[].assertionResults[]` shape as
@@ -270,6 +273,36 @@ Vitest's, so both go through one reader; Jest's `pending`, `todo`, `skipped` and
 count as skipped and `focused` as passed. A file that fails to load (status `failed`, no
 assertion results) is recorded as `file::(load)` for either runner. Any other runner is
 `env_unsupported`.
+
+**Python.** The package directory is the nearest one above the test files with a
+`pyproject.toml`, `requirements.txt`, `setup.py` or `setup.cfg`, else the repository root. The
+image is `python:<major.minor>-bookworm`: the version comes from `.python-version`, else the lowest
+minor `requires-python` allows (`">=3.10,<4"` is 3.10, raised to 3.9 when lower, since pytest 8
+needs 3.9), else 3.12. The install is the first that applies: `uv.lock` → `pip install uv && uv
+sync --frozen` into `/opt/venv`; `poetry.lock` → `pip install poetry && poetry install
+--no-interaction --no-root` into the image's Python (no virtualenv); `requirements.txt` plus any
+of `requirements-dev.txt`, `requirements-test.txt`, `dev-requirements.txt` → `pip install -r` each;
+a `pyproject.toml` with `[project]` or `[build-system]`, or a `setup.py` → `pip install -e .`. Every
+install ends by installing pytest. Nothing installed lands in the mounted checkout, and
+`PYTHONDONTWRITEBYTECODE` keeps `.pyc` files out of it. pip, uv and Poetry downloads share the
+batch's cache folder like npm's.
+
+pytest has no JSON output of its own, so the runner writes a small plugin
+(`pytestReporter.ts`, standard library only, checked on pytest 7.4 and 8.4) into `/patches` and
+loads it with `-p`. It writes the same `{id: status}` map as the `node --test` reporter. Ids are the
+file path relative to the repository plus the rest of pytest's node id, `file::test` or
+`file::Class::test`, with parameters as pytest prints them (`test_add[1-2]`), the shape
+`extractTests.ts` writes. A test is `failed` if its setup, call or teardown failed (errors count as
+failures), `skipped` if any phase skipped (an `xfail` arrives as skipped), and `passed` otherwise.
+A file that fails to collect (an import or syntax error) is `file::(load)`, as for the other
+runners. `--continue-on-collection-errors` is required: without it pytest stops before running any
+test when one file fails to import, and the whole suite would be absent from that state.
+
+The modification check for `.py` files reads indentation instead of running Python: a `def test*`
+at the top level or inside `class Test*` (with its decorators) up to the next statement at the same
+or lower indent, skipping lines inside strings and brackets. A file it cannot parse that way
+(unbalanced quotes or brackets, mixed tab and space indents) has every test treated as modified, so
+those tests are judged from R1 only.
 
 The commands used become the row's `eval_script`, the container definition its `image`, and
 the JSON reader its `log_parser`. Those three column names and meanings are SWE-bench's, from
@@ -351,5 +384,7 @@ Where each claim above about another benchmark comes from, with section numbers,
 ## Not yet
 
 Postgres or other services for tests that need them, browser and end-to-end runners, Bun,
-Python projects, and scheduled runs after each sprint. Each is a separate change once the dry
+Python runners other than pytest, Harbor export for pytest rows (`exportHarbor.ts` skips them:
+the verifier's check script runs on Node, which the Python image lacks), and scheduled runs after
+each sprint. Each is a separate change once the dry
 run is trusted.
