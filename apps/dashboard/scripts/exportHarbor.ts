@@ -14,7 +14,7 @@ import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { parseRows } from "@/lib/cse115a/benchmark/validation/batch";
 import { detectEnvironment } from "@/lib/cse115a/benchmark/validation/environment";
-import { buildHarborTask, harborTaskName, type HarborRow } from "@/lib/cse115a/benchmark/validation/harbor";
+import { buildHarborTask, harborSkipReason, harborTaskName, type HarborRow } from "@/lib/cse115a/benchmark/validation/harbor";
 import { fileIn, run, withPatchedWorktree } from "@/lib/cse115a/benchmark/validation/runRow";
 import { filesInPatch, type ValidationResult } from "@/lib/cse115a/benchmark/validation/validateTask";
 
@@ -64,6 +64,8 @@ async function main() {
       const env = await withPatchedWorktree(clone, row.base_commit, [row.test_patch, row.patch], (dir) =>
         detectEnvironment({ testFiles, read: (path) => fileIn(dir, path) }));
       if (!env.supported) { log(`${row.instance_id}: environment ${env.detail}, skipping`); continue; }
+      const skip = harborSkipReason(env);
+      if (skip) { log(`${row.instance_id}: ${skip}, skipping`); continue; }
 
       const name = harborTaskName(row.instance_id);
       const taskDir = join(to, name);

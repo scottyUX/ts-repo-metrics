@@ -1,11 +1,12 @@
 // Decides how to install and test a student repository: which package holds the tests (students
 // often keep them in `server/` or `apps/api/` inside a workspace), which package manager, which
 // Node, and what the package's own `test` script does. Supported runners are Vitest, Jest, and
-// Node's built-in `node --test`; anything else is `env_unsupported` with a one-line detail so the batch
+// Node's built-in `node --test`; a row whose test files are all Python runs pytest instead (see
+// detectPythonEnvironment). Anything else is `env_unsupported` with a one-line detail so the batch
 // lists it instead of guessing. Pure: reads files through the `read` callback, touches nothing.
 // Rules are in docs/CSE115A_BENCHMARK_VALIDATION.md, "Environment".
 
-export type Runner = "vitest" | "node-test" | "jest";
+export type Runner = "vitest" | "node-test" | "jest" | "pytest";
 
 /** One line of the test phase, run from the package directory. Reports land in $REPORT_DIR. */
 export type TestStep = { kind: Runner | "prep"; command: string };
@@ -13,8 +14,8 @@ export type TestStep = { kind: Runner | "prep"; command: string };
 export type Environment = {
   supported: true;
   runners: Runner[];
-  packageManager: "npm" | "pnpm" | "yarn";
-  /** Directory of the package.json nearest the test files, "" for the repository root. */
+  packageManager: "npm" | "pnpm" | "yarn" | "pip" | "uv" | "poetry";
+  /** Directory of the package.json (Python: the manifest) nearest the test files, "" for the repository root. */
   packageDir: string;
   /** Where `installCommand` runs: the workspace root when there is one, else `packageDir`. */
   installDir: string;
@@ -25,6 +26,8 @@ export type Environment = {
   /** Dockerfile text that reproduces the environment, stored on the row as `image` provenance. */
   dockerfile: string;
   image: string;
+  /** Python only: whether the repository's own manifests name pytest (the validator installs it either way). */
+  pytestDeclared?: boolean;
 };
 
 /**
@@ -162,6 +165,9 @@ export function stepsFromTestScript(script: string | null, defaultRunner: "vites
  * package.json above each test file, the workspace root, the lockfiles, and the Node version.
  */
 export async function detectEnvironment(probe: RepoProbe): Promise<Environment | Unsupported> {
+  const language = testLanguage(probe.testFiles);
+  if (language === "mixed") return unsupported("test files mix Python and JavaScript");
+  if (language === "python") return detectPythonEnvironment(probe);
   const { read } = probe;
   const rootPkg = parsePkg(await read("package.json"));
   if (rootPkg === "invalid") return unsupported("package.json is not valid JSON");
@@ -226,4 +232,158 @@ export async function detectEnvironment(probe: RepoProbe): Promise<Environment |
   ].filter(Boolean).join("\n") + "\n";
 
   return { supported: true, runners, packageManager, packageDir, installDir, installCommand, testSteps, env: CONTAINER_ENV, dockerfile, image };
+}
+
+// ---------------------------------------------------------------------------------------------
+// Python. Chosen when every test file the patch writes that is code is .py; the JS path above is
+// unchanged. Rules are in docs/CSE115A_BENCHMARK_VALIDATION.md, "Environment".
+
+const JS_FILE = /\.[cm]?[jt]sx?$/i;
+const PY_FILE = /\.py$/i;
+
+/** Which runner family the row's test files belong to. Non-code files (fixtures, snapshots) do not count. */
+export function testLanguage(testFiles: string[]): "javascript" | "python" | "mixed" {
+  const python = testFiles.some((f) => PY_FILE.test(f));
+  const js = testFiles.some((f) => JS_FILE.test(f));
+  if (python && js) return "mixed";
+  return python ? "python" : "javascript";
+}
+
+/** Files that mark a Python package directory, nearest first. */
+const PY_MANIFESTS = ["pyproject.toml", "requirements.txt", "setup.py", "setup.cfg"] as const;
+/** Extra requirement files installed after requirements.txt when present. */
+const PY_EXTRA_REQUIREMENTS = ["requirements-dev.txt", "requirements-test.txt", "dev-requirements.txt"] as const;
+
+export const DEFAULT_PYTHON = "3.12";
+/** Oldest Python the image is built from: pytest 8 needs 3.9, and `requires-python = ">=3.7"` templates are common. */
+export const MIN_PYTHON_MINOR = 9;
+/** Written into /patches by the runner and loaded with `-p`; records `file::Class::test` → status. */
+export const PYTEST_REPORTER_FILE = "/patches/hecate_pytest_reporter.py";
+/** Where uv puts the project's environment: outside the mounted checkout, so every run starts clean. */
+const UV_ENVIRONMENT = "/opt/venv";
+
+/**
+ * Container variables for Python runs. Poetry installs into the image's Python instead of a venv,
+ * and uv into /opt/venv, so nothing a run installs survives in the host checkout; no .pyc files
+ * are written into it either.
+ */
+export const PYTHON_ENV: Record<string, string> = {
+  PIP_DISABLE_PIP_VERSION_CHECK: "1",
+  PIP_ROOT_USER_ACTION: "ignore",
+  PYTHONDONTWRITEBYTECODE: "1",
+  POETRY_VIRTUALENVS_CREATE: "false",
+  UV_PROJECT_ENVIRONMENT: UV_ENVIRONMENT,
+  UV_LINK_MODE: "copy",
+};
+
+/**
+ * `major.minor` from .python-version ("3.11.4", "3.11"), else the lowest minor `requires-python`
+ * allows (">=3.10,<4" → 3.10), raised to MIN_PYTHON_MINOR; null when neither says.
+ */
+export function pythonVersionFrom(pythonVersion: string | null, pyproject: string | null): string | null {
+  const pinned = pythonVersion?.match(/^\s*(\d+)\.(\d+)/m);
+  if (pinned) return `${pinned[1]}.${pinned[2]}`;
+  const spec = pyproject?.match(/^\s*requires-python\s*=\s*["']([^"']+)["']/m)?.[1];
+  if (!spec) return null;
+  let lowest: [number, number] | null = null;
+  for (const clause of spec.split(",")) {
+    const m = clause.trim().match(/^(>=|>|~=|===?|\^|~)?\s*(\d+)(?:\.(\d+))?/);
+    if (!m) continue; // `<4`, `!=3.9.*`: upper bounds and exclusions say nothing about the lowest
+    const v: [number, number] = [Number(m[2]), Number(m[3] ?? 0)];
+    if (!lowest || v[0] > lowest[0] || (v[0] === lowest[0] && v[1] > lowest[1])) lowest = v;
+  }
+  if (!lowest) return null;
+  if (lowest[0] === 3 && lowest[1] < MIN_PYTHON_MINOR) lowest = [3, MIN_PYTHON_MINOR];
+  return `${lowest[0]}.${lowest[1]}`;
+}
+
+/** The pytest command; `runPrefix` is `uv run --no-sync ` or `poetry run ` when the manager owns the environment. */
+export function pytestCommand(runPrefix = ""): string {
+  const plugin = PYTEST_REPORTER_FILE.split("/").pop()!.replace(/\.py$/, "");
+  const dir = PYTEST_REPORTER_FILE.slice(0, PYTEST_REPORTER_FILE.lastIndexOf("/"));
+  // --continue-on-collection-errors: without it one file that cannot import stops pytest before any
+  // test runs, and every other test in the suite would be absent from that state.
+  return `PYTHONPATH=${dir} REPORT=$REPORT_DIR/pytest-0.json ${runPrefix}python -m pytest -p ${plugin} -p no:cacheprovider --continue-on-collection-errors`;
+}
+
+/**
+ * Environment for a row whose test files are Python. The package directory is the nearest one above
+ * the test files with a pyproject.toml, requirements.txt, setup.py or setup.cfg, else the root. The
+ * install follows the first of uv.lock, poetry.lock, requirements files, an installable
+ * pyproject.toml or setup.py, and always ends by installing pytest. The whole suite runs; no file selectors.
+ */
+export async function detectPythonEnvironment(probe: RepoProbe): Promise<Environment | Unsupported> {
+  const { read } = probe;
+  const exists = async (dir: string, name: string) => (await read(joinPath(dir, name))) != null;
+
+  let packageDir: string | null = null;
+  for (const file of probe.testFiles.filter((f) => PY_FILE.test(f))) {
+    let nearest: string | null = null;
+    for (const dir of parentDirs(file)) {
+      if (await anyExists(dir, PY_MANIFESTS, exists)) { nearest = dir; break; }
+    }
+    if (nearest == null) continue;
+    if (packageDir != null && packageDir !== nearest) return unsupported(`test files span two packages: ${packageDir || "."} and ${nearest || "."}`);
+    packageDir = nearest;
+  }
+  packageDir ??= "";
+
+  // Lockfiles are looked for in the package and then at the root (a uv or Poetry workspace).
+  const lockDir = async (name: string) => ((await exists(packageDir!, name)) ? packageDir! : (await exists("", name)) ? "" : null);
+  const uvDir = await lockDir("uv.lock");
+  const poetryDir = uvDir == null ? await lockDir("poetry.lock") : null;
+  const pyproject = await read(joinPath(packageDir, "pyproject.toml"));
+
+  let packageManager: Environment["packageManager"] = "pip";
+  let installDir = packageDir;
+  let install: string[];
+  let runPrefix = "";
+  if (uvDir != null) {
+    packageManager = "uv"; installDir = uvDir; runPrefix = "uv run --no-sync ";
+    install = ["pip install uv", "uv sync --frozen", `uv pip install --python ${UV_ENVIRONMENT}/bin/python pytest`];
+  } else if (poetryDir != null) {
+    // --no-root: student projects are rarely laid out as an installable package, and Poetry 2 fails
+    // the install when the root cannot be built; pytest runs from the package dir, which is on sys.path.
+    packageManager = "poetry"; installDir = poetryDir; runPrefix = "poetry run ";
+    install = ["pip install poetry", "poetry install --no-interaction --no-root", "pip install pytest"];
+  } else {
+    const requirements: string[] = [];
+    if (await exists(packageDir, "requirements.txt")) {
+      requirements.push("requirements.txt");
+      for (const name of PY_EXTRA_REQUIREMENTS) if (await exists(packageDir, name)) requirements.push(name);
+    }
+    // A pyproject.toml that only configures tools (`[tool.pytest.ini_options]`) is not installable.
+    const installable = (pyproject != null && /^\[(project|build-system)\]/m.test(pyproject)) || (await exists(packageDir, "setup.py"));
+    if (requirements.length) install = [`pip install ${requirements.map((r) => `-r ${r}`).join(" ")}`];
+    else if (installable) install = ["pip install -e ."];
+    else install = [];
+    install.push("pip install pytest");
+  }
+  const installCommand = install.join(" && ");
+
+  const version = pythonVersionFrom(
+    (await read(joinPath(packageDir, ".python-version"))) ?? (await read(".python-version")),
+    pyproject,
+  ) ?? DEFAULT_PYTHON;
+  const image = `python:${version}-bookworm`;
+
+  const manifests = await Promise.all([...PY_MANIFESTS, ...PY_EXTRA_REQUIREMENTS].map((n) => read(joinPath(packageDir!, n))));
+  const pytestDeclared = manifests.some((text) => text != null && /\bpytest\b/i.test(text));
+
+  const testSteps: TestStep[] = [{ kind: "pytest", command: pytestCommand(runPrefix) }];
+  const env = { ...CONTAINER_ENV, ...PYTHON_ENV };
+  const dockerfile = [
+    `FROM ${image}`, "WORKDIR /work",
+    ...Object.entries(env).map(([k, v]) => `ENV ${k}=${v}`),
+    `# cd ${installDir || "."} && ${installCommand}`,
+    `# cd ${packageDir || "."}`,
+    ...testSteps.map((s) => `# ${s.command}`),
+  ].join("\n") + "\n";
+
+  return { supported: true, runners: ["pytest"], packageManager, packageDir, installDir, installCommand, testSteps, env, dockerfile, image, pytestDeclared };
+}
+
+async function anyExists(dir: string, names: readonly string[], exists: (dir: string, name: string) => Promise<boolean>): Promise<boolean> {
+  for (const name of names) if (await exists(dir, name)) return true;
+  return false;
 }

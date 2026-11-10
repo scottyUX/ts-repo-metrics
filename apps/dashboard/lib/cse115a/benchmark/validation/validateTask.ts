@@ -159,7 +159,7 @@ export async function validateTask(input: ValidateInput): Promise<ValidationResu
     instance_id: row.instance_id,
     image: env.image,
     eval_script: containerScript(plan, "r2"),
-    log_parser: env.runners.map((r) => ({ vitest: "vitest-json", jest: "jest-json", "node-test": "node-test-json" })[r]).join("+"),
+    log_parser: env.runners.map((r) => ({ vitest: "vitest-json", jest: "jest-json", "node-test": "node-test-json", pytest: "pytest-json" })[r]).join("+"),
     package_dir: env.packageDir,
     test_files: testFiles,
     FAIL_TO_PASS: comparison.failToPass,

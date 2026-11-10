@@ -9,6 +9,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { RUNS_PER_STATE, type RunResults, type StateRuns } from "@/lib/cse115a/benchmark/validation/compareRuns";
 import { NODE_TEST_REPORTER_SOURCE } from "@/lib/cse115a/benchmark/validation/nodeTestReporter";
+import { PYTEST_REPORTER_MODULE, PYTEST_REPORTER_SOURCE } from "@/lib/cse115a/benchmark/validation/pytestReporter";
 import { parseNodeTestReport, parseVitestReport, type VitestReport } from "@/lib/cse115a/benchmark/validation/testIds";
 
 /** Which repository state to run: base; base + test_patch; base + test_patch + patch. */
@@ -86,7 +87,7 @@ export function containerScript(plan: RunPlan, state: State): string {
 
 /** Runs `docker run` with the repo mounted at /work and the patches at /patches. */
 /**
- * Environment that points npm, pnpm, yarn and corepack at one mounted folder, so a batch downloads
+ * Environment that points npm, pnpm, yarn, corepack, pip, uv and Poetry at one mounted folder, so a batch downloads
  * each package once instead of once per run. The folder is shared by every run and every repository.
  */
 export const PACKAGE_CACHE_ENV: Record<string, string> = {
@@ -94,6 +95,9 @@ export const PACKAGE_CACHE_ENV: Record<string, string> = {
   npm_config_store_dir: "/cache/pnpm-store",
   YARN_CACHE_FOLDER: "/cache/yarn",
   COREPACK_HOME: "/cache/corepack",
+  PIP_CACHE_DIR: "/cache/pip",
+  UV_CACHE_DIR: "/cache/uv",
+  POETRY_CACHE_DIR: "/cache/poetry",
 };
 
 export class DockerSuiteRunner implements SuiteRunner {
@@ -110,6 +114,7 @@ export class DockerSuiteRunner implements SuiteRunner {
       await writeFile(join(patches, "fix.diff"), plan.patch);
       await writeFile(join(patches, "run.sh"), containerScript(plan, state));
       await writeFile(join(patches, "reporter.mjs"), NODE_TEST_REPORTER_SOURCE);
+      await writeFile(join(patches, `${PYTEST_REPORTER_MODULE}.py`), PYTEST_REPORTER_SOURCE);
       const image = plan.image ?? "node:22-bookworm";
       const name = runName(state, attempt);
       const cacheEnv = this.cacheDir ? PACKAGE_CACHE_ENV : {};
@@ -145,7 +150,10 @@ export class DockerSuiteRunner implements SuiteRunner {
   }
 }
 
-/** Merges every report in the directory: `vitest-*.json` and `jest-*.json` (same JSON shape) and `node-*.json` (our reporter). */
+/**
+ * Merges every report in the directory: `vitest-*.json` and `jest-*.json` (same JSON shape), and
+ * `node-*.json` and `pytest-*.json` (our reporters, both a flat {id: status} map).
+ */
 export async function readReports(dir: string): Promise<RunResults> {
   let names: string[];
   try {
@@ -157,7 +165,7 @@ export async function readReports(dir: string): Promise<RunResults> {
   const results: RunResults = {};
   for (const name of names) {
     const text = await readFile(join(dir, name), "utf8");
-    const parsed = name.startsWith("node-")
+    const parsed = name.startsWith("node-") || name.startsWith("pytest-")
       ? parseNodeTestReport(JSON.parse(text) as Record<string, string>)
       : parseVitestReport(JSON.parse(text) as VitestReport);
     Object.assign(results, parsed);

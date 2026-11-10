@@ -39,8 +39,18 @@ export const GIT_REINIT_LAYER =
   "RUN cd /app && rm -rf .git && git init -q && git -c user.name=hecate -c user.email=hecate@localhost add -A" +
   " && git -c user.name=hecate -c user.email=hecate@localhost commit -qm base";
 
+/**
+ * Why a row cannot be exported yet, or null. The verifier's check.mjs runs on Node and the task
+ * image for a pytest row is a Python one, so pytest rows are skipped until a Python verifier exists.
+ */
+export function harborSkipReason(env: Environment): string | null {
+  return env.runners.includes("pytest") ? "Harbor export for pytest rows is not built yet" : null;
+}
+
 export function buildHarborTask(input: HarborInput): Map<string, string> {
   const { row, result, env } = input;
+  const skip = harborSkipReason(env);
+  if (skip) throw new Error(skip);
   const name = input.name ?? harborTaskName(row.instance_id);
   const files = new Map<string, string>();
   const expected = {

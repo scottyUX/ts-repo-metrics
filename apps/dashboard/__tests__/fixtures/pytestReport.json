@@ -1,0 +1,12 @@
+{
+  "/work/backend/tests/test_broken_import.py::(load)": "failed",
+  "/work/backend/tests/test_cases.py::TestThing::test_method": "passed",
+  "/work/backend/tests/test_cases.py::test_fail": "failed",
+  "/work/backend/tests/test_cases.py::test_param[1-2]": "passed",
+  "/work/backend/tests/test_cases.py::test_param[2-4]": "passed",
+  "/work/backend/tests/test_cases.py::test_param[x-y]": "failed",
+  "/work/backend/tests/test_cases.py::test_pass": "passed",
+  "/work/backend/tests/test_cases.py::test_setup_error": "failed",
+  "/work/backend/tests/test_cases.py::test_skip": "skipped",
+  "/work/backend/tests/test_cases.py::test_xfail": "skipped"
+}

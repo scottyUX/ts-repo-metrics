@@ -1,5 +1,6 @@
 // The repo census: for each row, what its repository needs to run — the detector's answer plus the
-// signals the detector does not act on yet (databases, browsers, other test runners). No Docker; the
+// signals the detector does not act on yet (databases, browsers, other test runners). Python repos
+// show their package manager (pip, uv, poetry), the Python image, and whether they declare pytest. No Docker; the
 // script around it clones and reads files, this module decides and formats.
 
 import type { Environment, Unsupported } from "@/lib/cse115a/benchmark/validation/environment";
@@ -41,15 +42,21 @@ export type CensusEntry = {
   note: string;
 };
 
+/** "supported", plus for a Python repo whether its manifests name pytest (the validator installs it regardless). */
+function supportedNote(env: Environment): string {
+  if (!env.runners.includes("pytest")) return "supported";
+  return env.pytestDeclared ? "supported; pytest declared" : "supported; pytest not declared, installed by the validator";
+}
+
 export function censusMarkdown(entries: CensusEntry[]): string {
   const lines = [
-    "| instance_id | repo | package | manager | runners | Node image | workspace | database | browser | other runners | detector |",
+    "| instance_id | repo | package | manager | runners | image | workspace | database | browser | other runners | detector |",
     "|---|---|---|---|---|---|---|---|---|---|---|",
   ];
   for (const e of entries) {
     const env = e.env;
     const cols = env.supported
-      ? [env.packageDir || ".", env.packageManager, env.runners.join("+"), env.image, env.installDir === "" && env.packageDir ? "yes" : "no", "supported"]
+      ? [env.packageDir || ".", env.packageManager, env.runners.join("+"), env.image, env.installDir === "" && env.packageDir ? "yes" : "no", supportedNote(env)]
       : ["", "", "", "", "", `unsupported: ${env.detail}`];
     lines.push(`| ${e.instance_id} | ${e.repo} | ${cols[0]} | ${cols[1]} | ${cols[2]} | ${cols[3]} | ${cols[4]} | ${e.signals.database.join(", ")} | ${e.signals.browser.join(", ")} | ${e.signals.otherRunners.join(", ")} | ${cols[5]}${e.note ? ` (${e.note})` : ""} |`);
   }
@@ -57,6 +64,6 @@ export function censusMarkdown(entries: CensusEntry[]): string {
   for (const e of entries) if (!repos.has(e.repo)) repos.set(e.repo, e);
   const count = (pick: (e: CensusEntry) => boolean) => [...repos.values()].filter(pick).length;
   lines.push("", `${repos.size} repositories, ${entries.length} rows.`,
-    `Need a database: ${count((e) => e.signals.database.length > 0)}. Browser tests: ${count((e) => e.signals.browser.length > 0)}. Other runners: ${count((e) => e.signals.otherRunners.length > 0)}. Detector unsupported: ${count((e) => !e.env.supported)}.`, "");
+    `Need a database: ${count((e) => e.signals.database.length > 0)}. Browser tests: ${count((e) => e.signals.browser.length > 0)}. Other runners: ${count((e) => e.signals.otherRunners.length > 0)}. Detector unsupported: ${count((e) => !e.env.supported)}. Python: ${count((e) => e.env.supported && e.env.runners.includes("pytest"))}.`, "");
   return lines.join("\n");
 }
