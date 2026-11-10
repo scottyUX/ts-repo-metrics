@@ -77,7 +77,7 @@ export function containerScript(plan: RunPlan, state: State): string {
   // Patches go on before the install, so a dependency or lockfile the student added is installed.
   if (state !== "r0") lines.push("git apply --whitespace=nowarn /patches/test.diff");
   if (state === "r2") lines.push("git apply --whitespace=nowarn /patches/fix.diff");
-  lines.push(sub(plan.installDir), plan.installCommand);
+  lines.push(sub(plan.installDir), installGuard(plan.installCommand));
   // Each step may fail (that is the point in R1); the reports are what matter. REPORT_DIR is
   // exported on its own line so the steps can use it in a redirect or pipeline.
   lines.push("mkdir -p /patches/reports", "export REPORT_DIR=/patches/reports", sub(plan.packageDir));
@@ -85,7 +85,41 @@ export function containerScript(plan: RunPlan, state: State): string {
   return lines.join("\n") + "\n";
 }
 
-/** Runs `docker run` with the repo mounted at /work and the patches at /patches. */
+/** Exit code of a container run whose install step failed; the runner turns it into an InstallError. */
+export const INSTALL_FAILED_EXIT = 97;
+/** Where the install step's output is kept inside the container (the patches folder on the host). */
+export const INSTALL_LOG = "/patches/install.log";
+
+/**
+ * The install command wrapped so that any failure in it stops the run with INSTALL_FAILED_EXIT.
+ * `set -e` alone is not enough: bash does not exit when a command that is not the last of an `&&`
+ * list fails, so `pip install -r requirements.txt && pip install pytest` with a bad requirement
+ * would carry on, run no tests, and turn an environment failure into a rejected row. The output is
+ * kept in INSTALL_LOG and echoed into the run log either way.
+ */
+export function installGuard(installCommand: string): string {
+  return [
+    `if ! { ${installCommand}; } > ${INSTALL_LOG} 2>&1; then`,
+    `  cat ${INSTALL_LOG}`,
+    `  echo "[hecate] install failed" >&2`,
+    `  exit ${INSTALL_FAILED_EXIT}`,
+    "fi",
+    `cat ${INSTALL_LOG}`,
+  ].join("\n");
+}
+
+/**
+ * Thrown when the install step failed in a run: the environment, not the student. `validateTask`
+ * turns it into an `env_error` result, so the row is never written back as rejected.
+ */
+export class InstallError extends Error {}
+
+/** The line of an install log that says what went wrong: the first that mentions an error, else the last. */
+export function installErrorLine(log: string): string {
+  const lines = log.split("\n").map((l) => l.trim()).filter(Boolean);
+  return lines.find((l) => /\berr(or)?\b/i.test(l)) ?? lines[lines.length - 1] ?? "(no install output)";
+}
+
 /**
  * Environment that points npm, pnpm, yarn, corepack, pip, uv and Poetry at one mounted folder, so a batch downloads
  * each package once instead of once per run. The folder is shared by every run and every repository.
@@ -139,7 +173,13 @@ export class DockerSuiteRunner implements SuiteRunner {
           const message = error instanceof Error ? error.message : String(error);
           const retry = tryNumber === 1 && !(error instanceof ExecError && error.timedOut);
           if (this.logDir) await writeFile(join(this.logDir, `${name}${retry ? ".attempt1" : ""}.log`), message);
-          if (!retry) throw error;
+          if (!retry) {
+            if (error instanceof ExecError && error.code === INSTALL_FAILED_EXIT) {
+              const log = await readFile(join(patches, "install.log"), "utf8").catch(() => "");
+              throw new InstallError(`install failed in ${name}: ${installErrorLine(log)}`);
+            }
+            throw error;
+          }
           await new Promise((r) => setTimeout(r, 15_000));
         }
       }
@@ -175,7 +215,7 @@ export async function readReports(dir: string): Promise<RunResults> {
 
 /** Thrown by `exec`; `timedOut` tells a hung run from one that died. */
 export class ExecError extends Error {
-  constructor(message: string, readonly timedOut: boolean) {
+  constructor(message: string, readonly timedOut: boolean, readonly code: number | null = null) {
     super(message);
   }
 }
@@ -195,7 +235,7 @@ function exec(command: string, args: string[], timeoutMs: number): Promise<strin
     child.on("close", (code) => {
       clearTimeout(timer);
       if (code === 0) resolve(output);
-      else reject(new ExecError(`${command} ${args[0]} exited ${code}:\n${output.trim().slice(-3000)}`, false));
+      else reject(new ExecError(`${command} ${args[0]} exited ${code}:\n${output.trim().slice(-3000)}`, false, code));
     });
   });
 }

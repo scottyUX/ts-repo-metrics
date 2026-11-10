@@ -237,7 +237,7 @@ describe("runner and Harbor for pytest rows", () => {
     const env = await detectEnvironment({ testFiles: ["backend/tests/test_a.py"], read: repo({ "backend/requirements.txt": "" }) });
     if (!env.supported) throw new Error(env.detail);
     const script = containerScript({ repoDir: "/r", baseCommit: "abc", patch: "", testPatch: "", installDir: env.installDir, installCommand: env.installCommand, packageDir: env.packageDir, testSteps: env.testSteps.map((s) => s.command) }, "r1");
-    expect(script).toContain(`cd /work/backend\npip install -r requirements.txt && pip install pytest\n`);
+    expect(script).toContain(`cd /work/backend\nif ! { pip install -r requirements.txt && pip install pytest; }`);
     expect(script).toContain(`cd /work/backend\n${STEP} || true\n`);
   });
 

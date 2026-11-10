@@ -6,7 +6,7 @@
 
 import { compareRuns, type Comparison } from "@/lib/cse115a/benchmark/validation/compareRuns";
 import type { Environment, Unsupported } from "@/lib/cse115a/benchmark/validation/environment";
-import { containerScript, runThreeStates, type RunPlan, type SuiteRunner, type ThreeStates } from "@/lib/cse115a/benchmark/validation/runner";
+import { containerScript, InstallError, runThreeStates, type RunPlan, type SuiteRunner, type ThreeStates } from "@/lib/cse115a/benchmark/validation/runner";
 import { modifiedTests, unmatchedStaticIds } from "@/lib/cse115a/benchmark/validation/testIds";
 
 /** The fields of a benchmark row the validator reads. */
@@ -134,7 +134,12 @@ export type ValidateInput = {
   timeoutSeconds?: number;
 };
 
-/** Runs the three states and shapes the result. Writes nothing anywhere. */
+/** Which report formats the environment's runners produce, e.g. `vitest-json` or `pytest-json`. */
+function logParser(env: Environment): string {
+  return env.runners.map((r) => ({ vitest: "vitest-json", jest: "jest-json", "node-test": "node-test-json", pytest: "pytest-json" })[r]).join("+");
+}
+
+/** Runs the three states and shapes the result. Writes nothing anywhere. A failed install is `env_error`. */
 export async function validateTask(input: ValidateInput): Promise<ValidationResult & { runs: ThreeStates }> {
   const { row, env } = input;
   const plan: RunPlan = {
@@ -150,7 +155,24 @@ export async function validateTask(input: ValidateInput): Promise<ValidationResu
     image: env.image,
     timeoutSeconds: input.timeoutSeconds,
   };
-  const runs = await runThreeStates(plan, input.runner);
+  let runs: ThreeStates;
+  try {
+    runs = await runThreeStates(plan, input.runner);
+  } catch (error) {
+    // A failed install is the environment's failure, not a verdict: env_error keeps the row a candidate.
+    if (!(error instanceof InstallError)) throw error;
+    const empty: ThreeStates = { r0: [], r1: [], r2: [], timings: {} };
+    return {
+      ...unsupportedResult(row, { supported: false, reason: "env_unsupported", detail: "" }),
+      image: env.image,
+      eval_script: containerScript(plan, "r2"),
+      log_parser: logParser(env),
+      package_dir: env.packageDir,
+      reason: "env_error",
+      detail: error.message,
+      runs: empty,
+    };
+  }
   const comparison = compareRuns({ r0: runs.r0, r1: runs.r1, r2: runs.r2, modified: input.modified });
   const allRuns = [...runs.r0, ...runs.r1, ...runs.r2];
   const staticIds = [...new Set([...row.FAIL_TO_PASS, ...row.PASS_TO_PASS])];
@@ -159,7 +181,7 @@ export async function validateTask(input: ValidateInput): Promise<ValidationResu
     instance_id: row.instance_id,
     image: env.image,
     eval_script: containerScript(plan, "r2"),
-    log_parser: env.runners.map((r) => ({ vitest: "vitest-json", jest: "jest-json", "node-test": "node-test-json", pytest: "pytest-json" })[r]).join("+"),
+    log_parser: logParser(env),
     package_dir: env.packageDir,
     test_files: testFiles,
     FAIL_TO_PASS: comparison.failToPass,

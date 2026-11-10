@@ -64,7 +64,7 @@ describe("containerScript", () => {
   it("checks out the base commit, applies patches, installs, runs the steps in the package dir, and never fails the script on a red suite", () => {
     const script = containerScript(plan, "r1");
     expect(script).toContain("git checkout -q -f abc123");
-    expect(script).toContain("git apply --whitespace=nowarn /patches/test.diff\ncd /work\nnpm ci\n");
+    expect(script).toContain("git apply --whitespace=nowarn /patches/test.diff\ncd /work\nif ! { npm ci; } > /patches/install.log 2>&1; then\n");
     expect(script).toContain("export REPORT_DIR=/patches/reports\ncd /work/server\npnpm build || true\nnpx vitest run --reporter=json --outputFile=$REPORT_DIR/vitest-1.json || true");
     expect(script.indexOf("git apply")).toBeLessThan(script.indexOf("npm ci"));
     expect(script.indexOf("npm ci")).toBeLessThan(script.indexOf("cd /work/server"));
@@ -72,7 +72,7 @@ describe("containerScript", () => {
 
   it("installs in the package dir when it is not a workspace", () => {
     const script = containerScript({ ...plan, installDir: "server" }, "r0");
-    expect(script).toContain("git clean -fdq\ncd /work/server\nnpm ci\n");
+    expect(script).toContain("git clean -fdq\ncd /work/server\nif ! { npm ci; }");
   });
 });
 
