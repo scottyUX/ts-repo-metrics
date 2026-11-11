@@ -81,7 +81,8 @@ export function summarize(results: ValidationResult[]): Summary {
     return {
       instance_id: r.instance_id,
       status: r.validation_status,
-      reason: r.reason ?? "",
+      // A harness problem must not read as a plain verdict: name the test files that never loaded after the fix.
+      reason: (r.reason ?? "") + (r.test_files_never_loaded?.length ? ` (test patch file(s) never loaded after the fix: ${r.test_files_never_loaded.join(", ")})` : ""),
       f2p: r.FAIL_TO_PASS.length, a2p: r.ABSENT_TO_PASS.length, p2p: r.PASS_TO_PASS.length,
       regressions: r.regressions.length + r.regression_skips.length, flaky: r.flaky.length,
       outside: (r.proof_outside_test_patch ?? []).length, seconds,

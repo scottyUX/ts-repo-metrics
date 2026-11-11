@@ -323,6 +323,19 @@ A file that fails to collect (an import or syntax error) is `file::(load)`, as f
 runners. `--continue-on-collection-errors` is required: without it pytest stops before running any
 test when one file fails to import, and the whole suite would be absent from that state.
 
+**Node version and installs from CI.** The Node major comes from `.nvmrc`, else `.node-version`,
+else `engines.node`, else the `node-version` of `actions/setup-node` in the CI job that runs the
+tests (a number or `24.x`; matrix and other expressions are ignored), else 22. Repository files
+win over CI. That same job's install steps (`npm ci`, `npm install`, `pnpm install`, `yarn
+install`, `yarn`, with flags; not a global install or one that names packages) are run in order,
+each in its directory (step `working-directory`, job `defaults.run.working-directory`, a `cd dir
+&&` before it, `--prefix`/`--dir`/`-C`) and each inside its own install guard, in place of the
+single detected install; pnpm and yarn steps get `corepack enable` first. A CI with no install
+step the validator recognises leaves the single install as it was. JoKHerre/Bookworm needs both:
+its server tests import the root's `shared/` code, whose dependencies only the root install
+provides, and its CI runs Node 24. The result records `install_dirs` and `node_source` (`from
+.nvmrc`, `from CI`, `default`), and `eval_script` starts with the same two facts as comments.
+
 **Databases.** Some repositories' tests are integration tests against a real Postgres (every test
 file in JoKHerre/Bookworm refuses to run unless `DATABASE_URL` names its `bookworm_test`
 database). Without a database every test fails to load in every state and the row is rejected
@@ -375,9 +388,13 @@ The validator prints one JSON object and writes nothing to the database:
 { instance_id, image, eval_script, log_parser, test_files,
   FAIL_TO_PASS, ABSENT_TO_PASS, PASS_TO_PASS, FAIL_TO_FAIL, regressions, flaky, skipped,
   judged_from_base, modified_tests, unmatched_static_ids, validation_status, reason, timings,
-  services? }
+  install_dirs, node_source?, test_files_never_loaded?, services? }
 ```
 
+`test_files_never_loaded` lists test-patch files that failed to load in R2, after the fix. That
+is usually the harness (a missing install, a wrong Node), not the student, so the verdict rules
+are unchanged but `detail` reads "test patch file(s) never loaded after the fix: <files>; check
+the run log", and the batch summary's reason column carries the same note.
 `services` is present only for a row whose runs had a database container (see "Databases").
 `judged_from_base` lists the tests whose "before" status was taken from R0 because R1 had no
 result for them (the fallback above); `modified_tests` lists the pre-existing tests whose source

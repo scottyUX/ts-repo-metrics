@@ -13,20 +13,58 @@ import {
 import { containerUrl, servicesFromWorkflows, type Service } from "@/lib/cse115a/benchmark/validation/services";
 import { validateTask, type TaskRow } from "@/lib/cse115a/benchmark/validation/validateTask";
 
-/** JoKHerre/Bookworm's CI job `test`, as the brief describes it. */
+/** JoKHerre/Bookworm's .github/workflows/ci.yml as of 2026-11-10 (read through the GitHub API; not cloned). */
 const BOOKWORM_CI = `name: CI
+
 on:
   push:
     branches: [main]
   pull_request:
+
+concurrency:
+  group: ci-\${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  lint:
+  check:
+    name: Lint, format, typecheck, build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - run: pnpm install
-      - run: pnpm lint
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.11.2
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            server/pnpm-lock.yaml
+
+      - name: Install frontend dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install server dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: server
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Check formatting
+        run: pnpm format:check
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Build
+        run: pnpm build
+
   test:
+    name: Backend tests
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -38,22 +76,41 @@ jobs:
         ports:
           - 5432:5432
         options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
+          --health-cmd "pg_isready -U bookworm -d bookworm_test"
+          --health-interval 5s
           --health-timeout 5s
-          --health-retries 5
+          --health-retries 10
     env:
       DATABASE_URL: postgres://bookworm:bookworm@localhost:5432/bookworm_test
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
+
       - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          version: 12.11.2
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
           cache: pnpm
-      - run: pnpm install
-      - run: pnpm --dir server db:push
-      - run: pnpm --dir server test
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            server/pnpm-lock.yaml
+
+      - name: Install frontend dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install server dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: server
+
+      - name: Apply schema to test database
+        run: pnpm db:push
+        working-directory: server
+
+      - name: Run backend tests
+        run: pnpm test
+        working-directory: server
 `;
 
 const BOOKWORM_SERVICE: Service = {
@@ -63,7 +120,7 @@ const BOOKWORM_SERVICE: Service = {
   env: { POSTGRES_USER: "bookworm", POSTGRES_PASSWORD: "bookworm", POSTGRES_DB: "bookworm_test" },
   databaseUrl: "postgres://bookworm:bookworm@localhost:5432/bookworm_test",
   containerDatabaseUrl: "postgres://bookworm:bookworm@postgres:5432/bookworm_test",
-  schemaCommand: "pnpm --dir server db:push",
+  schemaCommand: "(\n  cd server\n  pnpm db:push\n)",
 };
 
 const wf = (text: string) => [{ path: ".github/workflows/ci.yml", text }];
@@ -87,7 +144,7 @@ describe("servicesFromWorkflows", () => {
     const ci = BOOKWORM_CI
       .replace("          - 5432:5432", "          - 5433:5432")
       .replace("    env:\n      DATABASE_URL: postgres://bookworm:bookworm@localhost:5432/bookworm_test\n", "")
-      .replace("      - run: pnpm --dir server test\n", "      - run: pnpm --dir server test\n        env:\n          DATABASE_URL: postgresql://bookworm:bookworm@127.0.0.1:5433/bookworm_test?sslmode=disable\n");
+      .replace("        run: pnpm test\n        working-directory: server\n", "        run: pnpm test\n        working-directory: server\n        env:\n          DATABASE_URL: postgresql://bookworm:bookworm@127.0.0.1:5433/bookworm_test?sslmode=disable\n");
     const [service] = servicesFromWorkflows(wf(ci), "server");
     expect(service.databaseUrl).toBe("postgresql://bookworm:bookworm@127.0.0.1:5433/bookworm_test?sslmode=disable");
     expect(service.containerDatabaseUrl).toBe("postgresql://bookworm:bookworm@postgres:5432/bookworm_test?sslmode=disable");
@@ -160,13 +217,15 @@ describe("detectEnvironment with a CI postgres service", () => {
     expect(env.dockerfile).toContain("# service postgres: docker run -e POSTGRES_USER=bookworm -e POSTGRES_PASSWORD=bookworm -e POSTGRES_DB=bookworm_test postgres:16");
   });
 
-  it("leaves a repository without one exactly as before, with services: []", async () => {
+  it("keeps the placeholder DATABASE_URL and services: [] without a postgres service", async () => {
     const files = { ...BOOKWORM_FILES, ".github/workflows/ci.yml": BOOKWORM_CI.replace("image: postgres:16", "image: mysql:8") };
     const withCi = (await detectEnvironment({ testFiles: ["server/test/books.test.ts"], read: repo(files), workflowFiles: [".github/workflows/ci.yml"] })) as Environment;
     const without = (await detectEnvironment({ testFiles: ["server/test/books.test.ts"], read: repo(files) })) as Environment;
     expect(withCi.services).toEqual([]);
-    expect(withCi).toEqual(without);
     expect(withCi.env).toEqual(CONTAINER_ENV);
+    expect(withCi.env).toEqual(without.env);
+    expect(withCi.dockerfile).toContain(`ENV DATABASE_URL=${CONTAINER_ENV.DATABASE_URL}`);
+    expect(withCi.dockerfile).not.toContain("# service");
   });
 
   it("is listed as supported in the census and skipped by the Harbor export", async () => {
@@ -189,7 +248,8 @@ const plan: RunPlan = {
   testSteps: ["npx vitest run --reporter=json --outputFile=$REPORT_DIR/vitest-0.json --passWithNoTests"],
   env: { CI: "true", DATABASE_URL: BOOKWORM_SERVICE.containerDatabaseUrl },
   image: "node:22-bookworm",
-  services: [BOOKWORM_SERVICE],
+  // A one-line schema command, so the script assertions below stay readable.
+  services: [{ ...BOOKWORM_SERVICE, schemaCommand: "pnpm --dir server db:push" }],
 };
 
 describe("containerScript with a service", () => {
@@ -360,7 +420,7 @@ describe("DockerSuiteRunner with a postgres service (fake exec)", () => {
 
 describe("validateTask with a database service", () => {
   const row: TaskRow = { instance_id: "JoKHerre__Bookworm-1", repo: "JoKHerre/Bookworm", base_commit: "abc123", patch: plan.patch, test_patch: plan.testPatch, FAIL_TO_PASS: [], PASS_TO_PASS: [] };
-  const env = { supported: true, runners: ["vitest"], packageManager: "pnpm", packageDir: "server", installDir: "", installCommand: plan.installCommand, testSteps: [{ kind: "vitest", command: plan.testSteps[0] }], env: plan.env!, dockerfile: "", image: "node:22-bookworm", services: [BOOKWORM_SERVICE] } as Environment;
+  const env = { supported: true, runners: ["vitest"], packageManager: "pnpm", packageDir: "server", installDir: "", installCommand: plan.installCommand, testSteps: [{ kind: "vitest", command: plan.testSteps[0] }], env: plan.env!, dockerfile: "", image: "node:22-bookworm", services: plan.services } as Environment;
 
   it("records the service on the result and in eval_script", async () => {
     const result = await validateTask({ row, repoDir: "/tmp/repo", env, modified: new Set(), runner: runner(fakeDocker().exec) });

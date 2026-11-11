@@ -40,6 +40,10 @@ export type RunPlan = {
   timeoutSeconds?: number;
   /** Database containers started fresh for every run (from the repository's CI); none when empty. */
   services?: Service[];
+  /** Installs run in order instead of `installCommand` in `installDir` (CI's install steps); none when empty. */
+  installSteps?: Array<{ dir: string; command: string }>;
+  /** Comment lines put at the top of the script: how the environment was chosen (provenance only). */
+  notes?: string[];
 };
 
 /** One run of the suite in one state. Implemented by Docker, or by a fake in tests. `attempt` is 1-based. */
@@ -74,6 +78,7 @@ export function containerScript(plan: RunPlan, state: State): string {
   const sub = (dir: string) => (dir ? `cd /work/${dir}` : "cd /work");
   const services = plan.services ?? [];
   const lines = [
+    ...(plan.notes ?? []).map((note) => `# ${note}`),
     ...serviceProvenance(services),
     "set -e",
     "cd /work",
@@ -83,7 +88,8 @@ export function containerScript(plan: RunPlan, state: State): string {
   // Patches go on before the install, so a dependency or lockfile the student added is installed.
   if (state !== "r0") lines.push("git apply --whitespace=nowarn /patches/test.diff");
   if (state === "r2") lines.push("git apply --whitespace=nowarn /patches/fix.diff");
-  lines.push(sub(plan.installDir), installGuard(plan.installCommand));
+  const installs = plan.installSteps?.length ? plan.installSteps : [{ dir: plan.installDir, command: plan.installCommand }];
+  for (const step of installs) lines.push(sub(step.dir), installGuard(step.command));
   // The schema step runs from the repository root, as CI runs it, against the run's own database.
   const schema = services.map((s) => s.schemaCommand).filter((c): c is string => Boolean(c));
   if (schema.length) lines.push("cd /work", schemaGuard(schema.join("\n")));

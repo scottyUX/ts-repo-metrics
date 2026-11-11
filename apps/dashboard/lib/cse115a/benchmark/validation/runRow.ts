@@ -200,13 +200,15 @@ export async function validateRow(options: ValidateRowOptions): Promise<Validati
 
     await mkdir(options.logDir, { recursive: true });
     const db = env.services?.length ? `, with ${env.services.map((s) => s.image).join(", ")} from CI` : "";
-    log(`Environment: ${env.packageManager} + ${env.runners.join("+")} in ${env.packageDir || "."}, image ${env.image}${db}. Running three states, ${RUNS_PER_STATE} times each; logs in ${options.logDir}`);
+    const installs = env.installSteps?.length ? `, installs in ${env.installSteps.map((s) => s.dir || ".").join(", ")} (from CI)` : "";
+    log(`Environment: ${env.packageManager} + ${env.runners.join("+")} in ${env.packageDir || "."}, image ${env.image}${env.nodeSource && env.nodeSource !== "default" ? ` (from ${env.nodeSource})` : ""}${installs}${db}. Running three states, ${RUNS_PER_STATE} times each; logs in ${options.logDir}`);
     const { runs, ...result } = await validateTask({ row, repoDir, env, modified, runner: new DockerSuiteRunner(options.logDir, options.cacheDir), timeoutSeconds: options.timeoutSeconds });
     void runs;
     result.signals = needs;
     // A row that proved nothing in a repository whose tests want a service it did not get: say so, instead of a bare reason.
     if (result.validation_status === "rejected" && result.reason === "no_fail_to_pass" && needs.database.length > 0 && !env.services?.length) {
-      result.detail = `no test passed in any state and the tests appear to need a database (${needs.database.join(", ")}); the repository's CI has no postgres service the validator could start`;
+      const note = `no test passed in any state and the tests appear to need a database (${needs.database.join(", ")}); the repository's CI has no postgres service the validator could start`;
+      result.detail = result.detail ? `${result.detail}; ${note}` : note;
     }
     return result;
   } finally {

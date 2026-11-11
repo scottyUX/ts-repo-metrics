@@ -7,7 +7,7 @@
 // task.toml keys follow the Harbor task configuration page; check them against the current docs
 // before publishing a dataset.
 
-import { CONTAINER_ENV, type Environment } from "@/lib/cse115a/benchmark/validation/environment";
+import { CONTAINER_ENV, installPlan, type Environment } from "@/lib/cse115a/benchmark/validation/environment";
 import { NODE_TEST_REPORTER_SOURCE } from "@/lib/cse115a/benchmark/validation/nodeTestReporter";
 import type { TaskRow, ValidationResult } from "@/lib/cse115a/benchmark/validation/validateTask";
 
@@ -113,7 +113,7 @@ export function buildHarborTask(input: HarborInput): Map<string, string> {
     // Replace it with one anonymous commit, so the agent sees the files and nothing else, while
     // solve.sh and test.sh can still `git apply` against a repository.
     GIT_REINIT_LAYER,
-    `RUN ${sub(env.installDir)} && ${env.installCommand}`,
+    ...installPlan(env).map((step) => `RUN ${sub(step.cwd)} && ${step.command}`),
     "",
   ].join("\n"));
 
@@ -133,7 +133,7 @@ export function buildHarborTask(input: HarborInput): Map<string, string> {
     "mkdir -p /logs/verifier",
     "cd /app",
     "git apply --whitespace=nowarn /tests/test.diff || { echo 'test patch did not apply' >&2; echo 0 > /logs/verifier/reward.txt; exit 0; }",
-    `${sub(env.installDir)} && (${env.installCommand}) || true`,
+    ...installPlan(env).map((step) => `${sub(step.cwd)} && (${step.command}) || true`),
     "mkdir -p /tests/reports",
     "export REPORT_DIR=/tests/reports",
     sub(env.packageDir),

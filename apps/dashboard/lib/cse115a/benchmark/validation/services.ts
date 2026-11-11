@@ -1,6 +1,7 @@
-// Reads a repository's GitHub workflows for the database its tests run against in CI, so the runner
-// can start the same one next to the test container. Only Postgres for now. Pure: takes the
-// workflow texts, returns what to start; the runner does the Docker work.
+// Reads the GitHub workflow job that runs a repository's tests for what the validator should copy:
+// the database its tests run against (only Postgres for now), the directories it installs
+// dependencies in, and the Node version it sets up. Pure: takes the workflow texts, returns facts;
+// the detector and the runner act on them.
 // Rules are in docs/CSE115A_BENCHMARK_VALIDATION.md, "Environment".
 
 import { parse } from "yaml";
@@ -23,7 +24,7 @@ export type Service = {
 
 export type WorkflowFile = { path: string; text: string };
 
-type Step = { run?: unknown; env?: unknown; "working-directory"?: unknown };
+type Step = { run?: unknown; uses?: unknown; with?: unknown; env?: unknown; "working-directory"?: unknown };
 type Job = { services?: unknown; env?: unknown; steps?: unknown; defaults?: { run?: { "working-directory"?: unknown } } };
 
 const isObject = (v: unknown): v is Record<string, unknown> => Boolean(v) && typeof v === "object" && !Array.isArray(v);
@@ -147,11 +148,11 @@ function schemaCommand(job: Job, test: TestStep): string | null {
   return parts.length ? parts.join("\n") : null;
 }
 
-/**
- * The Postgres service of the CI job that runs the package's tests, or [] when that job has none,
- * no job runs tests, or a workflow cannot be parsed. `packageDir` is the package under test ("" root).
- */
-export function servicesFromWorkflows(files: WorkflowFile[], packageDir: string): Service[] {
+/** The CI job that runs the package's tests, with the step that runs them; null when there is none. */
+export type CiJob = { job: Job; test: TestStep; workflowEnv: Record<string, string> };
+
+/** Finds the job that runs the tests of `packageDir` ("" root); unparseable workflows are skipped. */
+export function ciTestJob(files: WorkflowFile[], packageDir: string): CiJob | null {
   const jobs: Array<Job & { workflowEnv: Record<string, string> }> = [];
   for (const file of files) {
     let doc: unknown;
@@ -165,15 +166,26 @@ export function servicesFromWorkflows(files: WorkflowFile[], packageDir: string)
     for (const job of Object.values(doc.jobs)) if (isObject(job)) jobs.push({ ...(job as Job), workflowEnv });
   }
   const picked = pickJob(jobs, normDir(packageDir));
-  if (!picked) return [];
-  const { job, test } = picked;
+  if (!picked) return null;
+  return { ...picked, workflowEnv: (picked.job as { workflowEnv: Record<string, string> }).workflowEnv };
+}
+
+/**
+ * The Postgres service of the CI job that runs the package's tests, or [] when that job has none,
+ * no job runs tests, or a workflow cannot be parsed. `packageDir` is the package under test ("" root).
+ */
+export function servicesFromWorkflows(files: WorkflowFile[], packageDir: string): Service[] {
+  const ci = ciTestJob(files, packageDir);
+  return ci ? servicesFromJob(ci) : [];
+}
+
+export function servicesFromJob({ job, test, workflowEnv }: CiJob): Service[] {
   const entry = postgresEntry(job);
   if (!entry) return [];
   const [alias, svc] = entry;
   const image = str(svc.image)!.trim();
   if (image.includes("${{")) return [];
 
-  const workflowEnv = (job as { workflowEnv: Record<string, string> }).workflowEnv;
   const jobEnv = { ...workflowEnv, ...stringMap(job.env) };
   const env = Object.fromEntries(Object.entries(stringMap(svc.env)).map(([k, v]) => [k, resolveEnv(v, jobEnv)]));
   const steps = Array.isArray(job.steps) ? (job.steps as Step[]) : [];
@@ -202,4 +214,79 @@ export function serviceProvenance(services: Service[]): string[] {
     `# DATABASE_URL=${s.containerDatabaseUrl}`,
     ...(s.schemaCommand ? [`# schema: ${s.schemaCommand.split("\n").join("\n#   ")}`] : []),
   ]);
+}
+
+/**
+ * One dependency install CI runs before the tests: `cwd`, where the command runs ("" root); `dir`,
+ * the package it installs (differs from `cwd` for `npm ci --prefix server`); the command as written.
+ */
+export type InstallStep = { dir: string; cwd: string; command: string };
+
+const INSTALL_VERB = /^(npm\s+(ci|install|i)|pnpm\s+(install|i)|yarn\s+install|yarn)(?=\s|$)/;
+const DIR_FLAGS = new Set(["--prefix", "--dir", "-C", "--cwd"]);
+const VALUE_FLAGS = new Set(["--filter", "--registry", "--network-timeout", "--loglevel"]);
+
+/**
+ * `pnpm install --frozen-lockfile` → its directory relative to the step's ("" when it names none);
+ * null when the segment is not a project install: another command, a global install (`npm i -g
+ * pnpm`), or one that names packages (`npm install left-pad`).
+ */
+function installTarget(segment: string): string | null {
+  const verb = segment.match(INSTALL_VERB);
+  if (!verb) return null;
+  const tokens = segment.slice(verb[0].length).trim().split(/\s+/).filter(Boolean);
+  let dir = "";
+  for (let i = 0; i < tokens.length; i++) {
+    const [flag, inline] = tokens[i].split("=", 2);
+    if (flag === "-g" || flag === "--global") return null;
+    if (DIR_FLAGS.has(flag)) { dir = normDir(inline ?? tokens[++i] ?? ""); continue; }
+    if (VALUE_FLAGS.has(flag)) { if (inline == null) i++; continue; }
+    if (!flag.startsWith("-")) return null;
+  }
+  return dir;
+}
+
+/**
+ * Every dependency install the job runs before its test step, in order, with its directory: the
+ * step's `working-directory` (or the job's `defaults.run.working-directory`), plus a `cd dir &&`
+ * before it on the same line and a `--prefix`/`--dir`/`-C` flag. [] when the job has none.
+ */
+export function installStepsFromJob({ job, test }: CiJob): InstallStep[] {
+  const steps = Array.isArray(job.steps) ? (job.steps as Step[]) : [];
+  const jobDir = normDir(str(job.defaults?.run?.["working-directory"]) ?? "");
+  const found: InstallStep[] = [];
+  for (let i = 0; i < test.index; i++) {
+    const run = str(steps[i]?.run);
+    if (!run) continue;
+    const stepDir = normDir(str(steps[i]["working-directory"]) ?? jobDir);
+    for (const line of run.split("\n")) {
+      let dir = stepDir;
+      for (const raw of line.split(/\s*&&\s*/)) {
+        const segment = raw.trim();
+        const cd = segment.match(/^cd\s+(\S+)$/);
+        if (cd) { dir = joinDir(dir, normDir(cd[1])); continue; }
+        const target = installTarget(segment);
+        if (target != null) found.push({ dir: joinDir(dir, target), cwd: dir, command: segment });
+      }
+    }
+  }
+  return found;
+}
+
+const joinDir = (a: string, b: string) => (a && b ? `${a}/${b}` : a || b);
+
+/**
+ * The Node major `actions/setup-node` sets up in the job (`24`, `"24.x"`, `"v22.11.0"`); null for
+ * none, or for a value that is not a version (`${{ matrix.node }}`, `lts/*`, `node-version-file`).
+ */
+export function nodeMajorFromJob({ job, test }: CiJob): number | null {
+  const steps = Array.isArray(job.steps) ? (job.steps as Step[]) : [];
+  for (let i = 0; i < test.index; i++) {
+    const uses = str(steps[i]?.uses);
+    if (!uses || !/^actions\/setup-node(@|$)/.test(uses) || !isObject(steps[i].with)) continue;
+    const version = str((steps[i].with as Record<string, unknown>)["node-version"])?.trim();
+    const m = version?.match(/^v?(\d+)(?:\.(?:\d+|x))*$/);
+    if (m) return Number(m[1]);
+  }
+  return null;
 }

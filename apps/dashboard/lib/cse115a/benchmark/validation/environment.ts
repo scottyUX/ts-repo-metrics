@@ -7,7 +7,7 @@
 // next to every run (see services.ts). Pure: reads files through the `read` callback, touches nothing.
 // Rules are in docs/CSE115A_BENCHMARK_VALIDATION.md, "Environment".
 
-import { serviceProvenance, servicesFromWorkflows, type Service } from "@/lib/cse115a/benchmark/validation/services";
+import { ciTestJob, installStepsFromJob, nodeMajorFromJob, serviceProvenance, servicesFromJob, type InstallStep, type Service } from "@/lib/cse115a/benchmark/validation/services";
 
 export type Runner = "vitest" | "node-test" | "jest" | "pytest";
 
@@ -33,7 +33,16 @@ export type Environment = {
   pytestDeclared?: boolean;
   /** Database containers to start next to every run, from the repository's CI; [] (or unset) for none. */
   services?: Service[];
+  /**
+   * The installs CI runs before its tests, in order, run instead of `installCommand` in
+   * `installDir`; [] (or unset) when CI has none the validator recognises. JavaScript only.
+   */
+  installSteps?: InstallStep[];
+  /** Where the Node major came from: `.nvmrc`, `.node-version`, `engines.node`, `CI`, or `default`. JavaScript only. */
+  nodeSource?: NodeSource;
 };
+
+export type NodeSource = ".nvmrc" | ".node-version" | "engines.node" | "CI" | "default";
 
 /**
  * Placeholder variables for every run. CI makes tools non-interactive. DATABASE_URL lets a Prisma
@@ -176,26 +185,53 @@ export async function detectEnvironment(probe: RepoProbe): Promise<Environment |
   const language = testLanguage(probe.testFiles);
   if (language === "mixed") return unsupported("test files mix Python and JavaScript");
   const env = language === "python" ? await detectPythonEnvironment(probe) : await detectNodeEnvironment(probe);
-  return env.supported ? withServices(env, probe) : env;
+  return env.supported ? withCi(env, probe) : env;
 }
 
 /**
- * Adds the CI job's Postgres service, if any: `services`, the real DATABASE_URL in place of the
- * placeholder, and the service in the Dockerfile provenance. Without one, `services: []` and
- * nothing else changes.
+ * Applies what the CI job that runs the tests says. Its Postgres service: `services`, the real
+ * DATABASE_URL in place of the placeholder, the service in the Dockerfile provenance. For
+ * JavaScript, its install steps (every directory it installs in, in order) and, when no repository
+ * file names a Node version, its setup-node version. Without CI, `services: []`, `installSteps: []`
+ * and nothing else changes.
  */
-export async function withServices(env: Environment, probe: RepoProbe): Promise<Environment> {
+export async function withCi(env: Environment, probe: RepoProbe): Promise<Environment> {
   const files = [];
   for (const path of probe.workflowFiles ?? []) {
     const text = await probe.read(path);
     if (text != null) files.push({ path, text });
   }
-  const services = servicesFromWorkflows(files, env.packageDir);
-  if (services.length === 0) return { ...env, services: [] };
-  const vars = { ...env.env, DATABASE_URL: services[0].containerDatabaseUrl };
-  const dockerfile = env.dockerfile.replace(/^ENV DATABASE_URL=.*$/m, `ENV DATABASE_URL=${vars.DATABASE_URL}`)
-    .replace(/^WORKDIR \/work$/m, (line) => [line, ...serviceProvenance(services)].join("\n"));
-  return { ...env, env: vars, dockerfile, services };
+  const ci = ciTestJob(files, env.packageDir);
+  const services = ci ? servicesFromJob(ci) : [];
+  const js = !env.runners.includes("pytest");
+  const installSteps = ci && js ? installStepsFromJob(ci) : [];
+  const ciNode = ci && js && env.nodeSource === "default" ? nodeMajorFromJob(ci) : null;
+  let out: Environment = { ...env, services, ...(js ? { installSteps } : {}) };
+  if (ciNode != null) {
+    const image = `node:${ciNode}-bookworm`;
+    out = { ...out, image, nodeSource: "CI", dockerfile: out.dockerfile.replace(/^FROM .*$/m, `FROM ${image}`) };
+  }
+  if (installSteps.length) {
+    const lines = installSteps.map((step) => `# cd ${step.cwd || "."} && ${step.command}`);
+    out.dockerfile = out.dockerfile.replace(/^# cd .*\n/m, lines.join("\n") + "\n");
+  }
+  if (services.length) {
+    out.env = { ...env.env, DATABASE_URL: services[0].containerDatabaseUrl };
+    out.dockerfile = out.dockerfile.replace(/^ENV DATABASE_URL=.*$/m, `ENV DATABASE_URL=${out.env.DATABASE_URL}`)
+      .replace(/^WORKDIR \/work$/m, (line) => [line, ...serviceProvenance(services)].join("\n"));
+  }
+  return out;
+}
+
+/**
+ * What a run installs with: CI's install steps, else the detected single install. `cwd` is where
+ * each command runs, `dir` the package it installs.
+ */
+export function installPlan(env: Environment): InstallStep[] {
+  if (!env.installSteps?.length) return [{ dir: env.installDir, cwd: env.installDir, command: env.installCommand }];
+  // The image has no pnpm or yarn until corepack provides them, as the single install does.
+  const corepack = (command: string) => (/^(pnpm|yarn)\b/.test(command) ? `corepack enable && ${command}` : command);
+  return env.installSteps.map((step) => ({ ...step, command: corepack(step.command) }));
 }
 
 /** The JavaScript half of detectEnvironment. */
@@ -252,7 +288,13 @@ async function detectNodeEnvironment(probe: RepoProbe): Promise<Environment | Un
 
   // Node version.
   const engines = (pkg.engines ?? rootPkg?.engines) as Record<string, unknown> | undefined;
-  const major = nodeMajorFrom(await read(".nvmrc"), engines?.node) ?? DEFAULT_NODE_MAJOR;
+  // Repository files first; CI's setup-node version is applied later (withCi) only when none says.
+  let nodeSource: NodeSource = "default";
+  let major = DEFAULT_NODE_MAJOR;
+  for (const [source, text] of [[".nvmrc", await read(".nvmrc")], [".node-version", await read(".node-version")], ["engines.node", null]] as const) {
+    const found = nodeMajorFrom(text, source === "engines.node" ? engines?.node : undefined);
+    if (found != null) { major = found; nodeSource = source; break; }
+  }
   const image = `node:${major}-bookworm`;
 
   const dockerfile = [
@@ -263,7 +305,7 @@ async function detectNodeEnvironment(probe: RepoProbe): Promise<Environment | Un
     ...testSteps.map((s) => `# ${s.command}`),
   ].filter(Boolean).join("\n") + "\n";
 
-  return { supported: true, runners, packageManager, packageDir, installDir, installCommand, testSteps, env: CONTAINER_ENV, dockerfile, image };
+  return { supported: true, runners, packageManager, packageDir, installDir, installCommand, testSteps, env: CONTAINER_ENV, dockerfile, image, nodeSource };
 }
 
 // ---------------------------------------------------------------------------------------------

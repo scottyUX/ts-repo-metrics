@@ -5,7 +5,7 @@
 // Rules are in docs/CSE115A_BENCHMARK_VALIDATION.md.
 
 import { compareRuns, type Comparison } from "@/lib/cse115a/benchmark/validation/compareRuns";
-import type { Environment, Unsupported } from "@/lib/cse115a/benchmark/validation/environment";
+import { installPlan, type Environment, type Unsupported } from "@/lib/cse115a/benchmark/validation/environment";
 import { containerScript, InstallError, runThreeStates, type RunPlan, type SuiteRunner, type ThreeStates } from "@/lib/cse115a/benchmark/validation/runner";
 import { modifiedTests, unmatchedStaticIds } from "@/lib/cse115a/benchmark/validation/testIds";
 
@@ -109,6 +109,16 @@ export type ValidationResult = {
   snapshot_bundle?: string | null;
   /** What the repository's tests seem to need beyond Node (from the census rules); informational. */
   signals?: { database: string[]; browser: string[]; otherRunners: string[] };
+  /** Directories dependencies were installed in, in order ("" is the root). Also in `eval_script`. */
+  install_dirs?: string[];
+  /** Where the Node version came from (`from .nvmrc`, `from CI`, `default`); absent for Python. Also in `eval_script`. */
+  node_source?: string;
+  /**
+   * Test-patch files that failed to load in R2, after the fix: a harness problem (a missing
+   * install, a wrong Node) more often than a student one. Does not change the verdict; the
+   * detail says so and the batch summary shows it next to the reason.
+   */
+  test_files_never_loaded?: string[];
   /** Database containers each run had, from the repository's CI; absent when none. Also in `eval_script`. */
   services?: Array<{ name: string; image: string; env: Record<string, string>; database_url: string; schema_command: string | null }>;
 };
@@ -141,6 +151,17 @@ function logParser(env: Environment): string {
   return env.runners.map((r) => ({ vitest: "vitest-json", jest: "jest-json", "node-test": "node-test-json", pytest: "pytest-json" })[r]).join("+");
 }
 
+/** `.nvmrc` → `from .nvmrc`, `CI` → `from CI`, `default` → `default`. */
+function nodeSourceLabel(env: Environment): string | null {
+  if (!env.nodeSource) return null;
+  return env.nodeSource === "default" ? "default" : `from ${env.nodeSource}`;
+}
+
+/** The detail for a row whose test-patch files never loaded after the fix. */
+export function neverLoadedDetail(files: string[]): string {
+  return `test patch file(s) never loaded after the fix: ${files.join(", ")}; check the run log`;
+}
+
 /** Runs the three states and shapes the result. Writes nothing anywhere. A failed install is `env_error`. */
 export async function validateTask(input: ValidateInput): Promise<ValidationResult & { runs: ThreeStates }> {
   const { row, env } = input;
@@ -153,11 +174,19 @@ export async function validateTask(input: ValidateInput): Promise<ValidationResu
     installCommand: env.installCommand,
     packageDir: env.packageDir,
     testSteps: env.testSteps.map((step) => step.command),
+    installSteps: env.installSteps?.length ? installPlan(env).map((step) => ({ dir: step.cwd, command: step.command })) : [],
     env: env.env,
     image: env.image,
     timeoutSeconds: input.timeoutSeconds,
     services: env.services ?? [],
   };
+  const installs = installPlan(env);
+  const nodeSource = nodeSourceLabel(env);
+  plan.notes = [
+    ...(nodeSource ? [`node: ${env.image} (${nodeSource})`] : []),
+    `install in: ${installs.map((s) => s.dir || ".").join(", ")}${env.installSteps?.length ? " (from CI)" : ""}`,
+  ];
+  const provenance = { install_dirs: installs.map((s) => s.dir), ...(nodeSource ? { node_source: nodeSource } : {}) };
   const services = env.services?.length
     ? { services: env.services.map((s) => ({ name: s.name, image: s.image, env: s.env, database_url: s.containerDatabaseUrl, schema_command: s.schemaCommand })) }
     : {};
@@ -176,6 +205,7 @@ export async function validateTask(input: ValidateInput): Promise<ValidationResu
       package_dir: env.packageDir,
       reason: "env_error",
       detail: error.message,
+      ...provenance,
       ...services,
       runs: empty,
     };
@@ -184,6 +214,10 @@ export async function validateTask(input: ValidateInput): Promise<ValidationResu
   const allRuns = [...runs.r0, ...runs.r1, ...runs.r2];
   const staticIds = [...new Set([...row.FAIL_TO_PASS, ...row.PASS_TO_PASS])];
   const testFiles = filesInPatch(row.test_patch);
+  const neverLoaded = comparison.loadFailures
+    .filter((entry) => entry.startsWith("r2 "))
+    .map((entry) => entry.slice(3))
+    .filter((file) => testFiles.includes(file));
   return {
     instance_id: row.instance_id,
     image: env.image,
@@ -206,8 +240,10 @@ export async function validateTask(input: ValidateInput): Promise<ValidationResu
     proof_outside_test_patch: proofOutsideTestPatch([...comparison.failToPass, ...comparison.absentToPass], testFiles),
     validation_status: comparison.validationStatus,
     reason: comparison.reason,
-    detail: null,
+    detail: neverLoaded.length ? neverLoadedDetail(neverLoaded) : null,
     timings: runs.timings,
+    ...provenance,
+    ...(neverLoaded.length ? { test_files_never_loaded: neverLoaded } : {}),
     ...services,
     runs,
   };
