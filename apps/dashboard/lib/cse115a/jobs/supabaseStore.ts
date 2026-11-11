@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { planBenchmarkSave, snapshotMergeCommit, type StoredSource } from "./benchmarkSave";
 import type { Job, JobStore, Submission } from "./runner";
 
 function check(error: { message: string } | null, what: string) {
@@ -64,22 +65,27 @@ export function supabaseJobStore(db: SupabaseClient): JobStore {
     },
     async saveBenchmark(submission, rows) {
       if (rows.length === 0) return;
-      const { error } = await db.from("cse_benchmark_tasks")
-        .upsert(rows.map((row) => row.instance), { onConflict: "instance_id" });
-      check(error, "save benchmark tasks");
-      const { error: sourceError } = await db.from("cse_benchmark_task_sources").upsert(
-        rows.map((row) => ({
-          instance_id: row.instance.instance_id,
-          course_id: submission.course_id,
-          user_id: submission.user_id,
-          assignment_submission_id: submission.id,
-          task_slot: row.slot,
-          flags: row.flags,
-          updated_at: new Date().toISOString(),
-        })),
-        { onConflict: "assignment_submission_id,task_slot" },
-      );
-      check(sourceError, "save benchmark sources");
+      const { data, error: readError } = await db.from("cse_benchmark_task_sources")
+        .select("instance_id,assignment_submission_id,task_slot,validation_status,flags,cse_assignment_submissions(snapshot)")
+        .in("instance_id", rows.map((row) => row.instance.instance_id));
+      check(readError, "read stored benchmark sources");
+      type Row = Omit<StoredSource, "merge_commit"> & { cse_assignment_submissions: { snapshot: unknown } | null };
+      const stored: StoredSource[] = ((data ?? []) as unknown as Row[]).map(({ cse_assignment_submissions: sub, ...source }) => ({
+        ...source,
+        flags: source.flags ?? [],
+        merge_commit: snapshotMergeCommit(sub?.snapshot, source.task_slot),
+      }));
+      const plan = planBenchmarkSave(submission, rows, stored, new Date().toISOString());
+      if (plan.tasks.length > 0) {
+        const { error } = await db.from("cse_benchmark_tasks").upsert(plan.tasks, { onConflict: "instance_id" });
+        check(error, "save benchmark tasks");
+      }
+      // One upsert per source row: some carry validation_status and some do not, and a bulk upsert
+      // would set the missing column to null.
+      for (const source of plan.sources) {
+        const { error } = await db.from("cse_benchmark_task_sources").upsert(source, { onConflict: "assignment_submission_id,task_slot" });
+        check(error, "save benchmark sources");
+      }
     },
   };
 }

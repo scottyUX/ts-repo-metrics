@@ -17,7 +17,8 @@ export type Submission = {
   snapshot: SubmissionSnapshot;
   superseded_at: string | null;
 };
-export type BenchmarkSave = { slot: number; instance: BenchmarkInstance; flags: BuildFlag[] };
+/** One captured task: its instance, the capture flags, and the PR merge commit it was captured from. */
+export type BenchmarkSave = { slot: number; instance: BenchmarkInstance; flags: BuildFlag[]; mergeCommit: string };
 
 export const MAX_ATTEMPTS = 3;
 const BASE_BACKOFF_MS = 60_000;
@@ -45,7 +46,11 @@ export interface JobStore {
   loadRepoMetrics(analysisResultId: string): Promise<unknown>;
   /** The submitting student's UCSC email, used to strip their identifiers from benchmark rows. */
   loadStudentEmail(courseId: string, userId: string): Promise<string | null>;
-  /** Upserts instances and their source rows; a source's validation status is kept. */
+  /**
+   * Upserts instances and their source rows; a source's validation status is kept. An instance
+   * already validated, rejected or rebuilt from the same merge commit is not overwritten (see
+   * benchmarkSave.ts).
+   */
   saveBenchmark(submission: Submission, rows: BenchmarkSave[]): Promise<void>;
 }
 
@@ -77,6 +82,7 @@ async function runBenchmark(store: JobStore, job: Job): Promise<void> {
   const studentEmail = await store.loadStudentEmail(submission.course_id, submission.user_id);
   const rows = await Promise.all(submission.snapshot.tasks.map(async (task) => ({
     slot: task.slot,
+    mergeCommit: task.pr.mergeCommitSha,
     ...buildInstance(task, submission.assignment_number, await store.loadRepoMetrics(task.analysisResultId), studentEmail),
   })));
   // Superseded attempts are still captured: the work was real, and the export filters by consent.
