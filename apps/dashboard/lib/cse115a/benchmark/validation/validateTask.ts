@@ -7,6 +7,7 @@
 import { compareRuns, type Comparison } from "@/lib/cse115a/benchmark/validation/compareRuns";
 import { installPlan, type Environment, type Unsupported } from "@/lib/cse115a/benchmark/validation/environment";
 import { containerScript, InstallError, runThreeStates, type RunPlan, type SuiteRunner, type ThreeStates } from "@/lib/cse115a/benchmark/validation/runner";
+import type { RebuildProvenance } from "@/lib/cse115a/benchmark/validation/rebuildRow";
 import { modifiedTests, unmatchedStaticIds } from "@/lib/cse115a/benchmark/validation/testIds";
 
 /** The fields of a benchmark row the validator reads. */
@@ -18,7 +19,22 @@ export type TaskRow = {
   test_patch: string;
   FAIL_TO_PASS: string[];
   PASS_TO_PASS: string[];
+  /** Set on a row staff rebuilt from its PR's merge commit (rebuildRow.ts); absent on captured rows. */
+  rebuild?: RebuildProvenance;
 };
+
+/**
+ * What a rebuilt row's result carries for write-back: the provenance plus the rebuilt base and
+ * patches, since write-back reads only results. The student-captured originals are identified by
+ * `original_base_commit` and the two hashes.
+ */
+export type RebuildRecord = RebuildProvenance & { base_commit: string; patch: string; test_patch: string };
+
+/** The result with the row's rebuild record attached, or unchanged for a captured row. */
+export function withRebuild<T extends { rebuild?: RebuildRecord }>(result: T, row: TaskRow): T {
+  if (!row.rebuild) return result;
+  return { ...result, rebuild: { ...row.rebuild, base_commit: row.base_commit, patch: row.patch, test_patch: row.test_patch } };
+}
 
 /** Files whose "after" side a unified diff writes (`+++ b/<path>`); deleted files are left out. */
 export function filesInPatch(patch: string): string[] {
@@ -119,6 +135,8 @@ export type ValidationResult = {
    * detail says so and the batch summary shows it next to the reason.
    */
   test_files_never_loaded?: string[];
+  /** Present when the row was rebuilt by staff: write-back replaces base_commit, patch and test_patch with these. */
+  rebuild?: RebuildRecord;
   /** Database containers each run had, from the repository's CI; absent when none. Also in `eval_script`. */
   services?: Array<{ name: string; image: string; env: Record<string, string>; database_url: string; schema_command: string | null }>;
 };

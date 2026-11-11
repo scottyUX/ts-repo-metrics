@@ -413,6 +413,45 @@ npx tsx apps/dashboard/scripts/validateBenchmarkTask.ts --row row.json --repo-di
 Where each claim above about another benchmark comes from, with section numbers, is in
 `docs/planning/BENCHMARK_VALIDATION_SURVEY.md`.
 
+## Rebuilt rows
+
+Some captured rows have the wrong diff because of how the student tagged or stacked their work: a
+`<id>-base` tag on the one commit that holds the spec and all the code makes the captured patch
+empty, and a PR merged into another task's branch carries that task's history. Staff rebuild such a
+row on our side; the student's repository, tags and grade are untouched.
+
+For the PR's merge commit M (from the submission snapshot, `pr.mergeCommitSha`), `base_commit` is
+M^1, the first parent: the tip of the branch the PR was merged into, so a stacked PR's diff holds
+only its own change. A squash or rebase merge has one parent and M^1 is still right. The change is
+`git diff M^1 M`, minus the sprint's task file (`docs/tasks/sprint-N/<id>.md`, `isTaskFilePath`;
+dropped for rebuilt rows only, captured rows are as before), passed through the app's own
+`buildInstance` with the submission's snapshot and the student's email, so the split, the scrubbing
+of personal data and the static `FAIL_TO_PASS` match capture. `problem_statement` and the other task
+fields are copied from the stored row.
+
+```sh
+npx tsx --tsconfig apps/dashboard/tsconfig.json apps/dashboard/scripts/fetchCandidateRows.ts --out rows.json --all
+npx tsx --tsconfig apps/dashboard/tsconfig.json apps/dashboard/scripts/rebuildBenchmarkRow.ts \
+  --rows rows.json --only <instance_id> --pr <n> --out rebuilt.json
+```
+
+Both need `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` (reads only). `--pr` must match the
+snapshot's PR. The rebuilt row carries `rebuild: { rebuilt_from: "merge-parent", merge_commit,
+original_base_commit, original_patch_sha256, original_test_patch_sha256 }`, which the validator
+copies into the result together with the rebuilt base and patches. Write-back of such a result
+(any verdict except `env_error`) also sets `base_commit`, `environment_setup_commit`, `patch` and
+`test_patch` in `cse_benchmark_tasks` and adds the flag `staff_rebuilt:merge-parent` to the source;
+captured rows are written back exactly as before. To revert, restore the student-captured values
+(the original base is in the result; re-capture the patches from it and check them against the
+hashes) and remove the flag.
+
+A later Submit does not undo this: re-capture keeps an instance whose source is no longer
+`candidate` when the snapshot's merge commit is unchanged (`lib/cse115a/jobs/benchmarkSave.ts`).
+
+Rebuilt so far: `JoKHerre__Bookworm-COL-04-T-4` (PR #115, M `96798e0b`, M^1 `40b28261`, the
+head of PR #114). `JoKHerre__Bookworm-COL-04-T-2` (PR #114) is not rebuilt: the PR changes no
+test file, so it stays rejected.
+
 ## Known limitations
 
 - **Renames are false regressions.** A renamed old test is old name passed→absent (regression,

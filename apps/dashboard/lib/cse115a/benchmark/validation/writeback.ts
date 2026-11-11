@@ -2,6 +2,7 @@
 // `writebackSql` (batch.ts), expressed as plain updates so a script can apply them through the
 // Supabase client with the service-role key, and a test can check them without a database.
 
+import { STAFF_REBUILT_FLAG } from "@/lib/cse115a/benchmark/validation/rebuildRow";
 import type { ValidationResult } from "@/lib/cse115a/benchmark/validation/validateTask";
 
 export const REASON_FLAG_PREFIX = "validation_reason:";
@@ -30,10 +31,15 @@ export type TaskUpdate = {
   log_parser: string;
 };
 
+/** The rebuilt base and patches a staff-rebuilt row writes, whatever its verdict. */
+export type RebuildUpdate = { base_commit: string; environment_setup_commit: string; patch: string; test_patch: string };
+
 export type WritebackOp = {
   instance_id: string;
   /** Null for a rejected row: its lists stay as the app guessed them. */
   task: TaskUpdate | null;
+  /** Set for a row rebuilt by staff (rebuildRow.ts); null for every captured row. */
+  rebuild: RebuildUpdate | null;
   validation_status: "validated" | "rejected";
   /** The reason flag to carry, or null to carry none (validated). */
   reasonFlag: string | null;
@@ -57,9 +63,12 @@ export function writebackPlan(results: ValidationResult[]): WritebackOp[] {
             log_parser: r.log_parser ?? "",
           }
         : null,
+      rebuild: r.rebuild
+        ? { base_commit: r.rebuild.base_commit, environment_setup_commit: r.rebuild.base_commit, patch: r.rebuild.patch, test_patch: r.rebuild.test_patch }
+        : null,
       validation_status: r.validation_status,
       reasonFlag: r.validation_status === "rejected" ? `${REASON_FLAG_PREFIX}${r.reason}` : null,
-      flags: managedFlags(r),
+      flags: r.rebuild ? [...managedFlags(r), STAFF_REBUILT_FLAG] : managedFlags(r),
     });
   }
   return ops;
@@ -69,7 +78,9 @@ export function writebackPlan(results: ValidationResult[]): WritebackOp[] {
 export function mergeFlags(existing: string[], flags: string[] | string | null): string[] {
   const kept = existing.filter((f) => !isManagedFlag(f));
   const added = flags == null ? [] : typeof flags === "string" ? [flags] : flags;
-  return [...kept, ...added];
+  // The staff-rebuilt flag is not validator-owned (a later captured result must not drop it), so it
+  // can already be in `kept`; never add it twice.
+  return [...kept, ...added.filter((f) => !kept.includes(f))];
 }
 
 /** The slice of the Supabase client the write-back uses, so a test can hand in a fake. */
@@ -84,8 +95,8 @@ export type WritebackClient = {
 export async function applyWriteback(client: WritebackClient, ops: WritebackOp[], now: () => string = () => new Date().toISOString()): Promise<string[]> {
   const lines: string[] = [];
   for (const op of ops) {
-    if (op.task) {
-      const { error } = await client.from("cse_benchmark_tasks").update(op.task).eq("instance_id", op.instance_id);
+    if (op.task || op.rebuild) {
+      const { error } = await client.from("cse_benchmark_tasks").update({ ...op.task, ...op.rebuild }).eq("instance_id", op.instance_id);
       if (error) throw new Error(`${op.instance_id}: cse_benchmark_tasks: ${error.message}`);
     }
     const { data, error } = await client.from("cse_benchmark_task_sources").select("flags").eq("instance_id", op.instance_id);
@@ -94,7 +105,8 @@ export async function applyWriteback(client: WritebackClient, ops: WritebackOp[]
     const result = await client.from("cse_benchmark_task_sources").update({ validation_status: op.validation_status, flags, updated_at: now() }).eq("instance_id", op.instance_id);
     if (result.error) throw new Error(`${op.instance_id}: cse_benchmark_task_sources: ${result.error.message}`);
     const proof = op.flags.includes(PROOF_OUTSIDE_FLAG) ? `, flagged ${PROOF_OUTSIDE_FLAG}` : "";
-    lines.push(`${op.instance_id}: ${op.validation_status}${op.reasonFlag ? ` (${op.reasonFlag.slice(REASON_FLAG_PREFIX.length)})` : ""}${op.task ? `, ${op.task.FAIL_TO_PASS.length} F2P / ${op.task.PASS_TO_PASS.length} P2P written` : ""}${proof}`);
+    const rebuilt = op.rebuild ? `, rebuilt base ${op.rebuild.base_commit.slice(0, 7)} and patches written, flagged ${STAFF_REBUILT_FLAG}` : "";
+    lines.push(`${op.instance_id}: ${op.validation_status}${op.reasonFlag ? ` (${op.reasonFlag.slice(REASON_FLAG_PREFIX.length)})` : ""}${op.task ? `, ${op.task.FAIL_TO_PASS.length} F2P / ${op.task.PASS_TO_PASS.length} P2P written` : ""}${proof}${rebuilt}`);
   }
   return lines;
 }

@@ -12,7 +12,7 @@ import { join } from "node:path";
 import { signals, type Signals } from "@/lib/cse115a/benchmark/validation/census";
 import { detectEnvironment } from "@/lib/cse115a/benchmark/validation/environment";
 import { DockerSuiteRunner } from "@/lib/cse115a/benchmark/validation/runner";
-import { filesInPatch, modifiedAcrossFiles, unsupportedResult, validateTask, type TaskRow, type ValidationResult } from "@/lib/cse115a/benchmark/validation/validateTask";
+import { filesInPatch, modifiedAcrossFiles, unsupportedResult, validateTask, withRebuild, type TaskRow, type ValidationResult } from "@/lib/cse115a/benchmark/validation/validateTask";
 import { githubAppConfig, repoInstallationToken } from "@/lib/cse115a/githubAppToken";
 
 /** Runs a command, returns stdout, throws on a non-zero exit with stderr in the message. */
@@ -170,6 +170,10 @@ export type ValidateRowOptions = {
  * states in Docker, and returns the result record. Resets the checkout afterwards.
  */
 export async function validateRow(options: ValidateRowOptions): Promise<ValidationResult> {
+  return withRebuild(await validateRowResult(options), options.row);
+}
+
+async function validateRowResult(options: ValidateRowOptions): Promise<ValidationResult> {
   const { row, repoDir } = options;
   const log = options.log ?? (() => {});
   try {

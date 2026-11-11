@@ -1,7 +1,8 @@
 // The pure parts of the batch: reading a list of rows, deciding which rows can run at all, and
 // summarizing results. The script around it does the cloning and Docker.
 
-import type { TaskRow, ValidationReason, ValidationResult } from "@/lib/cse115a/benchmark/validation/validateTask";
+import { STAFF_REBUILT_FLAG } from "@/lib/cse115a/benchmark/validation/rebuildRow";
+import { withRebuild, type TaskRow, type ValidationReason, type ValidationResult } from "@/lib/cse115a/benchmark/validation/validateTask";
 import { managedFlags, PROOF_OUTSIDE_FLAG, REASON_FLAG_PREFIX } from "@/lib/cse115a/benchmark/validation/writeback";
 
 /** Parses a JSON array (Supabase `json_agg`) or JSON Lines (one row per line). */
@@ -21,7 +22,7 @@ export function preflight(row: TaskRow): { reason: ValidationReason; detail: str
 
 /** The result record for a row the batch did not run (preflight failure or a crashed run). */
 export function rejectedWithoutRun(row: TaskRow, reason: ValidationReason, detail: string): ValidationResult {
-  return {
+  return withRebuild<ValidationResult>({
     instance_id: row.instance_id,
     image: null, eval_script: null, log_parser: null, package_dir: null,
     test_files: [],
@@ -29,7 +30,7 @@ export function rejectedWithoutRun(row: TaskRow, reason: ValidationReason, detai
     regressions: [], regression_skips: [], flaky: [], skipped: [], judged_from_base: [], load_failures: [],
     modified_tests: [], unmatched_static_ids: [], proof_outside_test_patch: [],
     validation_status: "rejected", reason, detail, timings: {},
-  };
+  }, row);
 }
 
 /** One step of the funnel: how many rows got this far, and how many fell out here. */
@@ -161,10 +162,25 @@ export function writebackSql(results: ValidationResult[]): string {
         ` where instance_id = ${id};`,
       );
     }
+    if (r.rebuild) {
+      // A staff-rebuilt row (rebuildRow.ts): the task gets the rebuilt base and patches. The
+      // student-captured values are in the result (original_base_commit and the two hashes).
+      lines.push(
+        `-- rebuilt from merge commit ${r.rebuild.merge_commit}; original base_commit ${r.rebuild.original_base_commit}`,
+        "update public.cse_benchmark_tasks",
+        `   set base_commit = ${quote(r.rebuild.base_commit)},`,
+        `       environment_setup_commit = ${quote(r.rebuild.base_commit)},`,
+        `       patch = ${quote(r.rebuild.patch)},`,
+        `       test_patch = ${quote(r.rebuild.test_patch)}`,
+        ` where instance_id = ${id};`,
+      );
+      flags.push(STAFF_REBUILT_FLAG);
+    }
+    const keepStaff = r.rebuild ? ` and f <> '${STAFF_REBUILT_FLAG}'` : "";
     lines.push(
       "update public.cse_benchmark_task_sources",
       `   set validation_status = ${quote(r.validation_status)},`,
-      `       flags = array_remove(array(select f from unnest(flags) as f where f not like '${REASON_FLAG_PREFIX}%' and f <> '${PROOF_OUTSIDE_FLAG}'), null)` +
+      `       flags = array_remove(array(select f from unnest(flags) as f where f not like '${REASON_FLAG_PREFIX}%' and f <> '${PROOF_OUTSIDE_FLAG}'${keepStaff}), null)` +
         (flags.length ? ` || array[${flags.map(quote).join(", ")}]` : "") + ",",
       "       updated_at = now()",
       ` where instance_id = ${id};`,
