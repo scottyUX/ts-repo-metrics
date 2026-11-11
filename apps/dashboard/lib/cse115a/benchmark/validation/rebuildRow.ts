@@ -11,7 +11,7 @@
 import { createHash } from "node:crypto";
 import { buildInstance, type BuildFlag } from "@/lib/cse115a/benchmark/buildInstance";
 import { parseDiffFiles } from "@/lib/cse115a/diff";
-import type { TaskSnapshot } from "@/lib/cse115a/submissionSnapshot";
+import type { SubmissionSnapshot, TaskSnapshot } from "@/lib/cse115a/submissionSnapshot";
 import { isTaskFilePath } from "@/lib/cse115a/taskSpec";
 import type { TaskRow } from "@/lib/cse115a/benchmark/validation/validateTask";
 
@@ -45,6 +45,51 @@ export type RebuildInput = {
 };
 
 export type RebuiltRow = TaskRow & Record<string, unknown> & { rebuild: RebuildProvenance };
+
+/** The slice of the Supabase client loadRebuildSource reads through, so a test can hand in a fake. */
+export type RebuildSourceClient = {
+  from(table: string): {
+    select(columns: string): {
+      eq(column: string, value: string): PromiseLike<{ data: unknown; error: { message: string } | null }> & {
+        eq(column: string, value: string): { maybeSingle(): PromiseLike<{ data: unknown; error: { message: string } | null }> };
+      };
+    };
+  };
+};
+
+/** What a rebuild needs from the database: the captured task, its sprint, and the student's email for scrubbing. */
+export type RebuildSource = { task: TaskSnapshot; assignmentNumber: number; attempt: number; studentEmail: string | null };
+
+type StoredSourceRow = {
+  task_slot: number;
+  course_id: string;
+  user_id: string;
+  cse_assignment_submissions: { assignment_number: number; attempt: number; superseded_at: string | null; snapshot: SubmissionSnapshot } | null;
+};
+
+/**
+ * Reads the submission an instance was captured from (read-only): the current attempt, else the
+ * latest one; the task in its slot; and the student's UCSC email, as capture uses them.
+ */
+export async function loadRebuildSource(db: RebuildSourceClient, instanceId: string): Promise<RebuildSource> {
+  const { data, error } = await db.from("cse_benchmark_task_sources")
+    .select("task_slot,course_id,user_id,cse_assignment_submissions!inner(assignment_number,attempt,superseded_at,snapshot)")
+    .eq("instance_id", instanceId);
+  if (error) throw new Error(`Supabase: ${error.message}`);
+  const sources = ((data ?? []) as StoredSourceRow[])
+    .filter((s): s is StoredSourceRow & { cse_assignment_submissions: NonNullable<StoredSourceRow["cse_assignment_submissions"]> } => s.cse_assignment_submissions != null)
+    .sort((a, b) => Number(a.cse_assignment_submissions.superseded_at != null) - Number(b.cse_assignment_submissions.superseded_at != null)
+      || b.cse_assignment_submissions.attempt - a.cse_assignment_submissions.attempt);
+  const source = sources[0];
+  if (!source) throw new Error(`${instanceId}: no cse_benchmark_task_sources row with a submission`);
+  const submission = source.cse_assignment_submissions;
+  const task = submission.snapshot.tasks.find((t) => t.slot === source.task_slot);
+  if (!task) throw new Error(`${instanceId}: the submission snapshot has no task in slot ${source.task_slot}`);
+  const member = await db.from("cse_course_memberships").select("ucsc_email").eq("course_id", source.course_id).eq("user_id", source.user_id).maybeSingle();
+  if (member.error) throw new Error(`Supabase: ${member.error.message}`);
+  const studentEmail = (member.data as { ucsc_email?: string } | null)?.ucsc_email ?? null;
+  return { task, assignmentNumber: submission.assignment_number, attempt: submission.attempt, studentEmail };
+}
 
 const sha256 = (text: string) => createHash("sha256").update(text).digest("hex");
 
