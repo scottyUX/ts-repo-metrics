@@ -323,6 +323,33 @@ A file that fails to collect (an import or syntax error) is `file::(load)`, as f
 runners. `--continue-on-collection-errors` is required: without it pytest stops before running any
 test when one file fails to import, and the whole suite would be absent from that state.
 
+**Databases.** Some repositories' tests are integration tests against a real Postgres (every test
+file in JoKHerre/Bookworm refuses to run unless `DATABASE_URL` names its `bookworm_test`
+database). Without a database every test fails to load in every state and the row is rejected
+`no_fail_to_pass`. The validator starts the database the repository's own CI starts, read from
+`.github/workflows/*.yml` on the patched tree (`services.ts`):
+
+| Read from CI | Rule |
+|---|---|
+| The job | the one whose steps run the package's tests (`npm test`, `pnpm --dir server test`, `npx vitest`, `pytest`, `node --test`); when several do, the one aimed at the package directory (`--dir`, `-C`, `--prefix`, `cd`, `working-directory`), then one with a Postgres service |
+| The service | that job's `services:` entry whose image is `postgres` or `postgres:<tag>`; its `env` (`POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`). MySQL, Redis and other images are ignored |
+| `DATABASE_URL` | the test step's `env`, else the job's, else the workflow's (`${{ env.X }}` resolved); with none, or another expression, built from the service's env. Host `localhost`/`127.0.0.1` becomes the service's key (`postgres`), a mapped host port (`5433:5432`) its container port |
+| The schema step | the steps before the test step whose command contains `db:push`, `migrate`, `prisma migrate deploy`, `prisma db push`, `drizzle-kit push` or `knex migrate`, kept as written; a step with its own `working-directory` runs in a subshell there |
+
+Every run, all nine, gets its own: `docker network create hecate-<run>-<id>`, the service image on
+it as `hecate-pg-<run>-<id>` with the CI env and the network alias of its CI key, and a wait of up
+to 60 one-second polls for `pg_isready` over TCP (the image's first-boot server answers on its
+socket and then restarts). The test container joins the network with `DATABASE_URL` set to the
+rewritten URL in place of the placeholder. Inside it: install (guarded, as above), then the schema
+command from the repository root in its own `bash -eo pipefail`, guarded the same way, then the
+test steps, still `|| true`. A database that never answers is `env_error` "database did not
+start"; a failed schema step is `env_error` "schema step failed: <first error line>". Both
+containers and the network are removed after every try, including a timeout and the one retry,
+and the database's log is appended to the run log when a run fails. The service (image, env,
+URL, schema command) is recorded in the result's `services` and as comment lines at the top of
+`eval_script`. A repository with no Postgres service in CI runs exactly as before, with the
+placeholder `DATABASE_URL`.
+
 The modification check for `.py` files reads indentation instead of running Python: a `def test*`
 at the top level or inside `class Test*` (with its decorators) up to the next statement at the same
 or lower indent, skipping lines inside strings and brackets. A file it cannot parse that way
@@ -347,9 +374,11 @@ The validator prints one JSON object and writes nothing to the database:
 ```
 { instance_id, image, eval_script, log_parser, test_files,
   FAIL_TO_PASS, ABSENT_TO_PASS, PASS_TO_PASS, FAIL_TO_FAIL, regressions, flaky, skipped,
-  judged_from_base, modified_tests, unmatched_static_ids, validation_status, reason, timings }
+  judged_from_base, modified_tests, unmatched_static_ids, validation_status, reason, timings,
+  services? }
 ```
 
+`services` is present only for a row whose runs had a database container (see "Databases").
 `judged_from_base` lists the tests whose "before" status was taken from R0 because R1 had no
 result for them (the fallback above); `modified_tests` lists the pre-existing tests whose source
 text the test patch changed. Both are diagnostic and do not affect the verdict by themselves.
@@ -414,8 +443,10 @@ Where each claim above about another benchmark comes from, with section numbers,
 
 ## Not yet
 
-Postgres or other services for tests that need them, browser and end-to-end runners, Bun,
-Python runners other than pytest, Harbor export for pytest rows (`exportHarbor.ts` skips them:
-the verifier's check script runs on Node, which the Python image lacks), and scheduled runs after
+Services other than Postgres (MySQL, Redis, MongoDB), a database the tests expect without a CI
+service for it, browser and end-to-end runners, Bun, Python runners other than pytest, Harbor
+export for pytest rows (`exportHarbor.ts` skips them: the verifier's check script runs on Node,
+which the Python image lacks) and for rows with a database service (a Harbor task is one image,
+with no sidecar), and scheduled runs after
 each sprint. Each is a separate change once the dry
 run is trusted.
