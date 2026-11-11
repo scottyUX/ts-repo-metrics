@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { BenchmarkInstance } from "@/lib/cse115a/benchmark/buildInstance";
+import type { HarborEnv } from "@/lib/cse115a/benchmark/validation/harbor";
 import { planBenchmarkSave, snapshotMergeCommit, type StoredSource } from "@/lib/cse115a/jobs/benchmarkSave";
 import type { BenchmarkSave, Submission } from "@/lib/cse115a/jobs/runner";
 
@@ -35,7 +36,7 @@ describe("planBenchmarkSave", () => {
   it("captures again and sends the row back to candidate when the merge commit differs (or is unknown)", () => {
     for (const previous of ["0000000000000000000000000000000000000000", null]) {
       const plan = planBenchmarkSave(submission, [save(M)], [stored({ merge_commit: previous, flags: ["staff_rebuilt:merge-parent"] })], NOW);
-      expect(plan.tasks).toEqual([instance]);
+      expect(plan.tasks).toEqual([{ ...instance, harbor_env: null }]);
       expect(plan.kept).toEqual([]);
       expect(plan.sources).toEqual([{
         instance_id: ID, course_id: "course", user_id: "user", assignment_submission_id: "sub-2", task_slot: 2,
@@ -47,12 +48,32 @@ describe("planBenchmarkSave", () => {
   it("writes a brand-new row (or one still a candidate) as today: instance upserted, no status set", () => {
     for (const existing of [[], [stored({ validation_status: "candidate" })]]) {
       const plan = planBenchmarkSave(submission, [save(M)], existing, NOW);
-      expect(plan.tasks).toEqual([instance]);
+      expect(plan.tasks).toEqual([{ ...instance, harbor_env: null }]);
       expect(plan.sources).toEqual([{
         instance_id: ID, course_id: "course", user_id: "user", assignment_submission_id: "sub-2", task_slot: 2, flags: ["no_test_patch"], updated_at: NOW,
       }]);
       expect("validation_status" in plan.sources[0]!).toBe(false);
     }
+  });
+});
+
+describe("planBenchmarkSave and harbor_env", () => {
+  const recipe: HarborEnv = { image: "node:24-bookworm@sha256:1", runners: ["vitest"], package_dir: "", install_steps: [], test_steps: [], env: {}, services: [], node_source: null };
+  const withRecipe = (mergeCommit: string): BenchmarkSave => ({ ...save(mergeCommit), instance: { ...instance, harbor_env: recipe } });
+
+  it("an overwrite (changed or new merge commit) sets harbor_env to null with the other validation fields", () => {
+    for (const existing of [[stored({ merge_commit: "0000000000000000000000000000000000000000" })], [], [stored({ validation_status: "candidate" })]]) {
+      const plan = planBenchmarkSave(submission, [withRecipe(M)], existing, NOW);
+      expect(plan.tasks).toHaveLength(1);
+      expect(plan.tasks[0]!.harbor_env).toBeNull();
+      expect("harbor_env" in plan.tasks[0]!).toBe(true);
+    }
+  });
+
+  it("a guarded row (unchanged merge commit) is not upserted, so its stored harbor_env stays", () => {
+    const plan = planBenchmarkSave(submission, [withRecipe(M)], [stored({})], NOW);
+    expect(plan.tasks).toEqual([]);
+    expect(plan.kept).toEqual([ID]);
   });
 });
 

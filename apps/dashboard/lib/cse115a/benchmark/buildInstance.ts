@@ -1,6 +1,7 @@
 import { splitPatch } from "@/lib/cse115a/diff";
 import type { TaskSnapshot } from "@/lib/cse115a/submissionSnapshot";
 import { extractAddedTests } from "./extractTests";
+import type { HarborEnv } from "./validation/harbor";
 import { identifiersFor, redactPersonalData, scrubPatch, scrubSpec, scrubText } from "./scrubPii";
 
 // Turns one submitted task into a SWE-bench instance. Rows are saved with
@@ -26,6 +27,11 @@ export type BenchmarkInstance = {
   log_parser: string | null;
   difficulty: string | null;
   repo_metrics: unknown;
+  /**
+   * The Harbor recipe the validator's write-back stores (validation/harbor.ts). Not a SWE-bench field:
+   * it is not in SWE_BENCH_FIELDS, so the JSONL export never carries it. A capture leaves it null.
+   */
+  harbor_env?: HarborEnv | null;
 };
 
 /** The SWE-bench fields, in export order. */

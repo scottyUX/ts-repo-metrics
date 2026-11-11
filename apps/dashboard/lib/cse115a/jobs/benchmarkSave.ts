@@ -34,7 +34,7 @@ export type SourceUpsert = {
 };
 
 export type BenchmarkSavePlan = {
-  /** Instances to upsert into cse_benchmark_tasks. */
+  /** Instances to upsert into cse_benchmark_tasks; each overwrites the row's validation fields, harbor_env included (null). */
   tasks: BenchmarkInstance[];
   /** Source rows to upsert, one per saved row. */
   sources: SourceUpsert[];
@@ -64,10 +64,11 @@ export function planBenchmarkSave(submission: Submission, rows: BenchmarkSave[],
       plan.sources.push({ ...base, flags: [...new Set([...row.flags, ...same.flags])], validation_status: same.validation_status });
     } else if (settled.length > 0) {
       // The PR changed since the row was judged: capture it again and send it back to the validator.
-      plan.tasks.push(row.instance);
+      // The capture's validation fields are empty, and the Harbor recipe goes with them.
+      plan.tasks.push({ ...row.instance, harbor_env: null });
       plan.sources.push({ ...base, validation_status: "candidate" });
     } else {
-      plan.tasks.push(row.instance);
+      plan.tasks.push({ ...row.instance, harbor_env: null });
       plan.sources.push(base);
     }
   }
