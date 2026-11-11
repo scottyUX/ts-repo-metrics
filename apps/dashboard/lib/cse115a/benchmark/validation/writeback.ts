@@ -9,18 +9,21 @@ import type { ValidationResult } from "@/lib/cse115a/benchmark/validation/valida
 export const REASON_FLAG_PREFIX = "validation_reason:";
 /** Set on a row whose proving tests include one outside the files the test patch touched. */
 export const PROOF_OUTSIDE_FLAG = "proof_outside_test_patch";
+/** Set on a validated row whose patch changes code files no proving test reaches by imports (untestedFiles.ts). */
+export const UNTESTED_FILES_FLAG = "untested_files";
 
 /** Whether a flag is one the validator owns (and so replaces on every write-back). */
 export function isManagedFlag(flag: string): boolean {
-  return flag.startsWith(REASON_FLAG_PREFIX) || flag === PROOF_OUTSIDE_FLAG;
+  return flag.startsWith(REASON_FLAG_PREFIX) || flag === PROOF_OUTSIDE_FLAG || flag === UNTESTED_FILES_FLAG;
 }
 
-/** The validator-owned flags a result produces: the reason flag when rejected, the proof flag when it applies. */
+/** The validator-owned flags a result produces: the reason flag when rejected, the diagnostic flags when they apply. */
 export function managedFlags(r: ValidationResult): string[] {
   const flags: string[] = [];
   if (r.validation_status === "rejected") flags.push(`${REASON_FLAG_PREFIX}${r.reason}`);
   // `?? []`: result files written before this field existed are still readable.
   if ((r.proof_outside_test_patch ?? []).length > 0) flags.push(PROOF_OUTSIDE_FLAG);
+  if ((r.untested_files ?? []).length > 0) flags.push(UNTESTED_FILES_FLAG);
   return flags;
 }
 
@@ -51,6 +54,8 @@ export type WritebackOp = {
   reasonFlag: string | null;
   /** Every validator-owned flag to carry (the reason flag plus any diagnostic flags). */
   flags: string[];
+  /** How many files `untested_files` lists (0 when none), for the output line. */
+  untestedFiles: number;
 };
 
 /** One op per result; `env_error` rows produce none (our run failed, the row stays a candidate). */
@@ -76,6 +81,7 @@ export function writebackPlan(results: ValidationResult[]): WritebackOp[] {
       validation_status: r.validation_status,
       reasonFlag: r.validation_status === "rejected" ? `${REASON_FLAG_PREFIX}${r.reason}` : null,
       flags: r.rebuild ? [...managedFlags(r), STAFF_REBUILT_FLAG] : managedFlags(r),
+      untestedFiles: (r.untested_files ?? []).length,
     });
   }
   return ops;
@@ -131,8 +137,9 @@ export async function applyWriteback(client: WritebackClient, ops: WritebackOp[]
     const result = await client.from("cse_benchmark_task_sources").update({ validation_status: op.validation_status, flags, updated_at: now() }).eq("instance_id", op.instance_id);
     if (result.error) throw new Error(`${op.instance_id}: cse_benchmark_task_sources: ${result.error.message}`);
     const proof = op.flags.includes(PROOF_OUTSIDE_FLAG) ? `, flagged ${PROOF_OUTSIDE_FLAG}` : "";
+    const untested = op.flags.includes(UNTESTED_FILES_FLAG) ? `, flagged ${UNTESTED_FILES_FLAG} (${op.untestedFiles})` : "";
     const rebuilt = op.rebuild ? `, rebuilt base ${op.rebuild.base_commit.slice(0, 7)} and patches written, flagged ${STAFF_REBUILT_FLAG}` : "";
-    lines.push(`${op.instance_id}: ${op.validation_status}${op.reasonFlag ? ` (${op.reasonFlag.slice(REASON_FLAG_PREFIX.length)})` : ""}${op.task ? `, ${op.task.FAIL_TO_PASS.length} F2P / ${op.task.PASS_TO_PASS.length} P2P written${op.task.harbor_env ? " with harbor_env" : ""}` : ""}${proof}${rebuilt}`);
+    lines.push(`${op.instance_id}: ${op.validation_status}${op.reasonFlag ? ` (${op.reasonFlag.slice(REASON_FLAG_PREFIX.length)})` : ""}${op.task ? `, ${op.task.FAIL_TO_PASS.length} F2P / ${op.task.PASS_TO_PASS.length} P2P written${op.task.harbor_env ? " with harbor_env" : ""}` : ""}${proof}${untested}${rebuilt}`);
   }
   return lines;
 }

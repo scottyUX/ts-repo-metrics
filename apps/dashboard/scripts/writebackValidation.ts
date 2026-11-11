@@ -7,8 +7,10 @@
 // PASS_TO_PASS, image (digest when known), eval_script, log_parser, harbor_env (the Harbor recipe, when
 // the result has one) and validation_status = validated. Stops before writing anything if the
 // harbor_env column is missing (apply supabase/migrations/20261110000000_cse115a_benchmark_harbor_env.sql).
-// Rejected rows get validation_status = rejected and a validation_reason:<reason> flag. env_error rows
-// are skipped (they stay candidate). --dry-run prints the plan and touches nothing.
+// Validated rows whose patch changes code no proving test reaches get the untested_files flag (removed
+// again when a later result lists none). Rejected rows get validation_status = rejected and a
+// validation_reason:<reason> flag. env_error rows are skipped (they stay candidate). --dry-run prints
+// the plan and touches nothing.
 
 import { readdir, readFile } from "node:fs/promises";
 import { join, resolve } from "node:path";

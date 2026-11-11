@@ -10,6 +10,7 @@ import { containerScript, InstallError, runThreeStates, type RunPlan, type Suite
 import { harborEnvFrom, type HarborEnv } from "@/lib/cse115a/benchmark/validation/harbor";
 import type { RebuildProvenance } from "@/lib/cse115a/benchmark/validation/rebuildRow";
 import { modifiedTests, unmatchedStaticIds } from "@/lib/cse115a/benchmark/validation/testIds";
+import { untestedFiles, type ReadFile } from "@/lib/cse115a/benchmark/validation/untestedFiles";
 
 /** The fields of a benchmark row the validator reads. */
 export type TaskRow = {
@@ -47,6 +48,24 @@ export function filesInPatch(patch: string): string[] {
     files.push(target.startsWith("b/") ? target.slice(2) : target);
   }
   return files;
+}
+
+/**
+ * Files the patch adds or modifies, by their new path; deletions are left out. `filesInPatch` reads
+ * the `+++` lines, which a pure rename (no content change) does not have, so such a block's
+ * `rename to` path is added here.
+ */
+export function changedFilesInPatch(patch: string): string[] {
+  const files: string[] = [];
+  for (const block of patch.split(/^(?=diff --git )/m)) {
+    const written = filesInPatch(block);
+    if (written.length) files.push(...written);
+    else if (!/^deleted file mode /m.test(block)) {
+      const renamed = /^rename to (.+)$/m.exec(block);
+      if (renamed) files.push(renamed[1].trim());
+    }
+  }
+  return [...new Set(files)];
 }
 
 /** The file part of a test id (`file::describe > test` → `file`). */
@@ -145,6 +164,12 @@ export type ValidationResult = {
    * batch puts the image digest in it; write-back stores it on validated rows as `harbor_env`.
    */
   harbor_env?: HarborEnv;
+  /**
+   * Validated rows only, present only when non-empty: code files the source patch changes that no
+   * proving test file reaches through imports (untestedFiles.ts). Diagnostic, not a rejection; the
+   * write-back carries it as the `untested_files` flag.
+   */
+  untested_files?: string[];
 };
 
 /** The result for a repository the validator cannot run (bun, mocha, no package.json). */
@@ -168,6 +193,11 @@ export type ValidateInput = {
   modified: Set<string>;
   runner: SuiteRunner;
   timeoutSeconds?: number;
+  /**
+   * Runs `fn` with a reader on the post-fix tree (base + test_patch + patch), for `untested_files`;
+   * called only for a validated result. Absent (as in most tests): the field is not computed.
+   */
+  withPostFixTree?: <T>(fn: (read: ReadFile) => Promise<T>) => Promise<T>;
 };
 
 /** Which report formats the environment's runners produce, e.g. `vitest-json` or `pytest-json`. */
@@ -242,6 +272,19 @@ export async function validateTask(input: ValidateInput): Promise<ValidationResu
     .filter((entry) => entry.startsWith("r2 "))
     .map((entry) => entry.slice(3))
     .filter((file) => testFiles.includes(file));
+  let detail = neverLoaded.length ? neverLoadedDetail(neverLoaded) : null;
+  let untested: string[] = [];
+  if (comparison.validationStatus === "validated" && input.withPostFixTree) {
+    try {
+      const provingTestFiles = [...new Set([...comparison.failToPass, ...comparison.absentToPass].map(fileOfTestId))];
+      untested = await input.withPostFixTree((read) =>
+        untestedFiles({ changedFiles: changedFilesInPatch(row.patch), provingTestFiles, read, packageDir: env.packageDir }));
+    } catch (error) {
+      // Diagnostic only: a failed read never changes or rejects the verdict.
+      const note = `untested_files not computed: ${error instanceof Error ? error.message.split("\n")[0] : String(error)}`;
+      detail = detail ? `${detail}; ${note}` : note;
+    }
+  }
   return {
     instance_id: row.instance_id,
     image: env.image,
@@ -264,10 +307,11 @@ export async function validateTask(input: ValidateInput): Promise<ValidationResu
     proof_outside_test_patch: proofOutsideTestPatch([...comparison.failToPass, ...comparison.absentToPass], testFiles),
     validation_status: comparison.validationStatus,
     reason: comparison.reason,
-    detail: neverLoaded.length ? neverLoadedDetail(neverLoaded) : null,
+    detail,
     timings: runs.timings,
     ...provenance,
     ...(neverLoaded.length ? { test_files_never_loaded: neverLoaded } : {}),
+    ...(untested.length ? { untested_files: untested } : {}),
     ...services,
     runs,
   };

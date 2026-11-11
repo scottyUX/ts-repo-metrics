@@ -206,7 +206,11 @@ async function validateRowResult(options: ValidateRowOptions): Promise<Validatio
     const db = env.services?.length ? `, with ${env.services.map((s) => s.image).join(", ")} from CI` : "";
     const installs = env.installSteps?.length ? `, installs in ${env.installSteps.map((s) => s.dir || ".").join(", ")} (from CI)` : "";
     log(`Environment: ${env.packageManager} + ${env.runners.join("+")} in ${env.packageDir || "."}, image ${env.image}${env.nodeSource && env.nodeSource !== "default" ? ` (from ${env.nodeSource})` : ""}${installs}${db}. Running three states, ${RUNS_PER_STATE} times each; logs in ${options.logDir}`);
-    const { runs, ...result } = await validateTask({ row, repoDir, env, modified, runner: new DockerSuiteRunner(options.logDir, options.cacheDir), timeoutSeconds: options.timeoutSeconds });
+    const { runs, ...result } = await validateTask({
+      row, repoDir, env, modified, runner: new DockerSuiteRunner(options.logDir, options.cacheDir), timeoutSeconds: options.timeoutSeconds,
+      // The R2 tree, checked out fresh (the container runs leave repoDir with installs and reports in it).
+      withPostFixTree: (fn) => withPatchedWorktree(repoDir, row.base_commit, [row.test_patch, row.patch], (dir) => fn((path) => fileIn(dir, path))),
+    });
     void runs;
     result.signals = needs;
     // A row that proved nothing in a repository whose tests want a service it did not get: say so, instead of a bare reason.

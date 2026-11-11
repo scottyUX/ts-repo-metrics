@@ -3,7 +3,7 @@
 
 import { STAFF_REBUILT_FLAG } from "@/lib/cse115a/benchmark/validation/rebuildRow";
 import { withRebuild, type TaskRow, type ValidationReason, type ValidationResult } from "@/lib/cse115a/benchmark/validation/validateTask";
-import { managedFlags, PROOF_OUTSIDE_FLAG, REASON_FLAG_PREFIX } from "@/lib/cse115a/benchmark/validation/writeback";
+import { managedFlags, PROOF_OUTSIDE_FLAG, REASON_FLAG_PREFIX, UNTESTED_FILES_FLAG } from "@/lib/cse115a/benchmark/validation/writeback";
 
 /** Parses a JSON array (Supabase `json_agg`) or JSON Lines (one row per line). */
 export function parseRows(text: string): TaskRow[] {
@@ -43,8 +43,10 @@ export type Summary = {
   byReason: Record<string, number>;
   /** Rows with at least one proving test outside the test patch's files (diagnostic). */
   proofOutsideTestPatch: number;
+  /** Validated rows whose patch changes code no proving test reaches (diagnostic). */
+  untestedFiles: number;
   funnel: FunnelStage[];
-  rows: Array<{ instance_id: string; status: string; reason: string; f2p: number; a2p: number; p2p: number; regressions: number; flaky: number; outside: number; seconds: number }>;
+  rows: Array<{ instance_id: string; status: string; reason: string; f2p: number; a2p: number; p2p: number; regressions: number; flaky: number; outside: number; untested: number; seconds: number }>;
 };
 
 /**
@@ -83,10 +85,12 @@ export function summarize(results: ValidationResult[]): Summary {
       instance_id: r.instance_id,
       status: r.validation_status,
       // A harness problem must not read as a plain verdict: name the test files that never loaded after the fix.
-      reason: (r.reason ?? "") + (r.test_files_never_loaded?.length ? ` (test patch file(s) never loaded after the fix: ${r.test_files_never_loaded.join(", ")})` : ""),
+      reason: (r.reason ?? "") + (r.test_files_never_loaded?.length ? ` (test patch file(s) never loaded after the fix: ${r.test_files_never_loaded.join(", ")})` : "") +
+        // Next to a validated row: how much of the fix no proving test reaches.
+        (r.validation_status === "validated" && r.untested_files?.length ? `${r.reason ? " " : ""}untested files: ${r.untested_files.length}` : ""),
       f2p: r.FAIL_TO_PASS.length, a2p: r.ABSENT_TO_PASS.length, p2p: r.PASS_TO_PASS.length,
       regressions: r.regressions.length + r.regression_skips.length, flaky: r.flaky.length,
-      outside: (r.proof_outside_test_patch ?? []).length, seconds,
+      outside: (r.proof_outside_test_patch ?? []).length, untested: (r.untested_files ?? []).length, seconds,
     };
   });
   return {
@@ -95,6 +99,7 @@ export function summarize(results: ValidationResult[]): Summary {
     rejected: results.filter((r) => r.validation_status === "rejected").length,
     byReason,
     proofOutsideTestPatch: results.filter((r) => (r.proof_outside_test_patch ?? []).length > 0).length,
+    untestedFiles: results.filter((r) => (r.untested_files ?? []).length > 0).length,
     funnel: funnel(results),
     rows,
   };
@@ -105,7 +110,8 @@ export function summaryMarkdown(summary: Summary): string {
   const lines = [
     `${summary.validated} validated, ${summary.rejected} rejected of ${summary.total}` +
       (Object.keys(summary.byReason).length ? ` (${Object.entries(summary.byReason).map(([k, v]) => `${k}: ${v}`).join(", ")})` : "") +
-      (summary.proofOutsideTestPatch ? `; ${summary.proofOutsideTestPatch} flagged proof_outside_test_patch` : ""),
+      (summary.proofOutsideTestPatch ? `; ${summary.proofOutsideTestPatch} flagged proof_outside_test_patch` : "") +
+      (summary.untestedFiles ? `; ${summary.untestedFiles} flagged untested_files` : ""),
     "",
     "| stage | reached | dropped |",
     "|---|---|---|",
@@ -129,7 +135,8 @@ function quote(text: string): string {
  * The write-back as SQL, one statement pair per row, for the Supabase SQL editor (or psql). Verified
  * lists replace the static ones; `image` carries the digest when known; the reason lives in
  * `cse_benchmark_task_sources.flags` as `validation_reason:<reason>` until the schema has a column,
- * and `proof_outside_test_patch` is set when the result lists any such test (see `managedFlags`).
+ * `proof_outside_test_patch` is set when the result lists any such test, and `untested_files` when a
+ * validated result lists changed code no proving test reaches (see `managedFlags`).
  * `env_error` rows are left untouched (still `candidate`). Rolling back is `validation_status =
  * 'candidate'` plus removing those flags.
  */
@@ -185,7 +192,7 @@ export function writebackSql(results: ValidationResult[]): string {
     lines.push(
       "update public.cse_benchmark_task_sources",
       `   set validation_status = ${quote(r.validation_status)},`,
-      `       flags = array_remove(array(select f from unnest(flags) as f where f not like '${REASON_FLAG_PREFIX}%' and f <> '${PROOF_OUTSIDE_FLAG}'${keepStaff}), null)` +
+      `       flags = array_remove(array(select f from unnest(flags) as f where f not like '${REASON_FLAG_PREFIX}%' and f <> '${PROOF_OUTSIDE_FLAG}' and f <> '${UNTESTED_FILES_FLAG}'${keepStaff}), null)` +
         (flags.length ? ` || array[${flags.map(quote).join(", ")}]` : "") + ",",
       "       updated_at = now()",
       ` where instance_id = ${id};`,
