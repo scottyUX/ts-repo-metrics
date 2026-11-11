@@ -226,9 +226,10 @@ export class DockerSuiteRunner implements SuiteRunner {
       // after a pause; a timeout does not, since it would only double the wait.
       for (let tryNumber = 1; ; tryNumber++) {
         try {
+          const id = `${name}-${this.runId()}`;
           const output = services.length
-            ? await this.withServices(services, `${name}-${this.runId()}`, timeoutMs, (extra) => this.exec("docker", [...args.slice(0, 2), ...extra, ...args.slice(2)], timeoutMs))
-            : await this.exec("docker", args, timeoutMs);
+            ? await this.withServices(services, id, timeoutMs, (extra) => this.exec("docker", [...args.slice(0, 2), ...extra, ...args.slice(2)], timeoutMs))
+            : await this.withNamedContainer(`hecate-run-${id}`, (extra) => this.exec("docker", [...args.slice(0, 2), ...extra, ...args.slice(2)], timeoutMs));
           if (this.logDir) await writeFile(join(this.logDir, `${name}.log`), output);
           break;
         } catch (error) {
@@ -253,6 +254,20 @@ export class DockerSuiteRunner implements SuiteRunner {
       return readReports(join(patches, "reports"));
     } finally {
       await rm(patches, { recursive: true, force: true });
+    }
+  }
+
+  /**
+   * One try of a run without services: the test container gets a name and is removed by it
+   * afterwards, since killing the `docker run` client on a timeout does not stop its container
+   * (`--rm` only acts once the container exits). After a normal exit it is already gone and the
+   * removal is a no-op.
+   */
+  private async withNamedContainer(testName: string, runTest: (extra: string[]) => Promise<string>): Promise<string> {
+    try {
+      return await runTest(["--name", testName]);
+    } finally {
+      await this.exec("docker", ["rm", "-f", testName], 60_000).catch(() => "");
     }
   }
 

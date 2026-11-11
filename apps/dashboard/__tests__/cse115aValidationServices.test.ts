@@ -327,15 +327,15 @@ describe("DockerSuiteRunner with a postgres service (fake exec)", () => {
     expect(docker.calls.filter((a) => a[0] === "network" && a[1] === "rm")).toHaveLength(2);
   });
 
-  it("runs a row without services with exactly the docker command it had before", async () => {
+  it("runs a row without services with the docker command it had before plus --name, then removes the container by name", async () => {
     const docker = fakeDocker();
     const { services: _s, ...plain } = plan;
     void _s;
     await runner(docker.exec).runSuite({ ...plain, env: { CI: "true", DATABASE_URL: CONTAINER_ENV.DATABASE_URL } }, "r0", 1);
-    expect(docker.calls).toHaveLength(1);
+    expect(docker.calls).toHaveLength(2);
     const patches = docker.calls[0][docker.calls[0].indexOf("/tmp/repo:/work") + 2];
     expect(docker.calls[0]).toEqual([
-      "run", "--rm",
+      "run", "--rm", "--name", "hecate-run-r0a-x1",
       "-e", "CI=true", "-e", `DATABASE_URL=${CONTAINER_ENV.DATABASE_URL}`,
       "-v", "/tmp/repo:/work",
       "-v", patches,
@@ -343,6 +343,18 @@ describe("DockerSuiteRunner with a postgres service (fake exec)", () => {
       "node:22-bookworm", "bash", "/patches/run.sh",
     ]);
     expect(patches).toMatch(/hecate-validate-.*:\/patches$/);
+    expect(docker.calls[1]).toEqual(["rm", "-f", "hecate-run-r0a-x1"]);
+  });
+
+  it("removes the test container of a timed-out run without services, and does not retry", async () => {
+    const docker = fakeDocker({ test: async () => { throw new ExecError("docker timed out after 900000 ms", true); } });
+    const { services: _s, ...plain } = plan;
+    void _s;
+    const error = await runner(docker.exec).runSuite(plain, "r1", 2).catch((e: unknown) => e);
+    expect((error as ExecError).timedOut).toBe(true);
+    expect(short(docker.calls)).toEqual(["run --rm (test)", "rm -f"]);
+    expect(docker.calls[0].slice(0, 4)).toEqual(["run", "--rm", "--name", "hecate-run-r1b-x1"]);
+    expect(docker.calls[1]).toEqual(["rm", "-f", "hecate-run-r1b-x1"]);
   });
 });
 
