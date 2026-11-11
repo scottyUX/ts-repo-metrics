@@ -388,8 +388,36 @@ The validator prints one JSON object and writes nothing to the database:
 { instance_id, image, eval_script, log_parser, test_files,
   FAIL_TO_PASS, ABSENT_TO_PASS, PASS_TO_PASS, FAIL_TO_FAIL, regressions, flaky, skipped,
   judged_from_base, modified_tests, unmatched_static_ids, validation_status, reason, timings,
-  install_dirs, node_source?, test_files_never_loaded?, services?, harbor_env? }
+  install_dirs, node_source?, test_files_never_loaded?, services?, harbor_env?, untested_files? }
 ```
+
+`untested_files` (validated rows only, present only when non-empty) lists the code files the
+source patch adds or modifies that no proving test reaches. A row is validated when its tests fail
+before the fix and pass after it, which proves the part of the fix the tests touch and nothing
+else: a PR whose tests exercise a back-end route can change four front-end files no test loads,
+and an agent graded on that row could leave the front end broken and still score 1.0. Such rows
+are kept, since the proven part is real, but flagged so the dataset can filter them or report them
+separately. The rule (`validation/untestedFiles.ts`): starting from the files of the
+`FAIL_TO_PASS` and `ABSENT_TO_PASS` tests, follow import statements through files in the
+repository, on the tree after the fix (base + test patch + patch); a changed code file
+(`.js .jsx .mjs .cjs .ts .tsx .mts .cts .vue .svelte .py`, not `.d.ts`) that is never reached is
+untested. JavaScript and TypeScript imports are `import`, `export … from`, `import("…")` with a
+plain string and `require("…")`, resolved relative to the file, through `baseUrl` and `paths` of
+the nearest `tsconfig.json` / `jsconfig.json` (exact keys and one trailing `*`; `extends` is not
+followed), with code extensions, `index.<ext>` and `.js` → `.ts`/`.tsx`; packages and anything that
+does not resolve to a repository file are ignored. Python imports (`import a.b`, `from a.b import
+c`, relative `from .m import x`) resolve to `a/b.py` or `a/b/__init__.py` under the importing
+file's folder and each folder above it, then `package_dir`, then the repository root; the
+`__init__.py` of each package on the way counts as reached, since Python runs it. Sitting in the
+same folder as a test is not reaching it. This is a static over-approximation of what the tests
+load, not coverage: a reached file can still be untested in practice (imported, function never
+called), and dynamic loading (paths built from strings, plugin registries, Next.js file routing, a
+front end tested only through HTTP) is invisible to it. It errs toward flagging: a missed import
+makes a file look untested, never the reverse. Diagnostic only: it does not change the verdict,
+reason or detail. The batch summary shows `untested files: N` next to the row; write-back adds
+the validator-owned flag `untested_files` to `cse_benchmark_task_sources.flags` and removes it
+when a later result lists none. If the post-fix tree cannot be read, `detail` gets
+"untested_files not computed: …" and the field is left out.
 
 `harbor_env` is the Harbor recipe for the environment the runs used (see "Harbor export"); the
 batch replaces its image with the digest it resolved.
@@ -566,6 +594,9 @@ harbor run -p OUT/<task> -a nop      # expect 0.0
   has every test treated as modified, so none of them takes the base fallback: an untouched one
   in a file that fails to load at R1 is then `FAIL_TO_PASS` by the load rule rather than
   `PASS_TO_PASS`. Visible in `modified_tests`.
+- **`untested_files` follows imports, not execution.** A file the tests import but never call
+  counts as tested, and code loaded dynamically (string-built paths, framework file routing, a
+  front end exercised only over HTTP) counts as untested; measured coverage would settle both.
 
 ## Not yet
 
