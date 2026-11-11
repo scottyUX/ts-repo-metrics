@@ -388,8 +388,11 @@ The validator prints one JSON object and writes nothing to the database:
 { instance_id, image, eval_script, log_parser, test_files,
   FAIL_TO_PASS, ABSENT_TO_PASS, PASS_TO_PASS, FAIL_TO_FAIL, regressions, flaky, skipped,
   judged_from_base, modified_tests, unmatched_static_ids, validation_status, reason, timings,
-  install_dirs, node_source?, test_files_never_loaded?, services? }
+  install_dirs, node_source?, test_files_never_loaded?, services?, harbor_env? }
 ```
+
+`harbor_env` is the Harbor recipe for the environment the runs used (see "Harbor export"); the
+batch replaces its image with the digest it resolved.
 
 `test_files_never_loaded` lists test-patch files that failed to load in R2, after the fix. That
 is usually the harness (a missing install, a wrong Node), not the student, so the verdict rules
@@ -452,6 +455,73 @@ Rebuilt so far: `JoKHerre__Bookworm-COL-04-T-4` (PR #115, M `96798e0b`, M^1 `40b
 head of PR #114). `JoKHerre__Bookworm-COL-04-T-2` (PR #114) is not rebuilt: the PR changes no
 test file, so it stays rejected.
 
+## Harbor export
+
+A validated row can be exported as a [Harbor](https://harborframework.com) task: `instruction.md`,
+`task.toml`, `environment/Dockerfile`, `solution/solve.sh` (applies the student's patch, the
+oracle) and `tests/test.sh` (applies the test patch, runs the suite the way the validator did,
+and writes reward 1 only if every verified `FAIL_TO_PASS` and `PASS_TO_PASS` id passed). The
+builder is `validation/harbor.ts`.
+
+**The recipe.** Everything a task needs besides the row is in `cse_benchmark_tasks.harbor_env`
+(jsonb): the image (`tag@sha256:…`), the runners, the package directory, the install steps in
+order (where each runs and the command), the test steps, the container variables, the database
+services by name and image, and where the Node version came from. The validator's result carries
+the same object, and write-back (`writebackValidation.ts` and `writeback.sql`) stores it for
+validated rows only; rejected and `env_error` rows leave the column alone, and so does a validated
+result file written before results carried a recipe. `writebackValidation.ts` checks the column
+exists before writing anything and stops with "apply migration
+`supabase/migrations/20261110000000_cse115a_benchmark_harbor_env.sql` first" if not. When a
+student's PR changes and the row is captured again, `harbor_env` goes back to null with the other
+validation fields; a re-capture of an unchanged PR keeps it. `harbor_env` is not a SWE-bench field
+and the JSONL export never contains it.
+
+**Where the repository comes from.**
+
+- `github` — what the course website uses. The Dockerfile fetches only the base commit, by id,
+  in one `RUN` (`git init`, `git fetch --depth 1 https://github.com/<repo>.git <base_commit>`,
+  `git checkout FETCH_HEAD`), so no later history is ever in a layer, and fetching by id works for
+  a commit no branch points at. This needs the repository to **stay public** on GitHub (and the
+  commit not to be garbage-collected, e.g. after a force-push and repository cleanup); a task
+  whose repository is made private or deleted no longer builds. The row needs a full 40-character
+  `base_commit` and an `owner/name` repo, or it is skipped. Neither source initialises git
+  submodules or fetches Git LFS objects (the image has no `git-lfs`, so LFS files are pointer
+  files); a repository whose tests need either fails in Harbor even though it validated, if the
+  validator's host checkout had them.
+- `bundle` — `scripts/exportHarbor.ts`, from a local batch run with `--snapshots`. The batch's
+  snapshot bundle is copied next to the Dockerfile and cloned from there, so the task builds
+  without reaching GitHub.
+
+Either way, the next layer throws the fetched history away and re-creates `/app` as one anonymous
+commit (`GIT_REINIT_LAYER`), so the agent sees the files and no commit messages, authors or branch
+names; then the install steps run.
+
+**Runners.** JavaScript tasks (Vitest, Jest, `node --test`) ship `tests/check.mjs` and, for
+`node --test`, the reporter `tests/reporter.mjs`. pytest tasks ship `tests/check.py`, a
+standard-library Python port of `check.mjs` with the same arguments and reward rule, and the
+validator's pytest reporter plugin in `tests/pytest_plugin/`, which `test.sh` puts on
+`PYTHONPATH` and loads with `-p hecate_pytest_reporter`.
+
+**On the course website.** The instructor benchmark page has "Download Harbor tasks (.zip)" next
+to the JSONL links (`GET /api/cse115a/instructor/courses/<slug>/benchmark-harbor.zip`). The zip
+holds exactly the rows the JSONL export returns with `?validated=1` (same consent rule, same
+code, and the same 409 while the consent wording is not approved), one folder per task, using the
+`github` source. Rows it cannot express are left out and listed in `SKIPPED.txt` at the zip root
+(instance id, tab, reason):
+
+- no `harbor_env` on the row (validated before the column existed): re-run the validator on it
+  and write back;
+- a database service in the runs: a Harbor task is one image with no sidecar, so these wait;
+- a short `base_commit` or a repo that is not `owner/name`.
+
+From a local batch instead:
+
+```sh
+npx tsx --tsconfig apps/dashboard/tsconfig.json apps/dashboard/scripts/exportHarbor.ts ROWS.json --batch DIR --to OUT [--only id,id]
+harbor run -p OUT/<task> -a oracle   # expect 1.0
+harbor run -p OUT/<task> -a nop      # expect 0.0
+```
+
 ## Known limitations
 
 - **Renames are false regressions.** A renamed old test is old name passed→absent (regression,
@@ -501,8 +571,6 @@ test file, so it stays rejected.
 
 Services other than Postgres (MySQL, Redis, MongoDB), a database the tests expect without a CI
 service for it, browser and end-to-end runners, Bun, Python runners other than pytest, Harbor
-export for pytest rows (`exportHarbor.ts` skips them: the verifier's check script runs on Node,
-which the Python image lacks) and for rows with a database service (a Harbor task is one image,
-with no sidecar), and scheduled runs after
-each sprint. Each is a separate change once the dry
+export for rows with a database service (a Harbor task is one image, with no sidecar), and
+scheduled runs after each sprint. Each is a separate change once the dry
 run is trusted.
