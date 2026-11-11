@@ -3,8 +3,11 @@
 // Node, and what the package's own `test` script does. Supported runners are Vitest, Jest, and
 // Node's built-in `node --test`; a row whose test files are all Python runs pytest instead (see
 // detectPythonEnvironment). Anything else is `env_unsupported` with a one-line detail so the batch
-// lists it instead of guessing. Pure: reads files through the `read` callback, touches nothing.
+// lists it instead of guessing. A Postgres service in the CI job that runs the tests is started
+// next to every run (see services.ts). Pure: reads files through the `read` callback, touches nothing.
 // Rules are in docs/CSE115A_BENCHMARK_VALIDATION.md, "Environment".
+
+import { serviceProvenance, servicesFromWorkflows, type Service } from "@/lib/cse115a/benchmark/validation/services";
 
 export type Runner = "vitest" | "node-test" | "jest" | "pytest";
 
@@ -28,12 +31,15 @@ export type Environment = {
   image: string;
   /** Python only: whether the repository's own manifests name pytest (the validator installs it either way). */
   pytestDeclared?: boolean;
+  /** Database containers to start next to every run, from the repository's CI; [] (or unset) for none. */
+  services?: Service[];
 };
 
 /**
  * Placeholder variables for every run. CI makes tools non-interactive. DATABASE_URL lets a Prisma
  * or Drizzle config file load (they throw when it is unset); nothing listens there, so a test that
- * really needs a database still fails, honestly.
+ * really needs a database still fails, honestly. A row with a CI Postgres service gets the real
+ * URL instead (see withServices).
  */
 export const CONTAINER_ENV: Record<string, string> = {
   CI: "true",
@@ -49,6 +55,8 @@ export type RepoProbe = {
   /** Repository-relative paths of the files the test patch writes. */
   testFiles: string[];
   read: FileReader;
+  /** Repository-relative paths of the GitHub workflow files (`.github/workflows/*.yml`); none when unset. */
+  workflowFiles?: string[];
 };
 
 export const DEFAULT_NODE_MAJOR = 22;
@@ -167,7 +175,31 @@ export function stepsFromTestScript(script: string | null, defaultRunner: "vites
 export async function detectEnvironment(probe: RepoProbe): Promise<Environment | Unsupported> {
   const language = testLanguage(probe.testFiles);
   if (language === "mixed") return unsupported("test files mix Python and JavaScript");
-  if (language === "python") return detectPythonEnvironment(probe);
+  const env = language === "python" ? await detectPythonEnvironment(probe) : await detectNodeEnvironment(probe);
+  return env.supported ? withServices(env, probe) : env;
+}
+
+/**
+ * Adds the CI job's Postgres service, if any: `services`, the real DATABASE_URL in place of the
+ * placeholder, and the service in the Dockerfile provenance. Without one, `services: []` and
+ * nothing else changes.
+ */
+export async function withServices(env: Environment, probe: RepoProbe): Promise<Environment> {
+  const files = [];
+  for (const path of probe.workflowFiles ?? []) {
+    const text = await probe.read(path);
+    if (text != null) files.push({ path, text });
+  }
+  const services = servicesFromWorkflows(files, env.packageDir);
+  if (services.length === 0) return { ...env, services: [] };
+  const vars = { ...env.env, DATABASE_URL: services[0].containerDatabaseUrl };
+  const dockerfile = env.dockerfile.replace(/^ENV DATABASE_URL=.*$/m, `ENV DATABASE_URL=${vars.DATABASE_URL}`)
+    .replace(/^WORKDIR \/work$/m, (line) => [line, ...serviceProvenance(services)].join("\n"));
+  return { ...env, env: vars, dockerfile, services };
+}
+
+/** The JavaScript half of detectEnvironment. */
+async function detectNodeEnvironment(probe: RepoProbe): Promise<Environment | Unsupported> {
   const { read } = probe;
   const rootPkg = parsePkg(await read("package.json"));
   if (rootPkg === "invalid") return unsupported("package.json is not valid JSON");

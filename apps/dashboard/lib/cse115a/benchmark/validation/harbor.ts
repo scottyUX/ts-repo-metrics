@@ -42,9 +42,12 @@ export const GIT_REINIT_LAYER =
 /**
  * Why a row cannot be exported yet, or null. The verifier's check.mjs runs on Node and the task
  * image for a pytest row is a Python one, so pytest rows are skipped until a Python verifier exists.
+ * A row whose runs had a database container is skipped too: a Harbor task has one image, no sidecar.
  */
 export function harborSkipReason(env: Environment): string | null {
-  return env.runners.includes("pytest") ? "Harbor export for pytest rows is not built yet" : null;
+  if (env.runners.includes("pytest")) return "Harbor export for pytest rows is not built yet";
+  if (env.services?.length) return "Harbor export for rows with a database service is not built yet";
+  return null;
 }
 
 export function buildHarborTask(input: HarborInput): Map<string, string> {

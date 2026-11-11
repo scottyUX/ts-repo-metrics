@@ -75,6 +75,12 @@ export async function cloneRepo(fullName: string, dir?: string, log: (line: stri
   return target;
 }
 
+/** Repository-relative paths of the GitHub workflow files in a checkout (`.github/workflows/*.yml|yaml`). */
+export async function workflowFiles(dir: string): Promise<string[]> {
+  const names = (await run("git", ["ls-files", ".github/workflows"], dir).catch(() => "")).split("\n");
+  return names.filter((n) => /\.ya?ml$/.test(n));
+}
+
 /** Fetches `commit` from origin unless the clone already has it. */
 export async function ensureCommit(repoDir: string, commit: string, log: (line: string) => void = () => {}): Promise<void> {
   try {
@@ -171,9 +177,9 @@ export async function validateRow(options: ValidateRowOptions): Promise<Validati
     // The environment comes from the finished tree: the student's test script and dependencies
     // usually arrive with the fix, since package.json is not a test file.
     const { env, needs } = await withPatchedWorktree(repoDir, row.base_commit, [row.test_patch, row.patch], async (dir) => {
-      const env = await detectEnvironment({ testFiles, read: (path) => fileIn(dir, path) });
+      const workflowNames = await workflowFiles(dir);
+      const env = await detectEnvironment({ testFiles, read: (path) => fileIn(dir, path), workflowFiles: workflowNames });
       const packageDir = env.supported ? env.packageDir : "";
-      const workflowNames = (await run("git", ["ls-files", ".github/workflows"], dir).catch(() => "")).split("\n").filter(Boolean);
       const needs: Signals = signals({
         packageJson: await fileIn(dir, packageDir ? `${packageDir}/package.json` : "package.json"),
         workflows: (await Promise.all(workflowNames.map((n) => fileIn(dir, n)))).join("\n"),
@@ -193,13 +199,14 @@ export async function validateRow(options: ValidateRowOptions): Promise<Validati
     const modified = modifiedAcrossFiles(testFiles, baseSources, patched);
 
     await mkdir(options.logDir, { recursive: true });
-    log(`Environment: ${env.packageManager} + ${env.runners.join("+")} in ${env.packageDir || "."}, image ${env.image}. Running three states, ${RUNS_PER_STATE} times each; logs in ${options.logDir}`);
+    const db = env.services?.length ? `, with ${env.services.map((s) => s.image).join(", ")} from CI` : "";
+    log(`Environment: ${env.packageManager} + ${env.runners.join("+")} in ${env.packageDir || "."}, image ${env.image}${db}. Running three states, ${RUNS_PER_STATE} times each; logs in ${options.logDir}`);
     const { runs, ...result } = await validateTask({ row, repoDir, env, modified, runner: new DockerSuiteRunner(options.logDir, options.cacheDir), timeoutSeconds: options.timeoutSeconds });
     void runs;
     result.signals = needs;
-    // A row that proved nothing in a repository whose tests want a service: say so, instead of a bare reason.
-    if (result.validation_status === "rejected" && result.reason === "no_fail_to_pass" && needs.database.length > 0) {
-      result.detail = `no test passed in any state and the tests appear to need a database (${needs.database.join(", ")}); database services are not supported yet`;
+    // A row that proved nothing in a repository whose tests want a service it did not get: say so, instead of a bare reason.
+    if (result.validation_status === "rejected" && result.reason === "no_fail_to_pass" && needs.database.length > 0 && !env.services?.length) {
+      result.detail = `no test passed in any state and the tests appear to need a database (${needs.database.join(", ")}); the repository's CI has no postgres service the validator could start`;
     }
     return result;
   } finally {

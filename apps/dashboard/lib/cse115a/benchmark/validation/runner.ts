@@ -7,9 +7,11 @@ import { spawn } from "node:child_process";
 import { mkdtemp, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { randomBytes } from "node:crypto";
 import { RUNS_PER_STATE, type RunResults, type StateRuns } from "@/lib/cse115a/benchmark/validation/compareRuns";
 import { NODE_TEST_REPORTER_SOURCE } from "@/lib/cse115a/benchmark/validation/nodeTestReporter";
 import { PYTEST_REPORTER_MODULE, PYTEST_REPORTER_SOURCE } from "@/lib/cse115a/benchmark/validation/pytestReporter";
+import { serviceProvenance, type Service } from "@/lib/cse115a/benchmark/validation/services";
 import { parseNodeTestReport, parseVitestReport, type VitestReport } from "@/lib/cse115a/benchmark/validation/testIds";
 
 /** Which repository state to run: base; base + test_patch; base + test_patch + patch. */
@@ -36,6 +38,8 @@ export type RunPlan = {
   image?: string;
   /** Seconds before one suite run is killed. */
   timeoutSeconds?: number;
+  /** Database containers started fresh for every run (from the repository's CI); none when empty. */
+  services?: Service[];
 };
 
 /** One run of the suite in one state. Implemented by Docker, or by a fake in tests. `attempt` is 1-based. */
@@ -68,7 +72,9 @@ export async function runThreeStates(plan: RunPlan, runner: SuiteRunner): Promis
 /** The shell script run inside the container for one state. Exported so tests can read it. */
 export function containerScript(plan: RunPlan, state: State): string {
   const sub = (dir: string) => (dir ? `cd /work/${dir}` : "cd /work");
+  const services = plan.services ?? [];
   const lines = [
+    ...serviceProvenance(services),
     "set -e",
     "cd /work",
     `git checkout -q -f ${plan.baseCommit}`,
@@ -78,6 +84,9 @@ export function containerScript(plan: RunPlan, state: State): string {
   if (state !== "r0") lines.push("git apply --whitespace=nowarn /patches/test.diff");
   if (state === "r2") lines.push("git apply --whitespace=nowarn /patches/fix.diff");
   lines.push(sub(plan.installDir), installGuard(plan.installCommand));
+  // The schema step runs from the repository root, as CI runs it, against the run's own database.
+  const schema = services.map((s) => s.schemaCommand).filter((c): c is string => Boolean(c));
+  if (schema.length) lines.push("cd /work", schemaGuard(schema.join("\n")));
   // Each step may fail (that is the point in R1); the reports are what matter. REPORT_DIR is
   // exported on its own line so the steps can use it in a redirect or pipeline.
   lines.push("mkdir -p /patches/reports", "export REPORT_DIR=/patches/reports", sub(plan.packageDir));
@@ -108,11 +117,40 @@ export function installGuard(installCommand: string): string {
   ].join("\n");
 }
 
+/** Exit code of a container run whose schema step failed; the runner turns it into a SchemaError. */
+export const SCHEMA_FAILED_EXIT = 98;
+/** Where the schema step's output is kept inside the container. */
+export const SCHEMA_LOG = "/patches/schema.log";
+
+/** Single-quotes a string for bash. */
+const shellQuote = (text: string) => `'${text.split("'").join("'\\''")}'`;
+
+/**
+ * The CI schema command (`pnpm --dir server db:push`) wrapped like the install: any failure stops
+ * the run with SCHEMA_FAILED_EXIT. It runs in its own `bash -eo pipefail`, as a GitHub `run:` step
+ * does, so a multi-line command stops at its first failing line.
+ */
+export function schemaGuard(schemaCommand: string): string {
+  return [
+    `if ! bash -eo pipefail -c ${shellQuote(schemaCommand)} > ${SCHEMA_LOG} 2>&1; then`,
+    `  cat ${SCHEMA_LOG}`,
+    `  echo "[hecate] schema step failed" >&2`,
+    `  exit ${SCHEMA_FAILED_EXIT}`,
+    "fi",
+    `cat ${SCHEMA_LOG}`,
+  ].join("\n");
+}
+
 /**
  * Thrown when the install step failed in a run: the environment, not the student. `validateTask`
- * turns it into an `env_error` result, so the row is never written back as rejected.
+ * turns it, and the subclasses below, into an `env_error` result, so the row is never written back
+ * as rejected.
  */
 export class InstallError extends Error {}
+/** The CI schema step failed in a run (`schema step failed in r0a: <line>`). */
+export class SchemaError extends InstallError {}
+/** The database container never answered pg_isready (`database did not start in r0a`). */
+export class DatabaseStartError extends InstallError {}
 
 /** The line of an install log that says what went wrong: the first that mentions an error, else the last. */
 export function installErrorLine(log: string): string {
@@ -134,12 +172,33 @@ export const PACKAGE_CACHE_ENV: Record<string, string> = {
   POETRY_CACHE_DIR: "/cache/poetry",
 };
 
+/** Runs a command and returns its combined output; rejects with an ExecError. Swapped for a fake in tests. */
+export type ExecFn = (command: string, args: string[], timeoutMs: number) => Promise<string>;
+
+/** How long a database container gets to answer pg_isready, in one-second polls. */
+export const DATABASE_READY_POLLS = 60;
+
+export type DockerSuiteRunnerDeps = {
+  exec?: ExecFn;
+  sleep?: (ms: number) => Promise<void>;
+  /** Makes the per-run suffix of container and network names; random by default. */
+  runId?: () => string;
+};
+
 export class DockerSuiteRunner implements SuiteRunner {
+  private readonly exec: ExecFn;
+  private readonly sleep: (ms: number) => Promise<void>;
+  private readonly runId: () => string;
+
   /**
    * `logDir`: one log per run (`<state><attempt>.log`); nothing is kept when unset.
    * `cacheDir`: a host folder mounted at /cache as the shared package cache; none when unset.
    */
-  constructor(private readonly logDir?: string, private readonly cacheDir?: string) {}
+  constructor(private readonly logDir?: string, private readonly cacheDir?: string, deps: DockerSuiteRunnerDeps = {}) {
+    this.exec = deps.exec ?? exec;
+    this.sleep = deps.sleep ?? ((ms) => new Promise((r) => setTimeout(r, ms)));
+    this.runId = deps.runId ?? (() => randomBytes(4).toString("hex"));
+  }
 
   async runSuite(plan: RunPlan, state: State, attempt: number): Promise<RunResults> {
     const patches = await mkdtemp(join(tmpdir(), "hecate-validate-"));
@@ -162,11 +221,14 @@ export class DockerSuiteRunner implements SuiteRunner {
         image, "bash", "/patches/run.sh",
       ];
       const timeoutMs = (plan.timeoutSeconds ?? 900) * 1000;
+      const services = plan.services ?? [];
       // A run that dies (a registry connection refused mid-install, a Docker hiccup) gets one retry
       // after a pause; a timeout does not, since it would only double the wait.
       for (let tryNumber = 1; ; tryNumber++) {
         try {
-          const output = await exec("docker", args, timeoutMs);
+          const output = services.length
+            ? await this.withServices(services, `${name}-${this.runId()}`, timeoutMs, (extra) => this.exec("docker", [...args.slice(0, 2), ...extra, ...args.slice(2)], timeoutMs))
+            : await this.exec("docker", args, timeoutMs);
           if (this.logDir) await writeFile(join(this.logDir, `${name}.log`), output);
           break;
         } catch (error) {
@@ -178,14 +240,67 @@ export class DockerSuiteRunner implements SuiteRunner {
               const log = await readFile(join(patches, "install.log"), "utf8").catch(() => "");
               throw new InstallError(`install failed in ${name}: ${installErrorLine(log)}`);
             }
+            if (error instanceof ExecError && error.code === SCHEMA_FAILED_EXIT) {
+              const log = await readFile(join(patches, "schema.log"), "utf8").catch(() => "");
+              throw new SchemaError(`schema step failed in ${name}: ${installErrorLine(log)}`);
+            }
+            if (error instanceof DatabaseStartError) throw new DatabaseStartError(`database did not start in ${name}`);
             throw error;
           }
-          await new Promise((r) => setTimeout(r, 15_000));
+          await this.sleep(15_000);
         }
       }
       return readReports(join(patches, "reports"));
     } finally {
       await rm(patches, { recursive: true, force: true });
+    }
+  }
+
+  /**
+   * One try of a run with its database: a fresh network `hecate-<id>`, the service container on it
+   * (reachable as its CI key, e.g. `postgres`), a wait for pg_isready, then `runTest` with the extra
+   * `docker run` arguments that name the test container and put it on the network. Both containers
+   * and the network are removed afterwards whatever happened, including a timeout, since killing
+   * the `docker run` client does not stop its container. On failure the database's own log is
+   * appended to the error.
+   */
+  private async withServices(services: Service[], id: string, timeoutMs: number, runTest: (extra: string[]) => Promise<string>): Promise<string> {
+    const network = `hecate-${id}`;
+    const dbNames = services.map((_s, i) => (i === 0 ? `hecate-pg-${id}` : `hecate-pg${i + 1}-${id}`));
+    const testName = `hecate-run-${id}`;
+    const quiet = (args: string[]) => this.exec("docker", args, 60_000).catch(() => "");
+    const dbLog = async () => (await Promise.all(dbNames.map((n) => quiet(["logs", n])))).join("\n");
+    try {
+      await this.exec("docker", ["network", "create", network], 60_000);
+      for (const [i, s] of services.entries()) {
+        await this.exec("docker", [
+          "run", "-d", "--name", dbNames[i], "--network", network, "--network-alias", s.alias,
+          ...Object.entries(s.env).flatMap(([k, v]) => ["-e", `${k}=${v}`]),
+          s.image,
+        ], 10 * 60_000);
+      }
+      for (const [i, s] of services.entries()) {
+        const user = s.env.POSTGRES_USER ?? "postgres";
+        const db = s.env.POSTGRES_DB ?? user;
+        let ready = false;
+        for (let poll = 0; poll < DATABASE_READY_POLLS && !ready; poll++) {
+          // Over TCP: the image's first-boot server listens only on the socket and then restarts.
+          ready = await this.exec("docker", ["exec", dbNames[i], "pg_isready", "-h", "127.0.0.1", "-p", "5432", "-U", user, "-d", db], 30_000).then(() => true, () => false);
+          if (!ready) await this.sleep(1000);
+        }
+        if (!ready) throw new DatabaseStartError(`database did not start\n--- database log ---\n${await dbLog()}`);
+      }
+      try {
+        return await runTest(["--name", testName, "--network", network]);
+      } catch (error) {
+        if (error instanceof ExecError) {
+          throw new ExecError(`${error.message}\n--- database log ---\n${await dbLog()}`, error.timedOut, error.code);
+        }
+        throw error;
+      }
+    } finally {
+      await quiet(["rm", "-f", testName, ...dbNames]);
+      await quiet(["network", "rm", network]);
     }
   }
 }

@@ -109,6 +109,8 @@ export type ValidationResult = {
   snapshot_bundle?: string | null;
   /** What the repository's tests seem to need beyond Node (from the census rules); informational. */
   signals?: { database: string[]; browser: string[]; otherRunners: string[] };
+  /** Database containers each run had, from the repository's CI; absent when none. Also in `eval_script`. */
+  services?: Array<{ name: string; image: string; env: Record<string, string>; database_url: string; schema_command: string | null }>;
 };
 
 /** The result for a repository the validator cannot run (bun, mocha, no package.json). */
@@ -154,7 +156,11 @@ export async function validateTask(input: ValidateInput): Promise<ValidationResu
     env: env.env,
     image: env.image,
     timeoutSeconds: input.timeoutSeconds,
+    services: env.services ?? [],
   };
+  const services = env.services?.length
+    ? { services: env.services.map((s) => ({ name: s.name, image: s.image, env: s.env, database_url: s.containerDatabaseUrl, schema_command: s.schemaCommand })) }
+    : {};
   let runs: ThreeStates;
   try {
     runs = await runThreeStates(plan, input.runner);
@@ -170,6 +176,7 @@ export async function validateTask(input: ValidateInput): Promise<ValidationResu
       package_dir: env.packageDir,
       reason: "env_error",
       detail: error.message,
+      ...services,
       runs: empty,
     };
   }
@@ -201,6 +208,7 @@ export async function validateTask(input: ValidateInput): Promise<ValidationResu
     reason: comparison.reason,
     detail: null,
     timings: runs.timings,
+    ...services,
     runs,
   };
 }

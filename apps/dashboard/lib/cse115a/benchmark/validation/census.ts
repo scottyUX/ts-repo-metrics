@@ -42,10 +42,15 @@ export type CensusEntry = {
   note: string;
 };
 
-/** "supported", plus for a Python repo whether its manifests name pytest (the validator installs it regardless). */
+/**
+ * "supported", plus for a Python repo whether its manifests name pytest (the validator installs it
+ * regardless), and "postgres service (from CI)" when the runs get a database container.
+ */
 function supportedNote(env: Environment): string {
-  if (!env.runners.includes("pytest")) return "supported";
-  return env.pytestDeclared ? "supported; pytest declared" : "supported; pytest not declared, installed by the validator";
+  const notes = ["supported"];
+  if (env.runners.includes("pytest")) notes.push(env.pytestDeclared ? "pytest declared" : "pytest not declared, installed by the validator");
+  if (env.services?.length) notes.push("postgres service (from CI)");
+  return notes.join("; ");
 }
 
 export function censusMarkdown(entries: CensusEntry[]): string {

@@ -9,7 +9,7 @@ import { join, resolve } from "node:path";
 import { parseRows } from "@/lib/cse115a/benchmark/validation/batch";
 import { censusMarkdown, signals, type CensusEntry } from "@/lib/cse115a/benchmark/validation/census";
 import { detectEnvironment } from "@/lib/cse115a/benchmark/validation/environment";
-import { cloneRepo, ensureCommit, fileIn, run, withPatchedWorktree } from "@/lib/cse115a/benchmark/validation/runRow";
+import { cloneRepo, ensureCommit, fileIn, withPatchedWorktree, workflowFiles } from "@/lib/cse115a/benchmark/validation/runRow";
 import { filesInPatch } from "@/lib/cse115a/benchmark/validation/validateTask";
 
 function parseArgs(argv: string[]) {
@@ -45,9 +45,9 @@ async function main() {
       await ensureCommit(repoDir, row.base_commit, log);
       const testFiles = filesInPatch(row.test_patch);
       const inspect = async (dir: string) => {
-        const env = await detectEnvironment({ testFiles, read: (path) => fileIn(dir, path) });
+        const workflowNames = await workflowFiles(dir);
+        const env = await detectEnvironment({ testFiles, read: (path) => fileIn(dir, path), workflowFiles: workflowNames });
         const packageDir = env.supported ? env.packageDir : "";
-        const workflowNames = (await run("git", ["ls-files", ".github/workflows"], dir)).split("\n").filter(Boolean);
         const workflows = (await Promise.all(workflowNames.map((n) => fileIn(dir, n)))).join("\n");
         const testSources = (await Promise.all(testFiles.map((f) => fileIn(dir, f)))).join("\n");
         const packageJson = await fileIn(dir, packageDir ? `${packageDir}/package.json` : "package.json");
