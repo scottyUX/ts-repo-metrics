@@ -6,11 +6,10 @@ import { extractAddedTests } from "@/lib/cse115a/benchmark/extractTests";
 import { censusMarkdown } from "@/lib/cse115a/benchmark/validation/census";
 import { compareRuns } from "@/lib/cse115a/benchmark/validation/compareRuns";
 import { detectEnvironment, pytestCommand, pythonVersionFrom, testLanguage, type Environment } from "@/lib/cse115a/benchmark/validation/environment";
-import { buildHarborTask, harborSkipReason } from "@/lib/cse115a/benchmark/validation/harbor";
+import { buildHarborTask, harborEnvFrom, harborSkipReason } from "@/lib/cse115a/benchmark/validation/harbor";
 import { PYTEST_REPORTER_SOURCE } from "@/lib/cse115a/benchmark/validation/pytestReporter";
 import { containerScript, PACKAGE_CACHE_ENV, readReports } from "@/lib/cse115a/benchmark/validation/runner";
 import { modifiedTests, parseNodeTestReport, pythonTestBodies } from "@/lib/cse115a/benchmark/validation/testIds";
-import { rejectedWithoutRun } from "@/lib/cse115a/benchmark/validation/batch";
 
 /** A fake repository: path → contents. */
 function repo(files: Record<string, string>) {
@@ -241,12 +240,11 @@ describe("runner and Harbor for pytest rows", () => {
     expect(script).toContain(`cd /work/backend\n${STEP} || true\n`);
   });
 
-  it("skips a pytest row in the Harbor export with a one-line reason", async () => {
+  it("is exported by Harbor: no pytest skip any more", async () => {
     const env = await detectEnvironment({ testFiles: ["tests/test_a.py"], read: repo({ "requirements.txt": "" }) }) as Environment;
     const row = { instance_id: "x-1", repo: "o/x", base_commit: "abc", patch: "", test_patch: "", FAIL_TO_PASS: [], PASS_TO_PASS: [] };
-    expect(harborSkipReason(env)).toBe("Harbor export for pytest rows is not built yet");
-    expect(() => buildHarborTask({ row, result: rejectedWithoutRun(row, "env_error", ""), env, bundleFile: "repo.bundle" })).toThrow("Harbor export for pytest rows is not built yet");
-    expect(harborSkipReason({ ...env, runners: ["vitest"] })).toBeNull();
+    expect(harborSkipReason(harborEnvFrom(env))).toBeNull();
+    expect(buildHarborTask({ row, env: harborEnvFrom(env), source: { kind: "bundle", file: "repo.bundle" } }).has("tests/check.py")).toBe(true);
   });
 
   it("census lists a Python repo with its manager, image and whether it declares pytest", async () => {

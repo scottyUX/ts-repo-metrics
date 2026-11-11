@@ -6,7 +6,7 @@ import { promisify } from "node:util";
 import { describe, expect, it } from "vitest";
 import { censusMarkdown } from "@/lib/cse115a/benchmark/validation/census";
 import { CONTAINER_ENV, detectEnvironment, type Environment } from "@/lib/cse115a/benchmark/validation/environment";
-import { harborSkipReason } from "@/lib/cse115a/benchmark/validation/harbor";
+import { harborEnvFrom, harborSkipReason } from "@/lib/cse115a/benchmark/validation/harbor";
 import {
   containerScript, DATABASE_READY_POLLS, DockerSuiteRunner, ExecError, SCHEMA_FAILED_EXIT, SCHEMA_LOG, schemaGuard, type ExecFn, type RunPlan,
 } from "@/lib/cse115a/benchmark/validation/runner";
@@ -230,8 +230,8 @@ describe("detectEnvironment with a CI postgres service", () => {
 
   it("is listed as supported in the census and skipped by the Harbor export", async () => {
     const env = (await detectEnvironment({ testFiles: ["server/test/books.test.ts"], read: repo(BOOKWORM_FILES), workflowFiles: [".github/workflows/ci.yml"] })) as Environment;
-    expect(harborSkipReason(env)).toBe("Harbor export for rows with a database service is not built yet");
-    expect(harborSkipReason({ ...env, services: [] })).toBeNull();
+    expect(harborSkipReason(harborEnvFrom(env))).toBe("Harbor export for rows with a database service is not built yet");
+    expect(harborSkipReason(harborEnvFrom({ ...env, services: [] }))).toBeNull();
     const md = censusMarkdown([{ instance_id: "b-1", repo: "JoKHerre/Bookworm", env, signals: { database: ["ci-service"], browser: [], otherRunners: [] }, note: "" }]);
     expect(md).toContain("| ci-service |  |  | supported; postgres service (from CI) |");
   });

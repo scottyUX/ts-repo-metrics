@@ -90,6 +90,7 @@ async function main() {
         if (result.image) {
           if (!digests.has(result.image)) digests.set(result.image, await imageDigest(result.image));
           result.image_digest = digests.get(result.image) ?? null;
+          if (result.harbor_env && result.image_digest) result.harbor_env = { ...result.harbor_env, image: result.image_digest };
         }
         // A bundle from an earlier run of this row is still valid (the base commit does not change), so
         // it is recorded even without --snapshots; the flag only decides whether to create a new one.

@@ -7,6 +7,7 @@
 import { compareRuns, type Comparison } from "@/lib/cse115a/benchmark/validation/compareRuns";
 import { installPlan, type Environment, type Unsupported } from "@/lib/cse115a/benchmark/validation/environment";
 import { containerScript, InstallError, runThreeStates, type RunPlan, type SuiteRunner, type ThreeStates } from "@/lib/cse115a/benchmark/validation/runner";
+import { harborEnvFrom, type HarborEnv } from "@/lib/cse115a/benchmark/validation/harbor";
 import type { RebuildProvenance } from "@/lib/cse115a/benchmark/validation/rebuildRow";
 import { modifiedTests, unmatchedStaticIds } from "@/lib/cse115a/benchmark/validation/testIds";
 
@@ -139,6 +140,11 @@ export type ValidationResult = {
   rebuild?: RebuildRecord;
   /** Database containers each run had, from the repository's CI; absent when none. Also in `eval_script`. */
   services?: Array<{ name: string; image: string; env: Record<string, string>; database_url: string; schema_command: string | null }>;
+  /**
+   * The Harbor recipe for this environment (harbor.ts), absent when no environment was detected. The
+   * batch puts the image digest in it; write-back stores it on validated rows as `harbor_env`.
+   */
+  harbor_env?: HarborEnv;
 };
 
 /** The result for a repository the validator cannot run (bun, mocha, no package.json). */
@@ -204,7 +210,7 @@ export async function validateTask(input: ValidateInput): Promise<ValidationResu
     ...(nodeSource ? [`node: ${env.image} (${nodeSource})`] : []),
     `install in: ${installs.map((s) => s.dir || ".").join(", ")}${env.installSteps?.length ? " (from CI)" : ""}`,
   ];
-  const provenance = { install_dirs: installs.map((s) => s.dir), ...(nodeSource ? { node_source: nodeSource } : {}) };
+  const provenance = { install_dirs: installs.map((s) => s.dir), ...(nodeSource ? { node_source: nodeSource } : {}), harbor_env: harborEnvFrom(env) };
   const services = env.services?.length
     ? { services: env.services.map((s) => ({ name: s.name, image: s.image, env: s.env, database_url: s.containerDatabaseUrl, schema_command: s.schemaCommand })) }
     : {};
