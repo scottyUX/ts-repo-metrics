@@ -2,6 +2,7 @@
 // `writebackSql` (batch.ts), expressed as plain updates so a script can apply them through the
 // Supabase client with the service-role key, and a test can check them without a database.
 
+import type { HarborEnv } from "@/lib/cse115a/benchmark/validation/harbor";
 import { STAFF_REBUILT_FLAG } from "@/lib/cse115a/benchmark/validation/rebuildRow";
 import type { ValidationResult } from "@/lib/cse115a/benchmark/validation/validateTask";
 
@@ -29,6 +30,11 @@ export type TaskUpdate = {
   image: string;
   eval_script: string;
   log_parser: string;
+  /**
+   * The Harbor recipe, when the result carries one. A result file written before the recipe existed
+   * leaves the column as it is rather than clearing a recipe a later run stored.
+   */
+  harbor_env?: HarborEnv;
 };
 
 /** The rebuilt base and patches a staff-rebuilt row writes, whatever its verdict. */
@@ -61,6 +67,7 @@ export function writebackPlan(results: ValidationResult[]): WritebackOp[] {
             image: r.image_digest ?? r.image ?? "",
             eval_script: r.eval_script ?? "",
             log_parser: r.log_parser ?? "",
+            ...(r.harbor_env ? { harbor_env: r.harbor_env } : {}),
           }
         : null,
       rebuild: r.rebuild
@@ -91,6 +98,25 @@ export type WritebackClient = {
   };
 };
 
+/** The migration that adds `cse_benchmark_tasks.harbor_env`; write-back needs it applied first. */
+export const HARBOR_ENV_MIGRATION = "supabase/migrations/20261110000000_cse115a_benchmark_harbor_env.sql";
+
+/** The slice of the Supabase client the column check uses. */
+export type ColumnProbeClient = {
+  from(table: string): { select(columns: string): { limit(count: number): PromiseLike<{ error: { message: string } | null }> } };
+};
+
+/**
+ * Throws a clear error when the database has no `harbor_env` column yet (one cheap select), so a
+ * write-back never half-applies against an unmigrated project.
+ */
+export async function assertHarborEnvColumn(client: ColumnProbeClient): Promise<void> {
+  const { error } = await client.from("cse_benchmark_tasks").select("harbor_env").limit(1);
+  if (!error) return;
+  if (/harbor_env/.test(error.message)) throw new Error(`cse_benchmark_tasks has no harbor_env column: apply migration ${HARBOR_ENV_MIGRATION} first (${error.message})`);
+  throw new Error(`could not check for the harbor_env column: ${error.message}`);
+}
+
 /** Applies the ops; returns one line per row describing what changed. Throws on the first database error. */
 export async function applyWriteback(client: WritebackClient, ops: WritebackOp[], now: () => string = () => new Date().toISOString()): Promise<string[]> {
   const lines: string[] = [];
@@ -106,7 +132,7 @@ export async function applyWriteback(client: WritebackClient, ops: WritebackOp[]
     if (result.error) throw new Error(`${op.instance_id}: cse_benchmark_task_sources: ${result.error.message}`);
     const proof = op.flags.includes(PROOF_OUTSIDE_FLAG) ? `, flagged ${PROOF_OUTSIDE_FLAG}` : "";
     const rebuilt = op.rebuild ? `, rebuilt base ${op.rebuild.base_commit.slice(0, 7)} and patches written, flagged ${STAFF_REBUILT_FLAG}` : "";
-    lines.push(`${op.instance_id}: ${op.validation_status}${op.reasonFlag ? ` (${op.reasonFlag.slice(REASON_FLAG_PREFIX.length)})` : ""}${op.task ? `, ${op.task.FAIL_TO_PASS.length} F2P / ${op.task.PASS_TO_PASS.length} P2P written` : ""}${proof}${rebuilt}`);
+    lines.push(`${op.instance_id}: ${op.validation_status}${op.reasonFlag ? ` (${op.reasonFlag.slice(REASON_FLAG_PREFIX.length)})` : ""}${op.task ? `, ${op.task.FAIL_TO_PASS.length} F2P / ${op.task.PASS_TO_PASS.length} P2P written${op.task.harbor_env ? " with harbor_env" : ""}` : ""}${proof}${rebuilt}`);
   }
   return lines;
 }

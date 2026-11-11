@@ -4,13 +4,15 @@
 //   SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... npx tsx --tsconfig apps/dashboard/tsconfig.json apps/dashboard/scripts/writebackValidation.ts --batch DIR [--only id,id] [--dry-run]
 //
 // Reads DIR/results/*.json. Validated rows get verified FAIL_TO_PASS (with ABSENT_TO_PASS folded in),
-// PASS_TO_PASS, image (digest when known), eval_script, log_parser and validation_status = validated.
+// PASS_TO_PASS, image (digest when known), eval_script, log_parser, harbor_env (the Harbor recipe, when
+// the result has one) and validation_status = validated. Stops before writing anything if the
+// harbor_env column is missing (apply supabase/migrations/20261110000000_cse115a_benchmark_harbor_env.sql).
 // Rejected rows get validation_status = rejected and a validation_reason:<reason> flag. env_error rows
 // are skipped (they stay candidate). --dry-run prints the plan and touches nothing.
 
 import { readdir, readFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
-import { applyWriteback, writebackPlan, type WritebackClient } from "@/lib/cse115a/benchmark/validation/writeback";
+import { applyWriteback, assertHarborEnvColumn, writebackPlan, type ColumnProbeClient, type WritebackClient } from "@/lib/cse115a/benchmark/validation/writeback";
 import type { ValidationResult } from "@/lib/cse115a/benchmark/validation/validateTask";
 
 function parseArgs(argv: string[]) {
@@ -38,7 +40,7 @@ async function main() {
   const ops = writebackPlan(results);
   console.error(`${results.length} result(s), ${ops.length} to write (${results.length - ops.length} env_error skipped)`);
   if (args.dryRun) {
-    for (const op of ops) console.log(`${op.instance_id}: ${op.validation_status}${op.reasonFlag ? ` (${op.reasonFlag})` : ""}${op.task ? ` F2P=${op.task.FAIL_TO_PASS.length} P2P=${op.task.PASS_TO_PASS.length} image=${op.task.image}` : ""}`);
+    for (const op of ops) console.log(`${op.instance_id}: ${op.validation_status}${op.reasonFlag ? ` (${op.reasonFlag})` : ""}${op.task ? ` F2P=${op.task.FAIL_TO_PASS.length} P2P=${op.task.PASS_TO_PASS.length} image=${op.task.image}${op.task.harbor_env ? " harbor_env" : ""}` : ""}`);
     console.error("Dry run: nothing written.");
     return;
   }
@@ -46,7 +48,9 @@ async function main() {
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
   if (!url || !key) throw new Error("Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY (or use --dry-run).");
   const { createClient } = await import("@supabase/supabase-js");
-  const client = createClient(url, key, { auth: { persistSession: false } }) as unknown as WritebackClient;
+  const supabase = createClient(url, key, { auth: { persistSession: false } });
+  await assertHarborEnvColumn(supabase as unknown as ColumnProbeClient);
+  const client = supabase as unknown as WritebackClient;
   for (const line of await applyWriteback(client, ops)) console.log(line);
 }
 
