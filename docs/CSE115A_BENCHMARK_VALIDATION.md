@@ -388,7 +388,8 @@ The validator prints one JSON object and writes nothing to the database:
 { instance_id, image, eval_script, log_parser, test_files,
   FAIL_TO_PASS, ABSENT_TO_PASS, PASS_TO_PASS, FAIL_TO_FAIL, regressions, flaky, skipped,
   judged_from_base, modified_tests, unmatched_static_ids, validation_status, reason, timings,
-  install_dirs, node_source?, test_files_never_loaded?, services?, harbor_env?, untested_files? }
+  install_dirs, node_source?, test_files_never_loaded?, services?, harbor_env?, untested_files?,
+  repo_source?, harbor_gold? }
 ```
 
 `untested_files` (validated rows only, present only when non-empty) lists the code files the
@@ -428,6 +429,11 @@ when a later result lists none. If the post-fix tree cannot be read, `detail` ge
 
 `harbor_env` is the Harbor recipe for the environment the runs used (see "Harbor export"); the
 batch replaces its image with the digest it resolved.
+
+`repo_source` (batch only) is where the code came from: `github` (the batch's clone in `repos/`)
+or `snapshot` (the row's bundle, because GitHub could not supply it; see "Private repositories").
+`harbor_gold` (batch with `--gold-check` or `--gold-only`) is the Harbor gold check, also copied
+into `harbor_env.gold` (see "Harbor export").
 
 `test_files_never_loaded` lists test-patch files that failed to load in R2, after the fix. That
 is usually the harness (a missing install, a wrong Node), not the student, so the verdict rules
@@ -562,9 +568,59 @@ code, and the same 409 while the consent wording is not approved), one folder pe
 - a database service in the runs: a Harbor task is one image with no sidecar, so these wait;
 - a short `base_commit` or a repo that is not `owner/name`;
 - `harbor_env.repo_public` is `false`: "repository is private; the task can only be built from a
-  snapshot" (see "Private repositories").
+  snapshot" (see "Private repositories");
+- the gold check (below) has not passed: `gold check failed: <reason>`, `gold check skipped:
+  <reason>`, or, when `harbor_env.gold` is absent, `not gold-checked yet; run the batch with
+  --gold-only and write back`. The reasons above take priority and keep their wording; a row is
+  exported only when `harbor_env.gold.status` is `passed`.
 
-From a local batch instead:
+**The gold check.** Before a task goes into the zip, Harbor itself must agree with the validator:
+the oracle agent (`solution/solve.sh`, the student's fix) must score 1.0 and the nop agent (no
+change) 0.0, with no exceptions. A nop score of 1.0 means the tests pass without the fix; an
+oracle below 1.0 means the task as built does not reproduce the validator's result (an image that
+does not build, a step that behaves differently in Harbor). `validateBenchmarkBatch.ts
+--gold-check` does this after each row it validates: it builds the task with the `bundle` source
+into `DIR/harbor-gold/<task>/` (the same builder as `scripts/exportHarbor.ts`,
+`validation/bundleTask.ts`) and runs
+
+```sh
+harbor run -p DIR/harbor-gold/<task> -a oracle -o DIR/harbor-gold/jobs --job-name <task>__oracle__<time> -n 1 -q
+harbor run -p DIR/harbor-gold/<task> -a nop    -o DIR/harbor-gold/jobs --job-name <task>__nop__<time>    -n 1 -q
+```
+
+with the working directory `DIR/harbor-gold/jobs/`, so all of Harbor's output stays in the batch
+folder; each run is stopped after 20 minutes (`--gold-timeout SECONDS`). The mean reward and the
+exception count come from the job's `result.json` (`stats.evals.<agent>__adhoc.metrics[0].mean`,
+`n_errors`, `n_errored_trials`, `exception_stats`; the format of Harbor 0.25, of which
+`__tests__/fixtures/harbor/` holds a real pair). `--gold-only` runs only the check, for the rows
+in `--only` whose result file exists and is validated: no clone and no Docker validation; each such
+result file is rewritten with only `harbor_gold` and `harbor_env.gold` changed, and `summary.json`,
+`summary.md` and `writeback.sql` are regenerated. That is how rows validated before the check
+existed get checked. The outcome:
+
+```
+harbor_gold: { status: "passed" | "failed" | "skipped", oracle: number | null, nop: number | null,
+               reason: string | null, checked_at: string }
+```
+
+`failed` names what went wrong (`oracle 0.0`, `nop 1.0: tests pass without the fix`, or the agent
+and the first useful line of Harbor's output for an exception, a timeout or a missing result,
+token-free). `skipped` means the task cannot be checked on this machine: Harbor is not installed
+(`harbor --version` fails), the row had a database service (the same reason as the export), or
+there is no snapshot bundle. The check never changes `validation_status`, `reason` or the test
+lists. The batch summary has a `gold` column (`passed`, `failed`, `skipped`, empty when not run)
+and the headline adds `; N gold-checked: P passed, F failed` (N counts passed and failed; skipped
+rows are added as `(S skipped)`).
+
+Write-back (`writebackValidation.ts` and `writeback.sql`) copies the check into
+`harbor_env.gold` for validated rows that have one; a result without one leaves the stored `gold`
+as it is (the recipe is replaced, the stored `gold` kept). A failed check adds the validator-owned
+flag `harbor_gold_failed`, which any later write-back without a failed check removes. The output
+line (and the `--dry-run` line) ends with `, gold check passed`, `, gold check failed: <reason>`
+or `, gold check skipped: <reason>`.
+
+From a local batch, to look at a task (this export is not gated on the gold check; it is how a
+failed one is investigated):
 
 ```sh
 npx tsx --tsconfig apps/dashboard/tsconfig.json apps/dashboard/scripts/exportHarbor.ts ROWS.json --batch DIR --to OUT [--only id,id]
@@ -616,6 +672,25 @@ every recipe written before the check existed. The course website's Harbor zip (
 leaves out a row with `repo_public === false` and lists it in `SKIPPED.txt` ("repository is
 private; the task can only be built from a snapshot"); absent or `true` export as before. The
 bundle export (`scripts/exportHarbor.ts`) is unaffected and builds such rows from the snapshot.
+
+**Validating from the snapshot.** A normal run (not `--snapshot-only`) falls back to the row's
+bundle when GitHub cannot supply the code: when cloning the repository or fetching `base_commit`
+into the batch's clone fails for any reason (refused, deleted, network), and the row has a bundle
+in `DIR/snapshots/` or in the folder given by `--snapshots-from DIR2`, the bundle (branch
+`hecate-snapshot`) is cloned into `DIR/repos-from-snapshot/<instance_id>/` (reused on a later run;
+one per row, because bundles are per row) and the row is validated from that checkout, with the
+same rules and the same lists as from GitHub. A bundle found only in `--snapshots-from` is copied
+into `DIR/snapshots/`, so the result records it and the Harbor export and gold check find it. The
+result has `repo_source: "snapshot"` (`"github"` otherwise) and its `detail` ends with "code taken
+from the snapshot because GitHub failed: <the clone or fetch failure>", token-free; the summary's
+reason cell says `from snapshot`. With no bundle, the row is `env_error` exactly as before. This is
+what makes a VM restored from the bucket (which leaves `repos/` out) able to validate a repository
+that has since been deleted or made private. `rebuildBenchmarkRow.ts` does not fall back: it needs
+the merge commit, which the bundle need not hold.
+
+```sh
+npx tsx --tsconfig apps/dashboard/tsconfig.json apps/dashboard/scripts/validateBenchmarkBatch.ts ROWS.json --out DIR --snapshots-from DIR2
+```
 
 ## Known limitations
 
