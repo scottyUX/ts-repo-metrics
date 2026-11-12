@@ -426,8 +426,9 @@ course website's zip and `scripts/exportHarbor.ts` skip it with "Harbor export f
 more than one test suite is not built yet", the way database rows are skipped, and the gold check
 records it as `skipped` with that reason.
 
-`untested_files` is unchanged: imports are resolved with the first suite's package directory as
-the Python fallback root.
+`untested_files` by the import rule is unchanged: imports are resolved with the first suite's
+package directory as the Python fallback root. The coverage run (see "Fix coverage") runs once per
+suite that has a proving test file and merges the reports per file.
 
 ## Output
 
@@ -438,11 +439,16 @@ The validator prints one JSON object and writes nothing to the database:
   FAIL_TO_PASS, ABSENT_TO_PASS, PASS_TO_PASS, FAIL_TO_FAIL, regressions, flaky, skipped,
   judged_from_base, modified_tests, unmatched_static_ids, validation_status, reason, timings,
   install_dirs, node_source?, test_files_never_loaded?, services?, harbor_env?, untested_files?,
-  repo_source?, harbor_gold?, suites? }
+  repo_source?, harbor_gold?, suites?, untested_files_source?, fix_coverage? }
 ```
 
 `untested_files` (validated rows only, present only when non-empty) lists the code files the
-source patch adds or modifies that no proving test reaches. A row is validated when its tests fail
+source patch adds or modifies that the proving tests do not run. When the batch ran the coverage
+run (`--fix-coverage` / `--fix-coverage-only`) and it measured something, the list comes from it
+(see "Fix coverage"); otherwise from the import rule below. `untested_files_source` says which:
+`coverage`, `imports`, or `mixed` (coverage, plus the import rule for the files coverage could
+not measure). It is present only on results the coverage run was requested for, so a result made
+without it is unchanged; absent, the list is the import rule's. A row is validated when its tests fail
 before the fix and pass after it, which proves the part of the fix the tests touch and nothing
 else: a PR whose tests exercise a back-end route can change four front-end files no test loads,
 and an agent graded on that row could leave the front end broken and still score 1.0. Such rows
@@ -476,6 +482,9 @@ the validator-owned flag `untested_files` to `cse_benchmark_task_sources.flags` 
 when a later result lists none. If the post-fix tree cannot be read, `detail` gets
 "untested_files not computed: …" and the field is left out.
 
+`fix_coverage` (batch with `--fix-coverage` or `--fix-coverage-only`, validated rows only) is the
+coverage run's outcome; see "Fix coverage".
+
 `harbor_env` is the Harbor recipe for the environment the runs used (see "Harbor export"); the
 batch replaces its image with the digest it resolved.
 
@@ -492,6 +501,138 @@ the run log", and the batch summary's reason column carries the same note.
 `judged_from_base` lists the tests whose "before" status was taken from R0 because R1 had no
 result for them (the fallback above); `modified_tests` lists the pre-existing tests whose source
 text the test patch changed. Both are diagnostic and do not affect the verdict by themselves.
+
+## Fix coverage
+
+The import rule guesses what the proving tests load, and it is wrong both ways: a test that imports
+a whole Express app reaches every route the fix changed, though it calls one; a test that imports
+one component through a folder's `index.ts` reaches the other component the fix changed, though it
+never renders it; and a module imported by a `conftest.py` fixture, through a Vite-only `@/` alias
+or a Vitest `setupFiles` entry, or a Next.js route the test calls over HTTP, reaches nothing by
+imports though it runs. The coverage run measures instead, as SWT-Bench's "change coverage" (the
+share of the gold patch's changed lines a test suite executes) and TDD-Bench Verified's adequacy
+score do for theirs. Code: `validation/fixCoverage.ts` (pure: changed lines, parsers,
+classification) and `validation/coverageRun.ts` (the steps and the run).
+
+**What runs.** For a validated row, after its verdict is final, one more container run of R2
+(base + test patch + patch) per suite that has a proving test file, with line coverage on and only
+the proving test files selected: the files of the `FAIL_TO_PASS` and `ABSENT_TO_PASS` ids,
+deduplicated. One run, not three. `PASS_TO_PASS` tests pass without the fix, so they cannot tell a
+full fix from a partial one; they are left out. Selection is by file, so a proving file's other
+tests (non-proving ones) run too and add their coverage. The run uses the suite's own plan: the
+same image (the result's digest for the first suite), installs, CI install steps, database sidecar,
+schema step and environment variables. Only the test steps change: each runner step gets the
+proving files it runs (a `node --test` step those its own path arguments, or Node's default
+patterns, match; Vitest and Jest steps the rest), a runner step with none is dropped, and so is
+every step after the last one kept (PocketWatch's `pnpm build` stays when the proving test is the
+`node --test` one, which imports `dist/`). The container does not work in the batch's checkout: it
+mounts it read-only at `/src` and clones it (`git clone --shared`) into `/work`, so the coverage
+tools it installs never reach `repos/`, later rows, the image digest on the row or the Harbor task.
+Its log is `logs/<instance_id>/coverage.log`; `--timeout` applies to it.
+
+**The tool per runner.**
+
+| Runner | Tool | How |
+|---|---|---|
+| pytest | coverage.py | `pip install coverage` (with uv: `uv pip install --python /opt/venv/bin/python coverage`), as pytest is installed; `python -m coverage run -m pytest <files>` and `coverage json`, through the run prefix (`uv run --no-sync`, `poetry run`), with our own rcfile: data in `/tmp`, only files under `/work` measured, the repository's own coverage config ignored |
+| Vitest | `@vitest/coverage-v8` | at exactly the repository's Vitest version, added only inside the container's clone when the repository does not have it (`npm install --no-save`, `pnpm add -D`, `yarn add -D`); `--coverage.enabled --coverage.provider=v8 --coverage.reporter=json`, `--coverage.all=false` before Vitest 4 (4 reports only loaded files by default) |
+| Jest | Jest's own coverage | `--coverage --coverageReporters=json --coveragePathIgnorePatterns=/node_modules/ --runTestsByPath <files>`; `collectCoverageFrom` is not set, so only loaded files are reported |
+| `node --test` | c8 10.1.3 | installed outside the checkout (`npm install --prefix /tmp/hecate-c8`) and wrapped around the `node` command, with the step's own path arguments replaced by the proving files; `--allowExternal` so files outside the package count |
+
+c8 rather than Node's `--experimental-test-coverage`: c8 reads `NODE_V8_COVERAGE`, which every
+Node from 18 to 24 has (checked on 18.20, 20.20, 22 and 24.22), writes the same Istanbul JSON as
+Jest and Vitest, and maps build output back to the source through source maps (PocketWatch's
+`dist/*.js` are reported as `src/*.ts`). Node's built-in `--experimental-test-coverage` has no
+lcov reporter on Node 18 (18.20 exits with an error; 20.20 writes one), so it would leave Node 18
+rows unmeasured. Reports are read against source files of the repository; paths are made
+repo-relative from the container's `/work`.
+
+**Which lines.** A file's changed lines are the post-fix line numbers of the patch's `+` lines
+(added and modified lines). Deleted files and non-code files are left out, as for the import rule,
+so the files are the same set. Of those lines, a line is **executable** when it is code and the
+tool reports it: code means not blank, not a comment, not brackets or separators alone, and, for
+JavaScript and TypeScript (read with the TypeScript parser), not type-only (interfaces, type
+aliases, annotations, `import type`, overload signatures, `declare`); for Python, Vue and Svelte
+the first three by text. That filter matters because c8 reports every line of a loaded file,
+comments and closing braces included, and Node runs TypeScript with its types blanked out, so an
+interface's lines read as executed. "The tool reports it": coverage.py's executed and missing
+lines; for Istanbul JSON (Jest, Vitest, c8), a statement that starts on the line, else the
+innermost statement or function that spans it (Istanbul's own line count credits only a
+statement's first line, so a fix editing the middle of a multi-line call would have nothing
+executable). A changed line that is not executable never counts for or against the row.
+
+**Per file.** `state` is:
+
+- `run`: the report has the file and at least one executable changed line was executed;
+- `not_run`: the file is in no report (never loaded; `executable`, `covered` and `uncovered` are
+  null), or it was loaded and none of its executable changed lines ran (`covered: 0`). A changed
+  file in a language no suite ran (a `.py` file when only a JavaScript suite ran) is `not_run`;
+- `not_measured`: coverage cannot speak for the file. Exactly five cases: none of its changed lines
+  is code (a pure rename, deletions only, comments or types only); it is loaded but the tool counts
+  none of its changed lines (the middle of a multi-line Python statement); a report of its language
+  failed (that step might have run it); it is absent and a report lists build output that maps to
+  it by path (`dist/`, `build/`, `out/` or `lib/` for `src/`) and was left unmapped because it has
+  no source map, which is never guessed; or it is a `.vue` / `.svelte` file absent from the reports
+  (not every runner instruments them).
+
+```
+fix_coverage: { status: "measured" | "partial" | "unavailable", reason?, tools: string[],
+                files: Array<{ path, state, changed_lines, executable, covered, uncovered }>,
+                files_changed, files_run, files_not_run, files_not_measured,
+                lines_executable, lines_covered }
+```
+
+`uncovered` lists the executable changed lines never executed as sorted ranges (`12-15,40`), ""
+when there are none. `lines_executable` and `lines_covered` add up the `run` files only. There is
+no single percentage across files: a file never loaded has no executable-line count, so a blended
+ratio would be invented. The headline is two numbers, files run of files changed and lines covered
+of lines executable in the files that ran. When several reports cover a file (two runner steps,
+two suites), a line covered in any of them is covered. `status` is `measured` when every report
+was usable and no file is `not_measured`; `partial` when some were measured and some could not be
+(`reason` names each failed report and the count of files not measured); `unavailable` when
+nothing was measured. Every failure of the coverage run (the coverage tool's install, the
+repository's install, a crash, a timeout, no report or an unreadable one, proving tests that did
+not pass in the run, no checkout) ends as a report that is not usable, and so in `partial` or
+`unavailable` with a one-line reason: never a rejection and never `env_error`. Neither status
+changes the verdict, the reason, `detail` or the test lists.
+
+**`untested_files`.** With `fix_coverage.status` `measured` or `partial`: the `not_run` files, plus
+the `not_measured` files the import rule flags (`untested_files_source: "coverage"`, or `"mixed"`
+when any file is `not_measured`). With no coverage run, or `unavailable`: the import rule's list,
+unchanged (`imports`). The import rule (`untestedFiles.ts`) stays as that fallback. Write-back is
+unchanged: the `untested_files` flag is added when the list is non-empty and removed when it is
+empty; the per-file detail stays in the result JSON.
+
+**Batch.** `--fix-coverage` runs it after each row that validates (before the gold check, when
+both are on). `--fix-coverage-only` runs only it, for the rows in `--only` whose result file
+exists and is validated, and rewrites each such file with only `fix_coverage`, `untested_files` and
+`untested_files_source` changed, then `summary.json`, `summary.md` and `writeback.sql`. Unlike
+`--gold-only` it needs Docker and the checkout: the clone in `repos/` (cloned again when missing),
+else the row's bundle (the snapshot fallback, with `--snapshots-from`); with neither, the row's
+`fix_coverage` is `unavailable` with the clone error. It never runs the three states, and it
+re-detects the environment on the post-fix tree, recording `unavailable` if the image or package
+folder no longer match the result's. `summary.md` gets a `coverage` column (`3/5 files, 41/60
+lines`, `partial: …`, `unavailable`, or empty without a run) and a headline count (`fix coverage: M
+measured, P partial, U unavailable`); the funnel is unchanged. A coverage run took 8 to 55 s on
+the eight validated Sprint 2 and A3 rows with a warm package cache, about 115 s with a cold pnpm
+install (one install plus one run of the proving files, against nine runs for validation).
+
+**Limits.**
+
+- Added and modified lines only. Lines the fix deletes are not measured (SWT-Bench also measures
+  removed lines, on the pre-fix code; this does not).
+- Executed is not checked: a line can run without any assertion depending on it.
+- Proving files can hold non-proving tests, which add their coverage too.
+- A line that declares a function counts as executed when its module loads with coverage.py and
+  with c8 (both report the `def` / `function` line as module code), but only when the function is
+  called with Jest and Vitest 4. A file whose only covered changed line is such a declaration reads
+  `run`; its `covered` / `executable` numbers show it.
+- A repository coverage config that narrows Vitest's `coverage.include` or Jest's
+  `collectCoverageFrom` can hide a file the tests ran, which then reads `not_run`; a pytest
+  `addopts` that turns on pytest-cov can conflict with coverage.py.
+- Front-end code exercised only through a browser, and every `not_measured` file, are outside what
+  this can see; a fix that changes two routes in one file the tests call once reads `run` for that
+  file, and only `uncovered` shows the other route.
 
 ## Running it
 
@@ -787,9 +928,10 @@ npx tsx --tsconfig apps/dashboard/tsconfig.json apps/dashboard/scripts/validateB
   has every test treated as modified, so none of them takes the base fallback: an untouched one
   in a file that fails to load at R1 is then `FAIL_TO_PASS` by the load rule rather than
   `PASS_TO_PASS`. Visible in `modified_tests`.
-- **`untested_files` follows imports, not execution.** A file the tests import but never call
-  counts as tested, and code loaded dynamically (string-built paths, framework file routing, a
-  front end exercised only over HTTP) counts as untested; measured coverage would settle both.
+- **Without the coverage run, `untested_files` follows imports, not execution.** A file the tests
+  import but never call counts as tested, and code loaded dynamically (string-built paths, framework
+  file routing, a front end exercised only over HTTP) counts as untested. `--fix-coverage` /
+  `--fix-coverage-only` measure it instead; their own limits are under "Fix coverage".
 
 ## Not yet
 
