@@ -12,7 +12,13 @@ import { join } from "node:path";
 import { signals, type Signals } from "@/lib/cse115a/benchmark/validation/census";
 import { detectEnvironment, envLanguage, suiteLabel } from "@/lib/cse115a/benchmark/validation/environment";
 import { DockerSuiteRunner, type SuiteRunner } from "@/lib/cse115a/benchmark/validation/runner";
-import { filesInPatch, modifiedAcrossFiles, unsupportedResult, validateTask, withRebuild, type TaskRow, type ValidationResult } from "@/lib/cse115a/benchmark/validation/validateTask";
+import { measureFixCoverage } from "@/lib/cse115a/benchmark/validation/coverageRun";
+import { unavailableCoverage, withFixCoverage, type FixCoverage } from "@/lib/cse115a/benchmark/validation/fixCoverage";
+import { untestedFiles } from "@/lib/cse115a/benchmark/validation/untestedFiles";
+import {
+  changedFilesInPatch, fileOfTestId, filesInPatch, modifiedAcrossFiles, suitePlan, unsupportedResult, validateTask, withRebuild,
+  type TaskRow, type ValidationResult,
+} from "@/lib/cse115a/benchmark/validation/validateTask";
 import { CourseRepoAccessError, githubAppConfig, repoInstallationToken, type GitHubAppConfig } from "@/lib/cse115a/githubAppToken";
 
 export type RunOptions = {
@@ -349,4 +355,61 @@ async function validateRowResult(options: ValidateRowOptions): Promise<Validatio
   } finally {
     await resetCheckout(repoDir, row.base_commit).catch(() => undefined);
   }
+}
+
+export type FixCoverageRowOptions = {
+  row: TaskRow;
+  /** A validated result; anything else is returned unchanged. */
+  result: ValidationResult;
+  /** A clone that has `row.base_commit`. Only read: the coverage container clones it (RunPlan.isolatedCheckout). */
+  repoDir: string;
+  /** `coverage.log` lands here. */
+  logDir: string;
+  cacheDir?: string;
+  timeoutSeconds?: number;
+  log?: (line: string) => void;
+  /** Runs the coverage plans; Docker when omitted. Tests hand in a fake. */
+  runner?: SuiteRunner;
+};
+
+/**
+ * Adds `fix_coverage` to a validated result and re-derives `untested_files` from it
+ * (withFixCoverage): detects the environment on the post-fix tree again (the detection is
+ * deterministic, and a result whose image or package folder no longer match is not measured), runs
+ * the coverage plans, classifies the changed files. Never throws and never changes the verdict,
+ * reason, detail or test lists: every failure is `status: "unavailable"` with a one-line reason.
+ */
+export async function fixCoverageRow(options: FixCoverageRowOptions): Promise<ValidationResult> {
+  const { row, result, repoDir } = options;
+  if (result.validation_status !== "validated") return result;
+  const log = options.log ?? (() => {});
+  const changedCount = changedFilesInPatch(row.patch).length;
+  let importRule: string[] | null = null;
+  let coverage: FixCoverage;
+  try {
+    coverage = await withPatchedWorktree(repoDir, row.base_commit, [row.test_patch, row.patch], async (dir) => {
+      const read = (path: string) => fileIn(dir, path);
+      const testFiles = filesInPatch(row.test_patch);
+      const env = await detectEnvironment({ testFiles, read, workflowFiles: await workflowFiles(dir) });
+      try {
+        const provingTestFiles = [...new Set([...result.FAIL_TO_PASS, ...result.ABSENT_TO_PASS].map(fileOfTestId))];
+        importRule = await untestedFiles({ changedFiles: changedFilesInPatch(row.patch), provingTestFiles, read, packageDir: env.supported ? env.packageDir : result.package_dir ?? "" });
+      } catch {
+        importRule = null;
+      }
+      if (!env.supported) return unavailableCoverage(`environment not supported now: ${env.detail}`, changedCount);
+      if (env.image !== result.image || env.packageDir !== (result.package_dir ?? "")) {
+        return unavailableCoverage(`the environment detected now (${env.image} in ${env.packageDir || "."}) differs from the validated run's (${result.image} in ${result.package_dir || "."})`, changedCount);
+      }
+      await mkdir(options.logDir, { recursive: true });
+      const runner = options.runner ?? new DockerSuiteRunner(options.logDir, options.cacheDir);
+      return measureFixCoverage({
+        row, result, env, runner, read, log,
+        plan: (suite) => suitePlan({ row, repoDir, timeoutSeconds: options.timeoutSeconds }, suite),
+      });
+    });
+  } catch (error) {
+    coverage = unavailableCoverage(`coverage run failed: ${firstLine(errorText(error))}`, changedCount);
+  }
+  return withFixCoverage(result, coverage, importRule);
 }

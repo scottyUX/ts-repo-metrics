@@ -1,6 +1,7 @@
 // The pure parts of the batch: reading a list of rows, deciding which rows can run at all, and
 // summarizing results. The script around it does the cloning and Docker.
 
+import { coverageCell } from "@/lib/cse115a/benchmark/validation/fixCoverage";
 import { STAFF_REBUILT_FLAG } from "@/lib/cse115a/benchmark/validation/rebuildRow";
 import { withRebuild, type TaskRow, type ValidationReason, type ValidationResult } from "@/lib/cse115a/benchmark/validation/validateTask";
 import { HARBOR_GOLD_FAILED_FLAG, managedFlags, PROOF_OUTSIDE_FLAG, REASON_FLAG_PREFIX, resultGold, staleCaptureFlags, UNTESTED_FILES_FLAG } from "@/lib/cse115a/benchmark/validation/writeback";
@@ -47,9 +48,11 @@ export type Summary = {
   untestedFiles: number;
   /** Harbor gold checks among validated rows (harbor_gold): passed, failed, skipped. */
   gold: { passed: number; failed: number; skipped: number };
+  /** Coverage runs among validated rows (fix_coverage): measured, partial, unavailable. */
+  fixCoverage: { measured: number; partial: number; unavailable: number };
   funnel: FunnelStage[];
-  /** `gold` is the gold check's status, "" when it was not run. */
-  rows: Array<{ instance_id: string; status: string; reason: string; f2p: number; a2p: number; p2p: number; regressions: number; flaky: number; outside: number; untested: number; seconds: number; gold: string }>;
+  /** `gold` is the gold check's status, "" when it was not run; `coverage` the coverageCell, "" when not run. */
+  rows: Array<{ instance_id: string; status: string; reason: string; f2p: number; a2p: number; p2p: number; regressions: number; flaky: number; outside: number; untested: number; seconds: number; gold: string; coverage: string }>;
 };
 
 /**
@@ -113,8 +116,10 @@ export function summarize(results: ValidationResult[]): Summary {
       regressions: r.regressions.length + r.regression_skips.length, flaky: r.flaky.length,
       outside: (r.proof_outside_test_patch ?? []).length, untested: (r.untested_files ?? []).length, seconds,
       gold: resultGold(r)?.status ?? "",
+      coverage: r.validation_status === "validated" ? coverageCell(r.fix_coverage) : "",
     };
   });
+  const coverages = results.filter((r) => r.validation_status === "validated").map((r) => r.fix_coverage?.status);
   const golds = results.map(resultGold);
   return {
     total: results.length,
@@ -127,6 +132,11 @@ export function summarize(results: ValidationResult[]): Summary {
       passed: golds.filter((g) => g?.status === "passed").length,
       failed: golds.filter((g) => g?.status === "failed").length,
       skipped: golds.filter((g) => g?.status === "skipped").length,
+    },
+    fixCoverage: {
+      measured: coverages.filter((s) => s === "measured").length,
+      partial: coverages.filter((s) => s === "partial").length,
+      unavailable: coverages.filter((s) => s === "unavailable").length,
     },
     funnel: funnel(results),
     rows,
@@ -143,6 +153,12 @@ function goldHeadline(gold: Summary["gold"]): string {
   return `; ${checked} gold-checked: ${gold.passed} passed, ${gold.failed} failed${gold.skipped ? ` (${gold.skipped} skipped)` : ""}`;
 }
 
+/** `; fix coverage: M measured, P partial, U unavailable`; empty when no row has a coverage run. */
+function coverageHeadline(c: Summary["fixCoverage"] | undefined): string {
+  if (!c || !(c.measured + c.partial + c.unavailable)) return "";
+  return `; fix coverage: ${c.measured} measured, ${c.partial} partial, ${c.unavailable} unavailable`;
+}
+
 /** The summary as Markdown: headline, funnel table, per-row table. Ready for Slack or the deliverable note. */
 export function summaryMarkdown(summary: Summary): string {
   const lines = [
@@ -150,15 +166,16 @@ export function summaryMarkdown(summary: Summary): string {
       (Object.keys(summary.byReason).length ? ` (${Object.entries(summary.byReason).map(([k, v]) => `${k}: ${v}`).join(", ")})` : "") +
       (summary.proofOutsideTestPatch ? `; ${summary.proofOutsideTestPatch} flagged proof_outside_test_patch` : "") +
       (summary.untestedFiles ? `; ${summary.untestedFiles} flagged untested_files` : "") +
-      goldHeadline(summary.gold),
+      goldHeadline(summary.gold) +
+      coverageHeadline(summary.fixCoverage),
     "",
     "| stage | reached | dropped |",
     "|---|---|---|",
     ...summary.funnel.map((f) => `| ${f.stage} | ${f.reached} | ${f.dropped} |`),
     "",
-    "| instance_id | status | reason | F2P | A2P | P2P | regressions | flaky | outside | seconds | gold |",
-    "|---|---|---|---|---|---|---|---|---|---|---|",
-    ...summary.rows.map((r) => `| ${r.instance_id} | ${r.status} | ${r.reason} | ${r.f2p} | ${r.a2p} | ${r.p2p} | ${r.regressions} | ${r.flaky} | ${r.outside} | ${r.seconds} | ${r.gold} |`),
+    "| instance_id | status | reason | F2P | A2P | P2P | regressions | flaky | outside | seconds | gold | coverage |",
+    "|---|---|---|---|---|---|---|---|---|---|---|---|",
+    ...summary.rows.map((r) => `| ${r.instance_id} | ${r.status} | ${r.reason} | ${r.f2p} | ${r.a2p} | ${r.p2p} | ${r.regressions} | ${r.flaky} | ${r.outside} | ${r.seconds} | ${r.gold} | ${r.coverage ?? ""} |`),
   ];
   return lines.join("\n") + "\n";
 }

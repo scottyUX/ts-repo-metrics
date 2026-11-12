@@ -7,7 +7,8 @@ import { join } from "node:path";
 import { preflight, rejectedWithoutRun, summarize, summaryMarkdown, writebackSql, type Summary } from "@/lib/cse115a/benchmark/validation/batch";
 import { withRepoPublic, type HarborRow } from "@/lib/cse115a/benchmark/validation/harbor";
 import { goldCheck, withGold, type HarborRunner } from "@/lib/cse115a/benchmark/validation/harborGold";
-import { assertRow, imageDigest, repoIsPublic, validateRow } from "@/lib/cse115a/benchmark/validation/runRow";
+import { unavailableCoverage, withFixCoverage } from "@/lib/cse115a/benchmark/validation/fixCoverage";
+import { assertRow, fixCoverageRow, imageDigest, repoIsPublic, validateRow } from "@/lib/cse115a/benchmark/validation/runRow";
 import type { SuiteRunner } from "@/lib/cse115a/benchmark/validation/runner";
 import { recordSnapshot, rowCheckout, withRepoSource, type BatchGit } from "@/lib/cse115a/benchmark/validation/snapshots";
 import type { TaskRow, ValidationResult } from "@/lib/cse115a/benchmark/validation/validateTask";
@@ -139,4 +140,63 @@ export async function goldOnly(options: { rows: HarborRow[]; out: string; harbor
   }
   const { summary, results } = await writeBatchFiles(options.out);
   return { checked, summary, all: results.length };
+}
+
+/**
+ * The coverage run for one validated result (--fix-coverage, and each row of --fix-coverage-only):
+ * the row's checkout as a normal run gets it (the clone in `repos/`, else the snapshot fallback),
+ * then fixCoverageRow. A checkout that cannot be had is `fix_coverage.status: "unavailable"` with the
+ * reason; nothing here throws or touches the verdict.
+ */
+export async function fixCoverageBatchRow(ctx: BatchRun, row: TaskRow, result: ValidationResult, logDir: string): Promise<ValidationResult> {
+  if (result.validation_status !== "validated") return result;
+  let repoDir: string;
+  try {
+    assertRow(row);
+    repoDir = (await rowCheckout({ out: ctx.out, row, clones: ctx.clones, log: ctx.log, git: ctx.git, snapshotsFrom: ctx.snapshotsFrom })).repoDir;
+  } catch (error) {
+    return withFixCoverage(result, unavailableCoverage(`no checkout: ${firstLine(error)}`), null);
+  }
+  return fixCoverageRow({ row, result, repoDir, logDir, cacheDir: join(ctx.out, "cache"), timeoutSeconds: ctx.timeoutSeconds, log: ctx.log, runner: ctx.runner });
+}
+
+/** `fix coverage measured: 3/5 files, 41/60 lines` and the like, for the log. */
+export function coverageLogLine(result: ValidationResult): string {
+  const c = result.fix_coverage;
+  if (!c) return "fix coverage not run";
+  if (c.status === "unavailable") return `fix coverage unavailable: ${c.reason ?? ""}`;
+  return `fix coverage ${c.status}: ${c.files_run}/${c.files_changed} files, ${c.lines_covered}/${c.lines_executable} lines${c.reason ? ` (${c.reason})` : ""}`;
+}
+
+/**
+ * The coverage-only pass (--fix-coverage-only): for each row whose result file exists and is
+ * validated, run the coverage run and write that result file back with only `fix_coverage`,
+ * `untested_files` and `untested_files_source` changed; then rewrite the summary files. Needs the
+ * checkout and Docker, but never runs the three states. Rows without a result, or with a verdict
+ * other than validated (env_error included), are logged and left alone.
+ */
+export async function fixCoverageOnly(ctx: BatchRun, rows: TaskRow[]): Promise<{ measured: ValidationResult[]; summary: Summary; all: number }> {
+  const measured: ValidationResult[] = [];
+  for (const [index, row] of rows.entries()) {
+    const prefix = `[${index + 1}/${rows.length}] ${row.instance_id}`;
+    const file = join(ctx.out, "results", `${row.instance_id}.json`);
+    let result: ValidationResult;
+    try {
+      result = JSON.parse(await readFile(file, "utf8")) as ValidationResult;
+    } catch {
+      ctx.log(`${prefix}: no result in the batch, skipping`);
+      continue;
+    }
+    if (result.validation_status !== "validated") {
+      ctx.log(`${prefix}: ${result.validation_status} (${result.reason}), skipping`);
+      continue;
+    }
+    ctx.log(prefix);
+    const updated = await fixCoverageBatchRow(ctx, row, result, join(ctx.out, "logs", row.instance_id));
+    await writeFile(file, JSON.stringify(updated, null, 2) + "\n");
+    ctx.log(`  ${coverageLogLine(updated)}`);
+    measured.push(updated);
+  }
+  const { summary, results } = await writeBatchFiles(ctx.out);
+  return { measured, summary, all: results.length };
 }

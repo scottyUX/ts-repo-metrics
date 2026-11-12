@@ -11,7 +11,10 @@ import type { ValidationResult } from "@/lib/cse115a/benchmark/validation/valida
 export const REASON_FLAG_PREFIX = "validation_reason:";
 /** Set on a row whose proving tests include one outside the files the test patch touched. */
 export const PROOF_OUTSIDE_FLAG = "proof_outside_test_patch";
-/** Set on a validated row whose patch changes code files no proving test reaches by imports (untestedFiles.ts). */
+/**
+ * Set on a validated row whose `untested_files` is non-empty: changed code files the proving tests
+ * do not run, from the coverage run when there was one (fixCoverage.ts), else from imports (untestedFiles.ts).
+ */
 export const UNTESTED_FILES_FLAG = "untested_files";
 /** Set on a validated row whose Harbor gold check failed (harbor_gold.status === "failed"). */
 export const HARBOR_GOLD_FAILED_FLAG = "harbor_gold_failed";

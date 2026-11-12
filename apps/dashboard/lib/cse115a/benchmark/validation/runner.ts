@@ -49,11 +49,25 @@ export type RunPlan = {
    * goes into log file names (`r0a.python-backend.log`) and error messages. Unset for one suite.
    */
   label?: string;
+  /**
+   * Run in a container-local clone instead of the host checkout: the checkout is mounted read-only
+   * at /src and cloned (sharing its objects) into /work, so nothing the run installs or writes
+   * reaches the host. Used by the coverage run (coverageRun.ts), whose extra tools must not leak
+   * into later runs on the same clone.
+   */
+  isolatedCheckout?: boolean;
+  /** Extra files written into /patches next to the patches (name → contents). */
+  extraFiles?: Record<string, string>;
 };
+
+/** What a coverage run leaves: the test results, and every file under $REPORT_DIR/coverage (path inside it → text). */
+export type CoverageRun = { results: RunResults; files: Record<string, string> };
 
 /** One run of the suite in one state. Implemented by Docker, or by a fake in tests. `attempt` is 1-based. */
 export interface SuiteRunner {
   runSuite(plan: RunPlan, state: State, attempt: number): Promise<RunResults>;
+  /** One R2 run of a coverage plan (coverageRun.ts); optional, so a runner without it measures nothing. */
+  runCoverage?(plan: RunPlan): Promise<CoverageRun>;
 }
 
 export type ThreeStates = { r0: StateRuns; r1: StateRuns; r2: StateRuns; timings: Record<string, number> };
@@ -116,6 +130,8 @@ export function containerScript(plan: RunPlan, state: State): string {
     ...(plan.notes ?? []).map((note) => `# ${note}`),
     ...serviceProvenance(services),
     "set -e",
+    // The host checkout is at /src (read-only); its objects are shared, not copied.
+    ...(plan.isolatedCheckout ? ["git config --global --add safe.directory '*'", "git clone -q --shared --no-checkout /src /work"] : []),
     "cd /work",
     `git checkout -q -f ${plan.baseCommit}`,
     "git clean -fdq",
@@ -241,7 +257,20 @@ export class DockerSuiteRunner implements SuiteRunner {
     this.runId = deps.runId ?? (() => randomBytes(4).toString("hex"));
   }
 
-  async runSuite(plan: RunPlan, state: State, attempt: number): Promise<RunResults> {
+  runSuite(plan: RunPlan, state: State, attempt: number): Promise<RunResults> {
+    return this.runContainer(plan, state, runName(state, attempt), (patches) => readReports(join(patches, "reports")));
+  }
+
+  /** The coverage run: R2 once, logged as `coverage.log`, through the same container path as every other run. */
+  runCoverage(plan: RunPlan): Promise<CoverageRun> {
+    return this.runContainer(plan, "r2", "coverage", async (patches) => ({
+      results: await readReports(join(patches, "reports")),
+      files: await readCoverageFiles(join(patches, "reports", "coverage")),
+    }));
+  }
+
+  /** One container run of `plan` in `state`; `collect` reads what it left in the patches folder before that is removed. */
+  private async runContainer<T>(plan: RunPlan, state: State, name: string, collect: (patches: string) => Promise<T>): Promise<T> {
     const patches = await mkdtemp(join(tmpdir(), "hecate-validate-"));
     try {
       await writeFile(join(patches, "test.diff"), plan.testPatch);
@@ -249,8 +278,8 @@ export class DockerSuiteRunner implements SuiteRunner {
       await writeFile(join(patches, "run.sh"), containerScript(plan, state));
       await writeFile(join(patches, "reporter.mjs"), NODE_TEST_REPORTER_SOURCE);
       await writeFile(join(patches, `${PYTEST_REPORTER_MODULE}.py`), PYTEST_REPORTER_SOURCE);
+      for (const [file, text] of Object.entries(plan.extraFiles ?? {})) await writeFile(join(patches, file), text);
       const image = plan.image ?? "node:22-bookworm";
-      const name = runName(state, attempt);
       // Several suites share a run: each gets its own log file and says which it was in errors.
       const logName = plan.label ? `${name}.${plan.label.replace(/[^A-Za-z0-9_.-]+/g, "-")}` : name;
       const where = plan.label ? `${name} (${plan.label})` : name;
@@ -259,7 +288,7 @@ export class DockerSuiteRunner implements SuiteRunner {
         "run", "--rm",
         ...Object.entries({ ...(plan.env ?? {}), ...cacheEnv }).flatMap(([k, v]) => ["-e", `${k}=${v}`]),
         ...(this.cacheDir ? ["-v", `${this.cacheDir}:/cache`] : []),
-        "-v", `${plan.repoDir}:/work`,
+        "-v", plan.isolatedCheckout ? `${plan.repoDir}:/src:ro` : `${plan.repoDir}:/work`,
         "-v", `${patches}:/patches`,
         "-w", "/work",
         image, "bash", "/patches/run.sh",
@@ -295,7 +324,7 @@ export class DockerSuiteRunner implements SuiteRunner {
           await this.sleep(15_000);
         }
       }
-      return readReports(join(patches, "reports"));
+      return await collect(patches);
     } finally {
       await rm(patches, { recursive: true, force: true });
     }
@@ -387,6 +416,23 @@ export async function readReports(dir: string): Promise<RunResults> {
   return results;
 }
 
+/** Every file under `dir`, recursively, as path (relative to `dir`) → text; {} when there is no such folder. */
+export async function readCoverageFiles(dir: string): Promise<Record<string, string>> {
+  const files: Record<string, string> = {};
+  let entries;
+  try {
+    entries = await readdir(dir, { recursive: true, withFileTypes: true });
+  } catch {
+    return files;
+  }
+  for (const entry of entries) {
+    if (!entry.isFile()) continue;
+    const full = join(entry.parentPath, entry.name);
+    files[full.slice(dir.length + 1).split("\\").join("/")] = await readFile(full, "utf8");
+  }
+  return files;
+}
+
 /** Thrown by `exec`; `timedOut` tells a hung run from one that died. */
 export class ExecError extends Error {
   constructor(message: string, readonly timedOut: boolean, readonly code: number | null = null) {
@@ -420,9 +466,24 @@ function exec(command: string, args: string[], timeoutMs: number): Promise<strin
  */
 export class FakeSuiteRunner implements SuiteRunner {
   calls: Array<{ state: State; attempt: number }> = [];
-  constructor(private readonly scripted: Partial<Record<string, RunResults>>) {}
+  /** Every coverage plan run, in order. */
+  coveragePlans: RunPlan[] = [];
+  /**
+   * `coverage`: what runCoverage returns, for every plan or as a function of the plan; an Error is
+   * thrown. Without it, runCoverage returns no results and no files.
+   */
+  constructor(
+    private readonly scripted: Partial<Record<string, RunResults>>,
+    private readonly coverage?: CoverageRun | Error | ((plan: RunPlan) => CoverageRun | Error),
+  ) {}
   async runSuite(_plan: RunPlan, state: State, attempt: number): Promise<RunResults> {
     this.calls.push({ state, attempt });
     return this.scripted[runName(state, attempt)] ?? this.scripted[state] ?? {};
+  }
+  async runCoverage(plan: RunPlan): Promise<CoverageRun> {
+    this.coveragePlans.push(plan);
+    const out = typeof this.coverage === "function" ? this.coverage(plan) : this.coverage;
+    if (out instanceof Error) throw out;
+    return out ?? { results: {}, files: {} };
   }
 }

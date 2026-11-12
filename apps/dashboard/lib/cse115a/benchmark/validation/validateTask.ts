@@ -7,6 +7,7 @@
 import { compareRuns, type Comparison } from "@/lib/cse115a/benchmark/validation/compareRuns";
 import { envLanguage, installPlan, suiteLabel, type Environment, type NodeSource, type SuiteLanguage, type Unsupported } from "@/lib/cse115a/benchmark/validation/environment";
 import { containerScript, InstallError, runThreeStates, SuiteCollisionError, type RunPlan, type SuiteRunner, type ThreeStates } from "@/lib/cse115a/benchmark/validation/runner";
+import type { FixCoverage, UntestedSource } from "@/lib/cse115a/benchmark/validation/fixCoverage";
 import { harborEnvFrom, type HarborEnv, type HarborGold } from "@/lib/cse115a/benchmark/validation/harbor";
 import type { RebuildProvenance } from "@/lib/cse115a/benchmark/validation/rebuildRow";
 import { modifiedTests, unmatchedStaticIds } from "@/lib/cse115a/benchmark/validation/testIds";
@@ -177,11 +178,24 @@ export type ValidationResult = {
    */
   harbor_gold?: HarborGold;
   /**
-   * Validated rows only, present only when non-empty: code files the source patch changes that no
-   * proving test file reaches through imports (untestedFiles.ts). Diagnostic, not a rejection; the
+   * Validated rows only, present only when non-empty: code files the source patch changes that the
+   * proving tests do not run. From the coverage run when `fix_coverage` measured something (the
+   * `not_run` files, plus the `not_measured` ones the import rule flags), else from the import rule
+   * (untestedFiles.ts); `untested_files_source` says which. Diagnostic, not a rejection; the
    * write-back carries it as the `untested_files` flag.
    */
   untested_files?: string[];
+  /**
+   * How `untested_files` was made: `coverage`, `imports`, or `mixed` (coverage plus the import rule
+   * for files coverage could not measure). Present only when the coverage run was requested
+   * (`--fix-coverage` / `--fix-coverage-only`); absent, the list is the import rule's.
+   */
+  untested_files_source?: UntestedSource;
+  /**
+   * Validated rows the batch ran `--fix-coverage` or `--fix-coverage-only` on: which changed lines
+   * the proving tests execute (fixCoverage.ts). Never changes the verdict, reason, detail or test lists.
+   */
+  fix_coverage?: FixCoverage;
   /**
    * Present only when the test files form more than one suite (one per language and package): each
    * suite, in the order the runs ran them. The top-level `image`, `package_dir`, `install_dirs`,
@@ -244,8 +258,8 @@ export function neverLoadedDetail(files: string[]): string {
   return `test patch file(s) never loaded after the fix: ${files.join(", ")}; check the run log`;
 }
 
-/** The run plan for one suite's environment. */
-function suitePlan(input: ValidateInput, env: Environment): RunPlan {
+/** The run plan for one suite's environment. Also the base of the coverage run (coverageRun.ts). */
+export function suitePlan(input: Pick<ValidateInput, "row" | "repoDir" | "timeoutSeconds">, env: Environment): RunPlan {
   const { row } = input;
   const plan: RunPlan = {
     repoDir: input.repoDir,
