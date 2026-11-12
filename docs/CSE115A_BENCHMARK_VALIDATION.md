@@ -282,8 +282,8 @@ dropped silently.
 
 For JavaScript, the runner follows the package's own `test` script, split on `&&`; segments that
 are not a runner (a build, a typecheck) run as written. A row whose test files are all Python runs
-pytest (below); one whose test files mix Python and JavaScript is `env_unsupported`. Four runners
-are supported:
+pytest (below); one whose test files mix Python and JavaScript, or sit in two packages, runs one
+suite per language and package (see "More than one test suite"). Four runners are supported:
 
 | Runner | Command | `log_parser` |
 |---|---|---|
@@ -380,6 +380,55 @@ SWE-bench Pro (a per-task `parser.py` emitting JSON). The image, install command
 ID format and mount-prefix rule are this validator's own choices, fixed by the fixture run in
 the spike; the ID format matches `extractTests.ts` because the row's static ids are in it.
 
+## More than one test suite
+
+A task's tests can live in more than one place: a FastAPI back end tested with pytest and a React
+front end tested with Vitest in the same PR, or a `client/` and a `server/` each with its own
+`package.json` and runner. The test patch's test files are split into **suites**, one per language
+and package (`suiteGroups` in `environment.ts`). The package is what the single-package detection
+finds for a file: the nearest `package.json` for JavaScript and TypeScript, the nearest Python
+manifest (`pyproject.toml`, `requirements.txt`, `setup.py`, `setup.cfg`) for Python. A file with
+no package above it joins its language's only package when there is one, else the repository
+root. In a row with both languages, files that are neither (fixtures, snapshots) join no suite; in
+a JavaScript-only row they count as before. Suites are ordered by package directory, then
+language.
+
+Each suite's environment is detected exactly as a single suite's is (image, package manager,
+installs, test steps, Node version, and the CI job, install steps and database service for that
+suite's package), from that suite's files only. At most 4 suites; more is `env_unsupported`
+("test files form 5 suites, more than 4: …"). A suite that is itself unsupported (Mocha, Bun)
+makes the row `env_unsupported` with a detail naming it ("suite javascript in frontend: …"). A
+row with one suite is detected, run and recorded exactly as before.
+
+**Runs.** In each of the nine runs (three states, three times each), every suite runs in its own
+fresh container on the same checkout state, one after another, with its own installs and, when
+its CI job has one, its own database sidecar; a suite whose CI has none gets none. Timeouts apply
+per suite run. The suites' results for that run are merged into one map; test ids are
+file-qualified, so two suites cannot report the same id unless they ran the same file, which is
+`env_error` ("test id reported by two suites in r0a: …"). A failed install (or schema step, or a
+database that does not start) in any suite is `env_error`, as for one suite. `compareRuns` then
+runs unchanged on the merged maps: a back-end `FAIL_TO_PASS` and a front-end `PASS_TO_PASS`
+validate together, and a regression in either suite rejects the row. Each suite's run log is
+`logs/<instance_id>/<run>.<suite>.log` (`r0a.python-in-backend.log`).
+
+**Recorded.** The result gains `suites`, only when there is more than one: `{ language,
+package_dir, runners, image, node_source, services }` per suite, in run order (`services` by
+name and image). `image`, `package_dir`, `install_dirs`, `node_source` and `services` describe the
+first suite; `eval_script` holds every suite's script in order, each under a line `# ---- suite
+<i> of <n>: <language> in <package> ----`; `log_parser` joins the suites' parsers with `+`
+(`pytest-json+vitest-json`). `harbor_env` keeps the first suite's recipe and adds `suites`, every
+suite's recipe; the batch puts the image digest in the first. The batch summary shows `2 suites`
+in the reason cell of a validated multi-suite row (after `untested files: N`), and the census lists
+such a repository as supported, one value per suite in each column, with the suites in the note.
+
+**Harbor.** A Harbor task has one verifier, so a multi-suite row is not exported yet: both the
+course website's zip and `scripts/exportHarbor.ts` skip it with "Harbor export for tasks with
+more than one test suite is not built yet", the way database rows are skipped, and the gold check
+records it as `skipped` with that reason.
+
+`untested_files` is unchanged: imports are resolved with the first suite's package directory as
+the Python fallback root.
+
 ## Output
 
 The validator prints one JSON object and writes nothing to the database:
@@ -389,7 +438,7 @@ The validator prints one JSON object and writes nothing to the database:
   FAIL_TO_PASS, ABSENT_TO_PASS, PASS_TO_PASS, FAIL_TO_FAIL, regressions, flaky, skipped,
   judged_from_base, modified_tests, unmatched_static_ids, validation_status, reason, timings,
   install_dirs, node_source?, test_files_never_loaded?, services?, harbor_env?, untested_files?,
-  repo_source?, harbor_gold? }
+  repo_source?, harbor_gold?, suites? }
 ```
 
 `untested_files` (validated rows only, present only when non-empty) lists the code files the
@@ -566,6 +615,8 @@ code, and the same 409 while the consent wording is not approved), one folder pe
 - no `harbor_env` on the row (validated before the column existed): re-run the validator on it
   and write back;
 - a database service in the runs: a Harbor task is one image with no sidecar, so these wait;
+- more than one test suite (see "More than one test suite"): "Harbor export for tasks with more
+  than one test suite is not built yet";
 - a short `base_commit` or a repo that is not `owner/name`;
 - `harbor_env.repo_public` is `false`: "repository is private; the task can only be built from a
   snapshot" (see "Private repositories");
@@ -744,6 +795,6 @@ npx tsx --tsconfig apps/dashboard/tsconfig.json apps/dashboard/scripts/validateB
 
 Services other than Postgres (MySQL, Redis, MongoDB), a database the tests expect without a CI
 service for it, browser and end-to-end runners, Bun, Python runners other than pytest, Harbor
-export for rows with a database service (a Harbor task is one image, with no sidecar), and
-scheduled runs after each sprint. Each is a separate change once the dry
+export for rows with a database service (a Harbor task is one image, with no sidecar) or with
+more than one test suite, and scheduled runs after each sprint. Each is a separate change once the dry
 run is trusted.
