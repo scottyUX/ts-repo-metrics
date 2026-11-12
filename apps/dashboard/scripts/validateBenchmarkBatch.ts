@@ -1,7 +1,7 @@
 // Validates a list of benchmark rows in Docker, one after another, and writes one result JSON per
 // row plus a summary. Dry run: it writes nothing to Supabase. Run from the repo root:
 //
-//   npx tsx --tsconfig apps/dashboard/tsconfig.json apps/dashboard/scripts/validateBenchmarkBatch.ts ROWS.json --out DIR [--snapshots | --snapshot-only] [--snapshots-from DIR] [--only id,id] [--redo] [--timeout SECONDS]
+//   npx tsx --tsconfig apps/dashboard/tsconfig.json apps/dashboard/scripts/validateBenchmarkBatch.ts ROWS.json --out DIR [--snapshots | --snapshot-only] [--snapshots-from DIR] [--gold-check | --gold-only] [--gold-timeout SECONDS] [--only id,id] [--redo] [--timeout SECONDS]
 //
 // ROWS.json is a JSON array of rows (Supabase: `select json_agg(t) from (...) t`) or JSON Lines.
 // DIR gets: results/<instance_id>.json, logs/<instance_id>/<run>.log, repos/<owner>__<name> (one
@@ -26,24 +26,37 @@
 // DIR/snapshots/), the bundle is cloned into repos-from-snapshot/<instance_id>/ and the row is
 // validated from it. The result says repo_source: "snapshot" and its detail carries the GitHub
 // failure; the summary's reason cell says "from snapshot". With no bundle, env_error as before.
+//
+// --gold-check: after a row validates, build its Harbor task from the bundle into
+// harbor-gold/<task>/ and run `harbor run` with the oracle agent (must score 1.0) and the nop agent
+// (must score 0.0), jobs in harbor-gold/jobs/. Recorded as harbor_gold and harbor_env.gold; never
+// changes the verdict. Skipped (with the reason) when Harbor is not installed, the row had a
+// database service, or there is no bundle. --gold-timeout SECONDS limits each Harbor run (default
+// 1200). --gold-only: only that, for the rows whose result file exists and is validated, updating
+// those files in place and rewriting the summary files; no clone, no Docker validation.
 
 import { access, mkdir, readFile, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { parseRows, summaryMarkdown } from "@/lib/cse115a/benchmark/validation/batch";
-import { batchRun, validateBatchRow, writeBatchFiles } from "@/lib/cse115a/benchmark/validation/batchRun";
+import { batchRun, goldOnly, validateBatchRow, writeBatchFiles } from "@/lib/cse115a/benchmark/validation/batchRun";
+import type { HarborRow } from "@/lib/cse115a/benchmark/validation/harbor";
+import { CliHarborRunner, GOLD_TIMEOUT_SECONDS, goldCheck, withGold } from "@/lib/cse115a/benchmark/validation/harborGold";
 import { snapshotOnly } from "@/lib/cse115a/benchmark/validation/snapshots";
 import type { ValidationResult } from "@/lib/cse115a/benchmark/validation/validateTask";
 
-const USAGE = "Usage: validateBenchmarkBatch.ts ROWS.json --out DIR [--snapshots | --snapshot-only] [--snapshots-from DIR] [--only id,id] [--redo] [--timeout SECONDS]";
+const USAGE = "Usage: validateBenchmarkBatch.ts ROWS.json --out DIR [--snapshots | --snapshot-only] [--snapshots-from DIR] [--gold-check | --gold-only] [--gold-timeout SECONDS] [--only id,id] [--redo] [--timeout SECONDS]";
 
 function parseArgs(argv: string[]) {
-  const args = { rowsPath: "", out: "", snapshots: false, snapshotOnly: false, snapshotsFrom: "", only: [] as string[], redo: false, timeoutSeconds: 900 };
+  const args = { rowsPath: "", out: "", snapshots: false, snapshotOnly: false, snapshotsFrom: "", goldCheck: false, goldOnly: false, goldTimeoutSeconds: GOLD_TIMEOUT_SECONDS, only: [] as string[], redo: false, timeoutSeconds: 900 };
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     if (arg === "--out") args.out = argv[++i] ?? "";
     else if (arg === "--snapshots") args.snapshots = true;
     else if (arg === "--snapshot-only") args.snapshotOnly = true;
     else if (arg === "--snapshots-from") args.snapshotsFrom = argv[++i] ?? "";
+    else if (arg === "--gold-check") args.goldCheck = true;
+    else if (arg === "--gold-only") args.goldOnly = true;
+    else if (arg === "--gold-timeout") args.goldTimeoutSeconds = Number(argv[++i]);
     else if (arg === "--only") args.only = (argv[++i] ?? "").split(",").map((s) => s.trim()).filter(Boolean);
     else if (arg === "--redo") args.redo = true;
     else if (arg === "--timeout") args.timeoutSeconds = Number(argv[++i]);
@@ -52,6 +65,9 @@ function parseArgs(argv: string[]) {
   }
   if (!args.rowsPath || !args.out) throw new Error(USAGE);
   if (args.snapshots && args.snapshotOnly) throw new Error("--snapshots and --snapshot-only do not go together: --snapshot-only already writes the bundles");
+  if (args.goldOnly && (args.snapshotOnly || args.snapshots || args.redo || args.goldCheck)) throw new Error("--gold-only runs only the gold check on existing results: it does not go with --snapshots, --snapshot-only, --redo or --gold-check");
+  if (args.snapshotOnly && args.goldCheck) throw new Error("--snapshot-only validates nothing, so there is nothing to gold-check");
+  if (!(args.goldTimeoutSeconds > 0)) throw new Error("--gold-timeout needs a number of seconds");
   return args;
 }
 
@@ -75,6 +91,15 @@ async function main() {
     await snapshotOnly({ rows, out, redo: args.redo, log, print: (line) => console.log(line) });
     return;
   }
+  const harbor = new CliHarborRunner();
+  const goldTimeoutMs = args.goldTimeoutSeconds * 1000;
+  if (args.goldOnly) {
+    log(`${rows.length} row(s), gold check only; output in ${out}`);
+    const { summary } = await goldOnly({ rows: rows as HarborRow[], out, harbor, timeoutMs: goldTimeoutMs, log });
+    console.log(summaryMarkdown(summary));
+    log("Dry run, nothing written to the database.");
+    return;
+  }
   await mkdir(join(out, "results"), { recursive: true });
   await mkdir(join(out, "cache"), { recursive: true });
   const startedAt = Date.now();
@@ -89,7 +114,13 @@ async function main() {
       continue;
     }
     log(`[${index + 1}/${rows.length}] ${row.instance_id}`);
-    const result: ValidationResult = await validateBatchRow(ctx, row, join(out, "logs", row.instance_id));
+    let result: ValidationResult = await validateBatchRow(ctx, row, join(out, "logs", row.instance_id));
+    // The gold check: recorded next to the verdict, never changes it.
+    if (args.goldCheck && result.validation_status === "validated") {
+      const gold = await goldCheck({ out, row: row as HarborRow, result, harbor, timeoutMs: goldTimeoutMs, log });
+      result = withGold(result, gold);
+      log(`  gold check ${gold.status}${gold.reason ? `: ${gold.reason}` : ""}`);
+    }
     await writeFile(resultFile, JSON.stringify(result, null, 2) + "\n");
     log(`  ${result.validation_status}${result.reason ? ` (${result.reason})` : ""}${result.repo_source === "snapshot" ? ", from snapshot" : ""}`);
   }

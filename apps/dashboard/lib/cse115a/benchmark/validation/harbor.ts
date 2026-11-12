@@ -44,6 +44,27 @@ export type HarborEnv = {
    * failed for a reason other than access). False keeps the row out of the github-source export.
    */
   repo_public?: boolean;
+  /**
+   * The gold check's outcome (`validateBenchmarkBatch.ts --gold-check` or `--gold-only`), written
+   * back with the recipe. The course website's zip exports a row only when its status is "passed".
+   */
+  gold?: HarborGold;
+};
+
+/**
+ * The Harbor gold check of one task: the oracle (the student's fix) must score 1.0 and nop (no
+ * change) 0.0, with no exceptions. `skipped` when the task cannot be checked on this machine.
+ */
+export type HarborGold = {
+  status: "passed" | "failed" | "skipped";
+  /** Mean reward of the oracle run; null when it did not run or reported none. */
+  oracle: number | null;
+  /** Mean reward of the nop run; null when it did not run or reported none. */
+  nop: number | null;
+  /** Why it failed or was skipped (one line, token-free); null when passed. */
+  reason: string | null;
+  /** ISO time of the check. */
+  checked_at: string;
 };
 
 /** The recipe with `repo_public` set from the batch's check; undefined (not checked) leaves it out. */

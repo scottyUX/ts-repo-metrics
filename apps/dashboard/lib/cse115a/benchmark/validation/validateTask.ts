@@ -7,7 +7,7 @@
 import { compareRuns, type Comparison } from "@/lib/cse115a/benchmark/validation/compareRuns";
 import { installPlan, type Environment, type Unsupported } from "@/lib/cse115a/benchmark/validation/environment";
 import { containerScript, InstallError, runThreeStates, type RunPlan, type SuiteRunner, type ThreeStates } from "@/lib/cse115a/benchmark/validation/runner";
-import { harborEnvFrom, type HarborEnv } from "@/lib/cse115a/benchmark/validation/harbor";
+import { harborEnvFrom, type HarborEnv, type HarborGold } from "@/lib/cse115a/benchmark/validation/harbor";
 import type { RebuildProvenance } from "@/lib/cse115a/benchmark/validation/rebuildRow";
 import { modifiedTests, unmatchedStaticIds } from "@/lib/cse115a/benchmark/validation/testIds";
 import { untestedFiles, type ReadFile } from "@/lib/cse115a/benchmark/validation/untestedFiles";
@@ -171,6 +171,11 @@ export type ValidationResult = {
    * written before the field existed.
    */
   repo_source?: "github" | "snapshot";
+  /**
+   * The Harbor gold check (`--gold-check` / `--gold-only`): the task's oracle and nop runs. Never
+   * changes the verdict; also copied into `harbor_env.gold`. Absent when the check was not run.
+   */
+  harbor_gold?: HarborGold;
   /**
    * Validated rows only, present only when non-empty: code files the source patch changes that no
    * proving test file reaches through imports (untestedFiles.ts). Diagnostic, not a rejection; the

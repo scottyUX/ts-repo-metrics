@@ -2,8 +2,9 @@ import AdmZip from "adm-zip";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { BenchmarkInstance } from "@/lib/cse115a/benchmark/buildInstance";
 import type { ExportCandidate } from "@/lib/cse115a/benchmark/exportJsonl";
-import { harborExport, NO_RECIPE_REASON } from "@/lib/cse115a/benchmark/exportHarbor";
+import { harborExport, NO_RECIPE_REASON, NOT_GOLD_CHECKED_REASON } from "@/lib/cse115a/benchmark/exportHarbor";
 import { PRIVATE_REPO_REASON, type HarborEnv } from "@/lib/cse115a/benchmark/validation/harbor";
+import { HARBOR_MISSING_REASON } from "@/lib/cse115a/benchmark/validation/harborGold";
 
 const state = vi.hoisted(() => ({ approved: false, candidates: [] as unknown[] }));
 
@@ -17,6 +18,8 @@ const recipe: HarborEnv = {
   image: "node:24-bookworm@sha256:8fa9", runners: ["vitest"], package_dir: "", install_steps: [{ cwd: "", command: "npm ci" }],
   test_steps: [{ kind: "vitest", command: "npx vitest run --reporter=json --outputFile=$REPORT_DIR/vitest-0.json --passWithNoTests" }],
   env: { CI: "true" }, services: [], node_source: "default",
+  // The zip exports only gold-checked rows; the existing tests are about other rules.
+  gold: { status: "passed", oracle: 1, nop: 0, reason: null, checked_at: "2026-11-11T00:00:00.000Z" },
 };
 
 /** `"omit"`: a row read before the column existed, with no harbor_env key at all. */
@@ -131,5 +134,41 @@ describe("harborExport, private repositories", () => {
     const checked = harborExport([candidate(instance("team__app-ok-1", { ...recipe, repo_public: true }), true, "validated")]).files;
     expect([...checked.keys()]).toEqual([...unchecked.keys()]);
     for (const [path, text] of unchecked) expect(checked.get(path)).toBe(text);
+  });
+});
+
+describe("9. harborExport, the gold-check gate", () => {
+  const { gold: _gold, ...unchecked } = recipe;
+  void _gold;
+  const failedGold = { status: "failed" as const, oracle: 0, nop: 0, reason: "oracle 0.0", checked_at: "2026-11-11T00:00:00.000Z" };
+  const skippedGold = { status: "skipped" as const, oracle: null, nop: null, reason: HARBOR_MISSING_REASON, checked_at: "2026-11-11T00:00:00.000Z" };
+  const out = harborExport([
+    candidate(instance("team__app-passed-1"), true, "validated"),
+    candidate(instance("team__app-failed-1", { ...recipe, gold: failedGold }), true, "validated"),
+    candidate(instance("team__app-skipped-1", { ...recipe, gold: skippedGold }), true, "validated"),
+    candidate(instance("team__app-unchecked-1", unchecked), true, "validated"),
+    // Existing reasons keep priority over the gold check, with their wording.
+    candidate(instance("team__app-dbfailed-1", { ...recipe, services: [{ name: "postgres", image: "postgres:16" }], gold: failedGold }), true, "validated"),
+    candidate(instance("team__app-privateunchecked-1", { ...unchecked, repo_public: false }), true, "validated"),
+    candidate(instance("team__app-norecipe-1", null), true, "validated"),
+  ]);
+
+  it("exports a row only when harbor_env.gold.status is passed", () => {
+    expect(out.exported).toEqual(["team__app-passed-1"]);
+    expect([...out.files.keys()].filter((p) => p !== "SKIPPED.txt").every((p) => p.startsWith("team__app-passed-1/"))).toBe(true);
+  });
+
+  it("lists failed, skipped and unchecked rows in SKIPPED.txt with the gold line, after the existing reasons", () => {
+    expect(out.skipped).toEqual([
+      { instance_id: "team__app-dbfailed-1", reason: "Harbor export for rows with a database service is not built yet" },
+      { instance_id: "team__app-failed-1", reason: "gold check failed: oracle 0.0" },
+      { instance_id: "team__app-norecipe-1", reason: NO_RECIPE_REASON },
+      { instance_id: "team__app-privateunchecked-1", reason: PRIVATE_REPO_REASON },
+      { instance_id: "team__app-skipped-1", reason: `gold check skipped: ${HARBOR_MISSING_REASON}` },
+      { instance_id: "team__app-unchecked-1", reason: NOT_GOLD_CHECKED_REASON },
+    ]);
+    expect(NOT_GOLD_CHECKED_REASON).toBe("not gold-checked yet; run the batch with --gold-only and write back");
+    expect(out.files.get("SKIPPED.txt")).toContain("team__app-failed-1\tgold check failed: oracle 0.0\n");
+    expect(out.files.get("SKIPPED.txt")).toContain(`team__app-unchecked-1\t${NOT_GOLD_CHECKED_REASON}\n`);
   });
 });

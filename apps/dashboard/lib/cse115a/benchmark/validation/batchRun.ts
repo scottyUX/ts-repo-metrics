@@ -1,11 +1,12 @@
-// One row of a normal batch run and the batch's summary files: the parts of
-// validateBenchmarkBatch.ts that touch the disk, git and Docker, with each of those reachable
+// One row of a normal batch run, the gold-only pass, and the batch's summary files: the parts of
+// validateBenchmarkBatch.ts that touch the disk, git, Docker and Harbor, with each of those reachable
 // through options so tests can hand in fakes.
 
 import { readdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { preflight, rejectedWithoutRun, summarize, summaryMarkdown, writebackSql, type Summary } from "@/lib/cse115a/benchmark/validation/batch";
-import { withRepoPublic } from "@/lib/cse115a/benchmark/validation/harbor";
+import { withRepoPublic, type HarborRow } from "@/lib/cse115a/benchmark/validation/harbor";
+import { goldCheck, withGold, type HarborRunner } from "@/lib/cse115a/benchmark/validation/harborGold";
 import { assertRow, imageDigest, repoIsPublic, validateRow } from "@/lib/cse115a/benchmark/validation/runRow";
 import type { SuiteRunner } from "@/lib/cse115a/benchmark/validation/runner";
 import { recordSnapshot, rowCheckout, withRepoSource, type BatchGit } from "@/lib/cse115a/benchmark/validation/snapshots";
@@ -90,7 +91,7 @@ export async function readAllResults(dir: string): Promise<ValidationResult[]> {
 
 /**
  * Writes summary.json, summary.md and writeback.sql from every result in the folder, not only the
- * rows this invocation touched, so a --only or --redo pass never shrinks them.
+ * rows this invocation touched, so a --only, --redo or --gold-only pass never shrinks them.
  */
 export async function writeBatchFiles(out: string): Promise<{ summary: Summary; results: ValidationResult[] }> {
   const results = await readAllResults(join(out, "results"));
@@ -99,4 +100,38 @@ export async function writeBatchFiles(out: string): Promise<{ summary: Summary; 
   await writeFile(join(out, "summary.md"), summaryMarkdown(summary));
   await writeFile(join(out, "writeback.sql"), writebackSql(results));
   return { summary, results };
+}
+
+/**
+ * The gold-only pass (--gold-only): for each row whose result file exists and is validated, run the
+ * gold check and write that result file back with only `harbor_gold` and `harbor_env.gold` changed;
+ * then rewrite the summary files. No clone, no Docker validation. Rows without a result, or with a
+ * verdict other than validated, are logged and left alone.
+ */
+export async function goldOnly(options: { rows: HarborRow[]; out: string; harbor: HarborRunner; timeoutMs?: number; log?: Log; now?: () => Date }): Promise<{ checked: ValidationResult[]; summary: Summary; all: number }> {
+  const log = options.log ?? (() => {});
+  const checked: ValidationResult[] = [];
+  for (const [index, row] of options.rows.entries()) {
+    const prefix = `[${index + 1}/${options.rows.length}] ${row.instance_id}`;
+    const file = join(options.out, "results", `${row.instance_id}.json`);
+    let result: ValidationResult;
+    try {
+      result = JSON.parse(await readFile(file, "utf8")) as ValidationResult;
+    } catch {
+      log(`${prefix}: no result in the batch, skipping`);
+      continue;
+    }
+    if (result.validation_status !== "validated") {
+      log(`${prefix}: ${result.validation_status} (${result.reason}), skipping`);
+      continue;
+    }
+    log(prefix);
+    const gold = await goldCheck({ out: options.out, row, result, harbor: options.harbor, timeoutMs: options.timeoutMs, now: options.now, log });
+    const updated = withGold(result, gold);
+    await writeFile(file, JSON.stringify(updated, null, 2) + "\n");
+    log(`  gold check ${gold.status}${gold.reason ? `: ${gold.reason}` : ""}`);
+    checked.push(updated);
+  }
+  const { summary, results } = await writeBatchFiles(options.out);
+  return { checked, summary, all: results.length };
 }

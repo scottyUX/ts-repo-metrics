@@ -3,7 +3,7 @@
 
 import { STAFF_REBUILT_FLAG } from "@/lib/cse115a/benchmark/validation/rebuildRow";
 import { withRebuild, type TaskRow, type ValidationReason, type ValidationResult } from "@/lib/cse115a/benchmark/validation/validateTask";
-import { managedFlags, PROOF_OUTSIDE_FLAG, REASON_FLAG_PREFIX, staleCaptureFlags, UNTESTED_FILES_FLAG } from "@/lib/cse115a/benchmark/validation/writeback";
+import { HARBOR_GOLD_FAILED_FLAG, managedFlags, PROOF_OUTSIDE_FLAG, REASON_FLAG_PREFIX, resultGold, staleCaptureFlags, UNTESTED_FILES_FLAG } from "@/lib/cse115a/benchmark/validation/writeback";
 
 /** Parses a JSON array (Supabase `json_agg`) or JSON Lines (one row per line). */
 export function parseRows(text: string): TaskRow[] {
@@ -45,8 +45,11 @@ export type Summary = {
   proofOutsideTestPatch: number;
   /** Validated rows whose patch changes code no proving test reaches (diagnostic). */
   untestedFiles: number;
+  /** Harbor gold checks among validated rows (harbor_gold): passed, failed, skipped. */
+  gold: { passed: number; failed: number; skipped: number };
   funnel: FunnelStage[];
-  rows: Array<{ instance_id: string; status: string; reason: string; f2p: number; a2p: number; p2p: number; regressions: number; flaky: number; outside: number; untested: number; seconds: number }>;
+  /** `gold` is the gold check's status, "" when it was not run. */
+  rows: Array<{ instance_id: string; status: string; reason: string; f2p: number; a2p: number; p2p: number; regressions: number; flaky: number; outside: number; untested: number; seconds: number; gold: string }>;
 };
 
 /**
@@ -107,8 +110,10 @@ export function summarize(results: ValidationResult[]): Summary {
       f2p: r.FAIL_TO_PASS.length, a2p: r.ABSENT_TO_PASS.length, p2p: r.PASS_TO_PASS.length,
       regressions: r.regressions.length + r.regression_skips.length, flaky: r.flaky.length,
       outside: (r.proof_outside_test_patch ?? []).length, untested: (r.untested_files ?? []).length, seconds,
+      gold: resultGold(r)?.status ?? "",
     };
   });
+  const golds = results.map(resultGold);
   return {
     total: results.length,
     validated: results.filter((r) => r.validation_status === "validated").length,
@@ -116,9 +121,24 @@ export function summarize(results: ValidationResult[]): Summary {
     byReason,
     proofOutsideTestPatch: results.filter((r) => (r.proof_outside_test_patch ?? []).length > 0).length,
     untestedFiles: results.filter((r) => (r.untested_files ?? []).length > 0).length,
+    gold: {
+      passed: golds.filter((g) => g?.status === "passed").length,
+      failed: golds.filter((g) => g?.status === "failed").length,
+      skipped: golds.filter((g) => g?.status === "skipped").length,
+    },
     funnel: funnel(results),
     rows,
   };
+}
+
+/**
+ * `; N gold-checked: P passed, F failed`, where N counts the checks that ran (passed + failed); rows
+ * the check skipped are added in parentheses. Empty when no row has a check.
+ */
+function goldHeadline(gold: Summary["gold"]): string {
+  const checked = gold.passed + gold.failed;
+  if (!checked && !gold.skipped) return "";
+  return `; ${checked} gold-checked: ${gold.passed} passed, ${gold.failed} failed${gold.skipped ? ` (${gold.skipped} skipped)` : ""}`;
 }
 
 /** The summary as Markdown: headline, funnel table, per-row table. Ready for Slack or the deliverable note. */
@@ -127,15 +147,16 @@ export function summaryMarkdown(summary: Summary): string {
     `${summary.validated} validated, ${summary.rejected} rejected of ${summary.total}` +
       (Object.keys(summary.byReason).length ? ` (${Object.entries(summary.byReason).map(([k, v]) => `${k}: ${v}`).join(", ")})` : "") +
       (summary.proofOutsideTestPatch ? `; ${summary.proofOutsideTestPatch} flagged proof_outside_test_patch` : "") +
-      (summary.untestedFiles ? `; ${summary.untestedFiles} flagged untested_files` : ""),
+      (summary.untestedFiles ? `; ${summary.untestedFiles} flagged untested_files` : "") +
+      goldHeadline(summary.gold),
     "",
     "| stage | reached | dropped |",
     "|---|---|---|",
     ...summary.funnel.map((f) => `| ${f.stage} | ${f.reached} | ${f.dropped} |`),
     "",
-    "| instance_id | status | reason | F2P | A2P | P2P | regressions | flaky | outside | seconds |",
-    "|---|---|---|---|---|---|---|---|---|---|",
-    ...summary.rows.map((r) => `| ${r.instance_id} | ${r.status} | ${r.reason} | ${r.f2p} | ${r.a2p} | ${r.p2p} | ${r.regressions} | ${r.flaky} | ${r.outside} | ${r.seconds} |`),
+    "| instance_id | status | reason | F2P | A2P | P2P | regressions | flaky | outside | seconds | gold |",
+    "|---|---|---|---|---|---|---|---|---|---|---|",
+    ...summary.rows.map((r) => `| ${r.instance_id} | ${r.status} | ${r.reason} | ${r.f2p} | ${r.a2p} | ${r.p2p} | ${r.regressions} | ${r.flaky} | ${r.outside} | ${r.seconds} | ${r.gold} |`),
   ];
   return lines.join("\n") + "\n";
 }
@@ -148,18 +169,33 @@ function quote(text: string): string {
 }
 
 /**
+ * The `harbor_env = …` line of a validated row's task update (the same rule as harborEnvToWrite in
+ * writeback.ts): the recipe with the result's gold check; the recipe keeping the stored `gold` when
+ * the result has no check; the stored recipe with the check added when the result has a check but no
+ * recipe (a null column stays null). None when the result has neither: an older result file must not
+ * clear a recipe a later run stored.
+ */
+function harborEnvSql(env: ValidationResult["harbor_env"], gold: ReturnType<typeof resultGold>): string[] {
+  if (env && gold) return [`       harbor_env = ${quote(JSON.stringify({ ...env, gold }))}::jsonb`];
+  if (env) return [`       harbor_env = ${quote(JSON.stringify(env))}::jsonb || case when harbor_env ? 'gold' then jsonb_build_object('gold', harbor_env -> 'gold') else '{}'::jsonb end`];
+  if (gold) return [`       harbor_env = case when harbor_env is null then null else harbor_env || jsonb_build_object('gold', ${quote(JSON.stringify(gold))}::jsonb) end`];
+  return [];
+}
+
+/**
  * The write-back as SQL, one statement pair per row, for the Supabase SQL editor (or psql). Verified
  * lists replace the static ones; `image` carries the digest when known; the reason lives in
  * `cse_benchmark_task_sources.flags` as `validation_reason:<reason>` until the schema has a column,
- * `proof_outside_test_patch` is set when the result lists any such test, and `untested_files` when a
- * validated result lists changed code no proving test reaches (see `managedFlags`).
+ * `proof_outside_test_patch` is set when the result lists any such test, `untested_files` when a
+ * validated result lists changed code no proving test reaches, and `harbor_gold_failed` when its
+ * gold check failed (see `managedFlags`); the gold check itself goes into `harbor_env.gold`.
  * `env_error` rows are left untouched (still `candidate`). Rolling back is `validation_status =
  * 'candidate'` plus removing those flags.
  */
 export function writebackSql(results: ValidationResult[]): string {
   const lines = [
     "-- Generated by validateBenchmarkBatch.ts. Review, then run in the Supabase SQL editor.",
-    ...(results.some((r) => r.validation_status === "validated" && r.harbor_env)
+    ...(results.some((r) => r.validation_status === "validated" && (r.harbor_env || resultGold(r)))
       ? ["-- Writes harbor_env: apply supabase/migrations/20261110000000_cse115a_benchmark_harbor_env.sql first."]
       : []),
     "begin;",
@@ -174,6 +210,7 @@ export function writebackSql(results: ValidationResult[]): string {
       lines.push("-- skipped: env_error is not a verdict; rerun this row.");
       continue;
     }
+    const gold = resultGold(r);
     if (r.validation_status === "validated") {
       const f2p = quote(JSON.stringify([...r.FAIL_TO_PASS, ...r.ABSENT_TO_PASS]));
       const p2p = quote(JSON.stringify(r.PASS_TO_PASS));
@@ -184,9 +221,8 @@ export function writebackSql(results: ValidationResult[]): string {
         `       "PASS_TO_PASS" = ${p2p}::jsonb,`,
         `       image = ${image},`,
         `       eval_script = ${quote(r.eval_script ?? "")},`,
-        `       log_parser = ${quote(r.log_parser ?? "")}` + (r.harbor_env ? "," : ""),
-        // Only when the result has a recipe: an older result file must not clear one a later run stored.
-        ...(r.harbor_env ? [`       harbor_env = ${quote(JSON.stringify(r.harbor_env))}::jsonb`] : []),
+        `       log_parser = ${quote(r.log_parser ?? "")}` + (r.harbor_env || gold ? "," : ""),
+        ...harborEnvSql(r.harbor_env, gold),
         ` where instance_id = ${id};`,
       );
     }
@@ -212,7 +248,7 @@ export function writebackSql(results: ValidationResult[]): string {
     lines.push(
       "update public.cse_benchmark_task_sources",
       `   set validation_status = ${quote(r.validation_status)},`,
-      `       flags = array_remove(array(select f from unnest(flags) as f where f not like '${REASON_FLAG_PREFIX}%' and f <> '${PROOF_OUTSIDE_FLAG}' and f <> '${UNTESTED_FILES_FLAG}'${keepStaff}${dropCapture}), null)` +
+      `       flags = array_remove(array(select f from unnest(flags) as f where f not like '${REASON_FLAG_PREFIX}%' and f <> '${PROOF_OUTSIDE_FLAG}' and f <> '${UNTESTED_FILES_FLAG}' and f <> '${HARBOR_GOLD_FAILED_FLAG}'${keepStaff}${dropCapture}), null)` +
         (flags.length ? ` || array[${flags.map(quote).join(", ")}]` : "") + ",",
       "       updated_at = now()",
       ` where instance_id = ${id};`,

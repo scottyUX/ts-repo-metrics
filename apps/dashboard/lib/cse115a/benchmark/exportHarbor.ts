@@ -1,11 +1,12 @@
 import { isExportable, type ExportCandidate } from "./exportJsonl";
-import { buildHarborTask, harborSkipReason, harborTaskName, type HarborSource } from "./validation/harbor";
+import { buildHarborTask, harborSkipReason, harborTaskName, type HarborEnv, type HarborSource } from "./validation/harbor";
 
 // The instructor Harbor export: the rows the JSONL export returns with ?validated=1 (same consent and
 // status rule, same isExportable), each as a Harbor task folder whose image fetches the base commit
 // from GitHub. Rows Harbor cannot express yet, and rows whose repository the batch found private
 // (harbor_env.repo_public === false; nobody outside can fetch it), are left out and listed, with the
-// reason, in SKIPPED.txt at the root. Pure, so it is tested without HTTP or a database; the route zips the files.
+// reason, in SKIPPED.txt at the root. So is every row whose Harbor gold check (harbor_env.gold, from
+// validateBenchmarkBatch.ts --gold-check or --gold-only) has not passed. Pure, so it is tested without HTTP or a database; the route zips the files.
 
 export type HarborExportSkip = { instance_id: string; reason: string };
 
@@ -20,6 +21,17 @@ export type HarborExport = {
 /** Rows validated before harbor_env existed, or written back from a result file without one. */
 export const NO_RECIPE_REASON = "no Harbor recipe (harbor_env) on the row; re-run the validator on it and write back";
 
+/** A row whose recipe has no gold check yet. */
+export const NOT_GOLD_CHECKED_REASON = "not gold-checked yet; run the batch with --gold-only and write back";
+
+/** Why a row that could be built is still left out: its gold check has not passed. Null when it has. */
+export function goldSkipReason(env: HarborEnv): string | null {
+  const gold = env.gold;
+  if (!gold) return NOT_GOLD_CHECKED_REASON;
+  if (gold.status === "passed") return null;
+  return `gold check ${gold.status}: ${gold.reason ?? "no reason recorded"}`;
+}
+
 const SOURCE: HarborSource = { kind: "github" };
 
 export function harborExport(candidates: ExportCandidate[]): HarborExport {
@@ -30,7 +42,8 @@ export function harborExport(candidates: ExportCandidate[]): HarborExport {
     .sort((a, b) => a.instance_id.localeCompare(b.instance_id));
   for (const instance of rows) {
     const env = instance.harbor_env ?? null;
-    const reason = env ? harborSkipReason(env, instance, SOURCE) : NO_RECIPE_REASON;
+    // The existing reasons first (no recipe, database, private repository, bad repo or commit), then the gold check.
+    const reason = env ? harborSkipReason(env, instance, SOURCE) ?? goldSkipReason(env) : NO_RECIPE_REASON;
     if (reason || !env) {
       out.skipped.push({ instance_id: instance.instance_id, reason: reason ?? NO_RECIPE_REASON });
       continue;

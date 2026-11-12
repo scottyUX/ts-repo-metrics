@@ -11,12 +11,15 @@
 // again when a later result lists none). Rejected rows get validation_status = rejected and a
 // validation_reason:<reason> flag. env_error rows are skipped (they stay candidate). A staff-rebuilt
 // row also gets its rebuilt base and patches, and loses the capture flags the rebuild made untrue
-// (staleCaptureFlags). --dry-run prints the plan and touches nothing; it reads no database, so it
+// (staleCaptureFlags). A validated result's Harbor gold check (harbor_gold, from the batch's
+// --gold-check or --gold-only) goes into harbor_env.gold (a result without one keeps the stored gold),
+// and a failed check sets the harbor_gold_failed flag (removed again by any write-back without one).
+// --dry-run prints the plan and touches nothing; it reads no database, so it
 // lists the capture flags it would drop "if present" rather than the ones the row has.
 
 import { readdir, readFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
-import { applyWriteback, assertHarborEnvColumn, writebackPlan, type ColumnProbeClient, type WritebackClient } from "@/lib/cse115a/benchmark/validation/writeback";
+import { applyWriteback, assertHarborEnvColumn, goldNote, writebackPlan, type ColumnProbeClient, type WritebackClient } from "@/lib/cse115a/benchmark/validation/writeback";
 import type { ValidationResult } from "@/lib/cse115a/benchmark/validation/validateTask";
 
 function parseArgs(argv: string[]) {
@@ -44,7 +47,7 @@ async function main() {
   const ops = writebackPlan(results);
   console.error(`${results.length} result(s), ${ops.length} to write (${results.length - ops.length} env_error skipped)`);
   if (args.dryRun) {
-    for (const op of ops) console.log(`${op.instance_id}: ${op.validation_status}${op.reasonFlag ? ` (${op.reasonFlag})` : ""}${op.task ? ` F2P=${op.task.FAIL_TO_PASS.length} P2P=${op.task.PASS_TO_PASS.length} image=${op.task.image}${op.task.harbor_env ? " harbor_env" : ""}` : ""}${op.dropCaptureFlags.length ? `, drops capture flag(s) if present: ${op.dropCaptureFlags.join(", ")}` : ""}`);
+    for (const op of ops) console.log(`${op.instance_id}: ${op.validation_status}${op.reasonFlag ? ` (${op.reasonFlag})` : ""}${op.task ? ` F2P=${op.task.FAIL_TO_PASS.length} P2P=${op.task.PASS_TO_PASS.length} image=${op.task.image}${op.task.harbor_env ? " harbor_env" : ""}` : ""}${op.dropCaptureFlags.length ? `, drops capture flag(s) if present: ${op.dropCaptureFlags.join(", ")}` : ""}${goldNote(op.gold)}`);
     console.error("Dry run: nothing written.");
     return;
   }

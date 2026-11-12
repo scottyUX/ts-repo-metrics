@@ -4,7 +4,7 @@
 
 import type { BuildFlag } from "@/lib/cse115a/benchmark/buildInstance";
 import { extractAddedTests } from "@/lib/cse115a/benchmark/extractTests";
-import type { HarborEnv } from "@/lib/cse115a/benchmark/validation/harbor";
+import type { HarborEnv, HarborGold } from "@/lib/cse115a/benchmark/validation/harbor";
 import { STAFF_REBUILT_FLAG } from "@/lib/cse115a/benchmark/validation/rebuildRow";
 import type { ValidationResult } from "@/lib/cse115a/benchmark/validation/validateTask";
 
@@ -13,10 +13,24 @@ export const REASON_FLAG_PREFIX = "validation_reason:";
 export const PROOF_OUTSIDE_FLAG = "proof_outside_test_patch";
 /** Set on a validated row whose patch changes code files no proving test reaches by imports (untestedFiles.ts). */
 export const UNTESTED_FILES_FLAG = "untested_files";
+/** Set on a validated row whose Harbor gold check failed (harbor_gold.status === "failed"). */
+export const HARBOR_GOLD_FAILED_FLAG = "harbor_gold_failed";
 
 /** Whether a flag is one the validator owns (and so replaces on every write-back). */
 export function isManagedFlag(flag: string): boolean {
-  return flag.startsWith(REASON_FLAG_PREFIX) || flag === PROOF_OUTSIDE_FLAG || flag === UNTESTED_FILES_FLAG;
+  return flag.startsWith(REASON_FLAG_PREFIX) || flag === PROOF_OUTSIDE_FLAG || flag === UNTESTED_FILES_FLAG || flag === HARBOR_GOLD_FAILED_FLAG;
+}
+
+/** A validated result's gold check: `harbor_gold`, else the copy in `harbor_env.gold`; null when none (or not validated). */
+export function resultGold(r: ValidationResult): HarborGold | null {
+  if (r.validation_status !== "validated") return null;
+  return r.harbor_gold ?? r.harbor_env?.gold ?? null;
+}
+
+/** `, gold check passed` / `, gold check failed: <reason>` / `, gold check skipped: <reason>`; empty without a check. */
+export function goldNote(gold: HarborGold | null | undefined): string {
+  if (!gold) return "";
+  return gold.status === "passed" ? ", gold check passed" : `, gold check ${gold.status}: ${gold.reason ?? "no reason recorded"}`;
 }
 
 /** The validator-owned flags a result produces: the reason flag when rejected, the diagnostic flags when they apply. */
@@ -26,6 +40,7 @@ export function managedFlags(r: ValidationResult): string[] {
   // `?? []`: result files written before this field existed are still readable.
   if ((r.proof_outside_test_patch ?? []).length > 0) flags.push(PROOF_OUTSIDE_FLAG);
   if ((r.untested_files ?? []).length > 0) flags.push(UNTESTED_FILES_FLAG);
+  if (resultGold(r)?.status === "failed") flags.push(HARBOR_GOLD_FAILED_FLAG);
   return flags;
 }
 
@@ -61,7 +76,8 @@ export type TaskUpdate = {
   log_parser: string;
   /**
    * The Harbor recipe, when the result carries one. A result file written before the recipe existed
-   * leaves the column as it is rather than clearing a recipe a later run stored.
+   * leaves the column as it is rather than clearing a recipe a later run stored. Carries `gold` when
+   * the result has a gold check; without one, applyWriteback keeps the `gold` already stored.
    */
   harbor_env?: HarborEnv;
 };
@@ -84,6 +100,11 @@ export type WritebackOp = {
   untestedFiles: number;
   /** Capture flags to remove if the row has them (a rebuilt row's staleCaptureFlags; empty otherwise). */
   dropCaptureFlags: string[];
+  /**
+   * The gold check to store in `harbor_env.gold` (validated rows that have one); null leaves any
+   * stored `gold` as it is.
+   */
+  gold: HarborGold | null;
 };
 
 /** One op per result; `env_error` rows produce none (our run failed, the row stays a candidate). */
@@ -91,6 +112,7 @@ export function writebackPlan(results: ValidationResult[]): WritebackOp[] {
   const ops: WritebackOp[] = [];
   for (const r of results) {
     if (r.reason === "env_error") continue;
+    const gold = resultGold(r);
     ops.push({
       instance_id: r.instance_id,
       task: r.validation_status === "validated"
@@ -100,7 +122,7 @@ export function writebackPlan(results: ValidationResult[]): WritebackOp[] {
             image: r.image_digest ?? r.image ?? "",
             eval_script: r.eval_script ?? "",
             log_parser: r.log_parser ?? "",
-            ...(r.harbor_env ? { harbor_env: r.harbor_env } : {}),
+            ...(r.harbor_env ? { harbor_env: gold ? { ...r.harbor_env, gold } : r.harbor_env } : {}),
           }
         : null,
       rebuild: r.rebuild
@@ -111,6 +133,7 @@ export function writebackPlan(results: ValidationResult[]): WritebackOp[] {
       flags: r.rebuild ? [...managedFlags(r), STAFF_REBUILT_FLAG] : managedFlags(r),
       untestedFiles: (r.untested_files ?? []).length,
       dropCaptureFlags: r.rebuild ? staleCaptureFlags(r.rebuild) : [],
+      gold,
     });
   }
   return ops;
@@ -131,7 +154,7 @@ export function mergeFlags(existing: string[], flags: string[] | string | null, 
 /** The slice of the Supabase client the write-back uses, so a test can hand in a fake. */
 export type WritebackClient = {
   from(table: string): {
-    select(columns: string): { eq(column: string, value: string): Promise<{ data: Array<{ flags: string[] }> | null; error: { message: string } | null }> };
+    select(columns: string): { eq(column: string, value: string): Promise<{ data: Array<{ flags?: string[]; harbor_env?: HarborEnv | null }> | null; error: { message: string } | null }> };
     update(values: Record<string, unknown>): { eq(column: string, value: string): Promise<{ error: { message: string } | null }> };
   };
 };
@@ -155,12 +178,34 @@ export async function assertHarborEnvColumn(client: ColumnProbeClient): Promise<
   throw new Error(`could not check for the harbor_env column: ${error.message}`);
 }
 
+/**
+ * The `harbor_env` a validated row's task update writes, given what is stored: the result's recipe
+ * with the result's gold check, or with the stored `gold` when the result has none; a result with a
+ * gold check but no recipe adds it to the stored recipe (and writes nothing when none is stored).
+ * Undefined: leave the column alone. Mirrors writebackSql.
+ */
+export function harborEnvToWrite(op: WritebackOp, stored: HarborEnv | null | undefined): HarborEnv | undefined {
+  const env = op.task?.harbor_env;
+  if (env) return op.gold || !stored?.gold ? env : { ...env, gold: stored.gold };
+  if (op.task && op.gold && stored) return { ...stored, gold: op.gold };
+  return undefined;
+}
+
 /** Applies the ops; returns one line per row describing what changed. Throws on the first database error. */
 export async function applyWriteback(client: WritebackClient, ops: WritebackOp[], now: () => string = () => new Date().toISOString()): Promise<string[]> {
   const lines: string[] = [];
   for (const op of ops) {
     if (op.task || op.rebuild) {
-      const { error } = await client.from("cse_benchmark_tasks").update({ ...op.task, ...op.rebuild }).eq("instance_id", op.instance_id);
+      let task: Record<string, unknown> | null = op.task;
+      // Reading the stored recipe is needed only to keep its gold, or to add one to it.
+      if (op.task && (op.task.harbor_env ? !op.gold : op.gold)) {
+        const stored = await client.from("cse_benchmark_tasks").select("harbor_env").eq("instance_id", op.instance_id);
+        if (stored.error) throw new Error(`${op.instance_id}: read harbor_env: ${stored.error.message}`);
+        const env = harborEnvToWrite(op, stored.data?.[0]?.harbor_env);
+        task = { ...op.task, harbor_env: env };
+        if (!env) delete task.harbor_env;
+      }
+      const { error } = await client.from("cse_benchmark_tasks").update({ ...task, ...op.rebuild }).eq("instance_id", op.instance_id);
       if (error) throw new Error(`${op.instance_id}: cse_benchmark_tasks: ${error.message}`);
     }
     const { data, error } = await client.from("cse_benchmark_task_sources").select("flags").eq("instance_id", op.instance_id);
@@ -173,7 +218,7 @@ export async function applyWriteback(client: WritebackClient, ops: WritebackOp[]
     const proof = op.flags.includes(PROOF_OUTSIDE_FLAG) ? `, flagged ${PROOF_OUTSIDE_FLAG}` : "";
     const untested = op.flags.includes(UNTESTED_FILES_FLAG) ? `, flagged ${UNTESTED_FILES_FLAG} (${op.untestedFiles})` : "";
     const rebuilt = op.rebuild ? `, rebuilt base ${op.rebuild.base_commit.slice(0, 7)} and patches written, flagged ${STAFF_REBUILT_FLAG}` : "";
-    lines.push(`${op.instance_id}: ${op.validation_status}${op.reasonFlag ? ` (${op.reasonFlag.slice(REASON_FLAG_PREFIX.length)})` : ""}${op.task ? `, ${op.task.FAIL_TO_PASS.length} F2P / ${op.task.PASS_TO_PASS.length} P2P written${op.task.harbor_env ? " with harbor_env" : ""}` : ""}${proof}${untested}${rebuilt}${dropped.length ? `, dropped capture flag(s): ${dropped.join(", ")}` : ""}`);
+    lines.push(`${op.instance_id}: ${op.validation_status}${op.reasonFlag ? ` (${op.reasonFlag.slice(REASON_FLAG_PREFIX.length)})` : ""}${op.task ? `, ${op.task.FAIL_TO_PASS.length} F2P / ${op.task.PASS_TO_PASS.length} P2P written${op.task.harbor_env ? " with harbor_env" : ""}` : ""}${proof}${untested}${rebuilt}${dropped.length ? `, dropped capture flag(s): ${dropped.join(", ")}` : ""}${goldNote(op.gold)}`);
   }
   return lines;
 }
