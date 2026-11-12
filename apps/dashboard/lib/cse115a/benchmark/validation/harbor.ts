@@ -49,6 +49,11 @@ export type HarborEnv = {
    * back with the recipe. The course website's zip exports a row only when its status is "passed".
    */
   gold?: HarborGold;
+  /**
+   * Set only for a row whose tests form more than one suite: each suite's recipe, in order (the
+   * fields above repeat the first). Such a row is not exported yet (harborSkipReason).
+   */
+  suites?: HarborEnv[];
 };
 
 /**
@@ -77,8 +82,19 @@ export function withRepoPublic(env: HarborEnv, isPublic: boolean | undefined): H
 /** Why a private repository's row is not in the github-source export (the course website's zip). */
 export const PRIVATE_REPO_REASON = "repository is private; the task can only be built from a snapshot";
 
-/** The recipe for an environment the validator ran, with the image digest when the batch knows it. */
+/** Why a multi-suite row is not in either Harbor export. */
+export const MULTI_SUITE_REASON = "Harbor export for tasks with more than one test suite is not built yet";
+
+/**
+ * The recipe for an environment the validator ran, with the image digest when the batch knows it.
+ * A multi-suite environment gives the first suite's recipe plus `suites`, every suite's recipe.
+ */
 export function harborEnvFrom(env: Environment, imageDigest?: string | null): HarborEnv {
+  const recipe = suiteRecipe(env, imageDigest);
+  return env.suites && env.suites.length > 1 ? { ...recipe, suites: env.suites.map((suite, i) => suiteRecipe(suite, i === 0 ? imageDigest : null)) } : recipe;
+}
+
+function suiteRecipe(env: Environment, imageDigest?: string | null): HarborEnv {
   return {
     image: imageDigest ?? env.image,
     runners: [...env.runners],
@@ -142,13 +158,15 @@ export function githubFetchLayer(repo: string, baseCommit: string): string {
 
 /**
  * Why a row cannot be exported yet, or null. A row whose runs had a database container is skipped:
- * a Harbor task has one image, no sidecar. With the github source, the image fetches the repository
+ * a Harbor task has one image, no sidecar; so is a row with more than one test suite, which would
+ * need one verifier per suite. With the github source, the image fetches the repository
  * anonymously, so a repository the batch found private is skipped (the bundle source still builds
  * it), and the repository and commit go into a Dockerfile line, so they must be an `owner/name` and
  * a full commit id (GitHub fetches no short ids).
  */
 export function harborSkipReason(env: HarborEnv, row?: Pick<TaskRow, "repo" | "base_commit">, source?: HarborSource): string | null {
   if (env.services?.length) return "Harbor export for rows with a database service is not built yet";
+  if (env.suites && env.suites.length > 1) return MULTI_SUITE_REASON;
   if (source?.kind === "github" && env.repo_public === false) return PRIVATE_REPO_REASON;
   if (row && source?.kind === "github") {
     if (!GITHUB_REPO.test(row.repo)) return `repo ${JSON.stringify(row.repo)} is not a GitHub owner/name`;

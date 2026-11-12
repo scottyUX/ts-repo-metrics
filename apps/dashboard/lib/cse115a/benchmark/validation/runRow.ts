@@ -10,7 +10,7 @@ import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { signals, type Signals } from "@/lib/cse115a/benchmark/validation/census";
-import { detectEnvironment } from "@/lib/cse115a/benchmark/validation/environment";
+import { detectEnvironment, envLanguage, suiteLabel } from "@/lib/cse115a/benchmark/validation/environment";
 import { DockerSuiteRunner, type SuiteRunner } from "@/lib/cse115a/benchmark/validation/runner";
 import { filesInPatch, modifiedAcrossFiles, unsupportedResult, validateTask, withRebuild, type TaskRow, type ValidationResult } from "@/lib/cse115a/benchmark/validation/validateTask";
 import { CourseRepoAccessError, githubAppConfig, repoInstallationToken, type GitHubAppConfig } from "@/lib/cse115a/githubAppToken";
@@ -327,7 +327,11 @@ async function validateRowResult(options: ValidateRowOptions): Promise<Validatio
     await mkdir(options.logDir, { recursive: true });
     const db = env.services?.length ? `, with ${env.services.map((s) => s.image).join(", ")} from CI` : "";
     const installs = env.installSteps?.length ? `, installs in ${env.installSteps.map((s) => s.dir || ".").join(", ")} (from CI)` : "";
-    log(`Environment: ${env.packageManager} + ${env.runners.join("+")} in ${env.packageDir || "."}, image ${env.image}${env.nodeSource && env.nodeSource !== "default" ? ` (from ${env.nodeSource})` : ""}${installs}${db}. Running three states, ${RUNS_PER_STATE} times each; logs in ${options.logDir}`);
+    if (env.suites && env.suites.length > 1) {
+      log(`${env.suites.length} test suites, each run in its own container in every run: ${env.suites.map((s) => `${suiteLabel({ language: envLanguage(s), packageDir: s.packageDir })} (${s.packageManager} + ${s.runners.join("+")}, image ${s.image}${s.services?.length ? `, with ${s.services.map((sv) => sv.image).join(", ")} from CI` : ""})`).join("; ")}. Running three states, ${RUNS_PER_STATE} times each; logs in ${options.logDir}`);
+    } else {
+      log(`Environment: ${env.packageManager} + ${env.runners.join("+")} in ${env.packageDir || "."}, image ${env.image}${env.nodeSource && env.nodeSource !== "default" ? ` (from ${env.nodeSource})` : ""}${installs}${db}. Running three states, ${RUNS_PER_STATE} times each; logs in ${options.logDir}`);
+    }
     const { runs, ...result } = await validateTask({
       row, repoDir, env, modified, runner: options.runner ?? new DockerSuiteRunner(options.logDir, options.cacheDir), timeoutSeconds: options.timeoutSeconds,
       // The R2 tree, checked out fresh (the container runs leave repoDir with installs and reports in it).
@@ -336,7 +340,8 @@ async function validateRowResult(options: ValidateRowOptions): Promise<Validatio
     void runs;
     result.signals = needs;
     // A row that proved nothing in a repository whose tests want a service it did not get: say so, instead of a bare reason.
-    if (result.validation_status === "rejected" && result.reason === "no_fail_to_pass" && needs.database.length > 0 && !env.services?.length) {
+    const anyService = (env.suites ?? [env]).some((s) => s.services?.length);
+    if (result.validation_status === "rejected" && result.reason === "no_fail_to_pass" && needs.database.length > 0 && !anyService) {
       const note = `no test passed in any state and the tests appear to need a database (${needs.database.join(", ")}); the repository's CI has no postgres service the validator could start`;
       result.detail = result.detail ? `${result.detail}; ${note}` : note;
     }

@@ -69,11 +69,15 @@ describe("detectEnvironment: Python", () => {
     expect(await detectEnvironment({ testFiles: ["test_a.py"], read: repo({}) })).toMatchObject({ supported: true, packageDir: "", installCommand: "pip install pytest" });
   });
 
-  it("rejects test files that mix Python and JavaScript, and Python tests in two packages", async () => {
+  // Both used to be env_unsupported ("test files mix Python and JavaScript", "test files span two
+  // packages"); they are now suites (cse115aValidationSuites.test.ts has the rules).
+  it("splits test files that mix Python and JavaScript, and Python tests in two packages, into suites", async () => {
+    // The JavaScript half has no runner, so that suite, and the row, is unsupported, naming the suite.
     expect(await detectEnvironment({ testFiles: ["tests/test_a.py", "web/a.test.ts"], read: repo({ "requirements.txt": "", "package.json": "{}" }) }))
-      .toEqual({ supported: false, reason: "env_unsupported", detail: "test files mix Python and JavaScript" });
-    expect(await detectEnvironment({ testFiles: ["a/tests/test_x.py", "b/tests/test_y.py"], read: repo({ "a/requirements.txt": "", "b/requirements.txt": "" }) }))
-      .toMatchObject({ supported: false, detail: "test files span two packages: a and b" });
+      .toEqual({ supported: false, reason: "env_unsupported", detail: "suite javascript in .: no vitest or jest dependency and no test script in the repository root" });
+    const two = await detectEnvironment({ testFiles: ["a/tests/test_x.py", "b/tests/test_y.py"], read: repo({ "a/requirements.txt": "", "b/requirements.txt": "" }) });
+    expect(two).toMatchObject({ supported: true, packageDir: "a" });
+    if (two.supported) expect(two.suites?.map((s) => [s.packageDir, s.runners])).toEqual([["a", ["pytest"]], ["b", ["pytest"]]]);
   });
 
   it("leaves a JavaScript row exactly as before, fixture files alongside or not", async () => {

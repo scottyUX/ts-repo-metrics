@@ -5,8 +5,8 @@
 // Rules are in docs/CSE115A_BENCHMARK_VALIDATION.md.
 
 import { compareRuns, type Comparison } from "@/lib/cse115a/benchmark/validation/compareRuns";
-import { installPlan, type Environment, type Unsupported } from "@/lib/cse115a/benchmark/validation/environment";
-import { containerScript, InstallError, runThreeStates, type RunPlan, type SuiteRunner, type ThreeStates } from "@/lib/cse115a/benchmark/validation/runner";
+import { envLanguage, installPlan, suiteLabel, type Environment, type NodeSource, type SuiteLanguage, type Unsupported } from "@/lib/cse115a/benchmark/validation/environment";
+import { containerScript, InstallError, runThreeStates, SuiteCollisionError, type RunPlan, type SuiteRunner, type ThreeStates } from "@/lib/cse115a/benchmark/validation/runner";
 import { harborEnvFrom, type HarborEnv, type HarborGold } from "@/lib/cse115a/benchmark/validation/harbor";
 import type { RebuildProvenance } from "@/lib/cse115a/benchmark/validation/rebuildRow";
 import { modifiedTests, unmatchedStaticIds } from "@/lib/cse115a/benchmark/validation/testIds";
@@ -182,6 +182,22 @@ export type ValidationResult = {
    * write-back carries it as the `untested_files` flag.
    */
   untested_files?: string[];
+  /**
+   * Present only when the test files form more than one suite (one per language and package): each
+   * suite, in the order the runs ran them. The top-level `image`, `package_dir`, `install_dirs`,
+   * `node_source` and `services` describe the first; `eval_script` and `log_parser` cover them all.
+   */
+  suites?: SuiteRecord[];
+};
+
+/** One suite of a multi-suite row, as the result records it. */
+export type SuiteRecord = {
+  language: SuiteLanguage;
+  package_dir: string;
+  runners: Environment["runners"];
+  image: string;
+  node_source: NodeSource | null;
+  services: Array<{ name: string; image: string }>;
 };
 
 /** The result for a repository the validator cannot run (bun, mocha, no package.json). */
@@ -228,9 +244,9 @@ export function neverLoadedDetail(files: string[]): string {
   return `test patch file(s) never loaded after the fix: ${files.join(", ")}; check the run log`;
 }
 
-/** Runs the three states and shapes the result. Writes nothing anywhere. A failed install is `env_error`. */
-export async function validateTask(input: ValidateInput): Promise<ValidationResult & { runs: ThreeStates }> {
-  const { row, env } = input;
+/** The run plan for one suite's environment. */
+function suitePlan(input: ValidateInput, env: Environment): RunPlan {
+  const { row } = input;
   const plan: RunPlan = {
     repoDir: input.repoDir,
     baseCommit: row.base_commit,
@@ -252,27 +268,55 @@ export async function validateTask(input: ValidateInput): Promise<ValidationResu
     ...(nodeSource ? [`node: ${env.image} (${nodeSource})`] : []),
     `install in: ${installs.map((s) => s.dir || ".").join(", ")}${env.installSteps?.length ? " (from CI)" : ""}`,
   ];
+  return plan;
+}
+
+/** `eval_script`: the suite's R2 script, or for several suites each one under a comment line naming it. */
+function evalScript(plans: RunPlan[]): string {
+  if (plans.length === 1) return containerScript(plans[0], "r2");
+  return plans.map((plan, i) => `# ---- suite ${i + 1} of ${plans.length}: ${plan.label} ----\n${containerScript(plan, "r2")}`).join("");
+}
+
+/** Runs the three states and shapes the result. Writes nothing anywhere. A failed install is `env_error`. */
+export async function validateTask(input: ValidateInput): Promise<ValidationResult & { runs: ThreeStates }> {
+  const { row, env } = input;
+  const suiteEnvs = env.suites?.length ? env.suites : [env];
+  const multi = suiteEnvs.length > 1;
+  const plans = suiteEnvs.map((suite) => ({ ...suitePlan(input, suite), ...(multi ? { label: suiteLabel({ language: envLanguage(suite), packageDir: suite.packageDir }) } : {}) }));
+  const installs = installPlan(env);
+  const nodeSource = nodeSourceLabel(env);
   const provenance = { install_dirs: installs.map((s) => s.dir), ...(nodeSource ? { node_source: nodeSource } : {}), harbor_env: harborEnvFrom(env) };
   const services = env.services?.length
     ? { services: env.services.map((s) => ({ name: s.name, image: s.image, env: s.env, database_url: s.containerDatabaseUrl, schema_command: s.schemaCommand })) }
     : {};
+  const suites: { suites?: SuiteRecord[] } = multi
+    ? {
+        suites: suiteEnvs.map((suite) => ({
+          language: envLanguage(suite), package_dir: suite.packageDir, runners: [...suite.runners], image: suite.image,
+          node_source: suite.nodeSource ?? null, services: (suite.services ?? []).map((sv) => ({ name: sv.name, image: sv.image })),
+        })),
+      }
+    : {};
+  const logParsers = suiteEnvs.map(logParser).join("+");
   let runs: ThreeStates;
   try {
-    runs = await runThreeStates(plan, input.runner);
+    runs = await runThreeStates(multi ? plans : plans[0], input.runner);
   } catch (error) {
     // A failed install is the environment's failure, not a verdict: env_error keeps the row a candidate.
-    if (!(error instanceof InstallError)) throw error;
+    // So is a test id two suites both reported.
+    if (!(error instanceof InstallError) && !(error instanceof SuiteCollisionError)) throw error;
     const empty: ThreeStates = { r0: [], r1: [], r2: [], timings: {} };
     return {
       ...unsupportedResult(row, { supported: false, reason: "env_unsupported", detail: "" }),
       image: env.image,
-      eval_script: containerScript(plan, "r2"),
-      log_parser: logParser(env),
+      eval_script: evalScript(plans),
+      log_parser: logParsers,
       package_dir: env.packageDir,
       reason: "env_error",
       detail: error.message,
       ...provenance,
       ...services,
+      ...suites,
       runs: empty,
     };
   }
@@ -300,8 +344,8 @@ export async function validateTask(input: ValidateInput): Promise<ValidationResu
   return {
     instance_id: row.instance_id,
     image: env.image,
-    eval_script: containerScript(plan, "r2"),
-    log_parser: logParser(env),
+    eval_script: evalScript(plans),
+    log_parser: logParsers,
     package_dir: env.packageDir,
     test_files: testFiles,
     FAIL_TO_PASS: comparison.failToPass,
@@ -325,6 +369,7 @@ export async function validateTask(input: ValidateInput): Promise<ValidationResu
     ...(neverLoaded.length ? { test_files_never_loaded: neverLoaded } : {}),
     ...(untested.length ? { untested_files: untested } : {}),
     ...services,
+    ...suites,
     runs,
   };
 }

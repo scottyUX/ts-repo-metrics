@@ -44,6 +44,11 @@ export type RunPlan = {
   installSteps?: Array<{ dir: string; command: string }>;
   /** Comment lines put at the top of the script: how the environment was chosen (provenance only). */
   notes?: string[];
+  /**
+   * The suite this plan runs (`python in backend`), set only when the row has more than one: it
+   * goes into log file names (`r0a.python-backend.log`) and error messages. Unset for one suite.
+   */
+  label?: string;
 };
 
 /** One run of the suite in one state. Implemented by Docker, or by a fake in tests. `attempt` is 1-based. */
@@ -58,19 +63,49 @@ export function runName(state: State, attempt: number): string {
   return `${state}${String.fromCharCode(96 + attempt)}`;
 }
 
-/** Runs each state RUNS_PER_STATE times, in order, and returns every result plus elapsed ms per run. */
-export async function runThreeStates(plan: RunPlan, runner: SuiteRunner): Promise<ThreeStates> {
+/**
+ * Runs each state RUNS_PER_STATE times, in order, and returns every result plus elapsed ms per run.
+ * With several plans (one per suite), every run runs each suite in turn, each in its own container
+ * on the same checkout state, and merges their results into one map; the run's time is the sum.
+ */
+export async function runThreeStates(plan: RunPlan | RunPlan[], runner: SuiteRunner): Promise<ThreeStates> {
+  const plans = Array.isArray(plan) ? plan : [plan];
   const timings: Record<string, number> = {};
   const runState = async (state: State): Promise<StateRuns> => {
     const results: RunResults[] = [];
     for (let attempt = 1; attempt <= RUNS_PER_STATE; attempt++) {
       const started = Date.now();
-      results.push(await runner.runSuite(plan, state, attempt));
+      const perSuite: RunResults[] = [];
+      for (const p of plans) perSuite.push(await runner.runSuite(p, state, attempt));
+      results.push(perSuite.length === 1 ? perSuite[0] : mergeSuiteResults(perSuite, plans, runName(state, attempt)));
       timings[runName(state, attempt)] = Date.now() - started;
     }
     return results;
   };
   return { r0: await runState("r0"), r1: await runState("r1"), r2: await runState("r2"), timings };
+}
+
+/**
+ * Two suites reported the same test id in one run. Ids are file-qualified, so this means two suites
+ * ran the same file; the row is env_error rather than a verdict built on one suite's result.
+ */
+export class SuiteCollisionError extends Error {}
+
+/** One run's results from every suite, as one map; throws SuiteCollisionError when an id appears in two. */
+export function mergeSuiteResults(perSuite: RunResults[], plans: RunPlan[], run: string): RunResults {
+  const merged: RunResults = {};
+  const owner = new Map<string, number>();
+  perSuite.forEach((results, i) => {
+    for (const [id, status] of Object.entries(results)) {
+      const first = owner.get(id);
+      if (first !== undefined) {
+        throw new SuiteCollisionError(`test id reported by two suites in ${run}: ${id} (${plans[first].label ?? `suite ${first + 1}`} and ${plans[i].label ?? `suite ${i + 1}`})`);
+      }
+      owner.set(id, i);
+      merged[id] = status;
+    }
+  });
+  return merged;
 }
 
 /** The shell script run inside the container for one state. Exported so tests can read it. */
@@ -216,6 +251,9 @@ export class DockerSuiteRunner implements SuiteRunner {
       await writeFile(join(patches, `${PYTEST_REPORTER_MODULE}.py`), PYTEST_REPORTER_SOURCE);
       const image = plan.image ?? "node:22-bookworm";
       const name = runName(state, attempt);
+      // Several suites share a run: each gets its own log file and says which it was in errors.
+      const logName = plan.label ? `${name}.${plan.label.replace(/[^A-Za-z0-9_.-]+/g, "-")}` : name;
+      const where = plan.label ? `${name} (${plan.label})` : name;
       const cacheEnv = this.cacheDir ? PACKAGE_CACHE_ENV : {};
       const args = [
         "run", "--rm",
@@ -236,22 +274,22 @@ export class DockerSuiteRunner implements SuiteRunner {
           const output = services.length
             ? await this.withServices(services, id, timeoutMs, (extra) => this.exec("docker", [...args.slice(0, 2), ...extra, ...args.slice(2)], timeoutMs))
             : await this.withNamedContainer(`hecate-run-${id}`, (extra) => this.exec("docker", [...args.slice(0, 2), ...extra, ...args.slice(2)], timeoutMs));
-          if (this.logDir) await writeFile(join(this.logDir, `${name}.log`), output);
+          if (this.logDir) await writeFile(join(this.logDir, `${logName}.log`), output);
           break;
         } catch (error) {
           const message = error instanceof Error ? error.message : String(error);
           const retry = tryNumber === 1 && !(error instanceof ExecError && error.timedOut);
-          if (this.logDir) await writeFile(join(this.logDir, `${name}${retry ? ".attempt1" : ""}.log`), message);
+          if (this.logDir) await writeFile(join(this.logDir, `${logName}${retry ? ".attempt1" : ""}.log`), message);
           if (!retry) {
             if (error instanceof ExecError && error.code === INSTALL_FAILED_EXIT) {
               const log = await readFile(join(patches, "install.log"), "utf8").catch(() => "");
-              throw new InstallError(`install failed in ${name}: ${installErrorLine(log)}`);
+              throw new InstallError(`install failed in ${where}: ${installErrorLine(log)}`);
             }
             if (error instanceof ExecError && error.code === SCHEMA_FAILED_EXIT) {
               const log = await readFile(join(patches, "schema.log"), "utf8").catch(() => "");
-              throw new SchemaError(`schema step failed in ${name}: ${installErrorLine(log)}`);
+              throw new SchemaError(`schema step failed in ${where}: ${installErrorLine(log)}`);
             }
-            if (error instanceof DatabaseStartError) throw new DatabaseStartError(`database did not start in ${name}`);
+            if (error instanceof DatabaseStartError) throw new DatabaseStartError(`database did not start in ${where}`);
             throw error;
           }
           await this.sleep(15_000);

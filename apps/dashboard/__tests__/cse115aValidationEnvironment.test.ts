@@ -113,12 +113,14 @@ describe("detectEnvironment: nested package and node --test (the PocketWatch sha
     expect(env).toMatchObject({ supported: true, packageDir: "server", installDir: "server", installCommand: "npm ci", runners: ["node-test"] });
   });
 
-  it("rejects test files that belong to two different packages", async () => {
+  // This used to be env_unsupported ("test files span two packages"); it is now two suites.
+  it("splits test files that belong to two different packages into two suites", async () => {
     const env = await detectEnvironment({
       testFiles: ["apps/api/a.test.ts", "apps/web/b.test.ts"],
       read: repo({ ...files, "apps/web/package.json": vitestPkg }),
     });
-    expect(env).toMatchObject({ supported: false, detail: "test files span two packages: apps/api and apps/web" });
+    expect(env).toMatchObject({ supported: true, packageDir: "apps/api" });
+    if (env.supported) expect(env.suites?.map((s) => [s.packageDir, s.runners])).toEqual([["apps/api", ["vitest", "node-test"]], ["apps/web", ["vitest"]]]);
   });
 });
 

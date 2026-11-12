@@ -63,7 +63,12 @@ export async function validateBatchRow(ctx: BatchRun, row: TaskRow, logDir: stri
     if (result.image) {
       if (!ctx.digests.has(result.image)) ctx.digests.set(result.image, await (ctx.imageDigest ?? imageDigest)(result.image));
       result.image_digest = ctx.digests.get(result.image) ?? null;
-      if (result.harbor_env && result.image_digest) result.harbor_env = { ...result.harbor_env, image: result.image_digest };
+      if (result.harbor_env && result.image_digest) {
+        const digest = result.image_digest;
+        const suites = result.harbor_env.suites;
+        // A multi-suite recipe repeats the first suite: its copy in `suites` gets the digest too.
+        result.harbor_env = { ...result.harbor_env, image: digest, ...(suites ? { suites: suites.map((s, i) => (i === 0 ? { ...s, image: digest } : s)) } : {}) };
+      }
     }
     // Whether the repository is public, checked once per repository; never fails the row.
     if (result.harbor_env) {

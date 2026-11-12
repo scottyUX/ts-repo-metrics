@@ -4,7 +4,9 @@
 // Node's built-in `node --test`; a row whose test files are all Python runs pytest instead (see
 // detectPythonEnvironment). Anything else is `env_unsupported` with a one-line detail so the batch
 // lists it instead of guessing. A Postgres service in the CI job that runs the tests is started
-// next to every run (see services.ts). Pure: reads files through the `read` callback, touches nothing.
+// next to every run (see services.ts). Test files in more than one language or package form several
+// suites, each detected the same way (detectSuites). Pure: reads files through the `read` callback,
+// touches nothing.
 // Rules are in docs/CSE115A_BENCHMARK_VALIDATION.md, "Environment".
 
 import { ciTestJob, installStepsFromJob, nodeMajorFromJob, serviceProvenance, servicesFromJob, type InstallStep, type Service } from "@/lib/cse115a/benchmark/validation/services";
@@ -40,6 +42,12 @@ export type Environment = {
   installSteps?: InstallStep[];
   /** Where the Node major came from: `.nvmrc`, `.node-version`, `engines.node`, `CI`, or `default`. JavaScript only. */
   nodeSource?: NodeSource;
+  /**
+   * Set only when the test files form more than one suite (one per language and package; see
+   * detectSuites): every suite's environment, in order, the first of which this object's own fields
+   * repeat. Absent for a single suite, whose environment is exactly what it was before suites.
+   */
+  suites?: Environment[];
 };
 
 export type NodeSource = ".nvmrc" | ".node-version" | "engines.node" | "CI" | "default";
@@ -182,10 +190,92 @@ export function stepsFromTestScript(script: string | null, defaultRunner: "vites
  * package.json above each test file, the workspace root, the lockfiles, and the Node version.
  */
 export async function detectEnvironment(probe: RepoProbe): Promise<Environment | Unsupported> {
-  const language = testLanguage(probe.testFiles);
-  if (language === "mixed") return unsupported("test files mix Python and JavaScript");
+  const groups = await suiteGroups(probe);
+  if ("supported" in groups) return groups;
+  // One suite: the single-package detection, on every test file, exactly as before suites existed.
+  if (groups.length <= 1) return detectOne(probe, testLanguage(probe.testFiles) === "python" ? "python" : "javascript");
+  if (groups.length > MAX_SUITES) {
+    return unsupported(`test files form ${groups.length} suites, more than ${MAX_SUITES}: ${groups.map(suiteLabel).join("; ")}`);
+  }
+  const suites: Environment[] = [];
+  for (const group of groups) {
+    const env = await detectOne({ ...probe, testFiles: group.files }, group.language);
+    if (!env.supported) return unsupported(`suite ${suiteLabel(group)}: ${env.detail}`);
+    suites.push(env);
+  }
+  return { ...suites[0], suites };
+}
+
+/** One suite's environment: the language's detector, then what CI says. */
+async function detectOne(probe: RepoProbe, language: SuiteLanguage): Promise<Environment | Unsupported> {
   const env = language === "python" ? await detectPythonEnvironment(probe) : await detectNodeEnvironment(probe);
   return env.supported ? withCi(env, probe) : env;
+}
+
+/** The most suites a row may have; more is env_unsupported. */
+export const MAX_SUITES = 4;
+
+export type SuiteLanguage = "javascript" | "python";
+
+/** A group of test files that run together: one language, one package. */
+export type SuiteGroup = { language: SuiteLanguage; packageDir: string; files: string[] };
+
+/** `python in backend`, `javascript in .` */
+export function suiteLabel(suite: { language: SuiteLanguage; packageDir: string }): string {
+  return `${suite.language} in ${suite.packageDir || "."}`;
+}
+
+/** The language of an Environment's suite. */
+export function envLanguage(env: Environment): SuiteLanguage {
+  return env.runners.includes("pytest") ? "python" : "javascript";
+}
+
+/**
+ * Splits the test files into suites, one per (language, package), sorted by package directory and
+ * then language. The package is what the single-suite detection finds for a file: the nearest
+ * package.json for JavaScript and TypeScript, the nearest Python manifest for Python. A file with no
+ * package above it joins the language's only package when there is exactly one, else the root
+ * (as the single detection treats it). When the row has no Python test file, every test file counts
+ * as JavaScript, fixtures included (as before); when it has both languages, files that are neither
+ * (fixtures, snapshots) join no suite. An invalid package.json on the way is env_unsupported.
+ */
+export async function suiteGroups(probe: RepoProbe): Promise<SuiteGroup[] | Unsupported> {
+  const { read } = probe;
+  const python = probe.testFiles.filter((f) => PY_FILE.test(f));
+  const js = python.length ? probe.testFiles.filter((f) => JS_FILE.test(f)) : probe.testFiles;
+  const exists = async (dir: string, name: string) => (await read(joinPath(dir, name))) != null;
+  const groups: SuiteGroup[] = [];
+
+  const place = (language: SuiteLanguage, placed: Array<{ file: string; dir: string | null }>) => {
+    const dirs = [...new Set(placed.map((p) => p.dir).filter((d): d is string => d != null))];
+    const fallback = dirs.length === 1 ? dirs[0] : "";
+    for (const { file, dir } of placed) {
+      const packageDir = dir ?? fallback;
+      let group = groups.find((g) => g.language === language && g.packageDir === packageDir);
+      if (!group) groups.push((group = { language, packageDir, files: [] }));
+      group.files.push(file);
+    }
+  };
+
+  const jsPlaced: Array<{ file: string; dir: string | null }> = [];
+  for (const file of js) {
+    const nearest = await nearestPackageDir(file, read);
+    if (nearest && "supported" in nearest) return nearest;
+    jsPlaced.push({ file, dir: nearest ? nearest.dir : null });
+  }
+  place("javascript", jsPlaced);
+
+  const pyPlaced: Array<{ file: string; dir: string | null }> = [];
+  for (const file of python) {
+    let dir: string | null = null;
+    for (const candidate of parentDirs(file)) {
+      if (await anyExists(candidate, PY_MANIFESTS, exists)) { dir = candidate; break; }
+    }
+    pyPlaced.push({ file, dir });
+  }
+  place("python", pyPlaced);
+
+  return groups.sort((a, b) => a.packageDir.localeCompare(b.packageDir) || a.language.localeCompare(b.language));
 }
 
 /**

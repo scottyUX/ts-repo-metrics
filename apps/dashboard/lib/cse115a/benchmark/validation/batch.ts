@@ -106,7 +106,9 @@ export function summarize(results: ValidationResult[]): Summary {
         (r.reason === "env_error" && r.detail?.trim() ? `: ${tableCell(r.detail)}` : "") +
         (r.test_files_never_loaded?.length ? ` (test patch file(s) never loaded after the fix: ${r.test_files_never_loaded.join(", ")})` : "") +
         // Next to a validated row: how much of the fix no proving test reaches.
-        (r.validation_status === "validated" && r.untested_files?.length ? `${r.reason ? " " : ""}untested files: ${r.untested_files.length}` : ""), r),
+        (r.validation_status === "validated" && r.untested_files?.length ? `${r.reason ? " " : ""}untested files: ${r.untested_files.length}` : "") +
+        // Next to a validated row: how many test suites ran (only when more than one).
+        (r.validation_status === "validated" && (r.suites?.length ?? 0) > 1 ? `${r.untested_files?.length ? "; " : ""}${r.suites!.length} suites` : ""), r),
       f2p: r.FAIL_TO_PASS.length, a2p: r.ABSENT_TO_PASS.length, p2p: r.PASS_TO_PASS.length,
       regressions: r.regressions.length + r.regression_skips.length, flaky: r.flaky.length,
       outside: (r.proof_outside_test_patch ?? []).length, untested: (r.untested_files ?? []).length, seconds,
