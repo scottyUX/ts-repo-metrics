@@ -165,6 +165,13 @@ export type ValidationResult = {
    */
   harbor_env?: HarborEnv;
   /**
+   * Where the batch got the code: `github` (the clone in `repos/`) or `snapshot` (the row's bundle,
+   * because cloning or fetching base_commit failed; `detail` then carries that failure). Absent for a
+   * row that never reached the repository (preflight, a clone failure with no bundle) and for results
+   * written before the field existed.
+   */
+  repo_source?: "github" | "snapshot";
+  /**
    * Validated rows only, present only when non-empty: code files the source patch changes that no
    * proving test file reaches through imports (untestedFiles.ts). Diagnostic, not a rejection; the
    * write-back carries it as the `untested_files` flag.

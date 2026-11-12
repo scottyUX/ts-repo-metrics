@@ -11,7 +11,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { signals, type Signals } from "@/lib/cse115a/benchmark/validation/census";
 import { detectEnvironment } from "@/lib/cse115a/benchmark/validation/environment";
-import { DockerSuiteRunner } from "@/lib/cse115a/benchmark/validation/runner";
+import { DockerSuiteRunner, type SuiteRunner } from "@/lib/cse115a/benchmark/validation/runner";
 import { filesInPatch, modifiedAcrossFiles, unsupportedResult, validateTask, withRebuild, type TaskRow, type ValidationResult } from "@/lib/cse115a/benchmark/validation/validateTask";
 import { CourseRepoAccessError, githubAppConfig, repoInstallationToken, type GitHubAppConfig } from "@/lib/cse115a/githubAppToken";
 
@@ -283,6 +283,8 @@ export type ValidateRowOptions = {
   cacheDir?: string;
   timeoutSeconds?: number;
   log?: (line: string) => void;
+  /** Runs the suites; Docker (logs in `logDir`) when omitted. Tests hand in a fake. */
+  runner?: SuiteRunner;
 };
 
 /**
@@ -327,7 +329,7 @@ async function validateRowResult(options: ValidateRowOptions): Promise<Validatio
     const installs = env.installSteps?.length ? `, installs in ${env.installSteps.map((s) => s.dir || ".").join(", ")} (from CI)` : "";
     log(`Environment: ${env.packageManager} + ${env.runners.join("+")} in ${env.packageDir || "."}, image ${env.image}${env.nodeSource && env.nodeSource !== "default" ? ` (from ${env.nodeSource})` : ""}${installs}${db}. Running three states, ${RUNS_PER_STATE} times each; logs in ${options.logDir}`);
     const { runs, ...result } = await validateTask({
-      row, repoDir, env, modified, runner: new DockerSuiteRunner(options.logDir, options.cacheDir), timeoutSeconds: options.timeoutSeconds,
+      row, repoDir, env, modified, runner: options.runner ?? new DockerSuiteRunner(options.logDir, options.cacheDir), timeoutSeconds: options.timeoutSeconds,
       // The R2 tree, checked out fresh (the container runs leave repoDir with installs and reports in it).
       withPostFixTree: (fn) => withPatchedWorktree(repoDir, row.base_commit, [row.test_patch, row.patch], (dir) => fn((path) => fileIn(dir, path))),
     });

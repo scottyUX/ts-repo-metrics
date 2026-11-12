@@ -82,6 +82,12 @@ function tableCell(text: string): string {
   return (line.length > 300 ? `${line.slice(0, 299)}…` : line).replace(/\|/g, "\\|");
 }
 
+/** The reason cell with `from snapshot` added when the row was validated from its bundle. */
+function withSnapshotNote(cell: string, r: ValidationResult): string {
+  if (r.repo_source !== "snapshot") return cell;
+  return cell ? `${cell}; from snapshot` : "from snapshot";
+}
+
 export function summarize(results: ValidationResult[]): Summary {
   const byReason: Record<string, number> = {};
   const rows = results.map((r) => {
@@ -91,12 +97,13 @@ export function summarize(results: ValidationResult[]): Summary {
       instance_id: r.instance_id,
       status: r.validation_status,
       // A harness problem must not read as a plain verdict: name the test files that never loaded after the fix.
-      reason: (r.reason ?? "") +
+      // The code came from the row's snapshot bundle because GitHub could not supply it.
+      reason: withSnapshotNote((r.reason ?? "") +
         // Our run failed, not the student's work: say how (a clone the repository refused, a crashed container).
         (r.reason === "env_error" && r.detail?.trim() ? `: ${tableCell(r.detail)}` : "") +
         (r.test_files_never_loaded?.length ? ` (test patch file(s) never loaded after the fix: ${r.test_files_never_loaded.join(", ")})` : "") +
         // Next to a validated row: how much of the fix no proving test reaches.
-        (r.validation_status === "validated" && r.untested_files?.length ? `${r.reason ? " " : ""}untested files: ${r.untested_files.length}` : ""),
+        (r.validation_status === "validated" && r.untested_files?.length ? `${r.reason ? " " : ""}untested files: ${r.untested_files.length}` : ""), r),
       f2p: r.FAIL_TO_PASS.length, a2p: r.ABSENT_TO_PASS.length, p2p: r.PASS_TO_PASS.length,
       regressions: r.regressions.length + r.regression_skips.length, flaky: r.flaky.length,
       outside: (r.proof_outside_test_patch ?? []).length, untested: (r.untested_files ?? []).length, seconds,

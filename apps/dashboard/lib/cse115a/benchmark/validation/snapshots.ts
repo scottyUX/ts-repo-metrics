@@ -1,10 +1,12 @@
 // The batch's repository clones and snapshot bundles, shared by a normal run and the snapshot-only
 // pass (validateBenchmarkBatch.ts --snapshot-only). A bundle holds every commit reachable from the
 // row's base_commit, so the files are kept even if the repository is later deleted or made private.
+// When GitHub can no longer supply a row's code, a normal run validates from that bundle instead
+// (rowCheckout).
 
-import { access } from "node:fs/promises";
-import { join } from "node:path";
-import { assertRow, bundleRepo, cloneRepo, CloneError, ensureCommit } from "@/lib/cse115a/benchmark/validation/runRow";
+import { access, copyFile, mkdir } from "node:fs/promises";
+import { dirname, join } from "node:path";
+import { assertRow, bundleRepo, cloneRepo, CloneError, ensureCommit, redactToken, run } from "@/lib/cse115a/benchmark/validation/runRow";
 import type { TaskRow } from "@/lib/cse115a/benchmark/validation/validateTask";
 
 type Log = (line: string) => void;
@@ -42,6 +44,79 @@ export async function batchRepo(out: string, repo: string, commit: string, clone
   }
   await (git.ensure ?? ensureCommit)(repoDir, commit, log, repo);
   return repoDir;
+}
+
+/** The branch a snapshot bundle holds (bundleRepo); `git clone -b` it to check the snapshot out. */
+export const SNAPSHOT_BRANCH = "hecate-snapshot";
+
+/** Where a row's code came from; recorded on the result as `repo_source`. */
+export type RepoSource = "github" | "snapshot";
+
+export type RowCheckout = {
+  /** A checkout that has the row's base_commit. */
+  repoDir: string;
+  source: RepoSource;
+  /** With `snapshot`: the clone or fetch failure, one line, token-free. Null with `github`. */
+  failure: string | null;
+};
+
+/**
+ * The row's bundle as an absolute path: `<out>/snapshots/<instance_id>.bundle`, else the same name in
+ * `snapshotsFrom` (validateBenchmarkBatch.ts --snapshots-from); null when neither has one.
+ */
+export async function findBundle(out: string, instanceId: string, snapshotsFrom?: string): Promise<string | null> {
+  const own = join(out, snapshotPath(instanceId));
+  if (await exists(own)) return own;
+  if (snapshotsFrom) {
+    const other = join(snapshotsFrom, `${instanceId}.bundle`);
+    if (await exists(other)) return other;
+  }
+  return null;
+}
+
+/**
+ * The checkout a normal run validates a row from: the batch's clone (batchRepo) when GitHub supplies
+ * the repository and base_commit. When the clone or the fetch fails, for any reason, and the row has a
+ * bundle (findBundle), the bundle is cloned into `<out>/repos-from-snapshot/<instance_id>/` (reused
+ * when already there; per row, because bundles are per row) and the run goes on from that. A bundle
+ * found only in `snapshotsFrom` is also copied into `<out>/snapshots/`, so the result records it and
+ * the Harbor export and gold check find it. With no bundle, the original error is thrown unchanged.
+ */
+export async function rowCheckout(options: {
+  out: string; row: Pick<TaskRow, "instance_id" | "repo" | "base_commit">; clones: Map<string, string>; log: Log; git?: BatchGit; snapshotsFrom?: string;
+}): Promise<RowCheckout> {
+  const { out, row, log } = options;
+  try {
+    return { repoDir: await batchRepo(out, row.repo, row.base_commit, options.clones, log, options.git), source: "github", failure: null };
+  } catch (error) {
+    const bundle = await findBundle(out, row.instance_id, options.snapshotsFrom);
+    if (!bundle) throw error;
+    const failure = redactToken(firstLine(error));
+    log(`  GitHub could not supply the code (${failure}); validating from the snapshot ${bundle}`);
+    const own = join(out, snapshotPath(row.instance_id));
+    const repoDir = join(out, "repos-from-snapshot", row.instance_id);
+    try {
+      if (bundle !== own) {
+        await mkdir(dirname(own), { recursive: true });
+        await copyFile(bundle, own);
+      }
+      if (!(await exists(join(repoDir, ".git")))) {
+        await mkdir(dirname(repoDir), { recursive: true });
+        await run("git", ["clone", "-q", "-b", SNAPSHOT_BRANCH, own, repoDir]);
+      }
+      await run("git", ["cat-file", "-e", `${row.base_commit}^{commit}`], repoDir);
+    } catch (snapshotError) {
+      throw new Error(`${failure}; the snapshot ${bundle} could not be used either: ${firstLine(snapshotError)}`);
+    }
+    return { repoDir, source: "snapshot", failure };
+  }
+}
+
+/** A result with where its code came from; a snapshot run's detail gets the GitHub failure appended. */
+export function withRepoSource<T extends { detail: string | null; repo_source?: RepoSource }>(result: T, checkout: RowCheckout): T {
+  if (checkout.source === "github") return { ...result, repo_source: "github" };
+  const note = `code taken from the snapshot because GitHub failed: ${checkout.failure}`;
+  return { ...result, repo_source: "snapshot", detail: result.detail ? `${result.detail}; ${note}` : note };
 }
 
 /**

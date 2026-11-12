@@ -1,7 +1,7 @@
 // Validates a list of benchmark rows in Docker, one after another, and writes one result JSON per
 // row plus a summary. Dry run: it writes nothing to Supabase. Run from the repo root:
 //
-//   npx tsx --tsconfig apps/dashboard/tsconfig.json apps/dashboard/scripts/validateBenchmarkBatch.ts ROWS.json --out DIR [--snapshots | --snapshot-only] [--only id,id] [--redo] [--timeout SECONDS]
+//   npx tsx --tsconfig apps/dashboard/tsconfig.json apps/dashboard/scripts/validateBenchmarkBatch.ts ROWS.json --out DIR [--snapshots | --snapshot-only] [--snapshots-from DIR] [--only id,id] [--redo] [--timeout SECONDS]
 //
 // ROWS.json is a JSON array of rows (Supabase: `select json_agg(t) from (...) t`) or JSON Lines.
 // DIR gets: results/<instance_id>.json, logs/<instance_id>/<run>.log, repos/<owner>__<name> (one
@@ -20,37 +20,39 @@
 // --redo. Prints one line per row and a count, and exits 0 even when some rows failed to clone.
 // Meant to run daily over the candidate rows, so the files are kept soon after Submit; a later
 // normal run into the same DIR reuses the clone in repos/ and records the bundle.
+//
+// Snapshot fallback: when cloning the repository or fetching base_commit fails for any reason and
+// the row has a bundle (in DIR/snapshots/, or in --snapshots-from DIR, which is then copied into
+// DIR/snapshots/), the bundle is cloned into repos-from-snapshot/<instance_id>/ and the row is
+// validated from it. The result says repo_source: "snapshot" and its detail carries the GitHub
+// failure; the summary's reason cell says "from snapshot". With no bundle, env_error as before.
 
-import { access, mkdir, readdir, readFile, writeFile } from "node:fs/promises";
+import { access, mkdir, readFile, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
-import { parseRows, preflight, rejectedWithoutRun, summarize, summaryMarkdown, writebackSql } from "@/lib/cse115a/benchmark/validation/batch";
-import { withRepoPublic } from "@/lib/cse115a/benchmark/validation/harbor";
-import { assertRow, imageDigest, repoIsPublic, validateRow } from "@/lib/cse115a/benchmark/validation/runRow";
-import { batchRepo, recordSnapshot, snapshotOnly } from "@/lib/cse115a/benchmark/validation/snapshots";
+import { parseRows, summaryMarkdown } from "@/lib/cse115a/benchmark/validation/batch";
+import { batchRun, validateBatchRow, writeBatchFiles } from "@/lib/cse115a/benchmark/validation/batchRun";
+import { snapshotOnly } from "@/lib/cse115a/benchmark/validation/snapshots";
 import type { ValidationResult } from "@/lib/cse115a/benchmark/validation/validateTask";
 
+const USAGE = "Usage: validateBenchmarkBatch.ts ROWS.json --out DIR [--snapshots | --snapshot-only] [--snapshots-from DIR] [--only id,id] [--redo] [--timeout SECONDS]";
+
 function parseArgs(argv: string[]) {
-  const args = { rowsPath: "", out: "", snapshots: false, snapshotOnly: false, only: [] as string[], redo: false, timeoutSeconds: 900 };
+  const args = { rowsPath: "", out: "", snapshots: false, snapshotOnly: false, snapshotsFrom: "", only: [] as string[], redo: false, timeoutSeconds: 900 };
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     if (arg === "--out") args.out = argv[++i] ?? "";
     else if (arg === "--snapshots") args.snapshots = true;
     else if (arg === "--snapshot-only") args.snapshotOnly = true;
+    else if (arg === "--snapshots-from") args.snapshotsFrom = argv[++i] ?? "";
     else if (arg === "--only") args.only = (argv[++i] ?? "").split(",").map((s) => s.trim()).filter(Boolean);
     else if (arg === "--redo") args.redo = true;
     else if (arg === "--timeout") args.timeoutSeconds = Number(argv[++i]);
     else if (!args.rowsPath) args.rowsPath = arg;
     else throw new Error(`Unexpected argument: ${arg}`);
   }
-  if (!args.rowsPath || !args.out) throw new Error("Usage: validateBenchmarkBatch.ts ROWS.json --out DIR [--snapshots | --snapshot-only] [--only id,id] [--redo] [--timeout SECONDS]");
+  if (!args.rowsPath || !args.out) throw new Error(USAGE);
   if (args.snapshots && args.snapshotOnly) throw new Error("--snapshots and --snapshot-only do not go together: --snapshot-only already writes the bundles");
   return args;
-}
-
-/** The first non-empty line of an error message (Docker's often starts with a blank one). */
-function firstLine(error: unknown): string {
-  const message = error instanceof Error ? error.message : String(error);
-  return message.split("\n").map((l) => l.trim()).find(Boolean) ?? message;
 }
 
 async function exists(path: string): Promise<boolean> {
@@ -66,83 +68,36 @@ async function main() {
   const args = parseArgs(process.argv.slice(2));
   const out = resolve(args.out);
   const rows = parseRows(await readFile(args.rowsPath, "utf8")).filter((r) => args.only.length === 0 || args.only.includes(r.instance_id));
+  const log = (line: string) => console.error(line);
   if (args.snapshotOnly) {
     console.error(`${rows.length} row(s), snapshots only; output in ${out}`);
     // Exit 0 whatever the rows did: each failure is on its own line.
-    await snapshotOnly({ rows, out, redo: args.redo, log: (line) => console.error(line), print: (line) => console.log(line) });
+    await snapshotOnly({ rows, out, redo: args.redo, log, print: (line) => console.log(line) });
     return;
   }
   await mkdir(join(out, "results"), { recursive: true });
   await mkdir(join(out, "cache"), { recursive: true });
-  const log = (line: string) => console.error(line);
   const startedAt = Date.now();
   log(`${rows.length} row(s); output in ${out}`);
 
-  const clones = new Map<string, string>();
-  const digests = new Map<string, string | null>();
-  const publicity = new Map<string, boolean | undefined>();
-  const results: ValidationResult[] = [];
+  const ctx = batchRun({ out, snapshots: args.snapshots, snapshotsFrom: args.snapshotsFrom ? resolve(args.snapshotsFrom) : undefined, timeoutSeconds: args.timeoutSeconds, log });
 
   for (const [index, row] of rows.entries()) {
     const resultFile = join(out, "results", `${row.instance_id}.json`);
     if (!args.redo && (await exists(resultFile))) {
-      results.push(JSON.parse(await readFile(resultFile, "utf8")) as ValidationResult);
       log(`[${index + 1}/${rows.length}] ${row.instance_id}: already done, skipping (use --redo to rerun)`);
       continue;
     }
     log(`[${index + 1}/${rows.length}] ${row.instance_id}`);
-    let result: ValidationResult;
-    try {
-      assertRow(row);
-      const skip = preflight(row);
-      if (skip) {
-        result = rejectedWithoutRun(row, skip.reason, skip.detail);
-      } else {
-        const repoDir = await batchRepo(out, row.repo, row.base_commit, clones, log);
-        result = await validateRow({ row, repoDir, logDir: join(out, "logs", row.instance_id), cacheDir: join(out, "cache"), timeoutSeconds: args.timeoutSeconds, log });
-        // Extras: a failure here is logged and must never discard the verdict above.
-        if (result.image) {
-          if (!digests.has(result.image)) digests.set(result.image, await imageDigest(result.image));
-          result.image_digest = digests.get(result.image) ?? null;
-          if (result.harbor_env && result.image_digest) result.harbor_env = { ...result.harbor_env, image: result.image_digest };
-        }
-        // Whether the repository is public, checked once per repository; never fails the row.
-        if (result.harbor_env) {
-          if (!publicity.has(row.repo)) publicity.set(row.repo, await repoIsPublic(row.repo, { log }));
-          result.harbor_env = withRepoPublic(result.harbor_env, publicity.get(row.repo));
-        }
-        // A bundle from an earlier run of this row is still valid (the base commit does not change), so
-        // it is recorded even without --snapshots; the flag only decides whether to create a new one.
-        // (A snapshot-only pass writes the same bundles.)
-        const bundle = await recordSnapshot(out, row, repoDir, args.snapshots, log);
-        if (bundle !== undefined) result.snapshot_bundle = bundle;
-      }
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      result = rejectedWithoutRun(row, "env_error", message.slice(0, 2000));
-      log(`  env_error: ${firstLine(error)}`);
-    }
+    const result: ValidationResult = await validateBatchRow(ctx, row, join(out, "logs", row.instance_id));
     await writeFile(resultFile, JSON.stringify(result, null, 2) + "\n");
-    results.push(result);
-    log(`  ${result.validation_status}${result.reason ? ` (${result.reason})` : ""}`);
+    log(`  ${result.validation_status}${result.reason ? ` (${result.reason})` : ""}${result.repo_source === "snapshot" ? ", from snapshot" : ""}`);
   }
 
-  // The summary and writeback.sql cover every result in the folder, not only the rows this invocation
-  // ran, so a --only or --redo pass never shrinks them to the rows it touched.
-  const allResults = await readAllResults(join(out, "results"));
-  const summary = summarize(allResults);
-  await writeFile(join(out, "summary.json"), JSON.stringify(summary, null, 2) + "\n");
-  await writeFile(join(out, "summary.md"), summaryMarkdown(summary));
-  await writeFile(join(out, "writeback.sql"), writebackSql(allResults));
-  if (allResults.length !== results.length) log(`Summary covers all ${allResults.length} result(s) in the folder; ${results.length} ran or were checked this time.`);
+  const { summary, results } = await writeBatchFiles(out);
+  if (results.length !== rows.length) log(`Summary covers all ${results.length} result(s) in the folder; ${rows.length} ran or were checked this time.`);
   console.log(summaryMarkdown(summary));
   log(`Done in ${Math.round((Date.now() - startedAt) / 1000)} s. Dry run, nothing written to the database.`);
-}
-
-/** Every results/*.json in the folder, sorted by file name. */
-async function readAllResults(dir: string): Promise<ValidationResult[]> {
-  const names = (await readdir(dir)).filter((n) => n.endsWith(".json")).sort();
-  return Promise.all(names.map(async (n) => JSON.parse(await readFile(join(dir, n), "utf8")) as ValidationResult));
 }
 
 main().catch((error) => {
