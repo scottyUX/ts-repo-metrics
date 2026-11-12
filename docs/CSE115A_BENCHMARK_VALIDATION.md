@@ -445,8 +445,9 @@ npx tsx apps/dashboard/scripts/validateBenchmarkTask.ts --row row.json --repo-di
 ```
 
 `row.json` holds one `cse_benchmark_tasks` row (`instance_id`, `repo`, `base_commit`, `patch`,
-`test_patch`, `FAIL_TO_PASS`). With no `--repo-dir`, the repository is cloned using
-`GITHUB_TOKEN` from the environment.
+`test_patch`, `FAIL_TO_PASS`). With no `--repo-dir`, the repository is cloned from GitHub:
+anonymously, or with the course App's installation token when the App variables are set (see
+"Private repositories").
 
 Where each claim above about another benchmark comes from, with section numbers, is in
 `docs/planning/BENCHMARK_VALIDATION_SURVEY.md`.
@@ -479,7 +480,16 @@ original_base_commit, original_patch_sha256, original_test_patch_sha256 }`, whic
 copies into the result together with the rebuilt base and patches. Write-back of such a result
 (any verdict except `env_error`) also sets `base_commit`, `environment_setup_commit`, `patch` and
 `test_patch` in `cse_benchmark_tasks` and adds the flag `staff_rebuilt:merge-parent` to the source;
-captured rows are written back exactly as before. To revert, restore the student-captured values
+captured rows are written back exactly as before. The same write-back drops the capture flags (the
+`BuildFlag`s in `buildInstance.ts`) that described the replaced diff and that the rebuilt patches
+make untrue (`staleCaptureFlags` in `validation/writeback.ts`): `no_test_patch` when the rebuilt
+`test_patch` is non-empty, `no_source_patch` when the rebuilt `patch` is non-empty, `diff_missing`
+when either is, `diff_truncated` always (a rebuild takes the whole `git diff M^1 M`), and
+`no_tests_found` when the rebuilt `test_patch` adds a test. The other capture flags stay:
+`base_commit_from_pr_base` / `base_commit_from_first_commit` (how capture chose its base) and
+`pii_scrubbed_from_patch` (the result does not say whether the rebuild's scrubbing changed
+anything). The output line names the flags dropped (`, dropped capture flag(s): no_test_patch`);
+`--dry-run` reads no database, so it lists the flags it would drop "if present". To revert, restore the student-captured values
 (the original base is in the result; re-capture the patches from it and check them against the
 hashes) and remove the flag.
 
@@ -501,7 +511,8 @@ builder is `validation/harbor.ts`.
 **The recipe.** Everything a task needs besides the row is in `cse_benchmark_tasks.harbor_env`
 (jsonb): the image (`tag@sha256:…`), the runners, the package directory, the install steps in
 order (where each runs and the command), the test steps, the container variables, the database
-services by name and image, and where the Node version came from. The validator's result carries
+services by name and image, where the Node version came from, and whether the repository is
+public (`repo_public`, see "Private repositories"). The validator's result carries
 the same object, and write-back (`writebackValidation.ts` and `writeback.sql`) stores it for
 validated rows only; rejected and `env_error` rows leave the column alone, and so does a validated
 result file written before results carried a recipe. `writebackValidation.ts` checks the column
@@ -518,12 +529,14 @@ and the JSONL export never contains it.
   `git checkout FETCH_HEAD`), so no later history is ever in a layer, and fetching by id works for
   a commit no branch points at. This needs the repository to **stay public** on GitHub (and the
   commit not to be garbage-collected, e.g. after a force-push and repository cleanup); a task
-  whose repository is made private or deleted no longer builds. The row needs a full 40-character
+  whose repository is made private or deleted no longer builds, and a row whose repository the
+  batch found private (`repo_public: false`) is not exported this way. The row needs a full 40-character
   `base_commit` and an `owner/name` repo, or it is skipped. Neither source initialises git
   submodules or fetches Git LFS objects (the image has no `git-lfs`, so LFS files are pointer
   files); a repository whose tests need either fails in Harbor even though it validated, if the
   validator's host checkout had them.
-- `bundle` — `scripts/exportHarbor.ts`, from a local batch run with `--snapshots`. The batch's
+- `bundle` — `scripts/exportHarbor.ts`, from a local batch run with `--snapshots` (or an earlier
+  `--snapshot-only` pass into the same folder). The batch's
   snapshot bundle is copied next to the Dockerfile and cloned from there, so the task builds
   without reaching GitHub.
 
@@ -547,7 +560,9 @@ code, and the same 409 while the consent wording is not approved), one folder pe
 - no `harbor_env` on the row (validated before the column existed): re-run the validator on it
   and write back;
 - a database service in the runs: a Harbor task is one image with no sidecar, so these wait;
-- a short `base_commit` or a repo that is not `owner/name`.
+- a short `base_commit` or a repo that is not `owner/name`;
+- `harbor_env.repo_public` is `false`: "repository is private; the task can only be built from a
+  snapshot" (see "Private repositories").
 
 From a local batch instead:
 
@@ -556,6 +571,51 @@ npx tsx --tsconfig apps/dashboard/tsconfig.json apps/dashboard/scripts/exportHar
 harbor run -p OUT/<task> -a oracle   # expect 1.0
 harbor run -p OUT/<task> -a nop      # expect 0.0
 ```
+
+## Private repositories
+
+Most student repositories are public, but not all (two Assignment 3 rows come from a private one),
+and a public repository can be made private or deleted after Submit.
+
+**Cloning.** With `GITHUB_APP_ID`, `GITHUB_APP_SLUG` and `GITHUB_APP_PRIVATE_KEY` set (the same
+course GitHub App the site uses), `cloneRepo` gets an installation token for the repository and
+clones with it, and the base-commit fetch uses it too; the token is put only in the URL handed to
+git, never stored in the remote, and removed from every message. Without them the clone is
+anonymous. Either way git runs with no credential helper and no prompt, so it never uses the
+machine owner's own GitHub credentials. When GitHub refuses a clone or base-commit fetch, the row
+is `env_error` (still `candidate`) and its `detail`, also shown in the batch summary's reason cell,
+says why:
+
+- no App variables: `clone failed: repository not found or private; set GITHUB_APP_ID,
+  GITHUB_APP_SLUG and GITHUB_APP_PRIVATE_KEY to clone private repositories`;
+- App variables set: `clone failed with the course App token: is the App installed on
+  <owner>/<repo>?`
+
+Other failures (network, a commit that is gone) keep git's own message.
+
+**Snapshots soon after Submit.** `validateBenchmarkBatch.ts ROWS.json --out DIR --snapshot-only`
+clones each row's repository (into `DIR/repos/`, the clone a normal run uses), fetches `base_commit`,
+writes `DIR/snapshots/<instance_id>.bundle` exactly as `--snapshots` does, and stops: no Docker, no
+results, no summary, no `writeback.sql`. A row with a bundle is skipped unless `--redo`. It prints
+one line per row (`snapshot written`, `already has a snapshot`, or the clone failure's detail) and a
+count, and exits 0 even when rows failed. Run it daily over the `candidate` rows, so the files are
+kept long before validation: a later normal run into the same `DIR` reuses the clone in `repos/`
+(no GitHub access needed once the base commit is there) and records the bundle, and
+`scripts/exportHarbor.ts` builds the task from it.
+
+```sh
+npx tsx --tsconfig apps/dashboard/tsconfig.json apps/dashboard/scripts/validateBenchmarkBatch.ts ROWS.json --out DIR --snapshot-only
+```
+
+**`repo_public`.** The batch checks each repository once with an anonymous
+`git ls-remote https://github.com/<owner>/<repo>.git` (no credentials, no prompt, 20 s timeout)
+and records the answer as `harbor_env.repo_public`, next to the image digest: `true` if it
+succeeds, `false` if GitHub refuses. If the check fails for another reason (network), the field is
+left out and the log says so; the row is never failed over it. Absent means "not checked", as on
+every recipe written before the check existed. The course website's Harbor zip (`github` source)
+leaves out a row with `repo_public === false` and lists it in `SKIPPED.txt` ("repository is
+private; the task can only be built from a snapshot"); absent or `true` export as before. The
+bundle export (`scripts/exportHarbor.ts`) is unaffected and builds such rows from the snapshot.
 
 ## Known limitations
 
