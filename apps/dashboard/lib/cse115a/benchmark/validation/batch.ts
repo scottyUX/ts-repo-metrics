@@ -3,7 +3,7 @@
 
 import { STAFF_REBUILT_FLAG } from "@/lib/cse115a/benchmark/validation/rebuildRow";
 import { withRebuild, type TaskRow, type ValidationReason, type ValidationResult } from "@/lib/cse115a/benchmark/validation/validateTask";
-import { managedFlags, PROOF_OUTSIDE_FLAG, REASON_FLAG_PREFIX, UNTESTED_FILES_FLAG } from "@/lib/cse115a/benchmark/validation/writeback";
+import { managedFlags, PROOF_OUTSIDE_FLAG, REASON_FLAG_PREFIX, staleCaptureFlags, UNTESTED_FILES_FLAG } from "@/lib/cse115a/benchmark/validation/writeback";
 
 /** Parses a JSON array (Supabase `json_agg`) or JSON Lines (one row per line). */
 export function parseRows(text: string): TaskRow[] {
@@ -196,12 +196,16 @@ export function writebackSql(results: ValidationResult[]): string {
         ` where instance_id = ${id};`,
       );
       flags.push(STAFF_REBUILT_FLAG);
+      const stale = staleCaptureFlags(r.rebuild);
+      if (stale.length) lines.push(`-- drops capture flag(s) the rebuild made untrue, if present: ${stale.join(", ")}`);
     }
     const keepStaff = r.rebuild ? ` and f <> '${STAFF_REBUILT_FLAG}'` : "";
+    // A rebuilt row also loses the capture flags the rebuild made untrue (the same list as the client write-back).
+    const dropCapture = r.rebuild ? staleCaptureFlags(r.rebuild).map((f) => ` and f <> '${f}'`).join("") : "";
     lines.push(
       "update public.cse_benchmark_task_sources",
       `   set validation_status = ${quote(r.validation_status)},`,
-      `       flags = array_remove(array(select f from unnest(flags) as f where f not like '${REASON_FLAG_PREFIX}%' and f <> '${PROOF_OUTSIDE_FLAG}' and f <> '${UNTESTED_FILES_FLAG}'${keepStaff}), null)` +
+      `       flags = array_remove(array(select f from unnest(flags) as f where f not like '${REASON_FLAG_PREFIX}%' and f <> '${PROOF_OUTSIDE_FLAG}' and f <> '${UNTESTED_FILES_FLAG}'${keepStaff}${dropCapture}), null)` +
         (flags.length ? ` || array[${flags.map(quote).join(", ")}]` : "") + ",",
       "       updated_at = now()",
       ` where instance_id = ${id};`,

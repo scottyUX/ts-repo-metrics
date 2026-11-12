@@ -190,12 +190,13 @@ describe("write-back of a rebuilt row", () => {
       FAIL_TO_PASS: ["server/backend_tests/ratings.test.ts::averages ratings"], PASS_TO_PASS: [], image: "node:24-bookworm", eval_script: "set -e\n", log_parser: "vitest-json",
       base_commit: PARENT, environment_setup_commit: PARENT, patch: row.patch, test_patch: row.test_patch,
     } });
-    expect(calls[2]!.values).toEqual({ validation_status: "validated", flags: ["no_source_patch", STAFF_REBUILT_FLAG], updated_at: "now" });
-    expect(lines[0]).toContain(`rebuilt base ${PARENT.slice(0, 7)} and patches written, flagged ${STAFF_REBUILT_FLAG}`);
+    // The rebuilt patch is non-empty, so capture's no_source_patch is no longer true and goes.
+    expect(calls[2]!.values).toEqual({ validation_status: "validated", flags: [STAFF_REBUILT_FLAG], updated_at: "now" });
+    expect(lines[0]).toContain(`rebuilt base ${PARENT.slice(0, 7)} and patches written, flagged ${STAFF_REBUILT_FLAG}, dropped capture flag(s): no_source_patch`);
     // Written back a second time (a rerun): the flag is not duplicated.
-    const again = fakeClient(["no_source_patch", STAFF_REBUILT_FLAG]);
+    const again = fakeClient(["base_commit_from_pr_base", STAFF_REBUILT_FLAG]);
     await applyWriteback(again.client, writebackPlan([validatedFrom(row)]), () => "now");
-    expect(again.calls[2]!.values!.flags).toEqual(["no_source_patch", STAFF_REBUILT_FLAG]);
+    expect(again.calls[2]!.values!.flags).toEqual(["base_commit_from_pr_base", STAFF_REBUILT_FLAG]);
   });
 
   it("client path: a rejected rebuilt row still gets its rebuilt base and patches, but no lists", async () => {
@@ -211,7 +212,7 @@ describe("write-back of a rebuilt row", () => {
     const sql = writebackSql([validatedFrom(row)]);
     expect(sql).toContain(`-- rebuilt from merge commit ${M}; original base_commit ${BASE_TAG}`);
     expect(sql).toContain(`   set base_commit = $hecate$${PARENT}$hecate$,\n       environment_setup_commit = $hecate$${PARENT}$hecate$,\n       patch = $hecate$${row.patch}$hecate$,`);
-    expect(sql).toContain(`and f <> '${STAFF_REBUILT_FLAG}'), null) || array[$hecate$${STAFF_REBUILT_FLAG}$hecate$],`);
+    expect(sql).toContain(`and f <> '${STAFF_REBUILT_FLAG}' and f <> 'no_test_patch' and f <> 'no_source_patch' and f <> 'diff_missing' and f <> 'diff_truncated' and f <> 'no_tests_found'), null) || array[$hecate$${STAFF_REBUILT_FLAG}$hecate$],`);
   });
 
   it("a normal result is written exactly as before, and an env_error result writes nothing (rebuilt or not)", async () => {

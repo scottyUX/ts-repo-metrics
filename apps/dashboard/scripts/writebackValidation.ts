@@ -9,8 +9,10 @@
 // harbor_env column is missing (apply supabase/migrations/20261110000000_cse115a_benchmark_harbor_env.sql).
 // Validated rows whose patch changes code no proving test reaches get the untested_files flag (removed
 // again when a later result lists none). Rejected rows get validation_status = rejected and a
-// validation_reason:<reason> flag. env_error rows are skipped (they stay candidate). --dry-run prints
-// the plan and touches nothing.
+// validation_reason:<reason> flag. env_error rows are skipped (they stay candidate). A staff-rebuilt
+// row also gets its rebuilt base and patches, and loses the capture flags the rebuild made untrue
+// (staleCaptureFlags). --dry-run prints the plan and touches nothing; it reads no database, so it
+// lists the capture flags it would drop "if present" rather than the ones the row has.
 
 import { readdir, readFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
@@ -42,7 +44,7 @@ async function main() {
   const ops = writebackPlan(results);
   console.error(`${results.length} result(s), ${ops.length} to write (${results.length - ops.length} env_error skipped)`);
   if (args.dryRun) {
-    for (const op of ops) console.log(`${op.instance_id}: ${op.validation_status}${op.reasonFlag ? ` (${op.reasonFlag})` : ""}${op.task ? ` F2P=${op.task.FAIL_TO_PASS.length} P2P=${op.task.PASS_TO_PASS.length} image=${op.task.image}${op.task.harbor_env ? " harbor_env" : ""}` : ""}`);
+    for (const op of ops) console.log(`${op.instance_id}: ${op.validation_status}${op.reasonFlag ? ` (${op.reasonFlag})` : ""}${op.task ? ` F2P=${op.task.FAIL_TO_PASS.length} P2P=${op.task.PASS_TO_PASS.length} image=${op.task.image}${op.task.harbor_env ? " harbor_env" : ""}` : ""}${op.dropCaptureFlags.length ? `, drops capture flag(s) if present: ${op.dropCaptureFlags.join(", ")}` : ""}`);
     console.error("Dry run: nothing written.");
     return;
   }
