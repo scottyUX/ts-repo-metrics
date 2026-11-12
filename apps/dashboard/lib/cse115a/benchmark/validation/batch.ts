@@ -76,6 +76,12 @@ export function funnel(results: ValidationResult[]): FunnelStage[] {
   return stages;
 }
 
+/** The first non-empty line of `text`, at most 300 characters, with `|` escaped for a Markdown table cell. */
+function tableCell(text: string): string {
+  const line = text.split("\n").map((l) => l.trim()).find(Boolean) ?? "";
+  return (line.length > 300 ? `${line.slice(0, 299)}…` : line).replace(/\|/g, "\\|");
+}
+
 export function summarize(results: ValidationResult[]): Summary {
   const byReason: Record<string, number> = {};
   const rows = results.map((r) => {
@@ -85,7 +91,10 @@ export function summarize(results: ValidationResult[]): Summary {
       instance_id: r.instance_id,
       status: r.validation_status,
       // A harness problem must not read as a plain verdict: name the test files that never loaded after the fix.
-      reason: (r.reason ?? "") + (r.test_files_never_loaded?.length ? ` (test patch file(s) never loaded after the fix: ${r.test_files_never_loaded.join(", ")})` : "") +
+      reason: (r.reason ?? "") +
+        // Our run failed, not the student's work: say how (a clone the repository refused, a crashed container).
+        (r.reason === "env_error" && r.detail?.trim() ? `: ${tableCell(r.detail)}` : "") +
+        (r.test_files_never_loaded?.length ? ` (test patch file(s) never loaded after the fix: ${r.test_files_never_loaded.join(", ")})` : "") +
         // Next to a validated row: how much of the fix no proving test reaches.
         (r.validation_status === "validated" && r.untested_files?.length ? `${r.reason ? " " : ""}untested files: ${r.untested_files.length}` : ""),
       f2p: r.FAIL_TO_PASS.length, a2p: r.ABSENT_TO_PASS.length, p2p: r.PASS_TO_PASS.length,

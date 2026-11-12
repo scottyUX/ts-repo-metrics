@@ -84,7 +84,7 @@ async function main() {
           if (!(await exists(join(repoDir, ".git")))) await cloneRepo(row.repo, repoDir, log);
           clones.set(row.repo, repoDir);
         }
-        await ensureCommit(repoDir, row.base_commit, log);
+        await ensureCommit(repoDir, row.base_commit, log, row.repo);
         result = await validateRow({ row, repoDir, logDir: join(out, "logs", row.instance_id), cacheDir: join(out, "cache"), timeoutSeconds: args.timeoutSeconds, log });
         // Extras: a failure here is logged and must never discard the verdict above.
         if (result.image) {

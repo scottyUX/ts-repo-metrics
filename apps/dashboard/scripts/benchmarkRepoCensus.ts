@@ -42,7 +42,7 @@ async function main() {
     let note = "";
     try {
       if (!(await exists(join(repoDir, ".git", "HEAD")))) await cloneRepo(row.repo, repoDir, log);
-      await ensureCommit(repoDir, row.base_commit, log);
+      await ensureCommit(repoDir, row.base_commit, log, row.repo);
       const testFiles = filesInPatch(row.test_patch);
       const inspect = async (dir: string) => {
         const workflowNames = await workflowFiles(dir);

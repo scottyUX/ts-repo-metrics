@@ -37,7 +37,7 @@ async function main() {
 
   const cloned = !args.repoDir;
   const repoDir = cloned ? await cloneRepo(row.repo, undefined, log) : resolve(args.repoDir);
-  await ensureCommit(repoDir, row.base_commit, log);
+  await ensureCommit(repoDir, row.base_commit, log, row.repo);
   try {
     const logDir = join(tmpdir(), "hecate-validate-logs", row.instance_id);
     const result = await validateRow({ row, repoDir, logDir, timeoutSeconds: args.timeoutSeconds, log });

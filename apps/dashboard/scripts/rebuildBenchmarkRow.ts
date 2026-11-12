@@ -53,7 +53,7 @@ async function main() {
   const cloned = !args.repoDir;
   const repoDir = cloned ? await cloneRepo(row.repo, await mkdtemp(join(tmpdir(), "hecate-rebuild-")), log) : resolve(args.repoDir);
   try {
-    await ensureCommit(repoDir, task.pr.mergeCommitSha, log);
+    await ensureCommit(repoDir, task.pr.mergeCommitSha, log, row.repo);
     const { row: rebuilt, flags, droppedFiles } = await rebuildRow({
       row, task, assignmentNumber, studentEmail, expectedPr: args.pr,
       git: (gitArgs) => run("git", gitArgs, repoDir),

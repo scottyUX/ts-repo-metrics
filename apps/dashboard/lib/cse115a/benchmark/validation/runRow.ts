@@ -13,18 +13,29 @@ import { signals, type Signals } from "@/lib/cse115a/benchmark/validation/census
 import { detectEnvironment } from "@/lib/cse115a/benchmark/validation/environment";
 import { DockerSuiteRunner } from "@/lib/cse115a/benchmark/validation/runner";
 import { filesInPatch, modifiedAcrossFiles, unsupportedResult, validateTask, withRebuild, type TaskRow, type ValidationResult } from "@/lib/cse115a/benchmark/validation/validateTask";
-import { githubAppConfig, repoInstallationToken } from "@/lib/cse115a/githubAppToken";
+import { CourseRepoAccessError, githubAppConfig, repoInstallationToken, type GitHubAppConfig } from "@/lib/cse115a/githubAppToken";
+
+export type RunOptions = {
+  /** The child's environment (default: this process's). */
+  env?: NodeJS.ProcessEnv;
+  /** Kill the command and reject after this many milliseconds. */
+  timeoutMs?: number;
+};
 
 /** Runs a command, returns stdout, throws on a non-zero exit with stderr in the message. */
-export function run(cmd: string, args: string[], cwd?: string): Promise<string> {
+export function run(cmd: string, args: string[], cwd?: string, options: RunOptions = {}): Promise<string> {
   return new Promise((resolvePromise, reject) => {
-    const child = spawn(cmd, args, { cwd, stdio: ["ignore", "pipe", "pipe"] });
+    const child = spawn(cmd, args, { cwd, env: options.env, stdio: ["ignore", "pipe", "pipe"] });
     let out = "";
     let err = "";
+    const timer = options.timeoutMs
+      ? setTimeout(() => { child.kill("SIGKILL"); reject(new Error(`${cmd} ${args.join(" ")} timed out after ${options.timeoutMs} ms`)); }, options.timeoutMs)
+      : null;
     child.stdout.on("data", (chunk) => { out += chunk; });
     child.stderr.on("data", (chunk) => { err += chunk; });
-    child.on("error", reject);
+    child.on("error", (error) => { if (timer) clearTimeout(timer); reject(error); });
     child.on("close", (code) => {
+      if (timer) clearTimeout(timer);
       if (code === 0) resolvePromise(out);
       else reject(new Error(`${cmd} ${args.join(" ")} exited ${code}\n${err.trim()}`));
     });
@@ -58,20 +69,95 @@ export async function fileIn(dir: string, path: string): Promise<string | null> 
   }
 }
 
+/** The detail of a row whose clone or base-commit fetch GitHub refused, when the course App is not configured. */
+export const NO_APP_CLONE_DETAIL =
+  "clone failed: repository not found or private; set GITHUB_APP_ID, GITHUB_APP_SLUG and GITHUB_APP_PRIVATE_KEY to clone private repositories";
+
+/** The same with the App configured: the token was used and GitHub still refused. */
+export function appCloneDetail(fullName: string): string {
+  return `clone failed with the course App token: is the App installed on ${fullName}?`;
+}
+
+/** A clone or base-commit fetch that failed; the message is the row's `detail` and never holds a token. */
+export class CloneError extends Error {}
+
+/**
+ * Whether git's output says GitHub refused access: a private or missing repository answers an
+ * anonymous request with "Repository not found" or a credentials prompt (which GIT_TERMINAL_PROMPT=0
+ * turns into "could not read Username … terminal prompts disabled"), a bad token with 401/403.
+ * Network, disk and missing-commit failures do not match.
+ */
+export function isAccessError(message: string): boolean {
+  return /repository not found|repository '[^']*' not found|could not read (username|password)|terminal prompts disabled|authentication failed|invalid username or password|returned error: 40[134]|permission to .* denied/i.test(message);
+}
+
+/** `text` with the token, and any credentials in a URL, replaced by `***`. */
+export function redactToken(text: string, token?: string | null): string {
+  const masked = token ? text.split(token).join("***") : text;
+  return masked.replace(/(https?:\/\/)[^/@\s]+@/g, "$1***@");
+}
+
+/** git with no credential prompt and no credential helper: only the URL's own credentials, never the user's keychain. */
+const GIT_NO_PROMPT = ["-c", "credential.helper="];
+const noPromptEnv = (): NodeJS.ProcessEnv => ({ ...process.env, GIT_TERMINAL_PROMPT: "0" });
+
+/** How the clone reaches GitHub; tests hand in fakes. */
+export type GitAccess = {
+  config?: () => GitHubAppConfig | null;
+  token?: (owner: string, name: string, config: GitHubAppConfig) => Promise<string>;
+  git?: typeof run;
+};
+
+/** The App token for `owner/name`, or null without App config. A failure becomes a CloneError. */
+async function appToken(fullName: string, access: GitAccess): Promise<{ configured: boolean; token: string | null }> {
+  const config = (access.config ?? githubAppConfig)();
+  if (!config) return { configured: false, token: null };
+  const [owner, name] = fullName.split("/");
+  try {
+    return { configured: true, token: await (access.token ?? repoInstallationToken)(owner, name, config) };
+  } catch (error) {
+    if (error instanceof CourseRepoAccessError && error.code === "github_app_not_installed") throw new CloneError(appCloneDetail(fullName));
+    throw new CloneError(`clone failed: could not get the course App token for ${fullName}: ${firstLine(redactToken(errorText(error)))}`);
+  }
+}
+
+function errorText(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
+function firstLine(text: string): string {
+  return text.split("\n").map((l) => l.trim()).find(Boolean) ?? text;
+}
+
+/** The CloneError for a failed git command: the access messages when GitHub refused, else git's first line. */
+function gitFailure(error: unknown, what: string, fullName: string, configured: boolean, token: string | null): CloneError {
+  const message = redactToken(errorText(error), token);
+  if (isAccessError(message)) return new CloneError(configured ? appCloneDetail(fullName) : NO_APP_CLONE_DETAIL);
+  // The first line is the command itself; git's own complaint is on the lines after it.
+  const lines = message.split("\n").map((l) => l.trim()).filter(Boolean);
+  return new CloneError(`${what} failed: ${lines.slice(1).join("; ") || lines[0] || "unknown error"}`.slice(0, 2000));
+}
+
+const githubUrl = (fullName: string, token: string | null) =>
+  token ? `https://x-access-token:${token}@github.com/${fullName}.git` : `https://github.com/${fullName}.git`;
+
 /**
  * Clones `owner/name` into `dir` (a fresh temp folder when omitted). Uses the course App's installation
- * token when the App is configured, otherwise an anonymous clone; the token never stays in the remote URL.
+ * token when the App is configured, otherwise an anonymous clone; the token never stays in the remote
+ * URL and never appears in an error. A failure throws a CloneError whose message is the row's detail.
  */
-export async function cloneRepo(fullName: string, dir?: string, log: (line: string) => void = () => {}): Promise<string> {
-  const [owner, name] = fullName.split("/");
-  const config = githubAppConfig();
-  const token = config ? await repoInstallationToken(owner, name, config) : null;
-  const url = token ? `https://x-access-token:${token}@github.com/${fullName}.git` : `https://github.com/${fullName}.git`;
+export async function cloneRepo(fullName: string, dir?: string, log: (line: string) => void = () => {}, access: GitAccess = {}): Promise<string> {
+  const git = access.git ?? run;
+  const { configured, token } = await appToken(fullName, access);
   const target = dir ?? (await mkdtemp(join(tmpdir(), "hecate-repo-")));
   if (dir) await mkdir(dir, { recursive: true });
   log(`Cloning ${fullName}${token ? " with the course App token" : ""}...`);
-  await run("git", ["clone", "--quiet", url, target]);
-  await run("git", ["remote", "set-url", "origin", `https://github.com/${fullName}.git`], target);
+  try {
+    await git("git", [...GIT_NO_PROMPT, "clone", "--quiet", githubUrl(fullName, token), target], undefined, { env: noPromptEnv() });
+  } catch (error) {
+    throw gitFailure(error, "clone", fullName, configured, token);
+  }
+  await git("git", ["remote", "set-url", "origin", githubUrl(fullName, null)], target);
   return target;
 }
 
@@ -81,13 +167,47 @@ export async function workflowFiles(dir: string): Promise<string[]> {
   return names.filter((n) => /\.ya?ml$/.test(n));
 }
 
-/** Fetches `commit` from origin unless the clone already has it. */
-export async function ensureCommit(repoDir: string, commit: string, log: (line: string) => void = () => {}): Promise<void> {
+/**
+ * Fetches `commit` unless the clone already has it. With `fullName`, the fetch goes to GitHub the way
+ * cloneRepo does (the App token when configured, never stored in the remote) and a failure throws a
+ * CloneError; without it, from origin as configured.
+ */
+export async function ensureCommit(repoDir: string, commit: string, log: (line: string) => void = () => {}, fullName?: string, access: GitAccess = {}): Promise<void> {
+  const git = access.git ?? run;
   try {
-    await run("git", ["cat-file", "-e", `${commit}^{commit}`], repoDir);
+    await git("git", ["cat-file", "-e", `${commit}^{commit}`], repoDir);
+    return;
   } catch {
-    log(`Fetching ${commit}...`);
-    await run("git", ["fetch", "--quiet", "origin", commit], repoDir);
+    // not here yet
+  }
+  log(`Fetching ${commit}...`);
+  if (!fullName) {
+    await git("git", ["fetch", "--quiet", "origin", commit], repoDir);
+    return;
+  }
+  const { configured, token } = await appToken(fullName, access);
+  try {
+    await git("git", [...GIT_NO_PROMPT, "fetch", "--quiet", githubUrl(fullName, token), commit], repoDir, { env: noPromptEnv() });
+  } catch (error) {
+    throw gitFailure(error, `fetch of ${commit}`, fullName, configured, token);
+  }
+}
+
+/**
+ * Whether GitHub serves `owner/name` to anyone: an anonymous `git ls-remote` with no credentials.
+ * True when it succeeds, false when GitHub refuses (private or gone), undefined when the check itself
+ * failed for another reason (network, timeout), which is logged and never fails the row.
+ */
+export async function repoIsPublic(fullName: string, options: { git?: typeof run; log?: (line: string) => void; timeoutMs?: number } = {}): Promise<boolean | undefined> {
+  const git = options.git ?? run;
+  try {
+    await git("git", [...GIT_NO_PROMPT, "ls-remote", githubUrl(fullName, null), "HEAD"], undefined, { env: noPromptEnv(), timeoutMs: options.timeoutMs ?? 20_000 });
+    return true;
+  } catch (error) {
+    const message = redactToken(errorText(error));
+    if (isAccessError(message)) return false;
+    options.log?.(`  could not check whether ${fullName} is public (repo_public left unset): ${firstLine(message.split("\n").slice(1).join("\n") || message)}`);
+    return undefined;
   }
 }
 
