@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { BenchmarkInstance } from "@/lib/cse115a/benchmark/buildInstance";
 import type { ExportCandidate } from "@/lib/cse115a/benchmark/exportJsonl";
 import { harborExport, NO_RECIPE_REASON } from "@/lib/cse115a/benchmark/exportHarbor";
-import type { HarborEnv } from "@/lib/cse115a/benchmark/validation/harbor";
+import { PRIVATE_REPO_REASON, type HarborEnv } from "@/lib/cse115a/benchmark/validation/harbor";
 
 const state = vi.hoisted(() => ({ approved: false, candidates: [] as unknown[] }));
 
@@ -111,5 +111,25 @@ describe("GET benchmark-harbor.zip", () => {
     expect((zip.getEntry("team__app-ok-1/tests/test.sh")!.attr >>> 16) & 0o777).toBe(0o755);
     expect((zip.getEntry("team__app-ok-1/task.toml")!.attr >>> 16) & 0o777).toBe(0o644);
     expect(zip.readAsText("team__app-ok-1/tests/expected.json")).toContain("src/a.test.ts::adds");
+  });
+});
+
+describe("harborExport, private repositories", () => {
+  const privateRow = candidate(instance("team__app-private-1", { ...recipe, repo_public: false }), true, "validated");
+  const publicRow = candidate(instance("team__app-public-1", { ...recipe, repo_public: true }), true, "validated");
+  const out = harborExport([CANDIDATES[0]!, privateRow, publicRow]);
+
+  it("leaves out a row whose repository the batch found private and lists it in SKIPPED.txt", () => {
+    expect(out.exported).toEqual(["team__app-ok-1", "team__app-public-1"]);
+    expect([...out.files.keys()].some((p) => p.startsWith("team__app-private-1/"))).toBe(false);
+    expect(out.skipped).toEqual([{ instance_id: "team__app-private-1", reason: PRIVATE_REPO_REASON }]);
+    expect(out.files.get("SKIPPED.txt")).toContain("team__app-private-1\trepository is private; the task can only be built from a snapshot\n");
+  });
+
+  it("exports rows with repo_public true or absent as before", () => {
+    const unchecked = harborExport([CANDIDATES[0]!]).files;
+    const checked = harborExport([candidate(instance("team__app-ok-1", { ...recipe, repo_public: true }), true, "validated")]).files;
+    expect([...checked.keys()]).toEqual([...unchecked.keys()]);
+    for (const [path, text] of unchecked) expect(checked.get(path)).toBe(text);
   });
 });

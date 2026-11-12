@@ -8,6 +8,8 @@
 // clone per repository, reused across rows), cache/ (npm, pnpm, yarn and corepack downloads, shared
 // by every run), snapshots/<instance_id>.bundle with --snapshots
 // (restore with `git clone -b hecate-snapshot <file>.bundle`), summary.json and summary.md. A row whose result file already exists is skipped unless --redo.
+// A result's Harbor recipe records whether the repository is public (an anonymous `git ls-remote`,
+// once per repository); the course website's zip leaves private ones out.
 // Rows with an empty patch or test_patch are rejected without a container run. A crashed run is
 // recorded as rejected / env_error with the message, and the batch continues.
 // Private repositories need GITHUB_APP_ID, GITHUB_APP_SLUG and GITHUB_APP_PRIVATE_KEY; a clone GitHub
@@ -22,7 +24,8 @@
 import { access, mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { parseRows, preflight, rejectedWithoutRun, summarize, summaryMarkdown, writebackSql } from "@/lib/cse115a/benchmark/validation/batch";
-import { assertRow, imageDigest, validateRow } from "@/lib/cse115a/benchmark/validation/runRow";
+import { withRepoPublic } from "@/lib/cse115a/benchmark/validation/harbor";
+import { assertRow, imageDigest, repoIsPublic, validateRow } from "@/lib/cse115a/benchmark/validation/runRow";
 import { batchRepo, recordSnapshot, snapshotOnly } from "@/lib/cse115a/benchmark/validation/snapshots";
 import type { ValidationResult } from "@/lib/cse115a/benchmark/validation/validateTask";
 
@@ -77,6 +80,7 @@ async function main() {
 
   const clones = new Map<string, string>();
   const digests = new Map<string, string | null>();
+  const publicity = new Map<string, boolean | undefined>();
   const results: ValidationResult[] = [];
 
   for (const [index, row] of rows.entries()) {
@@ -101,6 +105,11 @@ async function main() {
           if (!digests.has(result.image)) digests.set(result.image, await imageDigest(result.image));
           result.image_digest = digests.get(result.image) ?? null;
           if (result.harbor_env && result.image_digest) result.harbor_env = { ...result.harbor_env, image: result.image_digest };
+        }
+        // Whether the repository is public, checked once per repository; never fails the row.
+        if (result.harbor_env) {
+          if (!publicity.has(row.repo)) publicity.set(row.repo, await repoIsPublic(row.repo, { log }));
+          result.harbor_env = withRepoPublic(result.harbor_env, publicity.get(row.repo));
         }
         // A bundle from an earlier run of this row is still valid (the base commit does not change), so
         // it is recorded even without --snapshots; the flag only decides whether to create a new one.

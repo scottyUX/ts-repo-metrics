@@ -3,8 +3,9 @@ import { buildHarborTask, harborSkipReason, harborTaskName, type HarborSource } 
 
 // The instructor Harbor export: the rows the JSONL export returns with ?validated=1 (same consent and
 // status rule, same isExportable), each as a Harbor task folder whose image fetches the base commit
-// from GitHub. Rows Harbor cannot express yet are left out and listed, with the reason, in
-// SKIPPED.txt at the root. Pure, so it is tested without HTTP or a database; the route zips the files.
+// from GitHub. Rows Harbor cannot express yet, and rows whose repository the batch found private
+// (harbor_env.repo_public === false; nobody outside can fetch it), are left out and listed, with the
+// reason, in SKIPPED.txt at the root. Pure, so it is tested without HTTP or a database; the route zips the files.
 
 export type HarborExportSkip = { instance_id: string; reason: string };
 

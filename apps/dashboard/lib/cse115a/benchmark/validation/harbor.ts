@@ -38,7 +38,23 @@ export type HarborEnv = {
   services: Array<{ name: string; image: string }>;
   /** Where the Node version came from (JavaScript); null for Python, whose version is in the image tag. */
   node_source: NodeSource | null;
+  /**
+   * Whether anyone can fetch the repository from GitHub, as the batch found with an anonymous
+   * `git ls-remote`. Absent: not checked (every recipe written before the check, or a check that
+   * failed for a reason other than access). False keeps the row out of the github-source export.
+   */
+  repo_public?: boolean;
 };
+
+/** The recipe with `repo_public` set from the batch's check; undefined (not checked) leaves it out. */
+export function withRepoPublic(env: HarborEnv, isPublic: boolean | undefined): HarborEnv {
+  const next: HarborEnv = { ...env };
+  delete next.repo_public;
+  return isPublic === undefined ? next : { ...next, repo_public: isPublic };
+}
+
+/** Why a private repository's row is not in the github-source export (the course website's zip). */
+export const PRIVATE_REPO_REASON = "repository is private; the task can only be built from a snapshot";
 
 /** The recipe for an environment the validator ran, with the image digest when the batch knows it. */
 export function harborEnvFrom(env: Environment, imageDigest?: string | null): HarborEnv {
@@ -105,11 +121,14 @@ export function githubFetchLayer(repo: string, baseCommit: string): string {
 
 /**
  * Why a row cannot be exported yet, or null. A row whose runs had a database container is skipped:
- * a Harbor task has one image, no sidecar. With the github source, the repository and commit go into
- * a Dockerfile line, so they must be an `owner/name` and a full commit id (GitHub fetches no short ids).
+ * a Harbor task has one image, no sidecar. With the github source, the image fetches the repository
+ * anonymously, so a repository the batch found private is skipped (the bundle source still builds
+ * it), and the repository and commit go into a Dockerfile line, so they must be an `owner/name` and
+ * a full commit id (GitHub fetches no short ids).
  */
 export function harborSkipReason(env: HarborEnv, row?: Pick<TaskRow, "repo" | "base_commit">, source?: HarborSource): string | null {
   if (env.services?.length) return "Harbor export for rows with a database service is not built yet";
+  if (source?.kind === "github" && env.repo_public === false) return PRIVATE_REPO_REASON;
   if (row && source?.kind === "github") {
     if (!GITHUB_REPO.test(row.repo)) return `repo ${JSON.stringify(row.repo)} is not a GitHub owner/name`;
     if (!FULL_SHA.test(row.base_commit)) return `base_commit ${JSON.stringify(row.base_commit)} is not a full commit id`;
