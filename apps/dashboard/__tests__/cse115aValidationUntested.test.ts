@@ -98,6 +98,53 @@ describe("untestedFiles", () => {
       .toEqual([]);
   });
 
+  it("PocketWatch shape: an import of build output maps through outDir to rootDir", async () => {
+    const read = tree({
+      "package.json": "{}",
+      "tsconfig.json": `{ "compilerOptions": { "outDir": "./dist", "rootDir": "./src" } }`,
+      // A tests/ config without outDir is skipped: the lookup starts at the importer's package folder.
+      "tests/tsconfig.json": `{ "extends": "../tsconfig.json" }`,
+      "tests/x.test.mjs": `const { AuthController } = await import('../dist/auth/a.controller.js');`,
+      "src/auth/a.controller.ts": `import { svc } from "./a.service.js";`,
+      "src/auth/a.service.ts": "",
+      "src/app.module.ts": "",
+    });
+    expect(await untestedFiles({ changedFiles: ["src/auth/a.controller.ts", "src/auth/a.service.ts", "src/app.module.ts"], provingTestFiles: ["tests/x.test.mjs"], read, packageDir: "" }))
+      .toEqual(["src/app.module.ts"]);
+  });
+
+  it("outDir with no rootDir: the single top folder of include, else the config's folder", async () => {
+    const files = {
+      "api/package.json": "{}",
+      "api/test/a.test.js": `require("../out/lib/a.js");`,
+      "api/src/lib/a.ts": "",
+      "api/lib/a.ts": "",
+    };
+    const run = (config: string) => untestedFiles({ changedFiles: ["api/src/lib/a.ts", "api/lib/a.ts"], provingTestFiles: ["api/test/a.test.js"], read: tree({ ...files, "api/tsconfig.json": config }), packageDir: "api" });
+    expect(await run(`{ "compilerOptions": { "outDir": "out" }, "include": ["src/**/*"] }`)).toEqual(["api/lib/a.ts"]);
+    expect(await run(`{ "compilerOptions": { "outDir": "out" }, "include": ["src", "test"] }`)).toEqual(["api/src/lib/a.ts"]);
+  });
+
+  it("no outDir declared: dist/ and build/ of the package folder map to src/", async () => {
+    const read = tree({
+      "server/package.json": "{}",
+      "server/tests/a.test.mjs": `import "../dist/a.js";\nimport "../build/b/index.js";`,
+      "server/src/a.ts": "",
+      "server/src/b/index.ts": "",
+    });
+    expect(await untestedFiles({ changedFiles: ["server/src/a.ts", "server/src/b/index.ts"], provingTestFiles: ["server/tests/a.test.mjs"], read, packageDir: "server" })).toEqual([]);
+  });
+
+  it("an import into dist/ with no matching source is ignored", async () => {
+    const read = tree({
+      "package.json": "{}",
+      "tsconfig.json": `{ "compilerOptions": { "outDir": "dist", "rootDir": "src" } }`,
+      "tests/a.test.mjs": `import "../dist/generated/schema.js";\nimport "../dist/a.js";`,
+      "src/a.ts": "",
+    });
+    expect(await untestedFiles({ changedFiles: ["src/a.ts", "src/other.ts"], provingTestFiles: ["tests/a.test.mjs"], read, packageDir: "" })).toEqual(["src/other.ts"]);
+  });
+
   it("never lists non-code or declaration files", async () => {
     const read = tree({ "t.test.ts": "" });
     const changed = ["README.md", "src/styles.css", "package-lock.json", "src/types.d.ts", "src/a.ts"];

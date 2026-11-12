@@ -404,8 +404,15 @@ repository, on the tree after the fix (base + test patch + patch); a changed cod
 untested. JavaScript and TypeScript imports are `import`, `export … from`, `import("…")` with a
 plain string and `require("…")`, resolved relative to the file, through `baseUrl` and `paths` of
 the nearest `tsconfig.json` / `jsconfig.json` (exact keys and one trailing `*`; `extends` is not
-followed), with code extensions, `index.<ext>` and `.js` → `.ts`/`.tsx`; packages and anything that
-does not resolve to a repository file are ignored. Python imports (`import a.b`, `from a.b import
+followed), with code extensions, `index.<ext>` and `.js` → `.ts`/`.tsx`. Tests that import build
+output (`await import("../dist/auth/auth.controller.js")`) would otherwise reach nothing, since the
+tree has no `dist/`: a relative import that does not resolve, and lies under the `outDir` of the
+nearest `tsconfig.json` / `jsconfig.json` at or above the importing file's package folder (the
+nearest folder with a `package.json`), is mapped to the same path under that config's `rootDir`
+(else the single top folder of its `include`, such as `src`, else the config's folder) and resolved
+with the same extension rules; when that config declares no `outDir`, or there is none, `dist/` and
+`build/` of the package folder map to its `src/`. Packages and anything that does not resolve to a
+repository file are ignored. Python imports (`import a.b`, `from a.b import
 c`, relative `from .m import x`) resolve to `a/b.py` or `a/b/__init__.py` under the importing
 file's folder and each folder above it, then `package_dir`, then the repository root; the
 `__init__.py` of each package on the way counts as reached, since Python runs it. Sitting in the

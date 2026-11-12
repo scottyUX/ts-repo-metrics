@@ -105,7 +105,29 @@ export function pythonImports(source: string): PythonImport[] {
   return imports;
 }
 
-type TsConfig = { dir: string; baseUrl: string | null; paths: Record<string, string[]> };
+type TsConfig = {
+  dir: string;
+  baseUrl: string | null;
+  paths: Record<string, string[]>;
+  /** `compilerOptions.outDir`, repo-relative; null when the config declares none. */
+  outDir: string | null;
+  /** Where outDir's files come from: `rootDir`, else the single top folder of `include`, else the config's folder. */
+  rootDir: string;
+};
+
+/** `dir` with no "." for the repo root. */
+function parentOf(path: string): string {
+  const dir = posix.dirname(path);
+  return dir === "." ? "" : dir;
+}
+
+/** The one top folder every `include` entry starts with (`["src"]`, `["src/**\/*"]` → `src`), or null. */
+function includeTopFolder(include: unknown): string | null {
+  if (!Array.isArray(include) || include.length === 0) return null;
+  const tops = new Set(include.map((entry) => (typeof entry === "string" ? posix.normalize(entry).split("/")[0] : "")));
+  const [top] = tops;
+  return tops.size === 1 && top && top !== "." && top !== ".." && !/[*?{[]/.test(top) ? top : null;
+}
 
 /** JSON with comments and trailing commas, or null when it does not parse. */
 function parseJsonc(text: string): unknown {
@@ -142,31 +164,67 @@ class Resolver {
     return null;
   }
 
+  /** The tsconfig.json (else jsconfig.json) in `dir` itself, or null. */
+  private async configAt(dir: string): Promise<TsConfig | null> {
+    for (const name of ["tsconfig.json", "jsconfig.json"]) {
+      const text = await this.read(dir ? `${dir}/${name}` : name);
+      if (text == null) continue;
+      const json = parseJsonc(text) as { compilerOptions?: Record<string, unknown>; include?: unknown } | null;
+      const options = json?.compilerOptions ?? {};
+      const at = (value: unknown) => (typeof value === "string" ? inRepo(posix.join(dir || ".", value)) ?? "" : null);
+      const paths: Record<string, string[]> = {};
+      if (options.paths && typeof options.paths === "object") {
+        for (const [key, targets] of Object.entries(options.paths as Record<string, unknown>)) {
+          if (Array.isArray(targets)) paths[key] = targets.filter((t): t is string => typeof t === "string");
+        }
+      }
+      const top = includeTopFolder(json?.include);
+      return {
+        dir, baseUrl: at(options.baseUrl), paths, outDir: at(options.outDir),
+        rootDir: at(options.rootDir) ?? (top ? at(top)! : dir),
+      };
+    }
+    return null;
+  }
+
   /** The nearest tsconfig.json / jsconfig.json at or above `dir`. */
-  private async configFor(dir: string): Promise<TsConfig | null> {
+  private configFor(dir: string): Promise<TsConfig | null> {
     let found = this.configs.get(dir);
     if (!found) {
-      found = (async () => {
-        for (const name of ["tsconfig.json", "jsconfig.json"]) {
-          const path = dir ? `${dir}/${name}` : name;
-          const text = await this.read(path);
-          if (text == null) continue;
-          const json = parseJsonc(text) as { compilerOptions?: { baseUrl?: unknown; paths?: unknown } } | null;
-          const options = json?.compilerOptions ?? {};
-          const baseUrl = typeof options.baseUrl === "string" ? inRepo(posix.join(dir, options.baseUrl)) ?? "" : null;
-          const paths: Record<string, string[]> = {};
-          if (options.paths && typeof options.paths === "object") {
-            for (const [key, targets] of Object.entries(options.paths as Record<string, unknown>)) {
-              if (Array.isArray(targets)) paths[key] = targets.filter((t): t is string => typeof t === "string");
-            }
-          }
-          return { dir, baseUrl, paths };
-        }
-        return dir ? this.configFor(posix.dirname(dir) === "." ? "" : posix.dirname(dir)) : null;
-      })();
+      found = (async () => (await this.configAt(dir)) ?? (dir ? this.configFor(parentOf(dir)) : null))();
       this.configs.set(dir, found);
     }
     return found;
+  }
+
+  /** The nearest folder at or above `dir` with a package.json; the repo root when there is none. */
+  private async packageFolder(dir: string): Promise<string> {
+    for (let d = dir; ; d = parentOf(d)) {
+      if (await this.exists(d ? `${d}/package.json` : "package.json")) return d;
+      if (!d) return "";
+    }
+  }
+
+  /**
+   * A relative import that names build output (`../dist/auth/a.controller.js`, absent from the
+   * tree) mapped back to its source: under the outDir of the nearest config at or above the
+   * importer's package folder, to the same path under that config's rootDir; with no outDir
+   * declared, `dist/` or `build/` of the package folder to its `src/`. Null when nothing matches.
+   */
+  private async fromBuildOutput(importer: string, path: string): Promise<string | null> {
+    const pkg = await this.packageFolder(parentOf(importer));
+    const under = (dir: string) => (dir ? path.startsWith(`${dir}/`) : true) && path !== dir;
+    const config = await this.configFor(pkg);
+    if (config?.outDir != null) {
+      if (config.outDir === config.dir || !under(config.outDir)) return null;
+      const rest = config.outDir ? path.slice(config.outDir.length + 1) : path;
+      return this.jsFile(inRepo(posix.join(config.rootDir || ".", rest)));
+    }
+    for (const out of ["dist", "build"]) {
+      const outDir = pkg ? `${pkg}/${out}` : out;
+      if (under(outDir)) return this.jsFile(inRepo(posix.join(pkg || ".", "src", path.slice(outDir.length + 1))));
+    }
+    return null;
   }
 
   /** `base` as a file: as is, with each code extension, `.js` → `.ts`/`.tsx`, then `base/index.<ext>`. */
@@ -188,7 +246,8 @@ class Resolver {
     const spec = specifier.split("?")[0];
     const dir = posix.dirname(importer) === "." ? "" : posix.dirname(importer);
     if (spec.startsWith("./") || spec.startsWith("../") || spec === "." || spec === "..") {
-      return this.jsFile(inRepo(posix.join(dir, spec)));
+      const path = inRepo(posix.join(dir || ".", spec));
+      return (await this.jsFile(path)) ?? (path ? this.fromBuildOutput(importer, path) : null);
     }
     const config = await this.configFor(dir);
     if (!config) return null;
