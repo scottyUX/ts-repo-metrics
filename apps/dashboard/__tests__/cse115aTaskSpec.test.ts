@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isTaskFilePath, parsePullRequestUrl, parseTaskSpec } from "@/lib/cse115a/taskSpec";
+import { filenameMatchesId, isTaskFilePath, parsePullRequestUrl, parseTaskSpec } from "@/lib/cse115a/taskSpec";
 
 const valid = `---
 id: US-1-T-1
@@ -52,5 +52,21 @@ describe("CSE 115A task import", () => {
       expect(isTaskFilePath(`docs/tasks/sprint-2/${id}.md`, 2)).toBe(false);
     }
     expect(isTaskFilePath("docs/tasks/sprint-3/US-2.3-T-2.md", 2)).toBe(false);
+  });
+
+  it("accepts an underscore in a task file name and ID, like 3_2_1", () => {
+    expect(isTaskFilePath("docs/tasks/sprint-3/3_2_1.md", 3)).toBe(true);
+    expect(parseTaskSpec(valid.replace("id: US-1-T-1", "id: 3_2_1")).id).toBe("3_2_1");
+    for (const id of ["_3_2", "3_2_", "3__2"]) {
+      expect(isTaskFilePath(`docs/tasks/sprint-3/${id}.md`, 3)).toBe(false);
+    }
+  });
+
+  it("lets a file name use an underscore where the ID has a dot", () => {
+    expect(filenameMatchesId("3_2_1", "3.2.1")).toBe(true);
+    expect(filenameMatchesId("3_2_1", "3_2_1")).toBe(true);
+    expect(filenameMatchesId("US-2.3-T-2", "US-2.3-T-2")).toBe(true);
+    expect(filenameMatchesId("3_2_1", "3.2.2")).toBe(false);
+    expect(filenameMatchesId("3-2-1", "3.2.1")).toBe(false);
   });
 });

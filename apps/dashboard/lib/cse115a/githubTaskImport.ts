@@ -2,7 +2,7 @@ import "server-only";
 import { splitPatch } from "@/lib/cse115a/diff";
 import { summarizeCi, type TaskFacts } from "@/lib/cse115a/processChecklist";
 import { readCommitChecks } from "@/lib/cse115a/submissionSnapshot";
-import { isTaskFilePath, parsePullRequestUrl, parseTaskSpec, type TaskSpec } from "@/lib/cse115a/taskSpec";
+import { filenameMatchesId, isTaskFilePath, parsePullRequestUrl, parseTaskSpec, type TaskSpec } from "@/lib/cse115a/taskSpec";
 import { tagCommitSha, type GitHubReader } from "@/lib/cse115a/githubClient";
 
 type GitHubPull = {
@@ -74,7 +74,7 @@ export async function importTaskFromPullRequest(
   const markdown = Buffer.from(content.content.replace(/\s/g, ""), "base64").toString("utf8");
   const spec = parseTaskSpec(markdown);
   const filenameId = taskPath.split("/").pop()!.replace(/\.md$/i, "");
-  if (spec.id !== filenameId) throw new Error("The task ID in the file must match its filename.");
+  if (!filenameMatchesId(filenameId, spec.id)) throw new Error("The task ID in the file must match its filename.");
   if (spec.sprint !== assignmentNumber) throw new Error(`The task file sprint must be ${assignmentNumber}.`);
 
   const encodedFolder = `docs/tasks/sprint-${assignmentNumber}`.split("/").map(encodeURIComponent).join("/");
