@@ -299,6 +299,37 @@ count as skipped and `focused` as passed. A file that fails to load (status `fai
 assertion results) is recorded as `file::(load)` for either runner. Any other runner is
 `env_unsupported`.
 
+**Test files outside any package.** Some repositories keep `node --test` files in a root folder
+with no `package.json` above them (jjacobhw/roomie: `tests/*.test.mjs` at the root import
+`node:test` and `../backend/expenses.ts`; the only `package.json` is `backend/package.json`, with no
+`test` script). When neither the test files' folders nor the root has a `package.json`, the
+validator runs them from the root when all of these hold:
+
+1. at least one JavaScript or TypeScript test file imports `node:test` (`from "node:test"`,
+   `require("node:test")`, `import("node:test")`), so Vitest files that rely on globals are never
+   pushed through Node;
+2. the patched tree (tracked and untracked files, `node_modules` excluded) has exactly one
+   `package.json`, and it is valid JSON.
+
+The environment is then: tests from the repository root (`package_dir` `.`), the install in that
+package's folder by the usual lockfile rules, the Node version by the usual rules with that
+package's `engines.node`, and one step,
+`REPORT=$REPORT_DIR/node-0.json node --test --test-reporter=/patches/reporter.mjs <paths>`. Each test
+file with a compound ending (`.test.mjs`, `.spec.ts`) gives the unquoted shell glob
+`<folder>/*<ending>`, one per folder and ending, so the folder's older tests run as well and can be
+PASS_TO_PASS; a plain-ending file (`tests/check.mjs`) gives its own path; fixtures are ignored. The
+shell expands the globs, since `node --test` only reads globs itself from Node 21. The Dockerfile
+provenance says `# no package.json above the test files: node --test from the repository root,
+install in <dir>`, and the census signals read that package's `package.json`. A `.mjs` test that
+imports a `.ts` file needs Node 22.18 or later (type stripping on by default). When the rule does
+not hold, the row stays `env_unsupported`:
+
+| Condition failed | `detail` |
+|---|---|
+| no test file imports `node:test` | `no package.json above the test files or at the repository root` (as before) |
+| no `package.json` anywhere | `no package.json in the repository` |
+| more than one | `no package.json above the test files, and N packages to choose from: a/package.json, b/package.json` |
+
 **Python.** The package directory is the nearest one above the test files with a
 `pyproject.toml`, `requirements.txt`, `setup.py` or `setup.cfg`, else the repository root. The
 image is `python:<major.minor>-bookworm`: the version comes from `.python-version`, else the lowest
