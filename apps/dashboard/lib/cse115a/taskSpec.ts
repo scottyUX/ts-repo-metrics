@@ -1,5 +1,10 @@
-/** A task ID: letters and digits in two or more parts joined by "-" or "." (US-1-T-1, US-2.3-T-2). */
-export const TASK_ID_PATTERN = "[A-Za-z0-9]+(?:[-.][A-Za-z0-9]+)+";
+/** A task ID: letters and digits in two or more parts joined by "-", "." or "_" (US-1-T-1, US-2.3-T-2, 3_2_1). */
+export const TASK_ID_PATTERN = "[A-Za-z0-9]+(?:[-._][A-Za-z0-9]+)+";
+
+/** Whether a task file's name fits its ID. A name may use "_" where the ID has "." (3_2_1.md for 3.2.1). */
+export function filenameMatchesId(filenameId: string, id: string): boolean {
+  return filenameId === id || filenameId.replace(/_/g, ".") === id.replace(/_/g, ".");
+}
 
 /** Whether a path is a task file for this sprint: docs/tasks/sprint-N/<task ID>.md. */
 export function isTaskFilePath(path: string, sprint: number): boolean {
