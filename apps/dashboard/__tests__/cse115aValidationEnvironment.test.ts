@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { detectEnvironment, nodeMajorFrom, stepsFromTestScript } from "@/lib/cse115a/benchmark/validation/environment";
+import { containerScript } from "@/lib/cse115a/benchmark/validation/runner";
+import { suitePlan } from "@/lib/cse115a/benchmark/validation/validateTask";
 
 /** A fake repository: path → contents. */
 function repo(files: Record<string, string | object>) {
@@ -135,5 +137,72 @@ describe("stepsFromTestScript and nodeMajorFrom", () => {
     expect(nodeMajorFrom("v24.1.0\n", undefined)).toBe(24);
     expect(nodeMajorFrom(null, "^22.0.0")).toBe(22);
     expect(nodeMajorFrom("lts/*", undefined)).toBeNull();
+  });
+});
+
+describe("detectEnvironment: node --test files outside any package (the roomie shape)", () => {
+  const nodeTest = 'import { test } from "node:test";\nimport assert from "node:assert/strict";\nimport { split } from "../backend/expenses.ts";\n';
+  const backend = { name: "backend", type: "module", dependencies: { pg: "^8" } };
+  const roomie = { "tests/expenses.test.mjs": nodeTest, "backend/package.json": backend, "backend/package-lock.json": "{}" };
+  const nodeStep = (paths: string) => `REPORT=$REPORT_DIR/node-0.json node --test --test-reporter=/patches/reporter.mjs ${paths}`;
+  const noPackage = "no package.json above the test files or at the repository root";
+
+  it("runs node --test from the root over the folder's tests and installs in the only package", async () => {
+    const env = await detectEnvironment({ testFiles: ["tests/expenses.test.mjs"], read: repo(roomie), packageJsonFiles: ["backend/package.json"] });
+    expect(env).toMatchObject({ supported: true, packageDir: "", installDir: "backend", packageManager: "npm", installCommand: "npm ci", runners: ["node-test"], image: "node:22-bookworm", nodeSource: "default" });
+    if (!env.supported) return;
+    expect(env.testSteps).toEqual([{ kind: "node-test", command: nodeStep("tests/*.test.mjs") }]);
+    expect(env.dockerfile).toContain("# no package.json above the test files: node --test from the repository root, install in backend\n# cd backend && npm ci\n# cd .\n");
+  });
+
+  it("takes the Node version from that package's engines.node", async () => {
+    const env = await detectEnvironment({ testFiles: ["tests/expenses.test.mjs"], read: repo({ ...roomie, "backend/package.json": { ...backend, engines: { node: ">=24" } } }), packageJsonFiles: ["backend/package.json"] });
+    expect(env).toMatchObject({ supported: true, image: "node:24-bookworm", nodeSource: "engines.node" });
+  });
+
+  it("writes one glob per folder and compound ending, without duplicates", async () => {
+    const files = ["tests/a.test.mjs", "tests/b.test.mjs", "tests/c.spec.ts", "e2e/d.test.mjs", "tests/fixtures/data.json"];
+    const read = repo({ ...roomie, "tests/a.test.mjs": nodeTest, "tests/b.test.mjs": "", "tests/c.spec.ts": "", "e2e/d.test.mjs": "", "tests/fixtures/data.json": "{}" });
+    const env = await detectEnvironment({ testFiles: files, read, packageJsonFiles: ["backend/package.json"] });
+    expect(env.supported && env.testSteps).toEqual([{ kind: "node-test", command: nodeStep("tests/*.test.mjs tests/*.spec.ts e2e/*.test.mjs") }]);
+  });
+
+  it("runs a plain-ending test file by its own path", async () => {
+    const env = await detectEnvironment({ testFiles: ["tests/check.mjs"], read: repo({ ...roomie, "tests/check.mjs": 'const { test } = require("node:test");\n' }), packageJsonFiles: ["backend/package.json"] });
+    expect(env.supported && env.testSteps).toEqual([{ kind: "node-test", command: nodeStep("tests/check.mjs") }]);
+  });
+
+  it("keeps today's message when no test file imports node:test, or when the listing is not given", async () => {
+    const vitestGlobals = { ...roomie, "tests/expenses.test.mjs": "test('splits', () => expect(1).toBe(1));\n" };
+    expect(await detectEnvironment({ testFiles: ["tests/expenses.test.mjs"], read: repo(vitestGlobals), packageJsonFiles: ["backend/package.json"] })).toEqual({ supported: false, reason: "env_unsupported", detail: noPackage });
+    expect(await detectEnvironment({ testFiles: ["tests/expenses.test.mjs"], read: repo(roomie) })).toEqual({ supported: false, reason: "env_unsupported", detail: noPackage });
+  });
+
+  it("is unsupported with the choices when there are several packages, and says so when there is none", async () => {
+    const two = await detectEnvironment({ testFiles: ["tests/expenses.test.mjs"], read: repo({ ...roomie, "web/package.json": {} }), packageJsonFiles: ["web/package.json", "backend/package.json"] });
+    expect(two).toEqual({ supported: false, reason: "env_unsupported", detail: "no package.json above the test files, and 2 packages to choose from: backend/package.json, web/package.json" });
+    const none = await detectEnvironment({ testFiles: ["tests/expenses.test.mjs"], read: repo({ "tests/expenses.test.mjs": nodeTest }), packageJsonFiles: [] });
+    expect(none).toEqual({ supported: false, reason: "env_unsupported", detail: "no package.json in the repository" });
+  });
+
+  it("never reaches the fallback when a package.json sits at the root or above the tests", async () => {
+    const rootCase = { ...roomie, "package.json": { name: "root", scripts: { test: "node --test" } } };
+    const nested = { ...roomie, "tests/package.json": { name: "tests", scripts: { test: "node --test" } } };
+    for (const [files, listing] of [[rootCase, ["backend/package.json", "package.json"]], [nested, ["backend/package.json", "tests/package.json"]]] as const) {
+      const before = await detectEnvironment({ testFiles: ["tests/expenses.test.mjs"], read: repo(files) });
+      const after = await detectEnvironment({ testFiles: ["tests/expenses.test.mjs"], read: repo(files), packageJsonFiles: [...listing] });
+      expect(before.supported).toBe(true);
+      expect(after).toEqual(before);
+    }
+  });
+
+  it("installs in the package folder and tests from the repository root in the container", async () => {
+    const env = await detectEnvironment({ testFiles: ["tests/expenses.test.mjs"], read: repo(roomie), packageJsonFiles: ["backend/package.json"] });
+    if (!env.supported) throw new Error(env.detail);
+    const row = { instance_id: "x", repo: "o/r", base_commit: "abc123", patch: "", test_patch: "", FAIL_TO_PASS: [], PASS_TO_PASS: [] };
+    const script = containerScript(suitePlan({ row, repoDir: "/tmp/repo" }, env), "r2");
+    expect(script).toContain("cd /work/backend\nif ! { npm ci; }");
+    expect(script).toContain(`export REPORT_DIR=/patches/reports\ncd /work\n${nodeStep("tests/*.test.mjs")} || true\n`);
+    expect(script.indexOf("cd /work/backend")).toBeLessThan(script.indexOf("export REPORT_DIR"));
   });
 });

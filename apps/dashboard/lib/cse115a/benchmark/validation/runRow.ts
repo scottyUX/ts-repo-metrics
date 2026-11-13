@@ -10,7 +10,7 @@ import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { signals, type Signals } from "@/lib/cse115a/benchmark/validation/census";
-import { detectEnvironment, envLanguage, suiteLabel } from "@/lib/cse115a/benchmark/validation/environment";
+import { detectEnvironment, envLanguage, suiteLabel, type Environment, type Unsupported } from "@/lib/cse115a/benchmark/validation/environment";
 import { DockerSuiteRunner, type SuiteRunner } from "@/lib/cse115a/benchmark/validation/runner";
 import { measureFixCoverage } from "@/lib/cse115a/benchmark/validation/coverageRun";
 import { unavailableCoverage, withFixCoverage, type FixCoverage } from "@/lib/cse115a/benchmark/validation/fixCoverage";
@@ -174,6 +174,27 @@ export async function workflowFiles(dir: string): Promise<string[]> {
 }
 
 /**
+ * Every package.json in the tree at `dir`, node_modules excluded. Untracked files count: the
+ * patches are applied with `git apply`, which does not stage, and a package.json the patch adds
+ * must be seen (RepoProbe.packageJsonFiles).
+ */
+export async function packageJsonFiles(dir: string): Promise<string[]> {
+  const names = (await run("git", ["ls-files", "--cached", "--others", "--exclude-standard"], dir).catch(() => "")).split("\n");
+  return [...new Set(names.filter((n) => (n === "package.json" || n.endsWith("/package.json")) && !/(^|\/)node_modules\//.test(n)))].sort();
+}
+
+/**
+ * The package.json the census signals read: the test package's, else (the no-package fallback,
+ * where tests run from a root that has none) the one in the install folder.
+ */
+export async function signalsPackageJson(dir: string, env: Environment | Unsupported): Promise<string | null> {
+  const packageDir = env.supported ? env.packageDir : "";
+  const own = await fileIn(dir, packageDir ? `${packageDir}/package.json` : "package.json");
+  if (own != null || !env.supported || env.installDir === packageDir) return own;
+  return fileIn(dir, env.installDir ? `${env.installDir}/package.json` : "package.json");
+}
+
+/**
  * Fetches `commit` unless the clone already has it. With `fullName`, the fetch goes to GitHub the way
  * cloneRepo does (the App token when configured, never stored in the remote) and a failure throws a
  * CloneError; without it, from origin as configured.
@@ -310,10 +331,9 @@ async function validateRowResult(options: ValidateRowOptions): Promise<Validatio
     // usually arrive with the fix, since package.json is not a test file.
     const { env, needs } = await withPatchedWorktree(repoDir, row.base_commit, [row.test_patch, row.patch], async (dir) => {
       const workflowNames = await workflowFiles(dir);
-      const env = await detectEnvironment({ testFiles, read: (path) => fileIn(dir, path), workflowFiles: workflowNames });
-      const packageDir = env.supported ? env.packageDir : "";
+      const env = await detectEnvironment({ testFiles, read: (path) => fileIn(dir, path), workflowFiles: workflowNames, packageJsonFiles: await packageJsonFiles(dir) });
       const needs: Signals = signals({
-        packageJson: await fileIn(dir, packageDir ? `${packageDir}/package.json` : "package.json"),
+        packageJson: await signalsPackageJson(dir, env),
         workflows: (await Promise.all(workflowNames.map((n) => fileIn(dir, n)))).join("\n"),
         testSources: (await Promise.all(testFiles.map((f) => fileIn(dir, f)))).join("\n"),
       });
@@ -390,7 +410,7 @@ export async function fixCoverageRow(options: FixCoverageRowOptions): Promise<Va
     coverage = await withPatchedWorktree(repoDir, row.base_commit, [row.test_patch, row.patch], async (dir) => {
       const read = (path: string) => fileIn(dir, path);
       const testFiles = filesInPatch(row.test_patch);
-      const env = await detectEnvironment({ testFiles, read, workflowFiles: await workflowFiles(dir) });
+      const env = await detectEnvironment({ testFiles, read, workflowFiles: await workflowFiles(dir), packageJsonFiles: await packageJsonFiles(dir) });
       try {
         const provingTestFiles = [...new Set([...result.FAIL_TO_PASS, ...result.ABSENT_TO_PASS].map(fileOfTestId))];
         importRule = await untestedFiles({ changedFiles: changedFilesInPatch(row.patch), provingTestFiles, read, packageDir: env.supported ? env.packageDir : result.package_dir ?? "" });

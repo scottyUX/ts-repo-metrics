@@ -7,7 +7,7 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { detectEnvironment } from "@/lib/cse115a/benchmark/validation/environment";
 import { buildHarborTask, harborEnvFrom, harborSkipReason, harborTaskName, verifiedRow, type HarborEnv, type HarborRow } from "@/lib/cse115a/benchmark/validation/harbor";
-import { fileIn, run, withPatchedWorktree, workflowFiles } from "@/lib/cse115a/benchmark/validation/runRow";
+import { fileIn, packageJsonFiles, run, withPatchedWorktree, workflowFiles } from "@/lib/cse115a/benchmark/validation/runRow";
 import { SNAPSHOT_BRANCH } from "@/lib/cse115a/benchmark/validation/snapshots";
 import { filesInPatch, type ValidationResult } from "@/lib/cse115a/benchmark/validation/validateTask";
 
@@ -37,7 +37,7 @@ export async function writeBundleTask(options: { row: HarborRow; result: Validat
       await run("git", ["clone", "-q", "-b", SNAPSHOT_BRANCH, bundle, clone]);
       const testFiles = filesInPatch(row.test_patch);
       const env = await withPatchedWorktree(clone, row.base_commit, [row.test_patch, row.patch], (dir) =>
-        workflowFiles(dir).then((names) => detectEnvironment({ testFiles, read: (path) => fileIn(dir, path), workflowFiles: names })));
+        workflowFiles(dir).then(async (names) => detectEnvironment({ testFiles, read: (path) => fileIn(dir, path), workflowFiles: names, packageJsonFiles: await packageJsonFiles(dir) })));
       if (!env.supported) return { skip: `environment ${env.detail}` };
       recipe = harborEnvFrom(env, result.image_digest);
     } finally {

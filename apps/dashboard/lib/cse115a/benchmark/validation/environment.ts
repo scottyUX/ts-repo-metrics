@@ -74,6 +74,12 @@ export type RepoProbe = {
   read: FileReader;
   /** Repository-relative paths of the GitHub workflow files (`.github/workflows/*.yml`); none when unset. */
   workflowFiles?: string[];
+  /**
+   * Repository-relative paths of every package.json in the tree (untracked ones included, since the
+   * patches are applied but not staged; node_modules excluded). Read only by the no-package fallback
+   * (looseNodeTest); when unset that fallback is not tried.
+   */
+  packageJsonFiles?: string[];
 };
 
 export const DEFAULT_NODE_MAJOR = 22;
@@ -340,15 +346,22 @@ async function detectNodeEnvironment(probe: RepoProbe): Promise<Environment | Un
     if (found && found.dir !== nearest.dir) return unsupported(`test files span two packages: ${found.dir || "."} and ${nearest.dir || "."}`);
     found = nearest;
   }
+  let loose: LooseNodeTest | null = null;
   if (!found) {
-    if (!rootPkg) return unsupported("no package.json above the test files or at the repository root");
-    found = { dir: "", pkg: rootPkg };
+    if (!rootPkg) {
+      const fallback = await looseNodeTest(probe);
+      if ("supported" in fallback) return fallback;
+      loose = fallback;
+      found = { dir: "", pkg: fallback.pkg };
+    } else {
+      found = { dir: "", pkg: rootPkg };
+    }
   }
   const { dir: packageDir, pkg } = found;
 
   // Workspace root or single package?
   const workspaceRoot = Boolean(rootPkg && (rootPkg.workspaces || (await read("pnpm-workspace.yaml")) != null));
-  const installDir = workspaceRoot ? "" : packageDir;
+  const installDir = loose ? loose.installDir : workspaceRoot ? "" : packageDir;
 
   // Package manager, from the lockfile at the install dir (falling back to the root).
   const lockfiles = new Set<string>();
@@ -368,7 +381,7 @@ async function detectNodeEnvironment(probe: RepoProbe): Promise<Environment | Un
   const scripts = (pkg.scripts && typeof pkg.scripts === "object" ? pkg.scripts : {}) as Record<string, unknown>;
   const testScript = typeof scripts.test === "string" ? scripts.test : null;
   const defaultRunner = hasDependency(pkg, "vitest") ? "vitest" : hasDependency(pkg, "jest") ? "jest" : null;
-  const testSteps = stepsFromTestScript(testScript, defaultRunner);
+  const testSteps = loose ? loose.testSteps : stepsFromTestScript(testScript, defaultRunner);
   const runners = [...new Set(testSteps.map((s) => s.kind).filter((k): k is Runner => k !== "prep"))];
   if (runners.length === 0) {
     const where = packageDir || "the repository root";
@@ -390,12 +403,61 @@ async function detectNodeEnvironment(probe: RepoProbe): Promise<Environment | Un
   const dockerfile = [
     `FROM ${image}`, enable, "WORKDIR /work",
     ...Object.entries(CONTAINER_ENV).map(([k, v]) => `ENV ${k}=${v}`),
+    loose ? `# no package.json above the test files: node --test from the repository root, install in ${installDir || "."}` : "",
     `# cd ${installDir || "."} && ${installCommand}`,
     `# cd ${packageDir || "."}`,
     ...testSteps.map((s) => `# ${s.command}`),
   ].filter(Boolean).join("\n") + "\n";
 
   return { supported: true, runners, packageManager, packageDir, installDir, installCommand, testSteps, env: CONTAINER_ENV, dockerfile, image, nodeSource };
+}
+
+/** The no-package fallback's choice: the one package.json to install, and the node --test step run from the root. */
+type LooseNodeTest = { installDir: string; pkg: Pkg; testSteps: TestStep[] };
+
+const NODE_TEST_IMPORT = /(?:\bfrom\s*|\brequire\s*\(\s*|\bimport\s*\(\s*)(["'])node:test\1/;
+/** `.test.mjs`, `.spec.ts`: an ending other test files in the same folder share. */
+const COMPOUND_TEST_ENDING = /\.(?:test|spec)\.[cm]?[jt]sx?$/i;
+const NO_PACKAGE = "no package.json above the test files or at the repository root";
+
+/**
+ * Test files with no package.json above them and none at the root (jjacobhw/roomie: `tests/*.test.mjs`
+ * at the root, importing `node:test` and `../backend/expenses.ts`, with the only package.json in
+ * `backend/`). When a test file imports `node:test` and the repository has exactly one package.json,
+ * the tests run with `node --test` from the root and the install happens in that package's folder.
+ * The paths are one unquoted glob per folder and compound ending (`tests/*.test.mjs`), so the folder's
+ * older tests run too and the shell expands it (node --test reads globs itself only from Node 21),
+ * and a plain-ending file's own path. Otherwise env_unsupported, saying which condition failed.
+ */
+async function looseNodeTest(probe: RepoProbe): Promise<LooseNodeTest | Unsupported> {
+  if (!probe.packageJsonFiles) return unsupported(NO_PACKAGE);
+  const code: string[] = [];
+  let importsNodeTest = false;
+  for (const file of probe.testFiles.filter((f) => JS_FILE.test(f))) {
+    const text = await probe.read(file);
+    if (text == null) continue;
+    code.push(file);
+    if (NODE_TEST_IMPORT.test(text)) importsNodeTest = true;
+  }
+  if (!importsNodeTest) return unsupported(NO_PACKAGE);
+
+  const manifests = [...new Set(probe.packageJsonFiles)].sort();
+  if (manifests.length === 0) return unsupported("no package.json in the repository");
+  if (manifests.length > 1) return unsupported(`no package.json above the test files, and ${manifests.length} packages to choose from: ${manifests.join(", ")}`);
+  const pkg = parsePkg(await probe.read(manifests[0]));
+  if (pkg === "invalid") return unsupported(`${manifests[0]} is not valid JSON`);
+  if (pkg == null) return unsupported("no package.json in the repository");
+
+  const paths: string[] = [];
+  for (const file of code) {
+    const slash = file.lastIndexOf("/");
+    const ending = file.slice(slash + 1).match(COMPOUND_TEST_ENDING)?.[0];
+    const path = ending ? `${slash < 0 ? "" : file.slice(0, slash + 1)}*${ending}` : file;
+    if (!paths.includes(path)) paths.push(path);
+  }
+  const command = `REPORT=$REPORT_DIR/node-0.json node --test --test-reporter=${NODE_TEST_REPORTER_PATH} ${paths.join(" ")}`;
+  const slash = manifests[0].lastIndexOf("/");
+  return { installDir: slash < 0 ? "" : manifests[0].slice(0, slash), pkg, testSteps: [{ kind: "node-test", command }] };
 }
 
 // ---------------------------------------------------------------------------------------------
