@@ -301,15 +301,25 @@ assertion results) is recorded as `file::(load)` for either runner. Any other ru
 
 **Test files outside any package.** Some repositories keep `node --test` files in a root folder
 with no `package.json` above them (jjacobhw/roomie: `tests/*.test.mjs` at the root import
-`node:test` and `../backend/expenses.ts`; the only `package.json` is `backend/package.json`, with no
-`test` script). When neither the test files' folders nor the root has a `package.json`, the
+`node:test` and, through `tests/expense_test_helpers.mjs`, `../backend/expenses.ts`; the repository
+has `backend/package.json`, with no `test` script, and `frontend/package.json`). When neither the test files' folders nor the root has a `package.json`, the
 validator runs them from the root when all of these hold:
 
 1. at least one JavaScript or TypeScript test file imports `node:test` (`from "node:test"`,
    `require("node:test")`, `import("node:test")`), so Vitest files that rely on globals are never
    pushed through Node;
 2. the patched tree (tracked and untracked files, `node_modules` excluded) has exactly one
-   `package.json`, and it is valid JSON.
+   `package.json`, or several of which the test files' imports reach exactly one; and that one is
+   valid JSON.
+
+With several, the validator reads the relative imports (`from`, `import`, `import()`, `require()`)
+of the test patch's JavaScript and TypeScript files, on the tree with both patches applied. An
+import that lands inside a package's folder reaches that package and ends the chain; one that lands
+on a file outside every package folder (a shared helper such as `tests/expense_test_helpers.mjs`,
+whether or not the patch touches it) is read and its imports followed in turn, trying the path as
+written, then with `.ts`, `.tsx`, `.mts`, `.cts`, `.js`, `.jsx`, `.mjs`, `.cjs`, then as a folder's
+`index`. A chain is at most 5 files long, the test file included. A repository with one
+`package.json` never reads imports.
 
 The environment is then: tests from the repository root (`package_dir` `.`), the install in that
 package's folder by the usual lockfile rules, the Node version by the usual rules with that
@@ -328,7 +338,8 @@ not hold, the row stays `env_unsupported`:
 |---|---|
 | no test file imports `node:test` | `no package.json above the test files or at the repository root` (as before) |
 | no `package.json` anywhere | `no package.json in the repository` |
-| more than one | `no package.json above the test files, and N packages to choose from: a/package.json, b/package.json` |
+| more than one, and the imports reach none | `no package.json above the test files, and N packages to choose from: a/package.json, b/package.json; the test files' imports reach none of them` |
+| more than one, and the imports reach several | `…; the test files' imports reach 2: a/package.json, b/package.json` |
 
 **Python.** The package directory is the nearest one above the test files with a
 `pyproject.toml`, `requirements.txt`, `setup.py` or `setup.cfg`, else the repository root. The

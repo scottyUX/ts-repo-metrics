@@ -9,6 +9,7 @@
 // touches nothing.
 // Rules are in docs/CSE115A_BENCHMARK_VALIDATION.md, "Environment".
 
+import { posix } from "node:path";
 import { ciTestJob, installStepsFromJob, nodeMajorFromJob, serviceProvenance, servicesFromJob, type InstallStep, type Service } from "@/lib/cse115a/benchmark/validation/services";
 
 export type Runner = "vitest" | "node-test" | "jest" | "pytest";
@@ -443,9 +444,16 @@ async function looseNodeTest(probe: RepoProbe): Promise<LooseNodeTest | Unsuppor
 
   const manifests = [...new Set(probe.packageJsonFiles)].sort();
   if (manifests.length === 0) return unsupported("no package.json in the repository");
-  if (manifests.length > 1) return unsupported(`no package.json above the test files, and ${manifests.length} packages to choose from: ${manifests.join(", ")}`);
-  const pkg = parsePkg(await probe.read(manifests[0]));
-  if (pkg === "invalid") return unsupported(`${manifests[0]} is not valid JSON`);
+  let manifest = manifests[0];
+  if (manifests.length > 1) {
+    const reached = await packagesReached(code, manifests, probe.read);
+    const choices = `${manifests.length} packages to choose from: ${manifests.join(", ")}`;
+    if (reached.length === 0) return unsupported(`no package.json above the test files, and ${choices}; the test files' imports reach none of them`);
+    if (reached.length > 1) return unsupported(`no package.json above the test files, and ${choices}; the test files' imports reach ${reached.length}: ${reached.join(", ")}`);
+    manifest = reached[0];
+  }
+  const pkg = parsePkg(await probe.read(manifest));
+  if (pkg === "invalid") return unsupported(`${manifest} is not valid JSON`);
   if (pkg == null) return unsupported("no package.json in the repository");
 
   const paths: string[] = [];
@@ -456,8 +464,55 @@ async function looseNodeTest(probe: RepoProbe): Promise<LooseNodeTest | Unsuppor
     if (!paths.includes(path)) paths.push(path);
   }
   const command = `REPORT=$REPORT_DIR/node-0.json node --test --test-reporter=${NODE_TEST_REPORTER_PATH} ${paths.join(" ")}`;
-  const slash = manifests[0].lastIndexOf("/");
-  return { installDir: slash < 0 ? "" : manifests[0].slice(0, slash), pkg, testSteps: [{ kind: "node-test", command }] };
+  return { installDir: posix.dirname(manifest) === "." ? "" : posix.dirname(manifest), pkg, testSteps: [{ kind: "node-test", command }] };
+}
+
+/** `from "./x"`, `import "./x"`, `import("./x")`, `require("./x")`: relative specifiers only. */
+const RELATIVE_IMPORT = /(?:\bfrom\s*|\bimport\s*\(?\s*|\brequire\s*\(\s*)(["'])(\.\.?\/[^"'\n]+)\1/g;
+/** Most files read along one import chain, the test file included. */
+export const IMPORT_CHAIN_DEPTH = 5;
+const RESOLVE_SUFFIXES = ["", ".ts", ".tsx", ".mts", ".cts", ".js", ".jsx", ".mjs", ".cjs", "/index.ts", "/index.js", "/index.mjs"];
+
+/**
+ * The package.json files whose folders the test files' relative imports reach (jjacobhw/roomie has
+ * `backend/` and `frontend/`; its tests import `../backend/expenses.ts`, some through
+ * `tests/expense_test_helpers.mjs`). A chain is followed through files that sit outside every package
+ * folder, read from the tree, until it reaches a path inside a package folder or ends, at most
+ * IMPORT_CHAIN_DEPTH files long. Sorted.
+ */
+async function packagesReached(testFiles: string[], manifests: string[], read: FileReader): Promise<string[]> {
+  const dirs = manifests.map((m) => ({ manifest: m, dir: posix.dirname(m) }));
+  const owner = (path: string) => dirs.find((d) => d.dir !== "." && path.startsWith(`${d.dir}/`))?.manifest;
+  const reached = new Set<string>();
+  /** The shortest depth each file was followed at; a file met again at the same or a greater depth adds nothing. */
+  const seen = new Map<string, number>();
+  const follow = async (file: string, text: string, depth: number) => {
+    for (const match of text.matchAll(RELATIVE_IMPORT)) {
+      const target = posix.normalize(posix.join(posix.dirname(file), match[2]));
+      if (target.startsWith("..")) continue;
+      const pkg = owner(target);
+      if (pkg) { reached.add(pkg); continue; }
+      if (depth >= IMPORT_CHAIN_DEPTH) continue;
+      for (const suffix of RESOLVE_SUFFIXES) {
+        const path = target + suffix;
+        if (!JS_FILE.test(path)) continue;
+        const next = await read(path);
+        if (next == null) continue;
+        if ((seen.get(path) ?? Infinity) > depth + 1) {
+          seen.set(path, depth + 1);
+          await follow(path, next, depth + 1);
+        }
+        break;
+      }
+    }
+  };
+  for (const file of testFiles) {
+    const text = await read(file);
+    if (text == null) continue;
+    seen.set(file, 1);
+    await follow(file, text, 1);
+  }
+  return [...reached].sort();
 }
 
 // ---------------------------------------------------------------------------------------------

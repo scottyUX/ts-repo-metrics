@@ -178,9 +178,43 @@ describe("detectEnvironment: node --test files outside any package (the roomie s
     expect(await detectEnvironment({ testFiles: ["tests/expenses.test.mjs"], read: repo(roomie) })).toEqual({ supported: false, reason: "env_unsupported", detail: noPackage });
   });
 
-  it("is unsupported with the choices when there are several packages, and says so when there is none", async () => {
-    const two = await detectEnvironment({ testFiles: ["tests/expenses.test.mjs"], read: repo({ ...roomie, "web/package.json": {} }), packageJsonFiles: ["web/package.json", "backend/package.json"] });
-    expect(two).toEqual({ supported: false, reason: "env_unsupported", detail: "no package.json above the test files, and 2 packages to choose from: backend/package.json, web/package.json" });
+  describe("with several packages, the one the test files' imports reach", () => {
+    const listing = ["backend/package.json", "frontend/package.json"];
+    const twoPackages = { ...roomie, "frontend/package.json": { name: "frontend", dependencies: { react: "^19" } } };
+    const detect = (files: Record<string, string | object>, testFiles = ["tests/expenses.test.mjs"]) => detectEnvironment({ testFiles, read: repo(files), packageJsonFiles: listing });
+
+    it("installs in the package a test file imports directly", async () => {
+      expect(await detect(twoPackages)).toMatchObject({ supported: true, packageDir: "", installDir: "backend", installCommand: "npm ci", testSteps: [{ kind: "node-test", command: nodeStep("tests/*.test.mjs") }] });
+    });
+
+    it("follows an import through a helper outside the test patch and outside every package", async () => {
+      const files = {
+        ...twoPackages,
+        "tests/expenses.test.mjs": 'import test from "node:test";\nimport { withApi } from "./helpers.mjs";\n',
+        "tests/helpers.mjs": "import { registerExpenseRoutes } from '../backend/expenses.ts';\n",
+      };
+      expect(await detect(files)).toMatchObject({ supported: true, installDir: "backend" });
+    });
+
+    it("stops a chain after five files", async () => {
+      const chain = (n: number) => Object.fromEntries(Array.from({ length: n }, (_, i) => [`lib/h${i + 1}.mjs`, i + 1 < n ? `import "./h${i + 2}.mjs";\n` : 'import "../backend/x.ts";\n']));
+      const start = { "tests/expenses.test.mjs": 'import test from "node:test";\nimport "../lib/h1.mjs";\n' };
+      expect(await detect({ ...twoPackages, ...start, ...chain(4) })).toMatchObject({ supported: true, installDir: "backend" });
+      expect(await detect({ ...twoPackages, ...start, ...chain(5) })).toMatchObject({ supported: false, detail: expect.stringContaining("reach none of them") });
+    });
+
+    it("is unsupported with the list when the imports reach two packages", async () => {
+      const files = { ...twoPackages, "tests/expenses.test.mjs": 'import test from "node:test";\nimport "../backend/a.ts";\nimport "../frontend/b.js";\n' };
+      expect(await detect(files)).toEqual({ supported: false, reason: "env_unsupported", detail: "no package.json above the test files, and 2 packages to choose from: backend/package.json, frontend/package.json; the test files' imports reach 2: backend/package.json, frontend/package.json" });
+    });
+
+    it("is unsupported with the list when the imports reach none", async () => {
+      const files = { ...twoPackages, "tests/expenses.test.mjs": 'import test from "node:test";\nimport assert from "node:assert";\n' };
+      expect(await detect(files)).toEqual({ supported: false, reason: "env_unsupported", detail: "no package.json above the test files, and 2 packages to choose from: backend/package.json, frontend/package.json; the test files' imports reach none of them" });
+    });
+  });
+
+  it("says so when there is no package.json at all", async () => {
     const none = await detectEnvironment({ testFiles: ["tests/expenses.test.mjs"], read: repo({ "tests/expenses.test.mjs": nodeTest }), packageJsonFiles: [] });
     expect(none).toEqual({ supported: false, reason: "env_unsupported", detail: "no package.json in the repository" });
   });
