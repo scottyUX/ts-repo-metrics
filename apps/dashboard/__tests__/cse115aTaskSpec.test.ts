@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { filenameMatchesId, isTaskFilePath, parsePullRequestUrl, parseTaskSpec } from "@/lib/cse115a/taskSpec";
+import { canonicalHeadings, filenameMatchesId, isTaskFilePath, parsePullRequestUrl, parseTaskSpec } from "@/lib/cse115a/taskSpec";
 
 const valid = `---
 id: US-1-T-1
@@ -68,5 +68,38 @@ describe("CSE 115A task import", () => {
     expect(filenameMatchesId("US-2.3-T-2", "US-2.3-T-2")).toBe(true);
     expect(filenameMatchesId("3_2_1", "3.2.2")).toBe(false);
     expect(filenameMatchesId("3-2-1", "3.2.1")).toBe(false);
+  });
+
+
+  it("accepts a section heading with different case, a colon or one typo", () => {
+    for (const heading of ["Acceptance Criteria", "Acceptance Critera", "acceptance criteria:", "Acceptance  criteria"]) {
+      const spec = parseTaskSpec(valid.replace("## Acceptance criteria", `## ${heading}`));
+      expect(spec.acceptanceCriteria).toBe("1. Reject a non-university email.");
+    }
+  });
+
+  it("still rejects a missing section or one that is too far off", () => {
+    for (const heading of ["Acceptance", "Criteria", "Acceptance tests"]) {
+      expect(() => parseTaskSpec(valid.replace("## Acceptance criteria", `## ${heading}`)))
+        .toThrow("“Acceptance criteria” section");
+    }
+    expect(() => parseTaskSpec(valid.replace("## Specs", "## Steps"))).toThrow("“Specs” section");
+  });
+
+  it("does not guess when two headings are equally close", () => {
+    const twice = valid.replace("## Acceptance criteria", "## Acceptance Critera\nA.\n\n## Acceptance criterias");
+    expect(() => parseTaskSpec(twice)).toThrow("“Acceptance criteria” section");
+  });
+
+  it("rewrites a near-miss heading to the standard name for the stored copy", () => {
+    const typo = valid.replace("## Acceptance criteria", "## Acceptance Critera");
+    const result = canonicalHeadings(typo);
+    expect(result.markdown).toBe(valid);
+    expect(result.renamed).toEqual(["Acceptance Critera → Acceptance criteria"]);
+    expect(canonicalHeadings(valid)).toEqual({ markdown: valid, renamed: [] });
+    const twice = valid.replace("## Acceptance criteria", "## Acceptance Critera\nA.\n\n## Acceptance criterias");
+    expect(canonicalHeadings(twice).markdown).toBe(twice);
+    const crlf = typo.replace(/\n/g, "\r\n");
+    expect(canonicalHeadings(crlf).markdown).toBe(valid.replace(/\n/g, "\r\n"));
   });
 });
