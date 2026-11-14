@@ -2,7 +2,7 @@ import "server-only";
 import { splitPatch } from "@/lib/cse115a/diff";
 import { summarizeCi, type TaskFacts } from "@/lib/cse115a/processChecklist";
 import { readCommitChecks } from "@/lib/cse115a/submissionSnapshot";
-import { filenameMatchesId, isTaskFilePath, parsePullRequestUrl, parseTaskSpec, type TaskSpec } from "@/lib/cse115a/taskSpec";
+import { canonicalHeadings, filenameMatchesId, isTaskFilePath, parsePullRequestUrl, parseTaskSpec, type TaskSpec } from "@/lib/cse115a/taskSpec";
 import { tagCommitSha, type GitHubReader } from "@/lib/cse115a/githubClient";
 
 type GitHubPull = {
@@ -71,7 +71,8 @@ export async function importTaskFromPullRequest(
   if (!content || content.encoding !== "base64" || content.size > 65536) {
     throw new Error("The task file could not be imported from the merged PR.");
   }
-  const markdown = Buffer.from(content.content.replace(/\s/g, ""), "base64").toString("utf8");
+  // Stored with the standard section headings, so records read the same whatever the student's spelling.
+  const { markdown } = canonicalHeadings(Buffer.from(content.content.replace(/\s/g, ""), "base64").toString("utf8"));
   const spec = parseTaskSpec(markdown);
   const filenameId = taskPath.split("/").pop()!.replace(/\.md$/i, "");
   if (!filenameMatchesId(filenameId, spec.id)) throw new Error("The task ID in the file must match its filename.");
