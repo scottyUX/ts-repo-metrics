@@ -111,15 +111,15 @@ export const MULTI_SUITE_REASON = "Harbor export for tasks with more than one te
 export const NO_SERVICE_DETAIL_REASON =
   "the recipe has no settings for its database service (recorded before they were kept); run the batch with --gold-only on the row, then write back";
 
-/** A database image the sidecar can run: the official Postgres image, by tag or digest. */
-const POSTGRES_IMAGE = /^postgres(:[^@\s]+)?(@sha256:[0-9a-f]{64})?$/;
+/** A database image the sidecar can run: the official Postgres image or PostGIS (`postgis/postgis`), by tag or digest. */
+const POSTGRES_IMAGE = /^(postgres|postgis\/postgis)(:[^@\s]+)?(@sha256:[0-9a-f]{64})?$/;
 
 /** Why a recipe's database services cannot become the task's sidecar, or null when they can (or there are none). */
 export function serviceSkipReason(services: HarborService[] | undefined): string | null {
   if (!services?.length) return null;
   if (services.length > 1) return `Harbor export supports one database service; this row has ${services.length}`;
   const [s] = services;
-  if (s.name !== "postgres" || !POSTGRES_IMAGE.test(s.image)) return `database service image ${JSON.stringify(s.image)} is not a postgres image; Harbor export supports Postgres only`;
+  if (s.name !== "postgres" || !POSTGRES_IMAGE.test(s.image)) return `database service image ${JSON.stringify(s.image)} is not a postgres image; Harbor export supports Postgres (postgres or postgis/postgis) only`;
   if (!s.alias || !s.env) return NO_SERVICE_DETAIL_REASON;
   if (s.alias === "main") return `database service host name "main" is Harbor's own container name`;
   return null;

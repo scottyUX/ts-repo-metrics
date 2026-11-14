@@ -100,7 +100,7 @@ describe("1. a row with a Postgres service", () => {
 
 describe("2. services the sidecar cannot run stay skipped, with the reason", () => {
   it("an image that is not Postgres, more than one service, the alias `main`", () => {
-    expect(serviceSkipReason([{ ...service, image: "mysql:8" }])).toBe('database service image "mysql:8" is not a postgres image; Harbor export supports Postgres only');
+    expect(serviceSkipReason([{ ...service, image: "mysql:8" }])).toBe('database service image "mysql:8" is not a postgres image; Harbor export supports Postgres (postgres or postgis/postgis) only');
     expect(serviceSkipReason([{ ...service, image: "bitnami/postgresql:16" }])).toMatch(/is not a postgres image/);
     expect(serviceSkipReason([service, { ...service, alias: "db2" }])).toBe("Harbor export supports one database service; this row has 2");
     expect(serviceSkipReason([{ ...service, alias: "main" }])).toMatch(/Harbor's own container name/);

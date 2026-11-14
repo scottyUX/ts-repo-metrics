@@ -1,5 +1,5 @@
 // Reads the GitHub workflow job that runs a repository's tests for what the validator should copy:
-// the database its tests run against (only Postgres for now), the directories it installs
+// the database its tests run against (Postgres, or PostGIS, which is Postgres), the directories it installs
 // dependencies in, and the Node version it sets up. Pure: takes the workflow texts, returns facts;
 // the detector and the runner act on them.
 // Rules are in docs/CSE115A_BENCHMARK_VALIDATION.md, "Environment".
@@ -49,8 +49,12 @@ const normDir = (dir: string) => dir.trim().replace(/^\.\/?/, "").replace(/\/+$/
  */
 const TEST_LINE = /(^|[\s;&|(])((npm|pnpm|yarn|bun)(\s+(--dir|-C|--prefix|--filter|--cwd|--workspace|-w)[\s=]\S+)*\s+(run\s+)?test(:[\w:-]+)?(?=\s|$|;|&|\|)|(npx\s+)?(vitest|jest)(?=\s|$)|(python3?\s+-m\s+)?pytest(?=\s|$)|node\s+.*--test(?=\s|$))/;
 
-/** A line that creates or migrates the schema. */
-const SCHEMA_LINE = /db:push|\bmigrate\b|prisma\s+migrate\s+deploy|prisma\s+db\s+push|drizzle-kit\s+push|knex\s+migrate/;
+/**
+ * A line that creates or migrates the schema: `db:push`, `migrate` (Django, Prisma, Knex, ...),
+ * `drizzle-kit push`, `prisma db push`, `alembic upgrade head`, `flask db upgrade` (Flask-Migrate's
+ * wrapper around Alembic).
+ */
+const SCHEMA_LINE = /db:push|\bmigrate\b|prisma\s+migrate\s+deploy|prisma\s+db\s+push|drizzle-kit\s+push|knex\s+migrate|\balembic\s+upgrade\b|\bflask\s+db\s+upgrade\b/;
 
 /** The directory a test line targets: `--dir server`, `-C server`, `--prefix server`, `cd server &&`; null when it names none. */
 function lineTarget(line: string): string | null {
@@ -114,13 +118,34 @@ function pickJob(jobs: Job[], packageDir: string): { job: Job; test: TestStep } 
   return { job: withPg.job, test };
 }
 
+/** A Postgres image, by tag or digest: the official `postgres`, or `postgis/postgis` (Postgres with the PostGIS extension). */
+export const POSTGRES_IMAGE_NAME = /^(postgres|postgis\/postgis)(:|@|$)/;
+
 function postgresEntry(job: Job): [string, Record<string, unknown>] | null {
   if (!isObject(job.services)) return null;
   for (const [key, value] of Object.entries(job.services)) {
     const image = isObject(value) ? str(value.image) : str(value);
-    if (image && /^postgres(:|@|$)/.test(image.trim())) return [key, isObject(value) ? value : { image }];
+    if (image && POSTGRES_IMAGE_NAME.test(image.trim())) return [key, isObject(value) ? value : { image }];
   }
   return null;
+}
+
+/** The languages a test line runs: pytest is Python; npm, pnpm, yarn, bun, npx, node, vitest and jest are JavaScript. */
+function lineLanguages(line: string): Array<"python" | "javascript"> {
+  const out: Array<"python" | "javascript"> = [];
+  if (/(^|[\s;&|(])(python3?\s+-m\s+)?pytest(?=\s|$)/.test(line)) out.push("python");
+  if (/(^|[\s;&|(])(npm|pnpm|yarn|bun|npx|node|vitest|jest)(?=\s|$)/.test(line)) out.push("javascript");
+  return out;
+}
+
+/**
+ * Whether one of the job's test steps runs the suite in `packageDir` ("" root): a step aimed at
+ * that directory, or a step at the repository root in the suite's own language. Only then do the
+ * job's database and schema step (and, for Python, its pip installs) apply to the suite.
+ */
+export function jobRunsSuite({ job }: CiJob, packageDir: string, language: "python" | "javascript"): boolean {
+  const dir = normDir(packageDir);
+  return testSteps(job).some((t) => t.dir === dir || (t.dir === "" && lineLanguages(t.line).includes(language)));
 }
 
 /** The schema steps before the test step, as written; a step with its own directory runs in a subshell there. */
@@ -274,6 +299,44 @@ export function installStepsFromJob({ job, test }: CiJob): InstallStep[] {
 }
 
 const joinDir = (a: string, b: string) => (a && b ? `${a}/${b}` : a || b);
+
+/** `pip install ...`, `pip3 install ...`, `python -m pip install ...`, `python3 -m pip install ...`. */
+const PIP_INSTALL = /^(pip3?|python3?\s+-m\s+pip)\s+install(\s|$)/;
+/** Python installs the validator does not follow; a job with one keeps the detected install. */
+const OTHER_PY_INSTALL = /(^|[\s;&|(])(uv\s+(sync|pip\s+install|add)|poetry\s+install|pipenv\s+(install|sync)|conda\s+install|mamba\s+install)(?=\s|$)/;
+
+/**
+ * The pip installs the job runs before its test step, in order, as written, each with the
+ * directory it runs in (the step's `working-directory`, or the job's, plus a `cd dir &&` before it
+ * on the line). Accepted: `pip`, `pip3`, `python -m pip`, `python3 -m pip` followed by `install`
+ * and anything after it (`-r file`, `-e .`, `.`, named packages, flags). [] (follow the detected
+ * install instead) when there is none, when one has nothing after `install`, uses a GitHub
+ * expression (`${{ ... }}`), or when the job also installs with uv, Poetry, Pipenv or conda,
+ * whose part the validator would leave out.
+ */
+export function pipInstallStepsFromJob({ job, test }: CiJob): InstallStep[] {
+  const steps = Array.isArray(job.steps) ? (job.steps as Step[]) : [];
+  const jobDir = normDir(str(job.defaults?.run?.["working-directory"]) ?? "");
+  const found: InstallStep[] = [];
+  for (let i = 0; i < test.index; i++) {
+    const run = str(steps[i]?.run)?.replace(/[ \t]*\\\n\s*/g, " ");
+    if (!run) continue;
+    const stepDir = normDir(str(steps[i]["working-directory"]) ?? jobDir);
+    for (const line of run.split("\n")) {
+      if (OTHER_PY_INSTALL.test(line)) return [];
+      let dir = stepDir;
+      for (const raw of line.split(/\s*&&\s*/)) {
+        const segment = raw.trim();
+        const cd = segment.match(/^cd\s+(\S+)$/);
+        if (cd) { dir = joinDir(dir, normDir(cd[1])); continue; }
+        if (!PIP_INSTALL.test(segment)) continue;
+        if (segment.includes("${{") || !segment.replace(PIP_INSTALL, "").trim()) return [];
+        found.push({ dir, cwd: dir, command: segment });
+      }
+    }
+  }
+  return found;
+}
 
 /**
  * The Node major `actions/setup-node` sets up in the job (`24`, `"24.x"`, `"v22.11.0"`); null for

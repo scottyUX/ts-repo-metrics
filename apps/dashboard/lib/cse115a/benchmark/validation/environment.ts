@@ -10,7 +10,7 @@
 // Rules are in docs/CSE115A_BENCHMARK_VALIDATION.md, "Environment".
 
 import { posix } from "node:path";
-import { ciTestJob, installStepsFromJob, nodeMajorFromJob, serviceProvenance, servicesFromJob, type InstallStep, type Service } from "@/lib/cse115a/benchmark/validation/services";
+import { ciTestJob, installStepsFromJob, jobRunsSuite, nodeMajorFromJob, pipInstallStepsFromJob, serviceProvenance, servicesFromJob, type InstallStep, type Service } from "@/lib/cse115a/benchmark/validation/services";
 
 export type Runner = "vitest" | "node-test" | "jest" | "pytest";
 
@@ -38,7 +38,9 @@ export type Environment = {
   services?: Service[];
   /**
    * The installs CI runs before its tests, in order, run instead of `installCommand` in
-   * `installDir`; [] (or unset) when CI has none the validator recognises. JavaScript only.
+   * `installDir`; [] (or unset) when CI has none the validator recognises. JavaScript: npm, pnpm
+   * and yarn installs. Python (pip suites only): CI's pip installs, then `pip install pytest`;
+   * unset when CI has none.
    */
   installSteps?: InstallStep[];
   /** Where the Node major came from: `.nvmrc`, `.node-version`, `engines.node`, `CI`, or `default`. JavaScript only. */
@@ -286,11 +288,12 @@ export async function suiteGroups(probe: RepoProbe): Promise<SuiteGroup[] | Unsu
 }
 
 /**
- * Applies what the CI job that runs the tests says. Its Postgres service: `services`, the real
- * DATABASE_URL in place of the placeholder, the service in the Dockerfile provenance. For
- * JavaScript, its install steps (every directory it installs in, in order) and, when no repository
- * file names a Node version, its setup-node version. Without CI, `services: []`, `installSteps: []`
- * and nothing else changes.
+ * Applies what the CI job that runs the tests says. Its Postgres service, only when one of the
+ * job's test steps runs this suite (jobRunsSuite): `services`, the real DATABASE_URL in place of
+ * the placeholder, the service in the Dockerfile provenance. For JavaScript, its install steps
+ * (every directory it installs in, in order) and, when no repository file names a Node version, its
+ * setup-node version. For a pip suite the job runs, its pip installs, then `pip install pytest`.
+ * Without CI, `services: []`, `installSteps: []` (JavaScript) and nothing else changes.
  */
 export async function withCi(env: Environment, probe: RepoProbe): Promise<Environment> {
   const files = [];
@@ -299,11 +302,12 @@ export async function withCi(env: Environment, probe: RepoProbe): Promise<Enviro
     if (text != null) files.push({ path, text });
   }
   const ci = ciTestJob(files, env.packageDir);
-  const services = ci ? servicesFromJob(ci) : [];
   const js = !env.runners.includes("pytest");
-  const installSteps = ci && js ? installStepsFromJob(ci) : [];
+  const runs = ci != null && jobRunsSuite(ci, env.packageDir, js ? "javascript" : "python");
+  const services = ci && runs ? servicesFromJob(ci) : [];
+  const installSteps = js ? (ci ? installStepsFromJob(ci) : []) : ci && runs && env.packageManager === "pip" ? pythonInstallSteps(pipInstallStepsFromJob(ci)) : [];
   const ciNode = ci && js && env.nodeSource === "default" ? nodeMajorFromJob(ci) : null;
-  let out: Environment = { ...env, services, ...(js ? { installSteps } : {}) };
+  let out: Environment = { ...env, services, ...(js || installSteps.length ? { installSteps } : {}) };
   if (ciNode != null) {
     const image = `node:${ciNode}-bookworm`;
     out = { ...out, image, nodeSource: "CI", dockerfile: out.dockerfile.replace(/^FROM .*$/m, `FROM ${image}`) };
@@ -318,6 +322,13 @@ export async function withCi(env: Environment, probe: RepoProbe): Promise<Enviro
       .replace(/^WORKDIR \/work$/m, (line) => [line, ...serviceProvenance(services)].join("\n"));
   }
   return out;
+}
+
+/** CI's pip installs, then pytest (in the last one's directory); [] when CI has none. */
+function pythonInstallSteps(pip: InstallStep[]): InstallStep[] {
+  if (!pip.length) return [];
+  const last = pip[pip.length - 1];
+  return [...pip, { dir: last.cwd, cwd: last.cwd, command: "pip install pytest" }];
 }
 
 /**
