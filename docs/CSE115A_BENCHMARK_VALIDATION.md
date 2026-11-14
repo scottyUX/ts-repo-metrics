@@ -942,6 +942,60 @@ the merge commit, which the bundle need not hold.
 npx tsx --tsconfig apps/dashboard/tsconfig.json apps/dashboard/scripts/validateBenchmarkBatch.ts ROWS.json --out DIR --snapshots-from DIR2
 ```
 
+**The snapshot store.** A bundle in a batch folder is lost with the folder or the machine, and a
+repository deleted or made private since can then never be validated again. So the bundles are
+also kept in a Supabase Storage bucket in the course's own project: `benchmark-snapshots`,
+private (`public: false`), 50 MB file size limit, no policies, so only the service-role key can
+read or write it. Object name `<instance_id>.bundle`, content type `application/octet-stream`
+(`lib/cse115a/benchmark/validation/snapshotStore.ts`). The website and the Harbor exports never
+read the bucket; it exists only for the validator.
+
+The store is on when `SUPABASE_URL` (or `NEXT_PUBLIC_SUPABASE_URL`) and
+`SUPABASE_SERVICE_ROLE_KEY` are set, read as `fetchCandidateRows.ts` reads them; the batch then
+logs `Snapshot store: the Supabase bucket benchmark-snapshots`. Without both, every command
+behaves exactly as before. With it:
+
+- **Never overwritten.** Uploads use `upsert: false`, and Storage's "already exists" answer means
+  "already stored", not an error: a row's base commit never changes, so the first upload is the
+  copy. A `--redo` rewrites the local bundle but not the stored one.
+- **Upload after every new bundle.** `--snapshot-only` and `--snapshots` upload each bundle they
+  write. `--snapshot-only` also uploads a bundle already in `DIR/snapshots/` that the bucket does
+  not have yet (it asks first), so rerunning it over an old folder fills the bucket. The row's
+  line gets a second part (`snapshot written; stored`, `already has a snapshot; already stored`,
+  `snapshot written; upload failed: <first line>`) and the count line ends with
+  `N stored, N upload failures`; a normal run with `--snapshots` logs the same second part. An
+  upload failure is logged and never fails the row or changes a result; results gain no field.
+- **50 MB.** A bundle over the limit is not sent; it stays in the folder and its line says
+  `upload failed: the bundle is N MB, over the bucket's 50.0 MB limit; kept only in this folder`.
+  The project's global upload limit, if lower, wins over the bucket's.
+- **Restore order.** When GitHub cannot supply a row's code, the bundle is looked for in
+  `DIR/snapshots/`, then `--snapshots-from`, then the bucket. The bucket's copy is downloaded
+  straight into `DIR/snapshots/<instance_id>.bundle` (so the result records it and the Harbor
+  export and gold check find it) and checked before use: `git bundle verify`, a fetch of the
+  bundle into a throwaway repository (verify alone passes a truncated file; the fetch reads the
+  whole pack), and `base_commit` present. A copy that fails is deleted and treated as missing, so
+  the row is `env_error` with the original GitHub error, as before. The bucket is asked only
+  where a bundle is needed today: never on a row GitHub supplies.
+
+The bucket is created once with `createSnapshotBucket.ts`. It creates `benchmark-snapshots`
+private with the 50 MB limit, or prints the existing bucket's settings and changes nothing; if a
+bucket of that name exists and is public, it refuses and exits 1. No migration: the bucket is
+internal and stays out of the shared schema history.
+
+```sh
+SUPABASE_URL=https://<project-ref>.supabase.co SUPABASE_SERVICE_ROLE_KEY=... npx tsx --tsconfig apps/dashboard/tsconfig.json apps/dashboard/scripts/createSnapshotBucket.ts
+```
+
+`uploadSnapshots.ts` uploads a folder made before the store existed: every `DIR/snapshots/*.bundle`
+the bucket lacks, one line per file (`stored`, `already stored`, `upload failed: …`), then a
+count; it exits 1 if any upload failed. `--dry-run` lists what it would upload and uploads nothing
+(it does ask the bucket which bundles it has); `--only id,id` limits it to those rows.
+
+```sh
+SUPABASE_URL=https://<project-ref>.supabase.co SUPABASE_SERVICE_ROLE_KEY=... npx tsx --tsconfig apps/dashboard/tsconfig.json apps/dashboard/scripts/uploadSnapshots.ts --dir DIR --dry-run
+SUPABASE_URL=https://<project-ref>.supabase.co SUPABASE_SERVICE_ROLE_KEY=... npx tsx --tsconfig apps/dashboard/tsconfig.json apps/dashboard/scripts/uploadSnapshots.ts --dir DIR [--only id,id]
+```
+
 ## Known limitations
 
 - **Renames are false regressions.** A renamed old test is old name passed→absent (regression,
