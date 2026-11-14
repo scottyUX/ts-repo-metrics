@@ -465,7 +465,7 @@ such a repository as supported, one value per suite in each column, with the sui
 
 **Harbor.** A Harbor task has one verifier, so a multi-suite row is not exported yet: both the
 course website's zip and `scripts/exportHarbor.ts` skip it with "Harbor export for tasks with
-more than one test suite is not built yet", the way database rows are skipped, and the gold check
+more than one test suite is not built yet", and the gold check
 records it as `skipped` with that reason.
 
 `untested_files` by the import rule is unchanged: imports are resolved with the first suite's
@@ -797,8 +797,11 @@ builder is `validation/harbor.ts`.
 **The recipe.** Everything a task needs besides the row is in `cse_benchmark_tasks.harbor_env`
 (jsonb): the image (`tag@sha256:…`), the runners, the package directory, the install steps in
 order (where each runs and the command), the test steps, the container variables, the database
-services by name and image, where the Node version came from, and whether the repository is
-public (`repo_public`, see "Private repositories"). The validator's result carries
+services (name, image, and for the sidecar below the CI host name `alias`, the service's variables
+`env` and the CI `schema_command`), where the Node version came from, and whether the repository is
+public (`repo_public`, see "Private repositories"). The service variables are the ones the
+repository's own CI file sets (placeholders like `POSTGRES_PASSWORD: bookworm`), not secrets of
+ours. The validator's result carries
 the same object, and write-back (`writebackValidation.ts` and `writeback.sql`) stores it for
 validated rows only; rejected and `env_error` rows leave the column alone, and so does a validated
 result file written before results carried a recipe. `writebackValidation.ts` checks the column
@@ -807,6 +810,29 @@ exists before writing anything and stops with "apply migration
 student's PR changes and the row is captured again, `harbor_env` goes back to null with the other
 validation fields; a re-capture of an unchanged PR keeps it. `harbor_env` is not a SWE-bench field
 and the JSONL export never contains it.
+
+**A database.** A row whose runs had a Postgres service from CI gets it in Harbor as a sidecar
+container. Harbor 0.25's local Docker environment merges a task's `environment/docker-compose.yaml`
+into each trial's Compose project (`harbor/environments/docker/docker.py`, "Option 2: Task with
+extra services"; the agent's container is the service `main`). The builder writes one
+(`sidecarCompose` in `validation/harbor.ts`): a service named by the CI `alias` (so the tests reach
+it by the same host name as in CI and in the validator), the CI image and `env`, a healthcheck
+that runs `pg_isready` over TCP every second for up to two minutes, and `main` depending on it
+being healthy. `DATABASE_URL` in the agent's container is the one the validator used (the CI
+value with the alias as host), already in the recipe's `env`. `tests/test.sh` runs the CI schema
+step (`bash -eo pipefail -c '<schema_command>'`, from `/app`) after the installs and before the
+test steps, as the validator does; a failing schema step is reported and the tests then fail.
+`instruction.md` gets a short "Database" section: the host name, that `DATABASE_URL` points to it,
+and the schema command as CI runs it; nothing about the fix. There is no volume, and every trial
+is its own Compose project (`<trial>__env`), so each oracle, nop or agent trial starts with an
+empty database, as each validator run does. Only a single service whose image is the official
+`postgres` image (by tag or digest) is built; another image, more than one service, or the alias
+`main` (Harbor's own container) is skipped with the reason. A recipe stored before it kept
+`alias`, `env` and `schema_command` is skipped with "the recipe has no settings for its database
+service (recorded before they were kept); run the batch with --gold-only on the row, then write
+back": the gold-only pass copies them into the result's recipe from the result's own `services`
+(`withServiceDetail`), and the next write-back stores them. Rows without services get no compose
+file and are built exactly as before.
 
 **Where the repository comes from.**
 
@@ -845,7 +871,8 @@ code, and the same 409 while the consent wording is not approved), one folder pe
 
 - no `harbor_env` on the row (validated before the column existed): re-run the validator on it
   and write back;
-- a database service in the runs: a Harbor task is one image with no sidecar, so these wait;
+- a database service the sidecar cannot run (not the `postgres` image, more than one, the alias
+  `main`), or a recipe stored without the service's settings (see "A database" above);
 - more than one test suite (see "More than one test suite"): "Harbor export for tasks with more
   than one test suite is not built yet";
 - a short `base_commit` or a repo that is not `owner/name`;
@@ -888,8 +915,8 @@ harbor_gold: { status: "passed" | "failed" | "skipped", oracle: number | null, n
 `failed` names what went wrong (`oracle 0.0`, `nop 1.0: tests pass without the fix`, or the agent
 and the first useful line of Harbor's output for an exception, a timeout or a missing result,
 token-free). `skipped` means the task cannot be checked on this machine: Harbor is not installed
-(`harbor --version` fails), the row had a database service (the same reason as the export), or
-there is no snapshot bundle. The check never changes `validation_status`, `reason` or the test
+(`harbor --version` fails), the row has a database service the sidecar cannot run or more than
+one test suite (the same reasons as the export), or there is no snapshot bundle. The check never changes `validation_status`, `reason` or the test
 lists. The batch summary has a `gold` column (`passed`, `failed`, `skipped`, empty when not run)
 and the headline adds `; N gold-checked: P passed, F failed` (N counts passed and failed; skipped
 rows are added as `(S skipped)`).
@@ -1081,6 +1108,5 @@ SUPABASE_URL=https://<project-ref>.supabase.co SUPABASE_SERVICE_ROLE_KEY=... npx
 
 Services other than Postgres (MySQL, Redis, MongoDB), a database the tests expect without a CI
 service for it, browser and end-to-end runners, Bun, Python runners other than pytest, Harbor
-export for rows with a database service (a Harbor task is one image, with no sidecar) or with
-more than one test suite, and scheduled runs after each sprint. Each is a separate change once the dry
+export for rows with more than one test suite, and scheduled runs after each sprint. Each is a separate change once the dry
 run is trusted.
