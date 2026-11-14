@@ -350,7 +350,18 @@ sync --frozen` into `/opt/venv`; `poetry.lock` → `pip install poetry && poetry
 --no-interaction --no-root` into the image's Python (no virtualenv); `requirements.txt` plus any
 of `requirements-dev.txt`, `requirements-test.txt`, `dev-requirements.txt` → `pip install -r` each;
 a `pyproject.toml` with `[project]` or `[build-system]`, or a `setup.py` → `pip install -e .`. Every
-install ends by installing pytest. Nothing installed lands in the mounted checkout, and
+install ends by installing pytest. When the suite installs with pip (not uv or Poetry) and the CI
+job that runs it (see "Databases" below for which job runs a suite) has `pip install` steps before
+its test step, those run instead, in order, as written, each from the directory CI runs it in (step
+or job `working-directory`, a `cd dir &&` before it), then `pip install pytest` in the last one's
+directory. Accepted: `pip`, `pip3`, `python -m pip` or `python3 -m pip`, then `install` and
+anything after it (`-r file`, `-e .`, `.`, named packages, flags; a `\` line continuation is
+joined). CI is not followed at all, and the detected install stays, when one of them is a bare
+`pip install` or holds a `${{ … }}` expression, or when the job also installs with uv, Poetry,
+Pipenv or conda (the validator would run only part of CI's setup). jacobluanjohnston/lens needs
+this: CI runs `pip install -r backend/requirements.txt` at the root for every suite, while the
+nearest file to `pipeline/tests/` is `pipeline/requirements.txt`, which CI never installs and which
+has no Alembic. Nothing installed lands in the mounted checkout, and
 `PYTHONDONTWRITEBYTECODE` keeps `.pyc` files out of it. pip, uv and Poetry downloads share the
 batch's cache folder like npm's.
 
@@ -387,9 +398,10 @@ database). Without a database every test fails to load in every state and the ro
 | Read from CI | Rule |
 |---|---|
 | The job | the one whose steps run the package's tests (`npm test`, `pnpm --dir server test`, `npx vitest`, `pytest`, `node --test`); when several do, the one aimed at the package directory (`--dir`, `-C`, `--prefix`, `cd`, `working-directory`), then one with a Postgres service |
-| The service | that job's `services:` entry whose image is `postgres` or `postgres:<tag>`; its `env` (`POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`). MySQL, Redis and other images are ignored |
+| Whether it runs this suite | the job's service and schema step (and, for Python, its pip installs) apply only when one of its test steps runs the suite: a step aimed at the suite's package directory, or a step at the repository root in the suite's language (`pytest`/`python -m pytest` for Python; `npm`, `pnpm`, `yarn`, `bun`, `npx`, `node`, `vitest`, `jest` for JavaScript). A Jest suite in `frontend/` gets nothing from a job whose only test step is a root `pytest` (`jobRunsSuite`) |
+| The service | that job's `services:` entry whose image is `postgres` or `postgis/postgis` (PostGIS is Postgres with an extension: same variables, URL and readiness check), by tag or digest; its `env` (`POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`). MySQL, Redis and other images are ignored |
 | `DATABASE_URL` | the test step's `env`, else the job's, else the workflow's (`${{ env.X }}` resolved); with none, or another expression, built from the service's env. Host `localhost`/`127.0.0.1` becomes the service's key (`postgres`), a mapped host port (`5433:5432`) its container port |
-| The schema step | the steps before the test step whose command contains `db:push`, `migrate`, `prisma migrate deploy`, `prisma db push`, `drizzle-kit push` or `knex migrate`, kept as written; a step with its own `working-directory` runs in a subshell there |
+| The schema step | the steps before the test step whose command contains `db:push`, `migrate`, `prisma migrate deploy`, `prisma db push`, `drizzle-kit push`, `knex migrate`, `alembic upgrade` or `flask db upgrade` (Flask-Migrate's Alembic wrapper), kept as written (the whole `run:` block, so `cd backend` then `alembic upgrade head` stays two lines in order); a step with its own `working-directory` runs in a subshell there |
 
 Every run, all nine, gets its own: `docker network create hecate-<run>-<id>`, the service image on
 it as `hecate-pg-<run>-<id>` with the CI env and the network alias of its CI key, and a wait of up
@@ -826,7 +838,7 @@ test steps, as the validator does; a failing schema step is reported and the tes
 and the schema command as CI runs it; nothing about the fix. There is no volume, and every trial
 is its own Compose project (`<trial>__env`), so each oracle, nop or agent trial starts with an
 empty database, as each validator run does. Only a single service whose image is the official
-`postgres` image (by tag or digest) is built; another image, more than one service, or the alias
+`postgres` or `postgis/postgis` image (by tag or digest) is built; another image, more than one service, or the alias
 `main` (Harbor's own container) is skipped with the reason. A recipe stored before it kept
 `alias`, `env` and `schema_command` is skipped with "the recipe has no settings for its database
 service (recorded before they were kept); run the batch with --gold-only on the row, then write
@@ -871,7 +883,7 @@ code, and the same 409 while the consent wording is not approved), one folder pe
 
 - no `harbor_env` on the row (validated before the column existed): re-run the validator on it
   and write back;
-- a database service the sidecar cannot run (not the `postgres` image, more than one, the alias
+- a database service the sidecar cannot run (not the `postgres` or `postgis/postgis` image, more than one, the alias
   `main`), or a recipe stored without the service's settings (see "A database" above);
 - more than one test suite (see "More than one test suite"): "Harbor export for tasks with more
   than one test suite is not built yet";
@@ -1106,7 +1118,9 @@ SUPABASE_URL=https://<project-ref>.supabase.co SUPABASE_SERVICE_ROLE_KEY=... npx
 
 ## Not yet
 
-Services other than Postgres (MySQL, Redis, MongoDB), a database the tests expect without a CI
+Services other than Postgres and PostGIS (MySQL, Redis, MongoDB), a schema step from a job that
+runs both languages reaching the suite whose image cannot run it (a Jest suite given a Python job's
+`alembic upgrade head` fails `env_error` "schema step failed"), a database the tests expect without a CI
 service for it, browser and end-to-end runners, Bun, Python runners other than pytest, Harbor
 export for rows with more than one test suite, and scheduled runs after each sprint. Each is a separate change once the dry
 run is trusted.
