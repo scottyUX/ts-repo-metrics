@@ -609,10 +609,14 @@ executable). A changed line that is not executable never counts for or against t
 - `not_run`: the file is in no report (never loaded; `executable`, `covered` and `uncovered` are
   null), or it was loaded and none of its executable changed lines ran (`covered: 0`). A changed
   file in a language no suite ran (a `.py` file when only a JavaScript suite ran) is `not_run`;
-- `not_measured`: coverage cannot speak for the file. Exactly five cases: none of its changed lines
-  is code (a pure rename, deletions only, comments or types only); it is loaded but the tool counts
-  none of its changed lines (the middle of a multi-line Python statement); a report of its language
-  failed (that step might have run it); it is absent and a report lists build output that maps to
+- `no_code`: nothing to measure. None of its changed lines is run-time code by the same line
+  filter (`codeLines`): a pure rename, deletions only, or only types, interfaces or comments
+  (`shared/ratings.ts` in JoKHerre/Bookworm COL-04-T-4 gains only an interface; `backend/texting.ts`
+  in jjacobhw/roomie US-3-T-2 gains one comment line). `executable` and `covered` are 0 and
+  `uncovered` is "". Checked before every other state, whatever the reports say;
+- `not_measured`: coverage cannot speak for the file. Exactly four cases: it is loaded but the tool
+  counts none of its changed lines (the middle of a multi-line Python statement); a report of its
+  language failed (that step might have run it); it is absent and a report lists build output that maps to
   it by path (`dist/`, `build/`, `out/` or `lib/` for `src/`) and was left unmapped because it has
   no source map, which is never guessed; or it is a `.vue` / `.svelte` file absent from the reports
   (not every runner instruments them).
@@ -620,17 +624,28 @@ executable). A changed line that is not executable never counts for or against t
 ```
 fix_coverage: { status: "measured" | "partial" | "unavailable", reason?, tools: string[],
                 files: Array<{ path, state, changed_lines, executable, covered, uncovered }>,
-                files_changed, files_run, files_not_run, files_not_measured,
+                files_changed, files_run, files_not_run, files_not_measured, files_no_code,
                 lines_executable, lines_covered }
 ```
+
+`no_code` files are listed in `files` but counted only in `files_no_code`: `files_changed` is the
+files with at least one runnable changed line (`run` + `not_run` + `not_measured`), so "files run of
+files changed" counts only those. They never make a task `partial` or `unavailable`, and are never
+in `untested_files`. When every changed code file is `no_code`, the status is `measured` with
+`files_changed: 0` (0/0 files, 0/0 lines), even if a report failed or there was no proving test file
+to run: there was nothing to measure. A patch that changes no code file at all is unchanged
+(`unavailable` "no proving test file to run" when nothing ran).
 
 `uncovered` lists the executable changed lines never executed as sorted ranges (`12-15,40`), ""
 when there are none. `lines_executable` and `lines_covered` add up the `run` files only. There is
 no single percentage across files: a file never loaded has no executable-line count, so a blended
 ratio would be invented. The headline is two numbers, files run of files changed and lines covered
-of lines executable in the files that ran. When several reports cover a file (two runner steps,
+of lines executable in the files that ran. Read the two together: a task can have every file run
+and still have changed lines that never ran (two functions changed in one file, one of them
+tested); that shows in lines covered and the files' `uncovered` ranges, never in `untested_files`.
+When several reports cover a file (two runner steps,
 two suites), a line covered in any of them is covered. `status` is `measured` when every report
-was usable and no file is `not_measured`; `partial` when some were measured and some could not be
+was usable and no file is `not_measured` (`no_code` files do not count); `partial` when some were measured and some could not be
 (`reason` names each failed report and the count of files not measured); `unavailable` when
 nothing was measured. Every failure of the coverage run (the coverage tool's install, the
 repository's install, a crash, a timeout, no report or an unreadable one, proving tests that did
@@ -640,7 +655,8 @@ changes the verdict, the reason, `detail` or the test lists.
 
 **`untested_files`.** With `fix_coverage.status` `measured` or `partial`: the `not_run` files, plus
 the `not_measured` files the import rule flags (`untested_files_source: "coverage"`, or `"mixed"`
-when any file is `not_measured`). With no coverage run, or `unavailable`: the import rule's list,
+when any file is `not_measured`). `no_code` files are never listed, and the import rule is not
+consulted for them. With no coverage run, or `unavailable`: the import rule's list,
 unchanged (`imports`). The import rule (`untestedFiles.ts`) stays as that fallback. Write-back is
 unchanged: the `untested_files` flag is added when the list is non-empty and removed when it is
 empty; the per-file detail stays in the result JSON.
