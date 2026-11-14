@@ -8,7 +8,7 @@ import { spawn } from "node:child_process";
 import { mkdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { NO_BUNDLE_REASON, writeBundleTask } from "@/lib/cse115a/benchmark/validation/bundleTask";
-import { harborSkipReason, type HarborGold, type HarborRow } from "@/lib/cse115a/benchmark/validation/harbor";
+import { harborSkipReason, withServiceDetail, type HarborGold, type HarborRow } from "@/lib/cse115a/benchmark/validation/harbor";
 import { redactToken } from "@/lib/cse115a/benchmark/validation/runRow";
 import type { ValidationResult } from "@/lib/cse115a/benchmark/validation/validateTask";
 
@@ -192,8 +192,8 @@ export type GoldCheckOptions = {
 };
 
 /**
- * Gold-checks one validated result. `skipped` when Harbor is not installed, the row had a database
- * service (harborSkipReason), there is no bundle, or the task cannot be built; otherwise the oracle
+ * Gold-checks one validated result. `skipped` when Harbor is not installed, the recipe cannot be
+ * built by any source (harborSkipReason: several suites, an unsupported database service), there is no bundle, or the task cannot be built; otherwise the oracle
  * and nop runs decide (goldVerdict). Both agents always run, so a failure reports both rewards.
  */
 export async function goldCheck(options: GoldCheckOptions): Promise<HarborGold> {
@@ -204,9 +204,10 @@ export async function goldCheck(options: GoldCheckOptions): Promise<HarborGold> 
   const checkedAt = () => now().toISOString();
 
   if (!(await harbor.version())) return skippedGold(HARBOR_MISSING_REASON, checkedAt());
-  // Without a source, harborSkipReason checks only what no source can build: a database service.
-  const database = result.harbor_env ? harborSkipReason(result.harbor_env) : null;
-  if (database) return skippedGold(database, checkedAt());
+  // Without a source, harborSkipReason checks only what no source can build: more than one suite,
+  // or a database service that cannot be the task's sidecar.
+  const unbuildable = result.harbor_env ? harborSkipReason(withServiceDetail(result.harbor_env, result.services)) : null;
+  if (unbuildable) return skippedGold(unbuildable, checkedAt());
   if (!result.snapshot_bundle) return skippedGold(NO_BUNDLE_REASON, checkedAt());
 
   const goldDir = join(out, "harbor-gold");

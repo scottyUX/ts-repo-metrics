@@ -228,9 +228,9 @@ describe("detectEnvironment with a CI postgres service", () => {
     expect(withCi.dockerfile).not.toContain("# service");
   });
 
-  it("is listed as supported in the census and skipped by the Harbor export", async () => {
+  it("is listed as supported in the census and exported by Harbor as a sidecar", async () => {
     const env = (await detectEnvironment({ testFiles: ["server/test/books.test.ts"], read: repo(BOOKWORM_FILES), workflowFiles: [".github/workflows/ci.yml"] })) as Environment;
-    expect(harborSkipReason(harborEnvFrom(env))).toBe("Harbor export for rows with a database service is not built yet");
+    expect(harborSkipReason(harborEnvFrom(env))).toBeNull();
     expect(harborSkipReason(harborEnvFrom({ ...env, services: [] }))).toBeNull();
     const md = censusMarkdown([{ instance_id: "b-1", repo: "JoKHerre/Bookworm", env, signals: { database: ["ci-service"], browser: [], otherRunners: [] }, note: "" }]);
     expect(md).toContain("| ci-service |  |  | supported; postgres service (from CI) |");

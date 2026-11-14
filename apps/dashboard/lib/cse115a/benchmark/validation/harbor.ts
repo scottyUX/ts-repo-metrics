@@ -7,7 +7,9 @@
 // test patch, runs the same test steps the validator ran, and writes reward 1 only if every verified
 // FAIL_TO_PASS, ABSENT_TO_PASS and PASS_TO_PASS id passed — the SWE-bench grading rule.
 // The environment comes from the row's recipe (HarborEnv, stored on the row as harbor_env by the
-// write-back), so a task can be built from a database row alone.
+// write-back), so a task can be built from a database row alone. A row whose runs had a Postgres
+// service gets it as a sidecar: environment/docker-compose.yaml, which Harbor merges into the
+// trial's compose project, starts the CI image with the CI variables under the CI host name.
 // task.toml keys follow the Harbor task configuration page; check them against the current docs
 // before publishing a dataset.
 
@@ -20,7 +22,7 @@ import type { TaskRow, ValidationResult } from "@/lib/cse115a/benchmark/validati
  * The Harbor recipe: everything buildHarborTask needs besides the row itself. Stored on the row as
  * `cse_benchmark_tasks.harbor_env` (jsonb) and carried on the validator's result. No secrets: the
  * container variables are the validator's placeholders (or values from the repository's own CI
- * file), and a database service is recorded by name and image only.
+ * file), and so are a database service's variables (the CI file's own POSTGRES_* values).
  */
 export type HarborEnv = {
   /** The image the validator ran: `tag@sha256:…` when the batch resolved the digest, else the tag. */
@@ -34,8 +36,11 @@ export type HarborEnv = {
   test_steps: TestStep[];
   /** Container variables on top of CONTAINER_ENV. */
   env: Record<string, string>;
-  /** Database containers the runs had; a row with any is not exported yet. */
-  services: Array<{ name: string; image: string }>;
+  /**
+   * Database containers the runs had. A single Postgres one becomes the task's sidecar
+   * (environment/docker-compose.yaml); see HarborService.
+   */
+  services: HarborService[];
   /** Where the Node version came from (JavaScript); null for Python, whose version is in the image tag. */
   node_source: NodeSource | null;
   /**
@@ -54,6 +59,23 @@ export type HarborEnv = {
    * fields above repeat the first). Such a row is not exported yet (harborSkipReason).
    */
   suites?: HarborEnv[];
+};
+
+/**
+ * A database container of the recipe. `alias`, `env` and `schema_command` are what the sidecar
+ * needs (the host name the tests use, the container's variables, the CI schema step); a recipe
+ * written before they were kept has only `name` and `image`, and withServiceDetail fills them in
+ * from the result's own `services`.
+ */
+export type HarborService = {
+  name: string;
+  image: string;
+  /** The CI service key: the host name the test container reaches the database by. */
+  alias?: string;
+  /** The service container's variables, as CI sets them (POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB). */
+  env?: Record<string, string>;
+  /** The CI steps that create the schema, run from the repository root; null when none. */
+  schema_command?: string | null;
 };
 
 /**
@@ -85,6 +107,50 @@ export const PRIVATE_REPO_REASON = "repository is private; the task can only be 
 /** Why a multi-suite row is not in either Harbor export. */
 export const MULTI_SUITE_REASON = "Harbor export for tasks with more than one test suite is not built yet";
 
+/** Why a row whose recipe names its database but not its settings (written before they were kept) is skipped. */
+export const NO_SERVICE_DETAIL_REASON =
+  "the recipe has no settings for its database service (recorded before they were kept); run the batch with --gold-only on the row, then write back";
+
+/** A database image the sidecar can run: the official Postgres image, by tag or digest. */
+const POSTGRES_IMAGE = /^postgres(:[^@\s]+)?(@sha256:[0-9a-f]{64})?$/;
+
+/** Why a recipe's database services cannot become the task's sidecar, or null when they can (or there are none). */
+export function serviceSkipReason(services: HarborService[] | undefined): string | null {
+  if (!services?.length) return null;
+  if (services.length > 1) return `Harbor export supports one database service; this row has ${services.length}`;
+  const [s] = services;
+  if (s.name !== "postgres" || !POSTGRES_IMAGE.test(s.image)) return `database service image ${JSON.stringify(s.image)} is not a postgres image; Harbor export supports Postgres only`;
+  if (!s.alias || !s.env) return NO_SERVICE_DETAIL_REASON;
+  if (s.alias === "main") return `database service host name "main" is Harbor's own container name`;
+  return null;
+}
+
+/** A result's record of one database service (ValidationResult.services). */
+type ResultService = { name: string; image: string; env: Record<string, string>; database_url: string; schema_command: string | null };
+
+/** The host of a database URL (`postgres://u:p@postgres:5432/db` → `postgres`); null when it has none. */
+function urlHost(url: string): string | null {
+  const m = /^[a-z][a-z0-9+.-]*:\/\/(?:[^@/]*@)?([^:/?#]+)/i.exec(url);
+  return m ? m[1] : null;
+}
+
+/**
+ * The recipe with each database service's sidecar settings filled in from the result's own record of
+ * it (`services`: the CI variables, the in-container DATABASE_URL whose host is the CI alias, the
+ * schema step), for a recipe written before the recipe kept them. Services that already have them,
+ * and a recipe without services, come back unchanged (the same object).
+ */
+export function withServiceDetail(env: HarborEnv, recorded: ResultService[] | undefined): HarborEnv {
+  if (!env.services.length || env.services.every((s) => s.alias && s.env) || !recorded?.length) return env;
+  const services = env.services.map((s, i) => {
+    const r = recorded[i];
+    if ((s.alias && s.env) || !r || r.name !== s.name || r.image !== s.image) return s;
+    const alias = urlHost(r.database_url);
+    return alias ? { ...s, alias, env: { ...r.env }, schema_command: r.schema_command } : s;
+  });
+  return { ...env, services };
+}
+
 /**
  * The recipe for an environment the validator ran, with the image digest when the batch knows it.
  * A multi-suite environment gives the first suite's recipe plus `suites`, every suite's recipe.
@@ -102,7 +168,7 @@ function suiteRecipe(env: Environment, imageDigest?: string | null): HarborEnv {
     install_steps: installPlan(env).map((step) => ({ cwd: step.cwd, command: step.command })),
     test_steps: env.testSteps.map((step) => ({ ...step })),
     env: { ...env.env },
-    services: (env.services ?? []).map((s) => ({ name: s.name, image: s.image })),
+    services: (env.services ?? []).map((s) => ({ name: s.name, image: s.image, alias: s.alias, env: { ...s.env }, schema_command: s.schemaCommand })),
     node_source: env.nodeSource ?? null,
   };
 }
@@ -157,16 +223,17 @@ export function githubFetchLayer(repo: string, baseCommit: string): string {
 }
 
 /**
- * Why a row cannot be exported yet, or null. A row whose runs had a database container is skipped:
- * a Harbor task has one image, no sidecar; so is a row with more than one test suite, which would
- * need one verifier per suite. With the github source, the image fetches the repository
+ * Why a row cannot be exported yet, or null. A row with more than one test suite is skipped (it would
+ * need one verifier per suite); so is a row whose database services cannot become the task's sidecar
+ * (serviceSkipReason: more than one, not Postgres, or a recipe without the settings). With the github source, the image fetches the repository
  * anonymously, so a repository the batch found private is skipped (the bundle source still builds
  * it), and the repository and commit go into a Dockerfile line, so they must be an `owner/name` and
  * a full commit id (GitHub fetches no short ids).
  */
 export function harborSkipReason(env: HarborEnv, row?: Pick<TaskRow, "repo" | "base_commit">, source?: HarborSource): string | null {
-  if (env.services?.length) return "Harbor export for rows with a database service is not built yet";
   if (env.suites && env.suites.length > 1) return MULTI_SUITE_REASON;
+  const service = serviceSkipReason(env.services);
+  if (service) return service;
   if (source?.kind === "github" && env.repo_public === false) return PRIVATE_REPO_REASON;
   if (row && source?.kind === "github") {
     if (!GITHUB_REPO.test(row.repo)) return `repo ${JSON.stringify(row.repo)} is not a GitHub owner/name`;
@@ -187,6 +254,8 @@ export function buildHarborTask(input: HarborInput): Map<string, string> {
   if (skip) throw new Error(skip);
   const name = input.name ?? harborTaskName(row.instance_id);
   const python = env.runners.includes("pytest");
+  // At most one, a supported Postgres with its settings (harborSkipReason checked).
+  const database = env.services?.[0] ?? null;
   const files = new Map<string, string>();
   const expected = { FAIL_TO_PASS: row.FAIL_TO_PASS, PASS_TO_PASS: row.PASS_TO_PASS };
   const envLines = Object.entries({ ...CONTAINER_ENV, ...env.env }).map(([k, v]) => `ENV ${k}=${v}`);
@@ -207,6 +276,7 @@ export function buildHarborTask(input: HarborInput): Map<string, string> {
     `The repository is checked out at \`/app\` at commit \`${row.base_commit}\` of \`${row.repo}\`, with dependencies installed.`,
     "Make the change described above. Tests that exercise it will be run afterwards; do not modify or delete existing tests.",
     "",
+    ...databaseInstruction(database),
   ].join("\n"));
 
   files.set("task.toml", [
@@ -250,6 +320,7 @@ export function buildHarborTask(input: HarborInput): Map<string, string> {
     ...env.install_steps.map((step) => `RUN ${sub(step.cwd)} && ${step.command}`),
     "",
   ].join("\n"));
+  if (database) files.set("environment/docker-compose.yaml", sidecarCompose(database));
 
   files.set("solution/solve.sh", [
     "#!/bin/bash",
@@ -274,6 +345,8 @@ export function buildHarborTask(input: HarborInput): Map<string, string> {
     "cd /app",
     "git apply --whitespace=nowarn /tests/test.diff || { echo 'test patch did not apply' >&2; echo 0 > /logs/verifier/reward.txt; exit 0; }",
     ...env.install_steps.map((step) => `${sub(step.cwd)} && (${step.command}) || true`),
+    // The CI schema step, from the repository root, after the installs, as the validator ran it.
+    ...(database?.schema_command ? ["cd /app", `bash -eo pipefail -c ${shellQuote(database.schema_command)} || echo 'schema step failed' >&2`] : []),
     "mkdir -p /tests/reports",
     "export REPORT_DIR=/tests/reports",
     sub(env.package_dir),
@@ -302,6 +375,56 @@ export function buildHarborTask(input: HarborInput): Map<string, string> {
     "",
   ].join("\n"));
   return files;
+}
+
+/** Single-quotes a string for bash. */
+const shellQuote = (text: string) => `'${text.split("'").join("'\\''")}'`;
+
+/** A YAML double-quoted scalar (JSON's escaping is valid YAML) with `$` doubled, so Compose does not interpolate it. */
+const composeString = (value: string) => JSON.stringify(value.split("$").join("$$"));
+
+/**
+ * environment/docker-compose.yaml for a row with a Postgres service: the CI image and variables as a
+ * service named by the CI alias (its host name on the trial's network), healthy once pg_isready
+ * answers over TCP (the image's first boot listens only on its socket, then restarts), and Harbor's
+ * `main` container started only after that. No volume: each trial is its own Compose project
+ * (`<trial>__env`), so every oracle, nop or agent trial starts with an empty database.
+ */
+export function sidecarCompose(service: HarborService): string {
+  const env = service.env ?? {};
+  const user = env.POSTGRES_USER ?? "postgres";
+  const db = env.POSTGRES_DB ?? user;
+  const check = ["CMD", "pg_isready", "-h", "127.0.0.1", "-p", "5432", "-U", user, "-d", db];
+  return [
+    "# The database the tests run against, as the repository's CI starts it (Hecate validator).",
+    "services:",
+    "  main:",
+    "    depends_on:",
+    `      ${service.alias}:`,
+    "        condition: service_healthy",
+    `  ${service.alias}:`,
+    `    image: ${composeString(service.image)}`,
+    ...(Object.keys(env).length ? ["    environment:", ...Object.entries(env).map(([k, v]) => `      ${k}: ${composeString(v)}`)] : []),
+    "    healthcheck:",
+    `      test: [${check.map(composeString).join(", ")}]`,
+    "      interval: 1s",
+    "      timeout: 5s",
+    "      retries: 120",
+    "",
+  ].join("\n");
+}
+
+/** The instruction lines for a row with a database: where it is, and how CI creates its schema. Neutral; nothing about the fix. */
+function databaseInstruction(service: HarborService | null): string[] {
+  if (!service) return [];
+  return [
+    "## Database",
+    "",
+    `The tests use a PostgreSQL database that runs next to this container as host \`${service.alias}\`; \`DATABASE_URL\` points to it.` +
+      (service.schema_command ? " The repository's CI creates its schema from the repository root with:" : ""),
+    ...(service.schema_command ? ["", "```sh", service.schema_command, "```"] : []),
+    "",
+  ];
 }
 
 /**

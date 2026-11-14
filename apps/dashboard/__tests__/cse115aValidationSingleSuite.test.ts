@@ -1,7 +1,8 @@
 // A row with one test suite must come out byte-identical to what the validator produced before
 // multi-suite support: the detected environment, the result (field order included) and harbor_env.
 // The fixtures in fixtures/singleSuite/ were recorded from the code before that change
-// (RECORD_SINGLE_SUITE=1 rewrites them; only do that on purpose).
+// (RECORD_SINGLE_SUITE=1 rewrites them; only do that on purpose). #383 re-recorded bookworm-postgres
+// to add the sidecar settings to its services (alias, env, schema_command); nothing else changed.
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";

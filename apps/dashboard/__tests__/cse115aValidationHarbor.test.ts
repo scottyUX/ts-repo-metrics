@@ -132,7 +132,7 @@ describe("buildHarborTask, github source", () => {
 });
 
 describe("harborEnvFrom", () => {
-  it("keeps what the builder needs, with the digest and services by name and image only", () => {
+  it("keeps what the builder needs, with the digest and the sidecar settings of its database service", () => {
     const withService: Environment = {
       ...env, nodeSource: "CI", installSteps: [{ dir: "", cwd: "", command: "pnpm install" }, { dir: "apps/api", cwd: "apps/api", command: "npm ci" }],
       services: [{ name: "postgres", alias: "db", image: "postgres:16", env: { POSTGRES_PASSWORD: "pw" }, databaseUrl: "x", containerDatabaseUrl: "y", schemaCommand: null }],
@@ -141,10 +141,11 @@ describe("harborEnvFrom", () => {
     expect(r).toEqual({
       image: "node:24-bookworm@sha256:abc", runners: ["node-test"], package_dir: "apps/api",
       install_steps: [{ cwd: "", command: "corepack enable && pnpm install" }, { cwd: "apps/api", command: "npm ci" }],
-      test_steps: env.testSteps, env: { CI: "true" }, services: [{ name: "postgres", image: "postgres:16" }], node_source: "CI",
+      test_steps: env.testSteps, env: { CI: "true" }, services: [{ name: "postgres", image: "postgres:16", alias: "db", env: { POSTGRES_PASSWORD: "pw" }, schema_command: null }], node_source: "CI",
     } satisfies HarborEnv);
-    expect(JSON.stringify(r)).not.toContain("pw");
-    expect(harborSkipReason(r)).toBe("Harbor export for rows with a database service is not built yet");
+    // The CI URLs (with the host) are not kept: the container's DATABASE_URL is in `env`.
+    expect(JSON.stringify(r)).not.toContain('"x"');
+    expect(harborSkipReason(r)).toBeNull();
     expect(harborEnvFrom(env).image).toBe("node:24-bookworm");
   });
 });

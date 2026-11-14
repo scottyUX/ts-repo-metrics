@@ -5,7 +5,7 @@
 import { readdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { preflight, rejectedWithoutRun, summarize, summaryMarkdown, writebackSql, type Summary } from "@/lib/cse115a/benchmark/validation/batch";
-import { withRepoPublic, type HarborRow } from "@/lib/cse115a/benchmark/validation/harbor";
+import { withRepoPublic, withServiceDetail, type HarborRow } from "@/lib/cse115a/benchmark/validation/harbor";
 import { goldCheck, withGold, type HarborRunner } from "@/lib/cse115a/benchmark/validation/harborGold";
 import { unavailableCoverage, withFixCoverage } from "@/lib/cse115a/benchmark/validation/fixCoverage";
 import { assertRow, fixCoverageRow, imageDigest, repoIsPublic, validateRow } from "@/lib/cse115a/benchmark/validation/runRow";
@@ -113,8 +113,10 @@ export async function writeBatchFiles(out: string): Promise<{ summary: Summary; 
 
 /**
  * The gold-only pass (--gold-only): for each row whose result file exists and is validated, run the
- * gold check and write that result file back with only `harbor_gold` and `harbor_env.gold` changed;
- * then rewrite the summary files. No clone, no Docker validation. Rows without a result, or with a
+ * gold check and write that result file back with only `harbor_gold` and `harbor_env.gold` changed,
+ * plus, for a recipe written before it kept its database's settings, those settings copied into
+ * `harbor_env.services` from the result's own `services` (withServiceDetail), so write-back stores a
+ * recipe the website's export can build; then rewrite the summary files. No clone, no Docker validation. Rows without a result, or with a
  * verdict other than validated, are logged and left alone.
  */
 export async function goldOnly(options: { rows: HarborRow[]; out: string; harbor: HarborRunner; timeoutMs?: number; log?: Log; now?: () => Date }): Promise<{ checked: ValidationResult[]; summary: Summary; all: number }> {
@@ -136,7 +138,8 @@ export async function goldOnly(options: { rows: HarborRow[]; out: string; harbor
     }
     log(prefix);
     const gold = await goldCheck({ out: options.out, row, result, harbor: options.harbor, timeoutMs: options.timeoutMs, now: options.now, log });
-    const updated = withGold(result, gold);
+    const recipe = result.harbor_env ? withServiceDetail(result.harbor_env, result.services) : undefined;
+    const updated = withGold(recipe === result.harbor_env ? result : { ...result, harbor_env: recipe }, gold);
     await writeFile(file, JSON.stringify(updated, null, 2) + "\n");
     log(`  gold check ${gold.status}${gold.reason ? `: ${gold.reason}` : ""}`);
     checked.push(updated);

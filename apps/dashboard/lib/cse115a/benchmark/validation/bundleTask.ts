@@ -6,7 +6,7 @@ import { chmod, copyFile, mkdir, mkdtemp, rm, writeFile } from "node:fs/promises
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { detectEnvironment } from "@/lib/cse115a/benchmark/validation/environment";
-import { buildHarborTask, harborEnvFrom, harborSkipReason, harborTaskName, verifiedRow, type HarborEnv, type HarborRow } from "@/lib/cse115a/benchmark/validation/harbor";
+import { buildHarborTask, harborEnvFrom, harborSkipReason, harborTaskName, verifiedRow, withServiceDetail, type HarborEnv, type HarborRow } from "@/lib/cse115a/benchmark/validation/harbor";
 import { fileIn, packageJsonFiles, run, withPatchedWorktree, workflowFiles } from "@/lib/cse115a/benchmark/validation/runRow";
 import { SNAPSHOT_BRANCH } from "@/lib/cse115a/benchmark/validation/snapshots";
 import { filesInPatch, type ValidationResult } from "@/lib/cse115a/benchmark/validation/validateTask";
@@ -30,7 +30,8 @@ export async function writeBundleTask(options: { row: HarborRow; result: Validat
   if (!result.snapshot_bundle) return { skip: NO_BUNDLE_REASON };
   const bundle = join(batch, result.snapshot_bundle);
 
-  let recipe: HarborEnv | null = result.harbor_env ?? null;
+  // A recipe written before it kept the database's settings gets them from the result's own record.
+  let recipe: HarborEnv | null = result.harbor_env ? withServiceDetail(result.harbor_env, result.services) : null;
   if (!recipe) {
     const clone = await mkdtemp(join(tmpdir(), "hecate-harbor-"));
     try {

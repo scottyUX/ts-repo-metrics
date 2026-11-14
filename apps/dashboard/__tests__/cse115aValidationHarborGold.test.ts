@@ -8,7 +8,7 @@ import { join } from "node:path";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { rejectedWithoutRun } from "@/lib/cse115a/benchmark/validation/batch";
 import { NO_BUNDLE_REASON } from "@/lib/cse115a/benchmark/validation/bundleTask";
-import { harborTaskName, type HarborEnv, type HarborGold, type HarborRow } from "@/lib/cse115a/benchmark/validation/harbor";
+import { harborTaskName, NO_SERVICE_DETAIL_REASON, type HarborEnv, type HarborGold, type HarborRow } from "@/lib/cse115a/benchmark/validation/harbor";
 import { goldCheck, goldVerdict, HARBOR_MISSING_REASON, parseHarborResult, withGold, type HarborAgent, type HarborRun, type HarborRunner } from "@/lib/cse115a/benchmark/validation/harborGold";
 import type { ValidationResult } from "@/lib/cse115a/benchmark/validation/validateTask";
 
@@ -138,11 +138,11 @@ describe("5. goldCheck with a fake Harbor", () => {
     expect(harbor.calls).toEqual([]);
   });
 
-  it("a row with a database service: skipped, with harborSkipReason's wording", async () => {
+  it("a database row whose recipe and result lack the settings: skipped, with harborSkipReason's wording", async () => {
     const harbor = new FakeHarbor();
     const db = { ...validated, harbor_env: { ...recipe, services: [{ name: "postgres", image: "postgres:16" }] } };
     const gold = await goldCheck({ out: await batchWithBundle(), row, result: db, harbor, now: NOW });
-    expect(gold).toMatchObject({ status: "skipped", reason: "Harbor export for rows with a database service is not built yet" });
+    expect(gold).toMatchObject({ status: "skipped", reason: NO_SERVICE_DETAIL_REASON });
     expect(harbor.calls).toEqual([]);
   });
 

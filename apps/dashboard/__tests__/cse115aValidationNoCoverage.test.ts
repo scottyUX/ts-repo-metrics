@@ -3,7 +3,8 @@
 // at befe21e (the commit before fix_coverage) from these same inputs, for the three shapes the live
 // rows have: PocketWatch (Vitest, a build, node --test on build output), Bookworm (node --test with
 // a CI Postgres service and two installs) and a pytest package. Set HECATE_WRITE_NO_COVERAGE_FIXTURES=1
-// to rewrite them (only ever from that commit).
+// to rewrite them (only ever from that commit). Exception, #383: bookworm.json's harbor_env.services
+// was re-recorded to add the sidecar settings (alias, env, schema_command); nothing else changed.
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";

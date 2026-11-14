@@ -72,7 +72,14 @@
     "services": [
       {
         "name": "postgres",
-        "image": "postgres:16"
+        "image": "postgres:16",
+        "alias": "postgres",
+        "env": {
+          "POSTGRES_USER": "bookworm",
+          "POSTGRES_PASSWORD": "bookworm",
+          "POSTGRES_DB": "bookworm_test"
+        },
+        "schema_command": "(\n  cd server\n  pnpm db:push\n)"
       }
     ],
     "node_source": "CI"

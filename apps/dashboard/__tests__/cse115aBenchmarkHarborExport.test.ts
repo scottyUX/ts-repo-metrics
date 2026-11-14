@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { BenchmarkInstance } from "@/lib/cse115a/benchmark/buildInstance";
 import type { ExportCandidate } from "@/lib/cse115a/benchmark/exportJsonl";
 import { harborExport, NO_RECIPE_REASON, NOT_GOLD_CHECKED_REASON } from "@/lib/cse115a/benchmark/exportHarbor";
-import { PRIVATE_REPO_REASON, type HarborEnv } from "@/lib/cse115a/benchmark/validation/harbor";
+import { NO_SERVICE_DETAIL_REASON, PRIVATE_REPO_REASON, type HarborEnv } from "@/lib/cse115a/benchmark/validation/harbor";
 import { HARBOR_MISSING_REASON } from "@/lib/cse115a/benchmark/validation/harborGold";
 
 const state = vi.hoisted(() => ({ approved: false, candidates: [] as unknown[] }));
@@ -67,13 +67,13 @@ describe("harborExport", () => {
 
   it("lists validated, consented rows Harbor cannot express in SKIPPED.txt with the reason", () => {
     expect(out.skipped).toEqual([
-      { instance_id: "team__app-db-1", reason: "Harbor export for rows with a database service is not built yet" },
+      { instance_id: "team__app-db-1", reason: NO_SERVICE_DETAIL_REASON },
       { instance_id: "team__app-norecipe-1", reason: NO_RECIPE_REASON },
       { instance_id: "team__app-oldrow-1", reason: NO_RECIPE_REASON },
     ]);
     expect(out.files.get("SKIPPED.txt")).toBe([
       "# Validated, consented rows left out of this export, with the reason.",
-      "team__app-db-1\tHarbor export for rows with a database service is not built yet",
+      `team__app-db-1\t${NO_SERVICE_DETAIL_REASON}`,
       `team__app-norecipe-1\t${NO_RECIPE_REASON}`,
       `team__app-oldrow-1\t${NO_RECIPE_REASON}`,
       "",
@@ -147,7 +147,8 @@ describe("9. harborExport, the gold-check gate", () => {
     candidate(instance("team__app-failed-1", { ...recipe, gold: failedGold }), true, "validated"),
     candidate(instance("team__app-skipped-1", { ...recipe, gold: skippedGold }), true, "validated"),
     candidate(instance("team__app-unchecked-1", unchecked), true, "validated"),
-    // Existing reasons keep priority over the gold check, with their wording.
+    // A database row stored before the recipe kept the database's settings.
+  // Existing reasons keep priority over the gold check, with their wording.
     candidate(instance("team__app-dbfailed-1", { ...recipe, services: [{ name: "postgres", image: "postgres:16" }], gold: failedGold }), true, "validated"),
     candidate(instance("team__app-privateunchecked-1", { ...unchecked, repo_public: false }), true, "validated"),
     candidate(instance("team__app-norecipe-1", null), true, "validated"),
@@ -160,7 +161,7 @@ describe("9. harborExport, the gold-check gate", () => {
 
   it("lists failed, skipped and unchecked rows in SKIPPED.txt with the gold line, after the existing reasons", () => {
     expect(out.skipped).toEqual([
-      { instance_id: "team__app-dbfailed-1", reason: "Harbor export for rows with a database service is not built yet" },
+      { instance_id: "team__app-dbfailed-1", reason: NO_SERVICE_DETAIL_REASON },
       { instance_id: "team__app-failed-1", reason: "gold check failed: oracle 0.0" },
       { instance_id: "team__app-norecipe-1", reason: NO_RECIPE_REASON },
       { instance_id: "team__app-privateunchecked-1", reason: PRIVATE_REPO_REASON },
