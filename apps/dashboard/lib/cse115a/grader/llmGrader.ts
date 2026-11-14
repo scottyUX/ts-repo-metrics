@@ -114,13 +114,17 @@ export function buildMessages(input: GraderInput) {
   ];
 }
 
-/** Lowercases and collapses whitespace; diff markers at line starts are dropped so quotes of added lines match. */
+/**
+ * Lowercases and collapses whitespace; diff markers at line starts are dropped so quotes of added lines match,
+ * and backticks are dropped because the grader often quotes markdown code without them.
+ */
 export function normalizeForQuote(text: string): string {
-  return text.replace(/^[+-](?![+-])/gm, "").replace(/\s+/g, " ").trim().toLowerCase();
+  return text.replace(/^[+-](?![+-])/gm, "").replace(/`/g, "").replace(/\s+/g, " ").trim().toLowerCase();
 }
 
+/** Whether a quote is in the normalized haystack. Punctuation the grader adds at the end of a quote is ignored. */
 export function quoteFound(haystack: string, quote: string): boolean {
-  const needle = normalizeForQuote(quote);
+  const needle = normalizeForQuote(quote).replace(/[.,;:!?]+$/, "");
   return needle.length > 0 && haystack.includes(needle);
 }
 
