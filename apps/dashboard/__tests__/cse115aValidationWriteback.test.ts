@@ -56,7 +56,7 @@ describe("applyWriteback", () => {
     ]);
     expect(calls[2].values).toEqual({ validation_status: "validated", flags: ["no_test_patch"], updated_at: "2026-11-08T12:00:00Z" });
     expect(calls[4].values).toEqual({ validation_status: "rejected", flags: ["no_test_patch", "validation_reason:no_test_patch"], updated_at: "2026-11-08T12:00:00Z" });
-    expect(lines).toEqual(["v-1: validated, 2 F2P / 1 P2P written", "r-1: rejected (no_test_patch)"]);
+    expect(lines).toEqual(["v-1: validated, 2 F2P / 1 P2P written, detail: no coverage", "r-1: rejected (no_test_patch)"]);
   });
 
   it("stops on the first database error", async () => {
@@ -102,7 +102,7 @@ describe("harbor_env write-back", () => {
     const sql = writebackSql([withRecipe, { ...rejected, harbor_env: recipe }, { ...rejectedWithoutRun(row("e-2"), "env_error", "x"), harbor_env: recipe }]);
     expect(sql.match(/harbor_env = /g)).toHaveLength(1);
     // No gold check on the result: the recipe is written and a stored harbor_env.gold is kept.
-    expect(sql).toContain(`       log_parser = $hecate$node-test-json$hecate$,\n       harbor_env = $hecate$${JSON.stringify(recipe)}$hecate$::jsonb || case when harbor_env ? 'gold' then jsonb_build_object('gold', harbor_env -> 'gold') else '{}'::jsonb end\n where instance_id = $hecate$v-1$hecate$;`);
+    expect(sql).toContain(`       log_parser = $hecate$node-test-json$hecate$,\n       harbor_env = $hecate$${JSON.stringify(recipe)}$hecate$::jsonb || case when harbor_env ? 'gold' then jsonb_build_object('gold', harbor_env -> 'gold') else '{}'::jsonb end,\n       validation_detail = `);
     expect(sql).toContain(HARBOR_ENV_MIGRATION);
     expect(writebackSql([validated])).not.toContain("harbor_env");
   });
@@ -186,7 +186,7 @@ describe("8. gold check write-back", () => {
     const { db, client } = database([], recipe);
     await applyWriteback(client, writebackPlan([r]), () => "now");
     const sql = writebackSql([r]);
-    expect(sql).toContain(`       harbor_env = $hecate$${JSON.stringify(db.tasks.harbor_env)}$hecate$::jsonb\n`);
+    expect(sql).toContain(`       harbor_env = $hecate$${JSON.stringify(db.tasks.harbor_env)}$hecate$::jsonb,\n`);
     expect(sql).toContain(`and f <> '${HARBOR_GOLD_FAILED_FLAG}'`);
     expect(sql).toContain(`|| array[$hecate$${UNTESTED_FILES_FLAG}$hecate$, $hecate$${HARBOR_GOLD_FAILED_FLAG}$hecate$, $hecate$${STAFF_REBUILT_FLAG}$hecate$]`);
     expect(db.flags).toEqual([UNTESTED_FILES_FLAG, HARBOR_GOLD_FAILED_FLAG, STAFF_REBUILT_FLAG]);
@@ -197,7 +197,7 @@ describe("8. gold check write-back", () => {
     expect(passSql).toContain(`and f <> '${HARBOR_GOLD_FAILED_FLAG}'`);
     // A check without a recipe on the result: added to the stored recipe; a null column stays null.
     expect(writebackSql([{ ...validated, harbor_gold: passed }])).toContain(
-      `       harbor_env = case when harbor_env is null then null else harbor_env || jsonb_build_object('gold', $hecate$${JSON.stringify(passed)}$hecate$::jsonb) end\n`);
+      `       harbor_env = case when harbor_env is null then null else harbor_env || jsonb_build_object('gold', $hecate$${JSON.stringify(passed)}$hecate$::jsonb) end,\n`);
     // A rejected row never writes gold.
     const rejectedSql = writebackSql([{ ...rejected, harbor_gold: failed }]);
     expect(rejectedSql).not.toContain("harbor_env");

@@ -4,6 +4,7 @@
 
 import type { BuildFlag } from "@/lib/cse115a/benchmark/buildInstance";
 import { extractAddedTests } from "@/lib/cse115a/benchmark/extractTests";
+import type { FixCoverage, UntestedSource } from "@/lib/cse115a/benchmark/validation/fixCoverage";
 import type { HarborEnv, HarborGold } from "@/lib/cse115a/benchmark/validation/harbor";
 import { STAFF_REBUILT_FLAG } from "@/lib/cse115a/benchmark/validation/rebuildRow";
 import type { ValidationResult } from "@/lib/cse115a/benchmark/validation/validateTask";
@@ -71,6 +72,51 @@ export function staleCaptureFlags(rebuild: { patch: string; test_patch: string }
   return stale;
 }
 
+/**
+ * `cse_benchmark_tasks.validation_detail`: what a validated result says beyond its test lists, copied
+ * from the result file and never recomputed. Internal: not a SWE-bench field, and neither export
+ * carries it. The `untested_files` flag stays the quick filter; this is the detail behind it.
+ */
+export type ValidationDetail = {
+  /** The coverage run, whole; absent when the result has none (the batch ran without --fix-coverage). */
+  fix_coverage?: FixCoverage;
+  /** The result's `untested_files`; [] when the result lists none. */
+  untested_files: string[];
+  /** How that list was made; null when the coverage run was not requested (the list is the import rule's). */
+  untested_files_source: UntestedSource | null;
+  /** `github` or `snapshot`; null for a result written before the field existed. */
+  repo_source: "github" | "snapshot" | null;
+  /** The batch's snapshot bundle path for the row; null when it had none. */
+  snapshot_bundle: string | null;
+  /** How many ABSENT_TO_PASS, flaky, and proof-outside-the-test-patch tests the result lists. */
+  counts: { absent_to_pass: number; flaky: number; proof_outside_test_patch: number };
+  /** The result's own time (`validated_at`); null when the result file does not record one. */
+  validated_at: string | null;
+  /** The validator's commit, only when the result records one. */
+  validator_commit?: string;
+};
+
+/** The detail a validated result writes; null for any other result. */
+export function validationDetail(r: ValidationResult): ValidationDetail | null {
+  if (r.validation_status !== "validated") return null;
+  return {
+    ...(r.fix_coverage ? { fix_coverage: r.fix_coverage } : {}),
+    untested_files: r.untested_files ?? [],
+    untested_files_source: r.untested_files_source ?? null,
+    repo_source: r.repo_source ?? null,
+    snapshot_bundle: r.snapshot_bundle ?? null,
+    counts: { absent_to_pass: r.ABSENT_TO_PASS.length, flaky: r.flaky.length, proof_outside_test_patch: (r.proof_outside_test_patch ?? []).length },
+    validated_at: r.validated_at ?? null,
+    ...(r.validator_commit ? { validator_commit: r.validator_commit } : {}),
+  };
+}
+
+/** `detail: N/M files, N/M lines` (files run of files changed, lines covered of lines executable), or `detail: no coverage`. */
+export function detailNote(detail: ValidationDetail): string {
+  const c = detail.fix_coverage;
+  return c ? `detail: ${c.files_run}/${c.files_changed} files, ${c.lines_covered}/${c.lines_executable} lines` : "detail: no coverage";
+}
+
 export type TaskUpdate = {
   FAIL_TO_PASS: string[];
   PASS_TO_PASS: string[];
@@ -83,6 +129,8 @@ export type TaskUpdate = {
    * the result has a gold check; without one, applyWriteback keeps the `gold` already stored.
    */
   harbor_env?: HarborEnv;
+  /** What the result says beyond its lists (validationDetail); every validated row writes it. */
+  validation_detail: ValidationDetail;
 };
 
 /** The rebuilt base and patches a staff-rebuilt row writes, whatever its verdict. */
@@ -126,6 +174,7 @@ export function writebackPlan(results: ValidationResult[]): WritebackOp[] {
             eval_script: r.eval_script ?? "",
             log_parser: r.log_parser ?? "",
             ...(r.harbor_env ? { harbor_env: gold ? { ...r.harbor_env, gold } : r.harbor_env } : {}),
+            validation_detail: validationDetail(r)!,
           }
         : null,
       rebuild: r.rebuild
@@ -165,6 +214,9 @@ export type WritebackClient = {
 /** The migration that adds `cse_benchmark_tasks.harbor_env`; write-back needs it applied first. */
 export const HARBOR_ENV_MIGRATION = "supabase/migrations/20261110000000_cse115a_benchmark_harbor_env.sql";
 
+/** The migration that adds `cse_benchmark_tasks.validation_detail`; write-back needs it applied first. */
+export const VALIDATION_DETAIL_MIGRATION = "supabase/migrations/20261114000000_cse115a_benchmark_validation_detail.sql";
+
 /** The slice of the Supabase client the column check uses. */
 export type ColumnProbeClient = {
   from(table: string): { select(columns: string): { limit(count: number): PromiseLike<{ error: { message: string } | null }> } };
@@ -175,10 +227,19 @@ export type ColumnProbeClient = {
  * write-back never half-applies against an unmigrated project.
  */
 export async function assertHarborEnvColumn(client: ColumnProbeClient): Promise<void> {
-  const { error } = await client.from("cse_benchmark_tasks").select("harbor_env").limit(1);
+  await assertColumn(client, "harbor_env", HARBOR_ENV_MIGRATION);
+}
+
+/** The same check for `validation_detail`. */
+export async function assertValidationDetailColumn(client: ColumnProbeClient): Promise<void> {
+  await assertColumn(client, "validation_detail", VALIDATION_DETAIL_MIGRATION);
+}
+
+async function assertColumn(client: ColumnProbeClient, column: string, migration: string): Promise<void> {
+  const { error } = await client.from("cse_benchmark_tasks").select(column).limit(1);
   if (!error) return;
-  if (/harbor_env/.test(error.message)) throw new Error(`cse_benchmark_tasks has no harbor_env column: apply migration ${HARBOR_ENV_MIGRATION} first (${error.message})`);
-  throw new Error(`could not check for the harbor_env column: ${error.message}`);
+  if (error.message.includes(column)) throw new Error(`cse_benchmark_tasks has no ${column} column: apply migration ${migration} first (${error.message})`);
+  throw new Error(`could not check for the ${column} column: ${error.message}`);
 }
 
 /**
@@ -221,7 +282,17 @@ export async function applyWriteback(client: WritebackClient, ops: WritebackOp[]
     const proof = op.flags.includes(PROOF_OUTSIDE_FLAG) ? `, flagged ${PROOF_OUTSIDE_FLAG}` : "";
     const untested = op.flags.includes(UNTESTED_FILES_FLAG) ? `, flagged ${UNTESTED_FILES_FLAG} (${op.untestedFiles})` : "";
     const rebuilt = op.rebuild ? `, rebuilt base ${op.rebuild.base_commit.slice(0, 7)} and patches written, flagged ${STAFF_REBUILT_FLAG}` : "";
-    lines.push(`${op.instance_id}: ${op.validation_status}${op.reasonFlag ? ` (${op.reasonFlag.slice(REASON_FLAG_PREFIX.length)})` : ""}${op.task ? `, ${op.task.FAIL_TO_PASS.length} F2P / ${op.task.PASS_TO_PASS.length} P2P written${op.task.harbor_env ? " with harbor_env" : ""}` : ""}${proof}${untested}${rebuilt}${dropped.length ? `, dropped capture flag(s): ${dropped.join(", ")}` : ""}${goldNote(op.gold)}`);
+    lines.push(`${op.instance_id}: ${op.validation_status}${op.reasonFlag ? ` (${op.reasonFlag.slice(REASON_FLAG_PREFIX.length)})` : ""}${op.task ? `, ${op.task.FAIL_TO_PASS.length} F2P / ${op.task.PASS_TO_PASS.length} P2P written${op.task.harbor_env ? " with harbor_env" : ""}, ${detailNote(op.task.validation_detail)}` : ""}${proof}${untested}${rebuilt}${dropped.length ? `, dropped capture flag(s): ${dropped.join(", ")}` : ""}${goldNote(op.gold)}`);
   }
   return lines;
+}
+
+/**
+ * The write-back the script runs: checks both columns exist (harbor_env, validation_detail), then
+ * applies the ops. A missing column stops it before anything is written, naming the migration.
+ */
+export async function guardedWriteback(client: WritebackClient & ColumnProbeClient, ops: WritebackOp[], now?: () => string): Promise<string[]> {
+  await assertHarborEnvColumn(client);
+  await assertValidationDetailColumn(client);
+  return applyWriteback(client, ops, now);
 }

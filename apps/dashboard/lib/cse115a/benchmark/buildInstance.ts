@@ -2,6 +2,7 @@ import { splitPatch } from "@/lib/cse115a/diff";
 import type { TaskSnapshot } from "@/lib/cse115a/submissionSnapshot";
 import { extractAddedTests } from "./extractTests";
 import type { HarborEnv } from "./validation/harbor";
+import type { ValidationDetail } from "./validation/writeback";
 import { identifiersFor, redactPersonalData, scrubPatch, scrubSpec, scrubText } from "./scrubPii";
 
 // Turns one submitted task into a SWE-bench instance. Rows are saved with
@@ -32,6 +33,12 @@ export type BenchmarkInstance = {
    * it is not in SWE_BENCH_FIELDS, so the JSONL export never carries it. A capture leaves it null.
    */
   harbor_env?: HarborEnv | null;
+  /**
+   * What the validator's result says beyond its lists (validation/writeback.ts, validationDetail),
+   * stored by write-back on validated rows. Internal, like harbor_env: not in SWE_BENCH_FIELDS, not in
+   * the Harbor export. A capture leaves it null.
+   */
+  validation_detail?: ValidationDetail | null;
 };
 
 /** The SWE-bench fields, in export order. */

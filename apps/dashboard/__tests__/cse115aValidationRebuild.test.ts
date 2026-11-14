@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { rejectedWithoutRun, writebackSql } from "@/lib/cse115a/benchmark/validation/batch";
 import { loadRebuildSource, rebuildRow, STAFF_REBUILT_FLAG, type GitRunner, type RebuildSourceClient } from "@/lib/cse115a/benchmark/validation/rebuildRow";
 import type { TaskRow, ValidationResult } from "@/lib/cse115a/benchmark/validation/validateTask";
-import { applyWriteback, writebackPlan, type WritebackClient } from "@/lib/cse115a/benchmark/validation/writeback";
+import { applyWriteback, validationDetail, writebackPlan, type WritebackClient } from "@/lib/cse115a/benchmark/validation/writeback";
 import type { TaskSnapshot } from "@/lib/cse115a/submissionSnapshot";
 
 /** `git diff` output for one added file. */
@@ -188,6 +188,7 @@ describe("write-back of a rebuilt row", () => {
     const lines = await applyWriteback(client, writebackPlan([validatedFrom(row)]), () => "now");
     expect(calls[0]).toEqual({ table: "cse_benchmark_tasks", kind: "update", values: {
       FAIL_TO_PASS: ["server/backend_tests/ratings.test.ts::averages ratings"], PASS_TO_PASS: [], image: "node:24-bookworm", eval_script: "set -e\n", log_parser: "vitest-json",
+      validation_detail: validationDetail(validatedFrom(row)),
       base_commit: PARENT, environment_setup_commit: PARENT, patch: row.patch, test_patch: row.test_patch,
     } });
     // The rebuilt patch is non-empty, so capture's no_source_patch is no longer true and goes.
@@ -222,7 +223,7 @@ describe("write-back of a rebuilt row", () => {
     expect(op).toMatchObject({ rebuild: null, flags: [] });
     const { client, calls } = fakeClient(["no_test_patch"]);
     await applyWriteback(client, [op!], () => "now");
-    expect(calls[0]!.values).toEqual({ FAIL_TO_PASS: normal.FAIL_TO_PASS, PASS_TO_PASS: [], image: "node:24-bookworm", eval_script: "set -e\n", log_parser: "vitest-json" });
+    expect(calls[0]!.values).toEqual({ FAIL_TO_PASS: normal.FAIL_TO_PASS, PASS_TO_PASS: [], image: "node:24-bookworm", eval_script: "set -e\n", log_parser: "vitest-json", validation_detail: validationDetail(normal) });
     expect(calls[2]!.values!.flags).toEqual(["no_test_patch"]);
     const sql = writebackSql([normal]);
     expect(sql).not.toContain("base_commit");

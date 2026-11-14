@@ -264,7 +264,7 @@ describe("untested_files write-back", () => {
     const { client, state } = fakeClient([STAFF_REBUILT_FLAG]);
     const lines = await applyWriteback(client, writebackPlan([untested]), () => "now");
     expect(state.flags).toEqual([STAFF_REBUILT_FLAG, UNTESTED_FILES_FLAG]);
-    expect(lines[0]).toBe("v-1: validated, 1 F2P / 1 P2P written, flagged untested_files (2)");
+    expect(lines[0]).toBe("v-1: validated, 1 F2P / 1 P2P written, detail: no coverage, flagged untested_files (2)");
     const again = await applyWriteback(client, writebackPlan([validated]), () => "now");
     expect(state.flags).toEqual([STAFF_REBUILT_FLAG]);
     expect(again[0]).not.toContain(UNTESTED_FILES_FLAG);

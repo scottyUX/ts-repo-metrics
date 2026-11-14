@@ -202,6 +202,12 @@ export type ValidationResult = {
    * `node_source` and `services` describe the first; `eval_script` and `log_parser` cover them all.
    */
   suites?: SuiteRecord[];
+  /**
+   * When the result was made, and the validator's commit. The batch records neither today; write-back
+   * copies them into `validation_detail` when a result file has them (validationDetail, writeback.ts).
+   */
+  validated_at?: string;
+  validator_commit?: string;
 };
 
 /** One suite of a multi-suite row, as the result records it. */

@@ -36,7 +36,7 @@ describe("planBenchmarkSave", () => {
   it("captures again and sends the row back to candidate when the merge commit differs (or is unknown)", () => {
     for (const previous of ["0000000000000000000000000000000000000000", null]) {
       const plan = planBenchmarkSave(submission, [save(M)], [stored({ merge_commit: previous, flags: ["staff_rebuilt:merge-parent"] })], NOW);
-      expect(plan.tasks).toEqual([{ ...instance, harbor_env: null }]);
+      expect(plan.tasks).toEqual([{ ...instance, harbor_env: null, validation_detail: null }]);
       expect(plan.kept).toEqual([]);
       expect(plan.sources).toEqual([{
         instance_id: ID, course_id: "course", user_id: "user", assignment_submission_id: "sub-2", task_slot: 2,
@@ -48,7 +48,7 @@ describe("planBenchmarkSave", () => {
   it("writes a brand-new row (or one still a candidate) as today: instance upserted, no status set", () => {
     for (const existing of [[], [stored({ validation_status: "candidate" })]]) {
       const plan = planBenchmarkSave(submission, [save(M)], existing, NOW);
-      expect(plan.tasks).toEqual([{ ...instance, harbor_env: null }]);
+      expect(plan.tasks).toEqual([{ ...instance, harbor_env: null, validation_detail: null }]);
       expect(plan.sources).toEqual([{
         instance_id: ID, course_id: "course", user_id: "user", assignment_submission_id: "sub-2", task_slot: 2, flags: ["no_test_patch"], updated_at: NOW,
       }]);
