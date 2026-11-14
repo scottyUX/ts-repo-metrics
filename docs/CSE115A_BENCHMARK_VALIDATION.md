@@ -544,6 +544,38 @@ the run log", and the batch summary's reason column carries the same note.
 result for them (the fallback above); `modified_tests` lists the pre-existing tests whose source
 text the test patch changed. Both are diagnostic and do not affect the verdict by themselves.
 
+**In the database: `validation_detail`.** Write-back stores the test lists, image, recipe and
+gold check, and one label, the `untested_files` flag. What lies behind that label goes into
+`cse_benchmark_tasks.validation_detail` (jsonb), for validated rows only, copied from the result
+file and never recomputed (`validationDetail` in `validation/writeback.ts`):
+
+| field | from the result |
+|---|---|
+| `fix_coverage` | the whole coverage run (see "Fix coverage"); absent when the result has none |
+| `untested_files` | the list; `[]` when the result lists none |
+| `untested_files_source` | `coverage`, `imports` or `mixed`; null when the coverage run was not requested |
+| `repo_source` | `github` or `snapshot`; null for a result written before the field existed |
+| `snapshot_bundle` | the bundle path; null when the row had none |
+| `counts` | `absent_to_pass`, `flaky`, `proof_outside_test_patch`: the lengths of those lists |
+| `validated_at` | the result's own `validated_at`; null when the result does not record one (no batch writes it yet) |
+| `validator_commit` | only when the result records one (no batch writes it yet) |
+
+Both `writebackValidation.ts` and `writeback.sql` write it with the row's task update; rejected and
+`env_error` rows leave it alone. `writebackValidation.ts` checks the column exists before writing
+anything and stops with "apply migration
+`supabase/migrations/20261114000000_cse115a_benchmark_validation_detail.sql` first" if not; its
+`--dry-run` line, and the line it prints for each row written, ends each validated row with
+`detail: 1/1 files, 76/192 lines` (files run of files changed, changed lines covered of executable
+ones) or `detail: no coverage`. Re-capturing a changed PR sets it back to null with `harbor_env`.
+It is internal: not a SWE-bench field, so the JSONL export (`SWE_BENCH_FIELDS`) never contains it,
+and the Harbor export does not read it. The `untested_files` flag on
+`cse_benchmark_task_sources.flags` stays the quick filter; `validation_detail` is the detail behind
+it. To undo the migration:
+
+```sql
+alter table public.cse_benchmark_tasks drop column if exists validation_detail; notify pgrst, 'reload schema';
+```
+
 ## Fix coverage
 
 The import rule guesses what the proving tests load, and it is wrong both ways: a test that imports
