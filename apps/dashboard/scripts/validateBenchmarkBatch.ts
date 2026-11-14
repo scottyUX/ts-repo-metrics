@@ -47,6 +47,14 @@
 // Docker and the checkout: the clone in repos/ (cloned again when missing), else the row's bundle
 // in DIR/snapshots/ or --snapshots-from DIR (the snapshot fallback above); with neither, the row's
 // fix_coverage is "unavailable" with the clone error. It never re-runs the three states.
+//
+// Snapshot store: with SUPABASE_URL (or NEXT_PUBLIC_SUPABASE_URL) and SUPABASE_SERVICE_ROLE_KEY set,
+// every bundle written (--snapshots, --snapshot-only) is also uploaded to the private Supabase
+// Storage bucket benchmark-snapshots, never overwriting a stored copy, and --snapshot-only uploads a
+// bundle already in DIR/snapshots/ that the bucket lacks. The snapshot fallback above tries the
+// bucket last (after DIR/snapshots/ and --snapshots-from), downloading into DIR/snapshots/ and
+// checking the bundle first. An upload failure is logged and never fails a row. Without the
+// variables, nothing changes. See scripts/uploadSnapshots.ts and scripts/createSnapshotBucket.ts.
 
 import { access, mkdir, readFile, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
@@ -55,6 +63,7 @@ import { batchRun, coverageLogLine, fixCoverageBatchRow, fixCoverageOnly, goldOn
 import type { HarborRow } from "@/lib/cse115a/benchmark/validation/harbor";
 import { CliHarborRunner, GOLD_TIMEOUT_SECONDS, goldCheck, withGold } from "@/lib/cse115a/benchmark/validation/harborGold";
 import { snapshotOnly } from "@/lib/cse115a/benchmark/validation/snapshots";
+import { SNAPSHOT_BUCKET, supabaseSnapshotStore } from "@/lib/cse115a/benchmark/validation/snapshotStore";
 import type { ValidationResult } from "@/lib/cse115a/benchmark/validation/validateTask";
 
 const USAGE = "Usage: validateBenchmarkBatch.ts ROWS.json --out DIR [--snapshots | --snapshot-only] [--snapshots-from DIR] [--gold-check | --gold-only] [--gold-timeout SECONDS] [--fix-coverage | --fix-coverage-only] [--only id,id] [--redo] [--timeout SECONDS]";
@@ -103,10 +112,13 @@ async function main() {
   const out = resolve(args.out);
   const rows = parseRows(await readFile(args.rowsPath, "utf8")).filter((r) => args.only.length === 0 || args.only.includes(r.instance_id));
   const log = (line: string) => console.error(line);
+  // Null without the Supabase variables: then every pass below behaves as it did before the store.
+  const store = supabaseSnapshotStore(process.env);
+  if (store) log(`Snapshot store: the Supabase bucket ${SNAPSHOT_BUCKET}`);
   if (args.snapshotOnly) {
     console.error(`${rows.length} row(s), snapshots only; output in ${out}`);
     // Exit 0 whatever the rows did: each failure is on its own line.
-    await snapshotOnly({ rows, out, redo: args.redo, log, print: (line) => console.log(line) });
+    await snapshotOnly({ rows, out, redo: args.redo, log, print: (line) => console.log(line), store });
     return;
   }
   const harbor = new CliHarborRunner();
@@ -121,7 +133,7 @@ async function main() {
   await mkdir(join(out, "results"), { recursive: true });
   await mkdir(join(out, "cache"), { recursive: true });
   const startedAt = Date.now();
-  const ctx = batchRun({ out, snapshots: args.snapshots, snapshotsFrom: args.snapshotsFrom ? resolve(args.snapshotsFrom) : undefined, timeoutSeconds: args.timeoutSeconds, log });
+  const ctx = batchRun({ out, snapshots: args.snapshots, snapshotsFrom: args.snapshotsFrom ? resolve(args.snapshotsFrom) : undefined, store, timeoutSeconds: args.timeoutSeconds, log });
   if (args.fixCoverageOnly) {
     log(`${rows.length} row(s), fix coverage only; output in ${out}`);
     const { summary } = await fixCoverageOnly(ctx, rows);

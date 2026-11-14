@@ -127,7 +127,8 @@ describe("validateBenchmarkBatch.ts --snapshot-only (the script)", () => {
     const script = fileURLToPath(new URL("../scripts/validateBenchmarkBatch.ts", import.meta.url));
     const tsconfig = fileURLToPath(new URL("../tsconfig.json", import.meta.url));
     // github.com is rewritten to the local stand-in, so the real cloneRepo runs without the network.
-    const env = { ...process.env, GITHUB_APP_ID: "", GIT_CONFIG_COUNT: "1", GIT_CONFIG_KEY_0: `url.${github}/.insteadOf`, GIT_CONFIG_VALUE_0: "https://github.com/" };
+    // The Supabase variables are blanked so the script never uploads to a real snapshot store.
+    const env = { ...process.env, SUPABASE_URL: "", NEXT_PUBLIC_SUPABASE_URL: "", SUPABASE_SERVICE_ROLE_KEY: "", GITHUB_APP_ID: "", GIT_CONFIG_COUNT: "1", GIT_CONFIG_KEY_0: `url.${github}/.insteadOf`, GIT_CONFIG_VALUE_0: "https://github.com/" };
     const { code, stdout } = await new Promise<{ code: number | null; stdout: string }>((done) => {
       const child = spawn("npx", ["tsx", "--tsconfig", tsconfig, script, rowsFile, "--out", out, "--snapshot-only"], { env, stdio: ["ignore", "pipe", "pipe"] });
       let text = "";

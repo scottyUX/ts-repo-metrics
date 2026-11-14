@@ -11,6 +11,7 @@ import { unavailableCoverage, withFixCoverage } from "@/lib/cse115a/benchmark/va
 import { assertRow, fixCoverageRow, imageDigest, repoIsPublic, validateRow } from "@/lib/cse115a/benchmark/validation/runRow";
 import type { SuiteRunner } from "@/lib/cse115a/benchmark/validation/runner";
 import { recordSnapshot, rowCheckout, withRepoSource, type BatchGit } from "@/lib/cse115a/benchmark/validation/snapshots";
+import type { SnapshotStore } from "@/lib/cse115a/benchmark/validation/snapshotStore";
 import type { TaskRow, ValidationResult } from "@/lib/cse115a/benchmark/validation/validateTask";
 
 type Log = (line: string) => void;
@@ -28,6 +29,8 @@ export type BatchRun = {
   snapshots: boolean;
   /** A folder of `<instance_id>.bundle` files to fall back on when `<out>/snapshots/` has none (--snapshots-from). */
   snapshotsFrom?: string;
+  /** The Supabase copy of the bundles (snapshotStore.ts): new bundles are uploaded, a missing one restored. Null or absent: none. */
+  store?: SnapshotStore | null;
   timeoutSeconds: number;
   log: Log;
   /** Clones by repository, image digests by image, publicity by repository: each looked up once. */
@@ -57,7 +60,7 @@ export async function validateBatchRow(ctx: BatchRun, row: TaskRow, logDir: stri
     assertRow(row);
     const skip = preflight(row);
     if (skip) return rejectedWithoutRun(row, skip.reason, skip.detail);
-    const checkout = await rowCheckout({ out, row, clones: ctx.clones, log, git: ctx.git, snapshotsFrom: ctx.snapshotsFrom });
+    const checkout = await rowCheckout({ out, row, clones: ctx.clones, log, git: ctx.git, snapshotsFrom: ctx.snapshotsFrom, store: ctx.store });
     let result = await validateRow({ row, repoDir: checkout.repoDir, logDir, cacheDir: join(out, "cache"), timeoutSeconds: ctx.timeoutSeconds, log, runner: ctx.runner });
     result = withRepoSource(result, checkout);
     // Extras: a failure here is logged and must never discard the verdict above.
@@ -79,7 +82,7 @@ export async function validateBatchRow(ctx: BatchRun, row: TaskRow, logDir: stri
     // A bundle from an earlier run of this row is still valid (the base commit does not change), so
     // it is recorded even without --snapshots; the flag only decides whether to create a new one.
     // (A snapshot-only pass writes the same bundles; a snapshot fallback has just used one.)
-    const bundle = await recordSnapshot(out, row, checkout.repoDir, ctx.snapshots, log);
+    const bundle = await recordSnapshot(out, row, checkout.repoDir, ctx.snapshots, log, ctx.store);
     if (bundle !== undefined) result.snapshot_bundle = bundle;
     return result;
   } catch (error) {
@@ -153,7 +156,7 @@ export async function fixCoverageBatchRow(ctx: BatchRun, row: TaskRow, result: V
   let repoDir: string;
   try {
     assertRow(row);
-    repoDir = (await rowCheckout({ out: ctx.out, row, clones: ctx.clones, log: ctx.log, git: ctx.git, snapshotsFrom: ctx.snapshotsFrom })).repoDir;
+    repoDir = (await rowCheckout({ out: ctx.out, row, clones: ctx.clones, log: ctx.log, git: ctx.git, snapshotsFrom: ctx.snapshotsFrom, store: ctx.store })).repoDir;
   } catch (error) {
     return withFixCoverage(result, unavailableCoverage(`no checkout: ${firstLine(error)}`), null);
   }
