@@ -1,0 +1,179 @@
+{
+  "supported": true,
+  "runners": [
+    "vitest"
+  ],
+  "packageManager": "pnpm",
+  "packageDir": "server",
+  "installDir": "server",
+  "installCommand": "corepack enable && pnpm install --frozen-lockfile",
+  "testSteps": [
+    {
+      "kind": "vitest",
+      "command": "npx vitest run --reporter=json --outputFile=$REPORT_DIR/vitest-0.json --passWithNoTests"
+    }
+  ],
+  "env": {
+    "CI": "true",
+    "DATABASE_URL": "postgres://bookworm:bookworm@postgres:5432/bookworm_test"
+  },
+  "dockerfile": "FROM node:24-bookworm\nRUN corepack enable\nWORKDIR /work\n# service postgres: docker run -e POSTGRES_USER=bookworm -e POSTGRES_PASSWORD=bookworm -e POSTGRES_DB=bookworm_test postgres:16, on the run's own network as host postgres\n# DATABASE_URL=postgres://bookworm:bookworm@postgres:5432/bookworm_test\n# schema: (\n#     cd server\n#     pnpm db:push\n#   )\nENV CI=true\nENV DATABASE_URL=postgres://bookworm:bookworm@postgres:5432/bookworm_test\n# cd . && pnpm install --frozen-lockfile\n# cd server && pnpm install --frozen-lockfile\n# cd server\n# npx vitest run --reporter=json --outputFile=$REPORT_DIR/vitest-0.json --passWithNoTests\n",
+  "image": "node:24-bookworm",
+  "nodeSource": "CI",
+  "services": [
+    {
+      "name": "postgres",
+      "alias": "postgres",
+      "image": "postgres:16",
+      "env": {
+        "POSTGRES_USER": "bookworm",
+        "POSTGRES_PASSWORD": "bookworm",
+        "POSTGRES_DB": "bookworm_test"
+      },
+      "databaseUrl": "postgres://bookworm:bookworm@localhost:5432/bookworm_test",
+      "containerDatabaseUrl": "postgres://bookworm:bookworm@postgres:5432/bookworm_test",
+      "schemaCommand": "(\n  cd server\n  pnpm db:push\n)"
+    }
+  ],
+  "installSteps": [
+    {
+      "dir": "",
+      "cwd": "",
+      "command": "pnpm install --frozen-lockfile"
+    },
+    {
+      "dir": "server",
+      "cwd": "server",
+      "command": "pnpm install --frozen-lockfile"
+    }
+  ]
+}
+---
+{
+  "instance_id": "shape-bookworm-postgres",
+  "image": "node:24-bookworm",
+  "eval_script": "# node: node:24-bookworm (from CI)\n# install in: ., server (from CI)\n# service postgres: docker run -e POSTGRES_USER=bookworm -e POSTGRES_PASSWORD=bookworm -e POSTGRES_DB=bookworm_test postgres:16, on the run's own network as host postgres\n# DATABASE_URL=postgres://bookworm:bookworm@postgres:5432/bookworm_test\n# schema: (\n#     cd server\n#     pnpm db:push\n#   )\nset -e\ncd /work\ngit checkout -q -f 0123456789abcdef0123456789abcdef01234567\ngit clean -fdq\ngit apply --whitespace=nowarn /patches/test.diff\ngit apply --whitespace=nowarn /patches/fix.diff\ncd /work\nif ! { corepack enable && pnpm install --frozen-lockfile; } > /patches/install.log 2>&1; then\n  cat /patches/install.log\n  echo \"[hecate] install failed\" >&2\n  exit 97\nfi\ncat /patches/install.log\ncd /work/server\nif ! { corepack enable && pnpm install --frozen-lockfile; } > /patches/install.log 2>&1; then\n  cat /patches/install.log\n  echo \"[hecate] install failed\" >&2\n  exit 97\nfi\ncat /patches/install.log\ncd /work\nif ! bash -eo pipefail -c '(\n  cd server\n  pnpm db:push\n)' > /patches/schema.log 2>&1; then\n  cat /patches/schema.log\n  echo \"[hecate] schema step failed\" >&2\n  exit 98\nfi\ncat /patches/schema.log\nmkdir -p /patches/reports\nexport REPORT_DIR=/patches/reports\ncd /work/server\nnpx vitest run --reporter=json --outputFile=$REPORT_DIR/vitest-0.json --passWithNoTests || true\n",
+  "log_parser": "vitest-json",
+  "package_dir": "server",
+  "test_files": [
+    "server/test/books.test.ts"
+  ],
+  "FAIL_TO_PASS": [
+    "server/test/books.test.ts::books > adds a book"
+  ],
+  "ABSENT_TO_PASS": [],
+  "PASS_TO_PASS": [
+    "server/test/health.test.ts::health > ok"
+  ],
+  "FAIL_TO_FAIL": [],
+  "regressions": [],
+  "regression_skips": [],
+  "flaky": [],
+  "skipped": [],
+  "judged_from_base": [],
+  "load_failures": [],
+  "modified_tests": [],
+  "unmatched_static_ids": [],
+  "proof_outside_test_patch": [],
+  "validation_status": "validated",
+  "reason": null,
+  "detail": null,
+  "timings": {
+    "r0a": 0,
+    "r0b": 0,
+    "r0c": 0,
+    "r1a": 0,
+    "r1b": 0,
+    "r1c": 0,
+    "r2a": 0,
+    "r2b": 0,
+    "r2c": 0
+  },
+  "install_dirs": [
+    "",
+    "server"
+  ],
+  "node_source": "from CI",
+  "harbor_env": {
+    "image": "node:24-bookworm",
+    "runners": [
+      "vitest"
+    ],
+    "package_dir": "server",
+    "install_steps": [
+      {
+        "cwd": "",
+        "command": "corepack enable && pnpm install --frozen-lockfile"
+      },
+      {
+        "cwd": "server",
+        "command": "corepack enable && pnpm install --frozen-lockfile"
+      }
+    ],
+    "test_steps": [
+      {
+        "kind": "vitest",
+        "command": "npx vitest run --reporter=json --outputFile=$REPORT_DIR/vitest-0.json --passWithNoTests"
+      }
+    ],
+    "env": {
+      "CI": "true",
+      "DATABASE_URL": "postgres://bookworm:bookworm@postgres:5432/bookworm_test"
+    },
+    "services": [
+      {
+        "name": "postgres",
+        "image": "postgres:16"
+      }
+    ],
+    "node_source": "CI"
+  },
+  "services": [
+    {
+      "name": "postgres",
+      "image": "postgres:16",
+      "env": {
+        "POSTGRES_USER": "bookworm",
+        "POSTGRES_PASSWORD": "bookworm",
+        "POSTGRES_DB": "bookworm_test"
+      },
+      "database_url": "postgres://bookworm:bookworm@postgres:5432/bookworm_test",
+      "schema_command": "(\n  cd server\n  pnpm db:push\n)"
+    }
+  ]
+}
+---
+{
+  "image": "node:24-bookworm",
+  "runners": [
+    "vitest"
+  ],
+  "package_dir": "server",
+  "install_steps": [
+    {
+      "cwd": "",
+      "command": "corepack enable && pnpm install --frozen-lockfile"
+    },
+    {
+      "cwd": "server",
+      "command": "corepack enable && pnpm install --frozen-lockfile"
+    }
+  ],
+  "test_steps": [
+    {
+      "kind": "vitest",
+      "command": "npx vitest run --reporter=json --outputFile=$REPORT_DIR/vitest-0.json --passWithNoTests"
+    }
+  ],
+  "env": {
+    "CI": "true",
+    "DATABASE_URL": "postgres://bookworm:bookworm@postgres:5432/bookworm_test"
+  },
+  "services": [
+    {
+      "name": "postgres",
+      "image": "postgres:16"
+    }
+  ],
+  "node_source": "CI"
+}

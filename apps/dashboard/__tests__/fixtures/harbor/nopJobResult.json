@@ -1,0 +1,39 @@
+{
+    "id": "fc45be77-0ab0-4245-9119-0e596a400c35",
+    "started_at": "2026-11-11T01:25:50.397448",
+    "updated_at": "2026-11-11T01:26:05.514298",
+    "finished_at": "2026-11-11T01:26:05.514298",
+    "n_total_trials": 1,
+    "stats": {
+        "n_completed_trials": 1,
+        "n_errored_trials": 0,
+        "n_running_trials": 0,
+        "n_pending_trials": 0,
+        "n_cancelled_trials": 0,
+        "n_retries": 0,
+        "evals": {
+            "nop__adhoc": {
+                "n_trials": 1,
+                "n_errors": 0,
+                "metrics": [
+                    {
+                        "mean": 0.0
+                    }
+                ],
+                "pass_at_k": {},
+                "reward_stats": {
+                    "reward": {
+                        "0.0": [
+                            "verilet__verilet-scrum-3-t-1__M89jB7v"
+                        ]
+                    }
+                },
+                "exception_stats": {}
+            }
+        },
+        "n_input_tokens": null,
+        "n_cache_tokens": null,
+        "n_output_tokens": null,
+        "cost_usd": null
+    }
+}

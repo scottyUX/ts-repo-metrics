@@ -214,6 +214,20 @@ describe("JSONL export", () => {
   });
 });
 
+describe("JSONL export and harbor_env", () => {
+  it("never carries harbor_env: the record's keys are the SWE-bench fields, unchanged", () => {
+    const { instance } = buildInstance(snapshot(), 1, null);
+    const harbor_env = { image: "node:24-bookworm", runners: ["vitest" as const], package_dir: "", install_steps: [], test_steps: [], env: {}, services: [], node_source: null };
+    expect(Object.keys(toJsonlRecord({ ...instance, harbor_env }))).toEqual([
+      "instance_id", "repo", "base_commit", "environment_setup_commit", "created_at", "version",
+      "problem_statement", "hints_text", "patch", "test_patch", "FAIL_TO_PASS", "PASS_TO_PASS",
+      "eval_type", "image", "eval_script", "log_parser", "difficulty", "repo_metrics",
+    ]);
+    const sources = [{ consented: true, validationStatus: "validated" as const }];
+    expect(exportJsonl([{ instance: { ...instance, harbor_env }, sources }])).toBe(exportJsonl([{ instance, sources }]));
+  });
+});
+
 describe("export redaction", () => {
   it("drops per-author data and logins from repo_metrics and scrubs emails", () => {
     const report = {

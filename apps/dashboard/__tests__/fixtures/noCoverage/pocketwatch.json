@@ -1,0 +1,82 @@
+{
+  "instance_id": "Team__PocketWatch-cleanup-1",
+  "image": "node:24-bookworm",
+  "eval_script": "# node: node:24-bookworm (from .nvmrc)\n# install in: .\nset -e\ncd /work\ngit checkout -q -f c97955fd766e2787c5c16628441b133a63978f7a\ngit clean -fdq\ngit apply --whitespace=nowarn /patches/test.diff\ngit apply --whitespace=nowarn /patches/fix.diff\ncd /work\nif ! { corepack enable && pnpm install --frozen-lockfile; } > /patches/install.log 2>&1; then\n  cat /patches/install.log\n  echo \"[hecate] install failed\" >&2\n  exit 97\nfi\ncat /patches/install.log\nmkdir -p /patches/reports\nexport REPORT_DIR=/patches/reports\ncd /work/apps/api\nnpx vitest run --reporter=json --outputFile=$REPORT_DIR/vitest-0.json --passWithNoTests || true\npnpm build || true\nREPORT=$REPORT_DIR/node-2.json node --test --test-reporter=/patches/reporter.mjs tests/*.test.mjs || true\n",
+  "log_parser": "vitest-json+node-test-json",
+  "package_dir": "apps/api",
+  "test_files": [
+    "apps/api/tests/cleanup.test.mjs"
+  ],
+  "FAIL_TO_PASS": [
+    "apps/api/tests/cleanup.test.mjs::cleanup deletes"
+  ],
+  "ABSENT_TO_PASS": [],
+  "PASS_TO_PASS": [
+    "apps/api/src/old.spec.ts::keeps"
+  ],
+  "FAIL_TO_FAIL": [],
+  "regressions": [],
+  "regression_skips": [],
+  "flaky": [],
+  "skipped": [],
+  "judged_from_base": [],
+  "load_failures": [],
+  "modified_tests": [],
+  "unmatched_static_ids": [],
+  "proof_outside_test_patch": [],
+  "validation_status": "validated",
+  "reason": null,
+  "detail": null,
+  "timings": {
+    "r0a": 0,
+    "r0b": 0,
+    "r0c": 0,
+    "r1a": 0,
+    "r1b": 0,
+    "r1c": 0,
+    "r2a": 0,
+    "r2b": 0,
+    "r2c": 0
+  },
+  "install_dirs": [
+    ""
+  ],
+  "node_source": "from .nvmrc",
+  "harbor_env": {
+    "image": "node:24-bookworm",
+    "runners": [
+      "vitest",
+      "node-test"
+    ],
+    "package_dir": "apps/api",
+    "install_steps": [
+      {
+        "cwd": "",
+        "command": "corepack enable && pnpm install --frozen-lockfile"
+      }
+    ],
+    "test_steps": [
+      {
+        "kind": "vitest",
+        "command": "npx vitest run --reporter=json --outputFile=$REPORT_DIR/vitest-0.json --passWithNoTests"
+      },
+      {
+        "kind": "prep",
+        "command": "pnpm build"
+      },
+      {
+        "kind": "node-test",
+        "command": "REPORT=$REPORT_DIR/node-2.json node --test --test-reporter=/patches/reporter.mjs tests/*.test.mjs"
+      }
+    ],
+    "env": {
+      "CI": "true",
+      "DATABASE_URL": "postgresql://hecate:hecate@localhost:5432/hecate"
+    },
+    "services": [],
+    "node_source": ".nvmrc"
+  },
+  "untested_files": [
+    "apps/api/src/app.module.ts"
+  ]
+}
