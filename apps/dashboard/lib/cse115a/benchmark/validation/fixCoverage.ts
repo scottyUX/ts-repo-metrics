@@ -8,8 +8,12 @@ import { posix } from "node:path";
 import ts from "typescript";
 import { isCodeFile } from "@/lib/cse115a/benchmark/validation/untestedFiles";
 
-/** What coverage says about one changed file. */
-export type FileState = "run" | "not_run" | "not_measured";
+/**
+ * What coverage says about one changed file. `no_code`: none of its changed lines is run-time code
+ * (a pure rename, deletions only, types, interfaces or comments), so there is nothing to measure;
+ * not a gap in the measurement.
+ */
+export type FileState = "run" | "not_run" | "not_measured" | "no_code";
 
 export type FixCoverageFile = {
   /** Repo-relative changed code file (the set `changedFilesInPatch` + `isCodeFile` give). */
@@ -32,10 +36,13 @@ export type FixCoverage = {
   /** The coverage tools that produced a report, e.g. `coverage.py 7.6.1`, `vitest 4.1.12 (v8)`. */
   tools: string[];
   files: FixCoverageFile[];
+  /** Changed code files with at least one runnable changed line: every state but `no_code`. */
   files_changed: number;
   files_run: number;
   files_not_run: number;
   files_not_measured: number;
+  /** Changed code files with no runnable changed line; counted in none of the totals above. */
+  files_no_code: number;
   /** Summed over files with state `run`. */
   lines_executable: number;
   lines_covered: number;
@@ -356,12 +363,12 @@ export function classifyFixCoverage(input: ClassifyInput): FixCoverage {
     const unloaded = { executable: null, covered: null, uncovered: null };
     const record = (state: FileState, numbers: typeof measured | typeof unloaded) => files.push({ path, state, changed_lines: changed.length, ...numbers });
 
+    // Nothing the fix adds is code (a rename, deletions only, comments or types): nothing to execute.
+    if (lines.length === 0) { record("no_code", { executable: 0, covered: 0, uncovered: "" }); continue; }
     if (covered.length > 0) { record("run", measured); continue; }
     const stem = path.replace(/\.[^./]+$/, "");
     const fromBuild = mine.some((r) => r.generated.some((p) => sourceStems(p).includes(stem)));
     const notMeasured =
-      // Nothing the fix adds is code (a rename, deletions only, comments or types): nothing to execute.
-      lines.length === 0 ||
       // Loaded, but the tool counts none of the changed lines (the middle of a multi-line Python statement).
       (present && executable.length === 0) ||
       // A report of this language is missing: that step may have run it.
@@ -376,17 +383,22 @@ export function classifyFixCoverage(input: ClassifyInput): FixCoverage {
 
   const run = files.filter((f) => f.state === "run");
   const notMeasured = files.filter((f) => f.state === "not_measured");
+  const withCode = files.filter((f) => f.state !== "no_code");
   const totals = {
-    files_changed: files.length,
+    files_changed: withCode.length,
     files_run: run.length,
     files_not_run: files.filter((f) => f.state === "not_run").length,
     files_not_measured: notMeasured.length,
+    files_no_code: files.length - withCode.length,
     lines_executable: run.reduce((n, f) => n + (f.executable ?? 0), 0),
     lines_covered: run.reduce((n, f) => n + (f.covered ?? 0), 0),
   };
   const tools = [...new Set(usable.map((r) => r.tool))];
-  if (!input.reports.length) return unavailableCoverage("no proving test file to run", files.length);
-  if (!usable.length) return unavailableCoverage(failed.map((r) => `${r.label}: ${r.reason}`).join("; "), files.length);
+  // Every changed code file is no_code: nothing needed measuring, whatever the reports say. (A patch
+  // that changes no code file at all keeps the answers below.)
+  if (files.length && !withCode.length) return { status: "measured", tools, files, ...totals };
+  if (!input.reports.length) return unavailableCoverage("no proving test file to run", withCode.length);
+  if (!usable.length) return unavailableCoverage(failed.map((r) => `${r.label}: ${r.reason}`).join("; "), withCode.length);
   const problems = [
     ...failed.map((r) => `${r.label}: ${r.reason}`),
     ...(notMeasured.length ? [`${notMeasured.length} file(s) not measured`] : []),
@@ -399,7 +411,7 @@ export function unavailableCoverage(reason: string, filesChanged = 0): FixCovera
   const line = reason.split("\n").map((l) => l.trim()).find(Boolean) ?? "unknown error";
   return {
     status: "unavailable", reason: line.length > 300 ? `${line.slice(0, 299)}…` : line, tools: [], files: [],
-    files_changed: filesChanged, files_run: 0, files_not_run: 0, files_not_measured: 0, lines_executable: 0, lines_covered: 0,
+    files_changed: filesChanged, files_run: 0, files_not_run: 0, files_not_measured: 0, files_no_code: 0, lines_executable: 0, lines_covered: 0,
   };
 }
 
@@ -408,7 +420,7 @@ export function unavailableCoverage(reason: string, filesChanged = 0): FixCovera
 
 /**
  * `untested_files` and how it was made. With coverage measured (or partial): the `not_run` files,
- * plus the `not_measured` files the import rule flags. Without coverage, or unavailable: the
+ * plus the `not_measured` files the import rule flags; `no_code` files never, whatever the rule says. Without coverage, or unavailable: the
  * import rule's list as is.
  */
 export function deriveUntested(coverage: FixCoverage | undefined, importRule: string[]): { untested: string[]; source: UntestedSource } {

@@ -257,7 +257,7 @@ describe("classifyFixCoverage", () => {
     expect(result.tools).toEqual(["vitest 4.1.12 (v8)", "c8 10.1.3 (node v24.22.2)"]);
   });
 
-  it("not_measured: nothing changed is code; loaded but no changed line executable; a failed report of its language; unmapped build output; an absent .vue file", () => {
+  it("not_measured: loaded but no changed line executable; a failed report of its language; unmapped build output; an absent .vue file (nothing changed is code: no_code)", () => {
     const result = classifyFixCoverage({
       changed: new Map([
         ["shared/types.ts", [3, 4]], ["app/m.py", [5]], ["src/b.ts", [2]], ["src/greet.ts", [1, 2]], ["src/App.vue", [3]], ["src/pure.ts", []],
@@ -270,11 +270,78 @@ describe("classifyFixCoverage", () => {
       ],
     });
     expect(Object.fromEntries(result.files.map((f) => [f.path, f.state]))).toEqual({
-      "app/m.py": "not_measured", "shared/types.ts": "not_measured", "src/App.vue": "not_measured", "src/b.ts": "not_measured", "src/greet.ts": "not_measured", "src/pure.ts": "not_measured",
+      "app/m.py": "not_measured", "shared/types.ts": "no_code", "src/App.vue": "not_measured", "src/b.ts": "not_measured", "src/greet.ts": "not_measured", "src/pure.ts": "no_code",
     });
     expect(result.files.find((f) => f.path === "app/m.py")).toMatchObject({ executable: 0, covered: 0 });
     expect(result.status).toBe("partial");
-    expect(result.reason).toBe("jest-1 in .: could not install c8 10.1.3; 6 file(s) not measured");
+    expect(result.reason).toBe("jest-1 in .: could not install c8 10.1.3; 4 file(s) not measured");
+    expect(result).toMatchObject({ files_changed: 4, files_not_measured: 4, files_no_code: 2 });
+  });
+
+  describe("no_code: changed lines, none of them run-time code", () => {
+    /** Changed lines from a real patch, code lines from the post-fix source, as measureFixCoverage does. */
+    const classify = (patch: string, sources: Record<string, string>, reports: ReportCoverage[] = [report({ "src/a.ts": [[1, 1]] })]) => {
+      const changed = changedLinesInPatch(patch);
+      const codeMap = new Map([...changed.keys()].map((p) => [p, p in sources ? codeLines(p, sources[p]) : null]));
+      return classifyFixCoverage({ changed, code: codeMap, reports });
+    };
+    const runFile = "diff --git a/src/a.ts b/src/a.ts\n--- a/src/a.ts\n+++ b/src/a.ts\n@@ -1 +1 @@\n-export const a = 1;\n+export const a = 2;\n";
+    const runSource = { "src/a.ts": "export const a = 2;\n" };
+    const interfaceOnly = "diff --git a/shared/ratings.ts b/shared/ratings.ts\n--- a/shared/ratings.ts\n+++ b/shared/ratings.ts\n@@ -1 +1,5 @@\n export const MAX = 5;\n+export interface Rating {\n+  stars: number;\n+  note?: string;\n+}\n";
+    const interfaceSource = "export const MAX = 5;\nexport interface Rating {\n  stars: number;\n  note?: string;\n}\n";
+    const commentOnly = "diff --git a/backend/texting.ts b/backend/texting.ts\n--- a/backend/texting.ts\n+++ b/backend/texting.ts\n@@ -1,2 +1,3 @@\n /**\n+ * POST /messages/:inviteCode\n  * Create a new message.\n";
+    const commentSource = "/**\n * POST /messages/:inviteCode\n * Create a new message.\n */\nexport function send() { return 1; }\n";
+    const deletionsOnly = "diff --git a/src/old.ts b/src/old.ts\n--- a/src/old.ts\n+++ b/src/old.ts\n@@ -1,2 +1 @@\n export const keep = 1;\n-export const gone = 2;\n";
+    const pureRename = "diff --git a/src/x.ts b/src/y.ts\nsimilarity index 100%\nrename from src/x.ts\nrename to src/y.ts\n";
+
+    it("an interface, only comments, only deletions, a pure rename: no_code, with 0 / 0 / \"\"", () => {
+      const result = classify(runFile + interfaceOnly + commentOnly + deletionsOnly + pureRename, {
+        ...runSource, "shared/ratings.ts": interfaceSource, "backend/texting.ts": commentSource, "src/old.ts": "export const keep = 1;\n", "src/y.ts": "export const y = 1;\n",
+      });
+      expect(Object.fromEntries(result.files.map((f) => [f.path, f.state]))).toEqual({
+        "backend/texting.ts": "no_code", "shared/ratings.ts": "no_code", "src/a.ts": "run", "src/old.ts": "no_code", "src/y.ts": "no_code",
+      });
+      for (const f of result.files.filter((x) => x.state === "no_code")) expect(f).toMatchObject({ executable: 0, covered: 0, uncovered: "" });
+      expect(result.files.find((f) => f.path === "shared/ratings.ts")?.changed_lines).toBe(4);
+    });
+
+    it("one runnable changed line among type lines is not no_code: classified as before", () => {
+      const patch = "diff --git a/src/t.ts b/src/t.ts\n--- a/src/t.ts\n+++ b/src/t.ts\n@@ -0,0 +1,6 @@\n+export interface A {\n+  x: number;\n+  y: string;\n+}\n+export type B = A[];\n+export const DEFAULT: B = [];\n";
+      const source = { "src/t.ts": "export interface A {\n  x: number;\n  y: string;\n}\nexport type B = A[];\nexport const DEFAULT: B = [];\n" };
+      expect(classify(patch, source, [report({ "src/t.ts": [[6, 1]] })]).files[0]).toMatchObject({ state: "run", executable: 1, covered: 1 });
+      expect(classify(patch, source, [report({})]).files[0]).toMatchObject({ state: "not_run", executable: null });
+    });
+
+    it("one run file and one no_code file: measured, and the counts leave the no_code file out", () => {
+      const result = classify(runFile + interfaceOnly, { ...runSource, "shared/ratings.ts": interfaceSource });
+      expect(result).toMatchObject({ status: "measured", files_changed: 1, files_run: 1, files_not_run: 0, files_not_measured: 0, files_no_code: 1, lines_executable: 1, lines_covered: 1 });
+      expect(result.reason).toBeUndefined();
+      expect(coverageCell(result)).toBe("1/1 files, 1/1 lines");
+    });
+
+    it("one run file and one file not measured for another reason: still partial", () => {
+      const vue = "diff --git a/src/App.vue b/src/App.vue\n--- a/src/App.vue\n+++ b/src/App.vue\n@@ -1 +1 @@\n-<p>a</p>\n+<p>b</p>\n";
+      const result = classify(runFile + vue, { ...runSource, "src/App.vue": "<p>b</p>\n" });
+      expect(result).toMatchObject({ status: "partial", reason: "1 file(s) not measured", files_changed: 2, files_run: 1, files_not_measured: 1, files_no_code: 0 });
+    });
+
+    it("every changed code file no_code: measured with zero files changed, whatever the reports, and nothing untested", () => {
+      for (const reports of [[report({})], [], [{ label: "node-0 in .", language: "javascript" as const, ok: false as const, reason: "timed out" }]]) {
+        const result = classify(interfaceOnly + commentOnly, { "shared/ratings.ts": interfaceSource, "backend/texting.ts": commentSource }, reports);
+        expect(result).toMatchObject({ status: "measured", files_changed: 0, files_run: 0, files_not_run: 0, files_not_measured: 0, files_no_code: 2, lines_executable: 0, lines_covered: 0 });
+        expect(result.reason).toBeUndefined();
+        // The import rule flags both files; it is not consulted for no_code ones.
+        const after = withFixCoverage({ ...validated, untested_files: ["backend/texting.ts"] }, result, ["backend/texting.ts", "shared/ratings.ts"]);
+        expect(after.untested_files).toBeUndefined();
+        expect(after.untested_files_source).toBe("coverage");
+      }
+    });
+
+    it("the roomie US-3-T-2 shape: a run file plus a comment-only file the import rule flags → measured, nothing untested", () => {
+      const result = classify(runFile + commentOnly, { ...runSource, "backend/texting.ts": commentSource });
+      expect(result.status).toBe("measured");
+      expect(deriveUntested(result, ["backend/texting.ts"])).toEqual({ untested: [], source: "coverage" });
+    });
   });
 
   it("each not_measured rule is needed: without the failed report, src/b.ts is plainly not_run", () => {
