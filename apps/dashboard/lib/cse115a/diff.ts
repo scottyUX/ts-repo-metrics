@@ -34,6 +34,16 @@ export function isTestPath(path: string): boolean {
     || PY_TEST_FILE.test(path) || TEST_DIR.test(path);
 }
 
+/**
+ * What AI coding tools keep in a repo (agent skills, rules, settings), in any folder: .agents/, .claude/,
+ * .cursor/, .windsurf/ and skills-lock.json. Not part of a task's work, so benchmark rows leave them out (#384).
+ */
+const AI_TOOL_PATH = /(^|\/)(\.agents|\.claude|\.cursor|\.windsurf)\/|(^|\/)skills-lock\.json$/;
+
+export function isAiToolPath(path: string): boolean {
+  return AI_TOOL_PATH.test(path);
+}
+
 export type SplitPatch = { patch: string; testPatch: string; sourceFiles: string[]; testFiles: string[] };
 
 export function splitPatch(diff: string): SplitPatch {

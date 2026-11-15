@@ -3,6 +3,7 @@ import { extractAddedTests, extractJsTests, extractPyTests } from "@/lib/cse115a
 import { buildInstance, difficultyFor, instanceId, SWE_BENCH_FIELDS } from "@/lib/cse115a/benchmark/buildInstance";
 import { exportJsonl, isExportable, toJsonlRecord } from "@/lib/cse115a/benchmark/exportJsonl";
 import { identifiersFor, redactPersonalData, scrubPatch, scrubSpec, scrubText } from "@/lib/cse115a/benchmark/scrubPii";
+import { isAiToolPath } from "@/lib/cse115a/diff";
 import { runNextJob, type JobStore, type BenchmarkSave } from "@/lib/cse115a/jobs/runner";
 import type { TaskSnapshot } from "@/lib/cse115a/submissionSnapshot";
 import type { TaskSpec } from "@/lib/cse115a/taskSpec";
@@ -321,5 +322,57 @@ describe("benchmark job", () => {
       [1, "team-alpha__proj-US-1-T-1", { id: "result-1" }],
       [2, "team-alpha__proj-US-1-T-2", { id: "result-2" }],
     ]);
+  });
+});
+
+describe("AI-tool files in a captured diff (#384)", () => {
+  const AI_DIFF = `diff --git a/.claude/skills/review/SKILL.md b/.claude/skills/review/SKILL.md
+new file mode 100644
+--- /dev/null
++++ b/.claude/skills/review/SKILL.md
+@@ -0,0 +1,2 @@
++# Review
++Read the diff.
+diff --git a/frontend/.cursor/rules/style.mdc b/frontend/.cursor/rules/style.mdc
+new file mode 100644
+--- /dev/null
++++ b/frontend/.cursor/rules/style.mdc
+@@ -0,0 +1 @@
++Use tabs.
+diff --git a/.agents/skills/tdd/tests/example.test.ts b/.agents/skills/tdd/tests/example.test.ts
+new file mode 100644
+--- /dev/null
++++ b/.agents/skills/tdd/tests/example.test.ts
+@@ -0,0 +1,3 @@
++it("is an example inside a skill, not a test of the task", () => {
++  expect(1).toBe(1);
++});
+diff --git a/skills-lock.json b/skills-lock.json
+new file mode 100644
+--- /dev/null
++++ b/skills-lock.json
+@@ -0,0 +1 @@
++{}
+`;
+
+  it("recognises the AI-tool folders at any depth, and nothing else", () => {
+    const aiTool = [".agents/skills/a/SKILL.md", ".claude/settings.json", ".cursor/rules/x.mdc", ".windsurf/rules.md", "skills-lock.json", "frontend/.claude/settings.json", "apps/web/skills-lock.json"];
+    const other = ["src/claude/client.ts", "docs/.claude.md", "cursor/index.ts", "src/skills-lock.json.ts", "CLAUDE.md", "AGENTS.md", ".github/workflows/ci.yml", "src/agents/run.ts"];
+    expect(aiTool.filter((path) => !isAiToolPath(path))).toEqual([]);
+    expect(other.filter((path) => isAiToolPath(path))).toEqual([]);
+  });
+
+  it("keeps them out of patch and test_patch, and says so with a flag", () => {
+    const withAiFiles = buildInstance(snapshot({ diff: AI_DIFF + TS_DIFF }), 1, null);
+    const without = buildInstance(snapshot(), 1, null);
+    expect(withAiFiles.instance).toEqual(without.instance);
+    expect(withAiFiles.flags).toEqual(["ai_tool_files_dropped"]);
+    expect(without.flags).toEqual([]);
+  });
+
+  it("gives a task that changed only AI-tool files an empty patch", () => {
+    const { instance, flags } = buildInstance(snapshot({ diff: AI_DIFF }), 1, null);
+    expect([instance.patch, instance.test_patch, instance.FAIL_TO_PASS]).toEqual(["", "", []]);
+    expect(flags).toEqual(["no_test_patch", "no_source_patch", "ai_tool_files_dropped"]);
   });
 });

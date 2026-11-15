@@ -103,6 +103,11 @@ task file alone (`base_commit_from_first_commit`), or at the PR base.
 
 - `patch` and `test_patch` split the base-tag-to-merge diff by test path
   (`lib/cse115a/diff.ts`).
+- Files that AI coding tools keep in a repo are left out of both: anything
+  under `.agents/`, `.claude/`, `.cursor/` or `.windsurf/`, and
+  `skills-lock.json`, in any folder (`isAiToolPath`). Rows that had such
+  files get the `ai_tool_files_dropped` flag. Grading still sees them,
+  because the graders read the submission's own diff, not the benchmark row.
 - `FAIL_TO_PASS` holds test IDs added in `test_patch`, found statically
   (`file::describe > it` for Jest/Vitest, `file::Class::test` for pytest).
   They are unverified. `PASS_TO_PASS`, `image`, `eval_script`, and
