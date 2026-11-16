@@ -58,6 +58,12 @@ one task file under the matching `docs/tasks/sprint-N/` directory. The task ID
 in its front matter must match the filename. Missing tags or process evidence
 are shown as checks for the student; the app does not assign a grade.
 
+A PR that is still open is not imported, but its task file is checked at the
+PR's head commit and the student is told every problem at once, so the file can
+be fixed before the merge. If the PR has no file named after a task ID but adds
+exactly one other `.md` file in the sprint folder, that file is checked and the
+message names what is wrong with it (for example, its name against its ID).
+
 Submissions are tied to the signed-in UCSC account and course membership. A
 task is marked analyzed only after its Repo Metrics result is saved and linked
 to that exact PR. The student's task description comes from the committed file,

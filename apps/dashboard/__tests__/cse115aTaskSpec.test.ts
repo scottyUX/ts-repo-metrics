@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { canonicalHeadings, filenameMatchesId, isTaskFilePath, parsePullRequestUrl, parseTaskSpec } from "@/lib/cse115a/taskSpec";
+import { canonicalHeadings, filenameMatchesId, isTaskFilePath, parsePullRequestUrl, parseTaskSpec, TASK_ID_PATTERN, taskIdProblem } from "@/lib/cse115a/taskSpec";
 
 const valid = `---
 id: US-1-T-1
@@ -48,7 +48,7 @@ describe("CSE 115A task import", () => {
 
   it("rejects task IDs a git tag can't use or with one part", () => {
     for (const id of [".US-1", "US-1.", "US..1", "US--1", "3"]) {
-      expect(() => parseTaskSpec(valid.replace("id: US-1-T-1", `id: ${id}`))).toThrow("invalid id");
+      expect(() => parseTaskSpec(valid.replace("id: US-1-T-1", `id: ${id}`))).toThrow(`The task ID “${id}”`);
       expect(isTaskFilePath(`docs/tasks/sprint-2/${id}.md`, 2)).toBe(false);
     }
     expect(isTaskFilePath("docs/tasks/sprint-3/US-2.3-T-2.md", 2)).toBe(false);
@@ -101,5 +101,58 @@ describe("CSE 115A task import", () => {
     expect(canonicalHeadings(twice).markdown).toBe(twice);
     const crlf = typo.replace(/\n/g, "\r\n");
     expect(canonicalHeadings(crlf).markdown).toBe(valid.replace(/\n/g, "\r\n"));
+  });
+});
+
+describe("CSE 115A task file: every problem, named exactly (#388)", () => {
+  const CHARACTERS = 'Use only letters, digits, "-", "." and "_".';
+  const thrown = (markdown: string) => {
+    try {
+      parseTaskSpec(markdown);
+    } catch (error) {
+      return (error as Error).message;
+    }
+    return null;
+  };
+  const joiners = (id: string) => `The task ID “${id}” must be letters and digits joined by single "-", "." or "_", for example US-1-T-1.`;
+  const cases: Array<[string, string | null]> = [
+    ["", "The front matter needs an id."],
+    ["US 3 T 1", `The task ID “US 3 T 1” has a space. ${CHARACTERS}`],
+    ["US#3-T-1", `The task ID “US#3-T-1” has the character “#”. ${CHARACTERS}`],
+    ["US..1", joiners("US..1")],
+    [".US-1", joiners(".US-1")],
+    ["US-1.", joiners("US-1.")],
+    ["US--1", joiners("US--1")],
+    ["_3_2", joiners("_3_2")],
+    ["3__2", joiners("3__2")],
+    ["3", `The task ID “3” has only one part. Use two or more parts joined by "-", "." or "_", for example US-3-T-1.`],
+    ["US-1-T-1", null],
+    ["US-2.3-T-2", null],
+    ["3_2_1", null],
+    ["3.2.1", null],
+  ];
+
+  it.each(cases)("taskIdProblem(%j)", (id, problem) => {
+    expect(taskIdProblem(id)).toBe(problem);
+  });
+
+  it("finds an ID valid exactly when the task ID pattern matches it", () => {
+    for (const [id] of cases) {
+      expect(taskIdProblem(id) === null).toBe(new RegExp(`^${TASK_ID_PATTERN}$`).test(id));
+    }
+  });
+
+  it("lists a bad ID and two missing sections in one message, in order", () => {
+    const markdown = valid.replace("id: US-1-T-1", "id: US#1").replace("## Specs", "## Steps").replace("## Requirements", "## Needs");
+    expect(thrown(markdown)).toBe([
+      "The task file needs a nonempty “Specs” section.",
+      "The task file needs a nonempty “Requirements” section.",
+      `The task ID “US#1” has the character “#”. ${CHARACTERS}`,
+    ].join("\n"));
+  });
+
+  it("names a missing story and a non-number estimate, and no ID line when the ID is fine", () => {
+    const markdown = valid.replace("story: US-1\n", "").replace("estimate_hours: 3", "estimate_hours: three");
+    expect(thrown(markdown)).toBe("The front matter needs a story.\nThe front matter needs estimate_hours as a number.");
   });
 });
