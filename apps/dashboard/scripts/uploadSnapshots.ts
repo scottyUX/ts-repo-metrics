@@ -1,6 +1,7 @@
 // Uploads a batch folder's snapshot bundles to the private Supabase Storage bucket
 // benchmark-snapshots: every DIR/snapshots/*.bundle the bucket does not have yet, never overwriting
-// one it has. One line per file (stored, already stored, upload failed: ...), then a count; exits 1
+// one it has. Each object is named <instance_id>.<first 12 characters of the commit the bundle
+// holds>.bundle; the local files keep their names. Needs git (to read that commit). One line per file (stored, already stored, upload failed: ...), then a count; exits 1
 // when any upload failed. --dry-run lists what would be uploaded and uploads nothing (it still asks
 // the bucket which bundles it has). --only limits it to those instance ids. Run from the repo root:
 //

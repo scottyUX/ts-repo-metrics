@@ -13,10 +13,11 @@ import { bundleRepo, CloneError, NO_APP_CLONE_DETAIL, run } from "@/lib/cse115a/
 import type { RunPlan, State, SuiteRunner } from "@/lib/cse115a/benchmark/validation/runner";
 import { findBundle, rowCheckout, snapshotOnly, snapshotPath, type BatchGit } from "@/lib/cse115a/benchmark/validation/snapshots";
 import {
-  bucketSnapshotStore, ensureSnapshotBucket, SNAPSHOT_BUCKET, SNAPSHOT_SIZE_LIMIT, supabaseBucketAdmin, supabaseSnapshotStore, uploadSnapshotDir,
+  bucketSnapshotStore, ensureSnapshotBucket, legacySnapshotObject, SNAPSHOT_BUCKET, SNAPSHOT_SIZE_LIMIT, snapshotObject, supabaseBucketAdmin, supabaseSnapshotStore, uploadSnapshotDir,
   type BucketAdmin, type BucketFiles, type SnapshotStore,
 } from "@/lib/cse115a/benchmark/validation/snapshotStore";
 import type { TaskRow, ValidationResult } from "@/lib/cse115a/benchmark/validation/validateTask";
+import { folderBucket } from "./helpers/folderBucket";
 
 const GIT_ID = ["-c", "user.name=t", "-c", "user.email=t@localhost"];
 let scratch = "";
@@ -70,27 +71,35 @@ class CheckoutRunner implements SuiteRunner {
   }
 }
 
-/** An in-memory bucket that never overwrites, counting every call; `fail` makes each call throw. */
+/** The object name for a row id at the test repository's base commit. */
+const obj = (id: string) => snapshotObject(id, base);
+
+/**
+ * An in-memory bucket keyed by object name that never overwrites, counting every call (`has` and
+ * `upload` by object name, `download` by instance id); `fail` makes each call throw. Downloads try the
+ * new name, then the old one, as the Supabase store does.
+ */
 class FakeStore implements SnapshotStore {
   objects = new Map<string, Buffer>();
   calls: string[] = [];
   constructor(public fail: string | null = null) {}
-  async has(id: string) {
-    this.calls.push(`has ${id}`);
+  async has(id: string, baseCommit: string) {
+    this.calls.push(`has ${snapshotObject(id, baseCommit)}`);
     if (this.fail) throw new Error(this.fail);
-    return this.objects.has(id);
+    return this.objects.has(snapshotObject(id, baseCommit));
   }
-  async upload(id: string, file: string) {
-    this.calls.push(`upload ${id}`);
+  async upload(id: string, baseCommit: string, file: string) {
+    const name = snapshotObject(id, baseCommit);
+    this.calls.push(`upload ${name}`);
     if (this.fail) throw new Error(this.fail);
-    if (this.objects.has(id)) return "already stored" as const;
-    this.objects.set(id, await readFile(file));
+    if (this.objects.has(name)) return "already stored" as const;
+    this.objects.set(name, await readFile(file));
     return "uploaded" as const;
   }
-  async download(id: string, file: string) {
+  async download(id: string, baseCommit: string, file: string) {
     this.calls.push(`download ${id}`);
     if (this.fail) throw new Error(this.fail);
-    const body = this.objects.get(id);
+    const body = this.objects.get(snapshotObject(id, baseCommit)) ?? this.objects.get(legacySnapshotObject(id));
     if (!body) return false;
     await writeFile(file, body);
     return true;
@@ -158,19 +167,19 @@ describe("uploading", () => {
     const store = new FakeStore();
     const first = await snapshotOnly({ rows: [row], out, redo: false, git: { clone: cloneFromStandIn }, store });
     expect(first.lines).toEqual([`${row.instance_id}: snapshot written; stored`, "1 snapshot(s) written, 0 already had one, 0 failed, of 1 row(s), 1 stored, 0 upload failures"]);
-    expect(store.objects.get(row.instance_id)).toEqual(await readFile(join(out, snapshotPath(row.instance_id))));
+    expect(store.objects.get(obj(row.instance_id))).toEqual(await readFile(join(out, snapshotPath(row.instance_id))));
     const second = await snapshotOnly({ rows: [row], out, redo: false, git: { clone: cloneFromStandIn }, store });
     expect(second.lines).toEqual([`${row.instance_id}: already has a snapshot; already stored`, "0 snapshot(s) written, 1 already had one, 0 failed, of 1 row(s), 0 stored, 0 upload failures"]);
-    expect(store.calls.filter((c) => c.startsWith("upload"))).toEqual([`upload ${row.instance_id}`]);
+    expect(store.calls.filter((c) => c.startsWith("upload"))).toEqual([`upload ${obj(row.instance_id)}`]);
   });
 
   it("--redo rewrites the local bundle but never the stored copy", async () => {
     const out = await freshOut();
     const store = new FakeStore();
-    store.objects.set(row.instance_id, Buffer.from("the first copy"));
+    store.objects.set(obj(row.instance_id), Buffer.from("the first copy"));
     const redone = await snapshotOnly({ rows: [row], out, redo: true, git: { clone: cloneFromStandIn }, store });
     expect(redone.lines[0]).toBe(`${row.instance_id}: snapshot written; already stored`);
-    expect(store.objects.get(row.instance_id)?.toString()).toBe("the first copy");
+    expect(store.objects.get(obj(row.instance_id))?.toString()).toBe("the first copy");
   });
 
   it("3. a bundle already in the folder but not in the store is uploaded by the snapshot-only pass", async () => {
@@ -180,7 +189,7 @@ describe("uploading", () => {
     const report = await snapshotOnly({ rows: [row], out, redo: false, git: { clone: async () => { cloned = true; } }, store });
     expect(cloned).toBe(false);
     expect(report.lines).toEqual([`${row.instance_id}: already has a snapshot; stored`, "0 snapshot(s) written, 1 already had one, 0 failed, of 1 row(s), 1 stored, 0 upload failures"]);
-    expect(store.calls).toEqual([`has ${row.instance_id}`, `upload ${row.instance_id}`]);
+    expect(store.calls).toEqual([`has ${obj(row.instance_id)}`, `upload ${obj(row.instance_id)}`]);
   });
 
   it("4. an upload failure is on the row's line and in the count, and changes nothing else", async () => {
@@ -203,7 +212,7 @@ describe("uploading", () => {
     const lines: string[] = [];
     const ctx = { ...context(await freshOut(), { clone: cloneFromStandIn }, { snapshots: true, store }), log: (l: string) => lines.push(l) };
     await validateBatchRow(ctx, { ...row }, join(scratch, "logs"));
-    expect(store.objects.has(row.instance_id)).toBe(true);
+    expect(store.objects.has(obj(row.instance_id))).toBe(true);
     expect(lines).toContain("  snapshot written; stored");
   });
 });
@@ -213,7 +222,7 @@ describe("restoring", () => {
     const elsewhere = await mkdtemp(join(scratch, "from-"));
     await run("cp", [bundle, join(elsewhere, `${row.instance_id}.bundle`)]);
     const store = new FakeStore();
-    store.objects.set(row.instance_id, await readFile(bundle));
+    store.objects.set(obj(row.instance_id), await readFile(bundle));
 
     const own = await freshOut(true);
     expect(await findBundle(own, row, { snapshotsFrom: elsewhere, store })).toBe(join(own, snapshotPath(row.instance_id)));
@@ -257,7 +266,7 @@ describe("restoring", () => {
     // Truncated (git bundle verify alone passes this), not a bundle, and another repository's bundle.
     for (const body of [whole.subarray(0, Math.floor(whole.length / 2)), Buffer.from("not a bundle"), await readFile(wrong)]) {
       const store = new FakeStore();
-      store.objects.set(row.instance_id, body);
+      store.objects.set(obj(row.instance_id), body);
       const out = await freshOut();
       const lines: string[] = [];
       await expect(rowCheckout({ out, row, clones: new Map(), log: (l) => lines.push(l), git: { clone: refusedClone }, store })).rejects.toBe(REFUSED);
@@ -289,12 +298,12 @@ describe("the Supabase store over storage-js answers", () => {
   it("uploads with upsert false and the octet-stream type; an existing object is already stored, any other error throws", async () => {
     const seen: unknown[] = [];
     const ok = bucketSnapshotStore(files({ upload: async (path, body, options) => { seen.push(path, body.length, options); return { data: {}, error: null }; } }));
-    expect(await ok.upload(row.instance_id, bundle)).toBe("uploaded");
-    expect(seen).toEqual([`${row.instance_id}.bundle`, (await readFile(bundle)).length, { contentType: "application/octet-stream", upsert: false }]);
+    expect(await ok.upload(row.instance_id, base, bundle)).toBe("uploaded");
+    expect(seen).toEqual([`${row.instance_id}.${base.slice(0, 12)}.bundle`, (await readFile(bundle)).length, { contentType: "application/octet-stream", upsert: false }]);
     const duplicate = bucketSnapshotStore(files({ upload: async () => ({ data: null, error: apiError("The resource already exists", 400, "409") }) }));
-    expect(await duplicate.upload(row.instance_id, bundle)).toBe("already stored");
+    expect(await duplicate.upload(row.instance_id, base, bundle)).toBe("already stored");
     const missing = bucketSnapshotStore(files({ upload: async () => ({ data: null, error: apiError("Bucket not found", 400, "404") }) }));
-    await expect(missing.upload(row.instance_id, bundle)).rejects.toThrow("Storage: Bucket not found");
+    await expect(missing.upload(row.instance_id, base, bundle)).rejects.toThrow("Storage: Bucket not found");
   });
 
   it("refuses a bundle over the 50 MB limit before sending it", async () => {
@@ -303,7 +312,7 @@ describe("the Supabase store over storage-js answers", () => {
     await truncate(big, SNAPSHOT_SIZE_LIMIT + 1);
     let sent = false;
     const store = bucketSnapshotStore(files({ upload: async () => { sent = true; return { data: {}, error: null }; } }));
-    await expect(store.upload("big", big)).rejects.toThrow("the bundle is 50.0 MB, over the bucket's 50.0 MB limit; kept only in this folder");
+    await expect(store.upload("big", base, big)).rejects.toThrow("the bundle is 50.0 MB, over the bucket's 50.0 MB limit; kept only in this folder");
     expect(sent).toBe(false);
   });
 
@@ -311,20 +320,20 @@ describe("the Supabase store over storage-js answers", () => {
     const dir = await mkdtemp(join(scratch, "dl-"));
     const target = join(dir, "x.bundle");
     const notFound = bucketSnapshotStore(files({ download: async () => ({ data: null, error: { message: "Object not found", originalError: { status: 400 } } }) }));
-    expect(await notFound.download("x", target)).toBe(false);
+    expect(await notFound.download("x", base, target)).toBe(false);
     const body = await readFile(bundle);
     const found = bucketSnapshotStore(files({ download: async () => ({ data: new Blob([body]), error: null }) }));
-    expect(await found.download("x", target)).toBe(true);
+    expect(await found.download("x", base, target)).toBe(true);
     expect(await readFile(target)).toEqual(body);
     expect(await readdir(dir)).toEqual(["x.bundle"]);
     const broken = bucketSnapshotStore(files({ download: async () => ({ data: null, error: { message: "Internal Server Error", originalError: { status: 500 } } }) }));
-    await expect(broken.download("x", target)).rejects.toThrow("Storage: Internal Server Error");
+    await expect(broken.download("x", base, target)).rejects.toThrow("Storage: Internal Server Error");
   });
 
   it("has: true, false on not found, throws otherwise", async () => {
-    expect(await bucketSnapshotStore(files({ exists: async () => ({ data: true, error: null }) })).has("x")).toBe(true);
-    expect(await bucketSnapshotStore(files({ exists: async () => ({ data: false, error: { message: "", originalError: { status: 404 } } }) })).has("x")).toBe(false);
-    await expect(bucketSnapshotStore(files({ exists: async () => ({ data: false, error: { message: "denied", status: 403, statusCode: "403" } }) })).has("x")).rejects.toThrow("denied");
+    expect(await bucketSnapshotStore(files({ exists: async () => ({ data: true, error: null }) })).has("x", base)).toBe(true);
+    expect(await bucketSnapshotStore(files({ exists: async () => ({ data: false, error: { message: "", originalError: { status: 404 } } }) })).has("x", base)).toBe(false);
+    await expect(bucketSnapshotStore(files({ exists: async () => ({ data: false, error: { message: "denied", status: 403, statusCode: "403" } }) })).has("x", base)).rejects.toThrow("denied");
   });
 });
 
@@ -340,12 +349,12 @@ describe("8. uploadSnapshots.ts", () => {
   it("--dry-run lists what it would upload and uploads nothing", async () => {
     const dir = await folder(["A-1", "B-1"]);
     const store = new FakeStore();
-    store.objects.set("B-1", Buffer.from("x"));
+    store.objects.set(obj("B-1"), Buffer.from("x"));
     const report = await uploadSnapshotDir({ dir, store, dryRun: true });
     expect(report.lines[0]).toMatch(/^A-1: would upload \(0\.\d MB\)$/);
     expect(report.lines.slice(1)).toEqual(["B-1: already stored", "Dry run: 1 would be uploaded, 1 already stored, 0 check failures, of 2 bundle(s); nothing uploaded"]);
     expect(store.calls.filter((c) => c.startsWith("upload"))).toEqual([]);
-    expect([...store.objects.keys()]).toEqual(["B-1"]);
+    expect([...store.objects.keys()]).toEqual([obj("B-1")]);
   });
 
   it("uploads what is missing, then says already stored on a second run; --only limits it", async () => {
@@ -353,7 +362,7 @@ describe("8. uploadSnapshots.ts", () => {
     const store = new FakeStore();
     const first = await uploadSnapshotDir({ dir, store, only: ["A-1", "C-1", "Z-9"] });
     expect(first.lines).toEqual([`Z-9: no bundle in ${join(dir, "snapshots")}`, "A-1: stored", "C-1: stored", "2 stored, 0 already stored, 0 upload failures, of 2 bundle(s), 1 not found"]);
-    expect([...store.objects.keys()].sort()).toEqual(["A-1", "C-1"]);
+    expect([...store.objects.keys()].sort()).toEqual([obj("A-1"), obj("C-1")]);
     const second = await uploadSnapshotDir({ dir, store });
     expect(second.lines).toEqual(["A-1: already stored", "B-1: stored", "C-1: already stored", "1 stored, 2 already stored, 0 upload failures, of 3 bundle(s)"]);
     const failing = await uploadSnapshotDir({ dir, store: new FakeStore("Storage: timeout") });
@@ -417,5 +426,84 @@ describe("9. createSnapshotBucket.ts", () => {
   it("stops on any other error from getBucket", async () => {
     const fake: BucketAdmin = { getBucket: async () => ({ data: null, error: { message: "Invalid Compact JWS", status: 400, statusCode: "403" } }), createBucket: async () => { throw new Error("must not create"); } };
     await expect(ensureSnapshotBucket(fake, () => {})).rejects.toThrow("Storage: Invalid Compact JWS");
+  });
+});
+
+describe("#298 B: object names carry the base commit", () => {
+  async function bucket() {
+    const files = folderBucket(await mkdtemp(join(scratch, "bucket-")));
+    return { files, store: bucketSnapshotStore(files) };
+  }
+  async function otherRepoBundle(): Promise<string> {
+    const otherRepo = await mkdtemp(join(scratch, "other-"));
+    await run("git", ["init", "-q", "-b", "main"], otherRepo);
+    await writeFile(join(otherRepo, "x.txt"), "x\n");
+    await run("git", [...GIT_ID, "add", "-A"], otherRepo);
+    await run("git", [...GIT_ID, "commit", "-qm", "x"], otherRepo);
+    const file = join(otherRepo, "..", `${otherRepo.split("/").pop()}.bundle`);
+    await bundleRepo(otherRepo, "HEAD", file);
+    return file;
+  }
+
+  it("a writer uses <instance_id>.<first 12 characters of base_commit>.bundle; the local file keeps its name", async () => {
+    const { files, store } = await bucket();
+    const out = await freshOut();
+    await snapshotOnly({ rows: [row], out, redo: false, git: { clone: cloneFromStandIn }, store });
+    expect(await files.names()).toEqual([`${row.instance_id}.${base.slice(0, 12)}.bundle`]);
+    expect(await readdir(join(out, "snapshots"))).toEqual([`${row.instance_id}.bundle`]);
+    // The uploader names the object for the commit inside the bundle, not the file name.
+    const dir = await mkdtemp(join(scratch, "upload-"));
+    await mkdir(join(dir, "snapshots"));
+    await run("cp", [bundle, join(dir, "snapshots", "X-1.bundle")]);
+    const second = await bucket();
+    await uploadSnapshotDir({ dir, store: second.store });
+    expect(await second.files.names()).toEqual([`X-1.${base.slice(0, 12)}.bundle`]);
+    expect(() => snapshotObject("X-1", "main")).toThrow("not a commit id");
+  });
+
+  it("a reader finds a copy under the new name, then under the old name", async () => {
+    for (const name of [obj(row.instance_id), legacySnapshotObject(row.instance_id)]) {
+      const { files, store } = await bucket();
+      await writeFile(join(files.dir, name), await readFile(bundle));
+      const out = await freshOut();
+      expect(await findBundle(out, row, { store })).toBe(join(out, snapshotPath(row.instance_id)));
+      expect(await readFile(join(out, snapshotPath(row.instance_id)))).toEqual(await readFile(bundle));
+    }
+    // Both there: the new name is the one read.
+    const { files, store } = await bucket();
+    await writeFile(join(files.dir, obj(row.instance_id)), await readFile(bundle));
+    await writeFile(join(files.dir, legacySnapshotObject(row.instance_id)), "an older copy");
+    expect(await findBundle(await freshOut(), row, { store })).not.toBeNull();
+    expect(files.calls).toEqual([`download ${obj(row.instance_id)}`]);
+  });
+
+  it("a copy that does not hold the base commit is refused under either name", async () => {
+    const wrong = await readFile(await otherRepoBundle());
+    for (const name of [obj(row.instance_id), legacySnapshotObject(row.instance_id)]) {
+      const { files, store } = await bucket();
+      await writeFile(join(files.dir, name), wrong);
+      const out = await freshOut();
+      const lines: string[] = [];
+      expect(await findBundle(out, row, { store, log: (l) => lines.push(l) })).toBeNull();
+      expect(await readdir(join(out, "snapshots"))).toEqual([]);
+      expect(lines.some((l) => l.includes("failed the check and was deleted"))).toBe(true);
+    }
+  });
+
+  it("a changed base commit gets a second object and the first is untouched", async () => {
+    const { files, store } = await bucket();
+    await snapshotOnly({ rows: [row], out: await freshOut(), redo: false, git: { clone: cloneFromStandIn }, store });
+    const first = await readFile(join(files.dir, obj(row.instance_id)));
+    const later = (await run("git", ["rev-parse", "main"], join(github, "team", "app.git"))).trim();
+    expect(later).not.toBe(base);
+    const rebuilt = { ...row, base_commit: later };
+    const report = await snapshotOnly({ rows: [rebuilt], out: await freshOut(), redo: false, git: { clone: cloneFromStandIn }, store });
+    expect(report.lines[0]).toBe(`${row.instance_id}: snapshot written; stored`);
+    expect(await files.names()).toEqual([obj(row.instance_id), snapshotObject(row.instance_id, later)].sort());
+    expect(await readFile(join(files.dir, obj(row.instance_id)))).toEqual(first);
+    // Each row reads its own copy.
+    expect(await findBundle(await freshOut(), rebuilt, { store })).not.toBeNull();
+    expect(await findBundle(await freshOut(), row, { store })).not.toBeNull();
+    expect(await store.has(row.instance_id, later)).toBe(true);
   });
 });

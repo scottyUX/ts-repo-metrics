@@ -98,7 +98,7 @@ export async function findBundle(out: string, row: Pick<TaskRow, "instance_id" |
   if (!options.store) return null;
   try {
     await mkdir(dirname(own), { recursive: true });
-    if (!(await options.store.download(row.instance_id, own))) {
+    if (!(await options.store.download(row.instance_id, row.base_commit, own))) {
       log("  the snapshot store has no copy of this row's snapshot");
       return null;
     }
@@ -171,14 +171,15 @@ export const SNAPSHOT_UPLOAD_FAILED = "upload failed";
 export type StoreOutcome = { part: string; outcome: "stored" | "already stored" | "failed" };
 
 /**
- * Puts the row's bundle in the store unless it is there already: `checkFirst` asks `has` before
- * uploading (a bundle that was already in the folder); a new bundle goes straight to `upload`, which
- * never overwrites either. Never throws: a failure is the outcome, with its first line.
+ * Puts the row's bundle in the store, under the name for its base commit, unless it is there already:
+ * `checkFirst` asks `has` before uploading (a bundle that was already in the folder); a new bundle goes
+ * straight to `upload`, which never overwrites either. Never throws: a failure is the outcome, with its
+ * first line.
  */
-export async function storeBundle(store: SnapshotStore, instanceId: string, file: string, checkFirst: boolean): Promise<StoreOutcome> {
+export async function storeBundle(store: SnapshotStore, instanceId: string, baseCommit: string, file: string, checkFirst: boolean): Promise<StoreOutcome> {
   try {
-    if (checkFirst && (await store.has(instanceId))) return { part: SNAPSHOT_ALREADY_STORED, outcome: "already stored" };
-    const answer = await store.upload(instanceId, file);
+    if (checkFirst && (await store.has(instanceId, baseCommit))) return { part: SNAPSHOT_ALREADY_STORED, outcome: "already stored" };
+    const answer = await store.upload(instanceId, baseCommit, file);
     return answer === "uploaded" ? { part: SNAPSHOT_STORED, outcome: "stored" } : { part: SNAPSHOT_ALREADY_STORED, outcome: "already stored" };
   } catch (error) {
     return { part: `${SNAPSHOT_UPLOAD_FAILED}: ${firstLine(error)}`, outcome: "failed" };
@@ -200,7 +201,7 @@ export async function recordSnapshot(out: string, row: Pick<TaskRow, "instance_i
       log(`  snapshot failed: ${firstLine(error)}`);
       return null;
     }
-    if (store) log(`  ${SNAPSHOT_WRITTEN}; ${(await storeBundle(store, row.instance_id, join(out, bundle), false)).part}`);
+    if (store) log(`  ${SNAPSHOT_WRITTEN}; ${(await storeBundle(store, row.instance_id, row.base_commit, join(out, bundle), false)).part}`);
     return bundle;
   }
   return (await exists(join(out, bundle))) ? bundle : undefined;
@@ -235,9 +236,9 @@ export async function snapshotOnly(options: { rows: TaskRow[]; out: string; redo
   const clones = new Map<string, string>();
   const report: SnapshotOnlyReport = { lines: [], written: 0, existing: 0, failed: 0, stored: 0, uploadFailures: 0 };
   const say = (line: string) => { report.lines.push(line); options.print?.(line); };
-  const withStore = async (id: string, first: string, checkFirst: boolean): Promise<string> => {
+  const withStore = async (id: string, baseCommit: string, first: string, checkFirst: boolean): Promise<string> => {
     if (!store) return first;
-    const stored = await storeBundle(store, id, join(options.out, snapshotPath(id)), checkFirst);
+    const stored = await storeBundle(store, id, baseCommit, join(options.out, snapshotPath(id)), checkFirst);
     if (stored.outcome === "stored") report.stored++;
     if (stored.outcome === "failed") report.uploadFailures++;
     return `${first}; ${stored.part}`;
@@ -246,7 +247,7 @@ export async function snapshotOnly(options: { rows: TaskRow[]; out: string; redo
     const id = row.instance_id;
     if (!options.redo && (await exists(join(options.out, snapshotPath(id))))) {
       report.existing++;
-      say(`${id}: ${await withStore(id, SNAPSHOT_EXISTS, true)}`);
+      say(`${id}: ${await withStore(id, row.base_commit, SNAPSHOT_EXISTS, true)}`);
       continue;
     }
     try {
@@ -259,7 +260,7 @@ export async function snapshotOnly(options: { rows: TaskRow[]; out: string; redo
       continue;
     }
     report.written++;
-    say(`${id}: ${await withStore(id, SNAPSHOT_WRITTEN, false)}`);
+    say(`${id}: ${await withStore(id, row.base_commit, SNAPSHOT_WRITTEN, false)}`);
   }
   const storeCount = store ? `, ${report.stored} stored, ${report.uploadFailures} upload failures` : "";
   say(`${report.written} snapshot(s) written, ${report.existing} already had one, ${report.failed} failed, of ${options.rows.length} row(s)${storeCount}`);

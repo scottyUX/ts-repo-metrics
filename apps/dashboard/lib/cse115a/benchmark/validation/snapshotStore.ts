@@ -1,12 +1,19 @@
 // A copy of every snapshot bundle in a private Supabase Storage bucket, so a row whose repository
 // has since been deleted or made private can still be validated when the batch folder that holds its
-// bundle is gone. Object `<instance_id>.bundle` in bucket `benchmark-snapshots`; only the service-role
-// key reads or writes it (no policies). A copy is never overwritten: a row's base commit never
-// changes, so the first upload is the copy. The website and the exports never read the bucket.
+// bundle is gone. Object `<instance_id>.<first 12 characters of base_commit>.bundle` in bucket
+// `benchmark-snapshots`; only the service-role key reads or writes it (no policies). A copy is never
+// overwritten: a resubmission or a staff rebuild that changes a row's base commit gets a second object
+// under the new name, and the first stays. Objects uploaded before the name carried the base commit are
+// `<instance_id>.bundle`; readers try the new name, then that one, and check the base commit is in the
+// copy before using it (findBundle). Writers: the validator (validateBenchmarkBatch.ts,
+// uploadSnapshots.ts) and the website, which copies each task's repository at Submit when
+// CSE115A_REPO_COPIES=on (repoCopy.ts) and from the instructor Benchmark page. The website asks only
+// whether a copy exists; it never downloads one or serves one, and the exports never read the bucket.
 
 import { readdir, readFile, rename, rm, stat, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { createClient } from "@supabase/supabase-js";
+import { run } from "@/lib/cse115a/benchmark/validation/runRow";
 
 export const SNAPSHOT_BUCKET = "benchmark-snapshots";
 /** The bucket's file size limit (createSnapshotBucket.ts); a larger bundle stays local only. */
@@ -14,14 +21,28 @@ export const SNAPSHOT_SIZE_LIMIT = 50 * 1024 * 1024;
 const CONTENT_TYPE = "application/octet-stream";
 
 export type SnapshotStore = {
-  has(instanceId: string): Promise<boolean>;
-  /** Never overwrites: an object already there is "already stored". Throws on any other failure. */
-  upload(instanceId: string, file: string): Promise<"uploaded" | "already stored">;
-  /** Writes the object to `file`; false when there is no such object. Throws on any other failure. */
-  download(instanceId: string, file: string): Promise<boolean>;
+  /** Whether the copy for this base commit is stored (the new name only). */
+  has(instanceId: string, baseCommit: string): Promise<boolean>;
+  /** Writes the new name and never overwrites: an object already there is "already stored". Throws on any other failure. */
+  upload(instanceId: string, baseCommit: string, file: string): Promise<"uploaded" | "already stored">;
+  /**
+   * Writes the copy to `file`: the new name, else the old `<instance_id>.bundle`; false when there is
+   * neither. The caller checks the base commit is in it (findBundle). Throws on any other failure.
+   */
+  download(instanceId: string, baseCommit: string, file: string): Promise<boolean>;
 };
 
-export function snapshotObject(instanceId: string): string {
+/** How many characters of the base commit the object name carries. */
+export const OBJECT_COMMIT_CHARS = 12;
+
+/** The object for a row at a base commit: `<instance_id>.<first 12 characters of base_commit>.bundle`. */
+export function snapshotObject(instanceId: string, baseCommit: string): string {
+  if (!new RegExp(`^[0-9a-f]{${OBJECT_COMMIT_CHARS},64}$`, "i").test(baseCommit)) throw new Error(`not a commit id: ${JSON.stringify(baseCommit)}`);
+  return `${instanceId}.${baseCommit.slice(0, OBJECT_COMMIT_CHARS).toLowerCase()}.bundle`;
+}
+
+/** The name objects had before it carried the base commit; read, never written. */
+export function legacySnapshotObject(instanceId: string): string {
   return `${instanceId}.bundle`;
 }
 
@@ -86,25 +107,33 @@ function mb(bytes: number): string {
 /** The store over a bucket's file calls. */
 export function bucketSnapshotStore(files: BucketFiles): SnapshotStore {
   return {
-    async has(instanceId) {
-      const { data, error } = await files.exists(snapshotObject(instanceId));
+    async has(instanceId, baseCommit) {
+      const { data, error } = await files.exists(snapshotObject(instanceId, baseCommit));
       if (error && !isMissing(error)) throw new Error(`Storage: ${error.message}`);
       return data === true;
     },
-    async upload(instanceId, file) {
+    async upload(instanceId, baseCommit, file) {
+      const name = snapshotObject(instanceId, baseCommit);
       const { size } = await stat(file);
       if (size > SNAPSHOT_SIZE_LIMIT) throw new Error(`the bundle is ${mb(size)}, over the bucket's ${mb(SNAPSHOT_SIZE_LIMIT)} limit; kept only in this folder`);
       const body = await readFile(file);
-      const { error } = await files.upload(snapshotObject(instanceId), body, { contentType: CONTENT_TYPE, upsert: false });
+      const { error } = await files.upload(name, body, { contentType: CONTENT_TYPE, upsert: false });
       if (!error) return "uploaded";
       if (isDuplicate(error)) return "already stored";
       throw new Error(`Storage: ${error.message}`);
     },
-    async download(instanceId, file) {
-      const { data, error } = await files.download(snapshotObject(instanceId));
-      if (error) {
-        if (isMissing(error)) return false;
-        throw new Error(`Storage: ${error.message}`);
+    async download(instanceId, baseCommit, file) {
+      let data: Blob | null = null;
+      for (const name of [snapshotObject(instanceId, baseCommit), legacySnapshotObject(instanceId)]) {
+        const answer = await files.download(name);
+        if (answer.error) {
+          if (isMissing(answer.error)) continue;
+          throw new Error(`Storage: ${answer.error.message}`);
+        }
+        if (answer.data) {
+          data = answer.data;
+          break;
+        }
       }
       if (!data) return false;
       // Written beside the target and renamed, so an interrupted download never leaves a partial
@@ -132,12 +161,22 @@ export function supabaseSnapshotStore(env: Env = process.env): SnapshotStore | n
 
 type Print = (line: string) => void;
 
+/** The commit a snapshot bundle holds: its one branch's head (bundleRepo writes refs/heads/hecate-snapshot). */
+export async function bundleHead(file: string): Promise<string> {
+  const heads = (await run("git", ["bundle", "list-heads", file])).trim().split("\n").filter(Boolean);
+  const sha = heads.length === 1 ? heads[0]!.split(/\s+/)[0] : undefined;
+  if (!sha || !/^[0-9a-f]{40,64}$/i.test(sha)) throw new Error(`${file} is not a snapshot bundle with one branch`);
+  return sha;
+}
+
 export type UploadDirReport = { lines: string[]; stored: number; alreadyStored: number; wouldUpload: number; failures: number; notFound: number };
 
 /**
  * uploadSnapshots.ts: every `<dir>/snapshots/*.bundle` (or only the `only` ids) that the store does
  * not have yet is uploaded, one line per file (`stored`, `already stored`, `upload failed: …`), then
- * a count. With `dryRun` nothing is uploaded: each line says `would upload` or `already stored`.
+ * a count. The local file keeps its `<instance_id>.bundle` name; the object is named for the commit
+ * the bundle holds (bundleHead). With `dryRun` nothing is uploaded: each line says `would upload` or
+ * `already stored`.
  */
 export async function uploadSnapshotDir(options: { dir: string; store: SnapshotStore; only?: string[]; dryRun?: boolean; print?: Print }): Promise<UploadDirReport> {
   const { store } = options;
@@ -159,15 +198,17 @@ export async function uploadSnapshotDir(options: { dir: string; store: SnapshotS
     say(`${id}: no bundle in ${folder}`);
   }
   for (const id of ids) {
-    const file = join(folder, snapshotObject(id));
+    const file = join(folder, legacySnapshotObject(id));
     try {
-      if (await store.has(id)) {
+      // Local files keep the plain name; the object name takes the commit the bundle holds.
+      const baseCommit = await bundleHead(file);
+      if (await store.has(id, baseCommit)) {
         report.alreadyStored++;
         say(`${id}: already stored`);
       } else if (options.dryRun) {
         report.wouldUpload++;
         say(`${id}: would upload (${mb((await stat(file)).size)})`);
-      } else if ((await store.upload(id, file)) === "uploaded") {
+      } else if ((await store.upload(id, baseCommit, file)) === "uploaded") {
         report.stored++;
         say(`${id}: stored`);
       } else {
