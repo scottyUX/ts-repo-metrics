@@ -87,6 +87,7 @@ Environment on the service that runs the worker:
 | `OPENAI_API_KEY` | Grader calls. |
 | `CSE115A_GRADER_MODEL` | Optional; defaults to `gpt-4o`. |
 | `CSE115A_WORKER_SECRET` | Optional; enables `POST /api/cse115a/internal/jobs/tick` with header `x-cse115a-worker-secret`, which runs queued jobs on demand (`?limit=1..10`). |
+| `CSE115A_REPO_COPIES` | Optional; only `on` turns on the repo copies (a git bundle of each task's repository in the bucket `benchmark-snapshots`, at Submit and from the Benchmark page). Needs `SUPABASE_SERVICE_ROLE_KEY` and the GitHub App variables. |
 
 ## Benchmark capture
 
@@ -122,6 +123,16 @@ task file alone (`base_commit_from_first_commit`), or at the PR base.
   when a student who submitted it said yes to the current, approved consent
   wording and no source is rejected.
 
+With `CSE115A_REPO_COPIES=on`, the `benchmark` job also saves a copy of each
+task's repository at its base commit (a git bundle) in the private Storage
+bucket `benchmark-snapshots`, after the rows are saved, using the course
+GitHub App's token. The validator needs the copy for a private repository,
+because the App's private key stays on this site. Every task is copied,
+whatever the consent answer: consent governs export, not validation. A
+failed copy makes the job retry. The instructor Benchmark page shows which
+tasks have a copy and can save the missing ones. The site never serves a copy.
+See "Copies made by the website" in `docs/CSE115A_BENCHMARK_VALIDATION.md`.
+
 ## Instructor tools
 
 Staff open `/cse115a/instructor` (the header shows **Instructor** only to
@@ -143,7 +154,8 @@ SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... \
   (instructors only, reason required) supersedes the attempt so the student can
   change tasks and submit again; the old attempt stays as history.
 - **Benchmark**: counts by status and consent, a preview of the newest rows,
-  and JSONL download.
+  JSONL download, and the repo copies (which tasks have one; "Save missing
+  repo copies" and per-task "Retry" when `CSE115A_REPO_COPIES=on`).
 
 TAs can do everything except unlock and manage staff.
 

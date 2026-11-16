@@ -1017,9 +1017,14 @@ npx tsx --tsconfig apps/dashboard/tsconfig.json apps/dashboard/scripts/validateB
 repository deleted or made private since can then never be validated again. So the bundles are
 also kept in a Supabase Storage bucket in the course's own project: `benchmark-snapshots`,
 private (`public: false`), 50 MB file size limit, no policies, so only the service-role key can
-read or write it. Object name `<instance_id>.bundle`, content type `application/octet-stream`
-(`lib/cse115a/benchmark/validation/snapshotStore.ts`). The website and the Harbor exports never
-read the bucket; it exists only for the validator.
+read or write it. Object name `<instance_id>.<first 12 characters of base_commit>.bundle`, content
+type `application/octet-stream` (`lib/cse115a/benchmark/validation/snapshotStore.ts`). Objects
+uploaded before the name carried the base commit are `<instance_id>.bundle`; they stay as they are
+and are still read (see "Restore order"). Local files keep their names: `DIR/snapshots/<instance_id>.bundle`.
+Two writers: the validator, and the course website, which copies each task's repository at Submit
+(see "Copies made by the website" below). The website only writes copies and asks whether one
+exists; it never downloads one or serves one, and the Harbor exports never read the bucket. Reading
+a copy is for the validator only.
 
 The store is on when `SUPABASE_URL` (or `NEXT_PUBLIC_SUPABASE_URL`) and
 `SUPABASE_SERVICE_ROLE_KEY` are set, read as `fetchCandidateRows.ts` reads them; the batch then
@@ -1027,8 +1032,9 @@ logs `Snapshot store: the Supabase bucket benchmark-snapshots`. Without both, ev
 behaves exactly as before. With it:
 
 - **Never overwritten.** Uploads use `upsert: false`, and Storage's "already exists" answer means
-  "already stored", not an error: a row's base commit never changes, so the first upload is the
-  copy. A `--redo` rewrites the local bundle but not the stored one.
+  "already stored", not an error. The name carries the base commit because a row's base commit can
+  change (a resubmission, a staff rebuild): the new commit gets a second object and the first is
+  left alone. A `--redo` rewrites the local bundle but not the stored one.
 - **Upload after every new bundle.** `--snapshot-only` and `--snapshots` upload each bundle they
   write. `--snapshot-only` also uploads a bundle already in `DIR/snapshots/` that the bucket does
   not have yet (it asks first), so rerunning it over an old folder fills the bucket. The row's
@@ -1040,7 +1046,8 @@ behaves exactly as before. With it:
   `upload failed: the bundle is N MB, over the bucket's 50.0 MB limit; kept only in this folder`.
   The project's global upload limit, if lower, wins over the bucket's.
 - **Restore order.** When GitHub cannot supply a row's code, the bundle is looked for in
-  `DIR/snapshots/`, then `--snapshots-from`, then the bucket. The bucket's copy is downloaded
+  `DIR/snapshots/`, then `--snapshots-from`, then the bucket: the object for the row's base commit,
+  else the old `<instance_id>.bundle`. The bucket's copy is downloaded
   straight into `DIR/snapshots/<instance_id>.bundle` (so the result records it and the Harbor
   export and gold check find it) and checked before use: `git bundle verify`, a fetch of the
   bundle into a throwaway repository (verify alone passes a truncated file; the fetch reads the
@@ -1059,13 +1066,58 @@ SUPABASE_URL=https://<project-ref>.supabase.co SUPABASE_SERVICE_ROLE_KEY=... npx
 
 `uploadSnapshots.ts` uploads a folder made before the store existed: every `DIR/snapshots/*.bundle`
 the bucket lacks, one line per file (`stored`, `already stored`, `upload failed: …`), then a
-count; it exits 1 if any upload failed. `--dry-run` lists what it would upload and uploads nothing
+count; it exits 1 if any upload failed. Each object is named for the commit the bundle holds
+(`git bundle list-heads`), so it needs git. `--dry-run` lists what it would upload and uploads nothing
 (it does ask the bucket which bundles it has); `--only id,id` limits it to those rows.
 
 ```sh
 SUPABASE_URL=https://<project-ref>.supabase.co SUPABASE_SERVICE_ROLE_KEY=... npx tsx --tsconfig apps/dashboard/tsconfig.json apps/dashboard/scripts/uploadSnapshots.ts --dir DIR --dry-run
 SUPABASE_URL=https://<project-ref>.supabase.co SUPABASE_SERVICE_ROLE_KEY=... npx tsx --tsconfig apps/dashboard/tsconfig.json apps/dashboard/scripts/uploadSnapshots.ts --dir DIR [--only id,id]
 ```
+
+**Copies made by the website.** A private repository can be cloned only with the course App's
+private key, and that key stays on the website (Railway), not on the validator's machine. So the
+website makes the copy: `lib/cse115a/benchmark/repoCopy.ts` gets the App's installation token for
+the repository (with no installation there, or no App on the site, it tries an anonymous clone, so
+a public repository still works), clones into a fresh temp folder with the validator's own
+`cloneRepo` and `ensureCommit`, writes the bundle with `bundleRepo`, checks it with `verifyBundle`,
+uploads it under the name above, and removes the temp folder whatever happens. A copy already
+stored for the base commit is not cloned again. The token is never in a log line, an error, or a
+response.
+
+- **The switch.** Server setting `CSE115A_REPO_COPIES`. Only the exact value `on` turns copies on;
+  unset or anything else (`off`, `ON `, `1`) and the site does what it did before. Reading which
+  tasks have a copy works either way.
+- **At Submit.** The `benchmark` job saves the rows as before, then copies each task of the
+  submission at the base commit stored on its row (a kept row may have been rebuilt by staff). Every
+  submitted task is copied, whatever the student's consent answer: validation needs the copy, and
+  consent governs export, not validation (decided Nov 16). If any copy fails, the job throws after
+  the rows are saved, so the usual retry applies (1, then 4 minutes, 3 attempts) and the job keeps
+  the last error, one `Repo copy for <instance_id> failed: <line>` per failed task. Saving the rows
+  again on a retry changes nothing, and a stored copy is not uploaded again.
+- **Backfill and retry.** The instructor Benchmark page lists, under "Repo copies", every task
+  without a copy for its current base commit. "Save missing repo copies" asks
+  `POST /api/cse115a/instructor/courses/<slug>/benchmark/repo-copies` for at most 3 copies at a
+  time and repeats until none are left or a request makes no progress; a task that fails is shown
+  with its line and not tried again in the same backfill. "Retry" copies one task. The route uses
+  the same staff check as the page's other routes, is refused with 409 while the switch is off, and
+  returns only ids, outcomes and lines.
+- **What a failure line means.**
+  - `<repo> is private (or gone) and the course GitHub App is not installed on it. Install the App
+    on the repository, then retry.` The anonymous clone was refused and the App has no
+    installation there. (`… is not set up on this site.` when the site has no App variables.)
+  - `The base commit <12 characters> is not in <repo> on GitHub (it may have been force-pushed
+    away).` The clone worked but the commit is gone.
+  - `The copy is N MB, over the 50.0 MB limit for stored copies.` Nothing is uploaded; the
+    validator's own clone (with the key) or a local `--snapshots` run is the only way.
+  - `GitHub error: …` A token request, clone or fetch that failed for another reason (network,
+    a refused token, a clone or fetch over 2 minutes). Retry later.
+  - `Storage error: …` The bucket could not be asked or written. Check the bucket exists
+    (`createSnapshotBucket.ts`) and the site's `SUPABASE_SERVICE_ROLE_KEY`.
+  - `Could not write the copy: …` git could not write or check the bundle (disk, for example).
+- **On the validator.** Nothing changes: when GitHub refuses the clone, it restores from the
+  bucket (the "Restore order" above). A private repository with no copy stays `env_error`
+  (`candidate`), with the clone failure as its `detail`, exactly as before.
 
 ## Known limitations
 
