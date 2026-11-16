@@ -2,6 +2,8 @@ import type { AssignmentSubmissionStatus } from "@/lib/cse115a/server";
 import type { SubmissionSnapshot } from "@/lib/cse115a/submissionSnapshot";
 import type { TaskGrade } from "@/lib/cse115a/grader/gradeTask";
 import { buildInstance, type BenchmarkInstance, type BuildFlag } from "@/lib/cse115a/benchmark/buildInstance";
+import type { RepoCopyResult, RepoCopyTask } from "@/lib/cse115a/benchmark/repoCopy";
+import { repoCopiesEnabled } from "@/lib/cse115a/benchmark/repoCopySwitch";
 
 // Claims queued jobs and runs them. Storage is behind JobStore so the retry
 // rules can be tested without a database.
@@ -52,10 +54,17 @@ export interface JobStore {
    * benchmarkSave.ts).
    */
   saveBenchmark(submission: Submission, rows: BenchmarkSave[]): Promise<void>;
+  /**
+   * The stored rows' repo and base commit (a kept row may have been rebuilt by staff), for the repo
+   * copies. Without it, the copies use the rows the job built.
+   */
+  loadBenchmarkTasks?(instanceIds: string[]): Promise<RepoCopyTask[]>;
 }
 
 export type JobHandlers = {
   grade(snapshot: SubmissionSnapshot): Promise<TaskGrade[]>;
+  /** Copies one task's repository into the snapshot store (repoCopy.ts); used only when CSE115A_REPO_COPIES=on. */
+  copyRepo?(task: RepoCopyTask): Promise<RepoCopyResult>;
 };
 
 export const RUNNABLE_KINDS: JobKind[] = ["grade", "benchmark"];
@@ -76,7 +85,7 @@ async function runGrade(store: JobStore, handlers: JobHandlers, job: Job): Promi
   await store.setSubmissionStatus(submission.id, "graded");
 }
 
-async function runBenchmark(store: JobStore, job: Job): Promise<void> {
+async function runBenchmark(store: JobStore, handlers: JobHandlers, job: Job, env: Record<string, string | undefined>): Promise<void> {
   const submission = await store.loadSubmission(job.assignment_submission_id);
   if (!submission) throw new Error("The submission no longer exists.");
   const studentEmail = await store.loadStudentEmail(submission.course_id, submission.user_id);
@@ -87,10 +96,33 @@ async function runBenchmark(store: JobStore, job: Job): Promise<void> {
   })));
   // Superseded attempts are still captured: the work was real, and the export filters by consent.
   await store.saveBenchmark(submission, rows);
+  if (repoCopiesEnabled(env)) await copyRepos(store, handlers, rows);
+}
+
+/**
+ * #298: after the rows are saved, a copy of each task's repository at its stored base commit, for the
+ * validator. Every task is copied whatever the student's consent answer: validation needs the copy,
+ * and consent governs export. A failed copy throws after the rows are saved, so the job retries (the
+ * rows are saved again unchanged and a copy already stored is not uploaded again).
+ */
+async function copyRepos(store: JobStore, handlers: JobHandlers, rows: BenchmarkSave[]): Promise<void> {
+  if (!handlers.copyRepo) throw new Error("Repo copies are on, but this worker cannot make them.");
+  const ids = rows.map((row) => row.instance.instance_id);
+  const tasks = store.loadBenchmarkTasks
+    ? await store.loadBenchmarkTasks(ids)
+    : rows.map(({ instance }) => ({ instance_id: instance.instance_id, repo: instance.repo, base_commit: instance.base_commit }));
+  const failures: string[] = [];
+  for (const task of tasks) {
+    const result = await handlers.copyRepo(task);
+    if (result.outcome === "failed") failures.push(`Repo copy for ${task.instance_id} failed: ${result.line}`);
+  }
+  if (failures.length) throw new Error(failures.join("\n"));
 }
 
 /** Claims and runs one job. Returns null when nothing is runnable. */
-export async function runNextJob(store: JobStore, handlers: JobHandlers, now: () => Date = () => new Date()): Promise<RunResult> {
+export async function runNextJob(
+  store: JobStore, handlers: JobHandlers, now: () => Date = () => new Date(), env: Record<string, string | undefined> = process.env,
+): Promise<RunResult> {
   const job = await store.claim(RUNNABLE_KINDS);
   if (!job) return null;
   let outcome: JobOutcome;
@@ -100,7 +132,7 @@ export async function runNextJob(store: JobStore, handlers: JobHandlers, now: ()
   } else {
     try {
       if (job.kind === "grade") await runGrade(store, handlers, job);
-      else if (job.kind === "benchmark") await runBenchmark(store, job);
+      else if (job.kind === "benchmark") await runBenchmark(store, handlers, job, env);
       else throw new Error(`No handler for ${job.kind} jobs.`);
       outcome = { status: "succeeded" };
     } catch (error) {

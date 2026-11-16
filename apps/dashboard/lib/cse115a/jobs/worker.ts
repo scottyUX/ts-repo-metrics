@@ -1,6 +1,8 @@
 import OpenAI from "openai";
 import { getSupabase } from "@/lib/supabase/server";
 import { gradeTask } from "@/lib/cse115a/grader/gradeTask";
+import { copyTaskRepo } from "@/lib/cse115a/benchmark/repoCopy";
+import { supabaseSnapshotStore } from "@/lib/cse115a/benchmark/validation/snapshotStore";
 import { drainJobs, type JobHandlers } from "./runner";
 import { supabaseJobStore } from "./supabaseStore";
 
@@ -15,6 +17,11 @@ function productionHandlers(): JobHandlers {
       if (!process.env.OPENAI_API_KEY) throw new Error("OPENAI_API_KEY is not configured.");
       const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
       return Promise.all(snapshot.tasks.map((task) => gradeTask(client, task)));
+    },
+    async copyRepo(task) {
+      const store = supabaseSnapshotStore(process.env);
+      if (!store) return { instance_id: task.instance_id, outcome: "failed", reason: "storage", line: "Storage error: the site has no SUPABASE_SERVICE_ROLE_KEY." };
+      return copyTaskRepo(task, { store, log: (line) => console.info(`[cse115a repo copy] ${line}`) });
     },
   };
 }

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { RepoCopies } from "./RepoCopies";
 import { fetchJson, type StaffCourse } from "./shared";
 
 type Preview = {
@@ -65,6 +66,8 @@ export function BenchmarkPanel({ slug }: { slug: string }) {
         <a href={`${exportUrl}?validated=1`} className="rounded-lg border border-input px-4 py-2 text-sm font-medium">Validated only</a>
         <a href={harborUrl} className="rounded-lg border border-input px-4 py-2 text-sm font-medium">Download Harbor tasks (.zip)</a>
       </div>
+
+      <RepoCopies slug={slug} />
 
       <section className="space-y-3">
         <h2 className="font-semibold">Newest rows</h2>

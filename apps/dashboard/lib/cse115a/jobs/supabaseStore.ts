@@ -63,6 +63,12 @@ export function supabaseJobStore(db: SupabaseClient): JobStore {
       check(error, "load the student's email");
       return (data?.ucsc_email as string | undefined) ?? null;
     },
+    async loadBenchmarkTasks(instanceIds) {
+      if (instanceIds.length === 0) return [];
+      const { data, error } = await db.from("cse_benchmark_tasks").select("instance_id,repo,base_commit").in("instance_id", instanceIds);
+      check(error, "read stored benchmark tasks");
+      return (data ?? []) as Array<{ instance_id: string; repo: string; base_commit: string }>;
+    },
     async saveBenchmark(submission, rows) {
       if (rows.length === 0) return;
       const { data, error: readError } = await db.from("cse_benchmark_task_sources")
