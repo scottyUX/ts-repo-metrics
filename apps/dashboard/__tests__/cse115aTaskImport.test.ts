@@ -114,3 +114,117 @@ describe("CSE 115A task import: task ID in the PR title and branch (#324)", () =
     expect(task.validation.branchHasTaskId).toBe(true);
   });
 });
+/** A PR that is not merged. `files` maps each path it adds to its contents at the head commit "head1". */
+function stubUnmergedPull(files: Record<string, string>, state = "open"): string[] {
+  const requested: string[] = [];
+  const routes: Record<string, unknown> = {
+    "/repos/team/repo/pulls/1": {
+      state, merged_at: null, merge_commit_sha: null, title: "US-1-T-1: Reject",
+      user: { login: "student" }, head: { ref: "task/US-1-T-1", sha: "head1" }, base: { sha: "main0" },
+    },
+    "/repos/team/repo/pulls/1/files?per_page=100&page=1": Object.keys(files).map((filename) => ({ filename, status: "added" })),
+  };
+  for (const [path, text] of Object.entries(files)) {
+    const encoded = path.split("/").map(encodeURIComponent).join("/");
+    routes[`/repos/team/repo/contents/${encoded}?ref=head1`] = { encoding: "base64", size: text.length, content: Buffer.from(text).toString("base64") };
+  }
+  vi.stubGlobal("fetch", vi.fn(async (url: string) => {
+    const path = url.replace("https://api.github.com", "");
+    requested.push(path);
+    return path in routes ? new Response(JSON.stringify(routes[path])) : new Response("{}", { status: 404 });
+  }));
+  return requested;
+}
+
+describe("CSE 115A task import: the task file is checked before the merge (#388)", () => {
+  afterEach(() => vi.unstubAllGlobals());
+  const FOLDER = "docs/tasks/sprint-1";
+  const importPull = () => importTaskFromPullRequest("https://github.com/team/repo/pull/1", 1, githubReader("token"), "student");
+  const FIX = "This pull request is not merged yet. Before you merge, fix:\n";
+
+  it("says an open PR's good task file passes, and asks for the merge", async () => {
+    stubUnmergedPull({ [TASK]: SPEC, "app.js": "" });
+    await expect(importPull()).rejects.toThrow(new Error(
+      "This pull request is not merged yet. Its task file (US-1-T-1.md) passes the task-file checks. Merge the pull request, then add it here again.",
+    ));
+  });
+
+  it("lists a missing section and a bad ID on an open PR", async () => {
+    stubUnmergedPull({ [TASK]: SPEC.replace("id: US-1-T-1", "id: US..1").replace("## Specs", "## Steps") });
+    await expect(importPull()).rejects.toThrow(new Error(`${FIX}- The task file needs a nonempty “Specs” section.\n`
+      + `- The task ID “US..1” must be letters and digits joined by single "-", "." or "_", for example US-1-T-1.`));
+  });
+
+  it("names the file and the ID when they differ", async () => {
+    stubUnmergedPull({ [`${FOLDER}/3_2_2.md`]: SPEC.replace("id: US-1-T-1", "id: 3.2.1") });
+    await expect(importPull()).rejects.toThrow(new Error(
+      `${FIX}- The file is named “3_2_2.md” but the id inside it is “3.2.1”. Name the file 3.2.1.md.`,
+    ));
+  });
+
+  it("finds a task file whose name is not a task ID and says how to name it", async () => {
+    stubUnmergedPull({ [`${FOLDER}/my task.md`]: SPEC });
+    await expect(importPull()).rejects.toThrow(new Error(
+      `${FIX}- The file is named “my task.md” but the id inside it is “US-1-T-1”. Name the file US-1-T-1.md.`,
+    ));
+  });
+
+  it("finds 3.md and says its one-part ID is the problem", async () => {
+    stubUnmergedPull({ [`${FOLDER}/3.md`]: SPEC.replace("id: US-1-T-1", "id: 3") });
+    await expect(importPull()).rejects.toThrow(new Error(
+      `${FIX}- The task ID “3” has only one part. Use two or more parts joined by "-", "." or "_", for example US-3-T-1.`,
+    ));
+  });
+
+  it("says no task file was found when the PR adds no .md file in the folder", async () => {
+    stubUnmergedPull({ "app.js": "", [`${FOLDER}/README.md`]: "# Tasks" });
+    await expect(importPull()).rejects.toThrow(new Error(`${FIX}- No task file was found in docs/tasks/sprint-1/ in this PR.`));
+  });
+
+  it("names the other .md files when there are several and none is a task file", async () => {
+    stubUnmergedPull({ [`${FOLDER}/notes.md`]: "", [`${FOLDER}/plan.md`]: "" });
+    await expect(importPull()).rejects.toThrow(new Error(`${FIX}- No task file was found in docs/tasks/sprint-1/ in this PR. `
+      + "It adds 2 other .md files there (notes.md, plan.md); a task file is named after its task ID, for example US-1-T-1.md."));
+  });
+
+  it("ignores another .md file next to a task file, as before", async () => {
+    stubUnmergedPull({ [TASK]: SPEC, [`${FOLDER}/notes.md`]: "notes" });
+    await expect(importPull()).rejects.toThrow("Its task file (US-1-T-1.md) passes the task-file checks.");
+  });
+
+  it("says the task file could not be read when GitHub does not return it", async () => {
+    stubUnmergedPull({ [TASK]: SPEC });
+    const github = globalThis.fetch;
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => (url.includes("/contents/") ? new Response("{}", { status: 404 }) : github(url))));
+    await expect(importPull()).rejects.toThrow(new Error(`${FIX}- The task file could not be read from this pull request.`));
+  });
+
+  it("reads only the PR, its files and the task file at the head commit on an open PR", async () => {
+    const requested = stubUnmergedPull({ [TASK]: SPEC });
+    await expect(importPull()).rejects.toThrow("passes the task-file checks");
+    expect(requested).toEqual([
+      "/repos/team/repo/pulls/1",
+      "/repos/team/repo/pulls/1/files?per_page=100&page=1",
+      `/repos/team/repo/contents/${TASK}?ref=head1`,
+    ]);
+    expect(requested.some((path) => /\/git\/ref|\/commits|\/contents\/docs\/tasks\/sprint-1\?/.test(path))).toBe(false);
+  });
+
+  it("still refuses a closed PR that was not merged, without checking it", async () => {
+    const requested = stubUnmergedPull({ [TASK]: SPEC }, "closed");
+    await expect(importPull()).rejects.toThrow(new Error("This pull request must be merged before submission."));
+    expect(requested).toEqual(["/repos/team/repo/pulls/1"]);
+  });
+
+  it("finds a wrongly named task file on a merged PR and names the problem", async () => {
+    const path = `${FOLDER}/my task.md`;
+    stubGitHub("first", [path], [{ filename: path, status: "added" }]);
+    const github = globalThis.fetch;
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => (url.endsWith("/contents/docs/tasks/sprint-1/my%20task.md?ref=squash")
+      ? new Response(JSON.stringify({ encoding: "base64", size: SPEC.length, content: Buffer.from(SPEC).toString("base64") }))
+      : github(url))));
+    await expect(importPull()).rejects.toThrow(new Error(
+      "The file is named “my task.md” but the id inside it is “US-1-T-1”. Name the file US-1-T-1.md.",
+    ));
+  });
+});

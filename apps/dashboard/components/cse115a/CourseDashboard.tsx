@@ -654,7 +654,7 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
                         <button type="button" disabled={Boolean(phase[slot])} onClick={() => setChanging((previous) => ({ ...previous, [slot]: true }))} className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold">Change PR</button>
                       </div>
                     ) : null}
-                    {slotError[slot] ? <p role="alert" className="mt-3 text-sm text-red-700">{slotError[slot]}</p> : null}
+                    {slotError[slot] ? <p role="alert" className="mt-3 whitespace-pre-line text-sm text-red-700">{slotError[slot]}</p> : null}
                   </div>
                 );
               })}

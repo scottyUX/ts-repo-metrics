@@ -1,5 +1,28 @@
-/** A task ID: letters and digits in two or more parts joined by "-", "." or "_" (US-1-T-1, US-2.3-T-2, 3_2_1). */
-export const TASK_ID_PATTERN = "[A-Za-z0-9]+(?:[-._][A-Za-z0-9]+)+";
+/** The fewest parts a task ID may have. 2 refuses one-part IDs such as "3" (open for Scott, #388). */
+export const TASK_ID_MIN_PARTS = 2;
+
+/** A task ID: letters and digits in TASK_ID_MIN_PARTS or more parts joined by "-", "." or "_" (US-1-T-1, US-2.3-T-2, 3_2_1). */
+export const TASK_ID_PATTERN = `[A-Za-z0-9]+(?:[-._][A-Za-z0-9]+){${TASK_ID_MIN_PARTS - 1},}`;
+
+const ID_CHARACTERS = 'Use only letters, digits, "-", "." and "_".';
+
+/**
+ * What is wrong with a task ID, or null when it is valid. Null exactly when ^TASK_ID_PATTERN$ matches;
+ * the first problem found is the one named.
+ */
+export function taskIdProblem(id: string): string | null {
+  if (!id) return "The front matter needs an id.";
+  if (/\s/.test(id)) return `The task ID “${id}” has a space. ${ID_CHARACTERS}`;
+  const other = id.match(/[^A-Za-z0-9._-]/u);
+  if (other) return `The task ID “${id}” has the character “${other[0]}”. ${ID_CHARACTERS}`;
+  if (/^[-._]|[-._]$|[-._]{2}/.test(id)) {
+    return `The task ID “${id}” must be letters and digits joined by single "-", "." or "_", for example US-1-T-1.`;
+  }
+  if (id.split(/[-._]/).length < TASK_ID_MIN_PARTS) {
+    return `The task ID “${id}” has only one part. Use two or more parts joined by "-", "." or "_", for example US-3-T-1.`;
+  }
+  return null;
+}
 
 /** Whether a task file's name fits its ID. A name may use "_" where the ID has "." (3_2_1.md for 3.2.1). */
 export function filenameMatchesId(filenameId: string, id: string): boolean {
@@ -72,17 +95,22 @@ export function canonicalHeadings(markdown: string): { markdown: string; renamed
   return { markdown: out, renamed };
 }
 
-export function parseTaskSpec(markdown: string): TaskSpec {
-  if (markdown.length > 65536) throw new Error("The task file is too large to import.");
+/** The file's id and sprint as written, for the checks that compare them with the file name and assignment. */
+export type TaskSpecCheck = { spec: TaskSpec | null; problems: string[]; id: string; sprint: number };
+
+/** Every problem with a task file, in a fixed order, and the parsed task when there are none. */
+export function checkTaskSpec(markdown: string): TaskSpecCheck {
+  if (markdown.length > 65536) return { spec: null, problems: ["The task file is too large to import."], id: "", sprint: Number.NaN };
+  const problems: string[] = [];
   const frontMatter = markdown.match(/^---\s*\n([\s\S]*?)\n---\s*\n/);
-  if (!frontMatter) throw new Error("The task file needs YAML front matter.");
+  if (!frontMatter) problems.push("The task file needs YAML front matter.");
   const fields = new Map<string, string>();
-  for (const line of frontMatter[1]!.split(/\r?\n/)) {
+  for (const line of frontMatter?.[1]!.split(/\r?\n/) ?? []) {
     const match = line.match(/^([a-z_]+):\s*(.*?)\s*$/);
     if (match) fields.set(match[1]!, match[2]!.replace(/^['"]|['"]$/g, ""));
   }
-  const title = markdown.slice(frontMatter[0].length).match(/^#\s+(.+)\s*$/m)?.[1]?.trim();
-  if (!title) throw new Error("The task file needs a title.");
+  const title = markdown.slice(frontMatter?.[0].length ?? 0).match(/^#\s+(.+)\s*$/m)?.[1]?.trim();
+  if (!title) problems.push("The task file needs a title.");
   const headings = [...markdown.matchAll(/^##\s+(.+)\s*$/gm)];
   const sections = new Map<string, string>();
   for (let index = 0; index < headings.length; index++) {
@@ -94,24 +122,40 @@ export function parseTaskSpec(markdown: string): TaskSpec {
   const found = new Map<string, string>();
   for (const heading of REQUIRED_SECTIONS) {
     const body = findSection(sections, heading);
-    if (!body) throw new Error(`The task file needs a nonempty “${heading}” section.`);
-    found.set(heading, body);
+    if (body) found.set(heading, body);
+    else problems.push(`The task file needs a nonempty “${heading}” section.`);
   }
   const id = fields.get("id") ?? "";
   const story = fields.get("story") ?? "";
   const sprint = Number(fields.get("sprint"));
   const assignee = fields.get("assignee") ?? "";
   const estimateHours = Number(fields.get("estimate_hours"));
-  if (!new RegExp(`^${TASK_ID_PATTERN}$`).test(id) || !story || !Number.isInteger(sprint) || sprint < 1 || !assignee || !Number.isFinite(estimateHours)) {
-    throw new Error("The task file has missing or invalid id, story, sprint, assignee, or estimate_hours fields.");
+  if (frontMatter) {
+    const idProblem = taskIdProblem(id);
+    if (idProblem) problems.push(idProblem);
+    if (!story) problems.push("The front matter needs a story.");
+    if (!Number.isInteger(sprint) || sprint < 1) problems.push("The front matter needs a sprint number (a whole number, 1 or more).");
+    if (!assignee) problems.push("The front matter needs an assignee.");
+    if (!Number.isFinite(estimateHours)) problems.push("The front matter needs estimate_hours as a number.");
   }
+  if (problems.length > 0 || !title) return { spec: null, problems, id, sprint };
   return {
-    id, story, sprint, assignee, estimateHours, title,
-    description: found.get("Description")!,
-    specs: found.get("Specs")!,
-    requirements: found.get("Requirements")!,
-    acceptanceCriteria: found.get("Acceptance criteria")!,
+    spec: {
+      id, story, sprint, assignee, estimateHours, title,
+      description: found.get("Description")!,
+      specs: found.get("Specs")!,
+      requirements: found.get("Requirements")!,
+      acceptanceCriteria: found.get("Acceptance criteria")!,
+    },
+    problems, id, sprint,
   };
+}
+
+/** The parsed task file; throws every problem, one per line. */
+export function parseTaskSpec(markdown: string): TaskSpec {
+  const { spec, problems } = checkTaskSpec(markdown);
+  if (problems.length > 0 || !spec) throw new Error(problems.join("\n"));
+  return spec;
 }
 
 export function parsePullRequestUrl(value: string): { owner: string; repo: string; number: number; url: string } | null {
