@@ -1021,7 +1021,7 @@ read or write it. Object name `<instance_id>.<first 12 characters of base_commit
 type `application/octet-stream` (`lib/cse115a/benchmark/validation/snapshotStore.ts`). Objects
 uploaded before the name carried the base commit are `<instance_id>.bundle`; they stay as they are
 and are still read (see "Restore order"). Local files keep their names: `DIR/snapshots/<instance_id>.bundle`.
-Two writers: the validator, and the course website, which copies each task's repository at Submit
+Two writers: the validator, and the course website, which copies each task's repository after Submit
 (see "Copies made by the website" below). The website only writes copies and asks whether one
 exists; it never downloads one or serves one, and the Harbor exports never read the bucket. Reading
 a copy is for the validator only.
@@ -1083,25 +1083,49 @@ a public repository still works), clones into a fresh temp folder with the valid
 `cloneRepo` and `ensureCommit`, writes the bundle with `bundleRepo`, checks it with `verifyBundle`,
 uploads it under the name above, and removes the temp folder whatever happens. A copy already
 stored for the base commit is not cloned again. The token is never in a log line, an error, or a
-response.
+response. Each copy logs one line with how long it took:
+`[cse115a repo copy] <instance_id>: stored in 2.4 s` (or `already stored in …`, or `failed in …: <line>`).
 
+- **Their own line.** Copies run in `repo_copy` jobs (table `cse_grading_jobs`, migration
+  `20261116000000_cse115a_repo_copy_jobs.sql`), claimed by a second poller loop that claims nothing
+  else; the grading loop never claims a `repo_copy` job. Both loops start from `instrumentation.ts`
+  (`CSE115A_WORKER=true`), each ticks every 15 s, and each starts its next tick only when its own
+  last one has finished, so a slow or hung clone holds up only other copies. **Grading never waits
+  on a copy.** The copy loop claims nothing while the switch is off. The tick endpoint
+  (`/api/cse115a/internal/jobs/tick`) runs only the grading line.
 - **The switch.** Server setting `CSE115A_REPO_COPIES`. Only the exact value `on` turns copies on;
-  unset or anything else (`off`, `ON `, `1`) and the site does what it did before. Reading which
-  tasks have a copy works either way.
-- **At Submit.** The `benchmark` job saves the rows as before, then copies each task of the
-  submission at the base commit stored on its row (a kept row may have been rebuilt by staff). Every
-  submitted task is copied, whatever the student's consent answer: validation needs the copy, and
-  consent governs export, not validation (decided Nov 16). If any copy fails, the job throws after
-  the rows are saved, so the usual retry applies (1, then 4 minutes, 3 attempts) and the job keeps
-  the last error, one `Repo copy for <instance_id> failed: <line>` per failed task. Saving the rows
-  again on a retry changes nothing, and a stored copy is not uploaded again.
-- **Backfill and retry.** The instructor Benchmark page lists, under "Repo copies", every task
-  without a copy for its current base commit. "Save missing repo copies" asks
-  `POST /api/cse115a/instructor/courses/<slug>/benchmark/repo-copies` for at most 3 copies at a
-  time and repeats until none are left or a request makes no progress; a task that fails is shown
-  with its line and not tried again in the same backfill. "Retry" copies one task. The route uses
-  the same staff check as the page's other routes, is refused with 409 while the switch is off, and
-  returns only ids, outcomes and lines.
+  unset or anything else (`off`, `ON `, `1`) and the site does what it did before: no `repo_copy`
+  job is ever inserted, so it runs on a database without the migration. Reading which tasks have a
+  copy works either way.
+- **At Submit.** The `benchmark` job saves the rows as before, then queues the submission's
+  `repo_copy` job and finishes; it clones nothing. If queuing fails, the benchmark job fails and
+  retries as before (saving the rows again changes nothing). There is one `repo_copy` job per
+  submission (the same unique submission-and-kind key as its grade and benchmark jobs): a retry
+  leaves an existing one alone, and a resubmission, being a new submission, gets its own.
+- **The repo_copy job.** It copies every benchmark task of its submission, one after another, at
+  the base commit stored on the task's row (a staff rebuild may have moved it), skipping a task
+  whose copy is already stored. Every submitted task is copied, whatever the student's consent
+  answer: validation needs the copy, and consent governs export, not validation (decided Nov 16).
+  The job lock and retry are the same as every job's: a job left running 10 minutes is claimed
+  again; a failure retries after 1, then 4 minutes, 3 attempts, and the job keeps the last error,
+  one line: `Repo copy failed: <instance_id>: <line>; …`.
+- **Time limits.** Each step (the token request, each git command, each Storage call) has 30
+  seconds, and the copy of one task 90 seconds in all. On a timeout the git process and everything
+  it started are killed (a process group), the temp folder is removed, and the line names the step:
+  `Timed out: the clone took longer than 30 s.` or `Timed out: the copy took longer than 90 s
+  (during the fetch of the base commit).` A Storage call past its limit is abandoned, not cancelled.
+  A job starts no new task after 8 minutes, so it ends inside its 10-minute lock; it then fails
+  with `not finished, will retry: N of M task(s) not started within 8 minutes`, and the retry skips
+  what is stored. The validator's own batch runs keep their limits.
+- **Backfill and retry.** The instructor Benchmark page shows, under "Repo copies", each task as
+  stored, queued, running, failed (with the job's last error), or no copy, and refreshes every 5
+  seconds while any are queued or running. "Save missing repo copies"
+  (`POST /api/cse115a/instructor/courses/<slug>/benchmark/repo-copies`) queues the `repo_copy`
+  job of every submission with a task that has no copy or a failed job, and returns at once; there
+  is no cap. "Retry" queues one task's submission. A failed or finished job is reset (attempts 0,
+  no error); a queued or running one is left alone. A task's job is its newest submission's. The
+  route never clones; it uses the same staff check as the page's other routes, is refused with 409
+  while the switch is off, and returns only ids and counts.
 - **What a failure line means.**
   - `<repo> is private (or gone) and the course GitHub App is not installed on it. Install the App
     on the repository, then retry.` The anonymous clone was refused and the App has no
@@ -1110,11 +1134,20 @@ response.
     away).` The clone worked but the commit is gone.
   - `The copy is N MB, over the 50.0 MB limit for stored copies.` Nothing is uploaded; the
     validator's own clone (with the key) or a local `--snapshots` run is the only way.
-  - `GitHub error: …` A token request, clone or fetch that failed for another reason (network,
-    a refused token, a clone or fetch over 2 minutes). Retry later.
+  - `Timed out: …` A step or the whole copy ran past its limit (above). Retry later; a repository
+    that always times out needs the validator's own clone.
+  - `GitHub error: …` A token request, clone or fetch that failed for another reason (network, a
+    refused token). Retry later.
   - `Storage error: …` The bucket could not be asked or written. Check the bucket exists
     (`createSnapshotBucket.ts`) and the site's `SUPABASE_SERVICE_ROLE_KEY`.
   - `Could not write the copy: …` git could not write or check the bundle (disk, for example).
+  - `not finished, will retry: …` The job reached 8 minutes; it retries on its own.
+- **Rollout, in this order.** (1) Merge. (2) Apply `20261116000000_cse115a_repo_copy_jobs.sql`.
+  (3) Set `CSE115A_REPO_COPIES=on`. (4) Run "Save missing repo copies" on the Benchmark page. With
+  the switch on before the migration, every benchmark job would fail to queue its copy and retry
+  until it gives up (its rows are saved first). Undo: set the switch off, then, if the migration
+  must go too, `delete from public.cse_grading_jobs where kind = 'repo_copy';` and put the
+  constraint back to `check (kind in ('grade', 'benchmark'))` (the statements are in the migration).
 - **On the validator.** Nothing changes: when GitHub refuses the clone, it restores from the
   bucket (the "Restore order" above). A private repository with no copy stays `env_error`
   (`candidate`), with the clone failure as its `detail`, exactly as before.

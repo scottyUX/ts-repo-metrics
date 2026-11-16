@@ -24,6 +24,9 @@ service keeps its normal home page.
   then `20260926000000_cse115a_grading.sql` (draft grades, job claim function),
   then `20260927000000_cse115a_benchmark.sql` (benchmark rows, research consent),
   then `20260928000000_cse115a_instructor.sql` (staff roles, release and regrade).
+  The repo copies need `20261116000000_cse115a_repo_copy_jobs.sql` (the
+  `repo_copy` job kind) before `CSE115A_REPO_COPIES` is set to `on`; undo is in
+  a comment in that file.
 - Enable Google Auth in the Supabase project and configure its Google OAuth
   client ID and secret. In Google Cloud, add
   `https://walwexxczaibfojinkfi.supabase.co/auth/v1/callback` as an authorized
@@ -87,7 +90,7 @@ Environment on the service that runs the worker:
 | `OPENAI_API_KEY` | Grader calls. |
 | `CSE115A_GRADER_MODEL` | Optional; defaults to `gpt-4o`. |
 | `CSE115A_WORKER_SECRET` | Optional; enables `POST /api/cse115a/internal/jobs/tick` with header `x-cse115a-worker-secret`, which runs queued jobs on demand (`?limit=1..10`). |
-| `CSE115A_REPO_COPIES` | Optional; only `on` turns on the repo copies (a git bundle of each task's repository in the bucket `benchmark-snapshots`, at Submit and from the Benchmark page). Needs `SUPABASE_SERVICE_ROLE_KEY` and the GitHub App variables. |
+| `CSE115A_REPO_COPIES` | Optional; only `on` turns on the repo copies (a git bundle of each task's repository in the bucket `benchmark-snapshots`, in `repo_copy` jobs queued at Submit and from the Benchmark page). Needs the `repo_copy` migration first, `SUPABASE_SERVICE_ROLE_KEY` and the GitHub App variables. |
 
 ## Benchmark capture
 
@@ -123,14 +126,19 @@ task file alone (`base_commit_from_first_commit`), or at the PR base.
   when a student who submitted it said yes to the current, approved consent
   wording and no source is rejected.
 
-With `CSE115A_REPO_COPIES=on`, the `benchmark` job also saves a copy of each
-task's repository at its base commit (a git bundle) in the private Storage
-bucket `benchmark-snapshots`, after the rows are saved, using the course
+With `CSE115A_REPO_COPIES=on`, the `benchmark` job also queues a `repo_copy`
+job, which saves a copy of each task's repository at its base commit (a git
+bundle) in the private Storage bucket `benchmark-snapshots`, using the course
 GitHub App's token. The validator needs the copy for a private repository,
-because the App's private key stays on this site. Every task is copied,
-whatever the consent answer: consent governs export, not validation. A
-failed copy makes the job retry. The instructor Benchmark page shows which
-tasks have a copy and can save the missing ones. The site never serves a copy.
+because the App's private key stays on this site. Copies run in their own
+line: a second poller loop claims only `repo_copy` jobs and the grading loop
+never does, so grading never waits on a copy. Each step of a copy has 30
+seconds and each task 90; a job starts no new task after 8 minutes. Every task
+is copied, whatever the consent answer: consent governs export, not
+validation. The instructor Benchmark page shows each task's copy as stored,
+queued, running or failed and can queue the missing ones. The site never
+serves a copy. Rollout: merge, apply the `repo_copy` migration, set the switch
+to `on`, then run "Save missing repo copies".
 See "Copies made by the website" in `docs/CSE115A_BENCHMARK_VALIDATION.md`.
 
 ## Instructor tools
@@ -154,8 +162,9 @@ SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... \
   (instructors only, reason required) supersedes the attempt so the student can
   change tasks and submit again; the old attempt stays as history.
 - **Benchmark**: counts by status and consent, a preview of the newest rows,
-  JSONL download, and the repo copies (which tasks have one; "Save missing
-  repo copies" and per-task "Retry" when `CSE115A_REPO_COPIES=on`).
+  JSONL download, and the repo copies (each task stored, queued, running or
+  failed; "Save missing repo copies" and per-task "Retry" queue copy jobs when
+  `CSE115A_REPO_COPIES=on`).
 
 TAs can do everything except unlock and manage staff.
 
