@@ -63,11 +63,22 @@ export function supabaseJobStore(db: SupabaseClient): JobStore {
       check(error, "load the student's email");
       return (data?.ucsc_email as string | undefined) ?? null;
     },
-    async loadBenchmarkTasks(instanceIds) {
-      if (instanceIds.length === 0) return [];
-      const { data, error } = await db.from("cse_benchmark_tasks").select("instance_id,repo,base_commit").in("instance_id", instanceIds);
+    async queueRepoCopy(submissionId) {
+      // One repo_copy job per submission, like its grade and benchmark jobs; an existing one is left alone.
+      const { error } = await db.from("cse_grading_jobs")
+        .upsert({ assignment_submission_id: submissionId, kind: "repo_copy" }, { onConflict: "assignment_submission_id,kind", ignoreDuplicates: true });
+      check(error, "queue the repo copy job");
+    },
+    async loadSubmissionCopyTasks(submissionId) {
+      const { data: sources, error: sourceError } = await db.from("cse_benchmark_task_sources")
+        .select("instance_id,task_slot").eq("assignment_submission_id", submissionId).order("task_slot");
+      check(sourceError, "read the submission's benchmark sources");
+      const ids = ((sources ?? []) as Array<{ instance_id: string }>).map((row) => row.instance_id);
+      if (ids.length === 0) return [];
+      const { data, error } = await db.from("cse_benchmark_tasks").select("instance_id,repo,base_commit").in("instance_id", ids);
       check(error, "read stored benchmark tasks");
-      return (data ?? []) as Array<{ instance_id: string; repo: string; base_commit: string }>;
+      const tasks = (data ?? []) as Array<{ instance_id: string; repo: string; base_commit: string }>;
+      return ids.flatMap((id) => tasks.filter((task) => task.instance_id === id));
     },
     async saveBenchmark(submission, rows) {
       if (rows.length === 0) return;

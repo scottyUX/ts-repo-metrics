@@ -287,16 +287,17 @@ export function pinnedImage(image: string, repoDigest: string): string {
 /**
  * Writes a git bundle holding every commit reachable from `base`: the repository snapshot for a row.
  * Bundles record refs, not bare hashes, so the commit gets a temporary branch for the duration;
- * a branch (not a custom ref) so that `git clone <bundle>` checks the snapshot out.
+ * a branch (not a custom ref) so that `git clone <bundle>` checks the snapshot out. `exec` runs the
+ * git commands (`run`, with no time limit, unless the caller passes one: the website's repo copy does).
  */
-export async function bundleRepo(repoDir: string, base: string, outFile: string): Promise<void> {
+export async function bundleRepo(repoDir: string, base: string, outFile: string, exec: typeof run = run): Promise<void> {
   const ref = "refs/heads/hecate-snapshot";
   await mkdir(join(outFile, ".."), { recursive: true });
-  await run("git", ["update-ref", ref, base], repoDir);
+  await exec("git", ["update-ref", ref, base], repoDir);
   try {
-    await run("git", ["bundle", "create", outFile, ref], repoDir);
+    await exec("git", ["bundle", "create", outFile, ref], repoDir);
   } finally {
-    await run("git", ["update-ref", "-d", ref], repoDir).catch(() => undefined);
+    await exec("git", ["update-ref", "-d", ref], repoDir).catch(() => undefined);
   }
 }
 

@@ -5,7 +5,8 @@ import { mkdir, mkdtemp, readdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { copyMissing, copyStatus, copyTaskRepo, GIT_NETWORK_TIMEOUT_MS, type RepoCopyResult } from "@/lib/cse115a/benchmark/repoCopy";
+import { copyStatus, copyTaskRepo, GIT_STEP_TIMEOUT_MS, runGroup, type RepoCopyResult } from "@/lib/cse115a/benchmark/repoCopy";
+import { copyTaskViews, type CopyJobRow } from "@/lib/cse115a/benchmark/repoCopyJobs";
 import { run, type GitAccess } from "@/lib/cse115a/benchmark/validation/runRow";
 import { findBundle } from "@/lib/cse115a/benchmark/validation/snapshots";
 import { bucketSnapshotStore, snapshotObject, type SnapshotStore } from "@/lib/cse115a/benchmark/validation/snapshotStore";
@@ -177,15 +178,19 @@ describe("#298 A: copy one task's repository", () => {
     expect(await readdir(tmp)).toEqual([]);
   });
 
-  it("gives every git command the time limit", async () => {
+  it("gives every git command, the bundle and its check included, a limit of at most 30 s; logs the seconds", async () => {
     const { store, tmp } = await setup();
     const limits: Array<number | undefined> = [];
+    const commands: string[] = [];
     const { access } = standIn();
     const inner = access.git!;
-    access.git = async (cmd, args, cwd, options) => { limits.push(options?.timeoutMs); return inner(cmd, args, cwd, options); };
-    await copyTaskRepo(task("team/public-app"), { store, access, tmp });
-    expect(limits.length).toBeGreaterThan(0);
-    expect(new Set(limits)).toEqual(new Set([GIT_NETWORK_TIMEOUT_MS]));
+    access.git = async (cmd, args, cwd, options) => { limits.push(options?.timeoutMs); commands.push(args.find((a) => !a.startsWith("-") && !a.includes("=")) ?? ""); return inner(cmd, args, cwd, options); };
+    const { lines, log } = collect();
+    const t = task("team/public-app");
+    await copyTaskRepo(t, { store, access, tmp, log });
+    expect(commands).toEqual(expect.arrayContaining(["clone", "cat-file", "update-ref", "bundle", "init", "fetch"]));
+    expect(limits.every((ms) => typeof ms === "number" && ms > 0 && ms <= GIT_STEP_TIMEOUT_MS)).toBe(true);
+    expect(lines.at(-1)).toMatch(new RegExp(`^${t.instance_id}: stored in \\d+(\\.\\d)? s$`));
   });
 
   it("a changed base commit makes a second object", async () => {
@@ -198,7 +203,56 @@ describe("#298 A: copy one task's repository", () => {
   });
 });
 
-describe("#298 D: status and backfill steps", () => {
+describe("#298 follow-up: time limits", () => {
+  /** A step that never ends on its own: a shell that starts a child and waits, both marked so they can be looked for. */
+  const hang = (marker: string, options: Parameters<typeof run>[3]) => runGroup("sh", ["-c", `sleep ${marker} & sleep ${marker}; wait`], undefined, options);
+  const gone = async (marker: string) => run("pgrep", ["-f", `sleep ${marker}`]).then(() => false, () => true);
+
+  it("a git step that hangs is stopped at its limit with its children, the folder removed, one line naming the step, no token", async () => {
+    const { files, store, tmp } = await setup();
+    const { access } = standIn({ installed: true });
+    const inner = access.git!;
+    const marker = "7.31";
+    access.git = async (cmd, args, cwd, options) => (args.includes("clone") ? hang(marker, options) : inner(cmd, args, cwd, options));
+    const { lines, log } = collect();
+    const started = Date.now();
+    const result = await copyTaskRepo(task("team/private-app"), { store, access, tmp, log, stepTimeoutMs: 300 });
+    expect(Date.now() - started).toBeLessThan(3_000);
+    expect(result).toMatchObject({ outcome: "failed", reason: "timeout", line: "Timed out: the clone took longer than 0.3 s." });
+    await new Promise((r) => setTimeout(r, 100));
+    expect(await gone(marker)).toBe(true);
+    expect(await readdir(tmp)).toEqual([]);
+    expect(await files.names()).toEqual([]);
+    expect(JSON.stringify(result) + lines.join("\n")).not.toContain(TOKEN);
+  });
+
+  it("a copy that passes its total limit is stopped during whatever step it is in", async () => {
+    const { files, store, tmp } = await setup();
+    const { access } = standIn({ installed: true });
+    const inner = access.git!;
+    // Each git command first waits 150 ms (as a process, so the limit can stop it); none passes the 300 ms step limit.
+    access.git = async (cmd, args, cwd, options) => { await runGroup("sleep", ["0.15"], undefined, options); return inner(cmd, args, cwd, options); };
+    const result = await copyTaskRepo(task("team/private-app"), { store, access, tmp, stepTimeoutMs: 300, taskTimeoutMs: 400 });
+    expect(result).toMatchObject({ outcome: "failed", reason: "timeout" });
+    expect((result as { line: string }).line).toMatch(/^Timed out: the copy took longer than 0\.4 s \(during the (clone|fetch of the base commit|bundle|bundle check)\)\.$/);
+    expect(await readdir(tmp)).toEqual([]);
+    expect(await files.names()).toEqual([]);
+  });
+
+  it("a Storage call that hangs is abandoned at its limit", async () => {
+    const { tmp } = await setup();
+    const never = new Promise<never>(() => {});
+    const askHangs: SnapshotStore = { has: () => never, upload: async () => "uploaded", download: async () => false };
+    expect(await copyTaskRepo(task("team/public-app"), { store: askHangs, access: standIn().access, tmp, stepTimeoutMs: 200 }))
+      .toMatchObject({ reason: "timeout", line: "Timed out: the check for a stored copy took longer than 0.2 s." });
+    const uploadHangs: SnapshotStore = { has: async () => false, upload: () => never, download: async () => false };
+    expect(await copyTaskRepo(task("team/public-app"), { store: uploadHangs, access: standIn().access, tmp, stepTimeoutMs: 200 }))
+      .toMatchObject({ reason: "timeout", line: "Timed out: the upload took longer than 0.2 s." });
+    expect(await readdir(tmp)).toEqual([]);
+  });
+});
+
+describe("#298 D: status", () => {
   let tasks: Array<{ instance_id: string; repo: string; base_commit: string }> = [];
   beforeAll(() => { tasks = Array.from({ length: 5 }, (_, i) => ({ instance_id: `T-${i}`, repo: "team/public-app", base_commit: base })); });
 
@@ -212,23 +266,16 @@ describe("#298 D: status and backfill steps", () => {
     expect((await copyStatus(tasks.slice(0, 1), broken))[0]).toMatchObject({ stored: null, error: "Storage error: down" });
   });
 
-  it("copies at most 3, reports the rest, and goes on past a failure; skip leaves out the ones that failed", async () => {
-    const { files, store } = await setup();
-    await writeFile(join(files.dir, snapshotObject("T-0", base)), "x");
-    const seen: string[] = [];
-    const copy = async (t: { instance_id: string }): Promise<RepoCopyResult> => {
-      seen.push(t.instance_id);
-      if (t.instance_id === "T-1") return { instance_id: t.instance_id, outcome: "failed", reason: "github", line: "GitHub error: boom" };
-      if (t.instance_id === "T-2") throw new Error("unexpected");
-      return { instance_id: t.instance_id, outcome: "stored" };
-    };
-    const first = await copyMissing(tasks, store, copy);
-    expect(seen).toEqual(["T-1", "T-2", "T-3"]);
-    expect(first.results.map((r) => r.outcome)).toEqual(["failed", "failed", "stored"]);
-    expect(first.results[1]).toMatchObject({ reason: "github", line: "unexpected" });
-    expect(first.remaining).toBe(1);
-    const second = await copyMissing(tasks, store, copy, { skip: ["T-1", "T-2", "T-3"] });
-    expect(second.results.map((r) => r.instance_id)).toEqual(["T-4"]);
-    expect(second.remaining).toBe(0);
+  it("each task shows as stored, queued, running, failed with its reason, missing, or could not check", () => {
+    const row = (id: string, stored: boolean | null, sub: string) => ({ instance_id: id, repo: "team/app", base_commit: base, stored, assignment_submission_id: sub, ...(stored === null ? { error: "Storage error: down" } : {}) });
+    const job = (sub: string, status: CopyJobRow["status"], last_error: string | null = null): [string, CopyJobRow] => [sub, { assignment_submission_id: sub, status, last_error, attempts: 1 }];
+    const views = copyTaskViews(
+      [row("A", true, "s1"), row("B", false, "s2"), row("C", false, "s3"), row("D", false, "s4"), row("E", false, "s5"), row("F", false, "s6"), row("G", null, "s7")],
+      new Map([job("s1", "failed", "old"), job("s2", "queued"), job("s3", "running"), job("s4", "failed", "Repo copy failed: D: GitHub error: boom"), job("s5", "succeeded")]),
+    );
+    expect(views.map((v) => [v.instance_id, v.state, v.reason])).toEqual([
+      ["A", "stored", null], ["B", "queued", null], ["C", "running", null], ["D", "failed", "Repo copy failed: D: GitHub error: boom"],
+      ["E", "missing", null], ["F", "missing", null], ["G", "unknown", "Storage error: down"],
+    ]);
   });
 });

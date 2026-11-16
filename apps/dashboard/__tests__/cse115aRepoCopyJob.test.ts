@@ -1,20 +1,26 @@
-// #298 C: the benchmark job copies each task's repository after the rows are saved, only when
-// CSE115A_REPO_COPIES is exactly "on". Real git with a local repository for github.com, a folder for
-// the bucket, and an in-memory JobStore.
+// #298: repo copies in their own job kind on their own line. The benchmark job only queues a repo_copy
+// job (when CSE115A_REPO_COPIES is exactly "on"); the copy line claims only repo_copy jobs and the main
+// line never does. Real git with a local repository for github.com, a folder for the bucket, and an
+// in-memory job table with the unique submission-and-kind key.
 import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { copyTaskRepo, type RepoCopyTask } from "@/lib/cse115a/benchmark/repoCopy";
+import { copyTaskRepo, type RepoCopyResult, type RepoCopyTask } from "@/lib/cse115a/benchmark/repoCopy";
 import { run, type GitAccess } from "@/lib/cse115a/benchmark/validation/runRow";
 import { bucketSnapshotStore, snapshotObject } from "@/lib/cse115a/benchmark/validation/snapshotStore";
-import { runNextJob, type BenchmarkSave, type Job, type JobHandlers, type JobStore, type Submission } from "@/lib/cse115a/jobs/runner";
+import { startJobLoop } from "@/lib/cse115a/jobs/loop";
+import {
+  COPY_JOB_BUDGET_MS, drainJobs, REPO_COPY_KINDS, RUNNABLE_KINDS, runNextJob,
+  type BenchmarkSave, type Job, type JobHandlers, type JobKind, type JobOutcome, type JobStore, type Submission,
+} from "@/lib/cse115a/jobs/runner";
 import type { TaskSnapshot } from "@/lib/cse115a/submissionSnapshot";
 import type { TaskSpec } from "@/lib/cse115a/taskSpec";
 import { folderBucket, type FolderBucket } from "./helpers/folderBucket";
 
 const GIT_ID = ["-c", "user.name=t", "-c", "user.email=t@localhost"];
 const NOW = new Date("2026-11-16T00:00:00Z");
+const ON = { CSE115A_REPO_COPIES: "on" };
 const DIFF = `diff --git a/src/a.ts b/src/a.ts
 --- a/src/a.ts
 +++ b/src/a.ts
@@ -73,34 +79,54 @@ function task(slot: number, taskId: string): TaskSnapshot {
   };
 }
 
-/** A queue with one benchmark job, the rows it saved, and the order of saves and copies. */
-function memory(stored: Record<string, string> = {}) {
-  const state = { job: { status: "queued", attempts: 0 }, saved: [] as BenchmarkSave[][], order: [] as string[], loaded: 0 };
+type Row = Job & { status: string; error: string | null };
+
+/**
+ * A job table with the unique (submission, kind) key and claim-by-kinds, one submission, and the
+ * benchmark rows the job saved. `stored` gives a task's base commit as stored (a staff rebuild).
+ */
+function memory(options: { jobs?: JobKind[]; stored?: Record<string, string>; queueFails?: boolean; withQueue?: boolean; tasks?: number } = {}) {
+  const rows: Row[] = (options.jobs ?? ["benchmark"]).map((kind, i) => ({ id: `job-${i}`, assignment_submission_id: "sub-1", kind, attempts: 0, status: "queued", error: null }));
+  const state = { rows, saved: [] as BenchmarkSave[][], order: [] as string[], claims: [] as JobKind[][] };
+  const count = options.tasks ?? 2;
   const submission = {
     id: "sub-1", course_id: "c", user_id: "u", assignment_number: 1, status: "submitted", superseded_at: null,
-    snapshot: { version: 1, capturedAt: "", tasks: [task(1, "T-1"), task(2, "T-2")] },
+    snapshot: { version: 1, capturedAt: "", tasks: Array.from({ length: count }, (_, i) => task(i + 1, `T-${i + 1}`)) },
   } as unknown as Submission;
   const store: JobStore = {
-    async claim() {
-      if (state.job.status !== "queued") return null;
-      state.job.status = "running";
-      state.job.attempts += 1;
-      return { id: "job-1", assignment_submission_id: "sub-1", kind: "benchmark", attempts: state.job.attempts } as Job;
+    async claim(kinds) {
+      state.claims.push(kinds);
+      const job = rows.find((r) => r.status === "queued" && kinds.includes(r.kind));
+      if (!job) return null;
+      job.status = "running";
+      job.attempts += 1;
+      return { id: job.id, assignment_submission_id: job.assignment_submission_id, kind: job.kind, attempts: job.attempts };
     },
     async loadSubmission() { return submission; },
     async setSubmissionStatus() {},
-    async saveGrades() {},
-    async finishJob(_id, outcome) { state.job.status = outcome.status; },
+    async saveGrades() { state.order.push("graded"); },
+    async finishJob(id, outcome: JobOutcome) {
+      const job = rows.find((r) => r.id === id)!;
+      job.status = outcome.status;
+      job.error = outcome.status === "succeeded" ? null : outcome.error;
+    },
     async loadRepoMetrics() { return null; },
     async loadStudentEmail() { return null; },
-    async saveBenchmark(_submission, rows) { state.order.push("save"); state.saved.push(rows); },
-    async loadBenchmarkTasks(ids) {
-      state.loaded++;
-      // As stored: a staff rebuild may have moved a row's base commit.
-      return ids.map((id) => ({ instance_id: id, repo: "team/app", base_commit: stored[id] ?? base }));
+    async saveBenchmark(_submission, saved) { state.order.push("rows saved"); state.saved.push(saved); },
+    async loadSubmissionCopyTasks(submissionId) {
+      return Array.from({ length: count }, (_, i) => `team__app-T-${i + 1}`).map((id) => ({ instance_id: id, repo: "team/app", base_commit: options.stored?.[id] ?? base }))
+        .filter(() => submissionId === "sub-1");
     },
   };
-  const requeue = () => { state.job.status = "queued"; };
+  if (options.withQueue !== false) {
+    store.queueRepoCopy = async (submissionId) => {
+      if (options.queueFails) throw new Error("Could not queue the repo copy job: new row violates check constraint \"cse_grading_jobs_kind_check\"");
+      state.order.push("copy job queued");
+      if (rows.some((r) => r.assignment_submission_id === submissionId && r.kind === "repo_copy")) return;
+      rows.push({ id: `job-${rows.length}`, assignment_submission_id: submissionId, kind: "repo_copy", attempts: 0, status: "queued", error: null });
+    };
+  }
+  const requeue = (kind: JobKind) => { rows.find((r) => r.kind === kind)!.status = "queued"; };
   return { store, state, requeue };
 }
 
@@ -121,64 +147,124 @@ function handlers(files: FolderBucket, order: string[], git: { down: boolean } =
   };
 }
 
-describe("#298 C: repo copies at Submit", () => {
-  it.each([["unset", undefined], ["off", "off"], ["'ON '", "ON "], ["1", "1"]])("switch %s: no copy, and the job does what it did", async (_label, value) => {
-    const files = await bucket();
+describe("#298: the benchmark job queues a repo_copy job and copies nothing itself", () => {
+  it.each([["unset", undefined], ["off", "off"], ["'ON '", "ON "], ["1", "1"]])("switch %s: no repo_copy job, and the job does what it did before #298", async (_label, value) => {
     const env: Record<string, string | undefined> = value === undefined ? {} : { CSE115A_REPO_COPIES: value };
-    const withCopier = memory();
-    const h = handlers(files, withCopier.state.order);
-    const result = await runNextJob(withCopier.store, h, () => NOW, env);
-    expect(result?.outcome).toEqual({ status: "succeeded" });
-    expect(h.copied).toEqual([]);
-    expect(withCopier.state.loaded).toBe(0);
-    expect(await files.names()).toEqual([]);
-    // The same as a worker with no copier at all.
-    const plain = memory();
-    await runNextJob(plain.store, { grade: async () => [] }, () => NOW, env);
-    expect(withCopier.state.saved).toEqual(plain.state.saved);
-  });
-
-  it("switch on: one copy per task, at its stored base commit, after the rows are saved", async () => {
     const files = await bucket();
-    const { store, state } = memory({ "team__app-T-2": later });
+    const { store, state } = memory();
     const h = handlers(files, state.order);
-    const result = await runNextJob(store, h, () => NOW, { CSE115A_REPO_COPIES: "on" });
-    expect(result?.outcome).toEqual({ status: "succeeded" });
-    expect(state.order).toEqual(["save", "copy team__app-T-1", "copy team__app-T-2"]);
-    expect(h.copied.map((t) => t.base_commit)).toEqual([base, later]);
-    expect(await files.names()).toEqual([snapshotObject("team__app-T-1", base), snapshotObject("team__app-T-2", later)].sort());
+    expect((await runNextJob(store, h, () => NOW, env))?.outcome).toEqual({ status: "succeeded" });
+    expect(state.rows.map((r) => r.kind)).toEqual(["benchmark"]);
+    expect(state.order).toEqual(["rows saved"]);
+    expect(h.copied).toEqual([]);
+    // The same rows as a store and worker that know nothing of copies (a database without the migration).
+    const plain = memory({ withQueue: false });
+    await runNextJob(plain.store, { grade: async () => [] }, () => NOW, env);
+    expect(state.saved).toEqual(plain.state.saved);
   });
 
-  it("a failed copy throws after the rows are saved; the retry copies, and nothing is uploaded twice", async () => {
+  it("switch on: the rows are saved, then one repo_copy job is queued; nothing is cloned; a retry queues no second job", async () => {
     const files = await bucket();
     const { store, state, requeue } = memory();
-    const git = { down: true };
-    const h = handlers(files, state.order, git);
-    const env = { CSE115A_REPO_COPIES: "on" };
-    const first = await runNextJob(store, h, () => NOW, env);
-    expect(first?.outcome).toMatchObject({ status: "queued", runAfter: new Date("2026-11-16T00:01:00Z") });
-    const error = (first?.outcome as { error: string }).error;
-    expect(error).toBe([
-      "Repo copy for team__app-T-1 failed: GitHub error: clone failed: fatal: unable to access 'https://github.com/team/app.git/': Could not resolve host: github.com",
-      "Repo copy for team__app-T-2 failed: GitHub error: clone failed: fatal: unable to access 'https://github.com/team/app.git/': Could not resolve host: github.com",
-    ].join("\n"));
-    expect(state.saved).toHaveLength(1);
-    expect(state.order[0]).toBe("save");
-
-    git.down = false;
-    requeue();
-    expect((await runNextJob(store, h, () => NOW, env))?.outcome).toEqual({ status: "succeeded" });
-    requeue();
-    expect((await runNextJob(store, h, () => NOW, env))?.outcome).toEqual({ status: "succeeded" });
-    expect(state.saved).toHaveLength(3);
-    expect(files.calls.filter((c) => c.startsWith("upload"))).toEqual([
-      `upload ${snapshotObject("team__app-T-1", base)}`, `upload ${snapshotObject("team__app-T-2", base)}`,
-    ]);
+    const h = handlers(files, state.order);
+    expect((await runNextJob(store, h, () => NOW, ON))?.outcome).toEqual({ status: "succeeded" });
+    expect(state.order).toEqual(["rows saved", "copy job queued"]);
+    expect(h.copied).toEqual([]);
+    expect(await files.names()).toEqual([]);
+    requeue("benchmark");
+    await runNextJob(store, h, () => NOW, ON);
+    expect(state.rows.filter((r) => r.kind === "repo_copy")).toHaveLength(1);
   });
 
-  it("switch on with no copier: the job fails loudly instead of skipping the copies", async () => {
-    const { store } = memory();
-    const result = await runNextJob(store, { grade: async () => [] }, () => NOW, { CSE115A_REPO_COPIES: "on" });
-    expect(result?.outcome).toMatchObject({ status: "queued", error: "Repo copies are on, but this worker cannot make them." });
+  it("switch on: if queuing fails, the benchmark job fails after saving its rows and retries", async () => {
+    const { store, state } = memory({ queueFails: true });
+    const result = await runNextJob(store, { grade: async () => [] }, () => NOW, ON);
+    expect(result?.outcome).toMatchObject({ status: "queued", runAfter: new Date("2026-11-16T00:01:00Z") });
+    expect((result?.outcome as { error: string }).error).toContain("Could not queue the repo copy job");
+    expect(state.saved).toHaveLength(1);
+  });
+});
+
+describe("#298: two lines", () => {
+  it("the main line never claims a repo_copy job, and the copy line never claims a grade or benchmark job", async () => {
+    const { store, state } = memory({ jobs: ["repo_copy", "grade", "benchmark"] });
+    const h = { grade: async () => [], copyRepo: async (t: RepoCopyTask): Promise<RepoCopyResult> => ({ instance_id: t.instance_id, outcome: "stored" }) };
+    const main = await drainJobs(store, h);
+    expect(main.map((r) => r.kind)).toEqual(["grade", "benchmark"]);
+    expect(state.rows.find((r) => r.kind === "repo_copy")?.status).toBe("queued");
+    expect(new Set(state.claims.flat())).toEqual(new Set(RUNNABLE_KINDS));
+
+    const other = memory({ jobs: ["grade", "benchmark", "repo_copy"] });
+    const copies = await drainJobs(other.store, h, 10, REPO_COPY_KINDS);
+    expect(copies.map((r) => r.kind)).toEqual(["repo_copy"]);
+    expect(other.state.rows.filter((r) => r.kind !== "repo_copy").map((r) => r.status)).toEqual(["queued", "queued"]);
+    expect(new Set(other.state.claims.flat())).toEqual(new Set(["repo_copy"]));
+    expect(RUNNABLE_KINDS).not.toContain("repo_copy");
+  });
+
+  it("a grade job queued while a copy hangs is still graded", async () => {
+    const { store, state } = memory({ jobs: ["repo_copy"] });
+    let copyStarted = false;
+    const h: JobHandlers = {
+      grade: async () => [],
+      copyRepo: () => { copyStarted = true; return new Promise<never>(() => {}); },
+    };
+    const copyLine = startJobLoop("repo copies", 5, async () => { await drainJobs(store, h, 10, REPO_COPY_KINDS); });
+    const mainLine = startJobLoop("worker", 5, async () => { await drainJobs(store, h); });
+    try {
+      for (let i = 0; i < 100 && !copyStarted; i++) await new Promise((r) => setTimeout(r, 5));
+      expect(copyStarted).toBe(true);
+      state.rows.push({ id: "grade-1", assignment_submission_id: "sub-1", kind: "grade", attempts: 0, status: "queued", error: null });
+      for (let i = 0; i < 200 && state.rows.find((r) => r.id === "grade-1")!.status !== "succeeded"; i++) await new Promise((r) => setTimeout(r, 5));
+      expect(state.rows.find((r) => r.id === "grade-1")!.status).toBe("succeeded");
+      expect(state.order).toContain("graded");
+      expect(state.rows.find((r) => r.kind === "repo_copy")!.status).toBe("running");
+    } finally {
+      copyLine.stop();
+      mainLine.stop();
+    }
+  });
+});
+
+describe("#298: the repo_copy job", () => {
+  it("copies every task of the submission at its stored base commit; a second run uploads nothing", async () => {
+    const files = await bucket();
+    const { store, state, requeue } = memory({ jobs: ["repo_copy"], stored: { "team__app-T-2": later } });
+    const h = handlers(files, state.order);
+    expect((await runNextJob(store, h, () => NOW, ON, REPO_COPY_KINDS))?.outcome).toEqual({ status: "succeeded" });
+    expect(h.copied.map((t) => [t.instance_id, t.base_commit])).toEqual([["team__app-T-1", base], ["team__app-T-2", later]]);
+    expect(await files.names()).toEqual([snapshotObject("team__app-T-1", base), snapshotObject("team__app-T-2", later)].sort());
+    requeue("repo_copy");
+    expect((await runNextJob(store, h, () => NOW, ON, REPO_COPY_KINDS))?.outcome).toEqual({ status: "succeeded" });
+    expect(files.calls.filter((c) => c.startsWith("upload"))).toHaveLength(2);
+  });
+
+  it("a failed task fails the job with one line, and the retry rule applies", async () => {
+    const files = await bucket();
+    const { store, state } = memory({ jobs: ["repo_copy"] });
+    const result = await runNextJob(store, handlers(files, state.order, { down: true }), () => NOW, ON, REPO_COPY_KINDS);
+    expect(result?.outcome).toMatchObject({ status: "queued", runAfter: new Date("2026-11-16T00:01:00Z") });
+    const error = (result?.outcome as { error: string }).error;
+    expect(error).not.toContain("\n");
+    expect(error).toBe("Repo copy failed: "
+      + "team__app-T-1: GitHub error: clone failed: fatal: unable to access 'https://github.com/team/app.git/': Could not resolve host: github.com; "
+      + "team__app-T-2: GitHub error: clone failed: fatal: unable to access 'https://github.com/team/app.git/': Could not resolve host: github.com");
+  });
+
+  it("starts no task after 8 minutes, fails 'not finished, will retry', and the retry skips what is stored", async () => {
+    const files = await bucket();
+    const { store, state, requeue } = memory({ jobs: ["repo_copy"], tasks: 3 });
+    let clock = NOW.getTime();
+    const h = handlers(files, state.order);
+    const copy = h.copyRepo!;
+    // Each new copy takes 5 minutes of the job's clock (one already stored takes none): the third task would start at 10 minutes.
+    h.copyRepo = async (t) => { const r = await copy(t); if (r.outcome === "stored") clock += 5 * 60_000; return r; };
+    const first = await runNextJob(store, h, () => new Date(clock), ON, REPO_COPY_KINDS);
+    expect(COPY_JOB_BUDGET_MS).toBe(8 * 60_000);
+    expect(first?.outcome).toMatchObject({ status: "queued", error: "Repo copy failed: not finished, will retry: 1 of 3 task(s) not started within 8 minutes" });
+    expect(h.copied.map((t) => t.instance_id)).toEqual(["team__app-T-1", "team__app-T-2"]);
+    requeue("repo_copy");
+    expect((await runNextJob(store, h, () => new Date(clock), ON, REPO_COPY_KINDS))?.outcome).toEqual({ status: "succeeded" });
+    expect(files.calls.filter((c) => c.startsWith("upload"))).toHaveLength(3);
   });
 });

@@ -67,15 +67,16 @@ export type RowCheckout = {
 /**
  * Throws unless `file` is a whole bundle holding `commit`: `git bundle verify` (the header), then a
  * fetch of every branch into a throwaway repository (the pack itself: verify alone passes a
- * truncated file), then the commit. Run in an empty repository because verify needs one.
+ * truncated file), then the commit. Run in an empty repository because verify needs one. `exec` runs
+ * the git commands (`run`, with no time limit, unless the caller passes one).
  */
-export async function verifyBundle(file: string, commit: string): Promise<void> {
+export async function verifyBundle(file: string, commit: string, exec: typeof run = run): Promise<void> {
   const scratch = await mkdtemp(join(tmpdir(), "hecate-bundle-verify-"));
   try {
-    await run("git", ["init", "-q"], scratch);
-    await run("git", ["bundle", "verify", "-q", file], scratch);
-    await run("git", ["fetch", "-q", file, "refs/heads/*:refs/heads/*"], scratch);
-    await run("git", ["cat-file", "-e", `${commit}^{commit}`], scratch);
+    await exec("git", ["init", "-q"], scratch);
+    await exec("git", ["bundle", "verify", "-q", file], scratch);
+    await exec("git", ["fetch", "-q", file, "refs/heads/*:refs/heads/*"], scratch);
+    await exec("git", ["cat-file", "-e", `${commit}^{commit}`], scratch);
   } finally {
     await rm(scratch, { recursive: true, force: true });
   }

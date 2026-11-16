@@ -59,11 +59,14 @@ export async function loadExportCandidates(db: SupabaseClient, courseId: string)
 
 /**
  * Every benchmark task of a course with its stored repo and base commit (what the validator uses), for
- * the repo copies (#298): one per instance, every source counted whatever its consent, newest first.
+ * the repo copies (#298): one per instance, every source counted whatever its consent, newest first,
+ * each with its newest source's submission (the one a repo_copy job is attached to).
  */
-export async function loadCourseCopyTasks(db: SupabaseClient, courseId: string): Promise<Array<{ instance_id: string; repo: string; base_commit: string }>> {
+export async function loadCourseCopyTasks(db: SupabaseClient, courseId: string): Promise<Array<{ instance_id: string; repo: string; base_commit: string; assignment_submission_id: string }>> {
   const { sources } = await loadCourseSources(db, courseId);
-  const ids = [...new Set([...sources].reverse().map((row) => row.instance_id))];
+  const newest = new Map<string, string>();
+  for (const row of [...sources].reverse()) if (!newest.has(row.instance_id)) newest.set(row.instance_id, row.assignment_submission_id);
+  const ids = [...newest.keys()];
   const tasks: Array<{ instance_id: string; repo: string; base_commit: string }> = [];
   for (let index = 0; index < ids.length; index += 100) {
     const { data, error } = await db.from("cse_benchmark_tasks").select("instance_id,repo,base_commit").in("instance_id", ids.slice(index, index + 100));
@@ -71,5 +74,7 @@ export async function loadCourseCopyTasks(db: SupabaseClient, courseId: string):
     tasks.push(...((data ?? []) as typeof tasks));
   }
   const order = new Map(ids.map((id, index) => [id, index]));
-  return tasks.sort((a, b) => order.get(a.instance_id)! - order.get(b.instance_id)!);
+  return tasks
+    .sort((a, b) => order.get(a.instance_id)! - order.get(b.instance_id)!)
+    .map((task) => ({ ...task, assignment_submission_id: newest.get(task.instance_id)! }));
 }
