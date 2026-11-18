@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase/server";
 import { guardCourse } from "@/lib/cse115a/instructorApi";
-import { effectiveTotal, sprintScore, type TaskGradeRow } from "@/lib/cse115a/gradeReview";
+import { effectiveTotal, slotsFromSnapshotPaths, submittedSprintScore, type TaskGradeRow } from "@/lib/cse115a/gradeReview";
 
 export const runtime = "nodejs";
 
@@ -21,7 +21,7 @@ export async function GET(request: Request, { params }: Params) {
   const db = getSupabase();
   const [members, submissions] = await Promise.all([
     db.from("cse_course_memberships").select("user_id,ucsc_email").eq("course_id", course.id).order("ucsc_email"),
-    db.from("cse_assignment_submissions").select("id,user_id,attempt,status,submitted_at")
+    db.from("cse_assignment_submissions").select("id,user_id,attempt,status,submitted_at,first_slot:snapshot->tasks->0->slot,second_slot:snapshot->tasks->1->slot")
       .eq("course_id", course.id).eq("assignment_number", assignmentNumber).is("superseded_at", null),
   ]);
   if (members.error || submissions.error) return NextResponse.json({ error: "Could not load submissions." }, { status: 500 });
@@ -38,6 +38,8 @@ export async function GET(request: Request, { params }: Params) {
     const submission = submissions.data?.find((row) => row.user_id === member.user_id);
     if (!submission) return { userId: member.user_id, email: member.ucsc_email, submission: null };
     const taskGrades = (grades.data ?? []).filter((row) => row.assignment_submission_id === submission.id) as Array<Pick<TaskGradeRow, "task_slot" | "agent_total" | "instructor_total" | "needs_review" | "released_at">>;
+    // Only the tasks in the snapshot count: one task is the sprint score, and a missing grade shows no score yet (#348).
+    const slots = slotsFromSnapshotPaths(submission.first_slot, submission.second_slot);
     const gradeJob = jobs.data?.find((row) => row.assignment_submission_id === submission.id && row.kind === "grade");
     const tasks = [1, 2].map((slot) => {
       const grade = taskGrades.find((row) => row.task_slot === slot);
@@ -57,8 +59,11 @@ export async function GET(request: Request, { params }: Params) {
         status: submission.status,
         submittedAt: submission.submitted_at,
         tasks,
-        agentSprint: taskGrades.length ? sprintScore(tasks.map((task) => task.agentTotal)) : null,
-        sprint: taskGrades.length ? sprintScore(taskGrades.map(effectiveTotal)) : null,
+        agentSprint: submittedSprintScore(slots, (slot) => tasks.find((task) => task.slot === slot)?.agentTotal),
+        sprint: submittedSprintScore(slots, (slot) => {
+          const grade = taskGrades.find((row) => row.task_slot === slot);
+          return grade ? effectiveTotal(grade) : null;
+        }),
         needsReview: tasks.some((task) => task.needsReview && task.instructorTotal === null),
         jobError: gradeJob?.status === "failed" ? gradeJob.last_error : null,
       },

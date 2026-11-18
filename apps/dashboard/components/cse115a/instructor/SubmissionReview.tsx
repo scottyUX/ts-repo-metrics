@@ -5,8 +5,9 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { splitPatch } from "@/lib/cse115a/diff";
+import { oneTaskReviewLine, specEstimateHours } from "@/lib/cse115a/processChecklist";
 import { RUBRIC, TASK_POINTS } from "@/lib/cse115a/rubric";
-import { effectiveTotal, sprintScore, type TaskGradeRow } from "@/lib/cse115a/gradeReview";
+import { effectiveTotal, submittedSprintScore, type TaskGradeRow } from "@/lib/cse115a/gradeReview";
 import type { SubmissionSnapshot, TaskSnapshot } from "@/lib/cse115a/submissionSnapshot";
 import { fetchJson, formatPoints, STATUS_LABELS, type StaffCourse, type SubmissionStatus } from "./shared";
 
@@ -220,8 +221,11 @@ export function SubmissionReview({ id }: { id: string }) {
   const { submission, grades, course } = detail;
   const active = !submission.superseded_at;
   const tasks = [...submission.snapshot.tasks].sort((a, b) => a.slot - b.slot);
-  const missingSlots = [1, 2].filter((slot) => !tasks.some((task) => task.slot === slot));
-  const sprint = grades.length ? sprintScore(grades.map(effectiveTotal)) : null;
+  const oneTask = tasks.length === 1 ? oneTaskReviewLine(specEstimateHours(tasks[0]!.spec)) : null;
+  const sprint = submittedSprintScore(tasks.map((task) => task.slot), (slot) => {
+    const grade = grades.find((row) => row.task_slot === slot);
+    return grade ? effectiveTotal(grade) : null;
+  });
   const gradeJob = detail.jobs.find((job) => job.kind === "grade");
 
   return (
@@ -259,7 +263,7 @@ export function SubmissionReview({ id }: { id: string }) {
       <div className="grid gap-6 xl:grid-cols-2">
         {tasks.map((task) => <TaskPanel key={task.slot} submissionId={submission.id} task={task} grade={grades.find((row) => row.task_slot === task.slot)} onSaved={() => void load()} readOnly={!active} />)}
       </div>
-      {missingSlots.map((slot) => <p key={slot} className="text-sm text-muted-foreground">Task {slot}: not submitted (scores 0)</p>)}
+      {oneTask ? <p className={oneTask.warn ? "text-sm text-amber-700 dark:text-amber-300" : "text-sm text-muted-foreground"}>{oneTask.text}</p> : null}
 
       {detail.history.length > 1 ? (
         <section className="rounded-xl border border-border bg-card p-5">

@@ -12,12 +12,14 @@ service keeps its normal home page.
 3. Connect GitHub so the site knows their username. One teammate installs the course
    GitHub App on the team repository. That install is what lets the site read the
    repository. See [CSE115A_GITHUB_APP.md](CSE115A_GITHUB_APP.md).
-4. Open Assignment 1, 2, 3, and so on. Submit two merged task PR URLs. The app
+4. Open Assignment 1, 2, 3, and so on. Submit two merged task PR URLs, or one big task. The app
    imports `docs/tasks/sprint-N/<task-id>.md` from each PR's merge commit,
    records process checks, and analyzes the PR's changed source files. Once
-   every added task is analyzed, submit the assignment in the app. One task can
-   be submitted; the missing task scores 0, so the sprint score is that task's
-   score divided by 2. With two tasks, their task IDs and PR URLs must differ.
+   every added task is analyzed, submit the assignment in the app. A sprint is
+   two tasks or one big task (estimate 4 hours or more). One big task is scored
+   out of 10 on its own; two tasks are averaged. A big task under 4 hours shows
+   a warning but can still be submitted; graders decide. With two tasks, their
+   task IDs and PR URLs must differ.
 
 ## Backend setup
 
@@ -155,8 +157,9 @@ SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... \
   diffs, CI results, the Repo Metrics report, and the agent's rationale and
   quotes. Staff can override points (half steps) and add notes, then
   **Release**. Release is blocked while a submitted task has no grade or a
-  criterion has no points. A one-task submission shows "Task 2: not submitted
-  (scores 0)" (or Task 1) and releases with one grade. Edits saved
+  criterion has no points. A one-task submission shows "One-task sprint: this
+  task is the sprint score" with its estimate (amber when under 4 hours) and
+  releases with one grade. Edits saved
   after release are visible to the student right away.
 - **Regrade** requeues the grade job and keeps instructor edits. **Unlock**
   (instructors only, reason required) supersedes the attempt so the student can

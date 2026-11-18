@@ -13,6 +13,7 @@ import { CONSENT_TEXT, CONSENT_VERSION } from "@/lib/cse115a/consent";
 import { needsCourseInstallPrompt, repoFullNameFromPullRequest } from "@/lib/cse115a/installPrompt";
 import { oauthHashError } from "@/lib/cse115a/oauthError";
 import {
+  BIG_TASK_MIN_HOURS,
   firstOpenSprint,
   processChecklist,
   resolvePullRequestUrl,
@@ -21,6 +22,8 @@ import {
   submitAction,
   canChangeSubmission,
   submitBarText,
+  oneTaskConfirmText,
+  specEstimateHours,
   type TaskFacts,
 } from "@/lib/cse115a/processChecklist";
 import { ProcessChecklist } from "@/components/cse115a/ProcessChecklist";
@@ -293,6 +296,8 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
   const changeAllowed = Boolean(assignmentSubmission) && canChangeSubmission(assignmentSubmission!.status, sprintDueAt);
   const readyCount = submissions.filter((item) => sprintReady(item.validation_json)).length;
   const action = submitAction(submissions.length, readyCount, assignmentNumber);
+  // One task added: its saved estimate decides the big-task warning, which never blocks Submit (#348).
+  const oneTaskHours = submissions.length === 1 ? specEstimateHours(submissions[0]!.task_spec_json) : null;
   const setupDone = Boolean(me?.courses.length) && githubConnected === true;
 
   // Typed URLs and messages belong to the sprint they were typed in.
@@ -530,10 +535,10 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
                 <h1 className="text-3xl font-bold">Sprint {assignmentNumber}</h1>
                 <p className="mt-1 text-sm text-slate-600">
                   {released
-                    ? `Graded ${formatWhen(releasedGrades[0]!.releasedAt)} · the average of your two tasks${releasedGrades.length === 1 ? "; the missing task scores 0" : ""}`
+                    ? `Graded ${formatWhen(releasedGrades[0]!.releasedAt)} · ${releasedGrades.length === 1 ? "your one big task" : "the average of your two tasks"}`
                     : assignmentSubmission
                       ? `Submitted ${formatWhen(assignmentSubmission.submitted_at)}. Your grade appears here after instructor review.`
-                      : "Add two merged task PRs. We check each one against its checklist."}
+                      : `Add two merged task PRs, or one big task (estimate ${BIG_TASK_MIN_HOURS} hours or more). We check each one against its checklist.`}
                 </p>
                 {released ? <p className="mt-1 text-sm text-slate-600">Questions about this grade? Ask your TA.</p> : null}
                 {assignmentSubmission && !released ? <StatusSteps status={assignmentSubmission.status} /> : null}
@@ -663,7 +668,7 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
               <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-5">
                 <div>
                   <h2 className="font-semibold">Sprint {assignmentNumber}</h2>
-                  <p className="mt-1 text-sm text-slate-600">{submitBarText(submissions.length, readyCount)}</p>
+                  <p className="mt-1 text-sm text-slate-600">{submitBarText(submissions.length, readyCount, oneTaskHours)}</p>
                   {action.reason ? <p className="mt-1 text-sm text-slate-600">{action.reason}</p> : null}
                 </div>
                 <button type="button" disabled={submittingAssignment || action.disabled || preview}
@@ -707,7 +712,7 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
                   <DialogTitle>Submit Sprint {assignmentNumber}?</DialogTitle>
                   <DialogDescription>
                     {submissions.length === 1
-                      ? "You are submitting one task. The empty task scores 0, so the most this sprint can earn is 5 of 10. You can still change your submission and add the second task until the sprint closes."
+                      ? oneTaskConfirmText(oneTaskHours)
                       : "Both tasks lock when you submit. You can still change your submission until the sprint closes."}
                   </DialogDescription>
                 </DialogHeader>

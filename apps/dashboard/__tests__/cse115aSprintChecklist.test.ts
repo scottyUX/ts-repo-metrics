@@ -3,7 +3,14 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { ProcessChecklist } from "@/components/cse115a/ProcessChecklist";
 import {
+  BIG_TASK_MIN_HOURS,
+  TASK_MIN_HOURS,
+  bigTaskEstimateOk,
+  estimateMeetsTaskMinimum,
+  oneTaskConfirmText,
+  oneTaskReviewLine,
   processChecklist,
+  specEstimateHours,
   resolvePullRequestUrl,
   sprintReady,
   submitAction,
@@ -77,10 +84,58 @@ describe("sprint checklist", () => {
     expect(submitAction(1, 0, 3)).toEqual({ disabled: false, label: "Submit Sprint 3 with one task", reason: null });
   });
 
-  it("says a missing task scores 0 when one is added", () => {
+  it("says one big task counts as the whole sprint at 4 hours or more (#348)", () => {
+    expect(submitBarText(1, 1, 4)).toBe("1 task added · one big task counts as the whole sprint");
+    expect(submitBarText(1, 0, 6.5)).toBe("1 task added · one big task counts as the whole sprint");
+  });
+
+  it("warns, without blocking, when one task's estimate is under 4 hours or missing (#348)", () => {
+    expect(submitBarText(1, 1, 3)).toBe("1 task added · one big task needs an estimate of 4 hours or more (this one says 3). Add a second task, or submit anyway and a grader will check its size.");
+    expect(submitBarText(1, 1, 3.5)).toBe("1 task added · one big task needs an estimate of 4 hours or more (this one says 3.5). Add a second task, or submit anyway and a grader will check its size.");
+    expect(submitBarText(1, 1, null)).toBe("1 task added · one big task needs an estimate of 4 hours or more (this one has no estimate). Add a second task, or submit anyway and a grader will check its size.");
+    expect(submitBarText(1, 1)).toBe("1 task added · one big task needs an estimate of 4 hours or more (this one has no estimate). Add a second task, or submit anyway and a grader will check its size.");
+    expect(submitAction(1, 1, 2)).toEqual({ disabled: false, label: "Submit Sprint 2 with one task", reason: null });
+  });
+
+  it("leaves two tasks as they were, whatever the estimates", () => {
     expect(submitBarText(0, 0)).toBe("0 of 2 ready · You can change your submission until the sprint closes.");
-    expect(submitBarText(1, 1)).toBe("1 task added · a missing task scores 0");
     expect(submitBarText(2, 1)).toBe("1 of 2 ready · You can change your submission until the sprint closes.");
+    expect(submitBarText(2, 2, 3)).toBe("2 of 2 ready · You can change your submission until the sprint closes.");
+    expect(sprintReady({ ...passing, estimateAtLeastTwoHours: true })).toBe(true);
+  });
+
+  it("asks to confirm one big task, adding the size warning under 4 hours (#348)", () => {
+    const base = "You are submitting one big task. It counts as the whole sprint, scored out of 10. You can still change your submission and add a second task until the sprint closes.";
+    expect(oneTaskConfirmText(4)).toBe(base);
+    expect(oneTaskConfirmText(3)).toBe(`${base} Its estimate is 3 hours; one big task needs 4 or more. A grader will check its size.`);
+    expect(oneTaskConfirmText(1)).toBe(`${base} Its estimate is 1 hour; one big task needs 4 or more. A grader will check its size.`);
+    expect(oneTaskConfirmText(null)).toBe(`${base} It has no estimate; one big task needs 4 or more. A grader will check its size.`);
+  });
+
+  it("shows staff the one-task line, amber under 4 hours (#348)", () => {
+    expect(oneTaskReviewLine(5)).toEqual({ text: "One-task sprint: this task is the sprint score. Estimate: 5 hours.", warn: false });
+    expect(oneTaskReviewLine(4)).toEqual({ text: "One-task sprint: this task is the sprint score. Estimate: 4 hours.", warn: false });
+    expect(oneTaskReviewLine(3)).toEqual({ text: "One-task sprint: this task is the sprint score. Estimate: 3 hours (one big task needs 4 or more).", warn: true });
+    expect(oneTaskReviewLine(null)).toEqual({ text: "One-task sprint: this task is the sprint score. Estimate: none (one big task needs 4 or more).", warn: true });
+  });
+
+  it("reads the estimate from a saved task spec", () => {
+    expect(specEstimateHours({ estimateHours: 4 })).toBe(4);
+    expect(specEstimateHours({ estimateHours: Number.NaN })).toBeNull();
+    expect(specEstimateHours({})).toBeNull();
+    expect(specEstimateHours(null)).toBeNull();
+  });
+
+  it("keeps the hours in one place: a big task is twice the regular minimum", () => {
+    expect(TASK_MIN_HOURS).toBe(2);
+    expect(BIG_TASK_MIN_HOURS).toBe(4);
+    expect([3.99, 4, 4.5, null, undefined].map(bigTaskEstimateOk)).toEqual([false, true, true, false, false]);
+  });
+
+  it("gives estimateAtLeastTwoHours the same answers as hours >= 2", () => {
+    for (const hours of [0, 1, 1.5, 1.99, 2, 2.5, 3, 4, 8, Number.NaN, -1]) {
+      expect(estimateMeetsTaskMinimum(hours)).toBe(hours >= 2);
+    }
   });
 
   it("re-checks the saved URL when the input is empty", () => {
