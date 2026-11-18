@@ -530,7 +530,7 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
                 <h1 className="text-3xl font-bold">Sprint {assignmentNumber}</h1>
                 <p className="mt-1 text-sm text-slate-600">
                   {released
-                    ? `Graded ${formatWhen(releasedGrades[0]!.releasedAt)} · the average of your two tasks`
+                    ? `Graded ${formatWhen(releasedGrades[0]!.releasedAt)} · the average of your two tasks${releasedGrades.length === 1 ? "; the missing task scores 0" : ""}`
                     : assignmentSubmission
                       ? `Submitted ${formatWhen(assignmentSubmission.submitted_at)}. Your grade appears here after instructor review.`
                       : "Add two merged task PRs. We check each one against its checklist."}
@@ -663,7 +663,7 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
               <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-5">
                 <div>
                   <h2 className="font-semibold">Sprint {assignmentNumber}</h2>
-                  <p className="mt-1 text-sm text-slate-600">{submitBarText(readyCount)}</p>
+                  <p className="mt-1 text-sm text-slate-600">{submitBarText(submissions.length, readyCount)}</p>
                   {action.reason ? <p className="mt-1 text-sm text-slate-600">{action.reason}</p> : null}
                 </div>
                 <button type="button" disabled={submittingAssignment || action.disabled || preview}
@@ -705,7 +705,11 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Submit Sprint {assignmentNumber}?</DialogTitle>
-                  <DialogDescription>Both tasks lock when you submit. You can still change your submission until the sprint closes.</DialogDescription>
+                  <DialogDescription>
+                    {submissions.length === 1
+                      ? "You are submitting one task. The empty task scores 0, so the most this sprint can earn is 5 of 10. You can still change your submission and add the second task until the sprint closes."
+                      : "Both tasks lock when you submit. You can still change your submission until the sprint closes."}
+                  </DialogDescription>
                 </DialogHeader>
                 <ul className="space-y-2 text-sm">
                   {[...submissions].sort((a, b) => a.task_slot - b.task_slot).map((item) => (

@@ -76,7 +76,7 @@ const FAQS = [
   },
   {
     q: "How is the sprint score calculated?",
-    a: "Each task is out of 10: Scope 1, Specs 2, Acceptance criteria 2, Test quality 2, Tests pass 2, and Process 1. The sprint score is the average of your two tasks.",
+    a: "Each task is out of 10: Scope 1, Specs 2, Acceptance criteria 2, Test quality 2, Tests pass 2, and Process 1. The sprint score is the average of your two tasks. You can submit one task; the missing task scores 0.",
   },
   {
     q: "Does the research question affect my grade?",
@@ -247,8 +247,8 @@ const CourseHelp = () => (
     <section id="submit" className="space-y-3">
       <h2 className="text-xl font-semibold">7. Submit the sprint</h2>
       <ol className="list-decimal space-y-2 pl-5 text-sm leading-6 text-slate-700">
-        <li>Add both tasks. Each one shows Ready when the process checks pass.</li>
-        <li>Click <strong>Submit Sprint 2</strong> (or 3, or 4). Both tasks lock.</li>
+        <li>Add both tasks. Each one shows Ready when the process checks pass. You can submit one task; the missing task scores 0.</li>
+        <li>Click <strong>Submit Sprint 2</strong> (or 3, or 4). Your tasks lock.</li>
         <li>Before the deadline, and before a grade is released, <strong>Change submission</strong> withdraws the sprint so you can edit.</li>
         <li>After your instructor releases the grade, the sprint score is the average of the two tasks, out of 10.</li>
       </ol>

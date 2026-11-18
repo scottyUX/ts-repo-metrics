@@ -66,7 +66,7 @@ function groups(sprint: number): Group[] {
       title: "In this app",
       items: [
         { key: "add", title: "Add your PR here", detail: <p>Push the <Code>-done</Code> tag first, then paste the merged PR link. The repository owner installs the course GitHub App on your team repository first (the <strong>Install or manage</strong> button above your tasks); after that, every teammate can add PRs from it. If a check shows ✗, follow its fix and click Re-check.</p> },
-        { key: "submit", title: `Submit Sprint ${sprint}`, detail: <p>When both tasks are in, click Submit Sprint {sprint}. Both tasks lock when you submit, but you can change your submission until the sprint closes.</p> },
+        { key: "submit", title: `Submit Sprint ${sprint}`, detail: <p>When both tasks are in, click Submit Sprint {sprint}. You can submit one task; the missing task scores 0. Your tasks lock when you submit, but you can change your submission until the sprint closes.</p> },
       ],
     },
   ];

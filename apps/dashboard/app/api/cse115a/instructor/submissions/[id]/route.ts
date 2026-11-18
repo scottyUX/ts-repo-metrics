@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase/server";
 import { guardSubmission } from "@/lib/cse115a/instructorApi";
-import { releaseBlockers, type TaskGradeRow } from "@/lib/cse115a/gradeReview";
+import { releaseBlockers, submittedSlots, type TaskGradeRow } from "@/lib/cse115a/gradeReview";
 
 export const runtime = "nodejs";
 
@@ -32,7 +32,7 @@ export async function GET(_request: Request, { params }: Params) {
     course: guard.course,
     submission: { ...submission, email: member.data?.ucsc_email ?? null },
     grades: grades.data,
-    releaseBlockers: releaseBlockers((grades.data ?? []) as TaskGradeRow[]),
+    releaseBlockers: releaseBlockers((grades.data ?? []) as TaskGradeRow[], submittedSlots(submission.snapshot)),
     jobs: jobs.data,
     history: history.data,
   });

@@ -53,10 +53,17 @@ export function effectiveTotal(grade: Pick<TaskGradeRow, "agent_total" | "instru
   return Number(grade.instructor_total ?? grade.agent_total);
 }
 
-/** Reasons a submission cannot be released yet; empty when it can. */
-export function releaseBlockers(grades: TaskGradeRow[]): string[] {
+/** The task slots a submission's snapshot holds. A snapshot without a task list counts as both slots, as before #348. */
+export function submittedSlots(snapshot: unknown): number[] {
+  const tasks = (snapshot as { tasks?: unknown } | null | undefined)?.tasks;
+  if (!Array.isArray(tasks)) return [1, 2];
+  return tasks.map((task) => Number((task as { slot?: unknown } | null)?.slot)).filter(Number.isInteger).sort((a, b) => a - b);
+}
+
+/** Reasons a submission cannot be released yet; empty when it can. Only submitted slots need a grade (#348). */
+export function releaseBlockers(grades: TaskGradeRow[], slots: number[]): string[] {
   const blockers: string[] = [];
-  for (const slot of [1, 2]) {
+  for (const slot of slots) {
     const grade = grades.find((row) => row.task_slot === slot);
     if (!grade) { blockers.push(`Task ${slot} has no grade yet.`); continue; }
     if (grade.instructor_rubric) continue;

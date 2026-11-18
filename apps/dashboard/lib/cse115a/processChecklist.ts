@@ -138,15 +138,32 @@ export function resolvePullRequestUrl(input: string, saved: string | null | unde
 }
 
 export function submitAction(addedCount: number, readyCount: number, sprint: number): { disabled: boolean; label: string; reason: string | null } {
-  if (addedCount < 2) {
-    return { disabled: true, label: `Submit Sprint ${sprint}`, reason: "Add both tasks to submit." };
+  if (addedCount < 1) {
+    return { disabled: true, label: `Submit Sprint ${sprint}`, reason: "Add a task to submit." };
   }
+  // One task can be submitted; the missing task scores 0 (#348).
+  if (addedCount === 1) return { disabled: false, label: `Submit Sprint ${sprint} with one task`, reason: null };
   if (readyCount >= 2) return { disabled: false, label: `Submit Sprint ${sprint}`, reason: null };
   return { disabled: false, label: `Submit Sprint ${sprint} anyway`, reason: null };
 }
 
-export function submitBarText(readyCount: number): string {
+export function submitBarText(addedCount: number, readyCount: number): string {
+  if (addedCount === 1) return "1 task added · a missing task scores 0";
   return `${readyCount} of 2 ready · You can change your submission until the sprint closes.`;
+}
+
+export type SubmitTaskRow = { task_slot: number; task_id: string; pr_url: string; analysis_result_id: string | null };
+
+/** Why these task rows can't be submitted, or null when they can: one or two tasks, each analyzed, two must differ (#348). */
+export function submitTasksError(tasks: SubmitTaskRow[]): string | null {
+  if (tasks.length < 1 || tasks.length > 2) return "Add and analyze at least one merged task PR first.";
+  const sorted = [...tasks].sort((a, b) => a.task_slot - b.task_slot);
+  const unanalyzed = sorted.find((task) => !task.analysis_result_id);
+  if (unanalyzed) return `Task ${unanalyzed.task_slot} (${unanalyzed.task_id}) has not been analyzed yet. Re-check it, then submit.`;
+  if (sorted.length === 2 && (sorted[0]!.task_id === sorted[1]!.task_id || sorted[0]!.pr_url === sorted[1]!.pr_url)) {
+    return "Your two tasks must be different merged PRs with different task IDs.";
+  }
+  return null;
 }
 
 export function sprintTabLabel(number: number, options: { submitted: boolean; released: boolean; score: number | null }): string {
