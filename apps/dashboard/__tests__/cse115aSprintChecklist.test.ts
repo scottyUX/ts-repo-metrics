@@ -90,10 +90,10 @@ describe("sprint checklist", () => {
   });
 
   it("warns, without blocking, when one task's estimate is under 4 hours or missing (#348)", () => {
-    expect(submitBarText(1, 1, 3)).toBe("1 task added · one big task needs an estimate of 4 hours or more (this one says 3)");
-    expect(submitBarText(1, 1, 3.5)).toBe("1 task added · one big task needs an estimate of 4 hours or more (this one says 3.5)");
-    expect(submitBarText(1, 1, null)).toBe("1 task added · one big task needs an estimate of 4 hours or more (this one has no estimate)");
-    expect(submitBarText(1, 1)).toBe("1 task added · one big task needs an estimate of 4 hours or more (this one has no estimate)");
+    expect(submitBarText(1, 1, 3)).toBe("1 task added · one big task needs an estimate of 4 hours or more (this one says 3). Add a second task, or submit anyway and a grader will check its size.");
+    expect(submitBarText(1, 1, 3.5)).toBe("1 task added · one big task needs an estimate of 4 hours or more (this one says 3.5). Add a second task, or submit anyway and a grader will check its size.");
+    expect(submitBarText(1, 1, null)).toBe("1 task added · one big task needs an estimate of 4 hours or more (this one has no estimate). Add a second task, or submit anyway and a grader will check its size.");
+    expect(submitBarText(1, 1)).toBe("1 task added · one big task needs an estimate of 4 hours or more (this one has no estimate). Add a second task, or submit anyway and a grader will check its size.");
     expect(submitAction(1, 1, 2)).toEqual({ disabled: false, label: "Submit Sprint 2 with one task", reason: null });
   });
 

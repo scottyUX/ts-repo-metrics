@@ -178,7 +178,7 @@ export function submitBarText(addedCount: number, readyCount: number, oneTaskHou
   if (addedCount === 1) {
     if (bigTaskEstimateOk(oneTaskHours)) return "1 task added · one big task counts as the whole sprint";
     const says = oneTaskHours === null ? "this one has no estimate" : `this one says ${String(Number(oneTaskHours.toFixed(2)))}`;
-    return `1 task added · one big task needs an estimate of ${BIG_TASK_MIN_HOURS} hours or more (${says})`;
+    return `1 task added · one big task needs an estimate of ${BIG_TASK_MIN_HOURS} hours or more (${says}). Add a second task, or submit anyway and a grader will check its size.`;
   }
   return `${readyCount} of 2 ready · You can change your submission until the sprint closes.`;
 }
