@@ -35,7 +35,7 @@ Use the existing handler.
 `;
 
 /** A squash-merged PR. Its first commit is "first"; the squash commit on main is "squash". */
-function stubGitHub(baseTag: string | null, firstCommitFiles: string[], prFiles: Array<{ filename: string; status?: string }> = [{ filename: TASK }, { filename: "app.js" }]) {
+function stubGitHub(baseTag: string | null, firstCommitFiles: string[], prFiles: Array<{ filename: string; status?: string }> = [{ filename: TASK }, { filename: "app.js" }], spec = SPEC) {
     const routes: Record<string, unknown> = {
     "/repos/team/repo/pulls/1": {
       merged_at: "2026-10-14T00:00:00Z", merge_commit_sha: "squash", title: "US-1-T-1: Reject",
@@ -43,7 +43,7 @@ function stubGitHub(baseTag: string | null, firstCommitFiles: string[], prFiles:
     },
     "/user": { login: "student" },
     "/repos/team/repo/pulls/1/files?per_page=100&page=1": prFiles,
-    [`/repos/team/repo/contents/${TASK}?ref=squash`]: { encoding: "base64", size: SPEC.length, content: Buffer.from(SPEC).toString("base64") },
+    [`/repos/team/repo/contents/${TASK}?ref=squash`]: { encoding: "base64", size: spec.length, content: Buffer.from(spec).toString("base64") },
     "/repos/team/repo/pulls/1/commits?per_page=1&page=1": [{ sha: "first" }],
     "/repos/team/repo/contents/docs/tasks/sprint-1?ref=squash": [{ name: "US-1-T-1.md", type: "file" }],
     "/repos/team/repo/commits/first": { files: firstCommitFiles.map((filename) => ({ filename })), commit: { author: { email: "student@ucsc.edu" } } },
@@ -226,5 +226,21 @@ describe("CSE 115A task import: the task file is checked before the merge (#388)
     await expect(importPull()).rejects.toThrow(new Error(
       "The file is named “my task.md” but the id inside it is “US-1-T-1”. Name the file US-1-T-1.md.",
     ));
+  });
+});
+
+describe("CSE 115A task import: the 2-hour estimate check (#348)", () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it.each([
+    ["1.5", false],
+    ["2", true],
+    ["3", true],
+    ["4", true],
+  ])("estimate_hours %s gives estimateAtLeastTwoHours %s, as before", async (hours, ok) => {
+    stubGitHub("first", [TASK], undefined, SPEC.replace("estimate_hours: 3", `estimate_hours: ${hours}`));
+    const task = await importTaskFromPullRequest("https://github.com/team/repo/pull/1", 1, githubReader("token"), "student");
+    expect(task.spec.estimateHours).toBe(Number(hours));
+    expect(task.validation.estimateAtLeastTwoHours).toBe(ok);
   });
 });

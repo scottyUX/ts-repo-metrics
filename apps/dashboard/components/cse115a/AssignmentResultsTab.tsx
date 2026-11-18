@@ -1,6 +1,7 @@
 import type { TaskSpec } from "@/lib/cse115a/taskSpec";
 import { RUBRIC, TASK_POINTS } from "@/lib/cse115a/rubric";
 import type { StudentTaskGrade } from "@/lib/cse115a/gradeReview";
+import { BIG_TASK_MIN_HOURS } from "@/lib/cse115a/processChecklist";
 
 export type CourseTaskEvidence = {
   taskId: string;
@@ -85,7 +86,7 @@ export function AssignmentResultsTab({ task }: { task: CourseTaskEvidence }) {
         </div>
         <div className="rounded-xl border border-border bg-card p-5">
           <p className="text-sm font-semibold text-foreground">Sprint score</p>
-          <p className="mt-1 text-sm text-muted-foreground">Average of the two best task scores. A missing task scores 0. {grade ? "See the assignment page for your sprint score." : "The score appears after your instructor releases grades."}</p>
+          <p className="mt-1 text-sm text-muted-foreground">Two tasks are averaged. One big task (estimate {BIG_TASK_MIN_HOURS} hours or more) is scored out of 10 on its own. {grade ? "See the assignment page for your sprint score." : "The score appears after your instructor releases grades."}</p>
         </div>
       </div>
 

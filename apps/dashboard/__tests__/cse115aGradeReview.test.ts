@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { effectiveTotal, parseInstructorRubric, releaseBlockers, sprintScore, studentGradeView, submittedSlots, type TaskGradeRow } from "@/lib/cse115a/gradeReview";
+import { effectiveTotal, parseInstructorRubric, releaseBlockers, slotsFromSnapshotPaths, sprintScore, studentGradeView, submittedSlots, submittedSprintScore, type TaskGradeRow } from "@/lib/cse115a/gradeReview";
 import { RUBRIC, type CriterionGrade } from "@/lib/cse115a/rubric";
 
 const full = () => RUBRIC.map((row) => ({ name: row.name as string, awarded: row.points as number, note: "" }));
@@ -77,16 +77,44 @@ describe("release rules", () => {
 });
 
 describe("sprintScore", () => {
-  it("averages the two best tasks, counting a missing task as 0", () => {
+  it("averages two tasks, and the two best of more than two", () => {
     expect(sprintScore([8, 6])).toBe(7);
     expect(sprintScore([8, 6, 10])).toBe(9);
-    expect(sprintScore([8, null])).toBe(4);
     expect(sprintScore([])).toBe(0);
   });
 
-  it("gives half of a lone task's total (#348)", () => {
-    expect(sprintScore([8])).toBe(4);
-    expect(sprintScore([10])).toBe(5);
+  it("scores one big task out of 10 on its own (#348)", () => {
+    expect(sprintScore([8])).toBe(8);
+    expect(sprintScore([10])).toBe(10);
+  });
+});
+
+describe("instructor list sprint score (#348)", () => {
+  const totals = (bySlot: Record<number, number | null>) => (slot: number) => bySlot[slot];
+
+  it("scores a one-task submission as that task's total", () => {
+    const slots = slotsFromSnapshotPaths(1, null);
+    expect(slots).toEqual([1]);
+    expect(submittedSprintScore(slots, totals({ 1: 8 }))).toBe(8);
+    expect(submittedSprintScore(slotsFromSnapshotPaths(2, undefined), totals({ 2: 6.5 }))).toBe(6.5);
+  });
+
+  it("averages a two-task submission once both grades are in", () => {
+    const slots = slotsFromSnapshotPaths(1, 2);
+    expect(slots).toEqual([1, 2]);
+    expect(submittedSprintScore(slots, totals({ 1: 8, 2: 6 }))).toBe(7);
+  });
+
+  it("shows no score for a two-task submission with a grade missing, not a one-task score", () => {
+    expect(submittedSprintScore([1, 2], totals({ 1: 8, 2: null }))).toBeNull();
+    expect(submittedSprintScore([1, 2], totals({ 2: 6 }))).toBeNull();
+    expect(submittedSprintScore([1], totals({}))).toBeNull();
+  });
+
+  it("treats a snapshot without a task list as two tasks, as submittedSlots does", () => {
+    expect(slotsFromSnapshotPaths(null, null)).toEqual([1, 2]);
+    expect(slotsFromSnapshotPaths(undefined, undefined)).toEqual(submittedSlots({}));
+    expect(submittedSprintScore(slotsFromSnapshotPaths(null, null), totals({ 1: 8 }))).toBeNull();
   });
 });
 

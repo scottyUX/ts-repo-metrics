@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { fetchJson, formatPoints, STATUS_LABELS, type StaffCourse, type SubmissionStatus } from "./shared";
+import { BIG_TASK_MIN_HOURS } from "@/lib/cse115a/processChecklist";
 
 type Row = {
   userId: string;
@@ -169,7 +170,7 @@ export function InstructorHome() {
           </tbody>
         </table>
       </div>
-      <p className="text-sm text-muted-foreground">Gray totals are the agent&apos;s draft; dark totals include instructor edits. Sprint is the average of the two tasks; a task not submitted scores 0. Students see nothing until you release.</p>
+      <p className="text-sm text-muted-foreground">Gray totals are the agent&apos;s draft; dark totals include instructor edits. Sprint is the average of two tasks, or one big task (estimate {BIG_TASK_MIN_HOURS} hours or more) scored on its own. Students see nothing until you release.</p>
     </div>
   );
 }

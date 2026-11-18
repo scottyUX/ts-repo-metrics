@@ -1,3 +1,29 @@
+/** The smallest estimate a task may have, in hours. */
+export const TASK_MIN_HOURS = 2;
+/** The smallest estimate for one big task, which counts as the whole sprint: twice a regular task. */
+export const BIG_TASK_MIN_HOURS = 2 * TASK_MIN_HOURS;
+
+/** The regular estimate check: at least TASK_MIN_HOURS. Feeds estimateAtLeastTwoHours. */
+export function estimateMeetsTaskMinimum(hours: number): boolean {
+  return hours >= TASK_MIN_HOURS;
+}
+
+/** A saved task spec's estimate in hours, or null when it has none. */
+export function specEstimateHours(spec: { estimateHours?: unknown } | null | undefined): number | null {
+  const hours = spec?.estimateHours;
+  return typeof hours === "number" && Number.isFinite(hours) ? hours : null;
+}
+
+/** Whether one task is big enough to count as the whole sprint. Hours are the only rule; a short one warns, it does not block. */
+export function bigTaskEstimateOk(hours: number | null | undefined): boolean {
+  return typeof hours === "number" && hours >= BIG_TASK_MIN_HOURS;
+}
+
+function hoursText(hours: number): string {
+  const text = String(Number(hours.toFixed(2)));
+  return `${text} ${hours === 1 ? "hour" : "hours"}`;
+}
+
 export type CiFact = { state: "none" | "passed" | "failed"; failed: number; total: number };
 
 export type TaskFacts = {
@@ -125,7 +151,7 @@ export function processChecklist(
     {
       key: "estimateAtLeastTwoHours",
       ok: Boolean(validation.estimateAtLeastTwoHours),
-      label: "Estimate is at least 2 hours",
+      label: `Estimate is at least ${TASK_MIN_HOURS} hours`,
       detail: validation.estimateAtLeastTwoHours ? null : "Can't be fixed on this PR. The estimate is in the merged task file.",
     },
   ];
@@ -141,15 +167,35 @@ export function submitAction(addedCount: number, readyCount: number, sprint: num
   if (addedCount < 1) {
     return { disabled: true, label: `Submit Sprint ${sprint}`, reason: "Add a task to submit." };
   }
-  // One task can be submitted; the missing task scores 0 (#348).
+  // One big task can be submitted on its own; it counts as the whole sprint (#348).
   if (addedCount === 1) return { disabled: false, label: `Submit Sprint ${sprint} with one task`, reason: null };
   if (readyCount >= 2) return { disabled: false, label: `Submit Sprint ${sprint}`, reason: null };
   return { disabled: false, label: `Submit Sprint ${sprint} anyway`, reason: null };
 }
 
-export function submitBarText(addedCount: number, readyCount: number): string {
-  if (addedCount === 1) return "1 task added · a missing task scores 0";
+/** The submit bar's line. With one task, `oneTaskHours` is its saved estimate (null when it has none). */
+export function submitBarText(addedCount: number, readyCount: number, oneTaskHours: number | null = null): string {
+  if (addedCount === 1) {
+    if (bigTaskEstimateOk(oneTaskHours)) return "1 task added · one big task counts as the whole sprint";
+    const says = oneTaskHours === null ? "this one has no estimate" : `this one says ${String(Number(oneTaskHours.toFixed(2)))}`;
+    return `1 task added · one big task needs an estimate of ${BIG_TASK_MIN_HOURS} hours or more (${says})`;
+  }
   return `${readyCount} of 2 ready · You can change your submission until the sprint closes.`;
+}
+
+/** The submit dialog's text for one task, with the size warning when its estimate is under BIG_TASK_MIN_HOURS. */
+export function oneTaskConfirmText(hours: number | null): string {
+  const base = "You are submitting one big task. It counts as the whole sprint, scored out of 10. You can still change your submission and add a second task until the sprint closes.";
+  if (bigTaskEstimateOk(hours)) return base;
+  const estimate = hours === null ? "It has no estimate" : `Its estimate is ${hoursText(hours)}`;
+  return `${base} ${estimate}; one big task needs ${BIG_TASK_MIN_HOURS} or more. A grader will check its size.`;
+}
+
+/** The staff review page's line for a one-task submission; `warn` when the estimate is under BIG_TASK_MIN_HOURS. */
+export function oneTaskReviewLine(hours: number | null): { text: string; warn: boolean } {
+  const estimate = hours === null ? "none" : hoursText(hours);
+  if (bigTaskEstimateOk(hours)) return { text: `One-task sprint: this task is the sprint score. Estimate: ${estimate}.`, warn: false };
+  return { text: `One-task sprint: this task is the sprint score. Estimate: ${estimate} (one big task needs ${BIG_TASK_MIN_HOURS} or more).`, warn: true };
 }
 
 export type SubmitTaskRow = { task_slot: number; task_id: string; pr_url: string; analysis_result_id: string | null };

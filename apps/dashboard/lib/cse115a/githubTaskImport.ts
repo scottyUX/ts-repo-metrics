@@ -1,6 +1,6 @@
 import "server-only";
 import { splitPatch } from "@/lib/cse115a/diff";
-import { summarizeCi, type TaskFacts } from "@/lib/cse115a/processChecklist";
+import { estimateMeetsTaskMinimum, summarizeCi, type TaskFacts } from "@/lib/cse115a/processChecklist";
 import { readCommitChecks } from "@/lib/cse115a/submissionSnapshot";
 import { canonicalHeadings, checkTaskSpec, filenameMatchesId, isTaskFilePath, parsePullRequestUrl, taskIdProblem, type TaskSpec } from "@/lib/cse115a/taskSpec";
 import { tagCommitSha, type GitHubReader } from "@/lib/cse115a/githubClient";
@@ -225,7 +225,7 @@ export async function importTaskFromPullRequest(
       baseTagPushed: Boolean(baseSha),
       specCommittedFirst,
       doneTagOnMergeCommit: doneSha === pull.merge_commit_sha,
-      estimateAtLeastTwoHours: spec.estimateHours >= 2,
+      estimateAtLeastTwoHours: estimateMeetsTaskMinimum(spec.estimateHours),
     },
     facts,
   };
