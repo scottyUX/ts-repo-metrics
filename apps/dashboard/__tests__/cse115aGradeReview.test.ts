@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { effectiveTotal, parseInstructorRubric, releaseBlockers, sprintScore, studentGradeView, type TaskGradeRow } from "@/lib/cse115a/gradeReview";
+import { effectiveTotal, parseInstructorRubric, releaseBlockers, sprintScore, studentGradeView, submittedSlots, type TaskGradeRow } from "@/lib/cse115a/gradeReview";
 import { RUBRIC, type CriterionGrade } from "@/lib/cse115a/rubric";
 
 const full = () => RUBRIC.map((row) => ({ name: row.name as string, awarded: row.points as number, note: "" }));
@@ -41,15 +41,33 @@ describe("parseInstructorRubric", () => {
 
 describe("release rules", () => {
   it("needs both tasks graded", () => {
-    expect(releaseBlockers([grade(1)])).toEqual(["Task 2 has no grade yet."]);
-    expect(releaseBlockers([grade(1), grade(2)])).toEqual([]);
+    expect(releaseBlockers([grade(1)], [1, 2])).toEqual(["Task 2 has no grade yet."]);
+    expect(releaseBlockers([grade(1), grade(2)], [1, 2])).toEqual([]);
+  });
+
+  it("needs a grade only for submitted slots (#348)", () => {
+    expect(releaseBlockers([grade(1)], [1])).toEqual([]);
+    expect(releaseBlockers([grade(2)], [2])).toEqual([]);
+    expect(releaseBlockers([], [1])).toEqual(["Task 1 has no grade yet."]);
+    expect(releaseBlockers([grade(2)], [1])).toEqual(["Task 1 has no grade yet."]);
+    const unscored = grade(1);
+    unscored.rubric[4] = { ...unscored.rubric[4]!, awarded: null, level: null, needsReview: true };
+    expect(releaseBlockers([unscored], [1])).toEqual(["Task 1: enter points for Tests pass."]);
+  });
+
+  it("reads the submitted slots from the snapshot", () => {
+    expect(submittedSlots({ tasks: [{ slot: 2 }, { slot: 1 }] })).toEqual([1, 2]);
+    expect(submittedSlots({ tasks: [{ slot: 1 }] })).toEqual([1]);
+    expect(submittedSlots({ tasks: [{ slot: 2 }] })).toEqual([2]);
+    expect(submittedSlots({})).toEqual([1, 2]);
+    expect(submittedSlots(null)).toEqual([1, 2]);
   });
 
   it("needs points for criteria the agent left unscored, unless an instructor edited the task", () => {
     const unscored = grade(2);
     unscored.rubric[4] = { ...unscored.rubric[4]!, awarded: null, level: null, needsReview: true };
-    expect(releaseBlockers([grade(1), unscored])).toEqual(["Task 2: enter points for Tests pass."]);
-    expect(releaseBlockers([grade(1), { ...unscored, instructor_rubric: [] }])).toEqual([]);
+    expect(releaseBlockers([grade(1), unscored], [1, 2])).toEqual(["Task 2: enter points for Tests pass."]);
+    expect(releaseBlockers([grade(1), { ...unscored, instructor_rubric: [] }], [1, 2])).toEqual([]);
   });
 
   it("uses instructor totals over agent totals", () => {
@@ -64,6 +82,11 @@ describe("sprintScore", () => {
     expect(sprintScore([8, 6, 10])).toBe(9);
     expect(sprintScore([8, null])).toBe(4);
     expect(sprintScore([])).toBe(0);
+  });
+
+  it("gives half of a lone task's total (#348)", () => {
+    expect(sprintScore([8])).toBe(4);
+    expect(sprintScore([10])).toBe(5);
   });
 });
 

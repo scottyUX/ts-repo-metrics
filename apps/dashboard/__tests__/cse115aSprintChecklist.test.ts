@@ -7,6 +7,8 @@ import {
   resolvePullRequestUrl,
   sprintReady,
   submitAction,
+  submitBarText,
+  submitTasksError,
   canChangeSubmission,
   type TaskFacts,
 } from "@/lib/cse115a/processChecklist";
@@ -65,9 +67,20 @@ describe("sprint checklist", () => {
   });
 
   it("offers Submit anyway only after both PRs are added", () => {
-    expect(submitAction(1, 1, 2)).toEqual({ disabled: true, label: "Submit Sprint 2", reason: "Add both tasks to submit." });
     expect(submitAction(2, 1, 2)).toEqual({ disabled: false, label: "Submit Sprint 2 anyway", reason: null });
     expect(submitAction(2, 2, 2).label).toBe("Submit Sprint 2");
+  });
+
+  it("allows submitting one task, not zero (#348)", () => {
+    expect(submitAction(0, 0, 2)).toEqual({ disabled: true, label: "Submit Sprint 2", reason: "Add a task to submit." });
+    expect(submitAction(1, 1, 2)).toEqual({ disabled: false, label: "Submit Sprint 2 with one task", reason: null });
+    expect(submitAction(1, 0, 3)).toEqual({ disabled: false, label: "Submit Sprint 3 with one task", reason: null });
+  });
+
+  it("says a missing task scores 0 when one is added", () => {
+    expect(submitBarText(0, 0)).toBe("0 of 2 ready · You can change your submission until the sprint closes.");
+    expect(submitBarText(1, 1)).toBe("1 task added · a missing task scores 0");
+    expect(submitBarText(2, 1)).toBe("1 of 2 ready · You can change your submission until the sprint closes.");
   });
 
   it("re-checks the saved URL when the input is empty", () => {
@@ -101,5 +114,32 @@ describe("canChangeSubmission", () => {
   });
   it("keeps a sprint without a deadline open", () => {
     expect(canChangeSubmission("submitted", null)).toBe(true);
+  });
+});
+
+describe("submitTasksError (#348)", () => {
+  const task = (slot: number, overrides: Partial<{ task_id: string; pr_url: string; analysis_result_id: string | null }> = {}) => ({
+    task_slot: slot, task_id: `US-1-T-${slot}`, pr_url: `https://github.com/team/repo/pull/${slot}`, analysis_result_id: `r${slot}`, ...overrides,
+  });
+
+  it("accepts one or two analyzed tasks", () => {
+    expect(submitTasksError([task(1)])).toBeNull();
+    expect(submitTasksError([task(2)])).toBeNull();
+    expect(submitTasksError([task(1), task(2)])).toBeNull();
+  });
+
+  it("refuses nothing to submit", () => {
+    expect(submitTasksError([])).toBe("Add and analyze at least one merged task PR first.");
+  });
+
+  it("refuses a task that is added but not analyzed, and says which", () => {
+    expect(submitTasksError([task(1, { analysis_result_id: null })])).toBe("Task 1 (US-1-T-1) has not been analyzed yet. Re-check it, then submit.");
+    expect(submitTasksError([task(1), task(2, { analysis_result_id: null })])).toBe("Task 2 (US-1-T-2) has not been analyzed yet. Re-check it, then submit.");
+  });
+
+  it("refuses two tasks with the same PR URL or task ID", () => {
+    const same = "Your two tasks must be different merged PRs with different task IDs.";
+    expect(submitTasksError([task(1), task(2, { pr_url: task(1).pr_url })])).toBe(same);
+    expect(submitTasksError([task(1), task(2, { task_id: "US-1-T-1" })])).toBe(same);
   });
 });

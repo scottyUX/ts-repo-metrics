@@ -15,7 +15,9 @@ service keeps its normal home page.
 4. Open Assignment 1, 2, 3, and so on. Submit two merged task PR URLs. The app
    imports `docs/tasks/sprint-N/<task-id>.md` from each PR's merge commit,
    records process checks, and analyzes the PR's changed source files. Once
-   both are analyzed, submit the assignment in the app.
+   every added task is analyzed, submit the assignment in the app. One task can
+   be submitted; the missing task scores 0, so the sprint score is that task's
+   score divided by 2. With two tasks, their task IDs and PR URLs must differ.
 
 ## Backend setup
 
@@ -23,7 +25,11 @@ service keeps its normal home page.
   `20260925000000_cse115a_final_submissions.sql` (submit-once, snapshots, job queue),
   then `20260926000000_cse115a_grading.sql` (draft grades, job claim function),
   then `20260927000000_cse115a_benchmark.sql` (benchmark rows, research consent),
-  then `20260928000000_cse115a_instructor.sql` (staff roles, release and regrade).
+  then `20260928000000_cse115a_instructor.sql` (staff roles, release and regrade),
+  then `20260930000000_cse115a_sprint_page.sql` (Scrum confirmation, check facts, due dates),
+  then `20261117000000_cse115a_one_task_submit.sql` (submit and release with one
+  task or two; replaces `submit_cse_assignment` and
+  `release_cse_assignment_submission`, and its header names the old bodies to undo it).
 - Enable Google Auth in the Supabase project and configure its Google OAuth
   client ID and secret. In Google Cloud, add
   `https://walwexxczaibfojinkfi.supabase.co/auth/v1/callback` as an authorized
@@ -71,8 +77,8 @@ not text re-entered in the browser.
 
 ## Grading worker
 
-Submitting queues a `grade` job. A worker claims it, grades both tasks from the
-submit-time snapshot, and saves a draft in `cse_task_grades`. Students see a
+Submitting queues a `grade` job. A worker claims it, grades every task in the
+submit-time snapshot (one or two), and saves a draft in `cse_task_grades`. Students see a
 grade only after an instructor releases it.
 
 - **Tests pass** and **Process** come from recorded evidence: CI conclusions on
@@ -145,10 +151,12 @@ SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... \
 
 - **Submissions**: every enrolled student for an assignment, with status, agent
   and instructor totals, and a needs-review flag. Filter by status.
-- **Review**: both tasks side by side with the spec, `patch`/`test_patch`
+- **Review**: the submitted tasks side by side with the spec, `patch`/`test_patch`
   diffs, CI results, the Repo Metrics report, and the agent's rationale and
   quotes. Staff can override points (half steps) and add notes, then
-  **Release**. Release is blocked while a criterion has no points. Edits saved
+  **Release**. Release is blocked while a submitted task has no grade or a
+  criterion has no points. A one-task submission shows "Task 2: not submitted
+  (scores 0)" (or Task 1) and releases with one grade. Edits saved
   after release are visible to the student right away.
 - **Regrade** requeues the grade job and keeps instructor edits. **Unlock**
   (instructors only, reason required) supersedes the attempt so the student can
