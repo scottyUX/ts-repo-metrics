@@ -13,6 +13,7 @@ import { CONSENT_TEXT, CONSENT_VERSION } from "@/lib/cse115a/consent";
 import { needsCourseInstallPrompt, repoFullNameFromPullRequest } from "@/lib/cse115a/installPrompt";
 import { oauthHashError } from "@/lib/cse115a/oauthError";
 import {
+  BIG_TASK_MIN_HOURS,
   firstOpenSprint,
   processChecklist,
   resolvePullRequestUrl,
@@ -537,7 +538,7 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
                     ? `Graded ${formatWhen(releasedGrades[0]!.releasedAt)} · ${releasedGrades.length === 1 ? "your one big task" : "the average of your two tasks"}`
                     : assignmentSubmission
                       ? `Submitted ${formatWhen(assignmentSubmission.submitted_at)}. Your grade appears here after instructor review.`
-                      : "Add two merged task PRs. We check each one against its checklist."}
+                      : `Add two merged task PRs, or one big task (estimate ${BIG_TASK_MIN_HOURS} hours or more). We check each one against its checklist.`}
                 </p>
                 {released ? <p className="mt-1 text-sm text-slate-600">Questions about this grade? Ask your TA.</p> : null}
                 {assignmentSubmission && !released ? <StatusSteps status={assignmentSubmission.status} /> : null}
