@@ -3,24 +3,20 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { fetchJson, formatPoints, STATUS_LABELS, type StaffCourse, type SubmissionStatus } from "./shared";
+import { fetchJson, formatPoints, STATUS_LABELS, type StaffCourse } from "./shared";
 import { BIG_TASK_MIN_HOURS } from "@/lib/cse115a/processChecklist";
+import { nextSort, sortRows, type Sort, type SortKey, type SubmissionRow } from "./sortRows";
 
-type Row = {
-  userId: string;
-  email: string;
-  submission: null | {
-    id: string;
-    attempt: number;
-    status: SubmissionStatus;
-    submittedAt: string;
-    tasks: Array<{ slot: number; agentTotal: number | null; instructorTotal: number | null; needsReview: boolean }>;
-    agentSprint: number | null;
-    sprint: number | null;
-    needsReview: boolean;
-    jobError: string | null;
-  };
-};
+const COLUMNS: Array<{ key: SortKey; label: string; numeric: boolean }> = [
+  { key: "student", label: "Student", numeric: false },
+  { key: "submitted", label: "Submitted", numeric: false },
+  { key: "status", label: "Status", numeric: false },
+  { key: "task1", label: "Task 1", numeric: true },
+  { key: "task2", label: "Task 2", numeric: true },
+  { key: "sprint", label: "Sprint", numeric: true },
+];
+
+type Row = SubmissionRow;
 
 const FILTERS = ["all", "not_submitted", "needs_review", "submitted", "grading", "graded", "grading_failed", "released"] as const;
 type Filter = (typeof FILTERS)[number];
@@ -49,6 +45,7 @@ export function InstructorHome() {
   const [loaded, setLoaded] = useState<{ key: string; rows: Row[] } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<Filter>("all");
+  const [sort, setSort] = useState<Sort>(null);
   const slug = searchParams.get("course") ?? courses?.[0]?.slug ?? null;
   const assignment = Number(searchParams.get("assignment") ?? 1);
   const course = courses?.find((item) => item.slug === slug) ?? null;
@@ -76,7 +73,7 @@ export function InstructorHome() {
       .catch((caught: Error) => setError(caught.message));
   }, [rowsUrl]);
 
-  const visible = useMemo(() => (rows ?? []).filter((row) => matches(row, filter)), [rows, filter]);
+  const visible = useMemo(() => sortRows((rows ?? []).filter((row) => matches(row, filter)), sort), [rows, filter, sort]);
   const counts = useMemo(() => Object.fromEntries(FILTERS.map((item) => [item, (rows ?? []).filter((row) => matches(row, item)).length])), [rows]);
 
   if (courses && courses.length === 0) {
@@ -125,12 +122,17 @@ export function InstructorHome() {
         <table className="w-full min-w-[720px] text-left text-sm">
           <thead className="border-b border-border text-xs uppercase tracking-wide text-muted-foreground">
             <tr>
-              <th className="px-4 py-3 font-medium">Student</th>
-              <th className="px-4 py-3 font-medium">Submitted</th>
-              <th className="px-4 py-3 font-medium">Status</th>
-              <th className="px-4 py-3 text-right font-medium">Task 1</th>
-              <th className="px-4 py-3 text-right font-medium">Task 2</th>
-              <th className="px-4 py-3 text-right font-medium">Sprint</th>
+              {COLUMNS.map((column) => {
+                const active = sort?.key === column.key ? sort.direction : null;
+                return (
+                  <th key={column.key} scope="col" aria-sort={active === "asc" ? "ascending" : active === "desc" ? "descending" : "none"} className={`px-4 py-3 font-medium${column.numeric ? " text-right" : ""}`}>
+                    <button type="button" onClick={() => setSort((current) => nextSort(current, column.key))} className="inline-flex items-center gap-1 uppercase tracking-wide hover:text-foreground">
+                      {column.label}
+                      <span aria-hidden="true">{active === "asc" ? "▲" : active === "desc" ? "▼" : "↕"}</span>
+                    </button>
+                  </th>
+                );
+              })}
               <th className="px-4 py-3"><span className="sr-only">Review</span></th>
             </tr>
           </thead>
@@ -170,7 +172,7 @@ export function InstructorHome() {
           </tbody>
         </table>
       </div>
-      <p className="text-sm text-muted-foreground">Gray totals are the agent&apos;s draft; dark totals include instructor edits. Sprint is the average of two tasks, or one big task (estimate {BIG_TASK_MIN_HOURS} hours or more) scored on its own. Students see nothing until you release.</p>
+      <p className="text-sm text-muted-foreground">Gray totals are the agent&apos;s draft; dark totals include instructor edits. Sprint is the average of two tasks, or one big task (estimate {BIG_TASK_MIN_HOURS} hours or more) scored on its own. Students see nothing until you release. Click a column heading to sort; click again to reverse, a third time to go back to the original order. Rows with no value go last.</p>
     </div>
   );
 }
