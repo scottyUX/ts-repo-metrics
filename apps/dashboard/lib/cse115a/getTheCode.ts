@@ -24,10 +24,22 @@ export const NO_COPY: RepoCopyInfo = { stored: false, object: null, complete: fa
 export const GET_CODE_TITLE = "Get the code";
 export const FROM_GITHUB_TITLE = "From GitHub";
 export const GITHUB_NOTE = "Works when the repository is public or your GitHub account can read it.";
+export const PASTE_STEP = "In a terminal, from an empty folder, paste:";
 export const FROM_COPY_TITLE = "From the stored copy";
 export const DOWNLOAD_LABEL = "Download repo copy";
-export const COMPLETE_COPY_NOTE = "hecate-snapshot is where the task started; refs/hecate/pr-head is the PR's last commit; refs/hecate/merge is the merge commit.";
-export const OLDER_COPY_NOTE = "This older copy holds the repository only up to where the task started.";
+/** After the link in step 1. */
+export function downloadStepRest(instanceId: string): string {
+  return ` It saves ${repoCopyFileName(instanceId)} to your Downloads folder.`;
+}
+export const COMPLETE_COPY_DONE = "You now have the student's code at the merge commit, as if you had cloned it from GitHub. Open the folder in your editor.";
+export const OLDER_COPY_DONE = "You now have the repository up to where the task started. This older copy doesn't include the student's PR commits.";
+export const OTHER_POINTS_TITLE = "Other points in the task (optional), from inside that folder:";
+/** For a complete copy: a command and what it shows, for each other point in the task. */
+export const OTHER_POINTS: Array<{ command: string; what: string }> = [
+  { command: "git diff --stat hecate-snapshot refs/hecate/pr-head", what: "lists what changed from where the task started to the student's last commit." },
+  { command: "git checkout --detach hecate-snapshot", what: "goes back to before the student's code. The task's new tests should fail here." },
+  { command: "git checkout --detach refs/hecate/pr-head", what: "the student's last commit before the merge, without anything merged in from main at the end." },
+];
 export const NO_COPY_NOTE = "No repo copy is stored for this task yet.";
 export const RUN_RECIPE_TITLE = "How to run its tests";
 export const RUN_RECIPE_LABEL = "From the validator's run of this task";
