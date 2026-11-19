@@ -1,5 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { planBenchmarkSave, snapshotMergeCommit, type StoredSource } from "./benchmarkSave";
+import { planBenchmarkSave, snapshotCopyRefs, snapshotMergeCommit, type StoredSource } from "./benchmarkSave";
 import type { Job, JobStore, Submission } from "./runner";
 
 function check(error: { message: string } | null, what: string) {
@@ -73,12 +73,19 @@ export function supabaseJobStore(db: SupabaseClient): JobStore {
       const { data: sources, error: sourceError } = await db.from("cse_benchmark_task_sources")
         .select("instance_id,task_slot").eq("assignment_submission_id", submissionId).order("task_slot");
       check(sourceError, "read the submission's benchmark sources");
-      const ids = ((sources ?? []) as Array<{ instance_id: string }>).map((row) => row.instance_id);
+      const slots = (sources ?? []) as Array<{ instance_id: string; task_slot: number }>;
+      const ids = slots.map((row) => row.instance_id);
       if (ids.length === 0) return [];
       const { data, error } = await db.from("cse_benchmark_tasks").select("instance_id,repo,base_commit").in("instance_id", ids);
       check(error, "read stored benchmark tasks");
       const tasks = (data ?? []) as Array<{ instance_id: string; repo: string; base_commit: string }>;
-      return ids.flatMap((id) => tasks.filter((task) => task.instance_id === id));
+      // #298: the PR's own refs for a complete copy, from the submission snapshot's task in the source's slot.
+      const { data: submission, error: submissionError } = await db.from("cse_assignment_submissions")
+        .select("snapshot").eq("id", submissionId).maybeSingle();
+      check(submissionError, "read the submission snapshot");
+      return slots.flatMap(({ instance_id: id, task_slot: slot }) => tasks
+        .filter((task) => task.instance_id === id)
+        .map((task) => ({ ...task, ...snapshotCopyRefs(submission?.snapshot, slot) })));
     },
     async saveBenchmark(submission, rows) {
       if (rows.length === 0) return;

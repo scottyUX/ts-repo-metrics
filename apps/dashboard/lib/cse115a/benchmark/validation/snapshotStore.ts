@@ -6,9 +6,13 @@
 // under the new name, and the first stays. Objects uploaded before the name carried the base commit are
 // `<instance_id>.bundle`; readers try the new name, then that one, and check the base commit is in the
 // copy before using it (findBundle). Writers: the validator (validateBenchmarkBatch.ts,
-// uploadSnapshots.ts) and the website, which copies each task's repository at Submit when
-// CSE115A_REPO_COPIES=on (repoCopy.ts) and from the instructor Benchmark page. The website asks only
-// whether a copy exists; it never downloads one or serves one, and the exports never read the bucket.
+// uploadSnapshots.ts), whose bundles hold the base commit only and keep that name, and the website,
+// which copies each task's repository at Submit when CSE115A_REPO_COPIES=on (repoCopy.ts) and from the
+// instructor Benchmark page. The website's copy is complete (#298): the base commit plus the PR's own
+// commits (its head, its merge commit, and a paired task's task-file PR head), under
+// `<instance_id>.<first 12 characters of base_commit>.full.bundle`. Readers try that name first, then
+// the base-only name, then the legacy one. The website asks only whether a complete copy exists; it
+// never downloads one or serves one, and the exports never read the bucket.
 
 import { readdir, readFile, rename, rm, stat, writeFile } from "node:fs/promises";
 import { join } from "node:path";
@@ -20,14 +24,21 @@ export const SNAPSHOT_BUCKET = "benchmark-snapshots";
 export const SNAPSHOT_SIZE_LIMIT = 50 * 1024 * 1024;
 const CONTENT_TYPE = "application/octet-stream";
 
+/**
+ * Which object a writer means: "base", the validator's bundle of the base commit only
+ * (snapshotObject), or "full", the website's complete copy with the PR's own commits (fullSnapshotObject).
+ */
+export type SnapshotKind = "base" | "full";
+
 export type SnapshotStore = {
-  /** Whether the copy for this base commit is stored (the new name only). */
-  has(instanceId: string, baseCommit: string): Promise<boolean>;
-  /** Writes the new name and never overwrites: an object already there is "already stored". Throws on any other failure. */
-  upload(instanceId: string, baseCommit: string, file: string): Promise<"uploaded" | "already stored">;
+  /** Whether the copy of this kind (default "base") for this base commit is stored; that one name only. */
+  has(instanceId: string, baseCommit: string, kind?: SnapshotKind): Promise<boolean>;
+  /** Writes the name for this kind (default "base") and never overwrites: an object already there is "already stored". Throws on any other failure. */
+  upload(instanceId: string, baseCommit: string, file: string, kind?: SnapshotKind): Promise<"uploaded" | "already stored">;
   /**
-   * Writes the copy to `file`: the new name, else the old `<instance_id>.bundle`; false when there is
-   * neither. The caller checks the base commit is in it (findBundle). Throws on any other failure.
+   * Writes the copy to `file`: the complete copy, else the base-only one, else the old
+   * `<instance_id>.bundle`; false when there is none. The caller checks the base commit is in it
+   * (findBundle). Throws on any other failure.
    */
   download(instanceId: string, baseCommit: string, file: string): Promise<boolean>;
 };
@@ -39,6 +50,21 @@ export const OBJECT_COMMIT_CHARS = 12;
 export function snapshotObject(instanceId: string, baseCommit: string): string {
   if (!new RegExp(`^[0-9a-f]{${OBJECT_COMMIT_CHARS},64}$`, "i").test(baseCommit)) throw new Error(`not a commit id: ${JSON.stringify(baseCommit)}`);
   return `${instanceId}.${baseCommit.slice(0, OBJECT_COMMIT_CHARS).toLowerCase()}.bundle`;
+}
+
+/** The website's complete copy for a row at a base commit: `<instance_id>.<first 12 characters of base_commit>.full.bundle`. */
+export function fullSnapshotObject(instanceId: string, baseCommit: string): string {
+  return snapshotObject(instanceId, baseCommit).replace(/\.bundle$/, ".full.bundle");
+}
+
+/** The object name for a kind of copy. */
+export function snapshotObjectFor(instanceId: string, baseCommit: string, kind: SnapshotKind = "base"): string {
+  return kind === "full" ? fullSnapshotObject(instanceId, baseCommit) : snapshotObject(instanceId, baseCommit);
+}
+
+/** Every name a reader tries for a row at a base commit, in order: complete, base-only, legacy. */
+export function snapshotReadOrder(instanceId: string, baseCommit: string): string[] {
+  return [fullSnapshotObject(instanceId, baseCommit), snapshotObject(instanceId, baseCommit), legacySnapshotObject(instanceId)];
 }
 
 /** The name objects had before it carried the base commit; read, never written. */
@@ -107,13 +133,13 @@ function mb(bytes: number): string {
 /** The store over a bucket's file calls. */
 export function bucketSnapshotStore(files: BucketFiles): SnapshotStore {
   return {
-    async has(instanceId, baseCommit) {
-      const { data, error } = await files.exists(snapshotObject(instanceId, baseCommit));
+    async has(instanceId, baseCommit, kind) {
+      const { data, error } = await files.exists(snapshotObjectFor(instanceId, baseCommit, kind));
       if (error && !isMissing(error)) throw new Error(`Storage: ${error.message}`);
       return data === true;
     },
-    async upload(instanceId, baseCommit, file) {
-      const name = snapshotObject(instanceId, baseCommit);
+    async upload(instanceId, baseCommit, file, kind) {
+      const name = snapshotObjectFor(instanceId, baseCommit, kind);
       const { size } = await stat(file);
       if (size > SNAPSHOT_SIZE_LIMIT) throw new Error(`the bundle is ${mb(size)}, over the bucket's ${mb(SNAPSHOT_SIZE_LIMIT)} limit; kept only in this folder`);
       const body = await readFile(file);
@@ -124,7 +150,7 @@ export function bucketSnapshotStore(files: BucketFiles): SnapshotStore {
     },
     async download(instanceId, baseCommit, file) {
       let data: Blob | null = null;
-      for (const name of [snapshotObject(instanceId, baseCommit), legacySnapshotObject(instanceId)]) {
+      for (const name of snapshotReadOrder(instanceId, baseCommit)) {
         const answer = await files.download(name);
         if (answer.error) {
           if (isMissing(answer.error)) continue;

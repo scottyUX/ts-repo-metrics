@@ -9,7 +9,7 @@ import { copyStatus, copyTaskRepo, GIT_STEP_TIMEOUT_MS, runGroup, type RepoCopyR
 import { copyTaskViews, type CopyJobRow } from "@/lib/cse115a/benchmark/repoCopyJobs";
 import { run, type GitAccess } from "@/lib/cse115a/benchmark/validation/runRow";
 import { findBundle } from "@/lib/cse115a/benchmark/validation/snapshots";
-import { bucketSnapshotStore, snapshotObject, type SnapshotStore } from "@/lib/cse115a/benchmark/validation/snapshotStore";
+import { bucketSnapshotStore, fullSnapshotObject, legacySnapshotObject, snapshotObject, type SnapshotStore } from "@/lib/cse115a/benchmark/validation/snapshotStore";
 import { CourseRepoAccessError, type GitHubAppConfig } from "@/lib/cse115a/githubAppToken";
 import { folderBucket } from "./helpers/folderBucket";
 
@@ -94,7 +94,7 @@ describe("#298 A: copy one task's repository", () => {
     const { lines, log } = collect();
     const t = task("team/private-app");
     expect(await copyTaskRepo(t, { store, access, tmp, log })).toEqual({ instance_id: t.instance_id, outcome: "stored" });
-    expect(await files.names()).toEqual([snapshotObject(t.instance_id, base)]);
+    expect(await files.names()).toEqual([fullSnapshotObject(t.instance_id, base)]);
     expect(urls[0]).toContain("x-access-token:");
     expect(await readdir(tmp)).toEqual([]);
     // The validator restores it: the copy holds the base commit.
@@ -199,7 +199,7 @@ describe("#298 A: copy one task's repository", () => {
     const t = task("team/private-app");
     await copyTaskRepo(t, { store, access, tmp });
     expect(await copyTaskRepo({ ...t, base_commit: later }, { store, access, tmp })).toMatchObject({ outcome: "stored" });
-    expect(await files.names()).toEqual([snapshotObject(t.instance_id, base), snapshotObject(t.instance_id, later)].sort());
+    expect(await files.names()).toEqual([fullSnapshotObject(t.instance_id, base), fullSnapshotObject(t.instance_id, later)].sort());
   });
 });
 
@@ -256,10 +256,13 @@ describe("#298 D: status", () => {
   let tasks: Array<{ instance_id: string; repo: string; base_commit: string }> = [];
   beforeAll(() => { tasks = Array.from({ length: 5 }, (_, i) => ({ instance_id: `T-${i}`, repo: "team/public-app", base_commit: base })); });
 
-  it("status: which tasks have a copy for their base commit; a store error is null with its line", async () => {
+  it("status: which tasks have a complete copy for their base commit; a store error is null with its line", async () => {
     const { files, store } = await setup();
-    await writeFile(join(files.dir, snapshotObject("T-1", base)), "x");
-    await writeFile(join(files.dir, snapshotObject("T-2", later)), "x");
+    await writeFile(join(files.dir, fullSnapshotObject("T-1", base)), "x");
+    await writeFile(join(files.dir, fullSnapshotObject("T-2", later)), "x");
+    // Only an old-format copy: not stored.
+    await writeFile(join(files.dir, snapshotObject("T-3", base)), "x");
+    await writeFile(join(files.dir, legacySnapshotObject("T-4")), "x");
     const status = await copyStatus(tasks, store);
     expect(status.map((s) => s.stored)).toEqual([false, true, false, false, false]);
     const broken: SnapshotStore = { has: async () => { throw new Error("Storage: down"); }, upload: async () => "uploaded", download: async () => false };

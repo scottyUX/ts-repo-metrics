@@ -13,7 +13,7 @@ import { bundleRepo, CloneError, NO_APP_CLONE_DETAIL, run } from "@/lib/cse115a/
 import type { RunPlan, State, SuiteRunner } from "@/lib/cse115a/benchmark/validation/runner";
 import { findBundle, rowCheckout, snapshotOnly, snapshotPath, type BatchGit } from "@/lib/cse115a/benchmark/validation/snapshots";
 import {
-  bucketSnapshotStore, ensureSnapshotBucket, legacySnapshotObject, SNAPSHOT_BUCKET, SNAPSHOT_SIZE_LIMIT, snapshotObject, supabaseBucketAdmin, supabaseSnapshotStore, uploadSnapshotDir,
+  bucketSnapshotStore, ensureSnapshotBucket, fullSnapshotObject, legacySnapshotObject, snapshotReadOrder, SNAPSHOT_BUCKET, SNAPSHOT_SIZE_LIMIT, snapshotObject, supabaseBucketAdmin, supabaseSnapshotStore, uploadSnapshotDir,
   type BucketAdmin, type BucketFiles, type SnapshotStore,
 } from "@/lib/cse115a/benchmark/validation/snapshotStore";
 import type { TaskRow, ValidationResult } from "@/lib/cse115a/benchmark/validation/validateTask";
@@ -461,25 +461,33 @@ describe("#298 B: object names carry the base commit", () => {
     expect(() => snapshotObject("X-1", "main")).toThrow("not a commit id");
   });
 
-  it("a reader finds a copy under the new name, then under the old name", async () => {
-    for (const name of [obj(row.instance_id), legacySnapshotObject(row.instance_id)]) {
+  it("a reader finds a copy under the complete name, then the base-only name, then the old name", async () => {
+    for (const name of [fullSnapshotObject(row.instance_id, base), obj(row.instance_id), legacySnapshotObject(row.instance_id)]) {
       const { files, store } = await bucket();
       await writeFile(join(files.dir, name), await readFile(bundle));
       const out = await freshOut();
       expect(await findBundle(out, row, { store })).toBe(join(out, snapshotPath(row.instance_id)));
       expect(await readFile(join(out, snapshotPath(row.instance_id)))).toEqual(await readFile(bundle));
     }
-    // Both there: the new name is the one read.
+    // All three there: the complete copy is the one read.
     const { files, store } = await bucket();
-    await writeFile(join(files.dir, obj(row.instance_id)), await readFile(bundle));
+    await writeFile(join(files.dir, fullSnapshotObject(row.instance_id, base)), await readFile(bundle));
+    await writeFile(join(files.dir, obj(row.instance_id)), "a base-only copy");
     await writeFile(join(files.dir, legacySnapshotObject(row.instance_id)), "an older copy");
     expect(await findBundle(await freshOut(), row, { store })).not.toBeNull();
-    expect(files.calls).toEqual([`download ${obj(row.instance_id)}`]);
+    expect(files.calls).toEqual([`download ${fullSnapshotObject(row.instance_id, base)}`]);
+    // The base-only and old names: the complete name is asked first, then the next.
+    const second = await bucket();
+    await writeFile(join(second.files.dir, obj(row.instance_id)), await readFile(bundle));
+    await writeFile(join(second.files.dir, legacySnapshotObject(row.instance_id)), "an older copy");
+    expect(await findBundle(await freshOut(), row, { store: second.store })).not.toBeNull();
+    expect(second.files.calls).toEqual([`download ${fullSnapshotObject(row.instance_id, base)}`, `download ${obj(row.instance_id)}`]);
+    expect(snapshotReadOrder(row.instance_id, base)).toEqual([`${row.instance_id}.${base.slice(0, 12)}.full.bundle`, `${row.instance_id}.${base.slice(0, 12)}.bundle`, `${row.instance_id}.bundle`]);
   });
 
-  it("a copy that does not hold the base commit is refused under either name", async () => {
+  it("a copy that does not hold the base commit is refused under any name", async () => {
     const wrong = await readFile(await otherRepoBundle());
-    for (const name of [obj(row.instance_id), legacySnapshotObject(row.instance_id)]) {
+    for (const name of [fullSnapshotObject(row.instance_id, base), obj(row.instance_id), legacySnapshotObject(row.instance_id)]) {
       const { files, store } = await bucket();
       await writeFile(join(files.dir, name), wrong);
       const out = await freshOut();

@@ -8,7 +8,7 @@ import { join } from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { copyTaskRepo, type RepoCopyResult, type RepoCopyTask } from "@/lib/cse115a/benchmark/repoCopy";
 import { run, type GitAccess } from "@/lib/cse115a/benchmark/validation/runRow";
-import { bucketSnapshotStore, snapshotObject } from "@/lib/cse115a/benchmark/validation/snapshotStore";
+import { bucketSnapshotStore, fullSnapshotObject } from "@/lib/cse115a/benchmark/validation/snapshotStore";
 import { startJobLoop } from "@/lib/cse115a/jobs/loop";
 import {
   COPY_JOB_BUDGET_MS, drainJobs, REPO_COPY_KINDS, RUNNABLE_KINDS, runNextJob,
@@ -233,7 +233,7 @@ describe("#298: the repo_copy job", () => {
     const h = handlers(files, state.order);
     expect((await runNextJob(store, h, () => NOW, ON, REPO_COPY_KINDS))?.outcome).toEqual({ status: "succeeded" });
     expect(h.copied.map((t) => [t.instance_id, t.base_commit])).toEqual([["team__app-T-1", base], ["team__app-T-2", later]]);
-    expect(await files.names()).toEqual([snapshotObject("team__app-T-1", base), snapshotObject("team__app-T-2", later)].sort());
+    expect(await files.names()).toEqual([fullSnapshotObject("team__app-T-1", base), fullSnapshotObject("team__app-T-2", later)].sort());
     requeue("repo_copy");
     expect((await runNextJob(store, h, () => NOW, ON, REPO_COPY_KINDS))?.outcome).toEqual({ status: "succeeded" });
     expect(files.calls.filter((c) => c.startsWith("upload"))).toHaveLength(2);

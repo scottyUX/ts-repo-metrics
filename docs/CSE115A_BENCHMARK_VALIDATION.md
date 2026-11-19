@@ -1020,7 +1020,9 @@ private (`public: false`), 50 MB file size limit, no policies, so only the servi
 read or write it. Object name `<instance_id>.<first 12 characters of base_commit>.bundle`, content
 type `application/octet-stream` (`lib/cse115a/benchmark/validation/snapshotStore.ts`). Objects
 uploaded before the name carried the base commit are `<instance_id>.bundle`; they stay as they are
-and are still read (see "Restore order"). Local files keep their names: `DIR/snapshots/<instance_id>.bundle`.
+and are still read (see "Restore order"). The website's complete copies, which also hold the PR's
+own commits, are `<instance_id>.<first 12 characters of base_commit>.full.bundle` (see "Copies made
+by the website"). Local files keep their names: `DIR/snapshots/<instance_id>.bundle`.
 Two writers: the validator, and the course website, which copies each task's repository after Submit
 (see "Copies made by the website" below). The website only writes copies and asks whether one
 exists; it never downloads one or serves one, and the Harbor exports never read the bucket. Reading
@@ -1046,8 +1048,9 @@ behaves exactly as before. With it:
   `upload failed: the bundle is N MB, over the bucket's 50.0 MB limit; kept only in this folder`.
   The project's global upload limit, if lower, wins over the bucket's.
 - **Restore order.** When GitHub cannot supply a row's code, the bundle is looked for in
-  `DIR/snapshots/`, then `--snapshots-from`, then the bucket: the object for the row's base commit,
-  else the old `<instance_id>.bundle`. The bucket's copy is downloaded
+  `DIR/snapshots/`, then `--snapshots-from`, then the bucket: the website's complete copy for the
+  row's base commit (`….full.bundle`), else the validator's object for it (`….bundle`), else the old
+  `<instance_id>.bundle`. The bucket's copy is downloaded
   straight into `DIR/snapshots/<instance_id>.bundle` (so the result records it and the Harbor
   export and gold check find it) and checked before use: `git bundle verify`, a fetch of the
   bundle into a throwaway repository (verify alone passes a truncated file; the fetch reads the
@@ -1080,11 +1083,27 @@ private key, and that key stays on the website (Railway), not on the validator's
 website makes the copy: `lib/cse115a/benchmark/repoCopy.ts` gets the App's installation token for
 the repository (with no installation there, or no App on the site, it tries an anonymous clone, so
 a public repository still works), clones into a fresh temp folder with the validator's own
-`cloneRepo` and `ensureCommit`, writes the bundle with `bundleRepo`, checks it with `verifyBundle`,
-uploads it under the name above, and removes the temp folder whatever happens. A copy already
-stored for the base commit is not cloned again. The token is never in a log line, an error, or a
-response. Each copy logs one line with how long it took:
+`cloneRepo` and `ensureCommit`, then fetches the PR's own commits (below), writes the bundle with
+`bundleRepo`, checks it with `verifyBundle`, uploads it under the complete-copy name
+`<instance_id>.<first 12 of base_commit>.full.bundle`, and removes the temp folder whatever happens.
+A complete copy already stored for the base commit is not cloned again. The token is never in a log
+line, an error, or a response. Each copy logs one line with how long it took:
 `[cse115a repo copy] <instance_id>: stored in 2.4 s` (or `already stored in …`, or `failed in …: <line>`).
+
+- **A complete copy.** A bundle holds only the commits its refs reach, so a copy of the base commit
+  alone has nothing after the task's start: not the PR's head, not its merge. The copy therefore
+  also fetches, each under the step's limit and with the same token: the PR's head
+  (`refs/pull/<pr>/head`, which GitHub keeps after the branch is deleted) into `refs/hecate/pr-head`;
+  the merge commit by id into `refs/hecate/merge`; and, for a task whose task file came in a separate
+  PR, that PR's head into `refs/hecate/task-file-pr-head`. The PR numbers and merge commit come from
+  the submission snapshot's task in the benchmark source's slot (`prNumber`, `pr.mergeCommitSha`,
+  `taskFilePr.number`). The bundle holds `refs/heads/hecate-snapshot` (the base commit, which
+  `git clone -b hecate-snapshot` checks out, as before) plus each `refs/hecate/*` ref fetched; the
+  validator's own `--snapshots` bundles are unchanged. Only the base commit is required: a PR ref or
+  merge commit GitHub no longer has (`couldn't find remote ref`, `not our ref`) is left out and the
+  line says so, `<instance_id>: stored in 2.6 s; stored without refs/hecate/pr-head (refs/pull/<pr>/head
+  is not on GitHub)`. Any other failure fetching one (network, timeout) fails the copy as a failure
+  on the base commit would, so the retry can store it whole; a complete copy is never overwritten.
 
 - **Their own line.** Copies run in `repo_copy` jobs (table `cse_grading_jobs`, migration
   `20261116000000_cse115a_repo_copy_jobs.sql`), claimed by a second poller loop that claims nothing
@@ -1122,7 +1141,9 @@ response. Each copy logs one line with how long it took:
   seconds while any are queued or running. "Save missing repo copies"
   (`POST /api/cse115a/instructor/courses/<slug>/benchmark/repo-copies`) queues the `repo_copy`
   job of every submission with a task that has no copy or a failed job, and returns at once; there
-  is no cap. "Retry" queues one task's submission. A failed or finished job is reset (attempts 0,
+  is no cap. Only a complete copy (`….full.bundle`) counts as stored: a task with only a base-only or
+  old-format copy shows as no copy, and its job makes the complete one. The old objects are not
+  deleted. "Retry" queues one task's submission. A failed or finished job is reset (attempts 0,
   no error); a queued or running one is left alone. A task's job is its newest submission's. The
   route never clones; it uses the same staff check as the page's other routes, is refused with 409
   while the switch is off, and returns only ids and counts.
@@ -1137,7 +1158,8 @@ response. Each copy logs one line with how long it took:
   - `Timed out: …` A step or the whole copy ran past its limit (above). Retry later; a repository
     that always times out needs the validator's own clone.
   - `GitHub error: …` A token request, clone or fetch that failed for another reason (network, a
-    refused token). Retry later.
+    refused token), including a fetch of the PR's head, merge commit or task-file PR head. Retry
+    later. (A PR ref or merge commit that is simply gone does not fail the copy; see "A complete copy".)
   - `Storage error: …` The bucket could not be asked or written. Check the bucket exists
     (`createSnapshotBucket.ts`) and the site's `SUPABASE_SERVICE_ROLE_KEY`.
   - `Could not write the copy: …` git could not write or check the bundle (disk, for example).

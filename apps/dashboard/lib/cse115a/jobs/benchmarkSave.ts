@@ -80,3 +80,20 @@ export function snapshotMergeCommit(snapshot: unknown, slot: number): string | n
   const tasks = (snapshot as { tasks?: Array<{ slot?: number; pr?: { mergeCommitSha?: string } }> } | null)?.tasks ?? [];
   return tasks.find((task) => task.slot === slot)?.pr?.mergeCommitSha ?? null;
 }
+
+/**
+ * What a repo copy (#298) takes from the stored submission snapshot's task in `slot`: the PR's number
+ * (`prNumber`), its merge commit (`pr.mergeCommitSha`) and, for a task whose task file came in a
+ * separate PR, that PR's number (`taskFilePr.number`). A field the snapshot lacks is left out.
+ */
+export function snapshotCopyRefs(snapshot: unknown, slot: number): { pr_number?: number; merge_commit?: string; task_file_pr_number?: number } {
+  type Saved = { slot?: number; prNumber?: unknown; pr?: { mergeCommitSha?: unknown }; taskFilePr?: { number?: unknown } };
+  const tasks = (snapshot as { tasks?: Saved[] } | null)?.tasks ?? [];
+  const task = Array.isArray(tasks) ? tasks.find((t) => t?.slot === slot) : undefined;
+  if (!task) return {};
+  return {
+    ...(typeof task.prNumber === "number" ? { pr_number: task.prNumber } : {}),
+    ...(typeof task.pr?.mergeCommitSha === "string" && task.pr.mergeCommitSha ? { merge_commit: task.pr.mergeCommitSha } : {}),
+    ...(typeof task.taskFilePr?.number === "number" ? { task_file_pr_number: task.taskFilePr.number } : {}),
+  };
+}

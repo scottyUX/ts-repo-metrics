@@ -221,6 +221,22 @@ export async function ensureCommit(repoDir: string, commit: string, log: (line: 
 }
 
 /**
+ * Fetches the ref `remoteRef` (`refs/pull/12/head`, say) of `owner/name` into `localRef` of `repoDir`,
+ * with the course App's token when the App is configured, like ensureCommit (never in the remote, never
+ * in an error). A failure throws a CloneError with git's complaint, as ensureCommit's does.
+ */
+export async function fetchRef(repoDir: string, fullName: string, remoteRef: string, localRef: string, log: (line: string) => void = () => {}, access: GitAccess = {}): Promise<void> {
+  const git = access.git ?? run;
+  const { configured, token } = await appToken(fullName, access);
+  log(`Fetching ${remoteRef}...`);
+  try {
+    await git("git", [...GIT_NO_PROMPT, "fetch", "--quiet", "--no-tags", githubUrl(fullName, token), `${remoteRef}:${localRef}`], repoDir, { env: noPromptEnv() });
+  } catch (error) {
+    throw gitFailure(error, `fetch of ${remoteRef}`, fullName, configured, token);
+  }
+}
+
+/**
  * Whether GitHub serves `owner/name` to anyone: an anonymous `git ls-remote` with no credentials.
  * True when it succeeds, false when GitHub refuses (private or gone), undefined when the check itself
  * failed for another reason (network, timeout), which is logged and never fails the row.
@@ -289,13 +305,15 @@ export function pinnedImage(image: string, repoDigest: string): string {
  * Bundles record refs, not bare hashes, so the commit gets a temporary branch for the duration;
  * a branch (not a custom ref) so that `git clone <bundle>` checks the snapshot out. `exec` runs the
  * git commands (`run`, with no time limit, unless the caller passes one: the website's repo copy does).
+ * `extraRefs` (refs already in `repoDir`, such as the website copy's `refs/hecate/pr-head`) go into the
+ * bundle too, with every commit they reach; without them the bundle is the validator's, byte for byte.
  */
-export async function bundleRepo(repoDir: string, base: string, outFile: string, exec: typeof run = run): Promise<void> {
+export async function bundleRepo(repoDir: string, base: string, outFile: string, exec: typeof run = run, extraRefs: string[] = []): Promise<void> {
   const ref = "refs/heads/hecate-snapshot";
   await mkdir(join(outFile, ".."), { recursive: true });
   await exec("git", ["update-ref", ref, base], repoDir);
   try {
-    await exec("git", ["bundle", "create", outFile, ref], repoDir);
+    await exec("git", ["bundle", "create", outFile, ref, ...extraRefs], repoDir);
   } finally {
     await exec("git", ["update-ref", "-d", ref], repoDir).catch(() => undefined);
   }

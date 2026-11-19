@@ -221,7 +221,12 @@ command ("Don't add this tag: …") and is not counted in "N to fix".
 With `CSE115A_REPO_COPIES=on`, the `benchmark` job also queues a `repo_copy`
 job, which saves a copy of each task's repository at its base commit (a git
 bundle) in the private Storage bucket `benchmark-snapshots`, using the course
-GitHub App's token. The validator needs the copy for a private repository,
+GitHub App's token. The copy also holds the PR's own commits (its head, its
+merge commit, and a paired task's task-file PR head) and is named
+`<instance_id>.<first 12 of base_commit>.full.bundle`; a ref GitHub no longer
+has is left out and named in the log line. Only such a complete copy counts as
+stored, so "Save missing repo copies" re-copies a task that has only an older
+copy (which is kept). The validator needs the copy for a private repository,
 because the App's private key stays on this site. Copies run in their own
 line: a second poller loop claims only `repo_copy` jobs and the grading loop
 never does, so grading never waits on a copy. Each step of a copy has 30

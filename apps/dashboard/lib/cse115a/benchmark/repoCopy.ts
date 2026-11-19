@@ -1,6 +1,8 @@
 // The website's copy of a benchmark task's repository (#298): the whole repo at the row's base commit,
-// as a git bundle in the private bucket benchmark-snapshots, so the validator can validate a private
-// repository from the copy without the course App's private key, which only the website has. The
+// plus the PR's own commits (its head, its merge commit, and for a paired task the task-file PR's
+// head), as a git bundle in the private bucket benchmark-snapshots, so the validator can validate a
+// private repository from the copy without the course App's private key, which only the website has,
+// and a task's diff can be worked out again from the copy later. The
 // website writes copies, in `repo_copy` jobs on their own poller line (jobs/runner.ts, jobs/worker.ts),
 // and asks whether one exists; it never downloads or serves one.
 //
@@ -16,17 +18,25 @@ import { mkdtemp, rm, stat } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { CourseRepoAccessError, githubAppConfig, repoInstallationToken } from "@/lib/cse115a/githubAppToken";
-import { bundleRepo, cloneRepo, CloneError, ensureCommit, NO_APP_CLONE_DETAIL, redactToken, type GitAccess, type RunOptions } from "@/lib/cse115a/benchmark/validation/runRow";
+import { bundleRepo, cloneRepo, CloneError, ensureCommit, fetchRef, NO_APP_CLONE_DETAIL, redactToken, type GitAccess, type RunOptions } from "@/lib/cse115a/benchmark/validation/runRow";
 import { verifyBundle } from "@/lib/cse115a/benchmark/validation/snapshots";
 import { OBJECT_COMMIT_CHARS, SNAPSHOT_SIZE_LIMIT, type SnapshotStore } from "@/lib/cse115a/benchmark/validation/snapshotStore";
 
-/** What a copy needs from a benchmark row. */
-export type RepoCopyTask = { instance_id: string; repo: string; base_commit: string };
+/**
+ * What a copy needs from a benchmark row, and from the submission snapshot's task: the PR's number and
+ * merge commit, and for a task whose task file came in a separate PR, that PR's number. Those three are
+ * optional; only the base commit is required.
+ */
+export type RepoCopyTask = {
+  instance_id: string; repo: string; base_commit: string;
+  pr_number?: number; merge_commit?: string; task_file_pr_number?: number;
+};
 
 export type RepoCopyFailure = "not_installed" | "base_missing" | "too_large" | "github" | "storage" | "bundle" | "timeout";
 
 export type RepoCopyResult =
-  | { instance_id: string; outcome: "stored" | "already stored" }
+  /** `missing`: the refs a stored copy was made without, each with why (the copy is stored all the same). */
+  | { instance_id: string; outcome: "stored" | "already stored"; missing?: string[] }
   | { instance_id: string; outcome: "failed"; reason: RepoCopyFailure; line: string };
 
 /** Each step of a copy (the token request, one git command, a Storage call) is stopped after this. */
@@ -116,17 +126,36 @@ export async function copyTaskRepo(task: RepoCopyTask, options: RepoCopyOptions)
   const started = Date.now();
   const result = await copyOnce(task, options);
   const seconds = secondsText(Date.now() - started);
-  options.log?.(`${task.instance_id}: ${result.outcome} in ${seconds}${result.outcome === "failed" ? `: ${result.line}` : ""}`);
+  const missing = result.outcome !== "failed" && result.missing?.length ? `; stored without ${result.missing.join("; ")}` : "";
+  options.log?.(`${task.instance_id}: ${result.outcome} in ${seconds}${result.outcome === "failed" ? `: ${result.line}` : missing}`);
   return result;
 }
 
+/** A git complaint meaning the ref or commit is not on GitHub (any more). */
+const NOT_ON_GITHUB = /not our ref|couldn't find remote ref|no such remote ref|unadvertised object|bad object|not a valid object|unable to find/i;
+
+/** The refs a complete copy adds to the base commit, from the task's PR numbers and merge commit. */
+type ExtraRef = { ref: string; step: string; fetch: { pull: number } | { commit: string } };
+
+function extraRefs(task: RepoCopyTask): ExtraRef[] {
+  const out: ExtraRef[] = [];
+  if (task.pr_number !== undefined) out.push({ ref: "refs/hecate/pr-head", step: "fetch of the PR head", fetch: { pull: task.pr_number } });
+  if (task.merge_commit !== undefined) out.push({ ref: "refs/hecate/merge", step: "fetch of the merge commit", fetch: { commit: task.merge_commit } });
+  if (task.task_file_pr_number !== undefined) out.push({ ref: "refs/hecate/task-file-pr-head", step: "fetch of the task file PR's head", fetch: { pull: task.task_file_pr_number } });
+  return out;
+}
+
 /**
- * The copy: asks the store first (a copy for this base commit already there is "already stored" and
- * nothing is cloned); then the App's installation token for the repository, or an anonymous clone when
- * the App is not installed there or not set up on the site (so a public repository still works); a
- * clone into a fresh temp folder; the base commit fetched if the clone lacks it; the bundle written and
- * checked as the validator does; the upload. Each step has its own limit and the whole copy one too;
- * a git command past its limit is killed. The temp folder is removed whatever happens.
+ * The copy: asks the store first (a complete copy for this base commit already there is "already
+ * stored" and nothing is cloned; an old base-only copy is not enough); then the App's installation
+ * token for the repository, or an anonymous clone when the App is not installed there or not set up
+ * on the site (so a public repository still works); a clone into a fresh temp folder; the base commit
+ * fetched if the clone lacks it; the PR's head, its merge commit and a paired task's task-file PR head
+ * fetched into refs/hecate/*; the bundle written with those refs and checked as the validator does;
+ * the upload under the complete-copy name. A PR ref or merge commit GitHub no longer has is left out
+ * and named in the log line; any other failure fetching one fails the copy, as for the base commit, so
+ * a retry can make it whole. Each step has its own limit and the whole copy one too; a git command past
+ * its limit is killed. The temp folder is removed whatever happens.
  */
 async function copyOnce(task: RepoCopyTask, options: RepoCopyOptions): Promise<RepoCopyResult> {
   const { instance_id: id, repo, base_commit: base } = task;
@@ -164,7 +193,7 @@ async function copyOnce(task: RepoCopyTask, options: RepoCopyOptions): Promise<R
   if (!/^[0-9a-f]{40,64}$/i.test(base)) return fail("base_missing", `The base commit "${base}" is not a full commit id.`);
 
   try {
-    if (await within(options.store.has(id, base))) return { instance_id: id, outcome: "already stored" };
+    if (await within(options.store.has(id, base, "full"))) return { instance_id: id, outcome: "already stored" };
   } catch (error) {
     return error instanceof StepTimeout ? timeoutLine(error) : storageError(error);
   }
@@ -219,15 +248,40 @@ async function copyOnce(task: RepoCopyTask, options: RepoCopyOptions): Promise<R
     } catch (error) {
       if (timedOut) return timeoutLine(timedOut);
       const text = redactToken(errorText(error), token);
-      if (/not our ref|couldn't find remote ref|no such remote ref|unadvertised object|bad object|not a valid object|unable to find/i.test(text)) {
+      if (NOT_ON_GITHUB.test(text)) {
         return fail("base_missing", `The base commit ${base.slice(0, OBJECT_COMMIT_CHARS)} is not in ${repo} on GitHub (it may have been force-pushed away).`);
       }
       return fail("github", `GitHub error: ${firstLine(text)}`);
     }
+    const fetched: string[] = [];
+    const missing: string[] = [];
+    for (const extra of extraRefs(task)) {
+      step = extra.step;
+      const remote = "pull" in extra.fetch ? `refs/pull/${extra.fetch.pull}/head` : extra.fetch.commit;
+      if ("pull" in extra.fetch ? !(Number.isInteger(extra.fetch.pull) && extra.fetch.pull > 0) : !/^[0-9a-f]{40,64}$/i.test(extra.fetch.commit)) {
+        missing.push(`${extra.ref} (${JSON.stringify(String(remote))} is not a ${"pull" in extra.fetch ? "PR number" : "full commit id"})`);
+        continue;
+      }
+      try {
+        if ("pull" in extra.fetch) {
+          await fetchRef(repoDir, repo, remote, extra.ref, log, cloneAccess);
+        } else {
+          await ensureCommit(repoDir, remote, log, repo, cloneAccess);
+          await timed("git", ["update-ref", extra.ref, remote], repoDir);
+        }
+        fetched.push(extra.ref);
+      } catch (error) {
+        if (timedOut) return timeoutLine(timedOut);
+        const text = redactToken(errorText(error), token);
+        if (!NOT_ON_GITHUB.test(text)) return fail("github", `GitHub error: ${firstLine(text)}`);
+        const what = "pull" in extra.fetch ? `${remote} is` : `the merge commit ${remote.slice(0, OBJECT_COMMIT_CHARS)} is`;
+        missing.push(`${extra.ref} (${what} not on GitHub)`);
+      }
+    }
     const file = join(tmp, `${id}.bundle`);
     try {
       step = "bundle";
-      await bundleRepo(repoDir, base, file, timed);
+      await bundleRepo(repoDir, base, file, timed, fetched);
       step = "bundle check";
       await verifyBundle(file, base, timed);
     } catch (error) {
@@ -239,8 +293,8 @@ async function copyOnce(task: RepoCopyTask, options: RepoCopyOptions): Promise<R
     if (size > sizeLimit) return fail("too_large", `The copy is ${mb(size)}, over the ${mb(sizeLimit)} limit for stored copies.`);
     step = "upload";
     try {
-      const answer = await within(options.store.upload(id, base, file));
-      return { instance_id: id, outcome: answer === "uploaded" ? "stored" : "already stored" };
+      const answer = await within(options.store.upload(id, base, file, "full"));
+      return { instance_id: id, outcome: answer === "uploaded" ? "stored" : "already stored", ...(missing.length ? { missing } : {}) };
     } catch (error) {
       return error instanceof StepTimeout ? timeoutLine(error) : storageError(error);
     }
@@ -252,7 +306,7 @@ async function copyOnce(task: RepoCopyTask, options: RepoCopyOptions): Promise<R
 /** One task's copy state: true or false, or null when the store could not be asked (with the line). */
 export type CopyStatus = RepoCopyTask & { stored: boolean | null; error?: string };
 
-/** Whether each task has a copy for its current base commit, asking the store a few at a time. */
+/** Whether each task has a complete copy for its current base commit (an old base-only copy does not count), asking the store a few at a time. */
 export async function copyStatus(tasks: RepoCopyTask[], store: SnapshotStore, concurrency = 8): Promise<CopyStatus[]> {
   const out: CopyStatus[] = new Array(tasks.length);
   let next = 0;
@@ -261,7 +315,7 @@ export async function copyStatus(tasks: RepoCopyTask[], store: SnapshotStore, co
       const index = next++;
       const task = tasks[index]!;
       try {
-        out[index] = { ...task, stored: await store.has(task.instance_id, task.base_commit) };
+        out[index] = { ...task, stored: await store.has(task.instance_id, task.base_commit, "full") };
       } catch (error) {
         out[index] = { ...task, stored: null, error: `Storage error: ${firstLine(errorText(error)).replace(/^Storage:\s*/, "")}` };
       }
