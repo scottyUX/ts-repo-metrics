@@ -128,7 +128,10 @@ describe("results without --fix-coverage", () => {
         withPostFixTree: (fn) => fn(read),
       });
       void runs;
-      const text = JSON.stringify(result, null, 2) + "\n";
+      // Timings are wall-clock milliseconds from the fake runner: 0 on an idle machine, 1+ under load.
+      // Compare the keys only, so the fixture's zeros don't make this test flaky.
+      const stable = { ...result, timings: Object.fromEntries(Object.keys(result.timings).map((key) => [key, 0])) };
+      const text = JSON.stringify(stable, null, 2) + "\n";
       const file = join(FIXTURES, `${shape.name}.json`);
       if (process.env.HECATE_WRITE_NO_COVERAGE_FIXTURES) writeFileSync(file, text);
       expect(text).toBe(readFileSync(file, "utf8"));
