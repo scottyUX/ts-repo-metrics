@@ -284,6 +284,25 @@ SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... \
   task is the sprint score" with its estimate (amber when under 4 hours) and
   releases with one grade. Edits saved
   after release are visible to the student right away.
+- **Get the code** (a closed section in each task on the Review page), for
+  running a team's tests or checking a diff: the commands to clone the repo
+  from GitHub and check out the PR's merge commit (works when the repo is
+  public or the grader's GitHub account can read it), and, when the task has a
+  repo copy in `benchmark-snapshots`, a **Download repo copy** link with the
+  commands to open it. A complete (`.full`) copy also fetches `refs/hecate/*`
+  and checks out `refs/hecate/merge` (`hecate-snapshot` is where the task
+  started, `refs/hecate/pr-head` the PR's last commit); an older copy holds
+  only the starting point. When the task's benchmark row has a run recipe
+  (`harbor_env`), the section also shows the validator's image, installs and
+  test commands. It always warns that this is student code, to be run in a
+  container or a throwaway VM. The link is
+  `GET /api/cse115a/instructor/submissions/<id>/repo-copy?slot=<n>`: staff of
+  that course only (instructors and TAs); it answers with a redirect to a
+  Storage link that lasts 60 seconds and saves as `<instance_id>.bundle` (the
+  file never passes through the site), `404 No repo copy is stored for this
+  task.` when there is none, and logs one line per download:
+  `Repo copy download: user <staff user id> submission <id> slot <n> instance <instance_id>`
+  (no link or token). Students never see the section or the route.
 - **Regrade** requeues the grade job and keeps instructor edits. **Unlock**
   (instructors only, reason required) supersedes the attempt so the student can
   change tasks and submit again; the old attempt stays as history.
