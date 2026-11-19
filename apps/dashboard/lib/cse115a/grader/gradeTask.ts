@@ -21,7 +21,7 @@ export async function gradeTask(client: ChatClient, task: TaskSnapshot, model?: 
   const byName = new Map<string, CriterionGrade>([
     ...llm.criteria.map((grade) => [grade.name, grade] as const),
     ["Tests pass", gradeTestsPass(task.checks)],
-    ["Process", gradeProcess(task.validation, task.baseCommitSource)],
+    ["Process", gradeProcess(task.validation, task.baseCommitSource, task.taskFileFirstCommit)],
   ]);
   const rubric = RUBRIC.map((row) => byName.get(row.name)!);
   return {

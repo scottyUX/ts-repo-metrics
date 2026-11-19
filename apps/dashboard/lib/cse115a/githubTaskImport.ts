@@ -1,7 +1,7 @@
 import "server-only";
 import { splitPatch } from "@/lib/cse115a/diff";
 import { estimateMeetsTaskMinimum, summarizeCi, taskFileFirst, type TaskFacts } from "@/lib/cse115a/processChecklist";
-import { readCommitChecks } from "@/lib/cse115a/submissionSnapshot";
+import { readCommitChecks, readMergeBase } from "@/lib/cse115a/submissionSnapshot";
 import { canonicalHeadings, checkTaskSpec, filenameMatchesId, isTaskFilePath, parsePullRequestUrl, taskIdProblem, type TaskSpec } from "@/lib/cse115a/taskSpec";
 import type { GitHubReader } from "@/lib/cse115a/githubClient";
 import { firstCommitHoldsOnlyTaskFiles, type TaskFileCommitter } from "@/lib/cse115a/sharedPr";
@@ -374,14 +374,21 @@ export async function importTaskFromPullRequest(
   }
   const specCommittedFirst = taskFileFirst(firstCommitTaskOnly, taskFilePr);
   const mergeSha = pull.merge_commit_sha;
-  const checks = await readCommitChecks(gh, owner, repo, mergeSha);
+  const headSha = pull.head?.sha ?? null;
+  const [checks, mergeBase] = await Promise.all([
+    readCommitChecks(gh, owner, repo, mergeSha),
+    readMergeBase(gh, owner, repo, pull.base?.sha, headSha),
+  ]);
   let testFileCount: number | null = null;
   try {
-    // Counted over the same range the submit snapshot diffs: from the first commit when the task file came first.
-    const baseCommit = specCommittedFirst && firstSha ? firstSha : pull.base?.sha;
+    // Counted over the same range the submit snapshot diffs (#382): from the merge base of the PR's base and head
+    // to the head. When the merge base can't be read, the rule before #382: from the first commit when the task
+    // file came first, otherwise the PR base, to the merge commit.
+    const baseCommit = mergeBase ?? (specCommittedFirst && firstSha ? firstSha : pull.base?.sha);
+    const endCommit = mergeBase && headSha ? headSha : mergeSha;
     if (baseCommit) {
       const diff = await gh.text(
-        `/repos/${owner}/${repo}/compare/${baseCommit}...${mergeSha}`,
+        `/repos/${owner}/${repo}/compare/${baseCommit}...${endCommit}`,
         "application/vnd.github.diff",
       );
       testFileCount = splitPatch(diff).testFiles.length;

@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { splitPatch } from "@/lib/cse115a/diff";
-import { oneTaskReviewLine, specEstimateHours } from "@/lib/cse115a/processChecklist";
+import { baseCommitLine, oneTaskReviewLine, specEstimateHours } from "@/lib/cse115a/processChecklist";
 import { prTaskFileLines } from "@/lib/cse115a/sharedPr";
 import { taskFilePrReviewLine } from "@/lib/cse115a/taskFilePr";
 import { RUBRIC, TASK_POINTS } from "@/lib/cse115a/rubric";
@@ -101,7 +101,7 @@ function TaskPanel({ submissionId, task, grade, onSaved, readOnly, sharedPr, cod
         <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm">
           <a href={task.prUrl} target="_blank" rel="noopener noreferrer" className="text-primary underline">PR #{task.prNumber}</a>
           <Link href={`/cse115a/instructor/submissions/${submissionId}/tasks/${task.slot}/metrics`} className="text-primary underline">Repo Metrics</Link>
-          <span className="font-mono text-xs text-muted-foreground">base {task.baseCommit.slice(0, 7)}{task.baseCommitSource === "pr_base" ? " (PR base; the task file was not first)" : " (PR's first commit, the task file alone)"}</span>
+          <span className="font-mono text-xs text-muted-foreground">{baseCommitLine(task.baseCommit, task.baseCommitSource)}</span>
         </div>
         {task.taskFilePr ? <p className="mt-2 text-sm text-amber-700 dark:text-amber-300">{taskFilePrReviewLine(task.taskFilePr.number, task.prNumber)}</p> : null}
         {sharedPr.map((line) => <p key={line} className="mt-2 text-sm text-amber-700 dark:text-amber-300">{line}</p>)}

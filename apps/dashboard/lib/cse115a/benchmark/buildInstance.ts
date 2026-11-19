@@ -48,7 +48,7 @@ export const SWE_BENCH_FIELDS = [
   "eval_type", "image", "eval_script", "log_parser", "difficulty", "repo_metrics",
 ] as const satisfies readonly (keyof BenchmarkInstance)[];
 
-export type BuildFlag = "base_commit_from_pr_base" | "base_commit_from_first_commit" | "diff_missing" | "diff_truncated" | "no_test_patch" | "no_source_patch" | "no_tests_found" | "pii_scrubbed_from_patch" | "ai_tool_files_dropped" | "pr_holds_two_tasks" | "task_file_from_other_pr";
+export type BuildFlag = "base_commit_from_pr_base" | "base_commit_from_first_commit" | "base_commit_from_merge_base" | "diff_from_merge_commit" | "task_file_not_first" | "task_files_dropped" | "diff_missing" | "diff_truncated" | "no_test_patch" | "no_source_patch" | "no_tests_found" | "pii_scrubbed_from_patch" | "ai_tool_files_dropped" | "pr_holds_two_tasks" | "task_file_from_other_pr";
 
 /** SWE-bench Verified difficulty labels, from the student's estimate. */
 export function difficultyFor(estimateHours: number | undefined): string | null {
@@ -57,6 +57,11 @@ export function difficultyFor(estimateHours: number | undefined): string | null 
   if (estimateHours <= 1) return "15 min - 1 hour";
   if (estimateHours <= 4) return "1-4 hours";
   return ">4 hours";
+}
+
+/** Task files (`docs/tasks/...`): the task text is already the problem statement, so rows leave them out (#382). */
+export function isTaskFolderPath(path: string): boolean {
+  return /^docs\/tasks\//.test(path);
 }
 
 export function instanceId(repoFullName: string, taskId: string): string {
@@ -77,18 +82,29 @@ export function buildInstance(
   options: { prHoldsTwoTasks?: boolean } = {},
 ): { instance: BenchmarkInstance; flags: BuildFlag[] } {
   const ids = identifiersFor(task, studentEmail);
-  // AI-tool folders are not the task's work, so the row leaves them out (#384). Graders are not
-  // affected: they read task.diff, not this row. A diff without such files is split exactly as before.
+  // AI-tool folders are not the task's work, so the row leaves them out (#384), and nor are task files under
+  // docs/tasks/, whose text is already the problem statement (#382). Graders are not affected: they read
+  // task.diff, not this row. A diff without such files is split exactly as before.
   const files = parseDiffFiles(task.diff);
-  const kept = files.filter((file) => !isAiToolPath(file.path));
-  const aiToolFilesDropped = kept.length < files.length;
-  const split = splitPatch(aiToolFilesDropped ? kept.map((file) => file.text).join("") : task.diff);
+  const aiToolFilesDropped = files.some((file) => isAiToolPath(file.path));
+  const taskFilesDropped = files.some((file) => isTaskFolderPath(file.path));
+  const kept = files.filter((file) => !isAiToolPath(file.path) && !isTaskFolderPath(file.path));
+  const split = splitPatch(kept.length < files.length ? kept.map((file) => file.text).join("") : task.diff);
   const patch = scrubPatch(split.patch, ids);
   const testPatch = scrubPatch(split.testPatch, ids);
   const failToPass = extractAddedTests(testPatch.patch);
   const flags: BuildFlag[] = [];
   if (task.baseCommitSource === "pr_base") flags.push("base_commit_from_pr_base");
   if (task.baseCommitSource === "first_commit") flags.push("base_commit_from_first_commit");
+  if (task.baseCommitSource === "merge_base") flags.push("base_commit_from_merge_base");
+  // A capture after #382 that could not read the merge base: the range before #382, ending at the merge commit.
+  if (task.diffEnd === "merge_commit") flags.push("diff_from_merge_commit");
+  // A merge-base capture no longer says through its base whether the task file came first, so export reads this
+  // flag instead (TASK_FILE_NOT_FIRST_FLAGS): set when neither import's answer nor capture's own says it did, the
+  // same rule as gradeProcess. Snapshots on the older rule keep their base flags.
+  if (task.baseCommitSource === "merge_base" && task.validation.specCommittedFirst !== true && task.taskFileFirstCommit !== true) {
+    flags.push("task_file_not_first");
+  }
   if (task.diffError || !task.diff) flags.push("diff_missing");
   if (task.diffTruncated) flags.push("diff_truncated");
   if (!split.testPatch) flags.push("no_test_patch");
@@ -97,6 +113,7 @@ export function buildInstance(
   // Scrubbing added lines can change what a test checks, so validation should look at these rows.
   if (patch.changed || testPatch.changed) flags.push("pii_scrubbed_from_patch");
   if (aiToolFilesDropped) flags.push("ai_tool_files_dropped");
+  if (taskFilesDropped) flags.push("task_files_dropped");
   // A shared diff is not one task's work. Export leaves the row out; a later rebuild splits the diff by task.
   if (options.prHoldsTwoTasks) flags.push("pr_holds_two_tasks");
   // The task file came from a separate PR merged after the work. The row is still exportable: the task text

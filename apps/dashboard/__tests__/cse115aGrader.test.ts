@@ -229,6 +229,14 @@ describe("LLM grader", () => {
     expect(codeFirst.needsReview).toBe(true);
   });
 
+  it("scores Process full for a merge_base snapshot whose own first-commit check found the task file first (#382)", async () => {
+    const stale = { prMerged: true, specCommittedFirst: false };
+    const rescued = await gradeTask(fakeClient(GOOD), snapshot({ validation: stale, baseCommitSource: "merge_base", taskFileFirstCommit: true }), "m");
+    expect(rescued.rubric.find((row) => row.name === "Process")).toMatchObject({ level: "full", awarded: 1, needsReview: false });
+    const notFirst = await gradeTask(fakeClient(GOOD), snapshot({ validation: stale, baseCommitSource: "merge_base", taskFileFirstCommit: false }), "m");
+    expect(notFirst.rubric.find((row) => row.name === "Process")).toMatchObject({ level: "none", awarded: 0, needsReview: true });
+  });
+
   it("flags criteria whose quotes are missing or invented", async () => {
     const grade = await gradeTask(fakeClient({
       ...GOOD,

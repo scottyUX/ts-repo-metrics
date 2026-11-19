@@ -28,8 +28,9 @@ export function isExportable(candidate: ExportCandidate, options: { validatedOnl
 /**
  * Flags meaning the task file was not committed alone as the PR's first commit (or that commit could not be read),
  * or came from a separate PR after the code was merged: the spec may have been written after the code.
+ * `base_commit_from_pr_base` says so for rows on the rule before #382; `task_file_not_first` for merge-base rows.
  */
-export const TASK_FILE_NOT_FIRST_FLAGS = ["base_commit_from_pr_base", "task_file_from_other_pr"] as const;
+export const TASK_FILE_NOT_FIRST_FLAGS = ["base_commit_from_pr_base", "task_file_from_other_pr", "task_file_not_first"] as const;
 
 /** True unless a source of the instance has a flag in TASK_FILE_NOT_FIRST_FLAGS. Rows are not filtered on it. */
 export function taskFileFirst(sources: ExportCandidate["sources"]): boolean {

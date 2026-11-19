@@ -153,7 +153,11 @@ grade only after an instructor releases it.
 - **Process** has two steps, PR merged and task file first. The task file came
   first when `specCommittedFirst` is true or the snapshot's diff starts at the
   PR's first commit (`baseCommitSource` `first_commit`, which also covers a
-  snapshot taken before #392 whose task file was first but untagged). Both:
+  snapshot taken before #392 whose task file was first but untagged). A
+  `merge_base` snapshot (#382) never starts at the first commit; instead the
+  task file also came first when capture's own check of the PR's first commit
+  says so (`taskFileFirstCommit`, saved on snapshots since #382), which covers
+  a stale `specCommittedFirst` saved before #392. Both:
   full. Task file not first: none, always marked for instructor review. Not
   merged: partial. Tags play no part.
 - The other five criteria come from one OpenAI call per task with a strict JSON
@@ -191,18 +195,48 @@ one PR still get a row each. A task whose task file came from a separate
 task-file PR is flagged `task_file_from_other_pr` and still exported: its task
 text and its diff are each complete, but the spec was written after the code.
 
-The diff ends at the merge commit. It starts after the PR's first commit only
-when the task file came first (that commit holds only task files the PR adds
-and the task is not paired): `baseCommitSource` `first_commit`, flag
-`base_commit_from_first_commit`. In every other case it starts at the PR base
-(`pr_base`, flag `base_commit_from_pr_base`), so no code is ever cut out of the
-diff. No tag is read (#392). Snapshots taken before #392 may say `base_tag`,
-for a base tag on that same task-file-only first commit; the range was the same
-as `first_commit`, and those rows get neither flag.
+The diff is the PR's own, the way GitHub's "Files changed" tab computes it
+(#382): from the merge base of the PR's base and its head, to the PR's head.
+Capture asks GitHub for `compare/{base.sha}...{head.sha}` (JSON), reads
+`merge_base_commit.sha`, then fetches the diff of
+`compare/{mergeBase}...{head.sha}`. The snapshot saves `baseCommit` (the merge
+base), `baseCommitSource` `merge_base`, `headCommit` (the PR's head) and
+`diffEnd` `head`; the row gets the flag `base_commit_from_merge_base`. Why:
+the earlier rule ended at the merge commit, so anything a teammate merged into
+`main` while the task was open was in the diff (10 of 24 merged task PRs on
+Nov 14), and ending at the PR's head instead is not enough when the branch
+merged `main` in part-way. The merge base keeps teammates' work out either
+way, and works for stacked PRs and squash or rebase merges. The task file is
+part of the diff, as on GitHub. CI checks are still read on the merge commit.
+The import's test-file count (Add PR, Re-check) uses the same range.
 
-- `patch` and `test_patch` split the first-commit-to-merge (or
-  PR-base-to-merge) diff by test path
+Whether the task file came first is no longer told by where the diff starts.
+Capture still reads the PR's first commit and saves its answer as
+`taskFileFirstCommit` (true when that commit holds only task files the PR adds
+and the task is not paired). A `merge_base` row gets the flag
+`task_file_not_first` when neither `validation.specCommittedFirst` nor
+`taskFileFirstCommit` is `true`, the same rule as grading. The first commit
+also gives the fallback's start.
+
+Fallback: when the JSON compare fails or has no merge base, capture uses the
+rule before #382 and Submit goes on. The diff ends at the merge commit
+(`diffEnd` `merge_commit`, flag `diff_from_merge_commit`) and starts after the
+PR's first commit when the task file came first (that commit holds only task
+files the PR adds and the task is not paired): `baseCommitSource`
+`first_commit`, flag `base_commit_from_first_commit`; otherwise at the PR base
+(`pr_base`, flag `base_commit_from_pr_base`). No tag is read (#392).
+
+Saved submissions are unchanged: snapshots taken before #382 have no
+`headCommit`, `diffEnd` or `taskFileFirstCommit`, end at the merge commit, and keep their
+`first_commit` or `pr_base` start and flags. Snapshots taken before #392 may
+say `base_tag`, for a base tag on that same task-file-only first commit; the
+range was the same as `first_commit`, and those rows get neither flag.
+
+- `patch` and `test_patch` split the diff by test path
   (`lib/cse115a/diff.ts`).
+- Every file under `docs/tasks/` is left out of both (#382): the task text is
+  already `problem_statement`. Rows that had such files get the
+  `task_files_dropped` flag. Grading still sees them, last (see above).
 - Files that AI coding tools keep in a repo are left out of both: anything
   under `.agents/`, `.claude/`, `.cursor/` or `.windsurf/`, and
   `skills-lock.json`, in any folder (`isAiToolPath`). Rows that had such
@@ -228,7 +262,8 @@ as `first_commit`, and those rows get neither flag.
   wording and no source is rejected.
 - Each JSONL line has the SWE-bench fields, unchanged and in the same order,
   then one more key, `task_file_first` (boolean). It is `false` when any
-  source of the instance is flagged `base_commit_from_pr_base` or
+  source of the instance is flagged `base_commit_from_pr_base`,
+  `task_file_not_first` (a `merge_base` row) or
   `task_file_from_other_pr`: the task file was not committed alone as the
   PR's first commit, or came from a separate PR after the code was merged,
   so the spec may have been written after the code. `false` also covers the

@@ -71,7 +71,9 @@ describe("truncateDiff", () => {
 const isTagRequest = (path: string) => path.includes("/git/ref") || path.includes("/git/tags");
 const CODE_FIRST_FILES = ["docs/tasks/sprint-1/US-1-T-1.md", "src/a.ts"];
 
-describe("captureSubmissionSnapshot", () => {
+// This fake PR has no head sha, so no merge base is asked for: these tests cover the fallback to the rule before
+// #382 (start → merge commit). The merge-base range is in cse115aPrOwnDiff.test.ts and cse115aPrOwnDiffGit.test.ts.
+describe("captureSubmissionSnapshot, falling back to the range before #382", () => {
   it("diffs from a task-file-only first commit to the merge commit and records PR evidence, reading no tag (#392)", async () => {
     const { reader, calls } = fakeGitHub();
     const snapshot = await captureSubmissionSnapshot(reader, [task(2, "US-1-T-2", 13), task(1, "US-1-T-1", 12)], new Date("2026-10-02T00:00:00Z"));
@@ -82,7 +84,7 @@ describe("captureSubmissionSnapshot", () => {
     const first = snapshot.tasks[0]!;
     // Before #392 this case, a base tag on the first commit, was base_tag; the range is the same.
     expect(first).toMatchObject({
-      taskId: "US-1-T-1", analysisResultId: "result-1", baseCommit: "basetag", baseCommitSource: "first_commit",
+      taskId: "US-1-T-1", analysisResultId: "result-1", baseCommit: "basetag", baseCommitSource: "first_commit", headCommit: null, diffEnd: "merge_commit",
       diff: "diff --git a/src/a.ts b/src/a.ts\n+x\n", diffTruncated: false, diffError: null,
       pr: { mergeCommitSha: "merge123", baseSha: "prbase", author: "student", body: "Closes the card" },
     });
