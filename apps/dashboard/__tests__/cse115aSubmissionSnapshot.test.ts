@@ -118,6 +118,33 @@ describe("captureSubmissionSnapshot", () => {
     expect(own.tasks[0]).toMatchObject({ baseCommitSource: "first_commit", baseTagSameAuthor: true });
   });
 
+  it("ignores a base tag on a first commit that holds code, starts at the PR base, and keeps that commit's files", async () => {
+    const { reader, calls } = fakeGitHub({ firstFiles: ["docs/tasks/sprint-1/US-1-T-1.md", "src/first.ts"] });
+    const fromBase = (path: string) => path.includes("/compare/prbase...")
+      ? "diff --git a/src/first.ts b/src/first.ts\n+first\ndiff --git a/src/a.ts b/src/a.ts\n+x\n"
+      : "diff --git a/src/a.ts b/src/a.ts\n+x\n";
+    const snapshot = await captureSubmissionSnapshot({ ...reader, text: async (path: string) => { calls.push(path); return fromBase(path); } }, [task(1, "US-1-T-1", 12)]);
+    expect(snapshot.tasks[0]).toMatchObject({ baseCommit: "prbase", baseCommitSource: "pr_base", baseTagSameAuthor: null });
+    expect(snapshot.tasks[0]!.diff).toContain("src/first.ts");
+    expect(calls).toContain("/repos/team/proj/compare/prbase...merge123");
+    expect(calls.filter((path) => path === "/repos/team/proj/commits/basetag")).toHaveLength(1);
+  });
+
+  it("still takes a base tag on a task-file-only first commit, reading that commit once", async () => {
+    const { reader, calls } = fakeGitHub();
+    const snapshot = await captureSubmissionSnapshot(reader, [task(1, "US-1-T-1", 12)]);
+    expect(snapshot.tasks[0]).toMatchObject({ baseCommit: "basetag", baseCommitSource: "base_tag", baseTagSameAuthor: null });
+    expect(calls.filter((path) => path === "/repos/team/proj/commits/basetag")).toHaveLength(1);
+  });
+
+  it("ignores a base tag on a paired task's first commit", async () => {
+    const { reader, calls } = fakeGitHub();
+    const paired = { ...task(1, "US-1-T-1", 12), facts_json: { taskFilePr: { url: "https://github.com/team/proj/pull/11", number: 11, mergeSha: "spec11" } } };
+    const snapshot = await captureSubmissionSnapshot(reader, [paired]);
+    expect(snapshot.tasks[0]).toMatchObject({ baseCommit: "prbase", baseCommitSource: "pr_base" });
+    expect(calls).toContain("/repos/team/proj/compare/prbase...merge123");
+  });
+
   it("records a diff failure instead of blocking the submission", async () => {
     const { reader } = fakeGitHub({ diff: new Error("GitHub could not load this pull request diff (406).") });
     const snapshot = await captureSubmissionSnapshot(reader, [task(1, "US-1-T-1", 12)]);

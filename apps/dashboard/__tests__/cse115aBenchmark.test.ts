@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { extractAddedTests, extractJsTests, extractPyTests } from "@/lib/cse115a/benchmark/extractTests";
 import { buildInstance, difficultyFor, instanceId, SWE_BENCH_FIELDS } from "@/lib/cse115a/benchmark/buildInstance";
-import { exportJsonl, isExportable, toJsonlRecord } from "@/lib/cse115a/benchmark/exportJsonl";
+import { exportJsonl, isExportable, taskFileFirst, toExportRecord, toJsonlRecord, type ExportCandidate } from "@/lib/cse115a/benchmark/exportJsonl";
 import { identifiersFor, redactPersonalData, scrubPatch, scrubSpec, scrubText } from "@/lib/cse115a/benchmark/scrubPii";
 import { isAiToolPath } from "@/lib/cse115a/diff";
 import { runNextJob, type JobStore, type BenchmarkSave } from "@/lib/cse115a/jobs/runner";
@@ -176,7 +176,7 @@ describe("JSONL export", () => {
     const line = exportJsonl([{ instance, sources: [{ consented: true, validationStatus: "candidate" }] }]);
     expect(line.endsWith("\n")).toBe(true);
     const row = JSON.parse(line);
-    expect(Object.keys(row)).toEqual([...SWE_BENCH_FIELDS]);
+    expect(Object.keys(row)).toEqual([...SWE_BENCH_FIELDS, "task_file_first"]);
     expect(row).toEqual({
       instance_id: "team__py-US-2-T-1",
       repo: "team/py",
@@ -201,6 +201,7 @@ describe("JSONL export", () => {
       log_parser: null,
       difficulty: "1-4 hours",
       repo_metrics: null,
+      task_file_first: true,
     });
   });
 
@@ -212,6 +213,61 @@ describe("JSONL export", () => {
     expect(isExportable({ instance, sources: [{ consented: true, validationStatus: "candidate" }] }, { validatedOnly: true })).toBe(false);
     expect(exportJsonl([{ instance, sources: [{ consented: false, validationStatus: "candidate" }] }])).toBe("");
     expect(toJsonlRecord({ ...instance, created_at: null }).created_at).toBeNull();
+  });
+});
+
+describe("task_file_first in the export", () => {
+  const { instance } = buildInstance(snapshot({ diff: PY_DIFF, repoFullName: "team/py", taskId: "US-2-T-1" }), 2, null);
+  const source = (flags?: string[]): ExportCandidate["sources"][number] => ({ consented: true, validationStatus: "candidate", ...(flags ? { flags } : {}) });
+  const firstFlag = (sources: ExportCandidate["sources"]) => (JSON.parse(exportJsonl([{ instance, sources }])) as { task_file_first: unknown }).task_file_first;
+
+  it("is false when the diff starts at the PR base", () => {
+    expect(firstFlag([source(["base_commit_from_pr_base"])])).toBe(false);
+  });
+
+  it("is false when the task file came from a separate PR", () => {
+    expect(firstFlag([source(["task_file_from_other_pr"])])).toBe(false);
+    expect(firstFlag([source(["base_commit_from_pr_base", "task_file_from_other_pr"])])).toBe(false);
+  });
+
+  it("is true when the task file was committed alone first, or the source has no such flag", () => {
+    expect(firstFlag([source(["base_commit_from_first_commit"])])).toBe(true);
+    expect(firstFlag([source([])])).toBe(true);
+    expect(firstFlag([source()])).toBe(true);
+    expect(firstFlag([source(["no_test_patch", "pii_scrubbed_from_patch"])])).toBe(true);
+  });
+
+  it("is false when any one of two sources says the task file did not come first", () => {
+    expect(firstFlag([source(["base_commit_from_first_commit"]), source(["base_commit_from_pr_base"])])).toBe(false);
+    expect(firstFlag([source(["task_file_from_other_pr"]), source(["base_commit_from_first_commit"])])).toBe(false);
+    expect(taskFileFirst([source(["base_commit_from_first_commit"]), source()])).toBe(true);
+  });
+
+  it("leaves every SWE-bench field byte-identical and adds only task_file_first, last", () => {
+    const before = JSON.stringify(toJsonlRecord(instance));
+    for (const [flags, value] of [[["base_commit_from_first_commit"], true], [["base_commit_from_pr_base"], false], [["task_file_from_other_pr"], false]] as const) {
+      const line = exportJsonl([{ instance, sources: [source([...flags])] }]);
+      expect(line).toBe(`${before.slice(0, -1)},"task_file_first":${value}}\n`);
+      expect(Object.keys(JSON.parse(line))).toEqual([...SWE_BENCH_FIELDS, "task_file_first"]);
+      expect(toExportRecord({ instance, sources: [source([...flags])] })).toEqual({ ...toJsonlRecord(instance), task_file_first: value });
+    }
+  });
+
+  it("does not change which rows are exported", () => {
+    for (const flags of [["base_commit_from_pr_base"], ["task_file_from_other_pr"], ["base_commit_from_first_commit"], []]) {
+      expect(isExportable({ instance, sources: [source(flags)] })).toBe(true);
+      expect(isExportable({ instance, sources: [{ ...source(flags), validationStatus: "rejected" }] })).toBe(false);
+      expect(isExportable({ instance, sources: [{ ...source(flags), consented: false }] })).toBe(false);
+      expect(isExportable({ instance, sources: [source([...flags, "pr_holds_two_tasks"])] })).toBe(false);
+      expect(isExportable({ instance, sources: [source(flags)] }, { validatedOnly: true })).toBe(false);
+      expect(isExportable({ instance, sources: [{ ...source(flags), validationStatus: "validated" }] }, { validatedOnly: true })).toBe(true);
+    }
+    const lines = exportJsonl([
+      { instance, sources: [source(["task_file_from_other_pr"])] },
+      { instance: { ...instance, instance_id: "team__py-US-2-T-2" }, sources: [source(["base_commit_from_pr_base", "pr_holds_two_tasks"])] },
+      { instance: { ...instance, instance_id: "team__py-US-2-T-3" }, sources: [source(["base_commit_from_first_commit"])] },
+    ]).trim().split("\n").map((line) => JSON.parse(line) as { instance_id: string; task_file_first: boolean });
+    expect(lines.map((line) => [line.instance_id, line.task_file_first])).toEqual([["team__py-US-2-T-1", false], ["team__py-US-2-T-3", true]]);
   });
 });
 

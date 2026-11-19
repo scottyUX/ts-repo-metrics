@@ -51,7 +51,17 @@ export type ChecklistLine = {
   ok: boolean;
   label: string;
   detail: string | null;
+  /** False for a line that is not something to fix, so it is left out of "N to fix". Missing means it counts. */
+  counts?: boolean;
 };
+
+/** The base-tag line's detail when tagging the PR's first commit would cut code out of the graded diff. */
+export const NO_BASE_TAG_DETAIL = "Don't add this tag: your first commit isn't the task file, so tagging it would leave that commit's code out of your graded work.";
+
+/** The failing lines that count toward "N to fix". */
+export function linesToFix(lines: ChecklistLine[]): ChecklistLine[] {
+  return lines.filter((line) => !line.ok && line.counts !== false);
+}
 
 type CheckLike = { source?: string; status: string; conclusion: string | null };
 
@@ -111,6 +121,9 @@ export function processChecklist(
     : !titleOk
       ? "Edit the PR title on GitHub, then Re-check."
       : "Can't be fixed on this PR.";
+  // The first commit is code (or the work PR has no task file at all): a base tag there would start the diff after
+  // that code, so the card asks for no tag. Unknown (null, older tasks) keeps the command.
+  const noBaseTag = !validation.baseTagPushed && (facts?.firstCommitTaskOnly === false || Boolean(facts?.taskFilePr));
   // A missing or misplaced base tag fails this check too, but only a spec that wasn't first can't be fixed (#266).
   const specFirstDetail = facts?.firstCommitTaskOnly !== true
     ? "Can't be fixed on this PR. The spec must come first; use a new task."
@@ -127,7 +140,13 @@ export function processChecklist(
       label: "Task file committed alone, first",
       detail: validation.specCommittedFirst ? null : specFirstDetail,
     },
-    {
+    noBaseTag ? {
+      key: "baseTagPushed",
+      ok: false,
+      label: `${id}-base tag pushed`,
+      detail: NO_BASE_TAG_DETAIL,
+      counts: false,
+    } : {
       key: "baseTagPushed",
       ok: Boolean(validation.baseTagPushed),
       label: `${id}-base tag pushed`,

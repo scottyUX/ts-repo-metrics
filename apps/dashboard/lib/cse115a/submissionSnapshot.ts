@@ -127,19 +127,21 @@ export async function captureTaskSnapshot(gh: GitHubReader, task: SubmittedTaskR
     gh.json<Comment[]>(`${base}/pulls/${task.pr_number}/comments?per_page=100`),
     readCommitChecks(gh, owner, repo, mergeSha),
   ]);
-  // Use the base tag only when it is on this PR's first commit, so a tag moved onto another
-  // student's commit can't change this student's diff (#342).
+  // The diff starts after the PR's first commit only when that commit holds only task files: a tag on the first
+  // commit gives base_tag, otherwise first_commit. A base tag elsewhere, or on a first commit that holds code, is
+  // ignored, so neither a tag moved onto another student's commit (#342) nor a tag on code cuts work out of the diff.
   const firstSha = commits?.[0]?.sha ?? null;
   let baseCommit = pull.base.sha;
   let baseCommitSource: TaskSnapshot["baseCommitSource"] = "pr_base";
   let baseTagSameAuthor: boolean | null = null;
-  if (baseTagSha && baseTagSha === firstSha) {
-    baseCommit = baseTagSha;
-    baseCommitSource = "base_tag";
-  } else if (firstSha && !taskFilePr) {
+  if (firstSha && !taskFilePr) {
     // A paired task's PR has no task file, so its first commit is never the task file alone.
     const first = await gh.json<{ files?: Array<{ filename: string }>; commit?: { author?: { email?: string } } }>(`${base}/commits/${firstSha}`);
-    if (firstCommitHoldsOnlyTaskFiles(first?.files, task.task_path, [...samePrTaskPaths, ...(task.facts_json?.prTaskFiles ?? [])])) {
+    const taskFilesOnly = firstCommitHoldsOnlyTaskFiles(first?.files, task.task_path, [...samePrTaskPaths, ...(task.facts_json?.prTaskFiles ?? [])]);
+    if (taskFilesOnly && baseTagSha === firstSha) {
+      baseCommit = firstSha;
+      baseCommitSource = "base_tag";
+    } else if (taskFilesOnly) {
       baseCommit = firstSha;
       baseCommitSource = "first_commit";
       // A tag on another author's commit is likely a teammate's task with the same ID; the Process grade says so.

@@ -3,6 +3,7 @@ import { redactPersonalData } from "./scrubPii";
 
 // SWE-bench JSONL, shaped like the Hugging Face dataset: FAIL_TO_PASS and
 // PASS_TO_PASS are JSON-encoded strings and created_at is an ISO string.
+// Each line then adds task_file_first, after the SWE-bench fields; readers that ignore unknown keys see no change.
 
 export type ExportCandidate = {
   instance: BenchmarkInstance;
@@ -24,6 +25,17 @@ export function isExportable(candidate: ExportCandidate, options: { validatedOnl
   return candidate.sources.some((source) => source.consented);
 }
 
+/**
+ * Flags meaning the task file was not committed alone as the PR's first commit (or that commit could not be read),
+ * or came from a separate PR after the code was merged: the spec may have been written after the code.
+ */
+export const TASK_FILE_NOT_FIRST_FLAGS = ["base_commit_from_pr_base", "task_file_from_other_pr"] as const;
+
+/** True unless a source of the instance has a flag in TASK_FILE_NOT_FIRST_FLAGS. Rows are not filtered on it. */
+export function taskFileFirst(sources: ExportCandidate["sources"]): boolean {
+  return !sources.some((source) => source.flags?.some((flag) => (TASK_FILE_NOT_FIRST_FLAGS as readonly string[]).includes(flag)));
+}
+
 export function toJsonlRecord(instance: BenchmarkInstance): Record<string, unknown> {
   const record: Record<string, unknown> = {};
   for (const field of SWE_BENCH_FIELDS) {
@@ -37,10 +49,15 @@ export function toJsonlRecord(instance: BenchmarkInstance): Record<string, unkno
   return record;
 }
 
+/** One export line: the SWE-bench fields as toJsonlRecord writes them, then task_file_first. */
+export function toExportRecord(candidate: ExportCandidate): Record<string, unknown> {
+  return { ...toJsonlRecord(candidate.instance), task_file_first: taskFileFirst(candidate.sources) };
+}
+
 export function exportJsonl(candidates: ExportCandidate[], options: { validatedOnly?: boolean } = {}): string {
   return candidates
     .filter((candidate) => isExportable(candidate, options))
     .sort((a, b) => a.instance.instance_id.localeCompare(b.instance.instance_id))
-    .map((candidate) => `${JSON.stringify(toJsonlRecord(candidate.instance))}\n`)
+    .map((candidate) => `${JSON.stringify(toExportRecord(candidate))}\n`)
     .join("");
 }
