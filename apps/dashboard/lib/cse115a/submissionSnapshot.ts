@@ -1,6 +1,6 @@
 import type { TaskSpec } from "@/lib/cse115a/taskSpec";
-import type { TaskFacts } from "@/lib/cse115a/processChecklist";
-import { tagCommitSha, type GitHubReader } from "@/lib/cse115a/githubClient";
+import { taskFileFirst, type TaskFacts } from "@/lib/cse115a/processChecklist";
+import type { GitHubReader } from "@/lib/cse115a/githubClient";
 import { firstCommitHoldsOnlyTaskFiles } from "@/lib/cse115a/sharedPr";
 import { savedTaskFilePr, type TaskFilePr } from "@/lib/cse115a/taskFilePr";
 
@@ -51,9 +51,12 @@ export type TaskSnapshot = {
   taskFilePr?: TaskFilePr;
   pr: { title: string; body: string; headRef: string; author: string | null; mergedAt: string | null; baseSha: string; mergeCommitSha: string };
   baseCommit: string;
-  /** Where the diff starts: the base tag, the PR's first commit when the tag isn't on it (#342), or the PR base. */
+  /**
+   * Where the diff starts: the PR's first commit when the task file came first, otherwise the PR base (#392).
+   * `base_tag` is only on snapshots taken before #392, when a base tag on that same first commit was recorded so.
+   */
   baseCommitSource: "base_tag" | "first_commit" | "pr_base";
-  /** With a first_commit base: whether the base tag's commit has the same author as the PR's first commit. Null when unknown (#342). */
+  /** Only on snapshots taken before #392: whether a misplaced base tag's commit had the first commit's author. Never read. */
   baseTagSameAuthor?: boolean | null;
   diff: string;
   diffBytes: number;
@@ -119,38 +122,25 @@ export async function captureTaskSnapshot(gh: GitHubReader, task: SubmittedTaskR
   if (!pull?.merged_at || !pull.merge_commit_sha) throw new Error(`Task ${task.task_slot}: the pull request is no longer merged.`);
   const mergeSha = pull.merge_commit_sha;
 
-  const [baseTagSha, commits, issueComments, reviews, reviewComments, checks] = await Promise.all([
-    tagCommitSha(gh, owner, repo, `${task.task_id}-base`),
+  const [commits, issueComments, reviews, reviewComments, checks] = await Promise.all([
     gh.json<Array<{ sha: string }>>(`${base}/pulls/${task.pr_number}/commits?per_page=1&page=1`),
     gh.json<Comment[]>(`${base}/issues/${task.pr_number}/comments?per_page=100`),
     gh.json<Comment[]>(`${base}/pulls/${task.pr_number}/reviews?per_page=100`),
     gh.json<Comment[]>(`${base}/pulls/${task.pr_number}/comments?per_page=100`),
     readCommitChecks(gh, owner, repo, mergeSha),
   ]);
-  // The diff starts after the PR's first commit only when that commit holds only task files: a tag on the first
-  // commit gives base_tag, otherwise first_commit. A base tag elsewhere, or on a first commit that holds code, is
-  // ignored, so neither a tag moved onto another student's commit (#342) nor a tag on code cuts work out of the diff.
+  // The diff starts after the PR's first commit only when the task file came first: that commit holds only task
+  // files this PR adds and the task is not paired. Otherwise it starts at the PR base. No tag is read (#392).
   const firstSha = commits?.[0]?.sha ?? null;
   let baseCommit = pull.base.sha;
   let baseCommitSource: TaskSnapshot["baseCommitSource"] = "pr_base";
-  let baseTagSameAuthor: boolean | null = null;
   if (firstSha && !taskFilePr) {
     // A paired task's PR has no task file, so its first commit is never the task file alone.
-    const first = await gh.json<{ files?: Array<{ filename: string }>; commit?: { author?: { email?: string } } }>(`${base}/commits/${firstSha}`);
+    const first = await gh.json<{ files?: Array<{ filename: string }> }>(`${base}/commits/${firstSha}`);
     const taskFilesOnly = firstCommitHoldsOnlyTaskFiles(first?.files, task.task_path, [...samePrTaskPaths, ...(task.facts_json?.prTaskFiles ?? [])]);
-    if (taskFilesOnly && baseTagSha === firstSha) {
-      baseCommit = firstSha;
-      baseCommitSource = "base_tag";
-    } else if (taskFilesOnly) {
+    if (taskFileFirst(taskFilesOnly, taskFilePr)) {
       baseCommit = firstSha;
       baseCommitSource = "first_commit";
-      // A tag on another author's commit is likely a teammate's task with the same ID; the Process grade says so.
-      const firstAuthor = first?.commit?.author?.email;
-      if (baseTagSha && firstAuthor) {
-        const tagged = await gh.json<{ commit?: { author?: { email?: string } } }>(`${base}/commits/${baseTagSha}`, { optional: true });
-        const taggedAuthor = tagged?.commit?.author?.email;
-        if (taggedAuthor) baseTagSameAuthor = taggedAuthor.toLowerCase() === firstAuthor.toLowerCase();
-      }
     }
   }
 
@@ -199,7 +189,6 @@ export async function captureTaskSnapshot(gh: GitHubReader, task: SubmittedTaskR
     },
     baseCommit,
     baseCommitSource,
-    baseTagSameAuthor,
     diff, diffBytes, diffTruncated, diffError,
     comments,
     checks,

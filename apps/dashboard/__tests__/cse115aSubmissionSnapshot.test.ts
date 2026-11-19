@@ -18,7 +18,8 @@ function task(slot: number, taskId: string, prNumber: number): SubmittedTaskRow 
   };
 }
 
-function fakeGitHub(overrides: { baseTag?: boolean; diff?: string | Error; merged?: boolean; firstSha?: string; firstFiles?: string[]; tagAuthor?: string } = {}) {
+/** The repository has a US-1-T-1-base tag on "basetag", so a tag request would find it. The PR's first commit is "basetag" unless `firstSha` says otherwise. */
+function fakeGitHub(overrides: { diff?: string | Error; merged?: boolean; firstSha?: string; firstFiles?: string[] } = {}) {
   const calls: string[] = [];
   const reader: GitHubReader = {
     async json<T>(path: string) {
@@ -31,10 +32,9 @@ function fakeGitHub(overrides: { baseTag?: boolean; diff?: string | Error; merge
       }
       if (path.includes("/commits?per_page=1")) return [{ sha: overrides.firstSha ?? "basetag" }] as T;
       if (/\/commits\/[^/]+$/.test(path)) {
-        const email = path.endsWith("/basetag") ? overrides.tagAuthor ?? "student@ucsc.edu" : "student@ucsc.edu";
-        return { files: (overrides.firstFiles ?? ["docs/tasks/sprint-1/US-1-T-1.md"]).map((filename) => ({ filename })), commit: { author: { email } } } as T;
+        return { files: (overrides.firstFiles ?? ["docs/tasks/sprint-1/US-1-T-1.md"]).map((filename) => ({ filename })), commit: { author: { email: "student@ucsc.edu" } } } as T;
       }
-      if (path.includes("/git/ref/tags/")) return (overrides.baseTag === false ? null : { object: { type: "commit", sha: "basetag" } }) as T;
+      if (path.includes("/git/ref/tags/")) return { object: { type: "commit", sha: "basetag" } } as T;
       if (path.includes("/issues/")) return [{ body: "Looks good", user: { login: "ta" }, created_at: "2026-10-01T01:00:00Z" }, { body: "  " }] as T;
       if (path.includes("/reviews")) return [{ body: "Approved", user: { login: "teammate" }, submitted_at: "2026-10-01T02:00:00Z" }] as T;
       if (path.includes("/pulls/") && path.includes("/comments")) return [{ body: "nit", user: { login: "teammate" }, path: "src/a.ts" }] as T;
@@ -68,8 +68,11 @@ describe("truncateDiff", () => {
   });
 });
 
+const isTagRequest = (path: string) => path.includes("/git/ref") || path.includes("/git/tags");
+const CODE_FIRST_FILES = ["docs/tasks/sprint-1/US-1-T-1.md", "src/a.ts"];
+
 describe("captureSubmissionSnapshot", () => {
-  it("diffs from the base tag to the merge commit and records PR evidence", async () => {
+  it("diffs from a task-file-only first commit to the merge commit and records PR evidence, reading no tag (#392)", async () => {
     const { reader, calls } = fakeGitHub();
     const snapshot = await captureSubmissionSnapshot(reader, [task(2, "US-1-T-2", 13), task(1, "US-1-T-1", 12)], new Date("2026-10-02T00:00:00Z"));
 
@@ -77,12 +80,15 @@ describe("captureSubmissionSnapshot", () => {
     expect(snapshot.capturedAt).toBe("2026-10-02T00:00:00.000Z");
     expect(snapshot.tasks.map((item) => item.slot)).toEqual([1, 2]);
     const first = snapshot.tasks[0]!;
+    // Before #392 this case, a base tag on the first commit, was base_tag; the range is the same.
     expect(first).toMatchObject({
-      taskId: "US-1-T-1", analysisResultId: "result-1", baseCommit: "basetag", baseCommitSource: "base_tag",
+      taskId: "US-1-T-1", analysisResultId: "result-1", baseCommit: "basetag", baseCommitSource: "first_commit",
       diff: "diff --git a/src/a.ts b/src/a.ts\n+x\n", diffTruncated: false, diffError: null,
       pr: { mergeCommitSha: "merge123", baseSha: "prbase", author: "student", body: "Closes the card" },
     });
+    expect(first).not.toHaveProperty("baseTagSameAuthor");
     expect(calls).toContain("/repos/team/proj/compare/basetag...merge123");
+    expect(calls.filter(isTagRequest)).toEqual([]);
     expect(first.comments.map((item) => item.kind)).toEqual(["issue", "review", "review_comment"]);
     expect(first.comments[2]).toMatchObject({ path: "src/a.ts" });
     expect(first.checks).toEqual([
@@ -91,58 +97,37 @@ describe("captureSubmissionSnapshot", () => {
     ]);
   });
 
-  it("falls back to the PR base when the base tag is missing and the first commit isn't the task file alone", async () => {
-    const { reader, calls } = fakeGitHub({ baseTag: false, firstSha: "first1", firstFiles: ["docs/tasks/sprint-1/US-1-T-1.md", "src/a.ts"] });
-    const snapshot = await captureSubmissionSnapshot(reader, [task(1, "US-1-T-1", 12)]);
-    expect(snapshot.tasks[0]).toMatchObject({ baseCommit: "prbase", baseCommitSource: "pr_base" });
-    expect(calls).toContain("/repos/team/proj/compare/prbase...merge123");
-  });
-
-  it("ignores a base tag that isn't on this PR's first commit and diffs from that commit (#342)", async () => {
+  it("uses the PR's first commit when no tag is on it, the same range as before (#342)", async () => {
     const { reader, calls } = fakeGitHub({ firstSha: "first1" });
     const snapshot = await captureSubmissionSnapshot(reader, [task(1, "US-1-T-1", 12)]);
     expect(snapshot.tasks[0]).toMatchObject({ baseCommit: "first1", baseCommitSource: "first_commit" });
     expect(calls).toContain("/repos/team/proj/compare/first1...merge123");
+    expect(calls.filter(isTagRequest)).toEqual([]);
   });
 
-  it("uses the PR's first commit when the base tag is missing (#342)", async () => {
-    const { reader } = fakeGitHub({ baseTag: false, firstSha: "first1" });
-    const snapshot = await captureSubmissionSnapshot(reader, [task(1, "US-1-T-1", 12)]);
-    expect(snapshot.tasks[0]).toMatchObject({ baseCommit: "first1", baseCommitSource: "first_commit" });
+  it("starts at the PR base for a code-first PR and keeps that commit's files", async () => {
+    for (const firstSha of ["basetag", "first1"]) {
+      const { reader, calls } = fakeGitHub({ firstSha, firstFiles: CODE_FIRST_FILES });
+      const fromBase = (path: string) => path.includes("/compare/prbase...")
+        ? "diff --git a/src/first.ts b/src/first.ts\n+first\ndiff --git a/src/a.ts b/src/a.ts\n+x\n"
+        : "diff --git a/src/a.ts b/src/a.ts\n+x\n";
+      const snapshot = await captureSubmissionSnapshot({ ...reader, text: async (path: string) => { calls.push(path); return fromBase(path); } }, [task(1, "US-1-T-1", 12)]);
+      expect(snapshot.tasks[0]).toMatchObject({ baseCommit: "prbase", baseCommitSource: "pr_base" });
+      expect(snapshot.tasks[0]!.diff).toContain("src/first.ts");
+      expect(calls).toContain("/repos/team/proj/compare/prbase...merge123");
+      expect(calls.filter((path) => path === `/repos/team/proj/commits/${firstSha}`)).toHaveLength(1);
+      expect(calls.filter(isTagRequest)).toEqual([]);
+    }
   });
 
-  it("records whether a misplaced base tag is on another author's commit (#342)", async () => {
-    const other = await captureSubmissionSnapshot(fakeGitHub({ firstSha: "first1", tagAuthor: "student3@example.edu" }).reader, [task(1, "US-1-T-1", 12)]);
-    expect(other.tasks[0]).toMatchObject({ baseCommitSource: "first_commit", baseTagSameAuthor: false });
-    const own = await captureSubmissionSnapshot(fakeGitHub({ firstSha: "first1", tagAuthor: "Student@ucsc.edu" }).reader, [task(1, "US-1-T-1", 12)]);
-    expect(own.tasks[0]).toMatchObject({ baseCommitSource: "first_commit", baseTagSameAuthor: true });
-  });
-
-  it("ignores a base tag on a first commit that holds code, starts at the PR base, and keeps that commit's files", async () => {
-    const { reader, calls } = fakeGitHub({ firstFiles: ["docs/tasks/sprint-1/US-1-T-1.md", "src/first.ts"] });
-    const fromBase = (path: string) => path.includes("/compare/prbase...")
-      ? "diff --git a/src/first.ts b/src/first.ts\n+first\ndiff --git a/src/a.ts b/src/a.ts\n+x\n"
-      : "diff --git a/src/a.ts b/src/a.ts\n+x\n";
-    const snapshot = await captureSubmissionSnapshot({ ...reader, text: async (path: string) => { calls.push(path); return fromBase(path); } }, [task(1, "US-1-T-1", 12)]);
-    expect(snapshot.tasks[0]).toMatchObject({ baseCommit: "prbase", baseCommitSource: "pr_base", baseTagSameAuthor: null });
-    expect(snapshot.tasks[0]!.diff).toContain("src/first.ts");
-    expect(calls).toContain("/repos/team/proj/compare/prbase...merge123");
-    expect(calls.filter((path) => path === "/repos/team/proj/commits/basetag")).toHaveLength(1);
-  });
-
-  it("still takes a base tag on a task-file-only first commit, reading that commit once", async () => {
-    const { reader, calls } = fakeGitHub();
-    const snapshot = await captureSubmissionSnapshot(reader, [task(1, "US-1-T-1", 12)]);
-    expect(snapshot.tasks[0]).toMatchObject({ baseCommit: "basetag", baseCommitSource: "base_tag", baseTagSameAuthor: null });
-    expect(calls.filter((path) => path === "/repos/team/proj/commits/basetag")).toHaveLength(1);
-  });
-
-  it("ignores a base tag on a paired task's first commit", async () => {
+  it("starts at the PR base for a paired task, without reading its first commit", async () => {
     const { reader, calls } = fakeGitHub();
     const paired = { ...task(1, "US-1-T-1", 12), facts_json: { taskFilePr: { url: "https://github.com/team/proj/pull/11", number: 11, mergeSha: "spec11" } } };
     const snapshot = await captureSubmissionSnapshot(reader, [paired]);
     expect(snapshot.tasks[0]).toMatchObject({ baseCommit: "prbase", baseCommitSource: "pr_base" });
     expect(calls).toContain("/repos/team/proj/compare/prbase...merge123");
+    expect(calls).not.toContain("/repos/team/proj/commits/basetag");
+    expect(calls.filter(isTagRequest)).toEqual([]);
   });
 
   it("records a diff failure instead of blocking the submission", async () => {

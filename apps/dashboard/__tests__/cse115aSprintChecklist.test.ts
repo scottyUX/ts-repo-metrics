@@ -18,14 +18,13 @@ import {
   submitTasksError,
   canChangeSubmission,
   linesToFix,
-  NO_BASE_TAG_DETAIL,
+  savedTaskFileFirst,
+  taskFileFirst,
   type TaskFacts,
 } from "@/lib/cse115a/processChecklist";
 
 const passing = {
   specCommittedFirst: true,
-  baseTagPushed: true,
-  doneTagOnMergeCommit: true,
   prAuthoredByStudent: true,
   prTitleHasTaskId: true,
   branchHasTaskId: true,
@@ -40,12 +39,15 @@ const facts: TaskFacts = {
   prNumber: 7,
 };
 
+const UNFIXABLE = "Can't be fixed on this PR. The spec must come first; use a new task.";
+const PAIRED = { url: "https://github.com/team/proj/pull/8", number: 8, mergeSha: "c0ffee1" };
+const render = (validation: Record<string, boolean>, lineFacts: Partial<TaskFacts> | null) =>
+  renderToStaticMarkup(createElement(ProcessChecklist, { validation, facts: lineFacts }));
+
 describe("sprint checklist", () => {
   it("renders each process check with a fix or a new-PR explanation", () => {
     const cases: Array<{ key: keyof typeof passing; detail: string }> = [
       { key: "specCommittedFirst", detail: "use a new task" },
-      { key: "baseTagPushed", detail: "git fetch origin pull/7/head && git tag US-4-T-2-base a1b2c3d && git push origin US-4-T-2-base" },
-      { key: "doneTagOnMergeCommit", detail: "git fetch origin && git tag US-4-T-2-done 9f3c2a1 && git push origin US-4-T-2-done" },
       { key: "prAuthoredByStudent", detail: "Can't be fixed on this PR." },
       { key: "prTitleHasTaskId", detail: "Edit the PR title on GitHub, then Re-check." },
       { key: "branchHasTaskId", detail: "Can't be fixed on this PR." },
@@ -53,70 +55,93 @@ describe("sprint checklist", () => {
     ];
     for (const item of cases) {
       const validation = { ...passing, [item.key]: false };
-      const html = renderToStaticMarkup(createElement(ProcessChecklist, { validation, facts, taskId: "US-4-T-2" }));
-      const line = processChecklist(validation, facts, "US-4-T-2").find((entry) => !entry.ok);
+      const html = render(validation, facts);
+      const line = processChecklist(validation, facts).find((entry) => !entry.ok);
       expect(line?.detail).toContain(item.detail);
       expect(html).toContain("✗");
       expect(html).toContain(item.detail.replaceAll("&", "&amp;").replaceAll("'", "&#x27;"));
     }
   });
 
-  it("treats Ready as the six process checks only", () => {
-    expect(sprintReady(passing)).toBe(true);
-    expect(sprintReady({ ...passing, baseTagPushed: false })).toBe(false);
-    const html = renderToStaticMarkup(createElement(ProcessChecklist, {
-      validation: passing,
-      facts: { ...facts, testFileCount: 0, ci: { state: "failed", failed: 2, total: 3 } },
-      taskId: "US-4-T-2",
-    }));
-    expect(sprintReady(passing)).toBe(true);
+  it("treats Ready as the process checks only", () => {
+    expect(sprintReady(passing, facts)).toBe(true);
+    const html = render(passing, { ...facts, testFileCount: 0, ci: { state: "failed", failed: 2, total: 3 } });
     expect(html).toContain("GitHub Actions: 2 of 3 failed");
     expect(html).toContain("No test files in this PR");
     expect(html).not.toContain("✗");
   });
 
-  describe("base-tag line when the first commit isn't the task file alone", () => {
-    // A code-first PR: the spec-first check fails and no base tag was pushed.
-    const codeFirst = { ...passing, specCommittedFirst: false, baseTagPushed: false };
-    const baseLine = (validation: Record<string, boolean>, lineFacts: Partial<TaskFacts>) =>
-      processChecklist(validation, lineFacts, "US-4-T-2").find((entry) => entry.key === "baseTagPushed")!;
+  describe("no tags (#392)", () => {
+    const firstFacts = { ...facts, firstCommitTaskOnly: true };
+    const codeFirst = { ...passing, specCommittedFirst: false };
+    const codeFacts = { ...facts, firstCommitTaskOnly: false };
 
-    it("shows the don't-tag detail with no command and leaves the line out of N to fix", () => {
-      expect(NO_BASE_TAG_DETAIL).toBe("Don't add this tag: your first commit isn't the task file, so tagging it would leave that commit's code out of your graded work.");
-      const codeFacts = { ...facts, firstCommitTaskOnly: false };
-      const line = baseLine(codeFirst, codeFacts);
-      expect(line).toMatchObject({ ok: false, detail: NO_BASE_TAG_DETAIL, counts: false });
-      expect(line.detail).not.toContain("git ");
-      const lines = processChecklist(codeFirst, codeFacts, "US-4-T-2");
-      expect(linesToFix(lines).map((entry) => entry.key)).toEqual(["specCommittedFirst"]);
-      const html = renderToStaticMarkup(createElement(ProcessChecklist, { validation: codeFirst, facts: codeFacts, taskId: "US-4-T-2" }));
-      expect(html).not.toContain("git tag US-4-T-2-base");
-      expect(html).toContain("Don&#x27;t add this tag");
-    });
-
-    it("keeps today's command for a task-file-first PR with no tag, and when the first commit is unknown", () => {
-      const noTag = { ...passing, baseTagPushed: false };
-      const command = "git fetch origin pull/7/head && git tag US-4-T-2-base a1b2c3d && git push origin US-4-T-2-base";
-      for (const firstCommitTaskOnly of [true, null, undefined]) {
-        const lineFacts = { ...facts, firstCommitTaskOnly };
-        const line = baseLine(noTag, lineFacts);
-        expect(line).toEqual({ key: "baseTagPushed", ok: false, label: "US-4-T-2-base tag pushed", detail: command });
-        expect(linesToFix(processChecklist(noTag, lineFacts, "US-4-T-2")).map((entry) => entry.key)).toEqual(["baseTagPushed"]);
-        expect(baseLine(codeFirst, lineFacts).detail).toBe(command);
+    it("has four lines, none about a tag, and no git tag text in any state", () => {
+      const states: Array<[Record<string, boolean>, Partial<TaskFacts> | null]> = [
+        [passing, firstFacts], [codeFirst, codeFacts], [codeFirst, { ...facts, firstCommitTaskOnly: null, taskFilePr: PAIRED }],
+        [{ ...passing, prTitleHasTaskId: false, branchHasTaskId: false }, firstFacts], [{ ...passing, prAuthoredByStudent: false }, null],
+        [{ ...passing, estimateAtLeastTwoHours: false }, facts], [{}, null],
+        // An old row with the retired tag checks false.
+        [{ ...passing, baseTagPushed: false, doneTagOnMergeCommit: false }, firstFacts],
+      ];
+      for (const [validation, lineFacts] of states) {
+        const lines = processChecklist(validation, lineFacts);
+        expect(lines.map((line) => line.key)).toEqual(["specCommittedFirst", "prAuthoredByStudent", "taskIdInTitleAndBranch", "estimateAtLeastTwoHours"]);
+        const html = render(validation, lineFacts);
+        for (const text of ["git tag", "-base", "-done", "tag pushed", "tag on"]) {
+          expect(html).not.toContain(text);
+          expect(JSON.stringify(lines)).not.toContain(text);
+        }
       }
     });
 
-    it("shows the don't-tag detail for a paired task", () => {
-      const pairedFacts = { ...facts, firstCommitTaskOnly: null, taskFilePr: { url: "https://github.com/team/proj/pull/8", number: 8, mergeSha: "c0ffee1" } };
-      expect(baseLine(codeFirst, pairedFacts)).toMatchObject({ ok: false, detail: NO_BASE_TAG_DETAIL, counts: false });
-      expect(baseLine(codeFirst, { ...pairedFacts, firstCommitTaskOnly: false }).detail).toBe(NO_BASE_TAG_DETAIL);
+    it("shows a task-file-first task with everything else right as Ready, with nothing to fix", () => {
+      const lines = processChecklist(passing, firstFacts);
+      expect(lines.every((line) => line.ok && line.detail === null)).toBe(true);
+      expect(linesToFix(lines)).toEqual([]);
+      expect(sprintReady(passing, firstFacts)).toBe(true);
+      expect(lines[0]).toEqual({ key: "specCommittedFirst", ok: true, label: "Task file committed alone, first", detail: null });
     });
 
-    it("leaves a pushed tag's line and sprintReady as they were", () => {
-      const tagged = { ...codeFirst, baseTagPushed: true };
-      expect(baseLine(tagged, { ...facts, firstCommitTaskOnly: false })).toEqual({ key: "baseTagPushed", ok: true, label: "US-4-T-2-base tag pushed", detail: null });
-      expect(sprintReady(codeFirst)).toBe(false);
-      expect(sprintReady(tagged)).toBe(false);
+    it("gives a code-first task exactly one line to fix", () => {
+      const fix = linesToFix(processChecklist(codeFirst, codeFacts));
+      expect(fix).toEqual([{ key: "specCommittedFirst", ok: false, label: "Task file committed alone, first", detail: UNFIXABLE }]);
+      expect(sprintReady(codeFirst, codeFacts)).toBe(false);
+    });
+
+    it("never counts a paired task's file as first", () => {
+      const pairedFacts = { ...facts, firstCommitTaskOnly: false, taskFilePr: PAIRED };
+      expect(linesToFix(processChecklist(codeFirst, pairedFacts)).map((line) => line.key)).toEqual(["specCommittedFirst"]);
+      // Even a stray true fact does not pass a paired task.
+      expect(savedTaskFileFirst(passing, { ...pairedFacts, firstCommitTaskOnly: true })).toBe(false);
+    });
+
+    it("passes an old row whose task file was first but untagged, without a Re-check", () => {
+      const old = { ...passing, specCommittedFirst: false, baseTagPushed: false, doneTagOnMergeCommit: false };
+      const oldFacts = { ...facts, firstCommitTaskOnly: true, baseTagSameAuthor: null } as Partial<TaskFacts>;
+      expect(processChecklist(old, oldFacts)[0]).toMatchObject({ key: "specCommittedFirst", ok: true, detail: null });
+      expect(linesToFix(processChecklist(old, oldFacts))).toEqual([]);
+      expect(sprintReady(old, oldFacts)).toBe(true);
+      // The recorded fact also decides the other way: a saved true with a code-first first commit fails.
+      expect(sprintReady(passing, codeFacts)).toBe(false);
+    });
+
+    it("falls back to an old row's saved value when no first-commit fact is recorded", () => {
+      for (const missing of [{ ...facts }, { ...facts, firstCommitTaskOnly: null }, null, undefined]) {
+        expect(processChecklist({ ...passing, specCommittedFirst: false, baseTagPushed: true }, missing)[0]).toMatchObject({ ok: false, detail: UNFIXABLE });
+        expect(sprintReady({ ...passing, specCommittedFirst: false }, missing)).toBe(false);
+        expect(processChecklist({ ...passing, baseTagPushed: false, doneTagOnMergeCommit: false }, missing)[0]).toMatchObject({ ok: true });
+        expect(sprintReady({ ...passing, baseTagPushed: false, doneTagOnMergeCommit: false }, missing)).toBe(true);
+      }
+    });
+
+    it("has one rule: first commit holds only task files, and not paired", () => {
+      expect(taskFileFirst(true, undefined)).toBe(true);
+      expect(taskFileFirst(true, null)).toBe(true);
+      expect(taskFileFirst(true, PAIRED)).toBe(false);
+      expect(taskFileFirst(false, undefined)).toBe(false);
+      expect(taskFileFirst(null, undefined)).toBe(false);
+      expect(taskFileFirst(undefined, undefined)).toBe(false);
     });
   });
 
@@ -148,7 +173,7 @@ describe("sprint checklist", () => {
     expect(submitBarText(0, 0)).toBe("0 of 2 ready · You can change your submission until the sprint closes.");
     expect(submitBarText(2, 1)).toBe("1 of 2 ready · You can change your submission until the sprint closes.");
     expect(submitBarText(2, 2, 3)).toBe("2 of 2 ready · You can change your submission until the sprint closes.");
-    expect(sprintReady({ ...passing, estimateAtLeastTwoHours: true })).toBe(true);
+    expect(sprintReady({ ...passing, estimateAtLeastTwoHours: true }, facts)).toBe(true);
   });
 
   it("asks to confirm one big task, adding the size warning under 4 hours (#348)", () => {
@@ -192,11 +217,7 @@ describe("sprint checklist", () => {
   });
 
   it("shows missing CI as optional, without a failure mark", () => {
-    const html = renderToStaticMarkup(createElement(ProcessChecklist, {
-      validation: { ...passing, doneTagOnMergeCommit: false },
-      facts,
-      taskId: "US-4-T-2",
-    }));
+    const html = render({ ...passing, prTitleHasTaskId: false }, facts);
     expect(html).toContain('data-fact="ci">No CI found (optional)');
     expect(html).not.toMatch(/✗[^<]*No CI found/);
   });

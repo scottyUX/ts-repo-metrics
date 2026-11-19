@@ -139,11 +139,11 @@ describe("2. the pair imports", () => {
     expect(task.validation).toEqual({
       prMerged: true, prAuthoredByStudent: true,
       prTitleHasTaskId: false, // The work PR's title, not the task-file PR's (which has the ID).
-      branchHasTaskId: true, baseTagPushed: true, specCommittedFirst: false, doneTagOnMergeCommit: true, estimateAtLeastTwoHours: true,
+      branchHasTaskId: true, specCommittedFirst: false, estimateAtLeastTwoHours: true,
     });
     expect(task.facts).toEqual({
       ci: { state: "passed", failed: 0, total: 1 }, testFileCount: 1, mergeSha: "squash", firstCommitSha: "first",
-      firstCommitTaskOnly: false, baseTagSameAuthor: null, prNumber: 12, prTaskFileCount: 0, prTaskFiles: [],
+      firstCommitTaskOnly: false, prNumber: 12, prTaskFileCount: 0, prTaskFiles: [],
       taskFilePr: { url: FILE_URL, number: 13, mergeSha: "spec13" },
     });
     // The task file and its folder are read at the task-file PR's merge commit; the work PR's first commit is not read.
@@ -152,6 +152,8 @@ describe("2. the pair imports", () => {
     expect(requests.some((path) => path.includes("ref=squash"))).toBe(false);
     expect(requests).not.toContain("/repos/team/app/commits/first");
     expect(requests).toContain("/repos/team/app/commits/squash/check-runs?per_page=100");
+    // No tag is read for a pair either (#392).
+    expect(requests.filter((path) => path.includes("/git/ref") || path.includes("/git/tags"))).toEqual([]);
   });
 
   it("keeps a fixable title check fixable on the work PR", async () => {
@@ -440,7 +442,6 @@ function workReader(firstCommitFiles: string[] = ["src/app.ts"]): { reader: GitH
         if (/\/pulls\/12$/.test(path)) return { title: "Add the thing", body: "", merged_at: "2026-10-14T00:00:00Z", merge_commit_sha: "squash", base: { sha: "main0" }, head: { ref: "feature/x-t-7" }, user: { login: "student" } } as T;
         if (path.includes("/commits?per_page=1")) return [{ sha: "first" }] as T;
         if (path.endsWith("/commits/first")) return { files: firstCommitFiles.map((filename) => ({ filename })) } as T;
-        if (path.includes("/git/ref/tags/")) return null as T;
         return [] as T;
       },
       async text(path: string) { paths.push(path); return DIFF; },

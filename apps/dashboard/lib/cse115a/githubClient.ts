@@ -29,16 +29,3 @@ export function githubReader(token: string | ((path: string) => Promise<string>)
     },
   };
 }
-
-export async function tagCommitSha(gh: GitHubReader, owner: string, repo: string, tag: string): Promise<string | null> {
-  const ref = await gh.json<{ object: { type: string; sha: string } }>(
-    `/repos/${owner}/${repo}/git/ref/tags/${encodeURIComponent(tag)}`, { optional: true },
-  );
-  if (!ref) return null;
-  if (ref.object.type === "commit") return ref.object.sha;
-  if (ref.object.type !== "tag") return null;
-  const annotated = await gh.json<{ object: { type: string; sha: string } }>(
-    `/repos/${owner}/${repo}/git/tags/${ref.object.sha}`,
-  );
-  return annotated?.object.type === "commit" ? annotated.object.sha : null;
-}

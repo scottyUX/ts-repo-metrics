@@ -195,7 +195,7 @@ describe("PRs with one task file: unchanged", () => {
     expect(task.taskPath).toBe(T7);
     expect(task.facts).toEqual({
       ci: expect.anything(), testFileCount: null, mergeSha: "squash", firstCommitSha: "first", firstCommitTaskOnly: false,
-      baseTagSameAuthor: null, prNumber: 12, prTaskFileCount: 1, prTaskFiles: [T7],
+      prNumber: 12, prTaskFileCount: 1, prTaskFiles: [T7],
     });
     expect(lookups(requests)).toEqual([]);
   });
@@ -397,7 +397,6 @@ describe("13. committers in the snapshot, and nowhere else", () => {
       if (/\/pulls\/\d+$/.test(path)) return { title: "X", body: "", merged_at: "2026-10-14T00:00:00Z", merge_commit_sha: "squash", base: { sha: "main0" }, head: { ref: "feature/x" }, user: { login: "student" } } as T;
       if (path.includes("/commits?per_page=1")) return [{ sha: "first" }] as T;
       if (path.endsWith("/commits/first")) return { files: [{ filename: "src/app.ts" }] } as T;
-      if (path.includes("/git/ref/tags/")) return null as T;
       return [] as T;
     },
     async text() { return "diff --git a/src/app.ts b/src/app.ts\n--- a/src/app.ts\n+++ b/src/app.ts\n@@ -1 +1,2 @@\n x\n+y\n"; },

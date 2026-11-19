@@ -25,11 +25,17 @@ const PROCESS_LABELS: Record<string, string> = {
   prAuthoredByStudent: "PR opened by student",
   prTitleHasTaskId: "Task ID in PR title",
   branchHasTaskId: "Task ID in branch",
-  baseTagPushed: "Base tag pushed",
-  specCommittedFirst: "Task spec committed first",
-  doneTagOnMergeCommit: "Done tag on merge commit",
+  specCommittedFirst: "Task file committed alone, first",
   estimateAtLeastTwoHours: "Estimate at least two hours",
 };
+
+/** Checks that are no longer made (#392). Rows saved before then still carry them; they are not shown or counted. */
+const RETIRED_CHECKS = new Set(["baseTagPushed", "doneTagOnMergeCommit"]);
+
+/** The saved process checks this page shows: every one except the retired tag checks. */
+export function shownChecks(validation: Record<string, boolean>): Array<[string, boolean]> {
+  return Object.entries(validation).filter(([key]) => !RETIRED_CHECKS.has(key));
+}
 
 function EvidenceText({ label, value }: { label: string; value: string }) {
   return <div><h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{label}</h4><p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-foreground">{value}</p></div>;
@@ -41,14 +47,14 @@ function SubmittedEvidence({ task, section }: { task: CourseTaskEvidence; sectio
   if (section === "Specs") return <EvidenceText label="Specs" value={spec.specs} />;
   if (section === "Acceptance criteria") return <EvidenceText label="Acceptance criteria" value={spec.acceptanceCriteria} />;
   if (section === "Test quality") return <div className="space-y-2 text-sm text-muted-foreground"><p>The grader checks the actual tests in the PR and whether they fail without the implementation.</p><a href={`${task.prUrl}/files`} target="_blank" rel="noopener noreferrer" className="text-primary underline">Review changed test files on GitHub</a></div>;
-  if (section === "Tests pass") return <div className="space-y-2 text-sm text-muted-foreground"><p>Passing tests at the done tag require grader review of CI and the repository. This page does not infer a pass from the task description.</p><a href={`${task.prUrl}/checks`} target="_blank" rel="noopener noreferrer" className="text-primary underline">Review PR checks on GitHub</a></div>;
-  return <ul className="space-y-2 text-sm">{Object.entries(task.validation).map(([key, found]) => <li key={key} className="flex items-center gap-2"><span className={found ? "text-emerald-500" : "text-amber-500"} aria-hidden>{found ? "✓" : "○"}</span><span className="text-foreground">{PROCESS_LABELS[key] ?? key}</span><span className="text-muted-foreground">{found ? "Found" : "Review needed"}</span></li>)}</ul>;
+  if (section === "Tests pass") return <div className="space-y-2 text-sm text-muted-foreground"><p>Passing tests on the merge commit require grader review of CI and the repository. This page does not infer a pass from the task description.</p><a href={`${task.prUrl}/checks`} target="_blank" rel="noopener noreferrer" className="text-primary underline">Review PR checks on GitHub</a></div>;
+  return <ul className="space-y-2 text-sm">{shownChecks(task.validation).map(([key, found]) => <li key={key} className="flex items-center gap-2"><span className={found ? "text-emerald-500" : "text-amber-500"} aria-hidden>{found ? "✓" : "○"}</span><span className="text-foreground">{PROCESS_LABELS[key] ?? key}</span><span className="text-muted-foreground">{found ? "Found" : "Review needed"}</span></li>)}</ul>;
 }
 
 export function AssignmentResultsTab({ task }: { task: CourseTaskEvidence }) {
-  const checks = task.validation;
-  const observed = Object.values(checks).filter(Boolean).length;
-  const totalChecks = Object.keys(checks).length;
+  const checks = shownChecks(task.validation);
+  const observed = checks.filter(([, found]) => found).length;
+  const totalChecks = checks.length;
   const grade = task.gradeStatus === "released" ? task.grade ?? null : null;
   const statusLine = grade
     ? `Grade released ${new Date(grade.releasedAt).toLocaleDateString()} · each task is worth ${TASK_POINTS} points`
@@ -72,7 +78,7 @@ export function AssignmentResultsTab({ task }: { task: CourseTaskEvidence }) {
         {grade?.notes ? <div className="mt-4 rounded-lg border border-border bg-muted/40 p-4"><p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Instructor notes</p><p className="mt-1 whitespace-pre-wrap text-sm text-foreground">{grade.notes}</p></div> : null}
         <p className="mt-4 text-sm text-muted-foreground">{grade
           ? "Points were drafted by the grading agent from your task file, diff, and CI results, then reviewed by your instructor."
-          : "The grader reads the task file, tests, merged PR, tags, and Scrum board. Repo Metrics provides evidence; it does not award points automatically."}</p>
+          : "The grader reads the task file, tests, merged PR, and Scrum board. Repo Metrics provides evidence; it does not award points automatically."}</p>
         <div className="mt-4 flex flex-wrap gap-3 text-sm">
           <a href={task.prUrl} target="_blank" rel="noopener noreferrer" className="text-primary underline">Merged PR</a>
           <span className="font-mono text-muted-foreground">{task.taskPath}</span>
