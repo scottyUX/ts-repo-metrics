@@ -760,11 +760,12 @@ row on our side; the student's repository, tags and grade are untouched.
 For the PR's merge commit M (from the submission snapshot, `pr.mergeCommitSha`), `base_commit` is
 M^1, the first parent: the tip of the branch the PR was merged into, so a stacked PR's diff holds
 only its own change. A squash or rebase merge has one parent and M^1 is still right. The change is
-`git diff M^1 M`, minus the sprint's task file (`docs/tasks/sprint-N/<id>.md`, `isTaskFilePath`;
-dropped for rebuilt rows only, captured rows are as before), passed through the app's own
+`git diff M^1 M`, minus the sprint's task file (`docs/tasks/sprint-N/<id>.md`, `isTaskFilePath`),
+passed through the app's own
 `buildInstance` with the submission's snapshot and the student's email, so the split, the scrubbing
 of personal data and the static `FAIL_TO_PASS` match capture. `problem_statement` and the other task
-fields are copied from the stored row.
+fields are copied from the stored row. Since #382 `buildInstance` itself drops every file under
+`docs/tasks/` (flag `task_files_dropped`), so a task file from another sprint is left out too.
 
 ```sh
 npx tsx --tsconfig apps/dashboard/tsconfig.json apps/dashboard/scripts/fetchCandidateRows.ts --out rows.json --all
