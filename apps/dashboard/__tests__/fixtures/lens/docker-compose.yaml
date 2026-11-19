@@ -1,0 +1,17 @@
+# The database the tests run against, as the repository's CI starts it (Hecate validator).
+services:
+  main:
+    depends_on:
+      db:
+        condition: service_healthy
+  db:
+    image: "postgis/postgis:16-3.4"
+    environment:
+      POSTGRES_DB: "lens"
+      POSTGRES_USER: "lens"
+      POSTGRES_PASSWORD: "lens"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-p", "5432", "-U", "lens", "-d", "lens"]
+      interval: 1s
+      timeout: 5s
+      retries: 120

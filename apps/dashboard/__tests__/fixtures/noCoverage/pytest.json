@@ -1,0 +1,78 @@
+{
+  "instance_id": "Team__Restroom-US-1",
+  "image": "python:3.12-bookworm",
+  "eval_script": "# install in: server\nset -e\ncd /work\ngit checkout -q -f d8ec697dd896cbe94efab060b28a86736d053efc\ngit clean -fdq\ngit apply --whitespace=nowarn /patches/test.diff\ngit apply --whitespace=nowarn /patches/fix.diff\ncd /work/server\nif ! { pip install -r requirements.txt && pip install pytest; } > /patches/install.log 2>&1; then\n  cat /patches/install.log\n  echo \"[hecate] install failed\" >&2\n  exit 97\nfi\ncat /patches/install.log\nmkdir -p /patches/reports\nexport REPORT_DIR=/patches/reports\ncd /work/server\nPYTHONPATH=/patches REPORT=$REPORT_DIR/pytest-0.json python -m pytest -p hecate_pytest_reporter -p no:cacheprovider --continue-on-collection-errors || true\n",
+  "log_parser": "pytest-json",
+  "package_dir": "server",
+  "test_files": [
+    "server/tests/test_prefs.py"
+  ],
+  "FAIL_TO_PASS": [
+    "server/tests/test_prefs.py::test_rank"
+  ],
+  "ABSENT_TO_PASS": [],
+  "PASS_TO_PASS": [
+    "server/tests/test_prefs.py::test_old"
+  ],
+  "FAIL_TO_FAIL": [],
+  "regressions": [],
+  "regression_skips": [],
+  "flaky": [],
+  "skipped": [],
+  "judged_from_base": [],
+  "load_failures": [],
+  "modified_tests": [],
+  "unmatched_static_ids": [],
+  "proof_outside_test_patch": [],
+  "validation_status": "validated",
+  "reason": null,
+  "detail": null,
+  "timings": {
+    "r0a": 0,
+    "r0b": 0,
+    "r0c": 0,
+    "r1a": 0,
+    "r1b": 0,
+    "r1c": 0,
+    "r2a": 0,
+    "r2b": 0,
+    "r2c": 0
+  },
+  "install_dirs": [
+    "server"
+  ],
+  "harbor_env": {
+    "image": "python:3.12-bookworm",
+    "runners": [
+      "pytest"
+    ],
+    "package_dir": "server",
+    "install_steps": [
+      {
+        "cwd": "server",
+        "command": "pip install -r requirements.txt && pip install pytest"
+      }
+    ],
+    "test_steps": [
+      {
+        "kind": "pytest",
+        "command": "PYTHONPATH=/patches REPORT=$REPORT_DIR/pytest-0.json python -m pytest -p hecate_pytest_reporter -p no:cacheprovider --continue-on-collection-errors"
+      }
+    ],
+    "env": {
+      "CI": "true",
+      "DATABASE_URL": "postgresql://hecate:hecate@localhost:5432/hecate",
+      "PIP_DISABLE_PIP_VERSION_CHECK": "1",
+      "PIP_ROOT_USER_ACTION": "ignore",
+      "PYTHONDONTWRITEBYTECODE": "1",
+      "POETRY_VIRTUALENVS_CREATE": "false",
+      "UV_PROJECT_ENVIRONMENT": "/opt/venv",
+      "UV_LINK_MODE": "copy"
+    },
+    "services": [],
+    "node_source": null
+  },
+  "untested_files": [
+    "server/app/unused.py"
+  ]
+}

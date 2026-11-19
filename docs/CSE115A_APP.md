@@ -33,6 +33,9 @@ service keeps its normal home page.
   then `20261117000000_cse115a_one_task_submit.sql` (submit and release with one
   task or two; replaces `submit_cse_assignment` and
   `release_cse_assignment_submission`, and its header names the old bodies to undo it).
+  The repo copies need `20261116000000_cse115a_repo_copy_jobs.sql` (the
+  `repo_copy` job kind) before `CSE115A_REPO_COPIES` is set to `on`; undo is in
+  a comment in that file.
 - Enable Google Auth in the Supabase project and configure its Google OAuth
   client ID and secret. In Google Cloud, add
   `https://walwexxczaibfojinkfi.supabase.co/auth/v1/callback` as an authorized
@@ -149,6 +152,7 @@ Environment on the service that runs the worker:
 | `OPENAI_API_KEY` | Grader calls. |
 | `CSE115A_GRADER_MODEL` | Optional; defaults to `gpt-4o`. |
 | `CSE115A_WORKER_SECRET` | Optional; enables `POST /api/cse115a/internal/jobs/tick` with header `x-cse115a-worker-secret`, which runs queued jobs on demand (`?limit=1..10`). |
+| `CSE115A_REPO_COPIES` | Optional; only `on` turns on the repo copies (a git bundle of each task's repository in the bucket `benchmark-snapshots`, in `repo_copy` jobs queued at Submit and from the Benchmark page). Needs the `repo_copy` migration first, `SUPABASE_SERVICE_ROLE_KEY` and the GitHub App variables. |
 
 ## Benchmark capture
 
@@ -207,12 +211,35 @@ command ("Don't add this tag: …") and is not counted in "N to fix".
   so the spec may have been written after the code. `false` also covers the
   rare case where the PR's first commit could not be read. Otherwise it is
   `true`. Rows are not filtered on it; readers that ignore unknown keys, as
-  the SWE-bench harness does, see no change. Known gap: a row captured before
+  the SWE-bench harness does, see no change. The Harbor export writes the same
+  value as `task_file_first = true|false` in each task's `task.toml`, in the
+  `[metadata]` table next to `difficulty`; the instruction text does not
+  mention it. Known gap: a row captured before
   the base-tag fix, from a base tag a student had put on a first commit that
   holds code, has no flag and reads `task_file_first: true`. The fix stops new
   ones; staff find the old ones with a read-only query on the saved snapshots
   for tasks whose `baseCommitSource` is `base_tag` while `specCommittedFirst`
   is false.
+
+With `CSE115A_REPO_COPIES=on`, the `benchmark` job also queues a `repo_copy`
+job, which saves a copy of each task's repository at its base commit (a git
+bundle) in the private Storage bucket `benchmark-snapshots`, using the course
+GitHub App's token. The copy also holds the PR's own commits (its head, its
+merge commit, and a paired task's task-file PR head) and is named
+`<instance_id>.<first 12 of base_commit>.full.bundle`; a ref GitHub no longer
+has is left out and named in the log line. Only such a complete copy counts as
+stored, so "Save missing repo copies" re-copies a task that has only an older
+copy (which is kept). The validator needs the copy for a private repository,
+because the App's private key stays on this site. Copies run in their own
+line: a second poller loop claims only `repo_copy` jobs and the grading loop
+never does, so grading never waits on a copy. Each step of a copy has 30
+seconds and each task 90; a job starts no new task after 8 minutes. Every task
+is copied, whatever the consent answer: consent governs export, not
+validation. The instructor Benchmark page shows each task's copy as stored,
+queued, running or failed and can queue the missing ones. The site never
+serves a copy. Rollout: merge, apply the `repo_copy` migration, set the switch
+to `on`, then run "Save missing repo copies".
+See "Copies made by the website" in `docs/CSE115A_BENCHMARK_VALIDATION.md`.
 
 ## Instructor tools
 
@@ -238,7 +265,9 @@ SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... \
   (instructors only, reason required) supersedes the attempt so the student can
   change tasks and submit again; the old attempt stays as history.
 - **Benchmark**: counts by status and consent, a preview of the newest rows,
-  and JSONL download.
+  JSONL download, and the repo copies (each task stored, queued, running or
+  failed; "Save missing repo copies" and per-task "Retry" queue copy jobs when
+  `CSE115A_REPO_COPIES=on`).
 
 TAs can do everything except unlock and manage staff.
 

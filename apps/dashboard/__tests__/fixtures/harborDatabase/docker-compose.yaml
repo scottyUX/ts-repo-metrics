@@ -1,0 +1,17 @@
+# The database the tests run against, as the repository's CI starts it (Hecate validator).
+services:
+  main:
+    depends_on:
+      postgres:
+        condition: service_healthy
+  postgres:
+    image: "postgres:16"
+    environment:
+      POSTGRES_USER: "bookworm"
+      POSTGRES_PASSWORD: "bookworm"
+      POSTGRES_DB: "bookworm_test"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-p", "5432", "-U", "bookworm", "-d", "bookworm_test"]
+      interval: 1s
+      timeout: 5s
+      retries: 120

@@ -1,0 +1,102 @@
+{
+  "row": {
+    "instance_id": "CSE115a-PocketWatch__PocketWatch-logout-all-1",
+    "repo": "CSE115a-PocketWatch/PocketWatch",
+    "base_commit": "28e92a1",
+    "patch": "diff --git a/src/a.ts b/src/a.ts\n",
+    "test_patch": "diff --git a/tests/a.test.mjs b/tests/a.test.mjs\n",
+    "FAIL_TO_PASS": [],
+    "PASS_TO_PASS": [],
+    "problem_statement": "# logout-all-1\n\nLog out of every session.",
+    "hints_text": "Use the session store.",
+    "difficulty": "15 min - 1 hour",
+    "created_at": "2026-10-01T00:00:00.000Z"
+  },
+  "env": {
+    "supported": true,
+    "runners": [
+      "node-test"
+    ],
+    "packageManager": "pnpm",
+    "packageDir": "apps/api",
+    "installDir": "",
+    "installCommand": "corepack enable && pnpm install --frozen-lockfile",
+    "testSteps": [
+      {
+        "kind": "prep",
+        "command": "pnpm build"
+      },
+      {
+        "kind": "node-test",
+        "command": "REPORT=$REPORT_DIR/node-1.json node --test --test-reporter=/patches/reporter.mjs tests/*.test.mjs"
+      }
+    ],
+    "env": {
+      "CI": "true",
+      "NODE_ENV": "test"
+    },
+    "dockerfile": "",
+    "image": "node:24-bookworm",
+    "nodeSource": "CI",
+    "installSteps": [
+      {
+        "dir": "",
+        "cwd": "",
+        "command": "pnpm install --frozen-lockfile"
+      },
+      {
+        "dir": "apps/api",
+        "cwd": "apps/api",
+        "command": "npm ci"
+      }
+    ]
+  },
+  "result": {
+    "instance_id": "CSE115a-PocketWatch__PocketWatch-logout-all-1",
+    "image": "node:24-bookworm",
+    "eval_script": null,
+    "log_parser": null,
+    "package_dir": null,
+    "test_files": [],
+    "FAIL_TO_PASS": [
+      "apps/api/tests/a.test.mjs::one"
+    ],
+    "ABSENT_TO_PASS": [
+      "apps/api/tests/a.test.mjs::two"
+    ],
+    "PASS_TO_PASS": [
+      "apps/api/tests/old.test.mjs::three"
+    ],
+    "FAIL_TO_FAIL": [],
+    "regressions": [],
+    "regression_skips": [],
+    "flaky": [
+      "apps/api/tests/old.test.mjs::flaky"
+    ],
+    "skipped": [],
+    "judged_from_base": [],
+    "load_failures": [],
+    "modified_tests": [],
+    "unmatched_static_ids": [],
+    "proof_outside_test_patch": [],
+    "validation_status": "validated",
+    "reason": null,
+    "detail": null,
+    "timings": {},
+    "image_digest": "node:24-bookworm@sha256:8fa9",
+    "snapshot_bundle": "snapshots/x.bundle"
+  },
+  "files": {
+    "instruction.md": "# logout-all-1\n\nLog out of every session.\n\n## Hints\n\nUse the session store.\n\n## Repository\n\nThe repository is checked out at `/app` at commit `28e92a1` of `CSE115a-PocketWatch/PocketWatch`, with dependencies installed.\nMake the change described above. Tests that exercise it will be run afterwards; do not modify or delete existing tests.\n",
+    "task.toml": "version = \"1.0\"\n\n[metadata]\nauthor_name = \"Hecate (UCSC CSE 115A)\"\ndifficulty = \"15 min - 1 hour\"\ncategory = \"software-engineering\"\ntags = [\"hecate\", \"cse115a\", \"typescript\", \"node-test\"]\ninstance_id = \"CSE115a-PocketWatch__PocketWatch-logout-all-1\"\nrepo = \"CSE115a-PocketWatch/PocketWatch\"\nbase_commit = \"28e92a1\"\ncreated_at = \"2026-10-01T00:00:00.000Z\"\n\n[verifier]\ntimeout_sec = 900.0\n\n[agent]\ntimeout_sec = 1800.0\n\n[environment]\nbuild_timeout_sec = 1800.0\ncpus = 2\nmemory_mb = 4096\nstorage_mb = 10240\n",
+    "environment/Dockerfile": "FROM node:24-bookworm@sha256:8fa9\nENV CI=true\nENV DATABASE_URL=postgresql://hecate:hecate@localhost:5432/hecate\nENV NODE_ENV=test\nWORKDIR /app\nCOPY repo.bundle /tmp/repo.bundle\nRUN git clone -q -b hecate-snapshot /tmp/repo.bundle /app && rm /tmp/repo.bundle && git -C /app checkout -q 28e92a1 && git -C /app branch -D hecate-snapshot\nRUN cd /app && rm -rf .git && git init -q && git -c user.name=hecate -c user.email=hecate@localhost add -A && git -c user.name=hecate -c user.email=hecate@localhost commit -qm base\nRUN cd /app && corepack enable && pnpm install --frozen-lockfile\nRUN cd /app/apps/api && npm ci\n",
+    "solution/solve.sh": "#!/bin/bash\n# Oracle: apply the reference fix (the student's patch).\nset -e\ncd /app\ngit apply --whitespace=nowarn /solution/fix.diff\n",
+    "solution/fix.diff": "diff --git a/src/a.ts b/src/a.ts\n",
+    "tests/test.sh": "#!/bin/bash\n# Verifier: add the task's tests, run the suite the way the validator did, grade against expected.json.\nmkdir -p /logs/verifier\ncd /app\ngit apply --whitespace=nowarn /tests/test.diff || { echo 'test patch did not apply' >&2; echo 0 > /logs/verifier/reward.txt; exit 0; }\ncd /app && (corepack enable && pnpm install --frozen-lockfile) || true\ncd /app/apps/api && (npm ci) || true\nmkdir -p /tests/reports\nexport REPORT_DIR=/tests/reports\ncd /app/apps/api\npnpm build || true\nREPORT=$REPORT_DIR/node-1.json node --test --test-reporter=/tests/reporter.mjs tests/*.test.mjs || true\nnode /tests/check.mjs /tests/expected.json /tests/reports /app/ /logs/verifier/reward.txt > /logs/verifier/summary.txt 2>&1\ncat /logs/verifier/summary.txt\n",
+    "tests/test.diff": "diff --git a/tests/a.test.mjs b/tests/a.test.mjs\n",
+    "tests/expected.json": "{\n  \"FAIL_TO_PASS\": [\n    \"apps/api/tests/a.test.mjs::one\",\n    \"apps/api/tests/a.test.mjs::two\"\n  ],\n  \"PASS_TO_PASS\": [\n    \"apps/api/tests/old.test.mjs::three\"\n  ]\n}\n",
+    "tests/reporter.mjs": "import { writeFileSync } from \"node:fs\";\n\nconst log = (text) => process.stderr.write(text);\n\nexport default async function* hecateReporter(source) {\n  const results = {};\n  const stack = [];\n  let count = 0;\n  for await (const event of source) {\n    const d = event.data;\n    if (event.type === \"test:stderr\" || event.type === \"test:stdout\") { log(String(d?.message ?? \"\")); continue; }\n    if (event.type === \"test:diagnostic\") { log(\"[node:test] \" + String(d?.message ?? \"\") + \"\\n\"); continue; }\n    if (!d || typeof d.nesting !== \"number\") continue;\n    if (event.type === \"test:start\") { stack.length = d.nesting; stack.push(d.name); continue; }\n    if (event.type !== \"test:pass\" && event.type !== \"test:fail\") continue;\n    if (d.details && d.details.type === \"suite\") continue;\n    const names = [...stack.slice(0, d.nesting), d.name];\n    const file = String(d.file ?? \"\").replace(/^file:\\/\\//, \"\");\n    // A file that fails to load is reported by node as a top-level test named after the file.\n    const fileLevel = d.nesting === 0 && d.name && file.endsWith(\"/\" + d.name);\n    const id = fileLevel ? file + \"::(load)\" : file + \"::\" + names.join(\" > \");\n    const status = event.type === \"test:fail\" ? \"failed\" : (d.skip || d.todo) ? \"skipped\" : \"passed\";\n    results[id] = status;\n    count++;\n    if (status === \"failed\") {\n      const error = d.details && d.details.error;\n      const message = error ? String(error.cause && error.cause.message ? error.cause.message : error.message ?? error) : \"\";\n      log(\"[hecate] FAIL \" + id + \"\\n\" + message.split(\"\\n\").map((l) => \"    \" + l).join(\"\\n\") + \"\\n\");\n    }\n  }\n  log(\"[hecate] \" + count + \" test results written to \" + (process.env.REPORT ?? \"report.json\") + \"\\n\");\n  writeFileSync(process.env.REPORT ?? \"report.json\", JSON.stringify(results, null, 2));\n  yield \"\";\n}\n",
+    "tests/check.mjs": "import { readFileSync, readdirSync, writeFileSync, mkdirSync } from \"node:fs\";\nimport { dirname, join } from \"node:path\";\n\nconst [expectedFile, reportDir, prefix, rewardFile] = process.argv.slice(2);\nconst expected = JSON.parse(readFileSync(expectedFile, \"utf8\"));\nconst results = {};\nconst strip = (id) => (id.startsWith(prefix) ? id.slice(prefix.length) : id);\n\nlet names = [];\ntry { names = readdirSync(reportDir).filter((n) => n.endsWith(\".json\")).sort(); } catch {}\nfor (const name of names) {\n  const report = JSON.parse(readFileSync(join(reportDir, name), \"utf8\"));\n  if (name.startsWith(\"node-\")) {\n    for (const [id, status] of Object.entries(report)) results[strip(id)] = status;\n  } else {\n    for (const file of report.testResults ?? []) {\n      const path = strip(file.name ?? \"\");\n      for (const t of file.assertionResults ?? []) {\n        const id = path + \"::\" + [...(t.ancestorTitles ?? []), t.title].join(\" > \");\n        results[id] = t.status === \"passed\" || t.status === \"focused\" ? \"passed\" : t.status === \"failed\" ? \"failed\" : \"skipped\";\n      }\n    }\n  }\n}\n\nconst graded = [...expected.FAIL_TO_PASS.map((id) => [\"FAIL_TO_PASS\", id]), ...expected.PASS_TO_PASS.map((id) => [\"PASS_TO_PASS\", id])];\nconst failures = graded.filter(([, id]) => results[id] !== \"passed\");\nfor (const [list, id] of failures) console.log(`${list} not passed: ${id} (${results[id] ?? \"absent\"})`);\nconsole.log(`${graded.length - failures.length}/${graded.length} expected tests passed`);\nmkdirSync(dirname(rewardFile), { recursive: true });\nwriteFileSync(rewardFile, failures.length === 0 ? \"1\\n\" : \"0\\n\");\n",
+    "tests/README.md": "# cse115a-pocketwatch__pocketwatch-logout-all-1\n\nHarbor task built from Hecate instance `CSE115a-PocketWatch__PocketWatch-logout-all-1` (CSE115a-PocketWatch/PocketWatch @ 28e92a1).\n\nVerified by the Hecate validator: 2 fail-to-pass, 1 pass-to-pass, 1 flaky test(s) excluded.\nReward is 1 only if every id in expected.json passes after the agent's change; the same rule the SWE-bench harness applies.\n"
+  }
+}
