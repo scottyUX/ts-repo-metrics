@@ -19,11 +19,15 @@ export function firstCommitHoldsOnlyTaskFiles(
 
 type SlotTask = { slot: number; taskId: string; prUrl: string };
 
+/** Who made the commit that added a task file: the student, another GitHub account, or not known. */
+export type TaskFileCommitter = "student" | "someone_else" | "unknown";
+
 /**
  * One task of a sprint. `prTaskFiles` are the task files its PR adds in the sprint folder, recorded at import
- * (facts_json); missing on tasks saved before it was recorded.
+ * (facts_json); missing on tasks saved before it was recorded. `prTaskFileCommitters` says who committed each, for
+ * a PR that adds several; missing on older tasks.
  */
-export type PrTask = SlotTask & { taskPath: string; prTaskFiles?: string[] | null };
+export type PrTask = SlotTask & { taskPath: string; prTaskFiles?: string[] | null; prTaskFileCommitters?: Record<string, TaskFileCommitter> | null };
 
 const samePr = (a: string, b: string) => a.trim().toLowerCase() === b.trim().toLowerCase();
 const fileName = (path: string) => path.split("/").pop()!;
@@ -62,6 +66,22 @@ function unusedLine(paths: string[], audience: LineAudience): string {
     : `This PR also adds other task files, ${names.join(", ")}, which are not ${whose} tasks here. Their work is in the same diff.`;
 }
 
+const COMMITTER_WORDS: Record<TaskFileCommitter, string> = { student: "this student", someone_else: "someone else", unknown: "not confirmed" };
+
+/**
+ * Staff only: who committed the PR's task files, when it was recorded and at least one is not the student's.
+ * Asks staff to check this task's own file when its committer is not known.
+ */
+function committersLine(task: PrTask): string | null {
+  const committers = task.prTaskFileCommitters;
+  if (!committers || typeof committers !== "object") return null;
+  const paths = task.prTaskFiles?.length ? task.prTaskFiles : Object.keys(committers);
+  const whoOf = (path: string): TaskFileCommitter => committers[path] ?? "unknown";
+  if (paths.length === 0 || paths.every((path) => whoOf(path) === "student")) return null;
+  const line = `Who committed this PR's task files: ${paths.map((path) => `${fileName(path)}, ${COMMITTER_WORDS[whoOf(path)]}`).join("; ")}.`;
+  return whoOf(task.taskPath) === "unknown" ? `${line} Check that ${fileName(task.taskPath)} is this student's own.` : line;
+}
+
 /** The lines shown on the student's task card or the staff review page for a task whose PR adds more than one task file. */
 export function prTaskFileLines<T extends PrTask>(tasks: T[], task: T, audience: LineAudience): string[] {
   const sharing = prTaskFileSharing(tasks, task);
@@ -72,6 +92,8 @@ export function prTaskFileLines<T extends PrTask>(tasks: T[], task: T, audience:
     lines.push(`This PR holds two tasks: ${first.taskId} (Task ${first.slot}) and ${second.taskId} (Task ${second.slot}). They share one diff.`);
   }
   if (sharing.unused.length) lines.push(unusedLine(sharing.unused, audience));
+  const committers = audience === "staff" ? committersLine(task) : null;
+  if (committers) lines.push(committers);
   return lines;
 }
 

@@ -421,7 +421,7 @@ describe("two task files in one merged PR: grading and review", () => {
     const separate = snapshot(2, "X-T-8", { prUrl: "https://github.com/team/app/pull/13", prNumber: 13 });
     expect(prTaskFileGraderNotes([alone, separate], alone)).toEqual([]);
     expect(graderInput(alone, prTaskFileGraderNotes([alone, separate], alone)).notes.some((note) => note.includes("This PR"))).toBe(false);
-    expect(GRADER_PROMPT_VERSION).toBe("cse115a-grader-v4");
+    expect(GRADER_PROMPT_VERSION).toBe("cse115a-grader-v5");
   });
 
   it("says on the review page and student card which tasks share the PR", () => {

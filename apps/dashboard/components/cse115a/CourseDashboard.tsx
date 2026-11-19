@@ -674,7 +674,7 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
                         </button>
                         {choice ? (
                           <fieldset className="mt-4 rounded-lg border border-slate-300 p-3 text-sm">
-                            <legend className="px-1 font-semibold">This merged PR adds {choice.choices.length} task files. Which one is Task {slot}?</legend>
+                            <legend className="px-1 font-semibold">Which task file from this merged PR is Task {slot}?</legend>
                             <p className="text-slate-600">Each task file in this PR can be one of your tasks. Add the same PR in your other task and choose the other file.</p>
                             <div className="mt-3 flex flex-col gap-2">
                               {choice.choices.map((option) => (

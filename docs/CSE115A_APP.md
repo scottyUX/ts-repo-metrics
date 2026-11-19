@@ -93,6 +93,14 @@ it adds, this task's among them. This needs
 instead of per PR): apply it, then merge. Without it, PRs with one task file
 work as before and a second task from the same PR is refused with a message.
 
+Only the student's own task files count in a PR that adds several: a file
+whose adding commit was made from another GitHub account (say, a teammate's
+branch merged in) is not offered, cannot be chosen, and with one file left is
+imported without a choice. A commit with no GitHub account, or a lookup that
+fails, leaves the file offered; the review page then says who committed each
+file (`facts_json.prTaskFileCommitters`, no logins). An open PR is told which
+files are someone else's. PRs with one task file make no such lookup.
+
 Submissions are tied to the signed-in UCSC account and course membership. A
 task is marked analyzed only after its Repo Metrics result is saved and linked
 to that exact PR. The student's task description comes from the committed file,
@@ -110,7 +118,9 @@ grade only after an instructor releases it.
 - The other five criteria come from one OpenAI call per task with a strict JSON
   schema. Each must quote the submission; a quote that is missing or not found
   in the spec or diff marks it for review. The model and prompt version are
-  stored with the grade.
+  stored with the grade. The grader reads test and source files that the task
+  file names first, then the rest; images, lockfiles and `docs/tasks/` files
+  come last. Nothing is dropped, and the benchmark row keeps the diff's order.
 - Failed jobs retry after 1 and 4 minutes. After the third failure the job is
   `failed` and the submission is `grading_failed`.
 
