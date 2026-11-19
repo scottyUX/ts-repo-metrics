@@ -104,6 +104,11 @@ class FakeStore implements SnapshotStore {
     await writeFile(file, body);
     return true;
   }
+  async list() {
+    this.calls.push("list");
+    if (this.fail) throw new Error(this.fail);
+    return new Set(this.objects.keys());
+  }
 }
 
 const cloneFromStandIn: BatchGit["clone"] = async (fullName, dir) => { await run("git", ["clone", "-q", join(github, `${fullName}.git`), dir]); };
@@ -291,6 +296,7 @@ describe("the Supabase store over storage-js answers", () => {
       exists: async () => ({ data: false, error: null }),
       upload: async () => ({ data: {}, error: null }),
       download: async () => ({ data: null, error: null }),
+      list: async () => ({ data: [], error: null }),
       ...overrides,
     };
   }

@@ -28,6 +28,11 @@ export function folderBucket(dir: string): FolderBucket {
       await writeFile(join(dir, path), body);
       return { data: { path }, error: null };
     },
+    async list(path, options) {
+      calls.push(`list ${options.offset}`);
+      const names = (await readdir(join(dir, path))).sort();
+      return { data: names.slice(options.offset, options.offset + options.limit).map((name) => ({ name })), error: null };
+    },
     async download(path) {
       calls.push(`download ${path}`);
       if (!(await present(path))) return { data: null, error: { message: "Object not found", originalError: { status: 400 } } };

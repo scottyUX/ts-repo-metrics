@@ -16,6 +16,7 @@ const state = vi.hoisted(() => ({
   queued: [] as string[][],
   queueFails: false,
   cloned: 0,
+  lists: 0,
 }));
 
 vi.mock("server-only", () => ({}));
@@ -30,6 +31,7 @@ vi.mock("@/lib/cse115a/benchmark/validation/snapshotStore", async (original) => 
       has: async (id: string) => state.stored.has(id),
       upload: async () => { throw new Error("the route must not upload"); },
       download: async () => false,
+      list: async () => { state.lists++; return new Set(state.tasks.filter((t) => state.stored.has(t.instance_id)).map((t) => real.fullSnapshotObject(t.instance_id, t.base_commit))); },
     } satisfies SnapshotStore : null),
   };
 });
@@ -65,6 +67,7 @@ beforeEach(() => {
   state.queued = [];
   state.queueFails = false;
   state.cloned = 0;
+  state.lists = 0;
   vi.stubEnv("CSE115A_REPO_COPIES", "on");
   vi.stubEnv("SUPABASE_URL", "https://example.invalid");
   vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "k");
@@ -87,6 +90,8 @@ describe("#298 D: the repo-copies route", () => {
     expect(body.tasks.slice(0, 5).map((t: { state: string; reason: string | null }) => [t.state, t.reason])).toEqual([
       ["stored", null], ["queued", null], ["running", null], ["failed", "Repo copy failed: team__app-T-3: Timed out: the clone took longer than 30 s."], ["missing", null],
     ]);
+    // Ten tasks, one listing of the bucket.
+    expect(state.lists).toBe(1);
   });
 
   it.each([["unset", undefined], ["off", "off"], ["'ON '", "ON "], ["1", "1"]])("switch %s: queuing is refused, reading still works", async (_label, value) => {

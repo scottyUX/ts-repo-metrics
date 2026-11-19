@@ -41,6 +41,8 @@ export type SnapshotStore = {
    * (findBundle). Throws on any other failure.
    */
   download(instanceId: string, baseCommit: string, file: string): Promise<boolean>;
+  /** Every object name in the bucket, for answering many tasks from one listing (the Benchmark page). Throws on a failure. */
+  list(): Promise<Set<string>>;
 };
 
 /** How many characters of the base commit the object name carries. */
@@ -83,7 +85,15 @@ export type BucketFiles = {
   exists(path: string): Promise<{ data: boolean; error: StorageErrorLike | null }>;
   upload(path: string, body: Buffer, options: { contentType: string; upsert: boolean }): Promise<{ data: unknown; error: StorageErrorLike | null }>;
   download(path: string): PromiseLike<{ data: Blob | null; error: StorageErrorLike | null }>;
+  list(path: string, options: { limit: number; offset: number; sortBy: { column: string; order: string } }): Promise<{ data: Array<{ name: string }> | null; error: StorageErrorLike | null }>;
 };
+
+/**
+ * How many names one `list` call asks for. storage-js 2.97's `list(path, { limit, offset, sortBy })`
+ * defaults to 100; the store asks for more and pages by offset until a page comes back empty, so a
+ * server that returns fewer than asked is still read to the end.
+ */
+export const LIST_PAGE = 1000;
 
 /** The environment the store is configured from (process.env, or a plain object in tests). */
 export type Env = Record<string, string | undefined>;
@@ -173,6 +183,19 @@ export function bucketSnapshotStore(files: BucketFiles): SnapshotStore {
         throw writeError;
       }
       return true;
+    },
+    async list() {
+      const names = new Set<string>();
+      for (let offset = 0; ; ) {
+        const { data, error } = await files.list("", { limit: LIST_PAGE, offset, sortBy: { column: "name", order: "asc" } });
+        if (error) throw new Error(`Storage: ${error.message}`);
+        const page = data ?? [];
+        const before = names.size;
+        for (const item of page) if (item?.name) names.add(item.name);
+        // An empty page is the end; so is a page with nothing new (a server that ignored the offset).
+        if (page.length === 0 || names.size === before) return names;
+        offset += page.length;
+      }
     },
   };
 }

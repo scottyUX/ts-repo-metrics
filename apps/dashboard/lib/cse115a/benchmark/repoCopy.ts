@@ -20,7 +20,7 @@ import { join } from "node:path";
 import { CourseRepoAccessError, githubAppConfig, repoInstallationToken } from "@/lib/cse115a/githubAppToken";
 import { bundleRepo, cloneRepo, CloneError, ensureCommit, fetchRef, NO_APP_CLONE_DETAIL, redactToken, type GitAccess, type RunOptions } from "@/lib/cse115a/benchmark/validation/runRow";
 import { verifyBundle } from "@/lib/cse115a/benchmark/validation/snapshots";
-import { OBJECT_COMMIT_CHARS, SNAPSHOT_SIZE_LIMIT, type SnapshotStore } from "@/lib/cse115a/benchmark/validation/snapshotStore";
+import { fullSnapshotObject, OBJECT_COMMIT_CHARS, SNAPSHOT_SIZE_LIMIT, type SnapshotStore } from "@/lib/cse115a/benchmark/validation/snapshotStore";
 
 /**
  * What a copy needs from a benchmark row, and from the submission snapshot's task: the PR's number and
@@ -306,21 +306,24 @@ async function copyOnce(task: RepoCopyTask, options: RepoCopyOptions): Promise<R
 /** One task's copy state: true or false, or null when the store could not be asked (with the line). */
 export type CopyStatus = RepoCopyTask & { stored: boolean | null; error?: string };
 
-/** Whether each task has a complete copy for its current base commit (an old base-only copy does not count), asking the store a few at a time. */
-export async function copyStatus(tasks: RepoCopyTask[], store: SnapshotStore, concurrency = 8): Promise<CopyStatus[]> {
-  const out: CopyStatus[] = new Array(tasks.length);
-  let next = 0;
-  const worker = async () => {
-    while (next < tasks.length) {
-      const index = next++;
-      const task = tasks[index]!;
-      try {
-        out[index] = { ...task, stored: await store.has(task.instance_id, task.base_commit, "full") };
-      } catch (error) {
-        out[index] = { ...task, stored: null, error: `Storage error: ${firstLine(errorText(error)).replace(/^Storage:\s*/, "")}` };
-      }
+/**
+ * Whether each task has a complete copy for its current base commit (an old base-only copy does not
+ * count), from one listing of the bucket rather than a request per task. When the listing fails,
+ * every task is null with the one error line.
+ */
+export async function copyStatus(tasks: RepoCopyTask[], store: SnapshotStore): Promise<CopyStatus[]> {
+  let names: Set<string>;
+  try {
+    names = await store.list();
+  } catch (error) {
+    const line = `Storage error: ${firstLine(errorText(error)).replace(/^Storage:\s*/, "")}`;
+    return tasks.map((task) => ({ ...task, stored: null, error: line }));
+  }
+  return tasks.map((task) => {
+    try {
+      return { ...task, stored: names.has(fullSnapshotObject(task.instance_id, task.base_commit)) };
+    } catch (error) {
+      return { ...task, stored: null, error: firstLine(errorText(error)) };
     }
-  };
-  await Promise.all(Array.from({ length: Math.min(concurrency, tasks.length) }, worker));
-  return out;
+  });
 }

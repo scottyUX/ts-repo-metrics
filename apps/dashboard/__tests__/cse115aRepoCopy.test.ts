@@ -9,7 +9,7 @@ import { copyStatus, copyTaskRepo, GIT_STEP_TIMEOUT_MS, runGroup, type RepoCopyR
 import { copyTaskViews, type CopyJobRow } from "@/lib/cse115a/benchmark/repoCopyJobs";
 import { run, type GitAccess } from "@/lib/cse115a/benchmark/validation/runRow";
 import { findBundle } from "@/lib/cse115a/benchmark/validation/snapshots";
-import { bucketSnapshotStore, fullSnapshotObject, legacySnapshotObject, snapshotObject, type SnapshotStore } from "@/lib/cse115a/benchmark/validation/snapshotStore";
+import { bucketSnapshotStore, fullSnapshotObject, legacySnapshotObject, LIST_PAGE, snapshotObject, type SnapshotStore } from "@/lib/cse115a/benchmark/validation/snapshotStore";
 import { CourseRepoAccessError, type GitHubAppConfig } from "@/lib/cse115a/githubAppToken";
 import { folderBucket } from "./helpers/folderBucket";
 
@@ -171,9 +171,9 @@ describe("#298 A: copy one task's repository", () => {
     const { tmp } = await setup();
     const t = task("team/public-app");
     const access = standIn().access;
-    const askFails: SnapshotStore = { has: async () => { throw new Error("Storage: Bucket not found"); }, upload: async () => "uploaded", download: async () => false };
+    const askFails: SnapshotStore = { has: async () => { throw new Error("Storage: Bucket not found"); }, upload: async () => "uploaded", download: async () => false, list: async () => new Set<string>() };
     expect(await copyTaskRepo(t, { store: askFails, access, tmp })).toEqual({ instance_id: t.instance_id, outcome: "failed", reason: "storage", line: "Storage error: Bucket not found" });
-    const uploadFails: SnapshotStore = { has: async () => false, upload: async () => { throw new Error("Storage: Payload too large\nmore"); }, download: async () => false };
+    const uploadFails: SnapshotStore = { has: async () => false, upload: async () => { throw new Error("Storage: Payload too large\nmore"); }, download: async () => false, list: async () => new Set<string>() };
     expect(await copyTaskRepo(t, { store: uploadFails, access, tmp })).toMatchObject({ reason: "storage", line: "Storage error: Payload too large" });
     expect(await readdir(tmp)).toEqual([]);
   });
@@ -242,10 +242,10 @@ describe("#298 follow-up: time limits", () => {
   it("a Storage call that hangs is abandoned at its limit", async () => {
     const { tmp } = await setup();
     const never = new Promise<never>(() => {});
-    const askHangs: SnapshotStore = { has: () => never, upload: async () => "uploaded", download: async () => false };
+    const askHangs: SnapshotStore = { has: () => never, upload: async () => "uploaded", download: async () => false, list: async () => new Set<string>() };
     expect(await copyTaskRepo(task("team/public-app"), { store: askHangs, access: standIn().access, tmp, stepTimeoutMs: 200 }))
       .toMatchObject({ reason: "timeout", line: "Timed out: the check for a stored copy took longer than 0.2 s." });
-    const uploadHangs: SnapshotStore = { has: async () => false, upload: () => never, download: async () => false };
+    const uploadHangs: SnapshotStore = { has: async () => false, upload: () => never, download: async () => false, list: async () => new Set<string>() };
     expect(await copyTaskRepo(task("team/public-app"), { store: uploadHangs, access: standIn().access, tmp, stepTimeoutMs: 200 }))
       .toMatchObject({ reason: "timeout", line: "Timed out: the upload took longer than 0.2 s." });
     expect(await readdir(tmp)).toEqual([]);
@@ -265,8 +265,46 @@ describe("#298 D: status", () => {
     await writeFile(join(files.dir, legacySnapshotObject("T-4")), "x");
     const status = await copyStatus(tasks, store);
     expect(status.map((s) => s.stored)).toEqual([false, true, false, false, false]);
-    const broken: SnapshotStore = { has: async () => { throw new Error("Storage: down"); }, upload: async () => "uploaded", download: async () => false };
+    const broken: SnapshotStore = { has: async () => false, upload: async () => "uploaded", download: async () => false, list: async () => { throw new Error("Storage: down"); } };
     expect((await copyStatus(tasks.slice(0, 1), broken))[0]).toMatchObject({ stored: null, error: "Storage error: down" });
+  });
+
+  it("7. one list() call answers every task; a list() failure gives every task stored: null with the line", async () => {
+    const { files, store } = await setup();
+    const many = Array.from({ length: 250 }, (_, i) => ({ instance_id: `T-${i}`, repo: "team/public-app", base_commit: base }));
+    for (const t of many.filter((_, i) => i % 3 === 0)) await writeFile(join(files.dir, fullSnapshotObject(t.instance_id, base)), "x");
+    let lists = 0;
+    const counting: SnapshotStore = { ...store, has: async () => { throw new Error("must not ask per task"); }, list: () => { lists++; return store.list(); } };
+    const status = await copyStatus(many, counting);
+    expect(lists).toBe(1);
+    expect(status.map((s) => s.stored)).toEqual(many.map((_, i) => i % 3 === 0));
+    expect(files.calls.filter((call) => call.startsWith("exists"))).toEqual([]);
+    const listFails: SnapshotStore = { ...store, list: async () => { throw new Error("Storage: Bucket not found\nmore"); } };
+    const failed = await copyStatus(many.slice(0, 3), listFails);
+    expect(failed).toEqual(many.slice(0, 3).map((t) => ({ ...t, stored: null, error: "Storage error: Bucket not found" })));
+  });
+
+  it("list() pages through the bucket by offset until a page comes back empty, even when the server returns fewer than asked", async () => {
+    const names = Array.from({ length: 2345 }, (_, i) => `T-${String(i).padStart(4, "0")}.${base.slice(0, 12)}.full.bundle`);
+    const asked: Array<{ limit: number; offset: number }> = [];
+    // A server that caps a page at 700, whatever the limit.
+    const capped = bucketSnapshotStore({
+      exists: async () => ({ data: false, error: null }), upload: async () => ({ data: {}, error: null }), download: async () => ({ data: null, error: null }),
+      list: async (_path, options) => { asked.push({ limit: options.limit, offset: options.offset }); return { data: names.slice(options.offset, options.offset + Math.min(700, options.limit)).map((name) => ({ name })), error: null }; },
+    });
+    expect(await capped.list()).toEqual(new Set(names));
+    expect(asked.map((a) => a.offset)).toEqual([0, 700, 1400, 2100, 2345]);
+    expect(asked.every((a) => a.limit === LIST_PAGE)).toBe(true);
+    const broken = bucketSnapshotStore({
+      exists: async () => ({ data: false, error: null }), upload: async () => ({ data: {}, error: null }), download: async () => ({ data: null, error: null }),
+      list: async () => ({ data: null, error: { message: "Bucket not found", status: 400, statusCode: "404" } }),
+    });
+    await expect(broken.list()).rejects.toThrow("Storage: Bucket not found");
+    // The folder bucket the tests use lists its files.
+    const { files, store } = await setup();
+    await writeFile(join(files.dir, "a.bundle"), "x");
+    await writeFile(join(files.dir, "b.bundle"), "x");
+    expect(await store.list()).toEqual(new Set(["a.bundle", "b.bundle"]));
   });
 
   it("each task shows as stored, queued, running, failed with its reason, missing, or could not check", () => {

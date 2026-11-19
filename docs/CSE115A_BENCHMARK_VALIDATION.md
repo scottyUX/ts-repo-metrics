@@ -1138,7 +1138,10 @@ line, an error, or a response. Each copy logs one line with how long it took:
   what is stored. The validator's own batch runs keep their limits.
 - **Backfill and retry.** The instructor Benchmark page shows, under "Repo copies", each task as
   stored, queued, running, failed (with the job's last error), or no copy, and refreshes every 5
-  seconds while any are queued or running. "Save missing repo copies"
+  seconds while any are queued or running. Each load lists the bucket once (storage-js `list`,
+  1000 names a page, paged by offset until a page comes back empty) and answers every task from
+  that list, rather than asking Storage once per task; if the listing fails, every task shows
+  "could not check" with the one error line. A copy job still asks for its own task before cloning. "Save missing repo copies"
   (`POST /api/cse115a/instructor/courses/<slug>/benchmark/repo-copies`) queues the `repo_copy`
   job of every submission with a task that has no copy or a failed job, and returns at once; there
   is no cap. Only a complete copy (`….full.bundle`) counts as stored: a task with only a base-only or
