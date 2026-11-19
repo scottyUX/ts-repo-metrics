@@ -189,8 +189,8 @@ export type HarborInput = {
   name?: string;
   author?: { name: string; email?: string };
   /**
-   * The JSONL export's `task_file_first` (exportJsonl.ts taskFileFirst): whether the diff starts after a
-   * commit that holds only the task file. Written to task.toml's [metadata] when given (the instructor
+   * The JSONL export's `task_file_first` (exportJsonl.ts taskFileFirst): whether the PR's first commit held only
+   * the task file (no source flagged as in TASK_FILE_NOT_FIRST_FLAGS). Written to task.toml's [metadata] when given (the instructor
    * export); left out by the validator's own task folders.
    */
   taskFileFirst?: boolean;

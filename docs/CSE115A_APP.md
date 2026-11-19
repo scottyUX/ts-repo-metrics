@@ -154,7 +154,10 @@ grade only after an instructor releases it.
   first when `specCommittedFirst` is true or the snapshot's diff starts at the
   PR's first commit (`baseCommitSource` `first_commit`, which also covers a
   snapshot taken before #392 whose task file was first but untagged). A
-  `merge_base` snapshot (#382) goes by `specCommittedFirst` alone. Both:
+  `merge_base` snapshot (#382) never starts at the first commit; instead the
+  task file also came first when capture's own check of the PR's first commit
+  says so (`taskFileFirstCommit`, saved on snapshots since #382), which covers
+  a stale `specCommittedFirst` saved before #392. Both:
   full. Task file not first: none, always marked for instructor review. Not
   merged: partial. Tags play no part.
 - The other five criteria come from one OpenAI call per task with a strict JSON
@@ -208,9 +211,12 @@ part of the diff, as on GitHub. CI checks are still read on the merge commit.
 The import's test-file count (Add PR, Re-check) uses the same range.
 
 Whether the task file came first is no longer told by where the diff starts.
-It is the saved `validation.specCommittedFirst`; a `merge_base` row whose
-`specCommittedFirst` is not `true` gets the flag `task_file_not_first`. The
-PR's first commit is still read at capture, for the fallback.
+Capture still reads the PR's first commit and saves its answer as
+`taskFileFirstCommit` (true when that commit holds only task files the PR adds
+and the task is not paired). A `merge_base` row gets the flag
+`task_file_not_first` when neither `validation.specCommittedFirst` nor
+`taskFileFirstCommit` is `true`, the same rule as grading. The first commit
+also gives the fallback's start.
 
 Fallback: when the JSON compare fails or has no merge base, capture uses the
 rule before #382 and Submit goes on. The diff ends at the merge commit
@@ -221,7 +227,7 @@ files the PR adds and the task is not paired): `baseCommitSource`
 (`pr_base`, flag `base_commit_from_pr_base`). No tag is read (#392).
 
 Saved submissions are unchanged: snapshots taken before #382 have no
-`headCommit` or `diffEnd`, end at the merge commit, and keep their
+`headCommit`, `diffEnd` or `taskFileFirstCommit`, end at the merge commit, and keep their
 `first_commit` or `pr_base` start and flags. Snapshots taken before #392 may
 say `base_tag`, for a base tag on that same task-file-only first commit; the
 range was the same as `first_commit`, and those rows get neither flag.

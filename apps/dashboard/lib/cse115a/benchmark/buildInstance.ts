@@ -100,8 +100,11 @@ export function buildInstance(
   // A capture after #382 that could not read the merge base: the range before #382, ending at the merge commit.
   if (task.diffEnd === "merge_commit") flags.push("diff_from_merge_commit");
   // A merge-base capture no longer says through its base whether the task file came first, so export reads this
-  // flag instead (TASK_FILE_NOT_FIRST_FLAGS). Snapshots on the older rule keep their base flags.
-  if (task.baseCommitSource === "merge_base" && task.validation.specCommittedFirst !== true) flags.push("task_file_not_first");
+  // flag instead (TASK_FILE_NOT_FIRST_FLAGS): set when neither import's answer nor capture's own says it did, the
+  // same rule as gradeProcess. Snapshots on the older rule keep their base flags.
+  if (task.baseCommitSource === "merge_base" && task.validation.specCommittedFirst !== true && task.taskFileFirstCommit !== true) {
+    flags.push("task_file_not_first");
+  }
   if (task.diffError || !task.diff) flags.push("diff_missing");
   if (task.diffTruncated) flags.push("diff_truncated");
   if (!split.testPatch) flags.push("no_test_patch");

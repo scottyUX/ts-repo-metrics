@@ -7,7 +7,9 @@ import type { BenchmarkSave, Submission } from "./runner";
 // instance has left 'candidate' and came from the same PR merge commit, the work under the row has
 // not changed, so the instance is kept and the new source row inherits that source's status and
 // flags. A different merge commit means the student's PR changed: the instance is captured again
-// and the new source row goes back to 'candidate' for the validator. Pure, so it is tested
+// and the new source row goes back to 'candidate' for the validator. So does a row captured under the
+// other diff rule (#382): a source is "same" only when both or neither have `base_commit_from_merge_base`,
+// because a row from before #382 holds a different base and patch for the same merge commit. Pure, so it is tested
 // without a database; supabaseStore reads the stored sources and applies the plan.
 
 /** A source row already stored for an instance, with the merge commit of the task it was captured from. */
@@ -42,6 +44,9 @@ export type BenchmarkSavePlan = {
   kept: string[];
 };
 
+/** The flag of a row captured on the merge-base rule (#382); its presence tells the two capture rules apart. */
+const MERGE_BASE_FLAG = "base_commit_from_merge_base";
+
 export function planBenchmarkSave(submission: Submission, rows: BenchmarkSave[], stored: StoredSource[], now: string): BenchmarkSavePlan {
   const plan: BenchmarkSavePlan = { tasks: [], sources: [], kept: [] };
   for (const row of rows) {
@@ -56,14 +61,17 @@ export function planBenchmarkSave(submission: Submission, rows: BenchmarkSave[],
       updated_at: now,
     };
     const settled = stored.filter((s) => s.instance_id === id && s.validation_status !== "candidate");
-    const same = settled.find((s) => s.merge_commit != null && s.merge_commit === row.mergeCommit);
+    const mergeBaseRule = row.flags.includes(MERGE_BASE_FLAG);
+    const same = settled.find((s) => s.merge_commit != null && s.merge_commit === row.mergeCommit
+      && s.flags.includes(MERGE_BASE_FLAG) === mergeBaseRule);
     if (same) {
       // Unchanged PR: keep the instance (validated lists, a staff rebuild) and carry the status and
       // every flag the settled source has (validator and staff flags) onto this source row.
       plan.kept.push(id);
       plan.sources.push({ ...base, flags: [...new Set([...row.flags, ...same.flags])], validation_status: same.validation_status });
     } else if (settled.length > 0) {
-      // The PR changed since the row was judged: capture it again and send it back to the validator.
+      // The PR changed since the row was judged, or the row was captured under the other diff rule (#382):
+      // capture it again and send it back to the validator.
       // The capture's validation fields are empty, and the Harbor recipe and validation detail go with them.
       plan.tasks.push({ ...row.instance, harbor_env: null, validation_detail: null });
       plan.sources.push({ ...base, validation_status: "candidate" });

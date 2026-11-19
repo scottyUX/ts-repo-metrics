@@ -59,6 +59,13 @@ export type TaskSnapshot = {
    * a base tag on that same first commit was recorded so.
    */
   baseCommitSource: "merge_base" | "base_tag" | "first_commit" | "pr_base";
+  /**
+   * Capture's own answer to "did the task file come first": the PR's first commit holds only task files this PR
+   * adds, and the task is not paired. False when paired or the first commit can't be read. It can differ from the
+   * saved `validation.specCommittedFirst`, which import set, possibly before #392. Missing on snapshots taken before
+   * #382.
+   */
+  taskFileFirstCommit?: boolean;
   /** The PR's head commit (`pull.head.sha`). Missing on snapshots taken before #382. */
   headCommit?: string | null;
   /**
@@ -159,15 +166,18 @@ export async function captureTaskSnapshot(gh: GitHubReader, task: SubmittedTaskR
   ]);
   // The rule before #382, kept only as the fallback: the diff starts after the PR's first commit when the task
   // file came first (that commit holds only task files this PR adds and the task is not paired), otherwise at the
-  // PR base, and ends at the merge commit. No tag is read (#392). The first commit is still read either way.
+  // PR base, and ends at the merge commit. No tag is read (#392). The first commit is still read either way, and
+  // its answer is saved as `taskFileFirstCommit`.
   const firstSha = commits?.[0]?.sha ?? null;
   let fallbackBase = pull.base.sha;
   let fallbackSource: TaskSnapshot["baseCommitSource"] = "pr_base";
+  let taskFileFirstCommit = false;
   if (firstSha && !taskFilePr) {
     // A paired task's PR has no task file, so its first commit is never the task file alone.
     const first = await gh.json<{ files?: Array<{ filename: string }> }>(`${base}/commits/${firstSha}`);
     const taskFilesOnly = firstCommitHoldsOnlyTaskFiles(first?.files, task.task_path, [...samePrTaskPaths, ...(task.facts_json?.prTaskFiles ?? [])]);
-    if (taskFileFirst(taskFilesOnly, taskFilePr)) {
+    taskFileFirstCommit = taskFileFirst(taskFilesOnly, taskFilePr);
+    if (taskFileFirstCommit) {
       fallbackBase = firstSha;
       fallbackSource = "first_commit";
     }
@@ -225,6 +235,7 @@ export async function captureTaskSnapshot(gh: GitHubReader, task: SubmittedTaskR
     },
     baseCommit,
     baseCommitSource,
+    taskFileFirstCommit,
     headCommit: headSha,
     diffEnd: fromMergeBase ? "head" : "merge_commit",
     diff, diffBytes, diffTruncated, diffError,

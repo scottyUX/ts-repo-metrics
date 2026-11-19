@@ -793,7 +793,9 @@ anything). The output line names the flags dropped (`, dropped capture flag(s): 
 hashes) and remove the flag.
 
 A later Submit does not undo this: re-capture keeps an instance whose source is no longer
-`candidate` when the snapshot's merge commit is unchanged (`lib/cse115a/jobs/benchmarkSave.ts`).
+`candidate` when the snapshot's merge commit is unchanged and both captures used the same diff rule
+(both or neither flagged `base_commit_from_merge_base`, #382) (`lib/cse115a/jobs/benchmarkSave.ts`). A row
+captured before #382 is captured again on the merge-base rule and goes back to `candidate`.
 
 Rebuilt so far: `JoKHerre__Bookworm-COL-04-T-4` (PR #115, M `96798e0b`, M^1 `40b28261`, the
 head of PR #114). `JoKHerre__Bookworm-COL-04-T-2` (PR #114) is not rebuilt: the PR changes no

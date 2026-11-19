@@ -1,10 +1,12 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { buildInstance } from "@/lib/cse115a/benchmark/buildInstance";
+import { buildInstance, type BenchmarkInstance } from "@/lib/cse115a/benchmark/buildInstance";
 import { toExportRecord, type ExportCandidate } from "@/lib/cse115a/benchmark/exportJsonl";
 import { parseDiffFiles } from "@/lib/cse115a/diff";
 import { githubReader, type GitHubReader } from "@/lib/cse115a/githubClient";
 import { importTaskFromPullRequest } from "@/lib/cse115a/githubTaskImport";
 import { gradeProcess } from "@/lib/cse115a/grader/deterministic";
+import { planBenchmarkSave, type StoredSource } from "@/lib/cse115a/jobs/benchmarkSave";
+import type { BenchmarkSave, Submission } from "@/lib/cse115a/jobs/runner";
 import { baseCommitLine } from "@/lib/cse115a/processChecklist";
 import { captureSubmissionSnapshot, captureTaskSnapshot, type SubmittedTaskRow, type TaskSnapshot } from "@/lib/cse115a/submissionSnapshot";
 import type { TaskSpec } from "@/lib/cse115a/taskSpec";
@@ -257,5 +259,59 @@ describe("9. the review page's base line", () => {
     expect(baseCommitLine(sha, "pr_base")).toBe("base abc1234 (PR base; the task file was not first)");
     expect(baseCommitLine(sha, "first_commit")).toBe("base abc1234 (PR's first commit, the task file alone)");
     expect(baseCommitLine(sha, "base_tag")).toBe("base abc1234 (PR's first commit, the task file alone)");
+  });
+});
+
+describe("follow-up: planBenchmarkSave keeps a settled row only under the same capture rule", () => {
+  const MERGE = "0123456789abcdef0123456789abcdef01234567";
+  const ID = "team__proj-US-1-T-1";
+  const submission = { id: "sub-2", course_id: "course", user_id: "user", assignment_number: 1, status: "submitted", snapshot: { version: 1, capturedAt: "2026-11-19T00:00:00.000Z", tasks: [] }, superseded_at: null } as Submission;
+  const newInstance = { instance_id: ID, base_commit: "mb1", patch: "new", test_patch: "", harbor_env: null, validation_detail: null } as BenchmarkInstance;
+  const newCapture: BenchmarkSave = { slot: 1, instance: newInstance, flags: ["base_commit_from_merge_base", "task_files_dropped"], mergeCommit: MERGE };
+  const stored = (flags: string[]): StoredSource => ({ instance_id: ID, assignment_submission_id: "sub-1", task_slot: 1, validation_status: "validated", flags, merge_commit: MERGE });
+  const NOW = "2026-11-19T00:00:00.000Z";
+
+  it("sends an old-rule validated row back to candidate with the new instance, for the same merge commit", () => {
+    const plan = planBenchmarkSave(submission, [newCapture], [stored(["base_commit_from_first_commit"])], NOW);
+    expect(plan.kept).toEqual([]);
+    expect(plan.tasks).toEqual([{ ...newInstance, harbor_env: null, validation_detail: null }]);
+    expect(plan.sources).toEqual([{
+      instance_id: ID, course_id: "course", user_id: "user", assignment_submission_id: "sub-2", task_slot: 1,
+      flags: ["base_commit_from_merge_base", "task_files_dropped"], updated_at: NOW, validation_status: "candidate",
+    }]);
+  });
+
+  it("keeps a merge-base row with its status when a second merge-base capture has the same merge commit", () => {
+    const plan = planBenchmarkSave(submission, [newCapture], [stored(["base_commit_from_merge_base", "staff_note"])], NOW);
+    expect(plan.kept).toEqual([ID]);
+    expect(plan.tasks).toEqual([]);
+    expect(plan.sources[0]).toMatchObject({ validation_status: "validated", flags: ["base_commit_from_merge_base", "task_files_dropped", "staff_note"] });
+  });
+
+  it("still keeps an old-rule row for an old-rule (fallback) capture from the same merge commit", () => {
+    const fallback: BenchmarkSave = { ...newCapture, flags: ["base_commit_from_first_commit", "diff_from_merge_commit"] };
+    const plan = planBenchmarkSave(submission, [fallback], [stored(["base_commit_from_first_commit"])], NOW);
+    expect(plan.kept).toEqual([ID]);
+  });
+});
+
+describe("follow-up: capture's own first-commit answer (taskFileFirstCommit)", () => {
+  it("is saved on a new capture: true for a task-file-only first commit, false for code first or a paired task", async () => {
+    expect((await captureTaskSnapshot(fakeGitHub().reader, row())).taskFileFirstCommit).toBe(true);
+    expect((await captureTaskSnapshot(fakeGitHub({ firstFiles: [TASK_FILE, "src/cart.ts"] }).reader, row())).taskFileFirstCommit).toBe(false);
+    const paired = row({ taskFilePr: { url: "https://github.com/team/proj/pull/11", number: 11, mergeSha: "spec11" } });
+    expect((await captureTaskSnapshot(fakeGitHub().reader, paired)).taskFileFirstCommit).toBe(false);
+  });
+
+  it("rescues a stale specCommittedFirst (saved before #392): full Process and no task_file_not_first", () => {
+    const task = snapshot({ validation: { prMerged: true, specCommittedFirst: false }, taskFileFirstCommit: true });
+    expect(gradeProcess(task.validation, task.baseCommitSource, task.taskFileFirstCommit)).toMatchObject({ level: "full", needsReview: false });
+    expect(buildInstance(task, 1, null).flags).not.toContain("task_file_not_first");
+  });
+
+  it("with both false: none, marked for review, and the flag", () => {
+    const task = snapshot({ validation: { prMerged: true, specCommittedFirst: false }, taskFileFirstCommit: false });
+    expect(gradeProcess(task.validation, task.baseCommitSource, task.taskFileFirstCommit)).toMatchObject({ level: "none", needsReview: true });
+    expect(buildInstance(task, 1, null).flags).toContain("task_file_not_first");
   });
 });
