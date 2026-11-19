@@ -188,6 +188,12 @@ export type HarborInput = {
   /** Harbor task name; defaults to the instance id lower-cased with safe characters. */
   name?: string;
   author?: { name: string; email?: string };
+  /**
+   * The JSONL export's `task_file_first` (exportJsonl.ts taskFileFirst): whether the diff starts after a
+   * commit that holds only the task file. Written to task.toml's [metadata] when given (the instructor
+   * export); left out by the validator's own task folders.
+   */
+  taskFileFirst?: boolean;
 };
 
 /** A batch row with the result's verified lists, the way the database stores it after write-back. */
@@ -286,6 +292,7 @@ export function buildHarborTask(input: HarborInput): Map<string, string> {
     `author_name = ${toml(input.author?.name ?? "Hecate (UCSC CSE 115A)")}`,
     ...(input.author?.email ? [`author_email = ${toml(input.author.email)}`] : []),
     `difficulty = ${toml(row.difficulty ?? "medium")}`,
+    ...(input.taskFileFirst === undefined ? [] : [`task_file_first = ${input.taskFileFirst ? "true" : "false"}`]),
     `category = "software-engineering"`,
     `tags = ["hecate", "cse115a", ${toml(python ? "python" : "typescript")}, ${toml(env.runners.join("+"))}]`,
     `instance_id = ${toml(row.instance_id)}`,

@@ -1,4 +1,4 @@
-import { isExportable, type ExportCandidate } from "./exportJsonl";
+import { isExportable, taskFileFirst, type ExportCandidate } from "./exportJsonl";
 import { buildHarborTask, harborSkipReason, harborTaskName, type HarborEnv, type HarborSource } from "./validation/harbor";
 
 // The instructor Harbor export: the rows the JSONL export returns with ?validated=1 (same consent and
@@ -38,9 +38,8 @@ export function harborExport(candidates: ExportCandidate[]): HarborExport {
   const out: HarborExport = { files: new Map(), exported: [], skipped: [] };
   const rows = candidates
     .filter((candidate) => isExportable(candidate, { validatedOnly: true }))
-    .map((candidate) => candidate.instance)
-    .sort((a, b) => a.instance_id.localeCompare(b.instance_id));
-  for (const instance of rows) {
+    .sort((a, b) => a.instance.instance_id.localeCompare(b.instance.instance_id));
+  for (const { instance, sources } of rows) {
     const env = instance.harbor_env ?? null;
     // The existing reasons first (no recipe, database, private repository, bad repo or commit), then the gold check.
     const reason = env ? harborSkipReason(env, instance, SOURCE) ?? goldSkipReason(env) : NO_RECIPE_REASON;
@@ -49,7 +48,9 @@ export function harborExport(candidates: ExportCandidate[]): HarborExport {
       continue;
     }
     const name = harborTaskName(instance.instance_id);
-    for (const [path, contents] of buildHarborTask({ row: instance, env, source: SOURCE, name })) out.files.set(`${name}/${path}`, contents);
+    // task_file_first as the JSONL export writes it, in task.toml's [metadata]; not in the instruction.
+    const files = buildHarborTask({ row: instance, env, source: SOURCE, name, taskFileFirst: taskFileFirst(sources) });
+    for (const [path, contents] of files) out.files.set(`${name}/${path}`, contents);
     out.exported.push(instance.instance_id);
   }
   if (out.skipped.length) {

@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { BenchmarkInstance } from "@/lib/cse115a/benchmark/buildInstance";
 import type { ExportCandidate } from "@/lib/cse115a/benchmark/exportJsonl";
 import { harborExport, NO_RECIPE_REASON, NOT_GOLD_CHECKED_REASON } from "@/lib/cse115a/benchmark/exportHarbor";
-import { NO_SERVICE_DETAIL_REASON, PRIVATE_REPO_REASON, type HarborEnv } from "@/lib/cse115a/benchmark/validation/harbor";
+import { buildHarborTask, NO_SERVICE_DETAIL_REASON, PRIVATE_REPO_REASON, type HarborEnv } from "@/lib/cse115a/benchmark/validation/harbor";
 import { HARBOR_MISSING_REASON } from "@/lib/cse115a/benchmark/validation/harborGold";
 
 const state = vi.hoisted(() => ({ approved: false, candidates: [] as unknown[] }));
@@ -171,5 +171,35 @@ describe("9. harborExport, the gold-check gate", () => {
     expect(NOT_GOLD_CHECKED_REASON).toBe("not gold-checked yet; run the batch with --gold-only and write back");
     expect(out.files.get("SKIPPED.txt")).toContain("team__app-failed-1\tgold check failed: oracle 0.0\n");
     expect(out.files.get("SKIPPED.txt")).toContain(`team__app-unchecked-1\t${NOT_GOLD_CHECKED_REASON}\n`);
+  });
+});
+
+describe("task_file_first in the Harbor export (#288)", () => {
+  const withFlags = (id: string, flags: string[]): ExportCandidate => ({ instance: instance(id), sources: [{ consented: true, validationStatus: "validated", flags }] });
+  const out = harborExport([
+    withFlags("team__app-first-1", ["base_commit_from_first_commit"]),
+    withFlags("team__app-prbase-1", ["base_commit_from_pr_base"]),
+    withFlags("team__app-otherpr-1", ["task_file_from_other_pr"]),
+    withFlags("team__app-noflag-1", []),
+  ]);
+  const toml = (id: string) => out.files.get(`${id}/task.toml`)!;
+
+  it("writes task_file_first in task.toml's [metadata], next to difficulty: true and false", () => {
+    expect(toml("team__app-first-1")).toContain('difficulty = "medium"\ntask_file_first = true\n');
+    expect(toml("team__app-noflag-1")).toContain('difficulty = "medium"\ntask_file_first = true\n');
+    expect(toml("team__app-prbase-1")).toContain('difficulty = "medium"\ntask_file_first = false\n');
+    expect(toml("team__app-otherpr-1")).toContain('difficulty = "medium"\ntask_file_first = false\n');
+    const metadata = toml("team__app-prbase-1").split("\n[")[1]!;
+    expect(metadata.startsWith("metadata]")).toBe(true);
+    expect(metadata).toContain("task_file_first = false");
+  });
+
+  it("leaves the instruction unchanged, and the validator's own task folders without the key", () => {
+    const plain = buildHarborTask({ row: instance("team__app-prbase-1"), env: recipe, source: { kind: "github" }, name: "team__app-prbase-1" });
+    expect(out.files.get("team__app-prbase-1/instruction.md")).toBe(plain.get("instruction.md"));
+    expect(out.files.get("team__app-first-1/instruction.md")).not.toContain("task_file_first");
+    expect(plain.get("task.toml")).not.toContain("task_file_first");
+    // Only that line differs from the task.toml built without it.
+    expect(toml("team__app-prbase-1").replace("task_file_first = false\n", "")).toBe(plain.get("task.toml"));
   });
 });

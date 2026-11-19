@@ -211,7 +211,10 @@ command ("Don't add this tag: …") and is not counted in "N to fix".
   so the spec may have been written after the code. `false` also covers the
   rare case where the PR's first commit could not be read. Otherwise it is
   `true`. Rows are not filtered on it; readers that ignore unknown keys, as
-  the SWE-bench harness does, see no change. Known gap: a row captured before
+  the SWE-bench harness does, see no change. The Harbor export writes the same
+  value as `task_file_first = true|false` in each task's `task.toml`, in the
+  `[metadata]` table next to `difficulty`; the instruction text does not
+  mention it. Known gap: a row captured before
   the base-tag fix, from a base tag a student had put on a first commit that
   holds code, has no flag and reads `task_file_first: true`. The fix stops new
   ones; staff find the old ones with a read-only query on the saved snapshots
