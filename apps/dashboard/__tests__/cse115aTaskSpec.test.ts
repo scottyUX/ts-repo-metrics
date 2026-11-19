@@ -156,3 +156,19 @@ describe("CSE 115A task file: every problem, named exactly (#388)", () => {
     expect(thrown(markdown)).toBe("The front matter needs a story.\nThe front matter needs estimate_hours as a number.");
   });
 });
+
+describe("CSE 115A task file: blank lines before the front matter", () => {
+  const file = "---\nid: US-1-T-1\nstory: US-1\nsprint: 1\nassignee: A. Student\nestimate_hours: 3\n---\n\n# Reject a non-university email\n\n## Description\nOne.\n\n## Specs\n- Two.\n\n## Requirements\n- Three.\n\n## Acceptance criteria\n- [ ] Four.\n";
+
+  it("reads a task file that starts with a blank line, spaces or a byte-order mark", () => {
+    const plain = parseTaskSpec(file);
+    for (const start of ["\n", "\r\n\r\n", "  \n", "\uFEFF", "\uFEFF\n"]) {
+      expect(parseTaskSpec(start + file)).toEqual(plain);
+    }
+  });
+
+  it("still refuses a file with text before the front matter, or with none", () => {
+    expect(() => parseTaskSpec("Notes\n" + file)).toThrow("The task file needs YAML front matter.");
+    expect(() => parseTaskSpec(file.replace(/^---\n[\s\S]*?\n---\n/, ""))).toThrow("The task file needs YAML front matter.");
+  });
+});

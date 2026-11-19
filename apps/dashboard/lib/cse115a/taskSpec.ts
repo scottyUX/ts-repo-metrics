@@ -102,7 +102,7 @@ export type TaskSpecCheck = { spec: TaskSpec | null; problems: string[]; id: str
 export function checkTaskSpec(markdown: string): TaskSpecCheck {
   if (markdown.length > 65536) return { spec: null, problems: ["The task file is too large to import."], id: "", sprint: Number.NaN };
   const problems: string[] = [];
-  const frontMatter = markdown.match(/^---\s*\n([\s\S]*?)\n---\s*\n/);
+  const frontMatter = markdown.match(/^\s*---\s*\n([\s\S]*?)\n---\s*\n/);
   if (!frontMatter) problems.push("The task file needs YAML front matter.");
   const fields = new Map<string, string>();
   for (const line of frontMatter?.[1]!.split(/\r?\n/) ?? []) {
