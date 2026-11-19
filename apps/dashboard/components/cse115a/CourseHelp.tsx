@@ -72,6 +72,10 @@ const FAQS = [
     a: "A merged pull request can't be changed. Open a new pull request, from your own GitHub account in the same repository, that adds only your task file (docs/tasks/sprint-N/YOUR-ID.md) and changes nothing else, and merge it. Paste the first pull request and click Add PR. A second box asks for the task-file PR: paste its link and click Add both PRs. Your task is graded on the code in the first pull request. If your pull request is not merged yet, add the task file to it before you merge instead.",
   },
   {
+    q: "My pull request has two of my task files. How do I submit both tasks?",
+    a: "Add the same merged pull request in Task 1 and in Task 2. The app asks which task file each one is: choose a different file in each. Only the student who opened the pull request can add it this way. Each task is graded on its own, against its own task file. Next sprint, use one branch and one pull request per task.",
+  },
+  {
     q: "I already submitted. Can I change a task?",
     a: "Click Change submission before the sprint deadline, and before a grade is released. That withdraws the sprint so you can edit. Submit again when your tasks are ready.",
   },
