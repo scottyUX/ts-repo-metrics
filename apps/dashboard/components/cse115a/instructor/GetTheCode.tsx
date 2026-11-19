@@ -4,7 +4,7 @@ import {
   STUDENT_CODE_WARNING, type TaskCode,
 } from "@/lib/cse115a/getTheCode";
 
-const block = "overflow-auto whitespace-pre rounded-md bg-muted p-3 font-mono text-xs select-all";
+const block = "overflow-auto whitespace-pre-wrap break-all rounded-md bg-muted p-3 font-mono text-xs select-all";
 
 /** A task's "Get the code" section on the staff review page (closed until opened). */
 export function GetTheCode({ submissionId, slot, repoFullName, mergeCommit, code }: {
