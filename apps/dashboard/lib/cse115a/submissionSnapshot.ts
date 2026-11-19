@@ -2,6 +2,7 @@ import type { TaskSpec } from "@/lib/cse115a/taskSpec";
 import type { TaskFacts } from "@/lib/cse115a/processChecklist";
 import { tagCommitSha, type GitHubReader } from "@/lib/cse115a/githubClient";
 import { firstCommitHoldsOnlyTaskFiles } from "@/lib/cse115a/sharedPr";
+import { savedTaskFilePr, type TaskFilePr } from "@/lib/cse115a/taskFilePr";
 
 // Everything grading and benchmark capture need, copied from GitHub when the
 // student submits. Later jobs never call GitHub with the student's token.
@@ -21,7 +22,7 @@ export type SubmittedTaskRow = {
   task_spec_json: TaskSpec;
   validation_json: Record<string, boolean>;
   analysis_result_id: string;
-  /** The facts saved at import; `prTaskFiles` and `prTaskFileCommitters` are carried into the snapshot. */
+  /** The facts saved at import; `prTaskFiles`, `prTaskFileCommitters` and `taskFilePr` are carried into the snapshot. */
   facts_json?: Partial<TaskFacts> | null;
 };
 
@@ -43,6 +44,11 @@ export type TaskSnapshot = {
   prTaskFiles?: string[];
   /** Who committed each of those task files, for a PR that adds several. Missing on older tasks and snapshots. Staff only. */
   prTaskFileCommitters?: TaskFacts["prTaskFileCommitters"];
+  /**
+   * For a merged PR with no task file: the separate PR its task file came from. The spec is the saved one; the
+   * diff, comments and checks are this task's PR (the work PR). Missing on normal tasks and older snapshots.
+   */
+  taskFilePr?: TaskFilePr;
   pr: { title: string; body: string; headRef: string; author: string | null; mergedAt: string | null; baseSha: string; mergeCommitSha: string };
   baseCommit: string;
   /** Where the diff starts: the base tag, the PR's first commit when the tag isn't on it (#342), or the PR base. */
@@ -106,6 +112,7 @@ export async function readCommitChecks(gh: GitHubReader, owner: string, repo: st
 
 /** `samePrTaskPaths`: the task files of the student's other tasks from this same PR (two tasks, one PR). */
 export async function captureTaskSnapshot(gh: GitHubReader, task: SubmittedTaskRow, samePrTaskPaths: string[] = []): Promise<TaskSnapshot> {
+  const taskFilePr = savedTaskFilePr(task.facts_json);
   const [owner, repo] = task.repo_full_name.split("/") as [string, string];
   const base = `/repos/${owner}/${repo}`;
   const pull = await gh.json<Pull>(`${base}/pulls/${task.pr_number}`);
@@ -129,7 +136,8 @@ export async function captureTaskSnapshot(gh: GitHubReader, task: SubmittedTaskR
   if (baseTagSha && baseTagSha === firstSha) {
     baseCommit = baseTagSha;
     baseCommitSource = "base_tag";
-  } else if (firstSha) {
+  } else if (firstSha && !taskFilePr) {
+    // A paired task's PR has no task file, so its first commit is never the task file alone.
     const first = await gh.json<{ files?: Array<{ filename: string }>; commit?: { author?: { email?: string } } }>(`${base}/commits/${firstSha}`);
     if (firstCommitHoldsOnlyTaskFiles(first?.files, task.task_path, [...samePrTaskPaths, ...(task.facts_json?.prTaskFiles ?? [])])) {
       baseCommit = firstSha;
@@ -177,6 +185,7 @@ export async function captureTaskSnapshot(gh: GitHubReader, task: SubmittedTaskR
     ...(Array.isArray(task.facts_json?.prTaskFiles) ? { prTaskFiles: task.facts_json.prTaskFiles } : {}),
     ...(task.facts_json?.prTaskFileCommitters && typeof task.facts_json.prTaskFileCommitters === "object"
       ? { prTaskFileCommitters: task.facts_json.prTaskFileCommitters } : {}),
+    ...(taskFilePr ? { taskFilePr } : {}),
     pr: {
       title: pull.title,
       body: pull.body ?? "",

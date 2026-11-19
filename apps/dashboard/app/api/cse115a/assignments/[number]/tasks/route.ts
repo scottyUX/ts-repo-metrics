@@ -2,14 +2,14 @@ import { NextResponse } from "next/server";
 import { getSupabase, isSupabaseConfigured } from "@/lib/supabase/server";
 import { getActiveAssignmentSubmission, getCourseIdentity, getEnrolledCourse, lockedAssignmentMessage, TASK_SUBMISSION_COLUMNS } from "@/lib/cse115a/server";
 import { CourseRepoAccessError, courseRepoReader } from "@/lib/cse115a/githubApp";
-import { ChooseTaskFileError, importTaskFromPullRequest } from "@/lib/cse115a/githubTaskImport";
+import { ChooseTaskFileError, importTaskFromPullRequest, NeedTaskFilePrError } from "@/lib/cse115a/githubTaskImport";
 import { parseGitHubUrl } from "@/lib/github/parseGitHubUrl";
-import { duplicateTaskMessage, ownTaskConflict, ownTasksFromSamePr, saveConflictMessage, type OwnTask } from "@/lib/cse115a/duplicateTask";
+import { duplicateTaskMessage, ownTaskConflict, ownTaskFilePrConflict, ownTasksFromSamePr, saveConflictMessage, type OwnTask } from "@/lib/cse115a/duplicateTask";
 
 export const runtime = "nodejs";
 
 type Params = { params: Promise<{ number: string }> };
-type SubmissionBody = { courseSlug?: unknown; slot?: unknown; prUrl?: unknown; taskPath?: unknown; resultId?: unknown; scrumBoard?: unknown };
+type SubmissionBody = { courseSlug?: unknown; slot?: unknown; prUrl?: unknown; taskPath?: unknown; taskFilePrUrl?: unknown; resultId?: unknown; scrumBoard?: unknown };
 
 function lockedResponse(assignmentNumber: number) {
   return NextResponse.json({ error: lockedAssignmentMessage(assignmentNumber), code: "already_submitted" }, { status: 409 });
@@ -50,9 +50,10 @@ export async function POST(request: Request, params: Params) {
   if (!identity.githubLogin) return NextResponse.json({ error: "Connect GitHub before submitting a pull request.", code: "github_not_linked" }, { status: 403 });
   const prUrl = typeof body.prUrl === "string" ? body.prUrl.trim() : "";
   const taskPath = typeof body.taskPath === "string" && body.taskPath.trim() ? body.taskPath.trim() : null;
+  const taskFilePrUrl = typeof body.taskFilePrUrl === "string" && body.taskFilePrUrl.trim() ? body.taskFilePrUrl.trim() : null;
   const db = getSupabase();
   const { data: ownRows, error: ownError } = await db.from("cse_task_submissions")
-    .select("assignment_number,task_slot,repo_full_name,pr_number,task_path")
+    .select("assignment_number,task_slot,repo_full_name,pr_number,task_path,facts_json")
     .eq("course_id", course.id).eq("user_id", identity.userId);
   if (ownError) return NextResponse.json({ error: "Could not check this task against your other tasks." }, { status: 500 });
   const own = (ownRows ?? []) as OwnTask[];
@@ -64,7 +65,7 @@ export async function POST(request: Request, params: Params) {
     .ilike("repo_full_name", repoFullName);
   let imported;
   try {
-    imported = await importTaskFromPullRequest(prUrl, assignmentNumber, courseRepoReader(identity.githubLogin), identity.githubLogin, { taskPath });
+    imported = await importTaskFromPullRequest(prUrl, assignmentNumber, courseRepoReader(identity.githubLogin), identity.githubLogin, { taskPath, taskFilePrUrl });
   } catch (error) {
     if (error instanceof CourseRepoAccessError) return NextResponse.json({ error: error.message, code: error.code }, { status: 403 });
     if (error instanceof ChooseTaskFileError) {
@@ -80,15 +81,34 @@ export async function POST(request: Request, params: Params) {
       });
       return NextResponse.json({ error: error.message, code: error.code, choices }, { status: 409 });
     }
+    if (error instanceof NeedTaskFilePrError) {
+      // A merged PR with no task file: the form asks for a task-file PR. Another student's PR is refused first.
+      const { data: others, error: othersError } = await otherStudents(error.repoFullName);
+      if (othersError) return NextResponse.json({ error: "Could not check this task against other students' tasks." }, { status: 500 });
+      const duplicate = duplicateTaskMessage(others ?? [], { repoFullName: error.repoFullName, prNumber: error.prNumber, taskId: null });
+      if (duplicate) return NextResponse.json({ error: duplicate, code: "taken_by_another_student" }, { status: 409 });
+      return NextResponse.json({ error: error.message, code: error.code }, { status: 409 });
+    }
     return NextResponse.json({ error: error instanceof Error ? error.message : "Could not import this task." }, { status: 422 });
   }
   const { data: others, error: othersError } = await otherStudents(imported.repoFullName);
   if (othersError) return NextResponse.json({ error: "Could not check this task against other students' tasks." }, { status: 500 });
   const duplicate = duplicateTaskMessage(others ?? [], { repoFullName: imported.repoFullName, prNumber: imported.prNumber, taskId: imported.spec.id });
   if (duplicate) return NextResponse.json({ error: duplicate, code: "taken_by_another_student" }, { status: 409 });
+  // A task-file PR another student already added, as their PR, blocks too. (Their task-file PRs are opened by them,
+  // and this one by this student, so the two can't meet.)
+  const taskFilePr = imported.facts.taskFilePr ?? null;
+  const pairDuplicate = taskFilePr
+    ? duplicateTaskMessage(others ?? [], { repoFullName: imported.repoFullName, prNumber: taskFilePr.number, taskId: null })
+    : null;
+  if (pairDuplicate) return NextResponse.json({ error: pairDuplicate, code: "taken_by_another_student" }, { status: 409 });
   // The same PR in both slots only with two different task files it adds; the same file twice never reaches the database.
   const conflict = ownTaskConflict(own, { assignmentNumber, slot, repoFullName: imported.repoFullName, prNumber: imported.prNumber, taskPath: imported.taskPath });
   if (conflict) return NextResponse.json({ error: conflict, code: "task_file_already_used" }, { status: 409 });
+  const pairConflict = taskFilePr
+    ? ownTaskFilePrConflict(own, { assignmentNumber, slot, repoFullName: imported.repoFullName, prNumber: imported.prNumber, taskFilePrNumber: taskFilePr.number })
+    : null;
+  if (pairConflict) return NextResponse.json({ error: pairConflict, code: "task_file_already_used" }, { status: 409 });
   const { data: existing } = await db.from("cse_task_submissions")
     .select("pr_url,analysis_result_id")
     .eq("course_id", course.id).eq("user_id", identity.userId)

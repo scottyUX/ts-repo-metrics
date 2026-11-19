@@ -35,7 +35,7 @@ export const SWE_BENCH_FIELDS = [
   "eval_type", "image", "eval_script", "log_parser", "difficulty", "repo_metrics",
 ] as const satisfies readonly (keyof BenchmarkInstance)[];
 
-export type BuildFlag = "base_commit_from_pr_base" | "base_commit_from_first_commit" | "diff_missing" | "diff_truncated" | "no_test_patch" | "no_source_patch" | "no_tests_found" | "pii_scrubbed_from_patch" | "ai_tool_files_dropped" | "pr_holds_two_tasks";
+export type BuildFlag = "base_commit_from_pr_base" | "base_commit_from_first_commit" | "diff_missing" | "diff_truncated" | "no_test_patch" | "no_source_patch" | "no_tests_found" | "pii_scrubbed_from_patch" | "ai_tool_files_dropped" | "pr_holds_two_tasks" | "task_file_from_other_pr";
 
 /** SWE-bench Verified difficulty labels, from the student's estimate. */
 export function difficultyFor(estimateHours: number | undefined): string | null {
@@ -86,6 +86,9 @@ export function buildInstance(
   if (aiToolFilesDropped) flags.push("ai_tool_files_dropped");
   // A shared diff is not one task's work. Export leaves the row out; a later rebuild splits the diff by task.
   if (options.prHoldsTwoTasks) flags.push("pr_holds_two_tasks");
+  // The task file came from a separate PR merged after the work. The row is still exportable: the task text
+  // and the diff are each complete; the flag says the spec was written or added after the code.
+  if (task.taskFilePr) flags.push("task_file_from_other_pr");
   return {
     instance: {
       instance_id: instanceId(task.repoFullName, task.taskId),

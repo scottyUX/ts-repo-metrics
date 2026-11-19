@@ -105,9 +105,10 @@ describe("two task files in one merged PR: choosing the task file", () => {
 
   it("under Assignment 3, finds no task file: the PR only modifies the teammate's file there", async () => {
     stubPull();
-    await expect(importAs(3)).rejects.toThrow(new Error(
-      "No task file was found in docs/tasks/sprint-3/ in this PR. It changes Y-T-1.md but does not add it; a PR's task file is one it adds.",
-    ));
+    await expect(importAs(3)).rejects.toMatchObject({
+      code: "need_task_file_pr",
+      message: "It changes Y-T-1.md but does not add it; a PR's task file is one it adds. This merged PR does not add a task file in docs/tasks/sprint-3/. A merged PR can't be changed, so open a new PR that adds only your task file, merge it, and paste its link below. If you don't see a second box, refresh the page.",
+    });
   });
 
   it("imports each chosen file on its own: its own ID, estimate and checks", async () => {

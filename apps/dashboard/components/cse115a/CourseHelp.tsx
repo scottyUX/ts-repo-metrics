@@ -68,6 +68,10 @@ const FAQS = [
     a: "Yes, until you submit the sprint. Click Change PR and paste a merged pull request. It can be from the same repository or a different one.",
   },
   {
+    q: "I merged my PR without a task file. What now?",
+    a: "A merged pull request can't be changed. Open a new pull request, from your own GitHub account in the same repository, that adds only your task file (docs/tasks/sprint-N/YOUR-ID.md) and changes nothing else, and merge it. Paste the first pull request and click Add PR. A second box asks for the task-file PR: paste its link and click Add both PRs. Your task is graded on the code in the first pull request. If your pull request is not merged yet, add the task file to it before you merge instead.",
+  },
+  {
     q: "I already submitted. Can I change a task?",
     a: "Click Change submission before the sprint deadline, and before a grade is released. That withdraws the sprint so you can edit. Submit again when your tasks are ready.",
   },

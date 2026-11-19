@@ -22,7 +22,11 @@ export function duplicateTaskMessage(
   return null;
 }
 
-export type OwnTask = { assignment_number: number; task_slot: number; repo_full_name: string; pr_number: number; task_path: string };
+/** `facts_json.taskFilePr` is set on a task whose task file came from a separate task-file PR. */
+export type OwnTask = {
+  assignment_number: number; task_slot: number; repo_full_name: string; pr_number: number; task_path: string;
+  facts_json?: { taskFilePr?: { number?: unknown } | null } | null;
+};
 export type TaskTarget = { assignmentNumber: number; slot: number; repoFullName: string; prNumber: number };
 
 /** The student's other tasks from the same PR: every slot but the one being filled. */
@@ -49,6 +53,17 @@ export function ownTaskConflict(own: OwnTask[], target: TaskTarget & { taskPath:
   }
   if (samePr.length >= 2) return "At most two task files from one PR can be used, one for each task.";
   return null;
+}
+
+/**
+ * Why this student can't use this task-file PR, or null: it is already the PR or the task-file PR of one of their
+ * tasks in another slot or sprint. A task-file PR holds one task file, so it serves one task.
+ */
+export function ownTaskFilePrConflict(own: OwnTask[], target: TaskTarget & { taskFilePrNumber: number }): string | null {
+  const used = own.find((row) => sameText(row.repo_full_name, target.repoFullName)
+    && !(row.assignment_number === target.assignmentNumber && row.task_slot === target.slot)
+    && (row.pr_number === target.taskFilePrNumber || row.facts_json?.taskFilePr?.number === target.taskFilePrNumber));
+  return used ? `That PR is already used by your ${slotName(used, target.assignmentNumber)}.` : null;
 }
 
 /**
