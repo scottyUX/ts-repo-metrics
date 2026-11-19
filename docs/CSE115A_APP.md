@@ -195,6 +195,15 @@ task file alone (`base_commit_from_first_commit`), or at the PR base.
 - Export (`lib/cse115a/benchmark/exportJsonl.ts`) includes an instance only
   when a student who submitted it said yes to the current, approved consent
   wording and no source is rejected.
+- Each JSONL line has the SWE-bench fields, unchanged and in the same order,
+  then one more key, `task_file_first` (boolean). It is `false` when any
+  source of the instance is flagged `base_commit_from_pr_base` or
+  `task_file_from_other_pr`: the task file was not committed alone as the
+  PR's first commit, or came from a separate PR after the code was merged,
+  so the spec may have been written after the code. `false` also covers the
+  rare case where the PR's first commit could not be read. Otherwise it is
+  `true`. Rows are not filtered on it; readers that ignore unknown keys, as
+  the SWE-bench harness does, see no change.
 
 ## Instructor tools
 
