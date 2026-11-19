@@ -166,9 +166,13 @@ one PR still get a row each. A task whose task file came from a separate
 task-file PR is flagged `task_file_from_other_pr` and still exported: its task
 text and its diff are each complete, but the spec was written after the code.
 
-The diff starts at the base tag only when the tag is on the PR's first
-commit; otherwise it starts at the PR's first commit when that commit is the
-task file alone (`base_commit_from_first_commit`), or at the PR base.
+The diff starts after the PR's first commit only when that commit holds only
+task files and the task is not paired: at the base tag when the tag is on that
+commit, otherwise at the commit itself (`base_commit_from_first_commit`). In
+every other case it starts at the PR base, so a base tag on a first commit that
+holds code, or on a paired task's work PR, is ignored and cannot cut that
+commit's code out of the diff. For such tasks the card's base-tag line shows no
+command ("Don't add this tag: …") and is not counted in "N to fix".
 
 - `patch` and `test_patch` split the base-tag-to-merge diff by test path
   (`lib/cse115a/diff.ts`).
@@ -203,7 +207,12 @@ task file alone (`base_commit_from_first_commit`), or at the PR base.
   so the spec may have been written after the code. `false` also covers the
   rare case where the PR's first commit could not be read. Otherwise it is
   `true`. Rows are not filtered on it; readers that ignore unknown keys, as
-  the SWE-bench harness does, see no change.
+  the SWE-bench harness does, see no change. Known gap: a row captured before
+  the base-tag fix, from a base tag a student had put on a first commit that
+  holds code, has no flag and reads `task_file_first: true`. The fix stops new
+  ones; staff find the old ones with a read-only query on the saved snapshots
+  for tasks whose `baseCommitSource` is `base_tag` while `specCommittedFirst`
+  is false.
 
 ## Instructor tools
 

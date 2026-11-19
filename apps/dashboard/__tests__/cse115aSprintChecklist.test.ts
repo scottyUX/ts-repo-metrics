@@ -17,6 +17,8 @@ import {
   submitBarText,
   submitTasksError,
   canChangeSubmission,
+  linesToFix,
+  NO_BASE_TAG_DETAIL,
   type TaskFacts,
 } from "@/lib/cse115a/processChecklist";
 
@@ -71,6 +73,51 @@ describe("sprint checklist", () => {
     expect(html).toContain("GitHub Actions: 2 of 3 failed");
     expect(html).toContain("No test files in this PR");
     expect(html).not.toContain("✗");
+  });
+
+  describe("base-tag line when the first commit isn't the task file alone", () => {
+    // A code-first PR: the spec-first check fails and no base tag was pushed.
+    const codeFirst = { ...passing, specCommittedFirst: false, baseTagPushed: false };
+    const baseLine = (validation: Record<string, boolean>, lineFacts: Partial<TaskFacts>) =>
+      processChecklist(validation, lineFacts, "US-4-T-2").find((entry) => entry.key === "baseTagPushed")!;
+
+    it("shows the don't-tag detail with no command and leaves the line out of N to fix", () => {
+      expect(NO_BASE_TAG_DETAIL).toBe("Don't add this tag: your first commit isn't the task file, so tagging it would leave that commit's code out of your graded work.");
+      const codeFacts = { ...facts, firstCommitTaskOnly: false };
+      const line = baseLine(codeFirst, codeFacts);
+      expect(line).toMatchObject({ ok: false, detail: NO_BASE_TAG_DETAIL, counts: false });
+      expect(line.detail).not.toContain("git ");
+      const lines = processChecklist(codeFirst, codeFacts, "US-4-T-2");
+      expect(linesToFix(lines).map((entry) => entry.key)).toEqual(["specCommittedFirst"]);
+      const html = renderToStaticMarkup(createElement(ProcessChecklist, { validation: codeFirst, facts: codeFacts, taskId: "US-4-T-2" }));
+      expect(html).not.toContain("git tag US-4-T-2-base");
+      expect(html).toContain("Don&#x27;t add this tag");
+    });
+
+    it("keeps today's command for a task-file-first PR with no tag, and when the first commit is unknown", () => {
+      const noTag = { ...passing, baseTagPushed: false };
+      const command = "git fetch origin pull/7/head && git tag US-4-T-2-base a1b2c3d && git push origin US-4-T-2-base";
+      for (const firstCommitTaskOnly of [true, null, undefined]) {
+        const lineFacts = { ...facts, firstCommitTaskOnly };
+        const line = baseLine(noTag, lineFacts);
+        expect(line).toEqual({ key: "baseTagPushed", ok: false, label: "US-4-T-2-base tag pushed", detail: command });
+        expect(linesToFix(processChecklist(noTag, lineFacts, "US-4-T-2")).map((entry) => entry.key)).toEqual(["baseTagPushed"]);
+        expect(baseLine(codeFirst, lineFacts).detail).toBe(command);
+      }
+    });
+
+    it("shows the don't-tag detail for a paired task", () => {
+      const pairedFacts = { ...facts, firstCommitTaskOnly: null, taskFilePr: { url: "https://github.com/team/proj/pull/8", number: 8, mergeSha: "c0ffee1" } };
+      expect(baseLine(codeFirst, pairedFacts)).toMatchObject({ ok: false, detail: NO_BASE_TAG_DETAIL, counts: false });
+      expect(baseLine(codeFirst, { ...pairedFacts, firstCommitTaskOnly: false }).detail).toBe(NO_BASE_TAG_DETAIL);
+    });
+
+    it("leaves a pushed tag's line and sprintReady as they were", () => {
+      const tagged = { ...codeFirst, baseTagPushed: true };
+      expect(baseLine(tagged, { ...facts, firstCommitTaskOnly: false })).toEqual({ key: "baseTagPushed", ok: true, label: "US-4-T-2-base tag pushed", detail: null });
+      expect(sprintReady(codeFirst)).toBe(false);
+      expect(sprintReady(tagged)).toBe(false);
+    });
   });
 
   it("offers Submit anyway only after both PRs are added", () => {

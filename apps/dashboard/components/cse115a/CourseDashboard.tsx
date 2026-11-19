@@ -17,6 +17,7 @@ import { NEED_TASK_FILE_PR_CODE, recheckRequest, savedTaskFilePr, TASK_FILE_PR_B
 import {
   BIG_TASK_MIN_HOURS,
   firstOpenSprint,
+  linesToFix,
   processChecklist,
   resolvePullRequestUrl,
   sprintReady,
@@ -635,7 +636,8 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
                 const grade = releasedGrades.find((row) => row.slot === slot) ?? null;
                 const showInput = !locked && (!item || changing[slot]);
                 const lines = item ? processChecklist(item.validation_json, item.facts_json, item.task_id) : [];
-                const fixCount = lines.filter((line) => !line.ok).length;
+                const fixCount = linesToFix(lines).length;
+                const countedLines = lines.filter((line) => line.counts !== false).length;
                 const prNumber = item?.pr_url.match(/\/pull\/(\d+)/)?.[1];
                 const lost = grade ? grade.criteria.filter((row) => row.awarded < row.points) : [];
                 const choice = taskFileChoices[slot] ?? null;
@@ -688,7 +690,7 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
                           <details className="group">
                             <summary className="cursor-pointer list-none text-slate-700 [&::-webkit-details-marker]:hidden">
                               <span aria-hidden className="mr-1 inline-block transition-transform group-open:rotate-90">›</span>
-                              Process checks: {lines.length - fixCount} of {lines.length} {fixCount === 0 ? "✓" : ""}
+                              Process checks: {countedLines - fixCount} of {countedLines} {fixCount === 0 ? "✓" : ""}
                             </summary>
                             <ProcessChecklist validation={item.validation_json} facts={item.facts_json} taskId={item.task_id} />
                           </details>
