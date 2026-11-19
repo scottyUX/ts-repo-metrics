@@ -352,8 +352,8 @@ export default function CourseAnalyzePage() {
             <h2 className="font-semibold">Before you analyze</h2>
             <ol className="mt-3 list-inside list-decimal space-y-2 text-muted-foreground">
               <li>Complete two different tasks this sprint, each with its own spec in <code>docs/tasks/sprint-N/</code>.</li>
-              <li>Commit each spec before implementation and push its <code>&lt;id&gt;-base</code> tag.</li>
-              <li>Commit tests for every acceptance criterion, merge each task PR, and push its <code>&lt;id&gt;-done</code> tag.</li>
+              <li>Commit each task file alone, first, and push it before you write code.</li>
+              <li>Commit tests for every acceptance criterion and merge each task PR.</li>
               <li>Run Repo Metrics on each merged PR. Submit the two PR links on Canvas.</li>
             </ol>
             <p className="mt-3 text-muted-foreground">Your team name is recorded in Repo Metrics only; it is not part of your Canvas submission.</p>

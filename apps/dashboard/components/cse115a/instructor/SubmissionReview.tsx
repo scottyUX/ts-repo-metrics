@@ -97,7 +97,7 @@ function TaskPanel({ submissionId, task, grade, onSaved, readOnly, sharedPr }: {
         <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm">
           <a href={task.prUrl} target="_blank" rel="noopener noreferrer" className="text-primary underline">PR #{task.prNumber}</a>
           <Link href={`/cse115a/instructor/submissions/${submissionId}/tasks/${task.slot}/metrics`} className="text-primary underline">Repo Metrics</Link>
-          <span className="font-mono text-xs text-muted-foreground">base {task.baseCommit.slice(0, 7)}{task.baseCommitSource === "pr_base" ? " (PR base; no usable base tag)" : task.baseCommitSource === "first_commit" ? " (PR's first commit; base tag missing or not on this PR)" : ""}</span>
+          <span className="font-mono text-xs text-muted-foreground">base {task.baseCommit.slice(0, 7)}{task.baseCommitSource === "pr_base" ? " (PR base; the task file was not first)" : " (PR's first commit, the task file alone)"}</span>
         </div>
         {task.taskFilePr ? <p className="mt-2 text-sm text-amber-700 dark:text-amber-300">{taskFilePrReviewLine(task.taskFilePr.number, task.prNumber)}</p> : null}
         {sharedPr.map((line) => <p key={line} className="mt-2 text-sm text-amber-700 dark:text-amber-300">{line}</p>)}

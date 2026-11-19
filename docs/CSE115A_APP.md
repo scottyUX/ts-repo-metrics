@@ -66,8 +66,23 @@ Each assignment has two task slots. Import requires a merged PR that adds
 exactly one task file under the matching `docs/tasks/sprint-N/` directory. Only
 a task file the PR adds can be its own: one it only modifies or removes (say, a
 teammate's file changed by a merge from `main`) never is. The task ID in its
-front matter must match the filename. Missing tags or process evidence
-are shown as checks for the student; the app does not assign a grade.
+front matter must match the filename. Missing process evidence is shown as
+checks for the student; the app does not assign a grade.
+
+The task card's checklist has four checks: task file committed alone, first;
+opened from the student's GitHub account; task ID in the PR title and branch;
+estimate at least 2 hours. Below them are the CI and test-file facts, which are
+not checks. A task is Ready when all four pass. Students push no tags (#392):
+the app finds the PR's first commit (GitHub's list of the PR's commits) and its
+merge commit (stored on the PR) itself, and any `-base` or `-done` tags in the
+repository are ignored. "Task file committed alone, first" passes when the PR's
+first commit holds only task files the PR adds, this task's among them, and
+the task is not paired with a separate task-file PR. When it fails it can't be
+fixed on that PR. Rows saved before #392 stored it as false whenever the base
+tag was missing; the card and Ready use `facts_json.firstCommitTaskOnly` when it
+is recorded, so such a task shows the line as passed without a Re-check. Those
+rows also still carry `baseTagPushed` and `doneTagOnMergeCommit` in
+`validation_json`; nothing reads or shows them.
 
 A PR that is still open is not imported, but its task file is checked at the
 PR's head commit and the student is told every problem at once, so the file can
@@ -83,7 +98,7 @@ files it adds; the student picks one per slot (a file used in the other slot is
 shown as taken), and the server re-checks the choice against the PR's added
 task files. Only the PR's author can do this, each file must pass every check
 on its own, and at most two of its task files can be used. Each slot keeps its
-own task file, ID, tags and grade; the captured diff is the same for both, and
+own task file, ID and grade; the captured diff is the same for both, and
 the grader is told to judge each task only against its own task file. The same
 applies when the student uses only one file of such a PR: the task card, the
 review page and the grader say the PR adds another task file. "Task
@@ -108,7 +123,7 @@ the second link. Only the work PR's author can pair. The task-file PR is
 checked in order: same repository, not the work PR, merged, opened by the
 student, its only file an added task file for this sprint, and that file passes
 every task-file check at the task-file PR's merge commit. The task file, ID and
-spec come from it; the PR number, tags, first commit, CI, test count, title and
+spec come from it; the PR number, first commit, CI, test count, title and
 branch checks, diff and analysis come from the work PR. "Task file committed
 first" fails (the work PR has none). The task-file PR is saved in
 `facts_json.taskFilePr` (`url`, `number`, `mergeSha`); Re-check re-imports the
@@ -130,8 +145,14 @@ submit-time snapshot (one or two), and saves a draft in `cse_task_grades`. Stude
 grade only after an instructor releases it.
 
 - **Tests pass** and **Process** come from recorded evidence: CI conclusions on
-  the merge commit and the import checks. No finished CI, or a missing base
-  tag, marks the criterion for instructor review.
+  the merge commit and the import checks. No finished CI marks Tests pass for
+  instructor review.
+- **Process** has two steps, PR merged and task file first. The task file came
+  first when `specCommittedFirst` is true or the snapshot's diff starts at the
+  PR's first commit (`baseCommitSource` `first_commit`, which also covers a
+  snapshot taken before #392 whose task file was first but untagged). Both:
+  full. Task file not first: none, always marked for instructor review. Not
+  merged: partial. Tags play no part.
 - The other five criteria come from one OpenAI call per task with a strict JSON
   schema. Each must quote the submission; a quote that is missing or not found
   in the spec or diff marks it for review. The model and prompt version are
@@ -166,15 +187,17 @@ one PR still get a row each. A task whose task file came from a separate
 task-file PR is flagged `task_file_from_other_pr` and still exported: its task
 text and its diff are each complete, but the spec was written after the code.
 
-The diff starts after the PR's first commit only when that commit holds only
-task files and the task is not paired: at the base tag when the tag is on that
-commit, otherwise at the commit itself (`base_commit_from_first_commit`). In
-every other case it starts at the PR base, so a base tag on a first commit that
-holds code, or on a paired task's work PR, is ignored and cannot cut that
-commit's code out of the diff. For such tasks the card's base-tag line shows no
-command ("Don't add this tag: …") and is not counted in "N to fix".
+The diff ends at the merge commit. It starts after the PR's first commit only
+when the task file came first (that commit holds only task files the PR adds
+and the task is not paired): `baseCommitSource` `first_commit`, flag
+`base_commit_from_first_commit`. In every other case it starts at the PR base
+(`pr_base`, flag `base_commit_from_pr_base`), so no code is ever cut out of the
+diff. No tag is read (#392). Snapshots taken before #392 may say `base_tag`,
+for a base tag on that same task-file-only first commit; the range was the same
+as `first_commit`, and those rows get neither flag.
 
-- `patch` and `test_patch` split the base-tag-to-merge diff by test path
+- `patch` and `test_patch` split the first-commit-to-merge (or
+  PR-base-to-merge) diff by test path
   (`lib/cse115a/diff.ts`).
 - Files that AI coding tools keep in a repo are left out of both: anything
   under `.agents/`, `.claude/`, `.cursor/` or `.windsurf/`, and

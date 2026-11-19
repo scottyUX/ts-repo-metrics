@@ -14,7 +14,7 @@ export default async function Cse115aLanding() {
           Submit your sprint tasks.
           <span className="mt-2 block">See how they&apos;re graded.</span>
         </h1>
-        <p className="mx-auto max-w-2xl text-lg leading-relaxed text-slate-600">Paste two merged PRs per sprint. We read your task spec, check your tags and tests, and show you the rubric and Repo Metrics results.</p>
+        <p className="mx-auto max-w-2xl text-lg leading-relaxed text-slate-600">Paste two merged PRs per sprint. We read your task spec, check that it came first and your tests, and show you the rubric and Repo Metrics results.</p>
         <UcscGoogleButton />
         <p className="text-sm text-slate-500">Works best on desktop. Mobile support is limited.</p>
       </div>
