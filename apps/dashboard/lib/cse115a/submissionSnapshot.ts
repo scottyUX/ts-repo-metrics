@@ -21,7 +21,7 @@ export type SubmittedTaskRow = {
   task_spec_json: TaskSpec;
   validation_json: Record<string, boolean>;
   analysis_result_id: string;
-  /** The facts saved at import; `prTaskFiles` is carried into the snapshot. */
+  /** The facts saved at import; `prTaskFiles` and `prTaskFileCommitters` are carried into the snapshot. */
   facts_json?: Partial<TaskFacts> | null;
 };
 
@@ -41,6 +41,8 @@ export type TaskSnapshot = {
   analysisResultId: string;
   /** The task files this task's PR adds in the sprint folder, from import. Missing on older tasks and snapshots. */
   prTaskFiles?: string[];
+  /** Who committed each of those task files, for a PR that adds several. Missing on older tasks and snapshots. Staff only. */
+  prTaskFileCommitters?: TaskFacts["prTaskFileCommitters"];
   pr: { title: string; body: string; headRef: string; author: string | null; mergedAt: string | null; baseSha: string; mergeCommitSha: string };
   baseCommit: string;
   /** Where the diff starts: the base tag, the PR's first commit when the tag isn't on it (#342), or the PR base. */
@@ -173,6 +175,8 @@ export async function captureTaskSnapshot(gh: GitHubReader, task: SubmittedTaskR
     validation: task.validation_json,
     analysisResultId: task.analysis_result_id,
     ...(Array.isArray(task.facts_json?.prTaskFiles) ? { prTaskFiles: task.facts_json.prTaskFiles } : {}),
+    ...(task.facts_json?.prTaskFileCommitters && typeof task.facts_json.prTaskFileCommitters === "object"
+      ? { prTaskFileCommitters: task.facts_json.prTaskFileCommitters } : {}),
     pr: {
       title: pull.title,
       body: pull.body ?? "",

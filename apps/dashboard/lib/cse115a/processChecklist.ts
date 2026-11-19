@@ -40,6 +40,8 @@ export type TaskFacts = {
   /** How many task files the PR adds in the sprint folder, and which. More than one marks the task's shared diff. */
   prTaskFileCount?: number;
   prTaskFiles?: string[];
+  /** For a PR that adds several task files: who committed each, by path. No logins are stored. */
+  prTaskFileCommitters?: Record<string, "student" | "someone_else" | "unknown">;
 };
 
 export type ChecklistLine = {

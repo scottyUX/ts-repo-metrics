@@ -4,7 +4,7 @@ import { estimateMeetsTaskMinimum, summarizeCi, type TaskFacts } from "@/lib/cse
 import { readCommitChecks } from "@/lib/cse115a/submissionSnapshot";
 import { canonicalHeadings, checkTaskSpec, filenameMatchesId, isTaskFilePath, parsePullRequestUrl, taskIdProblem, type TaskSpec } from "@/lib/cse115a/taskSpec";
 import { tagCommitSha, type GitHubReader } from "@/lib/cse115a/githubClient";
-import { firstCommitHoldsOnlyTaskFiles } from "@/lib/cse115a/sharedPr";
+import { firstCommitHoldsOnlyTaskFiles, type TaskFileCommitter } from "@/lib/cse115a/sharedPr";
 
 type GitHubPull = {
   title: string;
@@ -53,7 +53,7 @@ export type TaskFileChoice = { path: string; taskId: string };
 export class ChooseTaskFileError extends Error {
   readonly code = "choose_task_file";
   constructor(readonly choices: TaskFileChoice[], readonly repoFullName: string, readonly prNumber: number) {
-    super(`This merged PR adds ${choices.length} task files. Choose which one is this task.`);
+    super("This merged PR adds several task files. Choose which one is this task. If you don't see the choices, refresh the page.");
     this.name = "ChooseTaskFileError";
   }
 }
@@ -87,6 +87,51 @@ function chooseTaskFile(files: GitHubFile[], sprint: number): { path: string } |
   return {
     problem: `${notFound} It adds ${others.length} other .md files there (${names}); a task file is named after its task ID, for example US-${sprint}-T-1.md.`,
   };
+}
+
+/**
+ * Who made the commit that added a task file, called only for a PR that adds more than one: "student" when its
+ * GitHub account is the student's linked login, "someone_else" for another account, "unknown" when the commit has
+ * no GitHub account or the lookup can't tell (a failed request, an empty list, or a full page of 100 that may have
+ * more). The list is newest first, so the last entry added the file. Never throws.
+ */
+async function taskFileCommitter(
+  gh: GitHubReader, owner: string, repo: string, headSha: string | undefined, path: string, githubLogin: string,
+): Promise<TaskFileCommitter> {
+  if (!headSha) return "unknown";
+  try {
+    const encodedPath = path.split("/").map(encodeURIComponent).join("/");
+    const commits = await gh.json<Array<{ author?: { login?: string } | null }>>(
+      `/repos/${owner}/${repo}/commits?sha=${encodeURIComponent(headSha)}&path=${encodedPath}&per_page=100`,
+    );
+    if (!Array.isArray(commits) || commits.length === 0 || commits.length >= 100) return "unknown";
+    const login = commits[commits.length - 1]?.author?.login;
+    if (typeof login !== "string" || !login) return "unknown";
+    return login.toLowerCase() === githubLogin.toLowerCase() ? "student" : "someone_else";
+  } catch {
+    return "unknown";
+  }
+}
+
+/** Who committed each task file a PR adds, by path. */
+async function taskFileCommitters(
+  gh: GitHubReader, owner: string, repo: string, headSha: string | undefined, paths: string[], githubLogin: string,
+): Promise<Record<string, TaskFileCommitter>> {
+  const found = await Promise.all(paths.map((path) => taskFileCommitter(gh, owner, repo, headSha, path, githubLogin)));
+  return Object.fromEntries(paths.map((path, index) => [path, found[index]!]));
+}
+
+/** No task file the PR adds is the student's own. */
+function noTaskFileYoursMessage(githubLogin: string): string {
+  return `None of the task files this PR adds were committed from your GitHub account (@${githubLogin}). If you commit from another account, contact a TA.`;
+}
+
+/** An open PR's task files committed by someone else, usually from a teammate's branch merged into the student's. */
+function someoneElsesTaskFilesProblem(paths: string[]): string {
+  const names = paths.map(fileName).join(", ");
+  return paths.length === 1
+    ? `${names} was committed by someone else, probably because their branch was merged into yours. Their PR should merge first; then update your branch from main and it drops out of this PR.`
+    : `${names} were committed by someone else, probably because their branch was merged into yours. Their PR should merge first; then update your branch from main and they drop out of this PR.`;
 }
 
 /** Why an open PR with several task files can't be merged as it is. */
@@ -123,27 +168,37 @@ function taskFileProblems(markdown: string, taskPath: string, sprint: number): {
 
 /**
  * Checks an open task PR's task file at its head commit, so the student can fix it before merging (#388).
- * Always throws: an open PR is never imported. Reads only the PR, its files and the task file.
+ * Always throws: an open PR is never imported. Reads only the PR, its files and the task file, and, when it adds
+ * several task files, who committed each.
  */
 async function refuseOpenPullRequest(
-  gh: GitHubReader, owner: string, repo: string, number: number, headSha: string | undefined, sprint: number,
+  gh: GitHubReader, owner: string, repo: string, number: number, headSha: string | undefined, sprint: number, githubLogin: string,
 ): Promise<never> {
   const chosen = chooseTaskFile(await pullRequestFiles(gh, owner, repo, number), sprint);
-  let problems: string[];
-  if ("problem" in chosen) {
-    problems = [chosen.problem];
-  } else if ("several" in chosen) {
-    problems = [severalTaskFilesProblem(chosen.several)];
-  } else {
+  const formatProblems = async (path: string): Promise<string[]> => {
     let markdown: string | null = null;
     if (headSha) {
       try {
-        markdown = await readTaskFile(gh, owner, repo, chosen.path, headSha);
+        markdown = await readTaskFile(gh, owner, repo, path, headSha);
       } catch {
         markdown = null;
       }
     }
-    problems = markdown === null ? ["The task file could not be read from this pull request."] : taskFileProblems(markdown, chosen.path, sprint).problems;
+    return markdown === null ? ["The task file could not be read from this pull request."] : taskFileProblems(markdown, path, sprint).problems;
+  };
+  let problems: string[];
+  if ("problem" in chosen) {
+    problems = [chosen.problem];
+  } else if ("several" in chosen) {
+    const committers = await taskFileCommitters(gh, owner, repo, headSha, chosen.several, githubLogin);
+    const yours = chosen.several.filter((path) => committers[path] !== "someone_else");
+    const theirs = chosen.several.filter((path) => committers[path] === "someone_else");
+    const theirsProblem = theirs.length ? [someoneElsesTaskFilesProblem(theirs)] : [];
+    if (yours.length === 0) problems = [noTaskFileYoursMessage(githubLogin)];
+    else if (yours.length === 1) problems = [...await formatProblems(yours[0]!), ...theirsProblem];
+    else problems = [severalTaskFilesProblem(yours), ...theirsProblem];
+  } else {
+    problems = await formatProblems(chosen.path);
     if (problems.length === 0) {
       throw new Error(`This pull request is not merged yet. Its task file (${fileName(chosen.path)}) passes the task-file checks. Merge the pull request, then add it here again.`);
     }
@@ -154,8 +209,9 @@ async function refuseOpenPullRequest(
 /**
  * Imports a merged task PR. `githubLogin` is the submitting student's linked GitHub account. An open PR is
  * refused with the result of the task-file checks, so the file can still be fixed before the merge.
- * `taskPath` is the task file the student chose, for a merged PR that adds several; it must be one the PR adds.
- * Without it such a PR throws ChooseTaskFileError with the files to choose from.
+ * `taskPath` is the task file the student chose, for a merged PR that adds several; it must be one the PR adds
+ * and not one committed from another GitHub account. Without it such a PR throws ChooseTaskFileError with the
+ * student's own files to choose from, or imports the only one that is theirs.
  */
 export async function importTaskFromPullRequest(
   prUrl: string,
@@ -169,7 +225,7 @@ export async function importTaskFromPullRequest(
   const { owner, repo, number } = parsed;
   const pull = await gh.json<GitHubPull>(`/repos/${owner}/${repo}/pulls/${number}`);
   if (!pull?.merged_at || !pull.merge_commit_sha) {
-    if (pull?.state === "open") return refuseOpenPullRequest(gh, owner, repo, number, pull.head?.sha, assignmentNumber);
+    if (pull?.state === "open") return refuseOpenPullRequest(gh, owner, repo, number, pull.head?.sha, assignmentNumber, githubLogin);
     throw new Error("This pull request must be merged before submission.");
   }
 
@@ -182,15 +238,28 @@ export async function importTaskFromPullRequest(
   if (requested && !addedTaskPaths.includes(requested)) {
     throw new Error(`This PR does not add ${fileName(requested)} in docs/tasks/sprint-${assignmentNumber}/. Choose a task file it adds: ${addedTaskPaths.map(fileName).join(", ")}.`);
   }
+  let taskPath = "several" in chosen ? requested : chosen.path;
+  let committers: Record<string, TaskFileCommitter> | null = null;
   if ("several" in chosen) {
     if (!prAuthoredByStudent) throw new Error(SEVERAL_TASK_FILES_NOT_AUTHOR);
+    // Only the student's own task files can be their task: a teammate's can reach the PR through a branch merge.
+    // A file whose committer can't be told is still offered; the review page says so.
+    committers = await taskFileCommitters(gh, owner, repo, pull.head?.sha, chosen.several, githubLogin);
+    const yours = chosen.several.filter((path) => committers![path] !== "someone_else");
+    if (yours.length === 0) throw new Error(noTaskFileYoursMessage(githubLogin));
+    if (requested && committers[requested] === "someone_else") {
+      throw new Error(`${fileName(requested)} was committed by someone else, so it can't be your task. Choose a task file you committed.`);
+    }
     if (!requested) {
-      throw new ChooseTaskFileError(
-        chosen.several.map((path) => ({ path, taskId: fileName(path).replace(/\.md$/i, "") })), `${owner}/${repo}`, number,
-      );
+      if (yours.length > 1) {
+        throw new ChooseTaskFileError(
+          yours.map((path) => ({ path, taskId: fileName(path).replace(/\.md$/i, "") })), `${owner}/${repo}`, number,
+        );
+      }
+      taskPath = yours[0]!;
     }
   }
-  const taskPath = "several" in chosen ? requested! : chosen.path;
+  if (!taskPath) throw new Error("The task file could not be imported from the merged PR.");
   const markdown = await readTaskFile(gh, owner, repo, taskPath, pull.merge_commit_sha);
   if (markdown === null) throw new Error("The task file could not be imported from the merged PR.");
   const checked = taskFileProblems(markdown, taskPath, assignmentNumber);
@@ -258,6 +327,7 @@ export async function importTaskFromPullRequest(
     prNumber: number,
     prTaskFileCount: addedTaskPaths.length,
     prTaskFiles: addedTaskPaths,
+    ...(committers ? { prTaskFileCommitters: committers } : {}),
   };
   return {
     prUrl: parsed.url,
