@@ -1,5 +1,5 @@
 import { criterion, pointsFor, type CriterionGrade, type Level } from "@/lib/cse115a/rubric";
-import type { SnapshotCheck } from "@/lib/cse115a/submissionSnapshot";
+import type { SnapshotCheck, TaskSnapshot } from "@/lib/cse115a/submissionSnapshot";
 
 // Tests pass and Process come from evidence recorded at submit time, not from
 // the language model.
@@ -33,35 +33,19 @@ export function gradeTestsPass(checks: SnapshotCheck[]): CriterionGrade {
   return evidenceGrade("Tests pass", "partial", `${failed.length} of ${passed.length + failed.length} CI checks failed on the merge commit.`, quotes);
 }
 
-/** Why a base tag that isn't on the spec-first commit should be checked before deducting (#342). */
-function misplacedTagReason(sameAuthor: boolean | null): string {
-  const start = "The task file was committed first, but the base tag isn't on that commit.";
-  if (sameAuthor === false) return `${start} It's on a commit by another author, likely a teammate's task with the same ID; restore the point unless there's a reason not to.`;
-  if (sameAuthor === true) return `${start} It's on the student's own older commit, likely left behind by an amend or rebase after tagging; check before deducting.`;
-  return `${start} Check before deducting.`;
-}
-
-/** Grades "Process" from the checks recorded when the PR was imported. The Scrum card cannot be verified, so it is not scored here.
- * `misplacedTag` is set when the snapshot found the first commit holds only the task file but the base tag is elsewhere (#342). */
-export function gradeProcess(validation: Record<string, boolean>, misplacedTag?: { sameAuthor: boolean | null }): CriterionGrade {
-  const steps = [
-    ["prMerged", "PR merged"],
-    ["baseTagPushed", "base tag pushed"],
-    ["doneTagOnMergeCommit", "done tag on the merge commit"],
-  ] as const;
-  const quotes = [...steps, ["specCommittedFirst", "spec committed first"] as const]
-    .map(([key, label]) => `${label}: ${validation[key] === true ? "yes" : "no"}`);
-  const missing = steps.filter(([key]) => validation[key] !== true).map(([, label]) => label);
-
-  // Without a base tag the order of commits cannot be checked, so a missing
-  // tag is a missing step rather than proof that the spec came late.
-  if (validation.baseTagPushed !== true) {
-    return evidenceGrade("Process", "partial", `Missing: ${missing.join(", ")}. Without the base tag, spec-first order could not be checked.`, quotes, true);
+/**
+ * Grades "Process" from the checks recorded when the PR was imported. The Scrum card cannot be verified, so it is
+ * not scored here. The task file came first when `specCommittedFirst` is true or the snapshot's diff starts at the
+ * PR's first commit (`first_commit`): a task saved before #392 stored false when its base tag was missing, even
+ * with the task file alone and first. Code before the task file is always confirmed by a person.
+ */
+export function gradeProcess(validation: Record<string, boolean>, baseCommitSource?: TaskSnapshot["baseCommitSource"]): CriterionGrade {
+  const merged = validation.prMerged === true;
+  const fileFirst = validation.specCommittedFirst === true || baseCommitSource === "first_commit";
+  const quotes = [`PR merged: ${merged ? "yes" : "no"}`, `task file first: ${fileFirst ? "yes" : "no"}`];
+  if (!fileFirst) {
+    return evidenceGrade("Process", "none", "The PR's first commit was not the task file alone, so the task file did not come before the code.", quotes, true);
   }
-  if (validation.specCommittedFirst !== true) {
-    if (misplacedTag) return evidenceGrade("Process", "none", misplacedTagReason(misplacedTag.sameAuthor), quotes, true);
-    return evidenceGrade("Process", "none", "The first commit at the base tag was not the task file alone, so implementation did not follow the spec.", quotes);
-  }
-  if (missing.length === 0) return evidenceGrade("Process", "full", "Spec committed first, both tags pushed, and the PR is merged.", quotes);
-  return evidenceGrade("Process", "partial", `Missing: ${missing.join(", ")}.`, quotes);
+  if (!merged) return evidenceGrade("Process", "partial", "Missing: PR merged.", quotes);
+  return evidenceGrade("Process", "full", "Task file committed first, and the PR is merged.", quotes);
 }

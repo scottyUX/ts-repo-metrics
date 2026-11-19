@@ -58,10 +58,10 @@ function snapshot(overrides: Partial<TaskSnapshot> = {}): TaskSnapshot {
   return {
     slot: 1, taskId: "US-1-T-1", prUrl: "https://github.com/team/proj/pull/7", repoFullName: "team/proj", prNumber: 7,
     taskPath: "docs/tasks/sprint-1/US-1-T-1.md", specMarkdown: SPEC, spec: { id: "US-1-T-1" } as TaskSpec,
-    validation: { prMerged: true, baseTagPushed: true, specCommittedFirst: true, doneTagOnMergeCommit: true },
+    validation: { prMerged: true, specCommittedFirst: true },
     analysisResultId: "r1",
     pr: { title: "US-1-T-1", body: "", headRef: "US-1-T-1", author: "s", mergedAt: "2026-10-01T00:00:00Z", baseSha: "b", mergeCommitSha: "m" },
-    baseCommit: "b", baseCommitSource: "base_tag", diff: DIFF, diffBytes: DIFF.length, diffTruncated: false, diffError: null,
+    baseCommit: "b", baseCommitSource: "first_commit", diff: DIFF, diffBytes: DIFF.length, diffTruncated: false, diffError: null,
     comments: [], checks: [{ source: "check_run", name: "test", status: "completed", conclusion: "success" }],
     ...overrides,
   };
@@ -144,26 +144,48 @@ describe("Tests pass", () => {
   });
 });
 
-describe("Process", () => {
-  const all = { prMerged: true, baseTagPushed: true, specCommittedFirst: true, doneTagOnMergeCommit: true };
-  it("gives full credit when every step is recorded", () => {
-    expect(gradeProcess(all)).toMatchObject({ level: "full", awarded: 1, needsReview: false });
+describe("Process (#392: no tags)", () => {
+  const CODE_FIRST = "The PR's first commit was not the task file alone, so the task file did not come before the code.";
+  const now = { prMerged: true, specCommittedFirst: true };
+  const noTagKey = (quotes: string[]) => expect(quotes.join(" ")).not.toMatch(/tag/i);
+
+  it("gives full credit for a merged PR whose task file came first, with no tag keys", () => {
+    const grade = gradeProcess(now, "first_commit");
+    expect(grade).toMatchObject({ level: "full", awarded: 1, needsReview: false, rationale: "Task file committed first, and the PR is merged." });
+    expect(grade.evidenceQuotes).toEqual(["PR merged: yes", "task file first: yes"]);
+    noTagKey([grade.rationale, ...grade.evidenceQuotes]);
+    expect(gradeProcess(now)).toMatchObject({ level: "full", needsReview: false });
   });
-  it("gives none when implementation came before the spec", () => {
-    expect(gradeProcess({ ...all, specCommittedFirst: false })).toMatchObject({ level: "none", awarded: 0 });
+
+  it("gives none, always for review, when code came first", () => {
+    for (const source of ["pr_base", undefined] as const) {
+      const grade = gradeProcess({ prMerged: true, specCommittedFirst: false }, source);
+      expect(grade).toMatchObject({ level: "none", awarded: 0, needsReview: true, rationale: CODE_FIRST });
+      expect(grade.evidenceQuotes).toEqual(["PR merged: yes", "task file first: no"]);
+    }
   });
-  it("gives partial for a missing step", () => {
-    expect(gradeProcess({ ...all, doneTagOnMergeCommit: false })).toMatchObject({ level: "partial", awarded: 0.5, needsReview: false });
+
+  it("gives partial when the PR is not merged, as before", () => {
+    expect(gradeProcess({ prMerged: false, specCommittedFirst: true }, "first_commit"))
+      .toMatchObject({ level: "partial", awarded: 0.5, needsReview: false, rationale: "Missing: PR merged." });
   });
-  it("flags a missing base tag for review instead of scoring zero", () => {
-    expect(gradeProcess({ ...all, baseTagPushed: false, specCommittedFirst: false })).toMatchObject({ level: "partial", awarded: 0.5, needsReview: true });
+
+  it("gives full to an old first_commit snapshot whose task file was first but untagged", () => {
+    const old = { prMerged: true, baseTagPushed: false, specCommittedFirst: false, doneTagOnMergeCommit: false };
+    const grade = gradeProcess(old, "first_commit");
+    expect(grade).toMatchObject({ level: "full", awarded: 1, needsReview: false });
+    noTagKey([grade.rationale, ...grade.evidenceQuotes]);
   });
-  it("sends a base tag that isn't on the spec-first commit to review, with the likely reason (#342)", () => {
-    const misplaced = { ...all, specCommittedFirst: false };
-    expect(gradeProcess(misplaced, { sameAuthor: false })).toMatchObject({ level: "none", awarded: 0, needsReview: true });
-    expect(gradeProcess(misplaced, { sameAuthor: false }).rationale).toContain("another author");
-    expect(gradeProcess(misplaced, { sameAuthor: true }).rationale).toContain("own older commit");
-    expect(gradeProcess(misplaced)).toMatchObject({ needsReview: false });
+
+  it("gives full to an old base_tag snapshot saved as task file first", () => {
+    const old = { prMerged: true, baseTagPushed: true, specCommittedFirst: true, doneTagOnMergeCommit: true };
+    expect(gradeProcess(old, "base_tag")).toMatchObject({ level: "full", awarded: 1, needsReview: false });
+    expect(gradeProcess({ ...old, doneTagOnMergeCommit: false }, "base_tag")).toMatchObject({ level: "full" });
+  });
+
+  it("gives none for review to an old base_tag snapshot saved as not first", () => {
+    const old = { prMerged: true, baseTagPushed: true, specCommittedFirst: false, doneTagOnMergeCommit: true };
+    expect(gradeProcess(old, "base_tag")).toMatchObject({ level: "none", awarded: 0, needsReview: true, rationale: CODE_FIRST });
   });
 });
 
@@ -198,11 +220,13 @@ describe("LLM grader", () => {
     expect(grade.promptVersion).toBe("cse115a-grader-v5");
   });
 
-  it("sends Process to review when the snapshot diffed from the PR's first commit (#342)", async () => {
-    const validation = { prMerged: true, baseTagPushed: true, specCommittedFirst: false, doneTagOnMergeCommit: true };
-    const grade = await gradeTask(fakeClient(GOOD), snapshot({ validation, baseCommitSource: "first_commit", baseTagSameAuthor: false }), "m");
-    expect(grade.rubric.find((row) => row.name === "Process")).toMatchObject({ awarded: 0, needsReview: true });
-    expect(grade.needsReview).toBe(true);
+  it("scores Process from the snapshot's base: an old untagged first_commit snapshot is full, code first is none for review", async () => {
+    const old = { prMerged: true, baseTagPushed: false, specCommittedFirst: false, doneTagOnMergeCommit: false };
+    const first = await gradeTask(fakeClient(GOOD), snapshot({ validation: old, baseCommitSource: "first_commit", baseTagSameAuthor: false }), "m");
+    expect(first.rubric.find((row) => row.name === "Process")).toMatchObject({ level: "full", awarded: 1, needsReview: false });
+    const codeFirst = await gradeTask(fakeClient(GOOD), snapshot({ validation: { prMerged: true, specCommittedFirst: false }, baseCommitSource: "pr_base" }), "m");
+    expect(codeFirst.rubric.find((row) => row.name === "Process")).toMatchObject({ level: "none", awarded: 0, needsReview: true });
+    expect(codeFirst.needsReview).toBe(true);
   });
 
   it("flags criteria whose quotes are missing or invented", async () => {
