@@ -11,6 +11,8 @@ import { taskFilePrReviewLine } from "@/lib/cse115a/taskFilePr";
 import { RUBRIC, TASK_POINTS } from "@/lib/cse115a/rubric";
 import { effectiveTotal, submittedSprintScore, type TaskGradeRow } from "@/lib/cse115a/gradeReview";
 import type { SubmissionSnapshot, TaskSnapshot } from "@/lib/cse115a/submissionSnapshot";
+import type { TaskCode } from "@/lib/cse115a/getTheCode";
+import { GetTheCode } from "./GetTheCode";
 import { fetchJson, formatPoints, STATUS_LABELS, type StaffCourse, type SubmissionStatus } from "./shared";
 
 type Detail = {
@@ -23,6 +25,8 @@ type Detail = {
   releaseBlockers: string[];
   jobs: Array<{ kind: string; status: string; attempts: number; run_after: string; last_error: string | null; updated_at: string }>;
   history: Array<{ id: string; attempt: number; status: SubmissionStatus; submitted_at: string; superseded_at: string | null; unlock_reason: string | null }>;
+  /** Each slot's "Get the code" entry; missing from a response made before it existed. */
+  code?: TaskCode[];
 };
 
 const MAX_DIFF_DISPLAY = 200_000;
@@ -60,7 +64,7 @@ function draftFrom(grade: TaskGradeRow): Draft {
   return { values, notes, overall: grade.instructor_notes ?? "" };
 }
 
-function TaskPanel({ submissionId, task, grade, onSaved, readOnly, sharedPr }: { submissionId: string; task: TaskSnapshot; grade: TaskGradeRow | undefined; onSaved: () => void; readOnly: boolean; sharedPr: string[] }) {
+function TaskPanel({ submissionId, task, grade, onSaved, readOnly, sharedPr, code }: { submissionId: string; task: TaskSnapshot; grade: TaskGradeRow | undefined; onSaved: () => void; readOnly: boolean; sharedPr: string[]; code: TaskCode | undefined }) {
   const split = useMemo(() => splitPatch(task.diff), [task.diff]);
   const [draft, setDraft] = useState<Draft | null>(grade ? draftFrom(grade) : null);
   const [saving, setSaving] = useState(false);
@@ -109,6 +113,8 @@ function TaskPanel({ submissionId, task, grade, onSaved, readOnly, sharedPr }: {
         <summary className="cursor-pointer px-3 py-2 text-sm font-medium">Task spec · {task.taskPath}</summary>
         <pre className="max-h-96 overflow-auto whitespace-pre-wrap border-t border-border p-3 text-sm">{task.specMarkdown}</pre>
       </details>
+
+      <GetTheCode submissionId={submissionId} slot={task.slot} repoFullName={task.repoFullName} mergeCommit={task.pr?.mergeCommitSha} code={code} />
 
       <Tabs defaultValue="patch" className="rounded-lg border border-border">
         <TabsList className="m-2">
@@ -265,7 +271,7 @@ export function SubmissionReview({ id }: { id: string }) {
       ) : <p className="rounded-lg bg-muted p-3 text-sm text-muted-foreground">This attempt was unlocked and is read-only.</p>}
 
       <div className="grid gap-6 xl:grid-cols-2">
-        {tasks.map((task) => <TaskPanel key={task.slot} submissionId={submission.id} task={task} grade={grades.find((row) => row.task_slot === task.slot)} onSaved={() => void load()} readOnly={!active} sharedPr={prTaskFileLines(tasks, task, "staff")} />)}
+        {tasks.map((task) => <TaskPanel key={task.slot} submissionId={submission.id} task={task} grade={grades.find((row) => row.task_slot === task.slot)} onSaved={() => void load()} readOnly={!active} sharedPr={prTaskFileLines(tasks, task, "staff")} code={detail.code?.find((item) => item.slot === task.slot)} />)}
       </div>
       {oneTask ? <p className={oneTask.warn ? "text-sm text-amber-700 dark:text-amber-300" : "text-sm text-muted-foreground"}>{oneTask.text}</p> : null}
 

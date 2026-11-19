@@ -11,8 +11,9 @@
 // instructor Benchmark page. The website's copy is complete (#298): the base commit plus the PR's own
 // commits (its head, its merge commit, and a paired task's task-file PR head), under
 // `<instance_id>.<first 12 characters of base_commit>.full.bundle`. Readers try that name first, then
-// the base-only name, then the legacy one. The website asks only whether a complete copy exists; it
-// never downloads one or serves one, and the exports never read the bucket.
+// the base-only name, then the legacy one. The website asks whether a copy exists and never downloads
+// one; staff get a 60-second signed link to one from the review page (repoCopyAccess.ts), so the file
+// never passes through the site. The exports never read the bucket.
 
 import { readdir, readFile, rename, rm, stat, writeFile } from "node:fs/promises";
 import { join } from "node:path";

@@ -4,7 +4,8 @@
 // private repository from the copy without the course App's private key, which only the website has,
 // and a task's diff can be worked out again from the copy later. The
 // website writes copies, in `repo_copy` jobs on their own poller line (jobs/runner.ts, jobs/worker.ts),
-// and asks whether one exists; it never downloads or serves one.
+// and asks whether one exists; it never downloads one (staff download one through a signed link,
+// repoCopyAccess.ts).
 //
 // Everything is the validator's own code: cloneRepo and ensureCommit (the App token, never stored in
 // the remote and never in an error), bundleRepo, verifyBundle, and the SnapshotStore, which names the
