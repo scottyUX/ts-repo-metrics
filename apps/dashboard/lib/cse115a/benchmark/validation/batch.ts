@@ -82,10 +82,10 @@ export function funnel(results: ValidationResult[]): FunnelStage[] {
   return stages;
 }
 
-/** The first non-empty line of `text`, at most 300 characters, with `|` escaped for a Markdown table cell. */
+/** The first non-empty line of `text`, at most 300 characters, with `\` and `|` escaped for a Markdown table cell. */
 function tableCell(text: string): string {
   const line = text.split("\n").map((l) => l.trim()).find(Boolean) ?? "";
-  return (line.length > 300 ? `${line.slice(0, 299)}…` : line).replace(/\|/g, "\\|");
+  return (line.length > 300 ? `${line.slice(0, 299)}…` : line).replace(/[\\|]/g, "\\$&");
 }
 
 /** The reason cell with `from snapshot` added when the row was validated from its bundle. */

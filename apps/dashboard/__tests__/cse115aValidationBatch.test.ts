@@ -59,6 +59,11 @@ describe("summarize", () => {
     expect(md.indexOf("| stage |")).toBeLessThan(md.indexOf("| instance_id |"));
   });
 
+  it("escapes backslashes and pipes in an env_error detail so the table cell stays one cell", () => {
+    const crashed = rejectedWithoutRun(row({ instance_id: "T-9" }), "env_error", "path C:\\tmp\\| broke");
+    expect(summarize([crashed]).rows[0].reason).toBe("env_error: path C:\\\\tmp\\\\\\| broke");
+  });
+
   it("builds a funnel whose counts only go down and end at the validated count", () => {
     const unsupported = rejectedWithoutRun(row({ instance_id: "T-4" }), "env_unsupported", "jest");
     const crashed = rejectedWithoutRun(row({ instance_id: "T-5" }), "env_error", "docker died");
