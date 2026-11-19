@@ -84,10 +84,10 @@ const previewCourse: Course = {
   id: "preview-course", slug: "CSE115A-Fall26", title: "CSE 115A", term: "Fall 2026", assignment_count: 5,
 };
 const passValidation: Record<string, boolean> = {
-  prMerged: true, specCommittedFirst: true, baseTagPushed: true, doneTagOnMergeCommit: true,
+  prMerged: true, specCommittedFirst: true,
   prAuthoredByStudent: true, prTitleHasTaskId: true, branchHasTaskId: true, estimateAtLeastTwoHours: true,
 };
-const noCi: TaskFacts = { ci: { state: "none", failed: 0, total: 0 }, testFileCount: 1, mergeSha: "9f3c2a1", firstCommitSha: "a1b2c3d" };
+const noCi: TaskFacts = { ci: { state: "none", failed: 0, total: 0 }, testFileCount: 1, mergeSha: "9f3c2a1", firstCommitSha: "a1b2c3d", firstCommitTaskOnly: true };
 
 function previewTask(slot: number, assignmentNumber: number, validation: Record<string, boolean>, facts: TaskFacts): Submission {
   return {
@@ -106,7 +106,7 @@ function previewMe(state: PreviewState): Me {
   const base = { email, courses: [previewCourse], grades: [] as ReleasedGrade[], consent };
   if (state === "joined") return { ...base, consent: [], submissions: [], assignmentSubmissions: [] };
   if (state === "draft") {
-    return { ...base, assignmentSubmissions: [], submissions: [previewTask(1, 1, { ...passValidation, baseTagPushed: false }, noCi)] };
+    return { ...base, assignmentSubmissions: [], submissions: [previewTask(1, 1, { ...passValidation, prTitleHasTaskId: false }, noCi)] };
   }
   if (state === "ready") {
     return { ...base, assignmentSubmissions: [], submissions: [previewTask(1, 1, passValidation, noCi), previewTask(2, 1, passValidation, noCi)] };
@@ -120,7 +120,7 @@ function previewMe(state: PreviewState): Me {
   if (state === "needs-fixes") {
     return {
       ...base, assignmentSubmissions: [sprint1],
-      submissions: [...sprint1Tasks, previewTask(1, 2, { ...passValidation, doneTagOnMergeCommit: false }, noCi), previewTask(2, 2, passValidation, noCi)],
+      submissions: [...sprint1Tasks, previewTask(1, 2, { ...passValidation, prTitleHasTaskId: false }, noCi), previewTask(2, 2, passValidation, noCi)],
     };
   }
   const criteria = (lost: Record<string, [number, string]>) => RUBRIC.map((row) => ({
@@ -303,7 +303,7 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
   // The deadline is enforced but not shown until real dates are set.
   const sprintDueAt = course?.sprints?.find((sprint) => sprint.number === assignmentNumber)?.due_at ?? null;
   const changeAllowed = Boolean(assignmentSubmission) && canChangeSubmission(assignmentSubmission!.status, sprintDueAt);
-  const readyCount = submissions.filter((item) => sprintReady(item.validation_json)).length;
+  const readyCount = submissions.filter((item) => sprintReady(item.validation_json, item.facts_json)).length;
   const action = submitAction(submissions.length, readyCount, assignmentNumber);
   // One task added: its saved estimate decides the big-task warning, which never blocks Submit (#348).
   const oneTaskHours = submissions.length === 1 ? specEstimateHours(submissions[0]!.task_spec_json) : null;
@@ -635,9 +635,8 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
                 const item = submissions.find((submission) => submission.task_slot === slot);
                 const grade = releasedGrades.find((row) => row.slot === slot) ?? null;
                 const showInput = !locked && (!item || changing[slot]);
-                const lines = item ? processChecklist(item.validation_json, item.facts_json, item.task_id) : [];
+                const lines = item ? processChecklist(item.validation_json, item.facts_json) : [];
                 const fixCount = linesToFix(lines).length;
-                const countedLines = lines.filter((line) => line.counts !== false).length;
                 const prNumber = item?.pr_url.match(/\/pull\/(\d+)/)?.[1];
                 const lost = grade ? grade.criteria.filter((row) => row.awarded < row.points) : [];
                 const choice = taskFileChoices[slot] ?? null;
@@ -690,11 +689,11 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
                           <details className="group">
                             <summary className="cursor-pointer list-none text-slate-700 [&::-webkit-details-marker]:hidden">
                               <span aria-hidden className="mr-1 inline-block transition-transform group-open:rotate-90">›</span>
-                              Process checks: {countedLines - fixCount} of {countedLines} {fixCount === 0 ? "✓" : ""}
+                              Process checks: {lines.length - fixCount} of {lines.length} {fixCount === 0 ? "✓" : ""}
                             </summary>
-                            <ProcessChecklist validation={item.validation_json} facts={item.facts_json} taskId={item.task_id} />
+                            <ProcessChecklist validation={item.validation_json} facts={item.facts_json} />
                           </details>
-                        ) : <ProcessChecklist validation={item.validation_json} facts={item.facts_json} taskId={item.task_id} />}
+                        ) : <ProcessChecklist validation={item.validation_json} facts={item.facts_json} />}
                         {locked ? (
                           <p className="text-slate-600">Scrum card: {item.scrum_board ? "confirmed" : "not confirmed"}</p>
                         ) : (

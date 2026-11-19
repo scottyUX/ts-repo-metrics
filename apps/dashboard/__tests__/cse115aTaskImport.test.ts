@@ -34,9 +34,13 @@ Use the existing handler.
 | US-1-T-1 rejects email | HTTP 400 | 1 |
 `;
 
-/** A squash-merged PR. Its first commit is "first"; the squash commit on main is "squash". */
-function stubGitHub(baseTag: string | null, firstCommitFiles: string[], prFiles: Array<{ filename: string; status?: string }> = [{ filename: TASK, status: "added" }, { filename: "app.js", status: "added" }], spec = SPEC) {
-    const routes: Record<string, unknown> = {
+/**
+ * A squash-merged PR. Its first commit is "first"; the squash commit on main is "squash". The repository also has
+ * both tags, on "first" and "squash", so a tag request would find them. Returns every path requested.
+ */
+function stubGitHub(firstCommitFiles: string[], prFiles: Array<{ filename: string; status?: string }> = [{ filename: TASK, status: "added" }, { filename: "app.js", status: "added" }], spec = SPEC): string[] {
+  const requested: string[] = [];
+  const routes: Record<string, unknown> = {
     "/repos/team/repo/pulls/1": {
       merged_at: "2026-10-14T00:00:00Z", merge_commit_sha: "squash", title: "US-1-T-1: Reject",
       user: { login: "student" }, head: { ref: "task/US-1-T-1" }, base: { sha: "main0" },
@@ -48,35 +52,56 @@ function stubGitHub(baseTag: string | null, firstCommitFiles: string[], prFiles:
     "/repos/team/repo/contents/docs/tasks/sprint-1?ref=squash": [{ name: "US-1-T-1.md", type: "file" }],
     "/repos/team/repo/commits/first": { files: firstCommitFiles.map((filename) => ({ filename })), commit: { author: { email: "student@ucsc.edu" } } },
     "/repos/team/repo/commits/squash": { commit: { author: { email: "Student@ucsc.edu" } } },
-    "/repos/team/repo/commits/teammate": { commit: { author: { email: "student3@example.edu" } } },
+    "/repos/team/repo/git/ref/tags/US-1-T-1-base": { object: { type: "commit", sha: "first" } },
+    "/repos/team/repo/git/ref/tags/US-1-T-1-done": { object: { type: "commit", sha: "squash" } },
   };
-  if (baseTag) routes["/repos/team/repo/git/ref/tags/US-1-T-1-base"] = { object: { type: "commit", sha: baseTag } };
   vi.stubGlobal("fetch", vi.fn(async (url: string) => {
     const path = url.replace("https://api.github.com", "");
+    requested.push(path);
     return path in routes ? new Response(JSON.stringify(routes[path])) : new Response("{}", { status: 404 });
   }));
+  return requested;
 }
 
 const UNFIXABLE = "Can't be fixed on this PR. The spec must come first; use a new task.";
-const TEAMMATE_TAG = "This tag is on someone else's commit, maybe a teammate's task with the same ID. Don't move it; ask a TA.";
+const isTagRequest = (path: string) => path.includes("/git/ref") || path.includes("/git/tags");
 
-describe("CSE 115A task import: spec committed first (#266)", () => {
+describe("CSE 115A task import: task file first, no tags (#392)", () => {
   afterEach(() => vi.unstubAllGlobals());
 
   it.each([
-    ["task file only", "tag on it", "first", [TASK], true, null],
-    ["task file only", "tag missing", null, [TASK], false, "Push the base tag, then Re-check."],
-    ["task file only", "tag on the squash commit", "squash", [TASK], false, "git fetch origin pull/1/head && git tag -f US-1-T-1-base first && git push -f origin US-1-T-1-base"],
-    ["task file only", "tag on a teammate's commit", "teammate", [TASK], false, TEAMMATE_TAG],
-    ["task file and code", "tag missing", null, [TASK, "app.js"], false, UNFIXABLE],
-    ["task file and code", "tag on it", "first", [TASK, "app.js"], false, UNFIXABLE],
-  ])("first commit has the %s, %s", async (_files, _tag, baseTag, firstCommitFiles, ok, detail) => {
-    stubGitHub(baseTag, firstCommitFiles);
+    ["the task file alone", [TASK], true, null],
+    ["the task file and code", [TASK, "app.js"], false, UNFIXABLE],
+    ["only code", ["app.js"], false, UNFIXABLE],
+  ])("first commit holds %s", async (_files, firstCommitFiles, ok, detail) => {
+    const requested = stubGitHub(firstCommitFiles);
     const task = await importTaskFromPullRequest("https://github.com/team/repo/pull/1", 1, githubReader("token"), "student");
-    const line = processChecklist(task.validation, task.facts, "US-1-T-1").find((entry) => entry.key === "specCommittedFirst");
-    expect(task.facts.firstCommitTaskOnly).toBe(firstCommitFiles.length === 1);
+    expect(requested.filter(isTagRequest)).toEqual([]);
+    expect(task.facts.firstCommitTaskOnly).toBe(ok);
+    expect(task.validation.specCommittedFirst).toBe(ok);
+    const line = processChecklist(task.validation, task.facts).find((entry) => entry.key === "specCommittedFirst");
     expect(line?.ok).toBe(ok);
     expect(line?.detail).toBe(detail);
+  });
+
+  it("saves no tag check and no tag fact on a new row", async () => {
+    const requested = stubGitHub([TASK]);
+    const task = await importTaskFromPullRequest("https://github.com/team/repo/pull/1", 1, githubReader("token"), "student");
+    expect(Object.keys(task.validation).sort()).toEqual([
+      "branchHasTaskId", "estimateAtLeastTwoHours", "prAuthoredByStudent", "prMerged", "prTitleHasTaskId", "specCommittedFirst",
+    ]);
+    expect(task.validation).toMatchObject({ specCommittedFirst: true });
+    expect(task.facts).not.toHaveProperty("baseTagSameAuthor");
+    expect(JSON.stringify(task)).not.toMatch(/tag/i);
+    expect(requested.filter(isTagRequest)).toEqual([]);
+    // The test-file count reads the same range the snapshot diffs: from the first commit.
+    expect(requested).toContain("/repos/team/repo/compare/first...squash");
+  });
+
+  it("counts test files from the PR base for a code-first PR", async () => {
+    const requested = stubGitHub([TASK, "app.js"]);
+    await importTaskFromPullRequest("https://github.com/team/repo/pull/1", 1, githubReader("token"), "student");
+    expect(requested).toContain("/repos/team/repo/compare/main0...squash");
   });
 });
 
@@ -86,13 +111,13 @@ describe("CSE 115A task import: which task file is this PR's", () => {
   const OTHER = "docs/tasks/sprint-1/US-1-T-2.md";
 
   it("uses the task file the PR adds when it also edits an earlier task's file", async () => {
-    stubGitHub("first", [TASK], [{ filename: TASK, status: "added" }, { filename: OTHER, status: "modified" }]);
+    stubGitHub([TASK], [{ filename: TASK, status: "added" }, { filename: OTHER, status: "modified" }]);
     const task = await importTaskFromPullRequest("https://github.com/team/repo/pull/1", 1, githubReader("token"), "student");
     expect(task.taskPath).toBe(TASK);
   });
 
   it("asks which task file this task is when a merged PR adds more than one", async () => {
-    stubGitHub("first", [TASK], [{ filename: TASK, status: "added" }, { filename: OTHER, status: "added" }]);
+    stubGitHub([TASK], [{ filename: TASK, status: "added" }, { filename: OTHER, status: "added" }]);
     const result = importTaskFromPullRequest("https://github.com/team/repo/pull/1", 1, githubReader("token"), "student");
     await expect(result).rejects.toBeInstanceOf(ChooseTaskFileError);
     await expect(result).rejects.toMatchObject({
@@ -103,13 +128,13 @@ describe("CSE 115A task import: which task file is this PR's", () => {
   });
 
   it("never takes a task file the PR only modifies (rule 1)", async () => {
-    stubGitHub("first", [OTHER], [{ filename: OTHER, status: "modified" }, { filename: "app.js", status: "added" }]);
+    stubGitHub([OTHER], [{ filename: OTHER, status: "modified" }, { filename: "app.js", status: "added" }]);
     await expect(importTaskFromPullRequest("https://github.com/team/repo/pull/1", 1, githubReader("token"), "student"))
       .rejects.toMatchObject({ code: "need_task_file_pr", message: "It changes US-1-T-2.md but does not add it; a PR's task file is one it adds. This merged PR does not add a task file in docs/tasks/sprint-1/. A merged PR can't be changed, so open a new PR that adds only your task file, merge it, and paste its link below. If you don't see a second box, refresh the page." });
   });
 
   it("never takes a task file the PR removes", async () => {
-    stubGitHub("first", [OTHER], [{ filename: OTHER, status: "removed" }]);
+    stubGitHub([OTHER], [{ filename: OTHER, status: "removed" }]);
     await expect(importTaskFromPullRequest("https://github.com/team/repo/pull/1", 1, githubReader("token"), "student"))
       .rejects.toMatchObject({ code: "need_task_file_pr", message: "It changes US-1-T-2.md but does not add it; a PR's task file is one it adds. This merged PR does not add a task file in docs/tasks/sprint-1/. A merged PR can't be changed, so open a new PR that adds only your task file, merge it, and paste its link below. If you don't see a second box, refresh the page." });
   });
@@ -119,7 +144,7 @@ describe("CSE 115A task import: task ID in the PR title and branch (#324)", () =
   afterEach(() => vi.unstubAllGlobals());
 
   it("finds the task ID in any letter case", async () => {
-    stubGitHub("first", [TASK]);
+    stubGitHub([TASK]);
     const github = globalThis.fetch;
     vi.stubGlobal("fetch", vi.fn(async (url: string) => {
       const response = await github(url);
@@ -235,7 +260,7 @@ describe("CSE 115A task import: the task file is checked before the merge (#388)
 
   it("finds a wrongly named task file on a merged PR and names the problem", async () => {
     const path = `${FOLDER}/my task.md`;
-    stubGitHub("first", [path], [{ filename: path, status: "added" }]);
+    stubGitHub([path], [{ filename: path, status: "added" }]);
     const github = globalThis.fetch;
     vi.stubGlobal("fetch", vi.fn(async (url: string) => (url.endsWith("/contents/docs/tasks/sprint-1/my%20task.md?ref=squash")
       ? new Response(JSON.stringify({ encoding: "base64", size: SPEC.length, content: Buffer.from(SPEC).toString("base64") }))
@@ -255,7 +280,7 @@ describe("CSE 115A task import: the 2-hour estimate check (#348)", () => {
     ["3", true],
     ["4", true],
   ])("estimate_hours %s gives estimateAtLeastTwoHours %s, as before", async (hours, ok) => {
-    stubGitHub("first", [TASK], undefined, SPEC.replace("estimate_hours: 3", `estimate_hours: ${hours}`));
+    stubGitHub([TASK], undefined, SPEC.replace("estimate_hours: 3", `estimate_hours: ${hours}`));
     const task = await importTaskFromPullRequest("https://github.com/team/repo/pull/1", 1, githubReader("token"), "student");
     expect(task.spec.estimateHours).toBe(Number(hours));
     expect(task.validation.estimateAtLeastTwoHours).toBe(ok);

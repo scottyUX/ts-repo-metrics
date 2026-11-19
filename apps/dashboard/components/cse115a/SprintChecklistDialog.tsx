@@ -41,10 +41,10 @@ function groups(sprint: number): Group[] {
           <Commands lines={["git switch -c task/<id>"]} />
           <p className="mt-2">The task ID has to be in the branch name.</p>
         </> },
-        { key: "base", title: "Commit the spec first and tag it", detail: <>
-          <p>Commit only the task file, tag it, and push, before writing any code:</p>
-          <Commands lines={[`git add ${path}`, `git commit -m "<id>: task spec"`, "git tag <id>-base", "git push origin task/<id> <id>-base"]} />
-          <p className="mt-2">This commit must stay first on the branch. Don’t rebase, amend, or force-push it; if you did, the task card shows how to move the tag.</p>
+        { key: "base", title: "Commit the task file alone, first", detail: <>
+          <p>Commit only the task file, and push it before you write any code:</p>
+          <Commands lines={[`git add ${path}`, `git commit -m "<id>: task spec"`, "git push -u origin task/<id>"]} />
+          <p className="mt-2">This commit must stay first on the branch, with nothing else in it. The app finds it on its own.</p>
         </> },
       ],
     },
@@ -57,16 +57,12 @@ function groups(sprint: number): Group[] {
         </> },
         { key: "pr", title: "Open your pull request", detail: <p>Open it from your own GitHub account, titled <Code>{"<id>: <title>"}</Code>. Within <Code>docs/tasks/</Code> it changes only the task file; changes elsewhere are fine.</p> },
         { key: "merge", title: "Get a review and merge", detail: <p>A teammate reviews it. Merge once the task’s tests and the existing tests pass.</p> },
-        { key: "done", title: "Tag the merge", detail: <>
-          <p>Find the merge commit on the PR page (“merged commit <Code>abc1234</Code>”), then:</p>
-          <Commands lines={["git fetch origin", "git tag <id>-done <merge commit sha>", "git push origin <id>-done"]} />
-        </> },
       ],
     },
     {
       title: "In this app",
       items: [
-        { key: "add", title: "Add your PR here", detail: <p>Push the <Code>-done</Code> tag first, then paste the merged PR link. The repository owner installs the course GitHub App on your team repository first (the <strong>Install or manage</strong> button above your tasks); after that, every teammate can add PRs from it. If a check shows ✗, follow its fix and click Re-check.</p> },
+        { key: "add", title: "Add your PR here", detail: <p>Once it merges, paste the merged PR link. The repository owner installs the course GitHub App on your team repository first (the <strong>Install or manage</strong> button above your tasks); after that, every teammate can add PRs from it. If a check shows ✗, follow its fix and click Re-check.</p> },
         { key: "submit", title: `Submit Sprint ${sprint}`, detail: <p>When your two tasks are in, or your one big task (estimate {BIG_TASK_MIN_HOURS} hours or more), click Submit Sprint {sprint}. Your tasks lock when you submit, but you can change your submission until the sprint closes.</p> },
       ],
     },

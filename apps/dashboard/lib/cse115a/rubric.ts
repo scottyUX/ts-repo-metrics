@@ -6,8 +6,8 @@ export const RUBRIC = [
   { name: "Specs", points: 2, full: "Observable behavior and edge cases; names every tested interface", partial: "Behavior stated with gaps", none: "Implementation description, or missing", evidence: "Specs section" },
   { name: "Acceptance criteria", points: 2, full: "Every item is pass/fail and checkable", partial: "Some items vague", none: "Missing or not checkable", evidence: "Acceptance criteria section" },
   { name: "Test quality", points: 2, full: "Tests assert criteria and fail without implementation", partial: "Weak or trivial assertions", none: "Tests pass even without the implementation", evidence: "Committed tests in the PR" },
-  { name: "Tests pass", points: 2, full: "Task and existing tests pass at the done tag", partial: "Some task tests fail", none: "Tests do not run, all fail, or are missing", evidence: "CI and test run at the done tag" },
-  { name: "Process", points: 1, full: "Spec first, both tags pushed, Scrum card, merged PR", partial: "A step missing or late", none: "Implementation preceded task file", evidence: "PR history, tags, and Scrum board" },
+  { name: "Tests pass", points: 2, full: "Task and existing tests pass on the merge commit", partial: "Some task tests fail", none: "Tests do not run, all fail, or are missing", evidence: "CI and test run on the merge commit" },
+  { name: "Process", points: 1, full: "Task file first, Scrum card, merged PR", partial: "A step missing or late", none: "Code came before the task file", evidence: "PR history and Scrum board" },
 ] as const;
 
 export type CriterionName = (typeof RUBRIC)[number]["name"];

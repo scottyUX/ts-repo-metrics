@@ -11,7 +11,7 @@ const PREVIEW_GRADE: StudentTaskGrade = {
   slot: 1,
   total: 8.5,
   releasedAt: new Date().toISOString(),
-  notes: "Solid spec. Next time, push the base tag before you start so the process check can confirm spec-first order.",
+  notes: "Solid spec. Next time, put the task on the Scrum board before you start.",
   criteria: RUBRIC.map((row) => ({
     name: row.name,
     points: row.points,
@@ -19,7 +19,7 @@ const PREVIEW_GRADE: StudentTaskGrade = {
     rationale: row.name === "Test quality"
       ? "The test asserts only that the handler returns, so it would pass without the rejection logic."
       : `The ${row.name.toLowerCase()} meets the full-credit description.`,
-    note: row.name === "Process" ? "Base tag was missing." : "",
+    note: row.name === "Process" ? "The Scrum card was added after the PR merged." : "",
   })),
 };
 
@@ -49,7 +49,7 @@ export default async function Cse115aPreviewResultsPage({ searchParams }: { sear
           requirements: "Use the existing login handler; add no runtime dependency.",
           acceptanceCriteria: "Reject a non-university email; set no session cookie; accept case-insensitive UCSC domains.",
         },
-        validation: { prMerged: true, specCommittedFirst: true, baseTagPushed: false, doneTagOnMergeCommit: true },
+        validation: { prMerged: true, specCommittedFirst: true },
         gradeStatus: released ? "released" : "not_submitted",
         grade: released ? PREVIEW_GRADE : null,
       }} />

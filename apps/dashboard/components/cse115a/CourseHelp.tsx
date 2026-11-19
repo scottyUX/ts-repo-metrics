@@ -49,7 +49,7 @@ const FAQS = [
   },
   {
     q: "The first check says the task file was not committed first.",
-    a: "The first commit on the branch has to be the task file alone, tagged YOUR-ID-base. That cannot be repaired on the same pull request. Start a new task.",
+    a: "The pull request's first commit has to be the task file alone, committed and pushed before any code. That cannot be repaired on the same pull request. Start a new task.",
   },
   {
     q: "Can I fix a wrong branch name?",
@@ -60,8 +60,8 @@ const FAQS = [
     a: "You do, from the GitHub account you connected. A teammate can review it. If someone else opened it, that check cannot be fixed on this pull request.",
   },
   {
-    q: "What are the two tags?",
-    a: "YOUR-ID-base points at the first commit, the one that adds only the task file. YOUR-ID-done points at the merge commit on the default branch. Push the done tag before you paste the pull request.",
+    q: "Do I still need the -base and -done tags?",
+    a: "No. The site finds your pull request's first commit and its merge commit itself. Tags you already pushed are ignored and can stay.",
   },
   {
     q: "I added a pull request. Can I replace it?",
@@ -147,10 +147,9 @@ const PullRequestFigure = () => (
   <div className="rounded-xl border border-slate-200 bg-white p-4" aria-hidden>
     <ol className="space-y-2 text-sm">
       {[
-        ["1", "Commit only the task file", "tag US-2-T-1-base"],
+        ["1", "Commit only the task file", "push it before any code"],
         ["2", "Add code and tests, then merge", "teammate reviews"],
-        ["3", "Tag the merge commit", "US-2-T-1-done"],
-        ["4", "Paste the merged PR", "Add PR, then Re-check"],
+        ["3", "Paste the merged PR", "Add PR, then Re-check"],
       ].map(([n, title, detail]) => (
         <li key={n} className="flex items-start gap-3">
           <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-slate-900 text-xs font-semibold text-white">{n}</span>
@@ -240,9 +239,8 @@ const CourseHelp = () => (
         <h2 className="text-xl font-semibold">6. Open the pull request and add it here</h2>
         <ol className="list-decimal space-y-2 pl-5 text-sm leading-6 text-slate-700">
           <li>From an up-to-date main branch, start <code className="rounded bg-slate-100 px-1">task/YOUR-ID</code>.</li>
-          <li>Commit only the task file, tag it <code className="rounded bg-slate-100 px-1">YOUR-ID-base</code>, and push the branch and the tag before you write code.</li>
+          <li>Commit only the task file, alone, and push the branch before you write code.</li>
           <li>Add the implementation and tests on that branch. Open the pull request from your own GitHub account. Put the task ID in the title.</li>
-          <li>After it merges, tag the merge commit <code className="rounded bg-slate-100 px-1">YOUR-ID-done</code> and push that tag.</li>
           <li>Paste the merged pull request URL and click <strong>Add PR</strong>. Fix any red checks, then click <strong>Re-check</strong>.</li>
         </ol>
       </div>

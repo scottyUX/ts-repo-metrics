@@ -1,9 +1,9 @@
 import "server-only";
 import { splitPatch } from "@/lib/cse115a/diff";
-import { estimateMeetsTaskMinimum, summarizeCi, type TaskFacts } from "@/lib/cse115a/processChecklist";
+import { estimateMeetsTaskMinimum, summarizeCi, taskFileFirst, type TaskFacts } from "@/lib/cse115a/processChecklist";
 import { readCommitChecks } from "@/lib/cse115a/submissionSnapshot";
 import { canonicalHeadings, checkTaskSpec, filenameMatchesId, isTaskFilePath, parsePullRequestUrl, taskIdProblem, type TaskSpec } from "@/lib/cse115a/taskSpec";
-import { tagCommitSha, type GitHubReader } from "@/lib/cse115a/githubClient";
+import type { GitHubReader } from "@/lib/cse115a/githubClient";
 import { firstCommitHoldsOnlyTaskFiles, type TaskFileCommitter } from "@/lib/cse115a/sharedPr";
 import { NEED_TASK_FILE_PR_CODE, needTaskFilePrMessage, PAIR_NOT_AUTHOR, type TaskFilePr } from "@/lib/cse115a/taskFilePr";
 
@@ -351,9 +351,7 @@ export async function importTaskFromPullRequest(
   // The task file is looked for on the commit it was read from: the task-file PR's merge commit for a pair.
   const taskFileCommit = taskFilePr?.mergeSha ?? pull.merge_commit_sha;
   const encodedFolder = `docs/tasks/sprint-${assignmentNumber}`.split("/").map(encodeURIComponent).join("/");
-  const [baseSha, doneSha, commits, folder] = await Promise.all([
-    tagCommitSha(gh, owner, repo, `${spec.id}-base`),
-    tagCommitSha(gh, owner, repo, `${spec.id}-done`),
+  const [commits, folder] = await Promise.all([
     gh.json<Array<{ sha: string }>>(`/repos/${owner}/${repo}/pulls/${number}/commits?per_page=1&page=1`),
     gh.json<Array<{ name: string; type: string }>>(
       `/repos/${owner}/${repo}/contents/${encodedFolder}?ref=${encodeURIComponent(taskFileCommit)}`,
@@ -364,36 +362,23 @@ export async function importTaskFromPullRequest(
   if (!Array.isArray(folder) || !folder.some((entry) => entry.type === "file" && entry.name === filename)) {
     throw new Error(`The task file is not in docs/tasks/sprint-${assignmentNumber}/ on the merge commit.`);
   }
-  // Check the PR's first commit even when the base tag is missing or elsewhere,
-  // so the checklist can tell a fixable tag from a spec that wasn't first (#266).
+  // The task file came first when the PR's first commit holds only task files this PR adds (#392). No tag is read.
   // A paired work PR has no task file, so its first commit can't be the task file alone.
   const firstSha = commits?.[0]?.sha ?? null;
   let firstCommitTaskOnly: boolean | null = null;
-  let firstAuthor: string | null = null;
   if (taskFilePr) {
     firstCommitTaskOnly = false;
   } else if (firstSha) {
-    const first = await gh.json<{ files?: Array<{ filename: string }>; commit?: { author?: { email?: string } } }>(
-      `/repos/${owner}/${repo}/commits/${firstSha}`,
-    );
+    const first = await gh.json<{ files?: Array<{ filename: string }> }>(`/repos/${owner}/${repo}/commits/${firstSha}`);
     firstCommitTaskOnly = firstCommitHoldsOnlyTaskFiles(first?.files, taskPath, addedTaskPaths);
-    firstAuthor = first?.commit?.author?.email ?? null;
   }
-  const specCommittedFirst = firstCommitTaskOnly === true && baseSha === firstSha;
-  // A base tag on another author's commit may belong to a teammate's task with the same ID; moving it breaks theirs.
-  let baseTagSameAuthor: boolean | null = null;
-  if (firstCommitTaskOnly && baseSha && baseSha !== firstSha && firstAuthor) {
-    const tagged = await gh.json<{ commit?: { author?: { email?: string } } }>(
-      `/repos/${owner}/${repo}/commits/${baseSha}`, { optional: true },
-    );
-    const taggedAuthor = tagged?.commit?.author?.email;
-    if (taggedAuthor) baseTagSameAuthor = taggedAuthor.toLowerCase() === firstAuthor.toLowerCase();
-  }
+  const specCommittedFirst = taskFileFirst(firstCommitTaskOnly, taskFilePr);
   const mergeSha = pull.merge_commit_sha;
   const checks = await readCommitChecks(gh, owner, repo, mergeSha);
   let testFileCount: number | null = null;
   try {
-    const baseCommit = baseSha ?? pull.base?.sha;
+    // Counted over the same range the submit snapshot diffs: from the first commit when the task file came first.
+    const baseCommit = specCommittedFirst && firstSha ? firstSha : pull.base?.sha;
     if (baseCommit) {
       const diff = await gh.text(
         `/repos/${owner}/${repo}/compare/${baseCommit}...${mergeSha}`,
@@ -410,7 +395,6 @@ export async function importTaskFromPullRequest(
     mergeSha,
     firstCommitSha: commits?.[0]?.sha ?? null,
     firstCommitTaskOnly,
-    baseTagSameAuthor,
     prNumber: number,
     prTaskFileCount: addedTaskPaths.length,
     prTaskFiles: addedTaskPaths,
@@ -427,9 +411,7 @@ export async function importTaskFromPullRequest(
       prAuthoredByStudent,
       prTitleHasTaskId: pull.title.toLowerCase().includes(spec.id.toLowerCase()),
       branchHasTaskId: pull.head.ref.toLowerCase().includes(spec.id.toLowerCase()),
-      baseTagPushed: Boolean(baseSha),
       specCommittedFirst,
-      doneTagOnMergeCommit: doneSha === pull.merge_commit_sha,
       estimateAtLeastTwoHours: estimateMeetsTaskMinimum(spec.estimateHours),
     },
     facts,

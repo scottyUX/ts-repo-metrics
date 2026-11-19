@@ -5,7 +5,8 @@ import { exportJsonl, isExportable, taskFileFirst, toExportRecord, toJsonlRecord
 import { identifiersFor, redactPersonalData, scrubPatch, scrubSpec, scrubText } from "@/lib/cse115a/benchmark/scrubPii";
 import { isAiToolPath } from "@/lib/cse115a/diff";
 import { runNextJob, type JobStore, type BenchmarkSave } from "@/lib/cse115a/jobs/runner";
-import type { TaskSnapshot } from "@/lib/cse115a/submissionSnapshot";
+import { captureTaskSnapshot, type SubmittedTaskRow, type TaskSnapshot } from "@/lib/cse115a/submissionSnapshot";
+import type { GitHubReader } from "@/lib/cse115a/githubClient";
 import type { TaskSpec } from "@/lib/cse115a/taskSpec";
 
 const TS_DIFF = `diff --git a/src/cart.ts b/src/cart.ts
@@ -282,6 +283,53 @@ describe("task_file_first in the export", () => {
       { instance: { ...instance, instance_id: "team__py-US-2-T-3" }, sources: [source(["base_commit_from_first_commit"])] },
     ]).trim().split("\n").map((line) => JSON.parse(line) as { instance_id: string; task_file_first: boolean });
     expect(lines.map((line) => [line.instance_id, line.task_file_first])).toEqual([["team__py-US-2-T-1", false], ["team__py-US-2-T-3", true]]);
+  });
+});
+
+describe("benchmark flags without tags (#392)", () => {
+  const TASK_FILE = "docs/tasks/sprint-1/US-1-T-1.md";
+  const row = (facts: SubmittedTaskRow["facts_json"] = null): SubmittedTaskRow => ({
+    task_slot: 1, task_id: "US-1-T-1", pr_url: "https://github.com/team-alpha/proj/pull/7", repo_full_name: "team-alpha/proj", pr_number: 7,
+    task_path: TASK_FILE, task_spec_markdown: "# Cart total\n", task_spec_json: { id: "US-1-T-1", estimateHours: 3 } as TaskSpec,
+    validation_json: { prMerged: true }, analysis_result_id: "result-1", facts_json: facts,
+  });
+  /** A merged PR whose first commit "first1" holds `firstFiles`. The repository has a base tag on "first1" too. */
+  const reader = (firstFiles: string[], requested: string[]): GitHubReader => ({
+    async json<T>(path: string) {
+      requested.push(path);
+      if (/\/pulls\/7$/.test(path)) return { title: "US-1-T-1", body: "Adds Cart.total", merged_at: "2026-10-01T12:00:00Z", merge_commit_sha: "merge", base: { sha: "prbase" }, head: { ref: "US-1-T-1" }, user: { login: "s" } } as T;
+      if (path.includes("/commits?per_page=1")) return [{ sha: "first1" }] as T;
+      if (path.endsWith("/commits/first1")) return { files: firstFiles.map((filename) => ({ filename })) } as T;
+      if (path.includes("/git/ref/tags/")) return { object: { type: "commit", sha: "first1" } } as T;
+      return [] as T;
+    },
+    async text(path: string) { requested.push(path); return TS_DIFF; },
+  });
+  const source = (flags: string[]): ExportCandidate["sources"][number] => ({ consented: true, validationStatus: "candidate", flags });
+
+  it.each([
+    ["task file first, tagged or not (base_tag before #392)", [TASK_FILE], null, "first1", "first_commit", ["base_commit_from_first_commit"], true],
+    ["code first", [TASK_FILE, "src/cart.ts"], null, "prbase", "pr_base", ["base_commit_from_pr_base"], false],
+    ["paired", ["src/cart.ts"], { taskFilePr: { url: "https://github.com/team-alpha/proj/pull/6", number: 6, mergeSha: "spec6" } }, "prbase", "pr_base", ["base_commit_from_pr_base", "task_file_from_other_pr"], false],
+  ] as const)("%s", async (_name, firstFiles, facts, baseCommit, baseCommitSource, flags, first) => {
+    const requested: string[] = [];
+    const task = await captureTaskSnapshot(reader([...firstFiles], requested), row(facts));
+    expect(task).toMatchObject({ baseCommit, baseCommitSource });
+    expect(requested.filter((path) => path.includes("/git/"))).toEqual([]);
+    const built = buildInstance(task, 1, null);
+    expect(built.flags.filter((flag) => flag.startsWith("base_commit") || flag === "task_file_from_other_pr")).toEqual(flags);
+    expect(built.instance).toMatchObject({ base_commit: baseCommit, environment_setup_commit: baseCommit });
+    expect(toExportRecord({ instance: built.instance, sources: [source(built.flags)] }).task_file_first).toBe(first);
+  });
+
+  it("leaves an old base_tag snapshot without a base flag, and its row otherwise identical to the same task captured now", () => {
+    const old = buildInstance(snapshot({ baseCommit: "first1", baseCommitSource: "base_tag" }), 1, null);
+    const now = buildInstance(snapshot({ baseCommit: "first1", baseCommitSource: "first_commit" }), 1, null);
+    expect(old.flags).toEqual([]);
+    expect(now.flags).toEqual(["base_commit_from_first_commit"]);
+    expect(now.instance).toEqual(old.instance);
+    const line = (flags: string[]) => exportJsonl([{ instance: now.instance, sources: [source(flags)] }]);
+    expect(line(now.flags)).toBe(line(old.flags));
   });
 });
 

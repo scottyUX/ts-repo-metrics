@@ -31,12 +31,13 @@ export type TaskFacts = {
   testFileCount: number | null;
   mergeSha: string;
   firstCommitSha: string | null;
-  /** The PR number, so tag commands can fetch the PR's commits first (#292). */
+  /** The PR number. */
   prNumber?: number | null;
-  /** Whether the PR's first commit changes only the task file. Missing on tasks saved before #266. */
+  /**
+   * Whether the PR's first commit holds only task files this PR adds, this task's among them. False for a paired
+   * task. Missing on tasks saved before #266; null when the PR's commits could not be read.
+   */
   firstCommitTaskOnly?: boolean | null;
-  /** Whether the base tag's commit has the same author as the PR's first commit. Null when not checked. */
-  baseTagSameAuthor?: boolean | null;
   /** How many task files the PR adds in the sprint folder, and which. More than one marks the task's shared diff. */
   prTaskFileCount?: number;
   prTaskFiles?: string[];
@@ -51,16 +52,29 @@ export type ChecklistLine = {
   ok: boolean;
   label: string;
   detail: string | null;
-  /** False for a line that is not something to fix, so it is left out of "N to fix". Missing means it counts. */
-  counts?: boolean;
 };
 
-/** The base-tag line's detail when tagging the PR's first commit would cut code out of the graded diff. */
-export const NO_BASE_TAG_DETAIL = "Don't add this tag: your first commit isn't the task file, so tagging it would leave that commit's code out of your graded work.";
-
-/** The failing lines that count toward "N to fix". */
+/** The failing lines: "N to fix". */
 export function linesToFix(lines: ChecklistLine[]): ChecklistLine[] {
-  return lines.filter((line) => !line.ok && line.counts !== false);
+  return lines.filter((line) => !line.ok);
+}
+
+/**
+ * The one "task file first" rule (#392): the PR's first commit holds only task files this PR adds, this task's
+ * among them (`firstCommitHoldsOnlyTaskFiles`), and the task is not paired with a separate task-file PR. No tag
+ * is involved.
+ */
+export function taskFileFirst(firstCommitTaskOnly: boolean | null | undefined, taskFilePr: unknown): boolean {
+  return firstCommitTaskOnly === true && !taskFilePr;
+}
+
+/**
+ * Whether a saved task's file came first. Rows saved before #392 stored `specCommittedFirst` as false whenever the
+ * base tag was missing, so the recorded first-commit fact decides when there is one; otherwise the saved value.
+ */
+export function savedTaskFileFirst(validation: Record<string, boolean> | null | undefined, facts: Partial<TaskFacts> | null | undefined): boolean {
+  if (typeof facts?.firstCommitTaskOnly === "boolean") return taskFileFirst(facts.firstCommitTaskOnly, facts.taskFilePr);
+  return validation?.specCommittedFirst === true;
 }
 
 type CheckLike = { source?: string; status: string; conclusion: string | null };
@@ -92,12 +106,11 @@ export function testFactText(facts: Partial<TaskFacts> | null | undefined): stri
   return `Test files in this PR: ${facts.testFileCount}`;
 }
 
-export function sprintReady(validation: Record<string, boolean> | null | undefined): boolean {
+/** Ready: task file first, opened from the student's account, task ID in title and branch, estimate. No tags. */
+export function sprintReady(validation: Record<string, boolean> | null | undefined, facts: Partial<TaskFacts> | null | undefined): boolean {
   if (!validation) return false;
   return Boolean(
-    validation.specCommittedFirst &&
-    validation.baseTagPushed &&
-    validation.doneTagOnMergeCommit &&
+    savedTaskFileFirst(validation, facts) &&
     validation.prAuthoredByStudent &&
     validation.prTitleHasTaskId &&
     validation.branchHasTaskId &&
@@ -108,12 +121,7 @@ export function sprintReady(validation: Record<string, boolean> | null | undefin
 export function processChecklist(
   validation: Record<string, boolean>,
   facts: Partial<TaskFacts> | null | undefined,
-  taskId: string,
 ): ChecklistLine[] {
-  const id = taskId || "TASK";
-  const merge = facts?.mergeSha ?? "";
-  const first = facts?.firstCommitSha ?? "";
-  const fetchFirst = facts?.prNumber ? `git fetch origin pull/${facts.prNumber}/head && ` : "";
   const titleOk = Boolean(validation.prTitleHasTaskId);
   const branchOk = Boolean(validation.branchHasTaskId);
   const titleBranchDetail = !titleOk && !branchOk
@@ -121,46 +129,14 @@ export function processChecklist(
     : !titleOk
       ? "Edit the PR title on GitHub, then Re-check."
       : "Can't be fixed on this PR.";
-  // The first commit is code (or the work PR has no task file at all): a base tag there would start the diff after
-  // that code, so the card asks for no tag. Unknown (null, older tasks) keeps the command.
-  const noBaseTag = !validation.baseTagPushed && (facts?.firstCommitTaskOnly === false || Boolean(facts?.taskFilePr));
-  // A missing or misplaced base tag fails this check too, but only a spec that wasn't first can't be fixed (#266).
-  const specFirstDetail = facts?.firstCommitTaskOnly !== true
-    ? "Can't be fixed on this PR. The spec must come first; use a new task."
-    : !validation.baseTagPushed
-      ? "Push the base tag, then Re-check."
-      : facts?.baseTagSameAuthor === false
-        ? "This tag is on someone else's commit, maybe a teammate's task with the same ID. Don't move it; ask a TA."
-        : `${fetchFirst}git tag -f ${id}-base ${first} && git push -f origin ${id}-base`;
+  const firstOk = savedTaskFileFirst(validation, facts);
 
   return [
     {
       key: "specCommittedFirst",
-      ok: Boolean(validation.specCommittedFirst),
+      ok: firstOk,
       label: "Task file committed alone, first",
-      detail: validation.specCommittedFirst ? null : specFirstDetail,
-    },
-    noBaseTag ? {
-      key: "baseTagPushed",
-      ok: false,
-      label: `${id}-base tag pushed`,
-      detail: NO_BASE_TAG_DETAIL,
-      counts: false,
-    } : {
-      key: "baseTagPushed",
-      ok: Boolean(validation.baseTagPushed),
-      label: `${id}-base tag pushed`,
-      detail: validation.baseTagPushed ? null : (first
-        ? `${fetchFirst}git tag ${id}-base ${first} && git push origin ${id}-base`
-        : "Push the base tag, then Re-check."),
-    },
-    {
-      key: "doneTagOnMergeCommit",
-      ok: Boolean(validation.doneTagOnMergeCommit),
-      label: `${id}-done tag on the merge commit`,
-      detail: validation.doneTagOnMergeCommit ? null : (merge
-        ? `git fetch origin && git tag ${id}-done ${merge} && git push origin ${id}-done`
-        : "Push the done tag on the merge commit, then Re-check."),
+      detail: firstOk ? null : "Can't be fixed on this PR. The spec must come first; use a new task.",
     },
     {
       key: "prAuthoredByStudent",

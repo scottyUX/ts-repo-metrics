@@ -160,13 +160,18 @@ describe("two task files in one merged PR: task file committed first", () => {
 
   it("is true for both tasks when the first commit holds both task files and nothing else", async () => {
     stubPull({ firstCommitFiles: [T7, T8] });
-    expect((await importAs(2, T7)).facts.firstCommitTaskOnly).toBe(true);
-    expect((await importAs(2, T8)).facts.firstCommitTaskOnly).toBe(true);
+    for (const path of [T7, T8]) {
+      const task = await importAs(2, path);
+      expect(task.facts.firstCommitTaskOnly).toBe(true);
+      // No tag is needed for either task (#392).
+      expect(task.validation.specCommittedFirst).toBe(true);
+    }
   });
 
   it("is false for both tasks when the first commit holds code (code before the task files)", async () => {
     stubPull({ firstCommitFiles: ["src/app.ts"] });
     expect((await importAs(2, T7)).facts.firstCommitTaskOnly).toBe(false);
+    expect((await importAs(2, T7)).validation.specCommittedFirst).toBe(false);
     expect((await importAs(2, T8)).facts.firstCommitTaskOnly).toBe(false);
     stubPull({ firstCommitFiles: [T7, T8, "src/app.ts"] });
     expect((await importAs(2, T7)).facts.firstCommitTaskOnly).toBe(false);
@@ -569,7 +574,6 @@ describe("two task files in one merged PR: capture at submit", () => {
         if (/\/pulls\/\d+$/.test(path)) return { title: "X", body: "", merged_at: "2026-10-14T00:00:00Z", merge_commit_sha: "squash", base: { sha: "main0" }, head: { ref: "feature/x" }, user: { login: "student" } } as T;
         if (path.includes("/commits?per_page=1")) return [{ sha: "first" }] as T;
         if (path.endsWith("/commits/first")) return { files: firstFiles.map((filename) => ({ filename })), commit: { author: { email: "student@ucsc.edu" } } } as T;
-        if (path.includes("/git/ref/tags/")) return null as T;
         return [] as T;
       },
       async text() { return ""; },
