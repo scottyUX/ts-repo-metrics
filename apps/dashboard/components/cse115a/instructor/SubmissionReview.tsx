@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { splitPatch } from "@/lib/cse115a/diff";
 import { oneTaskReviewLine, specEstimateHours } from "@/lib/cse115a/processChecklist";
 import { prTaskFileLines } from "@/lib/cse115a/sharedPr";
+import { taskFilePrReviewLine } from "@/lib/cse115a/taskFilePr";
 import { RUBRIC, TASK_POINTS } from "@/lib/cse115a/rubric";
 import { effectiveTotal, submittedSprintScore, type TaskGradeRow } from "@/lib/cse115a/gradeReview";
 import type { SubmissionSnapshot, TaskSnapshot } from "@/lib/cse115a/submissionSnapshot";
@@ -98,6 +99,7 @@ function TaskPanel({ submissionId, task, grade, onSaved, readOnly, sharedPr }: {
           <Link href={`/cse115a/instructor/submissions/${submissionId}/tasks/${task.slot}/metrics`} className="text-primary underline">Repo Metrics</Link>
           <span className="font-mono text-xs text-muted-foreground">base {task.baseCommit.slice(0, 7)}{task.baseCommitSource === "pr_base" ? " (PR base; no usable base tag)" : task.baseCommitSource === "first_commit" ? " (PR's first commit; base tag missing or not on this PR)" : ""}</span>
         </div>
+        {task.taskFilePr ? <p className="mt-2 text-sm text-amber-700 dark:text-amber-300">{taskFilePrReviewLine(task.taskFilePr.number, task.prNumber)}</p> : null}
         {sharedPr.map((line) => <p key={line} className="mt-2 text-sm text-amber-700 dark:text-amber-300">{line}</p>)}
         {task.diffError ? <p className="mt-2 text-sm text-destructive">Diff not captured: {task.diffError}</p> : null}
         {task.diffTruncated ? <p className="mt-2 text-sm text-amber-700 dark:text-amber-300">The diff was over 1 MB and was cut off.</p> : null}

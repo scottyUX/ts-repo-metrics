@@ -101,6 +101,23 @@ fails, leaves the file offered; the review page then says who committed each
 file (`facts_json.prTaskFileCommitters`, no logins). An open PR is told which
 files are someone else's. PRs with one task file make no such lookup.
 
+Also a backup for PRs already merged: a merged PR that adds no task file (the
+work PR) can be paired with a second merged PR that adds only the task file
+(the task-file PR). Add PR answers `need_task_file_pr`, and the form asks for
+the second link. Only the work PR's author can pair. The task-file PR is
+checked in order: same repository, not the work PR, merged, opened by the
+student, its only file an added task file for this sprint, and that file passes
+every task-file check at the task-file PR's merge commit. The task file, ID and
+spec come from it; the PR number, tags, first commit, CI, test count, title and
+branch checks, diff and analysis come from the work PR. "Task file committed
+first" fails (the work PR has none). The task-file PR is saved in
+`facts_json.taskFilePr` (`url`, `number`, `mergeSha`); Re-check re-imports the
+pair. Neither PR can already be another student's, and the task-file PR can't
+be one of the student's other tasks. A PR that adds a wrongly named `.md` in
+the sprint folder is not paired; an open PR with no task file is told to add it
+before merging. The card, the review page and the snapshot say the task file
+came from a separate PR.
+
 Submissions are tied to the signed-in UCSC account and course membership. A
 task is marked analyzed only after its Repo Metrics result is saved and linked
 to that exact PR. The student's task description comes from the committed file,
@@ -145,7 +162,9 @@ one task file (counted at import, in `facts_json.prTaskFiles`) is flagged
 `pr_holds_two_tasks`, even when the student uses only one of the files: its
 `patch` also holds the other file's work, so export leaves it out (as it does
 rejected rows) until a later rebuild splits the diff by task. Two tasks from
-one PR still get a row each.
+one PR still get a row each. A task whose task file came from a separate
+task-file PR is flagged `task_file_from_other_pr` and still exported: its task
+text and its diff are each complete, but the spec was written after the code.
 
 The diff starts at the base tag only when the tag is on the PR's first
 commit; otherwise it starts at the PR's first commit when that commit is the

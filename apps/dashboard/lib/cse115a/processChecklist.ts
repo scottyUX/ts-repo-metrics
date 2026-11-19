@@ -42,6 +42,8 @@ export type TaskFacts = {
   prTaskFiles?: string[];
   /** For a PR that adds several task files: who committed each, by path. No logins are stored. */
   prTaskFileCommitters?: Record<string, "student" | "someone_else" | "unknown">;
+  /** For a merged PR with no task file: the separate PR that added the task file. The rest is this PR's. */
+  taskFilePr?: { url: string; number: number; mergeSha: string };
 };
 
 export type ChecklistLine = {

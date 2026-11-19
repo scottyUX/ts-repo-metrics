@@ -105,13 +105,13 @@ describe("CSE 115A task import: which task file is this PR's", () => {
   it("never takes a task file the PR only modifies (rule 1)", async () => {
     stubGitHub("first", [OTHER], [{ filename: OTHER, status: "modified" }, { filename: "app.js", status: "added" }]);
     await expect(importTaskFromPullRequest("https://github.com/team/repo/pull/1", 1, githubReader("token"), "student"))
-      .rejects.toThrow(new Error("No task file was found in docs/tasks/sprint-1/ in this PR. It changes US-1-T-2.md but does not add it; a PR's task file is one it adds."));
+      .rejects.toMatchObject({ code: "need_task_file_pr", message: "It changes US-1-T-2.md but does not add it; a PR's task file is one it adds. This merged PR does not add a task file in docs/tasks/sprint-1/. A merged PR can't be changed, so open a new PR that adds only your task file, merge it, and paste its link below. If you don't see a second box, refresh the page." });
   });
 
   it("never takes a task file the PR removes", async () => {
     stubGitHub("first", [OTHER], [{ filename: OTHER, status: "removed" }]);
     await expect(importTaskFromPullRequest("https://github.com/team/repo/pull/1", 1, githubReader("token"), "student"))
-      .rejects.toThrow("No task file was found in docs/tasks/sprint-1/ in this PR.");
+      .rejects.toMatchObject({ code: "need_task_file_pr", message: "It changes US-1-T-2.md but does not add it; a PR's task file is one it adds. This merged PR does not add a task file in docs/tasks/sprint-1/. A merged PR can't be changed, so open a new PR that adds only your task file, merge it, and paste its link below. If you don't see a second box, refresh the page." });
   });
 });
 
@@ -195,7 +195,7 @@ describe("CSE 115A task import: the task file is checked before the merge (#388)
 
   it("says no task file was found when the PR adds no .md file in the folder", async () => {
     stubUnmergedPull({ "app.js": "", [`${FOLDER}/README.md`]: "# Tasks" });
-    await expect(importPull()).rejects.toThrow(new Error(`${FIX}- No task file was found in docs/tasks/sprint-1/ in this PR.`));
+    await expect(importPull()).rejects.toThrow(new Error(`${FIX}- No task file was found in docs/tasks/sprint-1/ in this PR. Add your task file to this PR before you merge.`));
   });
 
   it("names the other .md files when there are several and none is a task file", async () => {

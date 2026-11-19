@@ -13,6 +13,7 @@ import { CONSENT_TEXT, CONSENT_VERSION } from "@/lib/cse115a/consent";
 import { needsCourseInstallPrompt, repoFullNameFromPullRequest } from "@/lib/cse115a/installPrompt";
 import { oauthHashError } from "@/lib/cse115a/oauthError";
 import { prTaskFileLines } from "@/lib/cse115a/sharedPr";
+import { NEED_TASK_FILE_PR_CODE, recheckRequest, savedTaskFilePr, TASK_FILE_PR_BOX, TASK_FILE_PR_CARD_NOTE } from "@/lib/cse115a/taskFilePr";
 import {
   BIG_TASK_MIN_HOURS,
   firstOpenSprint,
@@ -175,6 +176,9 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
   const [assignmentNumber, setAssignmentNumber] = useState(2);
   const [prInputs, setPrInputs] = useState<Record<number, string>>({});
   const [taskFileChoices, setTaskFileChoices] = useState<Record<number, TaskFileChoices | null>>({});
+  // A merged PR with no task file asks for a second PR that adds it: the work PR's URL, and what is typed there.
+  const [taskFilePrBox, setTaskFilePrBox] = useState<Record<number, { prUrl: string } | null>>({});
+  const [taskFilePrInputs, setTaskFilePrInputs] = useState<Record<number, string>>({});
   const [changing, setChanging] = useState<Record<number, boolean>>({});
   const [phase, setPhase] = useState<Record<number, string>>({});
   const [githubConnected, setGithubConnected] = useState<boolean | null>(preview ? previewState !== "joined" : null);
@@ -313,8 +317,20 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
     setAssignmentNumber(number);
     setPrInputs({});
     setTaskFileChoices({});
+    setTaskFilePrBox({});
+    setTaskFilePrInputs({});
     setSlotError({});
     setChanging({});
+  }
+
+  /** Change PR starts over with an empty form. */
+  function startChangingPr(slot: number) {
+    setChanging((previous) => ({ ...previous, [slot]: true }));
+    setPrInputs((previous) => ({ ...previous, [slot]: "" }));
+    setTaskFileChoices((previous) => ({ ...previous, [slot]: null }));
+    setTaskFilePrBox((previous) => ({ ...previous, [slot]: null }));
+    setTaskFilePrInputs((previous) => ({ ...previous, [slot]: "" }));
+    setSlotError((previous) => ({ ...previous, [slot]: "" }));
   }
 
   async function signOut() {
@@ -371,31 +387,48 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
     }
   }
 
-  /** `chosen`: the task file picked from a merged PR that adds several, with that PR's URL. */
-  async function savePullRequest(slot: number, mode: "add" | "recheck", chosen?: { prUrl: string; taskPath: string }) {
+  /**
+   * `chosen`: the task file picked from a merged PR that adds several, or the task-file PR paired with a merged PR
+   * that adds none, with that PR's URL.
+   */
+  async function savePullRequest(slot: number, mode: "add" | "recheck", chosen?: { prUrl: string; taskPath?: string; taskFilePrUrl?: string }) {
     if (preview || !course) return;
     const savedTask = submissions.find((item) => item.task_slot === slot);
     const prUrl = chosen?.prUrl ?? resolvePullRequestUrl(prInputs[slot] ?? "", savedTask?.pr_url, mode);
-    // Re-check keeps the saved task file, so a PR with two task files stays on this slot's file.
-    const taskPath = chosen?.taskPath ?? (mode === "recheck" ? savedTask?.task_path : undefined);
+    // Re-check keeps the saved task file, so a PR with two task files stays on this slot's file, and re-imports a
+    // pair with its saved task-file PR.
+    const saved = mode === "recheck" && savedTask ? recheckRequest(savedTask) : null;
+    const taskPath = chosen?.taskPath ?? saved?.taskPath;
+    const taskFilePrUrl = chosen?.taskFilePrUrl ?? saved?.taskFilePrUrl;
     if (mode === "add" && !parsePullRequestUrl(prUrl)) {
+      setSlotError((previous) => ({ ...previous, [slot]: "Enter a full GitHub pull request URL." }));
+      return;
+    }
+    // An empty second box; any other URL is checked by the server, which says what is wrong with it.
+    if (chosen && "taskFilePrUrl" in chosen && !chosen.taskFilePrUrl) {
       setSlotError((previous) => ({ ...previous, [slot]: "Enter a full GitHub pull request URL." }));
       return;
     }
     if (!prUrl) return;
     setSlotError((previous) => ({ ...previous, [slot]: "" }));
     setTaskFileChoices((previous) => ({ ...previous, [slot]: null }));
+    // The task-file box stays open while its own step is checked, so its errors show under it.
+    if (!chosen?.taskFilePrUrl) setTaskFilePrBox((previous) => ({ ...previous, [slot]: null }));
     setPhase((previous) => ({ ...previous, [slot]: "Checking…" }));
     try {
       const endpoint = `/api/cse115a/assignments/${assignmentNumber}/tasks`;
       const response = await fetch(endpoint, {
         method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include",
-        body: JSON.stringify({ courseSlug: course.slug, slot, prUrl, ...(taskPath ? { taskPath } : {}) }),
+        body: JSON.stringify({ courseSlug: course.slug, slot, prUrl, ...(taskPath ? { taskPath } : {}), ...(taskFilePrUrl ? { taskFilePrUrl } : {}) }),
       });
       const imported = await jsonResponse<{ submission: Submission; code?: string; choices?: TaskFileChoices["choices"] }>(response);
       if (!response.ok) {
         if (imported.code === "choose_task_file" && imported.choices) {
           setTaskFileChoices((previous) => ({ ...previous, [slot]: { prUrl, choices: imported.choices! } }));
+          return;
+        }
+        if (imported.code === NEED_TASK_FILE_PR_CODE) {
+          setTaskFilePrBox((previous) => ({ ...previous, [slot]: { prUrl } }));
           return;
         }
         if (imported.code === "github_app_not_installed") rememberInstallResult(prUrl, false);
@@ -404,6 +437,8 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
       rememberInstallResult(imported.submission.pr_url, true);
       setChanging((previous) => ({ ...previous, [slot]: false }));
       setPrInputs((previous) => ({ ...previous, [slot]: "" }));
+      setTaskFilePrBox((previous) => ({ ...previous, [slot]: null }));
+      setTaskFilePrInputs((previous) => ({ ...previous, [slot]: "" }));
       // Show the saved PR now; the analysis below takes about a minute.
       await load({ quiet: true });
       const shouldAnalyze = mode === "add" || !imported.submission.analysis_result_id;
@@ -604,6 +639,8 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
                 const prNumber = item?.pr_url.match(/\/pull\/(\d+)/)?.[1];
                 const lost = grade ? grade.criteria.filter((row) => row.awarded < row.points) : [];
                 const choice = taskFileChoices[slot] ?? null;
+                const pairBox = taskFilePrBox[slot] ?? null;
+                const pair = item ? savedTaskFilePr(item.facts_json) : null;
                 const prTask = prTasks.find((task) => task.slot === slot);
                 const prLines = prTask ? prTaskFileLines(prTasks, prTask, "student") : [];
                 return (
@@ -621,6 +658,15 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
                             <a href={`${item.pr_url.split("/pull/")[0]}/blob/HEAD/${item.task_path}`} target="_blank" rel="noopener noreferrer" className="text-blue-700 underline">Task file</a>
                             {prNumber ? <> · <a href={item.pr_url} target="_blank" rel="noopener noreferrer" className="text-blue-700 underline">PR #{prNumber}</a></> : null}
                           </p>
+                          {pair && prNumber ? (
+                            <>
+                              <p className="mt-1 text-slate-600">
+                                Task file from <a href={pair.url} target="_blank" rel="noopener noreferrer" className="text-blue-700 underline">PR #{pair.number}</a>
+                                {" · "}work from <a href={item.pr_url} target="_blank" rel="noopener noreferrer" className="text-blue-700 underline">PR #{prNumber}</a>
+                              </p>
+                              <p className="mt-1 text-slate-600">{TASK_FILE_PR_CARD_NOTE}</p>
+                            </>
+                          ) : null}
                           {prLines.map((line) => <p key={line} className="mt-1 text-slate-600">{line}</p>)}
                         </div>
                         {grade ? (
@@ -668,7 +714,7 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
                       <>
                         <label htmlFor={`pr-${slot}`} className="mt-5 block text-sm font-medium">Merged pull request URL</label>
                         {item ? <p className="mt-1 text-sm text-slate-600">Paste a pull request from this repository or a different one.</p> : null}
-                        <input id={`pr-${slot}`} type="url" value={prInputs[slot] ?? ""} onChange={(event) => { setPrInputs((previous) => ({ ...previous, [slot]: event.target.value })); setTaskFileChoices((previous) => ({ ...previous, [slot]: null })); }} placeholder="https://github.com/team/repo/pull/12" className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+                        <input id={`pr-${slot}`} type="url" value={prInputs[slot] ?? ""} onChange={(event) => { setPrInputs((previous) => ({ ...previous, [slot]: event.target.value })); setTaskFileChoices((previous) => ({ ...previous, [slot]: null })); setTaskFilePrBox((previous) => ({ ...previous, [slot]: null })); }} placeholder="https://github.com/team/repo/pull/12" className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
                         <button type="button" disabled={preview || Boolean(phase[slot])} onClick={() => void savePullRequest(slot, "add")} className="mt-3 w-full rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
                           {phase[slot] || "Add PR"}
                         </button>
@@ -689,12 +735,25 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
                             </div>
                           </fieldset>
                         ) : null}
+                        {pairBox ? (
+                          <fieldset className="mt-4 rounded-lg border border-slate-300 p-3 text-sm">
+                            <legend className="px-1 font-semibold">{TASK_FILE_PR_BOX.heading}</legend>
+                            <p className="text-slate-600">{TASK_FILE_PR_BOX.text(assignmentNumber)}</p>
+                            <label htmlFor={`task-file-pr-${slot}`} className="mt-3 block font-medium">{TASK_FILE_PR_BOX.label}</label>
+                            <input id={`task-file-pr-${slot}`} type="url" value={taskFilePrInputs[slot] ?? ""} onChange={(event) => setTaskFilePrInputs((previous) => ({ ...previous, [slot]: event.target.value }))} placeholder="https://github.com/team/repo/pull/13" className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+                            <button type="button" disabled={preview || Boolean(phase[slot])}
+                              onClick={() => void savePullRequest(slot, "add", { prUrl: pairBox.prUrl, taskFilePrUrl: (taskFilePrInputs[slot] ?? "").trim() })}
+                              className="mt-3 w-full rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
+                              {phase[slot] || TASK_FILE_PR_BOX.button}
+                            </button>
+                          </fieldset>
+                        ) : null}
                       </>
                     ) : null}
                     {!locked && item && !showInput ? (
                       <div className="mt-4 flex flex-wrap gap-2">
                         <button type="button" disabled={preview || Boolean(phase[slot])} onClick={() => void savePullRequest(slot, "recheck")} className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold disabled:opacity-50">Re-check</button>
-                        <button type="button" disabled={Boolean(phase[slot])} onClick={() => setChanging((previous) => ({ ...previous, [slot]: true }))} className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold">Change PR</button>
+                        <button type="button" disabled={Boolean(phase[slot])} onClick={() => startChangingPr(slot)} className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold">Change PR</button>
                       </div>
                     ) : null}
                     {slotError[slot] ? <p role="alert" className="mt-3 whitespace-pre-line text-sm text-red-700">{slotError[slot]}</p> : null}
