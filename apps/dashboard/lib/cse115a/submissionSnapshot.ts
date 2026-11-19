@@ -1,5 +1,8 @@
 import type { TaskSpec } from "@/lib/cse115a/taskSpec";
+import type { TaskFacts } from "@/lib/cse115a/processChecklist";
 import { tagCommitSha, type GitHubReader } from "@/lib/cse115a/githubClient";
+import { firstCommitHoldsOnlyTaskFiles } from "@/lib/cse115a/sharedPr";
+import { savedTaskFilePr, type TaskFilePr } from "@/lib/cse115a/taskFilePr";
 
 // Everything grading and benchmark capture need, copied from GitHub when the
 // student submits. Later jobs never call GitHub with the student's token.
@@ -19,6 +22,8 @@ export type SubmittedTaskRow = {
   task_spec_json: TaskSpec;
   validation_json: Record<string, boolean>;
   analysis_result_id: string;
+  /** The facts saved at import; `prTaskFiles`, `prTaskFileCommitters` and `taskFilePr` are carried into the snapshot. */
+  facts_json?: Partial<TaskFacts> | null;
 };
 
 export type SnapshotComment = { kind: "issue" | "review" | "review_comment"; author: string | null; body: string; createdAt: string | null; path?: string };
@@ -35,6 +40,15 @@ export type TaskSnapshot = {
   spec: TaskSpec;
   validation: Record<string, boolean>;
   analysisResultId: string;
+  /** The task files this task's PR adds in the sprint folder, from import. Missing on older tasks and snapshots. */
+  prTaskFiles?: string[];
+  /** Who committed each of those task files, for a PR that adds several. Missing on older tasks and snapshots. Staff only. */
+  prTaskFileCommitters?: TaskFacts["prTaskFileCommitters"];
+  /**
+   * For a merged PR with no task file: the separate PR its task file came from. The spec is the saved one; the
+   * diff, comments and checks are this task's PR (the work PR). Missing on normal tasks and older snapshots.
+   */
+  taskFilePr?: TaskFilePr;
   pr: { title: string; body: string; headRef: string; author: string | null; mergedAt: string | null; baseSha: string; mergeCommitSha: string };
   baseCommit: string;
   /** Where the diff starts: the base tag, the PR's first commit when the tag isn't on it (#342), or the PR base. */
@@ -96,7 +110,9 @@ export async function readCommitChecks(gh: GitHubReader, owner: string, repo: st
   ];
 }
 
-export async function captureTaskSnapshot(gh: GitHubReader, task: SubmittedTaskRow): Promise<TaskSnapshot> {
+/** `samePrTaskPaths`: the task files of the student's other tasks from this same PR (two tasks, one PR). */
+export async function captureTaskSnapshot(gh: GitHubReader, task: SubmittedTaskRow, samePrTaskPaths: string[] = []): Promise<TaskSnapshot> {
+  const taskFilePr = savedTaskFilePr(task.facts_json);
   const [owner, repo] = task.repo_full_name.split("/") as [string, string];
   const base = `/repos/${owner}/${repo}`;
   const pull = await gh.json<Pull>(`${base}/pulls/${task.pr_number}`);
@@ -111,22 +127,25 @@ export async function captureTaskSnapshot(gh: GitHubReader, task: SubmittedTaskR
     gh.json<Comment[]>(`${base}/pulls/${task.pr_number}/comments?per_page=100`),
     readCommitChecks(gh, owner, repo, mergeSha),
   ]);
-  // Use the base tag only when it is on this PR's first commit, so a tag moved onto another
-  // student's commit can't change this student's diff (#342).
+  // The diff starts after the PR's first commit only when that commit holds only task files: a tag on the first
+  // commit gives base_tag, otherwise first_commit. A base tag elsewhere, or on a first commit that holds code, is
+  // ignored, so neither a tag moved onto another student's commit (#342) nor a tag on code cuts work out of the diff.
   const firstSha = commits?.[0]?.sha ?? null;
   let baseCommit = pull.base.sha;
   let baseCommitSource: TaskSnapshot["baseCommitSource"] = "pr_base";
   let baseTagSameAuthor: boolean | null = null;
-  if (baseTagSha && baseTagSha === firstSha) {
-    baseCommit = baseTagSha;
-    baseCommitSource = "base_tag";
-  } else if (firstSha) {
+  if (firstSha && !taskFilePr) {
+    // A paired task's PR has no task file, so its first commit is never the task file alone.
     const first = await gh.json<{ files?: Array<{ filename: string }>; commit?: { author?: { email?: string } } }>(`${base}/commits/${firstSha}`);
-    if (first?.files?.length === 1 && first.files[0]?.filename === task.task_path) {
+    const taskFilesOnly = firstCommitHoldsOnlyTaskFiles(first?.files, task.task_path, [...samePrTaskPaths, ...(task.facts_json?.prTaskFiles ?? [])]);
+    if (taskFilesOnly && baseTagSha === firstSha) {
+      baseCommit = firstSha;
+      baseCommitSource = "base_tag";
+    } else if (taskFilesOnly) {
       baseCommit = firstSha;
       baseCommitSource = "first_commit";
       // A tag on another author's commit is likely a teammate's task with the same ID; the Process grade says so.
-      const firstAuthor = first.commit?.author?.email;
+      const firstAuthor = first?.commit?.author?.email;
       if (baseTagSha && firstAuthor) {
         const tagged = await gh.json<{ commit?: { author?: { email?: string } } }>(`${base}/commits/${baseTagSha}`, { optional: true });
         const taggedAuthor = tagged?.commit?.author?.email;
@@ -165,6 +184,10 @@ export async function captureTaskSnapshot(gh: GitHubReader, task: SubmittedTaskR
     spec: task.task_spec_json,
     validation: task.validation_json,
     analysisResultId: task.analysis_result_id,
+    ...(Array.isArray(task.facts_json?.prTaskFiles) ? { prTaskFiles: task.facts_json.prTaskFiles } : {}),
+    ...(task.facts_json?.prTaskFileCommitters && typeof task.facts_json.prTaskFileCommitters === "object"
+      ? { prTaskFileCommitters: task.facts_json.prTaskFileCommitters } : {}),
+    ...(taskFilePr ? { taskFilePr } : {}),
     pr: {
       title: pull.title,
       body: pull.body ?? "",
@@ -184,6 +207,9 @@ export async function captureTaskSnapshot(gh: GitHubReader, task: SubmittedTaskR
 }
 
 export async function captureSubmissionSnapshot(gh: GitHubReader, tasks: SubmittedTaskRow[], now = new Date()): Promise<SubmissionSnapshot> {
-  const snapshots = await Promise.all([...tasks].sort((a, b) => a.task_slot - b.task_slot).map((task) => captureTaskSnapshot(gh, task)));
+  const sorted = [...tasks].sort((a, b) => a.task_slot - b.task_slot);
+  const snapshots = await Promise.all(sorted.map((task) => captureTaskSnapshot(gh, task, sorted
+    .filter((other) => other.task_slot !== task.task_slot && other.pr_url.toLowerCase() === task.pr_url.toLowerCase())
+    .map((other) => other.task_path))));
   return { version: 1, capturedAt: now.toISOString(), tasks: snapshots };
 }

@@ -53,10 +53,17 @@ export function effectiveTotal(grade: Pick<TaskGradeRow, "agent_total" | "instru
   return Number(grade.instructor_total ?? grade.agent_total);
 }
 
-/** Reasons a submission cannot be released yet; empty when it can. */
-export function releaseBlockers(grades: TaskGradeRow[]): string[] {
+/** The task slots a submission's snapshot holds. A snapshot without a task list counts as both slots, as before #348. */
+export function submittedSlots(snapshot: unknown): number[] {
+  const tasks = (snapshot as { tasks?: unknown } | null | undefined)?.tasks;
+  if (!Array.isArray(tasks)) return [1, 2];
+  return tasks.map((task) => Number((task as { slot?: unknown } | null)?.slot)).filter(Number.isInteger).sort((a, b) => a - b);
+}
+
+/** Reasons a submission cannot be released yet; empty when it can. Only submitted slots need a grade (#348). */
+export function releaseBlockers(grades: TaskGradeRow[], slots: number[]): string[] {
   const blockers: string[] = [];
-  for (const slot of [1, 2]) {
+  for (const slot of slots) {
     const grade = grades.find((row) => row.task_slot === slot);
     if (!grade) { blockers.push(`Task ${slot} has no grade yet.`); continue; }
     if (grade.instructor_rubric) continue;
@@ -66,11 +73,32 @@ export function releaseBlockers(grades: TaskGradeRow[]): string[] {
   return blockers;
 }
 
-/** Sprint score: the average of the two best task scores; a missing task counts as 0. */
-export function sprintScore(taskTotals: Array<number | null | undefined>): number {
-  const best = taskTotals.map((total) => total ?? 0).sort((a, b) => b - a).slice(0, 2);
-  while (best.length < 2) best.push(0);
-  return (best[0]! + best[1]!) / 2;
+/**
+ * Sprint score from the submitted tasks' totals only: one big task is the sprint score, two tasks are
+ * averaged, none gives 0. More than two (planned later) gives the average of the two best (#348).
+ */
+export function sprintScore(taskTotals: number[]): number {
+  if (taskTotals.length === 0) return 0;
+  const best = [...taskTotals].sort((a, b) => b - a).slice(0, 2);
+  return best.reduce((sum, total) => sum + total, 0) / best.length;
+}
+
+/** The sprint score once every submitted slot has a total; null while one is missing, so a two-task submission is never scored as one task. */
+export function submittedSprintScore(slots: number[], totalFor: (slot: number) => number | null | undefined): number | null {
+  if (slots.length === 0) return null;
+  const totals: number[] = [];
+  for (const slot of slots) {
+    const total = totalFor(slot);
+    if (total === null || total === undefined || !Number.isFinite(total)) return null;
+    totals.push(total);
+  }
+  return sprintScore(totals);
+}
+
+/** Submitted slots from the first two snapshot task slots, selected as JSON paths so the list never loads the diffs. Neither present: both slots, as submittedSlots. */
+export function slotsFromSnapshotPaths(first: unknown, second: unknown): number[] {
+  const slots = [first, second].filter((slot) => slot !== null && slot !== undefined).map(Number).filter(Number.isInteger);
+  return slots.length ? [...new Set(slots)].sort((a, b) => a - b) : [1, 2];
 }
 
 export type StudentCriterion = { name: CriterionName; points: number; awarded: number; rationale: string; note: string };

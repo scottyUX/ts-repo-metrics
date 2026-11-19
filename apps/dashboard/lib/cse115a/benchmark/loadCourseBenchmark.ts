@@ -53,7 +53,7 @@ export async function loadExportCandidates(db: SupabaseClient, courseId: string)
   return instances.map((instance) => ({
     instance,
     sources: sources.filter((row) => row.instance_id === instance.instance_id)
-      .map((row) => ({ consented: consented.has(row.user_id), validationStatus: row.validation_status })),
+      .map((row) => ({ consented: consented.has(row.user_id), validationStatus: row.validation_status, flags: row.flags ?? [] })),
   }));
 }
 

@@ -4,6 +4,7 @@ import type { TaskGrade } from "@/lib/cse115a/grader/gradeTask";
 import { buildInstance, type BenchmarkInstance, type BuildFlag } from "@/lib/cse115a/benchmark/buildInstance";
 import type { RepoCopyResult, RepoCopyTask } from "@/lib/cse115a/benchmark/repoCopy";
 import { repoCopiesEnabled } from "@/lib/cse115a/benchmark/repoCopySwitch";
+import { prHoldsMoreThanThisTask } from "@/lib/cse115a/sharedPr";
 
 // Claims queued jobs and runs them. Storage is behind JobStore so the retry
 // rules can be tested without a database. Two lines, each its own poller loop
@@ -98,10 +99,12 @@ async function runBenchmark(store: JobStore, job: Job, env: Record<string, strin
   const submission = await store.loadSubmission(job.assignment_submission_id);
   if (!submission) throw new Error("The submission no longer exists.");
   const studentEmail = await store.loadStudentEmail(submission.course_id, submission.user_id);
-  const rows = await Promise.all(submission.snapshot.tasks.map(async (task) => ({
+  const tasks = submission.snapshot.tasks;
+  const rows = await Promise.all(tasks.map(async (task) => ({
     slot: task.slot,
     mergeCommit: task.pr.mergeCommitSha,
-    ...buildInstance(task, submission.assignment_number, await store.loadRepoMetrics(task.analysisResultId), studentEmail),
+    ...buildInstance(task, submission.assignment_number, await store.loadRepoMetrics(task.analysisResultId), studentEmail,
+      { prHoldsTwoTasks: prHoldsMoreThanThisTask(tasks, task) }),
   })));
   // Superseded attempts are still captured: the work was real, and the export filters by consent.
   await store.saveBenchmark(submission, rows);

@@ -12,8 +12,12 @@ import { RUBRIC } from "@/lib/cse115a/rubric";
 import { CONSENT_TEXT, CONSENT_VERSION } from "@/lib/cse115a/consent";
 import { needsCourseInstallPrompt, repoFullNameFromPullRequest } from "@/lib/cse115a/installPrompt";
 import { oauthHashError } from "@/lib/cse115a/oauthError";
+import { prTaskFileLines } from "@/lib/cse115a/sharedPr";
+import { NEED_TASK_FILE_PR_CODE, recheckRequest, savedTaskFilePr, TASK_FILE_PR_BOX, TASK_FILE_PR_CARD_NOTE } from "@/lib/cse115a/taskFilePr";
 import {
+  BIG_TASK_MIN_HOURS,
   firstOpenSprint,
+  linesToFix,
   processChecklist,
   resolvePullRequestUrl,
   sprintReady,
@@ -21,6 +25,8 @@ import {
   submitAction,
   canChangeSubmission,
   submitBarText,
+  oneTaskConfirmText,
+  specEstimateHours,
   type TaskFacts,
 } from "@/lib/cse115a/processChecklist";
 import { ProcessChecklist } from "@/components/cse115a/ProcessChecklist";
@@ -65,6 +71,8 @@ type AssignmentSubmission = {
 export type PreviewState = "joined" | "draft" | "ready" | "submitted" | "needs-fixes" | "grading" | "released";
 type ReleasedGrade = StudentTaskGrade & { assignmentSubmissionId: string };
 type Consent = { course_id: string; consented: boolean; consent_version: string; updated_at: string };
+/** A merged PR that adds several task files: the student chooses one for the slot (one PR, two tasks). */
+type TaskFileChoices = { prUrl: string; choices: Array<{ path: string; taskId: string; takenBySlot: number | null }> };
 type Me = { email: string; courses: Course[]; submissions: Submission[]; assignmentSubmissions: AssignmentSubmission[]; grades: ReleasedGrade[]; consent: Consent[] };
 
 const POLL_MS = 20_000;
@@ -168,6 +176,10 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
   const [selectedSlug, setSelectedSlug] = useState<string | null>(preview ? previewCourse.slug : null);
   const [assignmentNumber, setAssignmentNumber] = useState(2);
   const [prInputs, setPrInputs] = useState<Record<number, string>>({});
+  const [taskFileChoices, setTaskFileChoices] = useState<Record<number, TaskFileChoices | null>>({});
+  // A merged PR with no task file asks for a second PR that adds it: the work PR's URL, and what is typed there.
+  const [taskFilePrBox, setTaskFilePrBox] = useState<Record<number, { prUrl: string } | null>>({});
+  const [taskFilePrInputs, setTaskFilePrInputs] = useState<Record<number, string>>({});
   const [changing, setChanging] = useState<Record<number, boolean>>({});
   const [phase, setPhase] = useState<Record<number, string>>({});
   const [githubConnected, setGithubConnected] = useState<boolean | null>(preview ? previewState !== "joined" : null);
@@ -293,14 +305,33 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
   const changeAllowed = Boolean(assignmentSubmission) && canChangeSubmission(assignmentSubmission!.status, sprintDueAt);
   const readyCount = submissions.filter((item) => sprintReady(item.validation_json)).length;
   const action = submitAction(submissions.length, readyCount, assignmentNumber);
+  // One task added: its saved estimate decides the big-task warning, which never blocks Submit (#348).
+  const oneTaskHours = submissions.length === 1 ? specEstimateHours(submissions[0]!.task_spec_json) : null;
+  // A task whose PR adds more than one task file says so on its card, from the count recorded at import.
+  const prTasks = submissions.map((item) => ({
+    slot: item.task_slot, taskId: item.task_id, prUrl: item.pr_url, taskPath: item.task_path, prTaskFiles: item.facts_json?.prTaskFiles ?? null,
+  }));
   const setupDone = Boolean(me?.courses.length) && githubConnected === true;
 
   // Typed URLs and messages belong to the sprint they were typed in.
   function openSprint(number: number) {
     setAssignmentNumber(number);
     setPrInputs({});
+    setTaskFileChoices({});
+    setTaskFilePrBox({});
+    setTaskFilePrInputs({});
     setSlotError({});
     setChanging({});
+  }
+
+  /** Change PR starts over with an empty form. */
+  function startChangingPr(slot: number) {
+    setChanging((previous) => ({ ...previous, [slot]: true }));
+    setPrInputs((previous) => ({ ...previous, [slot]: "" }));
+    setTaskFileChoices((previous) => ({ ...previous, [slot]: null }));
+    setTaskFilePrBox((previous) => ({ ...previous, [slot]: null }));
+    setTaskFilePrInputs((previous) => ({ ...previous, [slot]: "" }));
+    setSlotError((previous) => ({ ...previous, [slot]: "" }));
   }
 
   async function signOut() {
@@ -357,31 +388,58 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
     }
   }
 
-  async function savePullRequest(slot: number, mode: "add" | "recheck") {
+  /**
+   * `chosen`: the task file picked from a merged PR that adds several, or the task-file PR paired with a merged PR
+   * that adds none, with that PR's URL.
+   */
+  async function savePullRequest(slot: number, mode: "add" | "recheck", chosen?: { prUrl: string; taskPath?: string; taskFilePrUrl?: string }) {
     if (preview || !course) return;
-    const saved = submissions.find((item) => item.task_slot === slot)?.pr_url;
-    const prUrl = resolvePullRequestUrl(prInputs[slot] ?? "", saved, mode);
+    const savedTask = submissions.find((item) => item.task_slot === slot);
+    const prUrl = chosen?.prUrl ?? resolvePullRequestUrl(prInputs[slot] ?? "", savedTask?.pr_url, mode);
+    // Re-check keeps the saved task file, so a PR with two task files stays on this slot's file, and re-imports a
+    // pair with its saved task-file PR.
+    const saved = mode === "recheck" && savedTask ? recheckRequest(savedTask) : null;
+    const taskPath = chosen?.taskPath ?? saved?.taskPath;
+    const taskFilePrUrl = chosen?.taskFilePrUrl ?? saved?.taskFilePrUrl;
     if (mode === "add" && !parsePullRequestUrl(prUrl)) {
+      setSlotError((previous) => ({ ...previous, [slot]: "Enter a full GitHub pull request URL." }));
+      return;
+    }
+    // An empty second box; any other URL is checked by the server, which says what is wrong with it.
+    if (chosen && "taskFilePrUrl" in chosen && !chosen.taskFilePrUrl) {
       setSlotError((previous) => ({ ...previous, [slot]: "Enter a full GitHub pull request URL." }));
       return;
     }
     if (!prUrl) return;
     setSlotError((previous) => ({ ...previous, [slot]: "" }));
+    setTaskFileChoices((previous) => ({ ...previous, [slot]: null }));
+    // The task-file box stays open while its own step is checked, so its errors show under it.
+    if (!chosen?.taskFilePrUrl) setTaskFilePrBox((previous) => ({ ...previous, [slot]: null }));
     setPhase((previous) => ({ ...previous, [slot]: "Checking…" }));
     try {
       const endpoint = `/api/cse115a/assignments/${assignmentNumber}/tasks`;
       const response = await fetch(endpoint, {
         method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include",
-        body: JSON.stringify({ courseSlug: course.slug, slot, prUrl }),
+        body: JSON.stringify({ courseSlug: course.slug, slot, prUrl, ...(taskPath ? { taskPath } : {}), ...(taskFilePrUrl ? { taskFilePrUrl } : {}) }),
       });
-      const imported = await jsonResponse<{ submission: Submission; code?: string }>(response);
+      const imported = await jsonResponse<{ submission: Submission; code?: string; choices?: TaskFileChoices["choices"] }>(response);
       if (!response.ok) {
+        if (imported.code === "choose_task_file" && imported.choices) {
+          setTaskFileChoices((previous) => ({ ...previous, [slot]: { prUrl, choices: imported.choices! } }));
+          return;
+        }
+        if (imported.code === NEED_TASK_FILE_PR_CODE) {
+          setTaskFilePrBox((previous) => ({ ...previous, [slot]: { prUrl } }));
+          return;
+        }
         if (imported.code === "github_app_not_installed") rememberInstallResult(prUrl, false);
         throw new Error(imported.error ?? "Could not import the task spec.");
       }
       rememberInstallResult(imported.submission.pr_url, true);
       setChanging((previous) => ({ ...previous, [slot]: false }));
       setPrInputs((previous) => ({ ...previous, [slot]: "" }));
+      setTaskFilePrBox((previous) => ({ ...previous, [slot]: null }));
+      setTaskFilePrInputs((previous) => ({ ...previous, [slot]: "" }));
       // Show the saved PR now; the analysis below takes about a minute.
       await load({ quiet: true });
       const shouldAnalyze = mode === "add" || !imported.submission.analysis_result_id;
@@ -530,10 +588,10 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
                 <h1 className="text-3xl font-bold">Sprint {assignmentNumber}</h1>
                 <p className="mt-1 text-sm text-slate-600">
                   {released
-                    ? `Graded ${formatWhen(releasedGrades[0]!.releasedAt)} · the average of your two tasks`
+                    ? `Graded ${formatWhen(releasedGrades[0]!.releasedAt)} · ${releasedGrades.length === 1 ? "your one big task" : "the average of your two tasks"}`
                     : assignmentSubmission
                       ? `Submitted ${formatWhen(assignmentSubmission.submitted_at)}. Your grade appears here after instructor review.`
-                      : "Add two merged task PRs. We check each one against its checklist."}
+                      : `Add two merged task PRs, or one big task (estimate ${BIG_TASK_MIN_HOURS} hours or more). We check each one against its checklist.`}
                 </p>
                 {released ? <p className="mt-1 text-sm text-slate-600">Questions about this grade? Ask your TA.</p> : null}
                 {assignmentSubmission && !released ? <StatusSteps status={assignmentSubmission.status} /> : null}
@@ -578,9 +636,15 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
                 const grade = releasedGrades.find((row) => row.slot === slot) ?? null;
                 const showInput = !locked && (!item || changing[slot]);
                 const lines = item ? processChecklist(item.validation_json, item.facts_json, item.task_id) : [];
-                const fixCount = lines.filter((line) => !line.ok).length;
+                const fixCount = linesToFix(lines).length;
+                const countedLines = lines.filter((line) => line.counts !== false).length;
                 const prNumber = item?.pr_url.match(/\/pull\/(\d+)/)?.[1];
                 const lost = grade ? grade.criteria.filter((row) => row.awarded < row.points) : [];
+                const choice = taskFileChoices[slot] ?? null;
+                const pairBox = taskFilePrBox[slot] ?? null;
+                const pair = item ? savedTaskFilePr(item.facts_json) : null;
+                const prTask = prTasks.find((task) => task.slot === slot);
+                const prLines = prTask ? prTaskFileLines(prTasks, prTask, "student") : [];
                 return (
                   <div key={slot} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                     <div className="flex items-start justify-between gap-3">
@@ -596,6 +660,16 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
                             <a href={`${item.pr_url.split("/pull/")[0]}/blob/HEAD/${item.task_path}`} target="_blank" rel="noopener noreferrer" className="text-blue-700 underline">Task file</a>
                             {prNumber ? <> · <a href={item.pr_url} target="_blank" rel="noopener noreferrer" className="text-blue-700 underline">PR #{prNumber}</a></> : null}
                           </p>
+                          {pair && prNumber ? (
+                            <>
+                              <p className="mt-1 text-slate-600">
+                                Task file from <a href={pair.url} target="_blank" rel="noopener noreferrer" className="text-blue-700 underline">PR #{pair.number}</a>
+                                {" · "}work from <a href={item.pr_url} target="_blank" rel="noopener noreferrer" className="text-blue-700 underline">PR #{prNumber}</a>
+                              </p>
+                              <p className="mt-1 text-slate-600">{TASK_FILE_PR_CARD_NOTE}</p>
+                            </>
+                          ) : null}
+                          {prLines.map((line) => <p key={line} className="mt-1 text-slate-600">{line}</p>)}
                         </div>
                         {grade ? (
                           <div className="rounded-lg bg-slate-50 p-3">
@@ -616,7 +690,7 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
                           <details className="group">
                             <summary className="cursor-pointer list-none text-slate-700 [&::-webkit-details-marker]:hidden">
                               <span aria-hidden className="mr-1 inline-block transition-transform group-open:rotate-90">›</span>
-                              Process checks: {lines.length - fixCount} of {lines.length} {fixCount === 0 ? "✓" : ""}
+                              Process checks: {countedLines - fixCount} of {countedLines} {fixCount === 0 ? "✓" : ""}
                             </summary>
                             <ProcessChecklist validation={item.validation_json} facts={item.facts_json} taskId={item.task_id} />
                           </details>
@@ -642,19 +716,49 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
                       <>
                         <label htmlFor={`pr-${slot}`} className="mt-5 block text-sm font-medium">Merged pull request URL</label>
                         {item ? <p className="mt-1 text-sm text-slate-600">Paste a pull request from this repository or a different one.</p> : null}
-                        <input id={`pr-${slot}`} type="url" value={prInputs[slot] ?? ""} onChange={(event) => setPrInputs((previous) => ({ ...previous, [slot]: event.target.value }))} placeholder="https://github.com/team/repo/pull/12" className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+                        <input id={`pr-${slot}`} type="url" value={prInputs[slot] ?? ""} onChange={(event) => { setPrInputs((previous) => ({ ...previous, [slot]: event.target.value })); setTaskFileChoices((previous) => ({ ...previous, [slot]: null })); setTaskFilePrBox((previous) => ({ ...previous, [slot]: null })); }} placeholder="https://github.com/team/repo/pull/12" className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
                         <button type="button" disabled={preview || Boolean(phase[slot])} onClick={() => void savePullRequest(slot, "add")} className="mt-3 w-full rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
                           {phase[slot] || "Add PR"}
                         </button>
+                        {choice ? (
+                          <fieldset className="mt-4 rounded-lg border border-slate-300 p-3 text-sm">
+                            <legend className="px-1 font-semibold">Which task file from this merged PR is Task {slot}?</legend>
+                            <p className="text-slate-600">Each task file in this PR can be one of your tasks. Add the same PR in your other task and choose the other file.</p>
+                            <div className="mt-3 flex flex-col gap-2">
+                              {choice.choices.map((option) => (
+                                <button key={option.path} type="button" disabled={preview || Boolean(phase[slot]) || option.takenBySlot !== null}
+                                  onClick={() => void savePullRequest(slot, "add", { prUrl: choice.prUrl, taskPath: option.path })}
+                                  className="rounded-lg border border-slate-300 px-3 py-2 text-left disabled:cursor-not-allowed disabled:opacity-50">
+                                  <span className="font-medium">{option.taskId}</span>
+                                  <span className="text-slate-600"> · {option.path.split("/").pop()}</span>
+                                  {option.takenBySlot !== null ? <span className="text-slate-600"> · Taken: already your Task {option.takenBySlot}</span> : null}
+                                </button>
+                              ))}
+                            </div>
+                          </fieldset>
+                        ) : null}
+                        {pairBox ? (
+                          <fieldset className="mt-4 rounded-lg border border-slate-300 p-3 text-sm">
+                            <legend className="px-1 font-semibold">{TASK_FILE_PR_BOX.heading}</legend>
+                            <p className="text-slate-600">{TASK_FILE_PR_BOX.text(assignmentNumber)}</p>
+                            <label htmlFor={`task-file-pr-${slot}`} className="mt-3 block font-medium">{TASK_FILE_PR_BOX.label}</label>
+                            <input id={`task-file-pr-${slot}`} type="url" value={taskFilePrInputs[slot] ?? ""} onChange={(event) => setTaskFilePrInputs((previous) => ({ ...previous, [slot]: event.target.value }))} placeholder="https://github.com/team/repo/pull/13" className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+                            <button type="button" disabled={preview || Boolean(phase[slot])}
+                              onClick={() => void savePullRequest(slot, "add", { prUrl: pairBox.prUrl, taskFilePrUrl: (taskFilePrInputs[slot] ?? "").trim() })}
+                              className="mt-3 w-full rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
+                              {phase[slot] || TASK_FILE_PR_BOX.button}
+                            </button>
+                          </fieldset>
+                        ) : null}
                       </>
                     ) : null}
                     {!locked && item && !showInput ? (
                       <div className="mt-4 flex flex-wrap gap-2">
                         <button type="button" disabled={preview || Boolean(phase[slot])} onClick={() => void savePullRequest(slot, "recheck")} className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold disabled:opacity-50">Re-check</button>
-                        <button type="button" disabled={Boolean(phase[slot])} onClick={() => setChanging((previous) => ({ ...previous, [slot]: true }))} className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold">Change PR</button>
+                        <button type="button" disabled={Boolean(phase[slot])} onClick={() => startChangingPr(slot)} className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold">Change PR</button>
                       </div>
                     ) : null}
-                    {slotError[slot] ? <p role="alert" className="mt-3 text-sm text-red-700">{slotError[slot]}</p> : null}
+                    {slotError[slot] ? <p role="alert" className="mt-3 whitespace-pre-line text-sm text-red-700">{slotError[slot]}</p> : null}
                   </div>
                 );
               })}
@@ -663,7 +767,7 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
               <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-5">
                 <div>
                   <h2 className="font-semibold">Sprint {assignmentNumber}</h2>
-                  <p className="mt-1 text-sm text-slate-600">{submitBarText(readyCount)}</p>
+                  <p className="mt-1 text-sm text-slate-600">{submitBarText(submissions.length, readyCount, oneTaskHours)}</p>
                   {action.reason ? <p className="mt-1 text-sm text-slate-600">{action.reason}</p> : null}
                 </div>
                 <button type="button" disabled={submittingAssignment || action.disabled || preview}
@@ -705,7 +809,11 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Submit Sprint {assignmentNumber}?</DialogTitle>
-                  <DialogDescription>Both tasks lock when you submit. You can still change your submission until the sprint closes.</DialogDescription>
+                  <DialogDescription>
+                    {submissions.length === 1
+                      ? oneTaskConfirmText(oneTaskHours)
+                      : "Both tasks lock when you submit. You can still change your submission until the sprint closes."}
+                  </DialogDescription>
                 </DialogHeader>
                 <ul className="space-y-2 text-sm">
                   {[...submissions].sort((a, b) => a.task_slot - b.task_slot).map((item) => (

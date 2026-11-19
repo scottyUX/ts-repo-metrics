@@ -12,10 +12,15 @@ service keeps its normal home page.
 3. Connect GitHub so the site knows their username. One teammate installs the course
    GitHub App on the team repository. That install is what lets the site read the
    repository. See [CSE115A_GITHUB_APP.md](CSE115A_GITHUB_APP.md).
-4. Open Assignment 1, 2, 3, and so on. Submit two merged task PR URLs. The app
+4. Open Assignment 1, 2, 3, and so on. Submit two merged task PR URLs, or one big task. The app
    imports `docs/tasks/sprint-N/<task-id>.md` from each PR's merge commit,
    records process checks, and analyzes the PR's changed source files. Once
-   both are analyzed, submit the assignment in the app.
+   every added task is analyzed, submit the assignment in the app. A sprint is
+   two tasks or one big task (estimate 4 hours or more). One big task is scored
+   out of 10 on its own; two tasks are averaged. A big task under 4 hours shows
+   a warning but can still be submitted; graders decide. With two tasks, their
+   task IDs must differ, and so must their PRs, unless one merged PR adds both
+   task files (see Submission behavior).
 
 ## Backend setup
 
@@ -23,7 +28,11 @@ service keeps its normal home page.
   `20260925000000_cse115a_final_submissions.sql` (submit-once, snapshots, job queue),
   then `20260926000000_cse115a_grading.sql` (draft grades, job claim function),
   then `20260927000000_cse115a_benchmark.sql` (benchmark rows, research consent),
-  then `20260928000000_cse115a_instructor.sql` (staff roles, release and regrade).
+  then `20260928000000_cse115a_instructor.sql` (staff roles, release and regrade),
+  then `20260930000000_cse115a_sprint_page.sql` (Scrum confirmation, check facts, due dates),
+  then `20261117000000_cse115a_one_task_submit.sql` (submit and release with one
+  task or two; replaces `submit_cse_assignment` and
+  `release_cse_assignment_submission`, and its header names the old bodies to undo it).
   The repo copies need `20261116000000_cse115a_repo_copy_jobs.sql` (the
   `repo_copy` job kind) before `CSE115A_REPO_COPIES` is set to `on`; undo is in
   a comment in that file.
@@ -56,10 +65,61 @@ service keeps its normal home page.
 
 ## Submission behavior
 
-Each assignment has two task slots. Import requires a merged PR with exactly
-one task file under the matching `docs/tasks/sprint-N/` directory. The task ID
-in its front matter must match the filename. Missing tags or process evidence
+Each assignment has two task slots. Import requires a merged PR that adds
+exactly one task file under the matching `docs/tasks/sprint-N/` directory. Only
+a task file the PR adds can be its own: one it only modifies or removes (say, a
+teammate's file changed by a merge from `main`) never is. The task ID in its
+front matter must match the filename. Missing tags or process evidence
 are shown as checks for the student; the app does not assign a grade.
+
+A PR that is still open is not imported, but its task file is checked at the
+PR's head commit and the student is told every problem at once, so the file can
+be fixed before the merge. If the PR has no file named after a task ID but adds
+exactly one other `.md` file in the sprint folder, that file is checked and the
+message names what is wrong with it (for example, its name against its ID).
+An open PR that adds several task files is refused and told to move each one
+to its own PR before merging.
+
+As a backup for PRs already merged, a merged PR that adds two of the student's
+own task files counts as two tasks. Add PR answers `choose_task_file` with the
+files it adds; the student picks one per slot (a file used in the other slot is
+shown as taken), and the server re-checks the choice against the PR's added
+task files. Only the PR's author can do this, each file must pass every check
+on its own, and at most two of its task files can be used. Each slot keeps its
+own task file, ID, tags and grade; the captured diff is the same for both, and
+the grader is told to judge each task only against its own task file. The same
+applies when the student uses only one file of such a PR: the task card, the
+review page and the grader say the PR adds another task file. "Task
+file committed first" counts when the PR's first commit holds only task files
+it adds, this task's among them. This needs
+`20261118000000_cse115a_two_tasks_one_pr.sql` (unique per PR and task file
+instead of per PR): apply it, then merge. Without it, PRs with one task file
+work as before and a second task from the same PR is refused with a message.
+
+Only the student's own task files count in a PR that adds several: a file
+whose adding commit was made from another GitHub account (say, a teammate's
+branch merged in) is not offered, cannot be chosen, and with one file left is
+imported without a choice. A commit with no GitHub account, or a lookup that
+fails, leaves the file offered; the review page then says who committed each
+file (`facts_json.prTaskFileCommitters`, no logins). An open PR is told which
+files are someone else's. PRs with one task file make no such lookup.
+
+Also a backup for PRs already merged: a merged PR that adds no task file (the
+work PR) can be paired with a second merged PR that adds only the task file
+(the task-file PR). Add PR answers `need_task_file_pr`, and the form asks for
+the second link. Only the work PR's author can pair. The task-file PR is
+checked in order: same repository, not the work PR, merged, opened by the
+student, its only file an added task file for this sprint, and that file passes
+every task-file check at the task-file PR's merge commit. The task file, ID and
+spec come from it; the PR number, tags, first commit, CI, test count, title and
+branch checks, diff and analysis come from the work PR. "Task file committed
+first" fails (the work PR has none). The task-file PR is saved in
+`facts_json.taskFilePr` (`url`, `number`, `mergeSha`); Re-check re-imports the
+pair. Neither PR can already be another student's, and the task-file PR can't
+be one of the student's other tasks. A PR that adds a wrongly named `.md` in
+the sprint folder is not paired; an open PR with no task file is told to add it
+before merging. The card, the review page and the snapshot say the task file
+came from a separate PR.
 
 Submissions are tied to the signed-in UCSC account and course membership. A
 task is marked analyzed only after its Repo Metrics result is saved and linked
@@ -68,8 +128,8 @@ not text re-entered in the browser.
 
 ## Grading worker
 
-Submitting queues a `grade` job. A worker claims it, grades both tasks from the
-submit-time snapshot, and saves a draft in `cse_task_grades`. Students see a
+Submitting queues a `grade` job. A worker claims it, grades every task in the
+submit-time snapshot (one or two), and saves a draft in `cse_task_grades`. Students see a
 grade only after an instructor releases it.
 
 - **Tests pass** and **Process** come from recorded evidence: CI conclusions on
@@ -78,7 +138,9 @@ grade only after an instructor releases it.
 - The other five criteria come from one OpenAI call per task with a strict JSON
   schema. Each must quote the submission; a quote that is missing or not found
   in the spec or diff marks it for review. The model and prompt version are
-  stored with the grade.
+  stored with the grade. The grader reads test and source files that the task
+  file names first, then the rest; images, lockfiles and `docs/tasks/` files
+  come last. Nothing is dropped, and the benchmark row keeps the diff's order.
 - Failed jobs retry after 1 and 4 minutes. After the third failure the job is
   `failed` and the submission is `grading_failed`.
 
@@ -99,14 +161,30 @@ SWE-bench instances in `cse_benchmark_tasks` (the SWE-bench columns plus
 `repo_metrics`, the task's Repo Metrics report). Every task is captured,
 including superseded attempts; `cse_benchmark_task_sources` records who
 submitted it, a `validation_status`, and flags such as
-`base_commit_from_pr_base` or `no_test_patch`.
+`base_commit_from_pr_base` or `no_test_patch`. A task whose PR adds more than
+one task file (counted at import, in `facts_json.prTaskFiles`) is flagged
+`pr_holds_two_tasks`, even when the student uses only one of the files: its
+`patch` also holds the other file's work, so export leaves it out (as it does
+rejected rows) until a later rebuild splits the diff by task. Two tasks from
+one PR still get a row each. A task whose task file came from a separate
+task-file PR is flagged `task_file_from_other_pr` and still exported: its task
+text and its diff are each complete, but the spec was written after the code.
 
-The diff starts at the base tag only when the tag is on the PR's first
-commit; otherwise it starts at the PR's first commit when that commit is the
-task file alone (`base_commit_from_first_commit`), or at the PR base.
+The diff starts after the PR's first commit only when that commit holds only
+task files and the task is not paired: at the base tag when the tag is on that
+commit, otherwise at the commit itself (`base_commit_from_first_commit`). In
+every other case it starts at the PR base, so a base tag on a first commit that
+holds code, or on a paired task's work PR, is ignored and cannot cut that
+commit's code out of the diff. For such tasks the card's base-tag line shows no
+command ("Don't add this tag: …") and is not counted in "N to fix".
 
 - `patch` and `test_patch` split the base-tag-to-merge diff by test path
   (`lib/cse115a/diff.ts`).
+- Files that AI coding tools keep in a repo are left out of both: anything
+  under `.agents/`, `.claude/`, `.cursor/` or `.windsurf/`, and
+  `skills-lock.json`, in any folder (`isAiToolPath`). Rows that had such
+  files get the `ai_tool_files_dropped` flag. Grading still sees them,
+  because the graders read the submission's own diff, not the benchmark row.
 - `FAIL_TO_PASS` holds test IDs added in `test_patch`, found statically
   (`file::describe > it` for Jest/Vitest, `file::Class::test` for pytest).
   They are unverified. `PASS_TO_PASS`, `image`, `eval_script`, and
@@ -125,6 +203,20 @@ task file alone (`base_commit_from_first_commit`), or at the PR base.
 - Export (`lib/cse115a/benchmark/exportJsonl.ts`) includes an instance only
   when a student who submitted it said yes to the current, approved consent
   wording and no source is rejected.
+- Each JSONL line has the SWE-bench fields, unchanged and in the same order,
+  then one more key, `task_file_first` (boolean). It is `false` when any
+  source of the instance is flagged `base_commit_from_pr_base` or
+  `task_file_from_other_pr`: the task file was not committed alone as the
+  PR's first commit, or came from a separate PR after the code was merged,
+  so the spec may have been written after the code. `false` also covers the
+  rare case where the PR's first commit could not be read. Otherwise it is
+  `true`. Rows are not filtered on it; readers that ignore unknown keys, as
+  the SWE-bench harness does, see no change. Known gap: a row captured before
+  the base-tag fix, from a base tag a student had put on a first commit that
+  holds code, has no flag and reads `task_file_first: true`. The fix stops new
+  ones; staff find the old ones with a read-only query on the saved snapshots
+  for tasks whose `baseCommitSource` is `base_tag` while `specCommittedFirst`
+  is false.
 
 With `CSE115A_REPO_COPIES=on`, the `benchmark` job also queues a `repo_copy`
 job, which saves a copy of each task's repository at its base commit (a git
@@ -153,10 +245,13 @@ SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... \
 
 - **Submissions**: every enrolled student for an assignment, with status, agent
   and instructor totals, and a needs-review flag. Filter by status.
-- **Review**: both tasks side by side with the spec, `patch`/`test_patch`
+- **Review**: the submitted tasks side by side with the spec, `patch`/`test_patch`
   diffs, CI results, the Repo Metrics report, and the agent's rationale and
   quotes. Staff can override points (half steps) and add notes, then
-  **Release**. Release is blocked while a criterion has no points. Edits saved
+  **Release**. Release is blocked while a submitted task has no grade or a
+  criterion has no points. A one-task submission shows "One-task sprint: this
+  task is the sprint score" with its estimate (amber when under 4 hours) and
+  releases with one grade. Edits saved
   after release are visible to the student right away.
 - **Regrade** requeues the grade job and keeps instructor edits. **Unlock**
   (instructors only, reason required) supersedes the attempt so the student can

@@ -1,3 +1,29 @@
+/** The smallest estimate a task may have, in hours. */
+export const TASK_MIN_HOURS = 2;
+/** The smallest estimate for one big task, which counts as the whole sprint: twice a regular task. */
+export const BIG_TASK_MIN_HOURS = 2 * TASK_MIN_HOURS;
+
+/** The regular estimate check: at least TASK_MIN_HOURS. Feeds estimateAtLeastTwoHours. */
+export function estimateMeetsTaskMinimum(hours: number): boolean {
+  return hours >= TASK_MIN_HOURS;
+}
+
+/** A saved task spec's estimate in hours, or null when it has none. */
+export function specEstimateHours(spec: { estimateHours?: unknown } | null | undefined): number | null {
+  const hours = spec?.estimateHours;
+  return typeof hours === "number" && Number.isFinite(hours) ? hours : null;
+}
+
+/** Whether one task is big enough to count as the whole sprint. Hours are the only rule; a short one warns, it does not block. */
+export function bigTaskEstimateOk(hours: number | null | undefined): boolean {
+  return typeof hours === "number" && hours >= BIG_TASK_MIN_HOURS;
+}
+
+function hoursText(hours: number): string {
+  const text = String(Number(hours.toFixed(2)));
+  return `${text} ${hours === 1 ? "hour" : "hours"}`;
+}
+
 export type CiFact = { state: "none" | "passed" | "failed"; failed: number; total: number };
 
 export type TaskFacts = {
@@ -11,6 +37,13 @@ export type TaskFacts = {
   firstCommitTaskOnly?: boolean | null;
   /** Whether the base tag's commit has the same author as the PR's first commit. Null when not checked. */
   baseTagSameAuthor?: boolean | null;
+  /** How many task files the PR adds in the sprint folder, and which. More than one marks the task's shared diff. */
+  prTaskFileCount?: number;
+  prTaskFiles?: string[];
+  /** For a PR that adds several task files: who committed each, by path. No logins are stored. */
+  prTaskFileCommitters?: Record<string, "student" | "someone_else" | "unknown">;
+  /** For a merged PR with no task file: the separate PR that added the task file. The rest is this PR's. */
+  taskFilePr?: { url: string; number: number; mergeSha: string };
 };
 
 export type ChecklistLine = {
@@ -18,7 +51,17 @@ export type ChecklistLine = {
   ok: boolean;
   label: string;
   detail: string | null;
+  /** False for a line that is not something to fix, so it is left out of "N to fix". Missing means it counts. */
+  counts?: boolean;
 };
+
+/** The base-tag line's detail when tagging the PR's first commit would cut code out of the graded diff. */
+export const NO_BASE_TAG_DETAIL = "Don't add this tag: your first commit isn't the task file, so tagging it would leave that commit's code out of your graded work.";
+
+/** The failing lines that count toward "N to fix". */
+export function linesToFix(lines: ChecklistLine[]): ChecklistLine[] {
+  return lines.filter((line) => !line.ok && line.counts !== false);
+}
 
 type CheckLike = { source?: string; status: string; conclusion: string | null };
 
@@ -78,6 +121,9 @@ export function processChecklist(
     : !titleOk
       ? "Edit the PR title on GitHub, then Re-check."
       : "Can't be fixed on this PR.";
+  // The first commit is code (or the work PR has no task file at all): a base tag there would start the diff after
+  // that code, so the card asks for no tag. Unknown (null, older tasks) keeps the command.
+  const noBaseTag = !validation.baseTagPushed && (facts?.firstCommitTaskOnly === false || Boolean(facts?.taskFilePr));
   // A missing or misplaced base tag fails this check too, but only a spec that wasn't first can't be fixed (#266).
   const specFirstDetail = facts?.firstCommitTaskOnly !== true
     ? "Can't be fixed on this PR. The spec must come first; use a new task."
@@ -94,7 +140,13 @@ export function processChecklist(
       label: "Task file committed alone, first",
       detail: validation.specCommittedFirst ? null : specFirstDetail,
     },
-    {
+    noBaseTag ? {
+      key: "baseTagPushed",
+      ok: false,
+      label: `${id}-base tag pushed`,
+      detail: NO_BASE_TAG_DETAIL,
+      counts: false,
+    } : {
       key: "baseTagPushed",
       ok: Boolean(validation.baseTagPushed),
       label: `${id}-base tag pushed`,
@@ -125,7 +177,7 @@ export function processChecklist(
     {
       key: "estimateAtLeastTwoHours",
       ok: Boolean(validation.estimateAtLeastTwoHours),
-      label: "Estimate is at least 2 hours",
+      label: `Estimate is at least ${TASK_MIN_HOURS} hours`,
       detail: validation.estimateAtLeastTwoHours ? null : "Can't be fixed on this PR. The estimate is in the merged task file.",
     },
   ];
@@ -138,15 +190,60 @@ export function resolvePullRequestUrl(input: string, saved: string | null | unde
 }
 
 export function submitAction(addedCount: number, readyCount: number, sprint: number): { disabled: boolean; label: string; reason: string | null } {
-  if (addedCount < 2) {
-    return { disabled: true, label: `Submit Sprint ${sprint}`, reason: "Add both tasks to submit." };
+  if (addedCount < 1) {
+    return { disabled: true, label: `Submit Sprint ${sprint}`, reason: "Add a task to submit." };
   }
+  // One big task can be submitted on its own; it counts as the whole sprint (#348).
+  if (addedCount === 1) return { disabled: false, label: `Submit Sprint ${sprint} with one task`, reason: null };
   if (readyCount >= 2) return { disabled: false, label: `Submit Sprint ${sprint}`, reason: null };
   return { disabled: false, label: `Submit Sprint ${sprint} anyway`, reason: null };
 }
 
-export function submitBarText(readyCount: number): string {
+/** The submit bar's line. With one task, `oneTaskHours` is its saved estimate (null when it has none). */
+export function submitBarText(addedCount: number, readyCount: number, oneTaskHours: number | null = null): string {
+  if (addedCount === 1) {
+    if (bigTaskEstimateOk(oneTaskHours)) return "1 task added · one big task counts as the whole sprint";
+    const says = oneTaskHours === null ? "this one has no estimate" : `this one says ${String(Number(oneTaskHours.toFixed(2)))}`;
+    return `1 task added · one big task needs an estimate of ${BIG_TASK_MIN_HOURS} hours or more (${says}). Add a second task, or submit anyway and a grader will check its size.`;
+  }
   return `${readyCount} of 2 ready · You can change your submission until the sprint closes.`;
+}
+
+/** The submit dialog's text for one task, with the size warning when its estimate is under BIG_TASK_MIN_HOURS. */
+export function oneTaskConfirmText(hours: number | null): string {
+  const base = "You are submitting one big task. It counts as the whole sprint, scored out of 10. You can still change your submission and add a second task until the sprint closes.";
+  if (bigTaskEstimateOk(hours)) return base;
+  const estimate = hours === null ? "It has no estimate" : `Its estimate is ${hoursText(hours)}`;
+  return `${base} ${estimate}; one big task needs ${BIG_TASK_MIN_HOURS} or more. A grader will check its size.`;
+}
+
+/** The staff review page's line for a one-task submission; `warn` when the estimate is under BIG_TASK_MIN_HOURS. */
+export function oneTaskReviewLine(hours: number | null): { text: string; warn: boolean } {
+  const estimate = hours === null ? "none" : hoursText(hours);
+  if (bigTaskEstimateOk(hours)) return { text: `One-task sprint: this task is the sprint score. Estimate: ${estimate}.`, warn: false };
+  return { text: `One-task sprint: this task is the sprint score. Estimate: ${estimate} (one big task needs ${BIG_TASK_MIN_HOURS} or more).`, warn: true };
+}
+
+export type SubmitTaskRow = { task_slot: number; task_id: string; pr_url: string; task_path: string; analysis_result_id: string | null };
+
+/**
+ * Why these task rows can't be submitted, or null when they can: one or two tasks, each analyzed, two must differ
+ * (#348). Two tasks may share a PR only with two different task files, as a merged PR that holds two tasks does.
+ */
+export function submitTasksError(tasks: SubmitTaskRow[]): string | null {
+  if (tasks.length < 1 || tasks.length > 2) return "Add and analyze at least one merged task PR first.";
+  const sorted = [...tasks].sort((a, b) => a.task_slot - b.task_slot);
+  const unanalyzed = sorted.find((task) => !task.analysis_result_id);
+  if (unanalyzed) return `Task ${unanalyzed.task_slot} (${unanalyzed.task_id}) has not been analyzed yet. Re-check it, then submit.`;
+  if (sorted.length === 2) {
+    const [first, second] = sorted as [SubmitTaskRow, SubmitTaskRow];
+    const samePr = first.pr_url.toLowerCase() === second.pr_url.toLowerCase();
+    if (samePr && first.task_path === second.task_path) {
+      return "Your two tasks use the same task file from the same PR. Each task needs its own task file.";
+    }
+    if (first.task_id === second.task_id) return "Your two tasks must have different task IDs.";
+  }
+  return null;
 }
 
 export function sprintTabLabel(number: number, options: { submitted: boolean; released: boolean; score: number | null }): string {

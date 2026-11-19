@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { effectiveTotal, parseInstructorRubric, releaseBlockers, sprintScore, studentGradeView, type TaskGradeRow } from "@/lib/cse115a/gradeReview";
+import { effectiveTotal, parseInstructorRubric, releaseBlockers, slotsFromSnapshotPaths, sprintScore, studentGradeView, submittedSlots, submittedSprintScore, type TaskGradeRow } from "@/lib/cse115a/gradeReview";
 import { RUBRIC, type CriterionGrade } from "@/lib/cse115a/rubric";
 
 const full = () => RUBRIC.map((row) => ({ name: row.name as string, awarded: row.points as number, note: "" }));
@@ -41,15 +41,33 @@ describe("parseInstructorRubric", () => {
 
 describe("release rules", () => {
   it("needs both tasks graded", () => {
-    expect(releaseBlockers([grade(1)])).toEqual(["Task 2 has no grade yet."]);
-    expect(releaseBlockers([grade(1), grade(2)])).toEqual([]);
+    expect(releaseBlockers([grade(1)], [1, 2])).toEqual(["Task 2 has no grade yet."]);
+    expect(releaseBlockers([grade(1), grade(2)], [1, 2])).toEqual([]);
+  });
+
+  it("needs a grade only for submitted slots (#348)", () => {
+    expect(releaseBlockers([grade(1)], [1])).toEqual([]);
+    expect(releaseBlockers([grade(2)], [2])).toEqual([]);
+    expect(releaseBlockers([], [1])).toEqual(["Task 1 has no grade yet."]);
+    expect(releaseBlockers([grade(2)], [1])).toEqual(["Task 1 has no grade yet."]);
+    const unscored = grade(1);
+    unscored.rubric[4] = { ...unscored.rubric[4]!, awarded: null, level: null, needsReview: true };
+    expect(releaseBlockers([unscored], [1])).toEqual(["Task 1: enter points for Tests pass."]);
+  });
+
+  it("reads the submitted slots from the snapshot", () => {
+    expect(submittedSlots({ tasks: [{ slot: 2 }, { slot: 1 }] })).toEqual([1, 2]);
+    expect(submittedSlots({ tasks: [{ slot: 1 }] })).toEqual([1]);
+    expect(submittedSlots({ tasks: [{ slot: 2 }] })).toEqual([2]);
+    expect(submittedSlots({})).toEqual([1, 2]);
+    expect(submittedSlots(null)).toEqual([1, 2]);
   });
 
   it("needs points for criteria the agent left unscored, unless an instructor edited the task", () => {
     const unscored = grade(2);
     unscored.rubric[4] = { ...unscored.rubric[4]!, awarded: null, level: null, needsReview: true };
-    expect(releaseBlockers([grade(1), unscored])).toEqual(["Task 2: enter points for Tests pass."]);
-    expect(releaseBlockers([grade(1), { ...unscored, instructor_rubric: [] }])).toEqual([]);
+    expect(releaseBlockers([grade(1), unscored], [1, 2])).toEqual(["Task 2: enter points for Tests pass."]);
+    expect(releaseBlockers([grade(1), { ...unscored, instructor_rubric: [] }], [1, 2])).toEqual([]);
   });
 
   it("uses instructor totals over agent totals", () => {
@@ -59,11 +77,44 @@ describe("release rules", () => {
 });
 
 describe("sprintScore", () => {
-  it("averages the two best tasks, counting a missing task as 0", () => {
+  it("averages two tasks, and the two best of more than two", () => {
     expect(sprintScore([8, 6])).toBe(7);
     expect(sprintScore([8, 6, 10])).toBe(9);
-    expect(sprintScore([8, null])).toBe(4);
     expect(sprintScore([])).toBe(0);
+  });
+
+  it("scores one big task out of 10 on its own (#348)", () => {
+    expect(sprintScore([8])).toBe(8);
+    expect(sprintScore([10])).toBe(10);
+  });
+});
+
+describe("instructor list sprint score (#348)", () => {
+  const totals = (bySlot: Record<number, number | null>) => (slot: number) => bySlot[slot];
+
+  it("scores a one-task submission as that task's total", () => {
+    const slots = slotsFromSnapshotPaths(1, null);
+    expect(slots).toEqual([1]);
+    expect(submittedSprintScore(slots, totals({ 1: 8 }))).toBe(8);
+    expect(submittedSprintScore(slotsFromSnapshotPaths(2, undefined), totals({ 2: 6.5 }))).toBe(6.5);
+  });
+
+  it("averages a two-task submission once both grades are in", () => {
+    const slots = slotsFromSnapshotPaths(1, 2);
+    expect(slots).toEqual([1, 2]);
+    expect(submittedSprintScore(slots, totals({ 1: 8, 2: 6 }))).toBe(7);
+  });
+
+  it("shows no score for a two-task submission with a grade missing, not a one-task score", () => {
+    expect(submittedSprintScore([1, 2], totals({ 1: 8, 2: null }))).toBeNull();
+    expect(submittedSprintScore([1, 2], totals({ 2: 6 }))).toBeNull();
+    expect(submittedSprintScore([1], totals({}))).toBeNull();
+  });
+
+  it("treats a snapshot without a task list as two tasks, as submittedSlots does", () => {
+    expect(slotsFromSnapshotPaths(null, null)).toEqual([1, 2]);
+    expect(slotsFromSnapshotPaths(undefined, undefined)).toEqual(submittedSlots({}));
+    expect(submittedSprintScore(slotsFromSnapshotPaths(null, null), totals({ 1: 8 }))).toBeNull();
   });
 });
 

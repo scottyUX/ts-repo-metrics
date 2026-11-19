@@ -1,6 +1,6 @@
 import type { ChatCompletionCreateParamsNonStreaming } from "openai/resources/chat/completions";
 import { LLM_CRITERIA, criterion, pointsFor, type CriterionGrade, type Level } from "@/lib/cse115a/rubric";
-import { splitPatch } from "@/lib/cse115a/diff";
+import { isTestPath, parseDiffFiles, type DiffFile } from "@/lib/cse115a/diff";
 import type { TaskSnapshot } from "@/lib/cse115a/submissionSnapshot";
 
 // Scores the five judgment criteria of one task with a single OpenAI call.
@@ -8,7 +8,7 @@ import type { TaskSnapshot } from "@/lib/cse115a/submissionSnapshot";
 // submission (or no quote at all) marks the criterion for instructor review.
 
 // Bump whenever the prompt or the rubric text in lib/cse115a/rubric.ts changes.
-export const GRADER_PROMPT_VERSION = "cse115a-grader-v3";
+export const GRADER_PROMPT_VERSION = "cse115a-grader-v5";
 export const DEFAULT_GRADER_MODEL = "gpt-4o";
 
 const MAX_SPEC_CHARS = 20_000;
@@ -91,9 +91,63 @@ function fence(tag: string, text: string): string {
 
 export type GraderInput = { specMarkdown: string; testPatch: string; patch: string; notes: string[] };
 
-export function graderInput(task: TaskSnapshot): GraderInput {
-  const split = splitPatch(task.diff);
-  const notes: string[] = [];
+const NOISE_EXTENSION = /\.(svg|png|jpe?g|gif|webp|ico|bmp)$/i;
+const LOCKFILES = new Set(["package-lock.json", "yarn.lock", "pnpm-lock.yaml", "bun.lockb", "poetry.lock", "pipfile.lock", "composer.lock", "gemfile.lock", "cargo.lock"]);
+const TASK_FILE_FOLDER = /^docs\/tasks\/.+\.md$/i;
+
+/** Images, lockfiles and task files: read last. This task's own task file is already shown as the spec. */
+function isNoisePath(path: string): boolean {
+  const name = path.split("/").pop()!.toLowerCase();
+  return NOISE_EXTENSION.test(path) || LOCKFILES.has(name) || TASK_FILE_FOLDER.test(path);
+}
+
+/**
+ * Whether the task file names this file: its full path or its file name appears in the spec, ignoring case, and
+ * not as part of a longer name (so "a.ts" is not found inside "data.ts"). Students often write only the file
+ * name, or a path from a subfolder.
+ */
+function namedInSpec(spec: string, path: string): boolean {
+  const name = path.split("/").pop()!;
+  return [path, name].some((needle) => {
+    const lower = needle.toLowerCase();
+    let at = spec.indexOf(lower);
+    while (at !== -1) {
+      const before = at === 0 ? "" : spec[at - 1]!;
+      const after = spec[at + lower.length] ?? "";
+      if (!/[a-z0-9_.-]/.test(before) && !/[a-z0-9_-]/.test(after)) return true;
+      at = spec.indexOf(lower, at + 1);
+    }
+    return false;
+  });
+}
+
+/**
+ * The diff's test and source text in the order the grader reads them: files the task file names first, then the
+ * rest, and for source files images, lockfiles and task files last. Each file's text is unchanged and files keep
+ * their diff order within each group, so a diff with nothing named and no noise reads exactly as splitPatch's.
+ */
+export function graderPatches(diff: string, specMarkdown: string): { testPatch: string; patch: string } {
+  const spec = specMarkdown.toLowerCase();
+  const files = parseDiffFiles(diff);
+  const named = (file: DiffFile) => namedInSpec(spec, file.path);
+  const join = (groups: DiffFile[][]) => groups.flat().map((file) => file.text).join("");
+  const tests = files.filter((file) => isTestPath(file.path));
+  const sources = files.filter((file) => !isTestPath(file.path));
+  const noise = sources.filter((file) => isNoisePath(file.path));
+  const code = sources.filter((file) => !isNoisePath(file.path));
+  return {
+    testPatch: join([tests.filter(named), tests.filter((file) => !named(file))]),
+    patch: join([code.filter(named), code.filter((file) => !named(file)), noise]),
+  };
+}
+
+/**
+ * `prNotes`: notes for a task whose PR adds more than one task file (prTaskFileGraderNotes). The test and source
+ * text read this task's own files first (graderPatches), so another task's files can't fill the window.
+ */
+export function graderInput(task: TaskSnapshot, prNotes: string[] = []): GraderInput {
+  const split = graderPatches(task.diff, task.specMarkdown);
+  const notes: string[] = [...prNotes];
   if (task.diffError) notes.push(`The diff could not be loaded: ${task.diffError}`);
   if (task.diffTruncated) notes.push("The diff was over 1 MB and was cut off.");
   if (!split.testPatch) notes.push("The diff has no test files.");
@@ -114,13 +168,17 @@ export function buildMessages(input: GraderInput) {
   ];
 }
 
-/** Lowercases and collapses whitespace; diff markers at line starts are dropped so quotes of added lines match. */
+/**
+ * Lowercases and collapses whitespace; diff markers at line starts are dropped so quotes of added lines match,
+ * and backticks are dropped because the grader often quotes markdown code without them.
+ */
 export function normalizeForQuote(text: string): string {
-  return text.replace(/^[+-](?![+-])/gm, "").replace(/\s+/g, " ").trim().toLowerCase();
+  return text.replace(/^[+-](?![+-])/gm, "").replace(/`/g, "").replace(/\s+/g, " ").trim().toLowerCase();
 }
 
+/** Whether a quote is in the normalized haystack. Punctuation the grader adds at the end of a quote is ignored. */
 export function quoteFound(haystack: string, quote: string): boolean {
-  const needle = normalizeForQuote(quote);
+  const needle = normalizeForQuote(quote).replace(/[.,;:!?]+$/, "");
   return needle.length > 0 && haystack.includes(needle);
 }
 
@@ -151,8 +209,8 @@ export function toCriterionGrades(raw: Record<string, RawCriterion>, input: Grad
 
 export type LlmGradeResult = { criteria: CriterionGrade[]; model: string; promptVersion: string };
 
-export async function gradeWithLlm(client: ChatClient, task: TaskSnapshot, model = graderModel()): Promise<LlmGradeResult> {
-  const input = graderInput(task);
+export async function gradeWithLlm(client: ChatClient, task: TaskSnapshot, model = graderModel(), prNotes: string[] = []): Promise<LlmGradeResult> {
+  const input = graderInput(task, prNotes);
   const response = await client.chat.completions.create({
     model,
     temperature: 0,

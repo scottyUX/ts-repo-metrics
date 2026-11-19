@@ -12,9 +12,12 @@ export type TaskGrade = {
   promptVersion: string;
 };
 
-/** The agent's draft grade for one task, in rubric order. Criteria without points count as zero until an instructor reviews them. */
-export async function gradeTask(client: ChatClient, task: TaskSnapshot, model?: string): Promise<TaskGrade> {
-  const llm = await gradeWithLlm(client, task, model);
+/**
+ * The agent's draft grade for one task, in rubric order. Criteria without points count as zero until an instructor
+ * reviews them. `prNotes` say when its PR adds more than one task file; each task is graded on its own.
+ */
+export async function gradeTask(client: ChatClient, task: TaskSnapshot, model?: string, prNotes: string[] = []): Promise<TaskGrade> {
+  const llm = await gradeWithLlm(client, task, model, prNotes);
   const byName = new Map<string, CriterionGrade>([
     ...llm.criteria.map((grade) => [grade.name, grade] as const),
     ["Tests pass", gradeTestsPass(task.checks)],

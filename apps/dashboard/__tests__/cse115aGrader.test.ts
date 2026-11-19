@@ -195,7 +195,7 @@ describe("LLM grader", () => {
     // Scope 1 + Specs 1 + AC 2 + Test quality 1 + Tests pass 2 + Process 1
     expect(grade.agentTotal).toBe(8);
     expect(grade.needsReview).toBe(false);
-    expect(grade.promptVersion).toBe("cse115a-grader-v3");
+    expect(grade.promptVersion).toBe("cse115a-grader-v5");
   });
 
   it("sends Process to review when the snapshot diffed from the PR's first commit (#342)", async () => {
@@ -224,6 +224,16 @@ describe("LLM grader", () => {
     expect(quoteFound(haystack, "it(\"rejects a@\", () => {\n\n     EXPECT(validateEmail(\"a@\")).toBe(false)")).toBe(true);
     expect(quoteFound(haystack, "export function validateEmail(input: string) { return")).toBe(true);
     expect(quoteFound(haystack, "   ")).toBe(false);
+  });
+
+  it("matches quotes without the source's backticks or with a period the grader added (#371)", () => {
+    const haystack = normalizeForQuote("- `POST /houseexpenses/:conversationId` returns HTTP 400 when the name is missing.\nIt falls back to Schema.org JSON-LD or OpenGraph to fill in missing fields");
+    expect(quoteFound(haystack, "POST /houseexpenses/:conversationId returns HTTP 400")).toBe(true);
+    expect(quoteFound(haystack, "It falls back to Schema.org JSON-LD or OpenGraph.")).toBe(true);
+    expect(quoteFound(haystack, "returns HTTP 400 when the name is missing.")).toBe(true);
+    expect(quoteFound(haystack, "returns HTTP 404")).toBe(false);
+    expect(quoteFound(haystack, "OpenGraph to fill in all fields.")).toBe(false);
+    expect(quoteFound(haystack, "...")).toBe(false);
   });
 
   it("rejects a malformed or empty response", async () => {

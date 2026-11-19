@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getSupabase, isSupabaseConfigured } from "@/lib/supabase/server";
 import { getActiveAssignmentSubmission, getCourseIdentity, getEnrolledCourse, lockedAssignmentMessage } from "@/lib/cse115a/server";
 import { CourseRepoAccessError, courseRepoReader } from "@/lib/cse115a/githubApp";
+import { submitTasksError } from "@/lib/cse115a/processChecklist";
 import { captureSubmissionSnapshot, type SubmittedTaskRow } from "@/lib/cse115a/submissionSnapshot";
 
 export const runtime = "nodejs";
@@ -25,20 +26,17 @@ export async function POST(request: Request, { params }: { params: Promise<{ num
 
   const db = getSupabase();
   const { data: tasks, error: tasksError } = await db.from("cse_task_submissions")
-    .select("task_slot,task_id,pr_url,repo_full_name,pr_number,task_path,task_spec_markdown,task_spec_json,validation_json,analysis_result_id")
+    .select("task_slot,task_id,pr_url,repo_full_name,pr_number,task_path,task_spec_markdown,task_spec_json,validation_json,facts_json,analysis_result_id")
     .eq("course_id", course.id).eq("user_id", identity.userId)
     .eq("assignment_number", assignmentNumber);
-  if (tasksError || !tasks || tasks.length !== 2 ||
-      !tasks.some((task) => task.task_slot === 1 && task.analysis_result_id) ||
-      !tasks.some((task) => task.task_slot === 2 && task.analysis_result_id) ||
-      tasks[0]!.task_id === tasks[1]!.task_id || tasks[0]!.pr_url === tasks[1]!.pr_url) {
-    return NextResponse.json({ error: "Submit and analyze two different merged task PRs first." }, { status: 400 });
-  }
+  const rows = tasksError ? [] : tasks ?? [];
+  const notSubmittable = submitTasksError(rows);
+  if (notSubmittable) return NextResponse.json({ error: notSubmittable }, { status: 400 });
 
   if (!identity.githubLogin) return NextResponse.json({ error: "Connect GitHub before submitting.", code: "github_not_linked" }, { status: 403 });
   let snapshot;
   try {
-    snapshot = await captureSubmissionSnapshot(courseRepoReader(identity.githubLogin), tasks as SubmittedTaskRow[]);
+    snapshot = await captureSubmissionSnapshot(courseRepoReader(identity.githubLogin), rows as SubmittedTaskRow[]);
   } catch (error) {
     if (error instanceof CourseRepoAccessError) return NextResponse.json({ error: error.message, code: error.code }, { status: 403 });
     return NextResponse.json({ error: error instanceof Error ? error.message : "Could not read your pull requests from GitHub." }, { status: 502 });

@@ -4,6 +4,7 @@ import { gradeTask } from "@/lib/cse115a/grader/gradeTask";
 import { copyTaskRepo } from "@/lib/cse115a/benchmark/repoCopy";
 import { supabaseSnapshotStore } from "@/lib/cse115a/benchmark/validation/snapshotStore";
 import { repoCopiesEnabled } from "@/lib/cse115a/benchmark/repoCopySwitch";
+import { prTaskFileGraderNotes } from "@/lib/cse115a/sharedPr";
 import { startJobLoop } from "./loop";
 import { drainJobs, REPO_COPY_KINDS, RUNNABLE_KINDS, type JobHandlers, type RunResult } from "./runner";
 import { supabaseJobStore } from "./supabaseStore";
@@ -18,7 +19,8 @@ function productionHandlers(): JobHandlers {
     async grade(snapshot) {
       if (!process.env.OPENAI_API_KEY) throw new Error("OPENAI_API_KEY is not configured.");
       const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-      return Promise.all(snapshot.tasks.map((task) => gradeTask(client, task)));
+      // A task whose PR adds more than one task file is told to judge only against its own; each is graded separately.
+      return Promise.all(snapshot.tasks.map((task) => gradeTask(client, task, undefined, prTaskFileGraderNotes(snapshot.tasks, task))));
     },
     async copyRepo(task) {
       const store = supabaseSnapshotStore(process.env);

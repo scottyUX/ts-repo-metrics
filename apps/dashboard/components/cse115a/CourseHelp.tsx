@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BIG_TASK_MIN_HOURS } from "@/lib/cse115a/processChecklist";
 
 const HANDOUT = "https://github.com/scottyUX/AI-Augmented-Software-Engineering/blob/main/resources/cse115a-sprint-task-specifications.md";
 
@@ -67,8 +68,12 @@ const FAQS = [
     a: "Yes, until you submit the sprint. Click Change PR and paste a merged pull request. It can be from the same repository or a different one.",
   },
   {
+    q: "I merged my PR without a task file. What now?",
+    a: "A merged pull request can't be changed. Open a new pull request, from your own GitHub account in the same repository, that adds only your task file (docs/tasks/sprint-N/YOUR-ID.md) and changes nothing else, and merge it. Paste the first pull request and click Add PR. A second box asks for the task-file PR: paste its link and click Add both PRs. Your task is graded on the code in the first pull request. If your pull request is not merged yet, add the task file to it before you merge instead.",
+  },
+  {
     q: "I already submitted. Can I change a task?",
-    a: "Click Change submission before the sprint deadline, and before a grade is released. That withdraws the sprint so you can edit. Submit again when both tasks are ready.",
+    a: "Click Change submission before the sprint deadline, and before a grade is released. That withdraws the sprint so you can edit. Submit again when your tasks are ready.",
   },
   {
     q: "Why are Sprint 1 and Sprint 5 missing?",
@@ -76,7 +81,7 @@ const FAQS = [
   },
   {
     q: "How is the sprint score calculated?",
-    a: "Each task is out of 10: Scope 1, Specs 2, Acceptance criteria 2, Test quality 2, Tests pass 2, and Process 1. The sprint score is the average of your two tasks.",
+    a: `Each task is out of 10: Scope 1, Specs 2, Acceptance criteria 2, Test quality 2, Tests pass 2, and Process 1. A sprint is two tasks or one big task (estimate ${BIG_TASK_MIN_HOURS} hours or more). Two tasks are averaged; one big task is scored out of 10 on its own.`,
   },
   {
     q: "Does the research question affect my grade?",
@@ -247,10 +252,10 @@ const CourseHelp = () => (
     <section id="submit" className="space-y-3">
       <h2 className="text-xl font-semibold">7. Submit the sprint</h2>
       <ol className="list-decimal space-y-2 pl-5 text-sm leading-6 text-slate-700">
-        <li>Add both tasks. Each one shows Ready when the process checks pass.</li>
-        <li>Click <strong>Submit Sprint 2</strong> (or 3, or 4). Both tasks lock.</li>
+        <li>Add two tasks, or one big task with an estimate of {BIG_TASK_MIN_HOURS} hours or more. Each one shows Ready when the process checks pass.</li>
+        <li>Click <strong>Submit Sprint 2</strong> (or 3, or 4). Your tasks lock.</li>
         <li>Before the deadline, and before a grade is released, <strong>Change submission</strong> withdraws the sprint so you can edit.</li>
-        <li>After your instructor releases the grade, the sprint score is the average of the two tasks, out of 10.</li>
+        <li>After your instructor releases the grade, the sprint score is out of 10: the average of your two tasks, or your one big task on its own.</li>
       </ol>
     </section>
 

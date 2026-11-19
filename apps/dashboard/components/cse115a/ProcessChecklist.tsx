@@ -17,7 +17,7 @@ export function ProcessChecklist({
         {lines.map((line) => (
           <li key={line.key}>
             <p className="flex gap-2">
-              <span className={line.ok ? "text-emerald-700" : "text-amber-700"} aria-hidden>{line.ok ? "✓" : "✗"}</span>
+              <span className={line.ok ? "text-emerald-700" : line.counts === false ? "text-slate-500" : "text-amber-700"} aria-hidden>{line.ok ? "✓" : line.counts === false ? "–" : "✗"}</span>
               <span>{line.label}</span>
             </p>
             {line.detail ? (

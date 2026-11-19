@@ -1,11 +1,11 @@
 // Research consent for using a student's final tasks in a published benchmark.
 //
-// TODO(IRB): replace CONSENT_TEXT with the IRB-approved wording, set
-// CONSENT_VERSION to that version's identifier, and set CONSENT_APPROVED.
-// Answers are recorded with the version shown; only answers to the current,
-// approved version count, so students are asked again when it changes.
+// The course staff approved CONSENT_TEXT as written (2026-11-16), so export is
+// on. If the wording changes, bump CONSENT_VERSION: answers are recorded with
+// the version shown and only answers to the current version count, so students
+// are asked again.
 
-export const CONSENT_APPROVED = false;
+export const CONSENT_APPROVED = true;
 
 export const CONSENT_VERSION = "placeholder";
 
