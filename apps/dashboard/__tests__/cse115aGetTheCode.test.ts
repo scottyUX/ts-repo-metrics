@@ -247,7 +247,10 @@ describe("3. the command blocks and the section", () => {
     expect(html).toContain("Works when the repository is public or your GitHub account can read it.");
     expect(html).toContain(`<a href="/api/cse115a/instructor/submissions/${SUB}/repo-copy?slot=1" class="text-primary underline">Download repo copy</a>`);
     expect(html).toContain(text.storedCopyCommands(ID1, true));
-    expect(html).toContain("hecate-snapshot is where the task started; refs/hecate/pr-head is the PR's last commit; refs/hecate/merge is the merge commit.");
+    expect(html).toMatch(/<ol[^>]*><li>Click <a [^>]*>Download repo copy<\/a>\. It saves [^<]+\.bundle to your Downloads folder\.<\/li><li>In a terminal, from an empty folder, paste:<pre/);
+    expect(html).toContain("You now have the student's code at the merge commit, as if you had cloned it from GitHub. Open the folder in your editor.");
+    for (const point of text.OTHER_POINTS) expect(html).toContain(point.command);
+    expect(html).not.toContain("hecate-snapshot is where the task started");
     expect(html).not.toContain("This older copy");
     expect(html).toContain("This is student code. Run it in a container or a throwaway VM, not directly on your machine.");
   });
@@ -256,8 +259,8 @@ describe("3. the command blocks and the section", () => {
     const html = render(code({ stored: true, object: legacySnapshotObject(ID1), complete: false }));
     expect(html).toContain(`>${text.storedCopyCommands(ID1, false)}</pre>`);
     expect(html).not.toContain("git fetch");
-    expect(html).toContain("This older copy holds the repository only up to where the task started.");
-    expect(html).not.toContain("refs/hecate/merge is the merge commit");
+    expect(html).toContain("You now have the repository up to where the task started. This older copy doesn't include the student's PR commits.");
+    expect(html).not.toContain(text.OTHER_POINTS_TITLE);
   });
 
   it.each([["no copy", code(text.NO_COPY)], ["no entry at all", undefined]])("%s: the GitHub block, the note, no link, the warning", (_label, entry) => {
@@ -343,6 +346,13 @@ describe("4. the commands open a real bundle written by bundleRepo", () => {
     expect(await git(clone, "rev-parse", "hecate-snapshot")).toBe(base);
     expect(await git(clone, "rev-parse", "refs/hecate/pr-head")).toBe(prHead);
     expect(await git(clone, "rev-parse", "refs/hecate/merge")).toBe(merge);
+    // The optional commands each run from inside the clone and land where they say.
+    const [diff, before, last] = text.OTHER_POINTS.map((point) => point.command) as [string, string, string];
+    await sh(clone, diff);
+    await sh(clone, before);
+    expect(await git(clone, "rev-parse", "HEAD")).toBe(base);
+    await sh(clone, last);
+    expect(await git(clone, "rev-parse", "HEAD")).toBe(prHead);
   });
 
   it("a copy without refs/hecate/merge: the clone and fetch work and pr-head is there; only the merge checkout fails", async () => {
