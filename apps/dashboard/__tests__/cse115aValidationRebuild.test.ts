@@ -95,16 +95,17 @@ describe("rebuildRow", () => {
     expect(row.patch.match(/^diff --git /gm)).toHaveLength(1);
   });
 
-  it("drops this sprint's task file only, copies problem_statement and the other task fields, and scrubs a UCSC email", async () => {
+  it("drops this sprint's task file itself and, through buildInstance (#382), any other task file; copies problem_statement and the other task fields, and scrubs a UCSC email", async () => {
     const { row, droppedFiles, flags } = await rebuild(SPEC + OTHER_SPRINT_DOC + CODE + TESTS).result;
     expect(droppedFiles).toEqual(["docs/tasks/sprint-2/COL-04-T-4.md"]);
     expect(row.patch).not.toContain("docs/tasks/sprint-2/");
-    expect(row.patch).toContain("+++ b/docs/tasks/sprint-1/COL-01-T-1.md");
+    // Before #382 another sprint's task file stayed in the patch; buildInstance now drops every docs/tasks/ file, as capture does.
+    expect(row.patch).not.toContain("docs/tasks/");
     expect(row.problem_statement).toBe(captured.problem_statement);
     expect([row.hints_text, row.version, row.difficulty, row.instance_id, row.repo]).toEqual(["stored hints", "sprint-2", "1-4 hours", captured.instance_id, captured.repo]);
     expect(row.patch).toContain("+// contact student@example.com");
     expect(row.patch).not.toContain("jdoe@ucsc.edu");
-    expect(flags).toEqual(["pii_scrubbed_from_patch"]);
+    expect(flags).toEqual(["pii_scrubbed_from_patch", "task_files_dropped"]);
   });
 
   it("refuses when --pr does not match the snapshot's PR, before touching git", async () => {

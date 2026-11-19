@@ -37,7 +37,9 @@ export function gradeTestsPass(checks: SnapshotCheck[]): CriterionGrade {
  * Grades "Process" from the checks recorded when the PR was imported. The Scrum card cannot be verified, so it is
  * not scored here. The task file came first when `specCommittedFirst` is true or the snapshot's diff starts at the
  * PR's first commit (`first_commit`): a task saved before #392 stored false when its base tag was missing, even
- * with the task file alone and first. Code before the task file is always confirmed by a person.
+ * with the task file alone and first. A `merge_base` snapshot (#382) is graded on `specCommittedFirst` alone: its
+ * diff starts at the merge base whatever came first, so the `first_commit` fallback never applies to it. Code
+ * before the task file is always confirmed by a person.
  */
 export function gradeProcess(validation: Record<string, boolean>, baseCommitSource?: TaskSnapshot["baseCommitSource"]): CriterionGrade {
   const merged = validation.prMerged === true;

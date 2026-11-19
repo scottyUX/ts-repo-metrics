@@ -52,10 +52,21 @@ export type TaskSnapshot = {
   pr: { title: string; body: string; headRef: string; author: string | null; mergedAt: string | null; baseSha: string; mergeCommitSha: string };
   baseCommit: string;
   /**
-   * Where the diff starts: the PR's first commit when the task file came first, otherwise the PR base (#392).
-   * `base_tag` is only on snapshots taken before #392, when a base tag on that same first commit was recorded so.
+   * Where the diff starts. `merge_base` (#382): the merge base of the PR's base and its head, as GitHub's "Files
+   * changed" computes it; the diff then ends at the PR's head. The others are today's rule before #382, and the
+   * fallback when the merge base can't be read: the PR's first commit when the task file came first, otherwise the
+   * PR base (#392), with the diff ending at the merge commit. `base_tag` is only on snapshots taken before #392, when
+   * a base tag on that same first commit was recorded so.
    */
-  baseCommitSource: "base_tag" | "first_commit" | "pr_base";
+  baseCommitSource: "merge_base" | "base_tag" | "first_commit" | "pr_base";
+  /** The PR's head commit (`pull.head.sha`). Missing on snapshots taken before #382. */
+  headCommit?: string | null;
+  /**
+   * Where the diff ends: `head` for the merge-base range, `merge_commit` when the capture fell back to the rule
+   * before #382 (the merge base could not be read). Missing on snapshots taken before #382, which all end at the
+   * merge commit.
+   */
+  diffEnd?: "head" | "merge_commit";
   /** Only on snapshots taken before #392: whether a misplaced base tag's commit had the first commit's author. Never read. */
   baseTagSameAuthor?: boolean | null;
   diff: string;
@@ -74,7 +85,7 @@ type Pull = {
   merged_at: string | null;
   merge_commit_sha: string | null;
   base: { sha: string };
-  head: { ref: string };
+  head: { ref: string; sha?: string };
   user: { login: string } | null;
 };
 type Comment = { body?: string | null; user?: { login: string } | null; created_at?: string | null; submitted_at?: string | null; path?: string };
@@ -113,6 +124,21 @@ export async function readCommitChecks(gh: GitHubReader, owner: string, repo: st
   ];
 }
 
+/**
+ * The merge base of the PR's base and its head, from GitHub's compare (JSON), or null when it can't be read.
+ * Never throws: the caller falls back to the rule before #382.
+ */
+export async function readMergeBase(gh: GitHubReader, owner: string, repo: string, baseSha: string | null | undefined, headSha: string | null | undefined): Promise<string | null> {
+  if (!baseSha || !headSha) return null;
+  try {
+    const compare = await gh.json<{ merge_base_commit?: { sha?: string } | null }>(`/repos/${owner}/${repo}/compare/${baseSha}...${headSha}`);
+    const sha = compare?.merge_base_commit?.sha;
+    return typeof sha === "string" && sha ? sha : null;
+  } catch {
+    return null;
+  }
+}
+
 /** `samePrTaskPaths`: the task files of the student's other tasks from this same PR (two tasks, one PR). */
 export async function captureTaskSnapshot(gh: GitHubReader, task: SubmittedTaskRow, samePrTaskPaths: string[] = []): Promise<TaskSnapshot> {
   const taskFilePr = savedTaskFilePr(task.facts_json);
@@ -121,35 +147,45 @@ export async function captureTaskSnapshot(gh: GitHubReader, task: SubmittedTaskR
   const pull = await gh.json<Pull>(`${base}/pulls/${task.pr_number}`);
   if (!pull?.merged_at || !pull.merge_commit_sha) throw new Error(`Task ${task.task_slot}: the pull request is no longer merged.`);
   const mergeSha = pull.merge_commit_sha;
+  const headSha = pull.head.sha ?? null;
 
-  const [commits, issueComments, reviews, reviewComments, checks] = await Promise.all([
+  const [commits, issueComments, reviews, reviewComments, checks, mergeBase] = await Promise.all([
     gh.json<Array<{ sha: string }>>(`${base}/pulls/${task.pr_number}/commits?per_page=1&page=1`),
     gh.json<Comment[]>(`${base}/issues/${task.pr_number}/comments?per_page=100`),
     gh.json<Comment[]>(`${base}/pulls/${task.pr_number}/reviews?per_page=100`),
     gh.json<Comment[]>(`${base}/pulls/${task.pr_number}/comments?per_page=100`),
     readCommitChecks(gh, owner, repo, mergeSha),
+    readMergeBase(gh, owner, repo, pull.base.sha, headSha),
   ]);
-  // The diff starts after the PR's first commit only when the task file came first: that commit holds only task
-  // files this PR adds and the task is not paired. Otherwise it starts at the PR base. No tag is read (#392).
+  // The rule before #382, kept only as the fallback: the diff starts after the PR's first commit when the task
+  // file came first (that commit holds only task files this PR adds and the task is not paired), otherwise at the
+  // PR base, and ends at the merge commit. No tag is read (#392). The first commit is still read either way.
   const firstSha = commits?.[0]?.sha ?? null;
-  let baseCommit = pull.base.sha;
-  let baseCommitSource: TaskSnapshot["baseCommitSource"] = "pr_base";
+  let fallbackBase = pull.base.sha;
+  let fallbackSource: TaskSnapshot["baseCommitSource"] = "pr_base";
   if (firstSha && !taskFilePr) {
     // A paired task's PR has no task file, so its first commit is never the task file alone.
     const first = await gh.json<{ files?: Array<{ filename: string }> }>(`${base}/commits/${firstSha}`);
     const taskFilesOnly = firstCommitHoldsOnlyTaskFiles(first?.files, task.task_path, [...samePrTaskPaths, ...(task.facts_json?.prTaskFiles ?? [])]);
     if (taskFileFirst(taskFilesOnly, taskFilePr)) {
-      baseCommit = firstSha;
-      baseCommitSource = "first_commit";
+      fallbackBase = firstSha;
+      fallbackSource = "first_commit";
     }
   }
+  // The PR's own diff, as GitHub's "Files changed" shows it (#382): from the merge base of the PR's base and head
+  // to the head. Work a teammate merged into main while the task was open stays out, even when the branch pulled
+  // main in. The task file is part of it, as on GitHub.
+  const fromMergeBase = mergeBase !== null && headSha !== null;
+  const baseCommit = fromMergeBase ? mergeBase : fallbackBase;
+  const baseCommitSource: TaskSnapshot["baseCommitSource"] = fromMergeBase ? "merge_base" : fallbackSource;
+  const diffEndSha = fromMergeBase ? headSha : mergeSha;
 
   let diff = "";
   let diffBytes = 0;
   let diffTruncated = false;
   let diffError: string | null = null;
   try {
-    const cut = truncateDiff(await gh.text(`${base}/compare/${baseCommit}...${mergeSha}`, "application/vnd.github.diff"));
+    const cut = truncateDiff(await gh.text(`${base}/compare/${baseCommit}...${diffEndSha}`, "application/vnd.github.diff"));
     diff = cut.diff;
     diffBytes = cut.bytes;
     diffTruncated = cut.truncated;
@@ -189,6 +225,8 @@ export async function captureTaskSnapshot(gh: GitHubReader, task: SubmittedTaskR
     },
     baseCommit,
     baseCommitSource,
+    headCommit: headSha,
+    diffEnd: fromMergeBase ? "head" : "merge_commit",
     diff, diffBytes, diffTruncated, diffError,
     comments,
     checks,

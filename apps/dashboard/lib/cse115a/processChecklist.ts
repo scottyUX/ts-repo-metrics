@@ -200,6 +200,17 @@ export function oneTaskReviewLine(hours: number | null): { text: string; warn: b
   return { text: `One-task sprint: this task is the sprint score. Estimate: ${estimate} (one big task needs ${BIG_TASK_MIN_HOURS} or more).`, warn: true };
 }
 
+/**
+ * The staff review page's base line for a task: its base commit and where the diff starts. `merge_base` is a
+ * capture after #382; the other sources keep the text they had before.
+ */
+export function baseCommitLine(baseCommit: string, source: string): string {
+  const short = baseCommit.slice(0, 7);
+  if (source === "merge_base") return `base ${short} (where the PR's branch left its base; the PR's own changes, as on GitHub)`;
+  if (source === "pr_base") return `base ${short} (PR base; the task file was not first)`;
+  return `base ${short} (PR's first commit, the task file alone)`;
+}
+
 export type SubmitTaskRow = { task_slot: number; task_id: string; pr_url: string; task_path: string; analysis_result_id: string | null };
 
 /**
