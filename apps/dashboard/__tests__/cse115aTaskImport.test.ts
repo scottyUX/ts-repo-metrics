@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { githubReader } from "@/lib/cse115a/githubClient";
-import { importTaskFromPullRequest } from "@/lib/cse115a/githubTaskImport";
+import { ChooseTaskFileError, importTaskFromPullRequest } from "@/lib/cse115a/githubTaskImport";
 import { processChecklist } from "@/lib/cse115a/processChecklist";
 
 vi.mock("server-only", () => ({}));
@@ -35,7 +35,7 @@ Use the existing handler.
 `;
 
 /** A squash-merged PR. Its first commit is "first"; the squash commit on main is "squash". */
-function stubGitHub(baseTag: string | null, firstCommitFiles: string[], prFiles: Array<{ filename: string; status?: string }> = [{ filename: TASK }, { filename: "app.js" }], spec = SPEC) {
+function stubGitHub(baseTag: string | null, firstCommitFiles: string[], prFiles: Array<{ filename: string; status?: string }> = [{ filename: TASK, status: "added" }, { filename: "app.js", status: "added" }], spec = SPEC) {
     const routes: Record<string, unknown> = {
     "/repos/team/repo/pulls/1": {
       merged_at: "2026-10-14T00:00:00Z", merge_commit_sha: "squash", title: "US-1-T-1: Reject",
@@ -91,10 +91,27 @@ describe("CSE 115A task import: which task file is this PR's", () => {
     expect(task.taskPath).toBe(TASK);
   });
 
-  it("names the task files when the PR adds more than one", async () => {
+  it("asks which task file this task is when a merged PR adds more than one", async () => {
     stubGitHub("first", [TASK], [{ filename: TASK, status: "added" }, { filename: OTHER, status: "added" }]);
+    const result = importTaskFromPullRequest("https://github.com/team/repo/pull/1", 1, githubReader("token"), "student");
+    await expect(result).rejects.toBeInstanceOf(ChooseTaskFileError);
+    await expect(result).rejects.toMatchObject({
+      code: "choose_task_file",
+      choices: [{ path: TASK, taskId: "US-1-T-1" }, { path: OTHER, taskId: "US-1-T-2" }],
+      repoFullName: "team/repo", prNumber: 1,
+    });
+  });
+
+  it("never takes a task file the PR only modifies (rule 1)", async () => {
+    stubGitHub("first", [OTHER], [{ filename: OTHER, status: "modified" }, { filename: "app.js", status: "added" }]);
     await expect(importTaskFromPullRequest("https://github.com/team/repo/pull/1", 1, githubReader("token"), "student"))
-      .rejects.toThrow("This PR adds or changes 2 task files: US-1-T-1.md, US-1-T-2.md. A task PR adds only its own task file.");
+      .rejects.toThrow(new Error("No task file was found in docs/tasks/sprint-1/ in this PR. It changes US-1-T-2.md but does not add it; a PR's task file is one it adds."));
+  });
+
+  it("never takes a task file the PR removes", async () => {
+    stubGitHub("first", [OTHER], [{ filename: OTHER, status: "removed" }]);
+    await expect(importTaskFromPullRequest("https://github.com/team/repo/pull/1", 1, githubReader("token"), "student"))
+      .rejects.toThrow("No task file was found in docs/tasks/sprint-1/ in this PR.");
   });
 });
 

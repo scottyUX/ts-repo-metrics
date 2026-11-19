@@ -19,7 +19,8 @@ service keeps its normal home page.
    two tasks or one big task (estimate 4 hours or more). One big task is scored
    out of 10 on its own; two tasks are averaged. A big task under 4 hours shows
    a warning but can still be submitted; graders decide. With two tasks, their
-   task IDs and PR URLs must differ.
+   task IDs must differ, and so must their PRs, unless one merged PR adds both
+   task files (see Submission behavior).
 
 ## Backend setup
 
@@ -61,9 +62,11 @@ service keeps its normal home page.
 
 ## Submission behavior
 
-Each assignment has two task slots. Import requires a merged PR with exactly
-one task file under the matching `docs/tasks/sprint-N/` directory. The task ID
-in its front matter must match the filename. Missing tags or process evidence
+Each assignment has two task slots. Import requires a merged PR that adds
+exactly one task file under the matching `docs/tasks/sprint-N/` directory. Only
+a task file the PR adds can be its own: one it only modifies or removes (say, a
+teammate's file changed by a merge from `main`) never is. The task ID in its
+front matter must match the filename. Missing tags or process evidence
 are shown as checks for the student; the app does not assign a grade.
 
 A PR that is still open is not imported, but its task file is checked at the
@@ -71,6 +74,24 @@ PR's head commit and the student is told every problem at once, so the file can
 be fixed before the merge. If the PR has no file named after a task ID but adds
 exactly one other `.md` file in the sprint folder, that file is checked and the
 message names what is wrong with it (for example, its name against its ID).
+An open PR that adds several task files is refused and told to move each one
+to its own PR before merging.
+
+As a backup for PRs already merged, a merged PR that adds two of the student's
+own task files counts as two tasks. Add PR answers `choose_task_file` with the
+files it adds; the student picks one per slot (a file used in the other slot is
+shown as taken), and the server re-checks the choice against the PR's added
+task files. Only the PR's author can do this, each file must pass every check
+on its own, and at most two of its task files can be used. Each slot keeps its
+own task file, ID, tags and grade; the captured diff is the same for both, and
+the grader is told to judge each task only against its own task file. The same
+applies when the student uses only one file of such a PR: the task card, the
+review page and the grader say the PR adds another task file. "Task
+file committed first" counts when the PR's first commit holds only task files
+it adds, this task's among them. This needs
+`20261118000000_cse115a_two_tasks_one_pr.sql` (unique per PR and task file
+instead of per PR): apply it, then merge. Without it, PRs with one task file
+work as before and a second task from the same PR is refused with a message.
 
 Submissions are tied to the signed-in UCSC account and course membership. A
 task is marked analyzed only after its Repo Metrics result is saved and linked
@@ -109,7 +130,12 @@ SWE-bench instances in `cse_benchmark_tasks` (the SWE-bench columns plus
 `repo_metrics`, the task's Repo Metrics report). Every task is captured,
 including superseded attempts; `cse_benchmark_task_sources` records who
 submitted it, a `validation_status`, and flags such as
-`base_commit_from_pr_base` or `no_test_patch`.
+`base_commit_from_pr_base` or `no_test_patch`. A task whose PR adds more than
+one task file (counted at import, in `facts_json.prTaskFiles`) is flagged
+`pr_holds_two_tasks`, even when the student uses only one of the files: its
+`patch` also holds the other file's work, so export leaves it out (as it does
+rejected rows) until a later rebuild splits the diff by task. Two tasks from
+one PR still get a row each.
 
 The diff starts at the base tag only when the tag is on the PR's first
 commit; otherwise it starts at the PR's first commit when that commit is the

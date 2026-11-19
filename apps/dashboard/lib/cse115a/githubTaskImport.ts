@@ -4,6 +4,7 @@ import { estimateMeetsTaskMinimum, summarizeCi, type TaskFacts } from "@/lib/cse
 import { readCommitChecks } from "@/lib/cse115a/submissionSnapshot";
 import { canonicalHeadings, checkTaskSpec, filenameMatchesId, isTaskFilePath, parsePullRequestUrl, taskIdProblem, type TaskSpec } from "@/lib/cse115a/taskSpec";
 import { tagCommitSha, type GitHubReader } from "@/lib/cse115a/githubClient";
+import { firstCommitHoldsOnlyTaskFiles } from "@/lib/cse115a/sharedPr";
 
 type GitHubPull = {
   title: string;
@@ -42,31 +43,55 @@ async function pullRequestFiles(gh: GitHubReader, owner: string, repo: string, n
   return all;
 }
 
+/** One of the task files a merged PR adds, offered as a choice for a task slot. */
+export type TaskFileChoice = { path: string; taskId: string };
+
 /**
- * The PR's own task file, or why there is none. A file named after a task ID wins, as before; only when the
- * PR has none is a single other .md file it adds directly in the sprint folder taken, so its checks can say
- * what is wrong with it (#388). It never passes them: a name outside TASK_ID_PATTERN cannot fit a valid ID.
+ * A merged PR adds several task files, and the request did not say which one this task is. The route turns it
+ * into a `choose_task_file` answer with the choices; it is not a failed check.
  */
-function chooseTaskFile(files: GitHubFile[], sprint: number): { path: string } | { problem: string } {
-  const candidates = files.filter((file) => isTaskFilePath(file.filename, sprint));
-  // A PR may also edit an earlier task's file (say, to update its test paths); its own task file is the one it adds.
-  const added = candidates.filter((file) => file.status === "added");
-  const own = candidates.length === 1 ? candidates : added;
-  if (own.length === 1) return { path: own[0]!.filename };
-  if (candidates.length > 0) {
-    const names = candidates.map((file) => file.filename.split("/").pop()).join(", ");
-    return { problem: `This PR adds or changes ${candidates.length} task files: ${names}. A task PR adds only its own task file.` };
+export class ChooseTaskFileError extends Error {
+  readonly code = "choose_task_file";
+  constructor(readonly choices: TaskFileChoice[], readonly repoFullName: string, readonly prNumber: number) {
+    super(`This merged PR adds ${choices.length} task files. Choose which one is this task.`);
+    this.name = "ChooseTaskFileError";
   }
+}
+
+export const SEVERAL_TASK_FILES_NOT_AUTHOR = "A PR with several task files can be added only by the student who opened it.";
+
+const fileName = (path: string) => path.split("/").pop()!;
+
+/**
+ * The PR's own task file, or why there is none. Only a task file the PR adds can be its own; one it only
+ * modifies or removes, such as a teammate's file changed by a merge, never is. A merged PR may add several:
+ * then `several` lists them and the student chooses one per slot. Only when the PR adds no file named after a
+ * task ID is a single other .md file it adds directly in the sprint folder taken, so its checks can say what is
+ * wrong with it (#388). It never passes them: a name outside TASK_ID_PATTERN cannot fit a valid ID.
+ */
+function chooseTaskFile(files: GitHubFile[], sprint: number): { path: string } | { several: string[] } | { problem: string } {
+  const added = files.filter((file) => file.status === "added" && isTaskFilePath(file.filename, sprint));
+  if (added.length === 1) return { path: added[0]!.filename };
+  if (added.length > 1) return { several: added.map((file) => file.filename) };
   const notFound = `No task file was found in docs/tasks/sprint-${sprint}/ in this PR.`;
   const folder = new RegExp(`^docs/tasks/sprint-${sprint}/[^/]+\\.md$`, "i");
   const others = files.filter((file) => file.status === "added" && folder.test(file.filename)
-    && file.filename.split("/").pop()!.toLowerCase() !== "readme.md");
+    && fileName(file.filename).toLowerCase() !== "readme.md");
   if (others.length === 1) return { path: others[0]!.filename };
-  if (others.length === 0) return { problem: notFound };
-  const names = others.map((file) => file.filename.split("/").pop()).join(", ");
+  if (others.length === 0) {
+    const changed = files.filter((file) => isTaskFilePath(file.filename, sprint)).map((file) => fileName(file.filename));
+    if (changed.length === 0) return { problem: notFound };
+    return { problem: `${notFound} It changes ${changed.join(", ")} but does not add ${changed.length === 1 ? "it" : "them"}; a PR's task file is one it adds.` };
+  }
+  const names = others.map((file) => fileName(file.filename)).join(", ");
   return {
     problem: `${notFound} It adds ${others.length} other .md files there (${names}); a task file is named after its task ID, for example US-${sprint}-T-1.md.`,
   };
+}
+
+/** Why an open PR with several task files can't be merged as it is. */
+function severalTaskFilesProblem(paths: string[]): string {
+  return `This PR adds ${paths.length} task files: ${paths.map(fileName).join(", ")}. A task PR adds only its own task file. Before merging, move each task file to its own PR. One PR per task.`;
 }
 
 /** The task file's text at a commit, with the standard section headings, or null when it cannot be read. */
@@ -107,6 +132,8 @@ async function refuseOpenPullRequest(
   let problems: string[];
   if ("problem" in chosen) {
     problems = [chosen.problem];
+  } else if ("several" in chosen) {
+    problems = [severalTaskFilesProblem(chosen.several)];
   } else {
     let markdown: string | null = null;
     if (headSha) {
@@ -118,7 +145,7 @@ async function refuseOpenPullRequest(
     }
     problems = markdown === null ? ["The task file could not be read from this pull request."] : taskFileProblems(markdown, chosen.path, sprint).problems;
     if (problems.length === 0) {
-      throw new Error(`This pull request is not merged yet. Its task file (${chosen.path.split("/").pop()}) passes the task-file checks. Merge the pull request, then add it here again.`);
+      throw new Error(`This pull request is not merged yet. Its task file (${fileName(chosen.path)}) passes the task-file checks. Merge the pull request, then add it here again.`);
     }
   }
   throw new Error(`This pull request is not merged yet. Before you merge, fix:\n${problems.map((problem) => `- ${problem}`).join("\n")}`);
@@ -127,12 +154,15 @@ async function refuseOpenPullRequest(
 /**
  * Imports a merged task PR. `githubLogin` is the submitting student's linked GitHub account. An open PR is
  * refused with the result of the task-file checks, so the file can still be fixed before the merge.
+ * `taskPath` is the task file the student chose, for a merged PR that adds several; it must be one the PR adds.
+ * Without it such a PR throws ChooseTaskFileError with the files to choose from.
  */
 export async function importTaskFromPullRequest(
   prUrl: string,
   assignmentNumber: number,
   gh: GitHubReader,
   githubLogin: string,
+  options: { taskPath?: string | null } = {},
 ): Promise<ImportedTask> {
   const parsed = parsePullRequestUrl(prUrl);
   if (!parsed) throw new Error("Enter a GitHub pull request URL, such as https://github.com/team/repo/pull/12.");
@@ -145,7 +175,22 @@ export async function importTaskFromPullRequest(
 
   const chosen = chooseTaskFile(await pullRequestFiles(gh, owner, repo, number), assignmentNumber);
   if ("problem" in chosen) throw new Error(chosen.problem);
-  const taskPath = chosen.path;
+  const prAuthoredByStudent = pull.user?.login.toLowerCase() === githubLogin.toLowerCase();
+  // The task files this PR adds; with several, each can be one of the student's tasks (one PR, two tasks).
+  const addedTaskPaths = "several" in chosen ? chosen.several : [chosen.path];
+  const requested = options.taskPath?.trim() || null;
+  if (requested && !addedTaskPaths.includes(requested)) {
+    throw new Error(`This PR does not add ${fileName(requested)} in docs/tasks/sprint-${assignmentNumber}/. Choose a task file it adds: ${addedTaskPaths.map(fileName).join(", ")}.`);
+  }
+  if ("several" in chosen) {
+    if (!prAuthoredByStudent) throw new Error(SEVERAL_TASK_FILES_NOT_AUTHOR);
+    if (!requested) {
+      throw new ChooseTaskFileError(
+        chosen.several.map((path) => ({ path, taskId: fileName(path).replace(/\.md$/i, "") })), `${owner}/${repo}`, number,
+      );
+    }
+  }
+  const taskPath = "several" in chosen ? requested! : chosen.path;
   const markdown = await readTaskFile(gh, owner, repo, taskPath, pull.merge_commit_sha);
   if (markdown === null) throw new Error("The task file could not be imported from the merged PR.");
   const checked = taskFileProblems(markdown, taskPath, assignmentNumber);
@@ -162,7 +207,7 @@ export async function importTaskFromPullRequest(
       { optional: true },
     ),
   ]);
-  const filename = taskPath.split("/").pop()!;
+  const filename = fileName(taskPath);
   if (!Array.isArray(folder) || !folder.some((entry) => entry.type === "file" && entry.name === filename)) {
     throw new Error(`The task file is not in docs/tasks/sprint-${assignmentNumber}/ on the merge commit.`);
   }
@@ -175,7 +220,7 @@ export async function importTaskFromPullRequest(
     const first = await gh.json<{ files?: Array<{ filename: string }>; commit?: { author?: { email?: string } } }>(
       `/repos/${owner}/${repo}/commits/${firstSha}`,
     );
-    firstCommitTaskOnly = first?.files?.length === 1 && first.files[0]?.filename === taskPath;
+    firstCommitTaskOnly = firstCommitHoldsOnlyTaskFiles(first?.files, taskPath, addedTaskPaths);
     firstAuthor = first?.commit?.author?.email ?? null;
   }
   const specCommittedFirst = firstCommitTaskOnly === true && baseSha === firstSha;
@@ -211,6 +256,8 @@ export async function importTaskFromPullRequest(
     firstCommitTaskOnly,
     baseTagSameAuthor,
     prNumber: number,
+    prTaskFileCount: addedTaskPaths.length,
+    prTaskFiles: addedTaskPaths,
   };
   return {
     prUrl: parsed.url,
@@ -219,7 +266,7 @@ export async function importTaskFromPullRequest(
     taskPath, markdown, spec,
     validation: {
       prMerged: true,
-      prAuthoredByStudent: pull.user?.login.toLowerCase() === githubLogin.toLowerCase(),
+      prAuthoredByStudent,
       prTitleHasTaskId: pull.title.toLowerCase().includes(spec.id.toLowerCase()),
       branchHasTaskId: pull.head.ref.toLowerCase().includes(spec.id.toLowerCase()),
       baseTagPushed: Boolean(baseSha),

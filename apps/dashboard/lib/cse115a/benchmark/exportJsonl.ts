@@ -7,12 +7,19 @@ import { redactPersonalData } from "./scrubPii";
 export type ExportCandidate = {
   instance: BenchmarkInstance;
   /** One entry per student who submitted this instance. */
-  sources: Array<{ consented: boolean; validationStatus: "candidate" | "validated" | "rejected" }>;
+  sources: Array<{ consented: boolean; validationStatus: "candidate" | "validated" | "rejected"; flags?: string[] }>;
 };
 
-/** An instance is exported when it was not rejected and a student who submitted it has consented. */
+/** Flags that keep a row out of export like a rejection: its diff is not one task's work yet. */
+export const NOT_EXPORTED_FLAGS = ["pr_holds_two_tasks"] as const;
+
+/**
+ * An instance is exported when it was not rejected, no source has a flag in NOT_EXPORTED_FLAGS, and a student who
+ * submitted it has consented.
+ */
 export function isExportable(candidate: ExportCandidate, options: { validatedOnly?: boolean } = {}): boolean {
   if (candidate.sources.some((source) => source.validationStatus === "rejected")) return false;
+  if (candidate.sources.some((source) => source.flags?.some((flag) => (NOT_EXPORTED_FLAGS as readonly string[]).includes(flag)))) return false;
   if (options.validatedOnly && !candidate.sources.some((source) => source.validationStatus === "validated")) return false;
   return candidate.sources.some((source) => source.consented);
 }
