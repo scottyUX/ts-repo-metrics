@@ -173,8 +173,9 @@ describe("canChangeSubmission", () => {
 });
 
 describe("submitTasksError (#348)", () => {
-  const task = (slot: number, overrides: Partial<{ task_id: string; pr_url: string; analysis_result_id: string | null }> = {}) => ({
-    task_slot: slot, task_id: `US-1-T-${slot}`, pr_url: `https://github.com/team/repo/pull/${slot}`, analysis_result_id: `r${slot}`, ...overrides,
+  const task = (slot: number, overrides: Partial<{ task_id: string; pr_url: string; task_path: string; analysis_result_id: string | null }> = {}) => ({
+    task_slot: slot, task_id: `US-1-T-${slot}`, pr_url: `https://github.com/team/repo/pull/${slot}`,
+    task_path: `docs/tasks/sprint-1/US-1-T-${slot}.md`, analysis_result_id: `r${slot}`, ...overrides,
   });
 
   it("accepts one or two analyzed tasks", () => {
@@ -192,9 +193,21 @@ describe("submitTasksError (#348)", () => {
     expect(submitTasksError([task(1), task(2, { analysis_result_id: null })])).toBe("Task 2 (US-1-T-2) has not been analyzed yet. Re-check it, then submit.");
   });
 
-  it("refuses two tasks with the same PR URL or task ID", () => {
-    const same = "Your two tasks must be different merged PRs with different task IDs.";
-    expect(submitTasksError([task(1), task(2, { pr_url: task(1).pr_url })])).toBe(same);
-    expect(submitTasksError([task(1), task(2, { task_id: "US-1-T-1" })])).toBe(same);
+  it("refuses two tasks with the same task ID", () => {
+    expect(submitTasksError([task(1), task(2, { task_id: "US-1-T-1" })])).toBe("Your two tasks must have different task IDs.");
+  });
+
+  it("accepts the same PR in both slots with two different task files (one merged PR, two tasks)", () => {
+    expect(submitTasksError([task(1), task(2, { pr_url: task(1).pr_url })])).toBeNull();
+  });
+
+  it("refuses the same PR in both slots with the same task file", () => {
+    expect(submitTasksError([task(1), task(2, { pr_url: task(1).pr_url, task_path: task(1).task_path, task_id: "US-1-T-9" })]))
+      .toBe("Your two tasks use the same task file from the same PR. Each task needs its own task file.");
+  });
+
+  it("leaves two different PRs as before", () => {
+    expect(submitTasksError([task(1), task(2)])).toBeNull();
+    expect(submitTasksError([task(1), task(2, { task_path: task(1).task_path })])).toBeNull();
   });
 });

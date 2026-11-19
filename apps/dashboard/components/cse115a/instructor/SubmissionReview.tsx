@@ -6,6 +6,7 @@ import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, Di
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { splitPatch } from "@/lib/cse115a/diff";
 import { oneTaskReviewLine, specEstimateHours } from "@/lib/cse115a/processChecklist";
+import { prTaskFileLines } from "@/lib/cse115a/sharedPr";
 import { RUBRIC, TASK_POINTS } from "@/lib/cse115a/rubric";
 import { effectiveTotal, submittedSprintScore, type TaskGradeRow } from "@/lib/cse115a/gradeReview";
 import type { SubmissionSnapshot, TaskSnapshot } from "@/lib/cse115a/submissionSnapshot";
@@ -58,7 +59,7 @@ function draftFrom(grade: TaskGradeRow): Draft {
   return { values, notes, overall: grade.instructor_notes ?? "" };
 }
 
-function TaskPanel({ submissionId, task, grade, onSaved, readOnly }: { submissionId: string; task: TaskSnapshot; grade: TaskGradeRow | undefined; onSaved: () => void; readOnly: boolean }) {
+function TaskPanel({ submissionId, task, grade, onSaved, readOnly, sharedPr }: { submissionId: string; task: TaskSnapshot; grade: TaskGradeRow | undefined; onSaved: () => void; readOnly: boolean; sharedPr: string[] }) {
   const split = useMemo(() => splitPatch(task.diff), [task.diff]);
   const [draft, setDraft] = useState<Draft | null>(grade ? draftFrom(grade) : null);
   const [saving, setSaving] = useState(false);
@@ -97,6 +98,7 @@ function TaskPanel({ submissionId, task, grade, onSaved, readOnly }: { submissio
           <Link href={`/cse115a/instructor/submissions/${submissionId}/tasks/${task.slot}/metrics`} className="text-primary underline">Repo Metrics</Link>
           <span className="font-mono text-xs text-muted-foreground">base {task.baseCommit.slice(0, 7)}{task.baseCommitSource === "pr_base" ? " (PR base; no usable base tag)" : task.baseCommitSource === "first_commit" ? " (PR's first commit; base tag missing or not on this PR)" : ""}</span>
         </div>
+        {sharedPr.map((line) => <p key={line} className="mt-2 text-sm text-amber-700 dark:text-amber-300">{line}</p>)}
         {task.diffError ? <p className="mt-2 text-sm text-destructive">Diff not captured: {task.diffError}</p> : null}
         {task.diffTruncated ? <p className="mt-2 text-sm text-amber-700 dark:text-amber-300">The diff was over 1 MB and was cut off.</p> : null}
       </div>
@@ -261,7 +263,7 @@ export function SubmissionReview({ id }: { id: string }) {
       ) : <p className="rounded-lg bg-muted p-3 text-sm text-muted-foreground">This attempt was unlocked and is read-only.</p>}
 
       <div className="grid gap-6 xl:grid-cols-2">
-        {tasks.map((task) => <TaskPanel key={task.slot} submissionId={submission.id} task={task} grade={grades.find((row) => row.task_slot === task.slot)} onSaved={() => void load()} readOnly={!active} />)}
+        {tasks.map((task) => <TaskPanel key={task.slot} submissionId={submission.id} task={task} grade={grades.find((row) => row.task_slot === task.slot)} onSaved={() => void load()} readOnly={!active} sharedPr={prTaskFileLines(tasks, task, "staff")} />)}
       </div>
       {oneTask ? <p className={oneTask.warn ? "text-sm text-amber-700 dark:text-amber-300" : "text-sm text-muted-foreground"}>{oneTask.text}</p> : null}
 

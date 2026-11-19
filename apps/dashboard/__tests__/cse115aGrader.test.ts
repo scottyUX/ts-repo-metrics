@@ -195,7 +195,7 @@ describe("LLM grader", () => {
     // Scope 1 + Specs 1 + AC 2 + Test quality 1 + Tests pass 2 + Process 1
     expect(grade.agentTotal).toBe(8);
     expect(grade.needsReview).toBe(false);
-    expect(grade.promptVersion).toBe("cse115a-grader-v3");
+    expect(grade.promptVersion).toBe("cse115a-grader-v4");
   });
 
   it("sends Process to review when the snapshot diffed from the PR's first commit (#342)", async () => {

@@ -26,7 +26,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ num
 
   const db = getSupabase();
   const { data: tasks, error: tasksError } = await db.from("cse_task_submissions")
-    .select("task_slot,task_id,pr_url,repo_full_name,pr_number,task_path,task_spec_markdown,task_spec_json,validation_json,analysis_result_id")
+    .select("task_slot,task_id,pr_url,repo_full_name,pr_number,task_path,task_spec_markdown,task_spec_json,validation_json,facts_json,analysis_result_id")
     .eq("course_id", course.id).eq("user_id", identity.userId)
     .eq("assignment_number", assignmentNumber);
   const rows = tasksError ? [] : tasks ?? [];

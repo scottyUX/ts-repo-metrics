@@ -35,7 +35,7 @@ export const SWE_BENCH_FIELDS = [
   "eval_type", "image", "eval_script", "log_parser", "difficulty", "repo_metrics",
 ] as const satisfies readonly (keyof BenchmarkInstance)[];
 
-export type BuildFlag = "base_commit_from_pr_base" | "base_commit_from_first_commit" | "diff_missing" | "diff_truncated" | "no_test_patch" | "no_source_patch" | "no_tests_found" | "pii_scrubbed_from_patch" | "ai_tool_files_dropped";
+export type BuildFlag = "base_commit_from_pr_base" | "base_commit_from_first_commit" | "diff_missing" | "diff_truncated" | "no_test_patch" | "no_source_patch" | "no_tests_found" | "pii_scrubbed_from_patch" | "ai_tool_files_dropped" | "pr_holds_two_tasks";
 
 /** SWE-bench Verified difficulty labels, from the student's estimate. */
 export function difficultyFor(estimateHours: number | undefined): string | null {
@@ -55,8 +55,14 @@ function hintsText(task: TaskSnapshot): string {
   return parts.filter(Boolean).join("\n\n");
 }
 
-/** `studentEmail` is the submitting student's address, used to find and remove their identifiers. */
-export function buildInstance(task: TaskSnapshot, assignmentNumber: number, repoMetrics: unknown, studentEmail: string | null = null): { instance: BenchmarkInstance; flags: BuildFlag[] } {
+/**
+ * `studentEmail` is the submitting student's address, used to find and remove their identifiers.
+ * `prHoldsTwoTasks`: this task's PR adds more than one task file, so `patch` also holds another task file's work.
+ */
+export function buildInstance(
+  task: TaskSnapshot, assignmentNumber: number, repoMetrics: unknown, studentEmail: string | null = null,
+  options: { prHoldsTwoTasks?: boolean } = {},
+): { instance: BenchmarkInstance; flags: BuildFlag[] } {
   const ids = identifiersFor(task, studentEmail);
   // AI-tool folders are not the task's work, so the row leaves them out (#384). Graders are not
   // affected: they read task.diff, not this row. A diff without such files is split exactly as before.
@@ -78,6 +84,8 @@ export function buildInstance(task: TaskSnapshot, assignmentNumber: number, repo
   // Scrubbing added lines can change what a test checks, so validation should look at these rows.
   if (patch.changed || testPatch.changed) flags.push("pii_scrubbed_from_patch");
   if (aiToolFilesDropped) flags.push("ai_tool_files_dropped");
+  // A shared diff is not one task's work. Export leaves the row out; a later rebuild splits the diff by task.
+  if (options.prHoldsTwoTasks) flags.push("pr_holds_two_tasks");
   return {
     instance: {
       instance_id: instanceId(task.repoFullName, task.taskId),

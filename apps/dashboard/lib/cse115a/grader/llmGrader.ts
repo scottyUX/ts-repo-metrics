@@ -8,7 +8,7 @@ import type { TaskSnapshot } from "@/lib/cse115a/submissionSnapshot";
 // submission (or no quote at all) marks the criterion for instructor review.
 
 // Bump whenever the prompt or the rubric text in lib/cse115a/rubric.ts changes.
-export const GRADER_PROMPT_VERSION = "cse115a-grader-v3";
+export const GRADER_PROMPT_VERSION = "cse115a-grader-v4";
 export const DEFAULT_GRADER_MODEL = "gpt-4o";
 
 const MAX_SPEC_CHARS = 20_000;
@@ -91,9 +91,10 @@ function fence(tag: string, text: string): string {
 
 export type GraderInput = { specMarkdown: string; testPatch: string; patch: string; notes: string[] };
 
-export function graderInput(task: TaskSnapshot): GraderInput {
+/** `prNotes`: notes for a task whose PR adds more than one task file (prTaskFileGraderNotes). */
+export function graderInput(task: TaskSnapshot, prNotes: string[] = []): GraderInput {
   const split = splitPatch(task.diff);
-  const notes: string[] = [];
+  const notes: string[] = [...prNotes];
   if (task.diffError) notes.push(`The diff could not be loaded: ${task.diffError}`);
   if (task.diffTruncated) notes.push("The diff was over 1 MB and was cut off.");
   if (!split.testPatch) notes.push("The diff has no test files.");
@@ -155,8 +156,8 @@ export function toCriterionGrades(raw: Record<string, RawCriterion>, input: Grad
 
 export type LlmGradeResult = { criteria: CriterionGrade[]; model: string; promptVersion: string };
 
-export async function gradeWithLlm(client: ChatClient, task: TaskSnapshot, model = graderModel()): Promise<LlmGradeResult> {
-  const input = graderInput(task);
+export async function gradeWithLlm(client: ChatClient, task: TaskSnapshot, model = graderModel(), prNotes: string[] = []): Promise<LlmGradeResult> {
+  const input = graderInput(task, prNotes);
   const response = await client.chat.completions.create({
     model,
     temperature: 0,

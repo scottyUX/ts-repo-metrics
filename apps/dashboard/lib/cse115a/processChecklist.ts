@@ -37,6 +37,9 @@ export type TaskFacts = {
   firstCommitTaskOnly?: boolean | null;
   /** Whether the base tag's commit has the same author as the PR's first commit. Null when not checked. */
   baseTagSameAuthor?: boolean | null;
+  /** How many task files the PR adds in the sprint folder, and which. More than one marks the task's shared diff. */
+  prTaskFileCount?: number;
+  prTaskFiles?: string[];
 };
 
 export type ChecklistLine = {
@@ -198,16 +201,24 @@ export function oneTaskReviewLine(hours: number | null): { text: string; warn: b
   return { text: `One-task sprint: this task is the sprint score. Estimate: ${estimate} (one big task needs ${BIG_TASK_MIN_HOURS} or more).`, warn: true };
 }
 
-export type SubmitTaskRow = { task_slot: number; task_id: string; pr_url: string; analysis_result_id: string | null };
+export type SubmitTaskRow = { task_slot: number; task_id: string; pr_url: string; task_path: string; analysis_result_id: string | null };
 
-/** Why these task rows can't be submitted, or null when they can: one or two tasks, each analyzed, two must differ (#348). */
+/**
+ * Why these task rows can't be submitted, or null when they can: one or two tasks, each analyzed, two must differ
+ * (#348). Two tasks may share a PR only with two different task files, as a merged PR that holds two tasks does.
+ */
 export function submitTasksError(tasks: SubmitTaskRow[]): string | null {
   if (tasks.length < 1 || tasks.length > 2) return "Add and analyze at least one merged task PR first.";
   const sorted = [...tasks].sort((a, b) => a.task_slot - b.task_slot);
   const unanalyzed = sorted.find((task) => !task.analysis_result_id);
   if (unanalyzed) return `Task ${unanalyzed.task_slot} (${unanalyzed.task_id}) has not been analyzed yet. Re-check it, then submit.`;
-  if (sorted.length === 2 && (sorted[0]!.task_id === sorted[1]!.task_id || sorted[0]!.pr_url === sorted[1]!.pr_url)) {
-    return "Your two tasks must be different merged PRs with different task IDs.";
+  if (sorted.length === 2) {
+    const [first, second] = sorted as [SubmitTaskRow, SubmitTaskRow];
+    const samePr = first.pr_url.toLowerCase() === second.pr_url.toLowerCase();
+    if (samePr && first.task_path === second.task_path) {
+      return "Your two tasks use the same task file from the same PR. Each task needs its own task file.";
+    }
+    if (first.task_id === second.task_id) return "Your two tasks must have different task IDs.";
   }
   return null;
 }

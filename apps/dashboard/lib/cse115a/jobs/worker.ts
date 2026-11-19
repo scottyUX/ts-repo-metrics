@@ -1,6 +1,7 @@
 import OpenAI from "openai";
 import { getSupabase } from "@/lib/supabase/server";
 import { gradeTask } from "@/lib/cse115a/grader/gradeTask";
+import { prTaskFileGraderNotes } from "@/lib/cse115a/sharedPr";
 import { drainJobs, type JobHandlers } from "./runner";
 import { supabaseJobStore } from "./supabaseStore";
 
@@ -14,7 +15,8 @@ function productionHandlers(): JobHandlers {
     async grade(snapshot) {
       if (!process.env.OPENAI_API_KEY) throw new Error("OPENAI_API_KEY is not configured.");
       const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-      return Promise.all(snapshot.tasks.map((task) => gradeTask(client, task)));
+      // A task whose PR adds more than one task file is told to judge only against its own; each is graded separately.
+      return Promise.all(snapshot.tasks.map((task) => gradeTask(client, task, undefined, prTaskFileGraderNotes(snapshot.tasks, task))));
     },
   };
 }
