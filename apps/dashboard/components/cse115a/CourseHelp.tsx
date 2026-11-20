@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { BIG_TASK_MIN_HOURS } from "@/lib/cse115a/processChecklist";
+import { EXTRA_TASK_WARNING, MAX_TASKS_PER_SPRINT } from "@/lib/cse115a/taskSlots";
 
 const HANDOUT = "https://github.com/scottyUX/AI-Augmented-Software-Engineering/blob/main/resources/cse115a-sprint-task-specifications.md";
 
@@ -85,7 +86,11 @@ const FAQS = [
   },
   {
     q: "How is the sprint score calculated?",
-    a: `Each task is out of 10: Scope 1, Specs 2, Acceptance criteria 2, Test quality 2, Tests pass 2, and Process 1. A sprint is two tasks or one big task (estimate ${BIG_TASK_MIN_HOURS} hours or more). Two tasks are averaged; one big task is scored out of 10 on its own.`,
+    a: `Each task is out of 10: Scope 1, Specs 2, Acceptance criteria 2, Test quality 2, Tests pass 2, and Process 1. A sprint is two tasks or one big task (estimate ${BIG_TASK_MIN_HOURS} hours or more). Two tasks are averaged; one big task is scored out of 10 on its own. If you submit extra tasks, the sprint score is the average of all of them.`,
+  },
+  {
+    q: "Can I submit more than two tasks?",
+    a: `Yes, up to ${MAX_TASKS_PER_SPRINT} in a sprint, but you don't have to: two tasks, or one big task, is a full sprint. Click Add another task under your tasks before you submit. ${EXTRA_TASK_WARNING} At most two of your tasks can come from one pull request.`,
   },
   {
     q: "Does the research question affect my grade?",
@@ -254,10 +259,10 @@ const CourseHelp = () => (
     <section id="submit" className="space-y-3">
       <h2 className="text-xl font-semibold">7. Submit the sprint</h2>
       <ol className="list-decimal space-y-2 pl-5 text-sm leading-6 text-slate-700">
-        <li>Add two tasks, or one big task with an estimate of {BIG_TASK_MIN_HOURS} hours or more. Each one shows Ready when the process checks pass.</li>
+        <li>Add two tasks, or one big task with an estimate of {BIG_TASK_MIN_HOURS} hours or more. Each one shows Ready when the process checks pass. Extra tasks are optional: <strong>Add another task</strong> adds one, up to {MAX_TASKS_PER_SPRINT} in all.</li>
         <li>Click <strong>Submit Sprint 2</strong> (or 3, or 4). Your tasks lock.</li>
         <li>Before the deadline, and before a grade is released, <strong>Change submission</strong> withdraws the sprint so you can edit.</li>
-        <li>After your instructor releases the grade, the sprint score is out of 10: the average of your two tasks, or your one big task on its own.</li>
+        <li>After your instructor releases the grade, the sprint score is out of 10: the average of your two tasks, or your one big task on its own. With extra tasks, it is the average of all the tasks you submitted.</li>
       </ol>
     </section>
 

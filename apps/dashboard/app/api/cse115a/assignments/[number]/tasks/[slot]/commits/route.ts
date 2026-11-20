@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getCourseIdentity, getEnrolledCourse } from "@/lib/cse115a/server";
 import { getSupabase, isSupabaseConfigured } from "@/lib/supabase/server";
 import { CourseRepoAccessError, courseRepoToken } from "@/lib/cse115a/githubApp";
+import { taskSlotFromPath } from "@/lib/cse115a/taskSlots";
 
 export const runtime = "nodejs";
 
@@ -28,8 +29,8 @@ export async function GET(_request: Request, { params }: Params) {
   if (!identity) return NextResponse.json({ error: "Sign in with UCSC Google." }, { status: 401 });
   const { number, slot } = await params;
   const assignmentNumber = Number(number);
-  const taskSlot = Number(slot);
-  if (!Number.isInteger(assignmentNumber) || assignmentNumber < 1 || ![1, 2].includes(taskSlot)) {
+  const taskSlot = taskSlotFromPath(slot);
+  if (!Number.isInteger(assignmentNumber) || assignmentNumber < 1 || taskSlot === null) {
     return NextResponse.json({ error: "Invalid task." }, { status: 400 });
   }
   const db = getSupabase();

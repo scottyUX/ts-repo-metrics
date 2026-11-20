@@ -5,6 +5,7 @@ import { CourseRepoAccessError, courseRepoReader } from "@/lib/cse115a/githubApp
 import { ChooseTaskFileError, importTaskFromPullRequest, NeedTaskFilePrError } from "@/lib/cse115a/githubTaskImport";
 import { parseGitHubUrl } from "@/lib/github/parseGitHubUrl";
 import { duplicateTaskMessage, ownTaskConflict, ownTaskFilePrConflict, ownTasksFromSamePr, saveConflictMessage, type OwnTask } from "@/lib/cse115a/duplicateTask";
+import { isTaskSlot, TASK_SLOT_ERROR } from "@/lib/cse115a/taskSlots";
 
 export const runtime = "nodejs";
 
@@ -32,8 +33,9 @@ async function context(params: Params, body: SubmissionBody) {
   if (!Number.isInteger(assignmentNumber) || assignmentNumber < 1 || assignmentNumber > course.assignment_count) {
     return { error: NextResponse.json({ error: "Invalid assignment number." }, { status: 400 }) };
   }
+  // Slots 1 to MAX_TASKS_PER_SPRINT (#412).
   const slot = Number(body.slot);
-  if (slot !== 1 && slot !== 2) return { error: NextResponse.json({ error: "Choose task 1 or task 2." }, { status: 400 }) };
+  if (!isTaskSlot(slot)) return { error: NextResponse.json({ error: TASK_SLOT_ERROR }, { status: 400 }) };
   if (await getActiveAssignmentSubmission(course.id, identity.userId, assignmentNumber)) {
     return { error: lockedResponse(assignmentNumber) };
   }
@@ -183,4 +185,24 @@ export async function PATCH(request: Request, params: Params) {
   if (isLockedError(error)) return lockedResponse(assignmentNumber);
   if (error) return NextResponse.json({ error: "Could not save the analysis result." }, { status: 500 });
   return NextResponse.json({ submission: data });
+}
+
+/**
+ * Removes the task in one slot, before the sprint is submitted (#412): the student may then leave a gap, such as
+ * Task 1 and Task 3 without Task 2. The database trigger refuses it once the sprint is submitted.
+ */
+export async function DELETE(request: Request, params: Params) {
+  if (!isSupabaseConfigured()) return NextResponse.json({ error: "Course storage is not configured." }, { status: 503 });
+  const body = await request.json().catch(() => null) as SubmissionBody | null;
+  if (!body) return NextResponse.json({ error: "Invalid request." }, { status: 400 });
+  const access = await context(params, body);
+  if ("error" in access) return access.error;
+  const { identity, course, assignmentNumber, slot } = access;
+  const { error } = await getSupabase().from("cse_task_submissions")
+    .delete()
+    .eq("course_id", course.id).eq("user_id", identity.userId)
+    .eq("assignment_number", assignmentNumber).eq("task_slot", slot);
+  if (isLockedError(error)) return lockedResponse(assignmentNumber);
+  if (error) return NextResponse.json({ error: "Could not remove this task." }, { status: 500 });
+  return NextResponse.json({ removed: { slot } });
 }

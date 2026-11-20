@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { splitPatch } from "@/lib/cse115a/diff";
-import { baseCommitLine, oneTaskReviewLine, specEstimateHours } from "@/lib/cse115a/processChecklist";
+import { baseCommitLine, manyTasksReviewLine, oneTaskReviewLine, specEstimateHours } from "@/lib/cse115a/processChecklist";
 import { prTaskFileLines } from "@/lib/cse115a/sharedPr";
 import { taskFilePrReviewLine } from "@/lib/cse115a/taskFilePr";
 import { RUBRIC, TASK_POINTS } from "@/lib/cse115a/rubric";
@@ -232,6 +232,7 @@ export function SubmissionReview({ id }: { id: string }) {
   const active = !submission.superseded_at;
   const tasks = [...submission.snapshot.tasks].sort((a, b) => a.slot - b.slot);
   const oneTask = tasks.length === 1 ? oneTaskReviewLine(specEstimateHours(tasks[0]!.spec)) : null;
+  const manyTasks = manyTasksReviewLine(tasks.length);
   const sprint = submittedSprintScore(tasks.map((task) => task.slot), (slot) => {
     const grade = grades.find((row) => row.task_slot === slot);
     return grade ? effectiveTotal(grade) : null;
@@ -274,6 +275,7 @@ export function SubmissionReview({ id }: { id: string }) {
         {tasks.map((task) => <TaskPanel key={task.slot} submissionId={submission.id} task={task} grade={grades.find((row) => row.task_slot === task.slot)} onSaved={() => void load()} readOnly={!active} sharedPr={prTaskFileLines(tasks, task, "staff")} code={detail.code?.find((item) => item.slot === task.slot)} />)}
       </div>
       {oneTask ? <p className={oneTask.warn ? "text-sm text-amber-700 dark:text-amber-300" : "text-sm text-muted-foreground"}>{oneTask.text}</p> : null}
+      {manyTasks ? <p className="text-sm text-muted-foreground">{manyTasks}</p> : null}
 
       {detail.history.length > 1 ? (
         <section className="rounded-xl border border-border bg-card p-5">

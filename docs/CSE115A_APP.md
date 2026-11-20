@@ -20,7 +20,9 @@ service keeps its normal home page.
    out of 10 on its own; two tasks are averaged. A big task under 4 hours shows
    a warning but can still be submitted; graders decide. With two tasks, their
    task IDs must differ, and so must their PRs, unless one merged PR adds both
-   task files (see Submission behavior).
+   task files (see Submission behavior). Extra tasks are optional: a student may
+   submit up to 6 (`MAX_TASKS_PER_SPRINT` in `lib/cse115a/taskSlots.ts`), and the
+   sprint score is then the average of all of them (see Extra tasks).
 
 ## Backend setup
 
@@ -32,7 +34,11 @@ service keeps its normal home page.
   then `20260930000000_cse115a_sprint_page.sql` (Scrum confirmation, check facts, due dates),
   then `20261117000000_cse115a_one_task_submit.sql` (submit and release with one
   task or two; replaces `submit_cse_assignment` and
-  `release_cse_assignment_submission`, and its header names the old bodies to undo it).
+  `release_cse_assignment_submission`, and its header names the old bodies to undo it),
+  then `20261118000000_cse115a_two_tasks_one_pr.sql`, then
+  `20261120010000_cse115a_extra_tasks.sql` (up to 6 tasks a sprint: the three
+  `task_slot` checks become `between 1 and 6` and `submit_cse_assignment` accepts
+  1 to 6 tasks; safe to apply before the app change; the undo is in its header).
   The repo copies need `20261116000000_cse115a_repo_copy_jobs.sql` (the
   `repo_copy` job kind) before `CSE115A_REPO_COPIES` is set to `on`; undo is in
   a comment in that file.
@@ -65,7 +71,7 @@ service keeps its normal home page.
 
 ## Submission behavior
 
-Each assignment has two task slots. Import requires a merged PR that adds
+Each assignment has two task slots, and up to 6 with extra tasks (see Extra tasks). Import requires a merged PR that adds
 exactly one task file under the matching `docs/tasks/sprint-N/` directory. Only
 a task file the PR adds can be its own: one it only modifies or removes (say, a
 teammate's file changed by a merge from `main`) never is. The task ID in its
@@ -110,6 +116,50 @@ it adds, this task's among them. This needs
 `20261118000000_cse115a_two_tasks_one_pr.sql` (unique per PR and task file
 instead of per PR): apply it, then merge. Without it, PRs with one task file
 work as before and a second task from the same PR is refused with a message.
+
+### Extra tasks (#412)
+
+A student may submit up to 6 tasks in a sprint (`MAX_TASKS_PER_SPRINT`, one
+constant in `lib/cse115a/taskSlots.ts`; the migration's `between 1 and 6` is the
+same number). Two tasks, or one big task, stay the normal sprint; more are
+optional.
+
+- **Scoring.** Each task is graded on its own, as before, out of 10. The sprint
+  score is the average of every submitted task (`sprintScore` in
+  `lib/cse115a/gradeReview.ts`): one task is the score, two are averaged, three
+  to six are all averaged. Nothing drops the lowest, so an extra task can lower
+  the score as well as raise it. Every place that shows a sprint score uses that
+  one function: the student's released score and the sprint tab label
+  (`/api/cse115a/me`), the instructor table's Sprint column, and the Review
+  page's sprint score (both through `submittedSprintScore`).
+- **Student page.** Task 1 and Task 2 always show. Under them, **Add another
+  task** opens the next slot until the sprint has 6 slots or is submitted; an
+  extra slot works like the first two (Add PR, Re-check, Change PR, choosing a
+  task file, the task-file PR pairing). Every task card has **Remove** (asks
+  once more) before the sprint is submitted, so a student can drop an extra task
+  or leave a gap (Task 1 and Task 3 without Task 2). Next to the button, and in
+  the submit dialog when there are three or more tasks, the page says: "Every
+  task you submit is graded, and your sprint score is the average of all of
+  them. An extra task can raise your score or lower it."
+- **Submit rules** (`submitTasksError`): 1 to 6 tasks, each analyzed; every pair
+  must differ in task ID; no two may use the same task file from the same PR;
+  and at most two tasks may come from one PR (also checked when a task is
+  added). Two tasks keep their old messages; three or more name the tasks.
+- **Staff.** The instructor table keeps the Task 1 and Task 2 columns and adds a
+  Task 3 to Task 6 column only when a listed submission has that slot; each
+  sorts like the others. The list reads each snapshot task's slot as a JSON path
+  (`SNAPSHOT_SLOT_PATHS`), never the diffs. The Review page shows every task,
+  each with its rubric, notes, Get the code and repo-copy download, and for three
+  or more tasks the line "N tasks: the sprint score is the average of all N."
+  Release needs a grade for every submitted task, as before.
+- **Jobs.** The grade, benchmark and repo-copy jobs already work per snapshot
+  task. A repo-copy job starts no task after 8 minutes; with six large
+  repositories it can end "not finished, will retry", and the retry skips the
+  copies already stored.
+- **Migration.** `20261120010000_cse115a_extra_tasks.sql`. Apply it before or
+  after the app change (old code only writes slots 1 and 2). Until it is
+  applied, a third task is refused by the database's slot check, and the add
+  fails with "Could not save the task submission."
 
 Only the student's own task files count in a PR that adds several: a file
 whose adding commit was made from another GitHub account (say, a teammate's
@@ -317,7 +367,8 @@ SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... \
   **Release**. Release is blocked while a submitted task has no grade or a
   criterion has no points. A one-task submission shows "One-task sprint: this
   task is the sprint score" with its estimate (amber when under 4 hours) and
-  releases with one grade. Edits saved
+  releases with one grade. Three or more tasks show "N tasks: the sprint score
+  is the average of all N." Edits saved
   after release are visible to the student right away.
 - **Get the code** (a closed section in each task on the Review page), for
   running a team's tests or checking a diff: the commands to clone the repo

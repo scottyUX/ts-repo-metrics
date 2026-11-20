@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { BIG_TASK_MIN_HOURS } from "@/lib/cse115a/processChecklist";
+import { EXTRA_TASK_WARNING, MAX_TASKS_PER_SPRINT } from "@/lib/cse115a/taskSlots";
 
 // The sprint workflow from the task instructions, shown full screen when a
 // student opens a sprint they have not started. Ticks are a personal to-do list
@@ -63,7 +64,10 @@ function groups(sprint: number): Group[] {
       title: "In this app",
       items: [
         { key: "add", title: "Add your PR here", detail: <p>Once it merges, paste the merged PR link. The repository owner installs the course GitHub App on your team repository first (the <strong>Install or manage</strong> button above your tasks); after that, every teammate can add PRs from it. If a check shows ✗, follow its fix and click Re-check.</p> },
-        { key: "submit", title: `Submit Sprint ${sprint}`, detail: <p>When your two tasks are in, or your one big task (estimate {BIG_TASK_MIN_HOURS} hours or more), click Submit Sprint {sprint}. Your tasks lock when you submit, but you can change your submission until the sprint closes.</p> },
+        { key: "submit", title: `Submit Sprint ${sprint}`, detail: <>
+          <p>When your two tasks are in, or your one big task (estimate {BIG_TASK_MIN_HOURS} hours or more), click Submit Sprint {sprint}. Your tasks lock when you submit, but you can change your submission until the sprint closes.</p>
+          <p className="mt-2">Extra tasks are optional: Add another task adds one, up to {MAX_TASKS_PER_SPRINT} in all. {EXTRA_TASK_WARNING}</p>
+        </> },
       ],
     },
   ];

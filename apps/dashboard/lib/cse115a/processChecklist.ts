@@ -1,3 +1,5 @@
+import { MAX_TASKS_PER_PR, MAX_TASKS_PER_SPRINT, USUAL_TASKS_PER_SPRINT } from "@/lib/cse115a/taskSlots";
+
 /** The smallest estimate a task may have, in hours. */
 export const TASK_MIN_HOURS = 2;
 /** The smallest estimate for one big task, which counts as the whole sprint: twice a regular task. */
@@ -171,7 +173,8 @@ export function submitAction(addedCount: number, readyCount: number, sprint: num
   }
   // One big task can be submitted on its own; it counts as the whole sprint (#348).
   if (addedCount === 1) return { disabled: false, label: `Submit Sprint ${sprint} with one task`, reason: null };
-  if (readyCount >= 2) return { disabled: false, label: `Submit Sprint ${sprint}`, reason: null };
+  // Every added task is submitted (#412), so every one must be ready for the plain label.
+  if (readyCount >= addedCount) return { disabled: false, label: `Submit Sprint ${sprint}`, reason: null };
   return { disabled: false, label: `Submit Sprint ${sprint} anyway`, reason: null };
 }
 
@@ -182,7 +185,20 @@ export function submitBarText(addedCount: number, readyCount: number, oneTaskHou
     const says = oneTaskHours === null ? "this one has no estimate" : `this one says ${String(Number(oneTaskHours.toFixed(2)))}`;
     return `1 task added · one big task needs an estimate of ${BIG_TASK_MIN_HOURS} hours or more (${says}). Add a second task, or submit anyway and a grader will check its size.`;
   }
-  return `${readyCount} of 2 ready · You can change your submission until the sprint closes.`;
+  return `${readyCount} of ${Math.max(addedCount, USUAL_TASKS_PER_SPRINT)} ready · You can change your submission until the sprint closes.`;
+}
+
+/** The submit dialog's text for two tasks or more; three or more add the extra-task warning on the page (#412). */
+export function manyTasksConfirmText(count: number): string {
+  if (count <= USUAL_TASKS_PER_SPRINT) return "Both tasks lock when you submit. You can still change your submission until the sprint closes.";
+  return `All ${count} tasks lock when you submit. You can still change your submission until the sprint closes.`;
+}
+
+/** What the released sprint score is, after "Graded <date> · ": right for one, two, or more tasks (#412). */
+export function releasedScoreBasis(taskCount: number): string {
+  if (taskCount === 1) return "your one big task";
+  if (taskCount === USUAL_TASKS_PER_SPRINT) return "the average of your two tasks";
+  return `the average of all ${taskCount} of your tasks`;
 }
 
 /** The submit dialog's text for one task, with the size warning when its estimate is under BIG_TASK_MIN_HOURS. */
@@ -200,6 +216,11 @@ export function oneTaskReviewLine(hours: number | null): { text: string; warn: b
   return { text: `One-task sprint: this task is the sprint score. Estimate: ${estimate} (one big task needs ${BIG_TASK_MIN_HOURS} or more).`, warn: true };
 }
 
+/** The staff review page's line for three or more tasks (#412); null for one or two. */
+export function manyTasksReviewLine(count: number): string | null {
+  return count > USUAL_TASKS_PER_SPRINT ? `${count} tasks: the sprint score is the average of all ${count}.` : null;
+}
+
 /**
  * The staff review page's base line for a task: its base commit and where the diff starts. `merge_base` is a
  * capture after #382; the other sources keep the text they had before.
@@ -213,22 +234,44 @@ export function baseCommitLine(baseCommit: string, source: string): string {
 
 export type SubmitTaskRow = { task_slot: number; task_id: string; pr_url: string; task_path: string; analysis_result_id: string | null };
 
+/** "Task 2 and Task 4", or "Task 1, Task 3 and Task 5". */
+function taskNames(tasks: SubmitTaskRow[]): string {
+  const names = tasks.map((task) => `Task ${task.task_slot}`);
+  return names.length <= 2 ? names.join(" and ") : `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`;
+}
+
 /**
- * Why these task rows can't be submitted, or null when they can: one or two tasks, each analyzed, two must differ
- * (#348). Two tasks may share a PR only with two different task files, as a merged PR that holds two tasks does.
+ * Why these task rows can't be submitted, or null when they can: 1 to MAX_TASKS_PER_SPRINT tasks (#412), each
+ * analyzed; every pair must differ in task ID, and no two may use the same task file from the same PR. Two tasks
+ * may share a PR only with two different task files, as a merged PR that holds two tasks does, and at most
+ * MAX_TASKS_PER_PR tasks come from one PR. Two tasks keep the messages they had (#348); more name the tasks.
  */
 export function submitTasksError(tasks: SubmitTaskRow[]): string | null {
-  if (tasks.length < 1 || tasks.length > 2) return "Add and analyze at least one merged task PR first.";
+  if (tasks.length < 1) return "Add and analyze at least one merged task PR first.";
+  if (tasks.length > MAX_TASKS_PER_SPRINT) {
+    return `A sprint can have at most ${MAX_TASKS_PER_SPRINT} tasks, and this one has ${tasks.length}. Remove a task, then submit.`;
+  }
   const sorted = [...tasks].sort((a, b) => a.task_slot - b.task_slot);
   const unanalyzed = sorted.find((task) => !task.analysis_result_id);
   if (unanalyzed) return `Task ${unanalyzed.task_slot} (${unanalyzed.task_id}) has not been analyzed yet. Re-check it, then submit.`;
-  if (sorted.length === 2) {
-    const [first, second] = sorted as [SubmitTaskRow, SubmitTaskRow];
-    const samePr = first.pr_url.toLowerCase() === second.pr_url.toLowerCase();
-    if (samePr && first.task_path === second.task_path) {
-      return "Your two tasks use the same task file from the same PR. Each task needs its own task file.";
-    }
-    if (first.task_id === second.task_id) return "Your two tasks must have different task IDs.";
+  const two = sorted.length === 2;
+  const samePr = (a: SubmitTaskRow, b: SubmitTaskRow) => a.pr_url.toLowerCase() === b.pr_url.toLowerCase();
+  const pairs = sorted.flatMap((first, index) => sorted.slice(index + 1).map((second) => [first, second] as const));
+  const sameFile = pairs.find(([first, second]) => samePr(first, second) && first.task_path === second.task_path);
+  if (sameFile) {
+    return two
+      ? "Your two tasks use the same task file from the same PR. Each task needs its own task file."
+      : `${taskNames([...sameFile])} use the same task file from the same PR. Each task needs its own task file.`;
+  }
+  const sameId = pairs.find(([first, second]) => first.task_id === second.task_id);
+  if (sameId) {
+    return two
+      ? "Your two tasks must have different task IDs."
+      : `${taskNames([...sameId])} have the same task ID, ${sameId[0].task_id}. Each task needs its own task ID.`;
+  }
+  const crowded = sorted.map((task) => sorted.filter((other) => samePr(task, other))).find((group) => group.length > MAX_TASKS_PER_PR);
+  if (crowded) {
+    return `${taskNames(crowded)} come from the same PR. At most ${MAX_TASKS_PER_PR} of your tasks can come from one PR, each with its own task file.`;
   }
   return null;
 }

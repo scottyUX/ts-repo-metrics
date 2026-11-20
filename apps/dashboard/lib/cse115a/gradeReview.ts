@@ -1,4 +1,5 @@
 import { RUBRIC, type CriterionGrade, type CriterionName } from "@/lib/cse115a/rubric";
+import { isTaskSlot, TASK_SLOTS, USUAL_TASKS_PER_SPRINT } from "@/lib/cse115a/taskSlots";
 
 // Instructor edits to an agent grade, and the rules for releasing it. Shared
 // by the instructor API and UI.
@@ -53,11 +54,19 @@ export function effectiveTotal(grade: Pick<TaskGradeRow, "agent_total" | "instru
   return Number(grade.instructor_total ?? grade.agent_total);
 }
 
-/** The task slots a submission's snapshot holds. A snapshot without a task list counts as both slots, as before #348. */
+/** What a snapshot without a task list counts as: the usual two slots, as before #348. None exist. */
+function slotsWithoutTaskList(): number[] {
+  return TASK_SLOTS.slice(0, USUAL_TASKS_PER_SPRINT);
+}
+
+/**
+ * Every task slot a submission's snapshot holds, up to MAX_TASKS_PER_SPRINT (#412). A snapshot without a task list
+ * counts as both usual slots, as before #348.
+ */
 export function submittedSlots(snapshot: unknown): number[] {
   const tasks = (snapshot as { tasks?: unknown } | null | undefined)?.tasks;
-  if (!Array.isArray(tasks)) return [1, 2];
-  return tasks.map((task) => Number((task as { slot?: unknown } | null)?.slot)).filter(Number.isInteger).sort((a, b) => a - b);
+  if (!Array.isArray(tasks)) return slotsWithoutTaskList();
+  return tasks.map((task) => Number((task as { slot?: unknown } | null)?.slot)).filter(isTaskSlot).sort((a, b) => a - b);
 }
 
 /** Reasons a submission cannot be released yet; empty when it can. Only submitted slots need a grade (#348). */
@@ -74,13 +83,13 @@ export function releaseBlockers(grades: TaskGradeRow[], slots: number[]): string
 }
 
 /**
- * Sprint score from the submitted tasks' totals only: one big task is the sprint score, two tasks are
- * averaged, none gives 0. More than two (planned later) gives the average of the two best (#348).
+ * The sprint score: the average of every submitted task's total (#412). One big task is the sprint score, two
+ * tasks are averaged, three to MAX_TASKS_PER_SPRINT are all averaged, so an extra task can lower the score as well
+ * as raise it. None gives 0. The one function for every place a sprint score is shown.
  */
 export function sprintScore(taskTotals: number[]): number {
   if (taskTotals.length === 0) return 0;
-  const best = [...taskTotals].sort((a, b) => b - a).slice(0, 2);
-  return best.reduce((sum, total) => sum + total, 0) / best.length;
+  return taskTotals.reduce((sum, total) => sum + total, 0) / taskTotals.length;
 }
 
 /** The sprint score once every submitted slot has a total; null while one is missing, so a two-task submission is never scored as one task. */
@@ -95,10 +104,24 @@ export function submittedSprintScore(slots: number[], totalFor: (slot: number) =
   return sprintScore(totals);
 }
 
-/** Submitted slots from the first two snapshot task slots, selected as JSON paths so the list never loads the diffs. Neither present: both slots, as submittedSlots. */
-export function slotsFromSnapshotPaths(first: unknown, second: unknown): number[] {
-  const slots = [first, second].filter((slot) => slot !== null && slot !== undefined).map(Number).filter(Number.isInteger);
-  return slots.length ? [...new Set(slots)].sort((a, b) => a - b) : [1, 2];
+/**
+ * The JSON paths the instructor list selects instead of the snapshot, so it never loads the diffs: one per
+ * possible task (`slot_1:snapshot->tasks->0->slot`, … up to MAX_TASKS_PER_SPRINT).
+ */
+export const SNAPSHOT_SLOT_PATHS = TASK_SLOTS.map((slot) => `slot_${slot}:snapshot->tasks->${slot - 1}->slot`).join(",");
+
+/** The values SNAPSHOT_SLOT_PATHS selected from one row, in order. */
+export function snapshotSlotPathValues(row: Record<string, unknown>): unknown[] {
+  return TASK_SLOTS.map((slot) => row[`slot_${slot}`]);
+}
+
+/**
+ * Submitted slots from the snapshot's task slots, selected as JSON paths (SNAPSHOT_SLOT_PATHS): every one present,
+ * up to MAX_TASKS_PER_SPRINT (#412). None present: both usual slots, as submittedSlots.
+ */
+export function slotsFromSnapshotPaths(...paths: unknown[]): number[] {
+  const slots = paths.filter((slot) => slot !== null && slot !== undefined).map(Number).filter(isTaskSlot);
+  return slots.length ? [...new Set(slots)].sort((a, b) => a - b) : slotsWithoutTaskList();
 }
 
 export type StudentCriterion = { name: CriterionName; points: number; awarded: number; rationale: string; note: string };
