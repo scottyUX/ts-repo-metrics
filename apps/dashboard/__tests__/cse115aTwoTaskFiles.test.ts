@@ -214,7 +214,7 @@ describe("two task files in one merged PR: duplicate rules", () => {
 
   it("uses at most two task files from one PR", () => {
     expect(ownTaskConflict([own(2, 1, T7), own(2, 2, T8)], { ...target, assignmentNumber: 3, slot: 1, taskPath: "docs/tasks/sprint-3/X-T-9.md" }))
-      .toBe("At most two task files from one PR can be used, one for each task.");
+      .toBe("At most two of your tasks can come from one PR, each with its own task file.");
   });
 
   it("still refuses another student's PR, before and after the file is chosen", () => {

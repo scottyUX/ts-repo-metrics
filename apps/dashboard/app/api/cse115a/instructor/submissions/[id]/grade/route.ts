@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase/server";
 import { guardSubmission } from "@/lib/cse115a/instructorApi";
 import { parseInstructorRubric } from "@/lib/cse115a/gradeReview";
+import { isTaskSlot, MAX_TASKS_PER_SPRINT } from "@/lib/cse115a/taskSlots";
 
 export const runtime = "nodejs";
 
@@ -14,7 +15,7 @@ export async function PUT(request: Request, { params }: Params) {
   if ("response" in guard) return guard.response;
   const body = await request.json().catch(() => null) as { slot?: unknown; rubric?: unknown; notes?: unknown } | null;
   const slot = body?.slot;
-  if (slot !== 1 && slot !== 2) return NextResponse.json({ error: "slot must be 1 or 2." }, { status: 400 });
+  if (!isTaskSlot(slot)) return NextResponse.json({ error: `slot must be a whole number from 1 to ${MAX_TASKS_PER_SPRINT}.` }, { status: 400 });
   const notes = typeof body?.notes === "string" ? body.notes.trim() : "";
   if (notes.length > 5000) return NextResponse.json({ error: "Notes are too long." }, { status: 400 });
 

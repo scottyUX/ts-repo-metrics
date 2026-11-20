@@ -26,9 +26,12 @@ import {
   canChangeSubmission,
   submitBarText,
   oneTaskConfirmText,
+  manyTasksConfirmText,
+  releasedScoreBasis,
   specEstimateHours,
   type TaskFacts,
 } from "@/lib/cse115a/processChecklist";
+import { canAddTask, EXTRA_TASK_WARNING, nextTaskSlot, shownTaskSlots, USUAL_TASKS_PER_SPRINT } from "@/lib/cse115a/taskSlots";
 import { ProcessChecklist } from "@/components/cse115a/ProcessChecklist";
 import { Cse115aStudentBar } from "@/components/cse115a/Cse115aStudentBar";
 import { CourseSetup } from "@/components/cse115a/CourseSetup";
@@ -181,6 +184,9 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
   const [taskFilePrBox, setTaskFilePrBox] = useState<Record<number, { prUrl: string } | null>>({});
   const [taskFilePrInputs, setTaskFilePrInputs] = useState<Record<number, string>>({});
   const [changing, setChanging] = useState<Record<number, boolean>>({});
+  // Slots opened with Add another task (#412), and the slot whose Remove waits for a second click.
+  const [openedSlots, setOpenedSlots] = useState<number[]>([]);
+  const [confirmingRemove, setConfirmingRemove] = useState<number | null>(null);
   const [phase, setPhase] = useState<Record<number, string>>({});
   const [githubConnected, setGithubConnected] = useState<boolean | null>(preview ? previewState !== "joined" : null);
   const [githubLogin, setGithubLogin] = useState<string | null>(null);
@@ -312,6 +318,9 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
     slot: item.task_slot, taskId: item.task_id, prUrl: item.pr_url, taskPath: item.task_path, prTaskFiles: item.facts_json?.prTaskFiles ?? null,
   }));
   const setupDone = Boolean(me?.courses.length) && githubConnected === true;
+  // Task 1 and Task 2 always; Task 3 and on when saved or opened with Add another task (#412).
+  const slots = shownTaskSlots(submissions.map((item) => item.task_slot), openedSlots, locked);
+  const addSlot = canAddTask(slots, locked) ? nextTaskSlot(slots) : null;
 
   // Typed URLs and messages belong to the sprint they were typed in.
   function openSprint(number: number) {
@@ -322,6 +331,8 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
     setTaskFilePrInputs({});
     setSlotError({});
     setChanging({});
+    setOpenedSlots([]);
+    setConfirmingRemove(null);
   }
 
   /** Change PR starts over with an empty form. */
@@ -468,6 +479,33 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
     }
   }
 
+  /** Removes the task in a slot before the sprint is submitted (#412). Its card stays if it is a usual slot. */
+  async function removeTask(slot: number) {
+    setConfirmingRemove(null);
+    if (preview || !course) return;
+    setSlotError((previous) => ({ ...previous, [slot]: "" }));
+    setPhase((previous) => ({ ...previous, [slot]: "Removing…" }));
+    try {
+      const response = await fetch(`/api/cse115a/assignments/${assignmentNumber}/tasks`, {
+        method: "DELETE", headers: { "Content-Type": "application/json" }, credentials: "include",
+        body: JSON.stringify({ courseSlug: course.slug, slot }),
+      });
+      const body = await jsonResponse<{ removed: { slot: number } }>(response);
+      if (!response.ok) throw new Error(body.error ?? "Could not remove this task.");
+      setChanging((previous) => ({ ...previous, [slot]: false }));
+      setPrInputs((previous) => ({ ...previous, [slot]: "" }));
+      setTaskFileChoices((previous) => ({ ...previous, [slot]: null }));
+      setTaskFilePrBox((previous) => ({ ...previous, [slot]: null }));
+      setTaskFilePrInputs((previous) => ({ ...previous, [slot]: "" }));
+      setOpenedSlots((previous) => previous.filter((item) => item !== slot));
+      await load();
+    } catch (caught) {
+      setSlotError((previous) => ({ ...previous, [slot]: caught instanceof Error ? caught.message : "Could not remove this task." }));
+    } finally {
+      setPhase((previous) => ({ ...previous, [slot]: "" }));
+    }
+  }
+
   function showScrumBoard(slot: number, checked: boolean) {
     setMe((current) => current && ({
       ...current,
@@ -588,7 +626,7 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
                 <h1 className="text-3xl font-bold">Sprint {assignmentNumber}</h1>
                 <p className="mt-1 text-sm text-slate-600">
                   {released
-                    ? `Graded ${formatWhen(releasedGrades[0]!.releasedAt)} · ${releasedGrades.length === 1 ? "your one big task" : "the average of your two tasks"}`
+                    ? `Graded ${formatWhen(releasedGrades[0]!.releasedAt)} · ${releasedScoreBasis(releasedGrades.length)}`
                     : assignmentSubmission
                       ? `Submitted ${formatWhen(assignmentSubmission.submitted_at)}. Your grade appears here after instructor review.`
                       : `Add two merged task PRs, or one big task (estimate ${BIG_TASK_MIN_HOURS} hours or more). We check each one against its checklist.`}
@@ -631,7 +669,7 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
               </div>
             ) : null}
             <div className="grid gap-4 md:grid-cols-2">
-              {[1, 2].map((slot) => {
+              {slots.map((slot) => {
                 const item = submissions.find((submission) => submission.task_slot === slot);
                 const grade = releasedGrades.find((row) => row.slot === slot) ?? null;
                 const showInput = !locked && (!item || changing[slot]);
@@ -755,6 +793,14 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
                       <div className="mt-4 flex flex-wrap gap-2">
                         <button type="button" disabled={preview || Boolean(phase[slot])} onClick={() => void savePullRequest(slot, "recheck")} className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold disabled:opacity-50">Re-check</button>
                         <button type="button" disabled={Boolean(phase[slot])} onClick={() => startChangingPr(slot)} className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold">Change PR</button>
+                        {confirmingRemove === slot ? (
+                          <>
+                            <button type="button" disabled={preview || Boolean(phase[slot])} onClick={() => void removeTask(slot)} className="rounded-lg border border-red-300 px-4 py-2 text-sm font-semibold text-red-700 disabled:opacity-50">Remove Task {slot}</button>
+                            <button type="button" onClick={() => setConfirmingRemove(null)} className="px-2 text-sm text-slate-600 underline">Keep it</button>
+                          </>
+                        ) : (
+                          <button type="button" disabled={Boolean(phase[slot])} onClick={() => setConfirmingRemove(slot)} className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold disabled:opacity-50">Remove</button>
+                        )}
                       </div>
                     ) : null}
                     {slotError[slot] ? <p role="alert" className="mt-3 whitespace-pre-line text-sm text-red-700">{slotError[slot]}</p> : null}
@@ -762,6 +808,15 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
                 );
               })}
             </div>
+            {addSlot !== null ? (
+              <div className="flex flex-wrap items-center gap-4 rounded-2xl border border-dashed border-slate-300 bg-white p-5">
+                <button type="button" onClick={() => setOpenedSlots((previous) => [...previous, addSlot])}
+                  className="shrink-0 rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold">
+                  Add another task
+                </button>
+                <p className="max-w-2xl text-sm text-slate-600">{EXTRA_TASK_WARNING}</p>
+              </div>
+            ) : null}
             {!assignmentSubmission ? (
               <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-5">
                 <div>
@@ -811,9 +866,10 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
                   <DialogDescription>
                     {submissions.length === 1
                       ? oneTaskConfirmText(oneTaskHours)
-                      : "Both tasks lock when you submit. You can still change your submission until the sprint closes."}
+                      : manyTasksConfirmText(submissions.length)}
                   </DialogDescription>
                 </DialogHeader>
+                {submissions.length > USUAL_TASKS_PER_SPRINT ? <p className="text-sm text-slate-700">{EXTRA_TASK_WARNING}</p> : null}
                 <ul className="space-y-2 text-sm">
                   {[...submissions].sort((a, b) => a.task_slot - b.task_slot).map((item) => (
                     <li key={item.id} className="rounded-lg border border-slate-200 p-3">

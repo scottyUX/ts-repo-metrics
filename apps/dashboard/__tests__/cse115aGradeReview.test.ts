@@ -77,9 +77,9 @@ describe("release rules", () => {
 });
 
 describe("sprintScore", () => {
-  it("averages two tasks, and the two best of more than two", () => {
+  it("averages two tasks, and every task of more than two (#412)", () => {
     expect(sprintScore([8, 6])).toBe(7);
-    expect(sprintScore([8, 6, 10])).toBe(9);
+    expect(sprintScore([8, 6, 10])).toBe(8);
     expect(sprintScore([])).toBe(0);
   });
 

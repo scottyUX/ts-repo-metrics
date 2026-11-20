@@ -1,3 +1,5 @@
+import { MAX_TASKS_PER_PR } from "@/lib/cse115a/taskSlots";
+
 // Each PR, and each task ID within a repository, belongs to one student in a course (#336).
 
 export type OtherStudentTask = { repo_full_name: string; pr_number: number; task_id: string };
@@ -40,9 +42,9 @@ function slotName(row: OwnTask, assignmentNumber: number): string {
 }
 
 /**
- * Why this student can't use this PR's task file in this slot, or null. The same PR may fill both slots only
- * with two different task files that it adds (a merged PR that holds two tasks), and at most two of its task
- * files can be used, one per slot.
+ * Why this student can't use this PR's task file in this slot, or null. The same PR may fill two slots only
+ * with two different task files that it adds (a merged PR that holds two tasks), and at most MAX_TASKS_PER_PR
+ * (two) of the student's tasks can come from one PR, whatever the sprint's task count (#412).
  */
 export function ownTaskConflict(own: OwnTask[], target: TaskTarget & { taskPath: string }): string | null {
   const samePr = ownTasksFromSamePr(own, target);
@@ -51,7 +53,7 @@ export function ownTaskConflict(own: OwnTask[], target: TaskTarget & { taskPath:
     const name = target.taskPath.split("/").pop();
     return `${name} from this PR is already your ${slotName(sameFile, target.assignmentNumber)}. Each task needs its own task file.`;
   }
-  if (samePr.length >= 2) return "At most two task files from one PR can be used, one for each task.";
+  if (samePr.length >= MAX_TASKS_PER_PR) return "At most two of your tasks can come from one PR, each with its own task file.";
   return null;
 }
 

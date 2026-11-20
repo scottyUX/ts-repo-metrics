@@ -92,7 +92,7 @@ export function AssignmentResultsTab({ task }: { task: CourseTaskEvidence }) {
         </div>
         <div className="rounded-xl border border-border bg-card p-5">
           <p className="text-sm font-semibold text-foreground">Sprint score</p>
-          <p className="mt-1 text-sm text-muted-foreground">Two tasks are averaged. One big task (estimate {BIG_TASK_MIN_HOURS} hours or more) is scored out of 10 on its own. {grade ? "See the assignment page for your sprint score." : "The score appears after your instructor releases grades."}</p>
+          <p className="mt-1 text-sm text-muted-foreground">Every task you submit is averaged: usually two, and an extra task counts too. One big task (estimate {BIG_TASK_MIN_HOURS} hours or more) is scored out of 10 on its own. {grade ? "See the assignment page for your sprint score." : "The score appears after your instructor releases grades."}</p>
         </div>
       </div>
 

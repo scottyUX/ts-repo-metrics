@@ -7,6 +7,7 @@ import { getSupabase } from "@/lib/supabase/server";
 import { parseGitHubUrl } from "@/lib/github/parseGitHubUrl";
 import type { RepoReport } from "@/lib/reportTypes";
 import type { TaskSpec } from "@/lib/cse115a/taskSpec";
+import { taskSlotFromPath } from "@/lib/cse115a/taskSlots";
 
 type Params = { params: Promise<{ number: string; slot: string }> };
 
@@ -16,8 +17,8 @@ export default async function Cse115aTaskMetricsPage({ params }: Params) {
 
   const { number, slot } = await params;
   const assignmentNumber = Number(number);
-  const taskSlot = Number(slot);
-  if (!Number.isInteger(assignmentNumber) || ![1, 2].includes(taskSlot)) notFound();
+  const taskSlot = taskSlotFromPath(slot);
+  if (!Number.isInteger(assignmentNumber) || taskSlot === null) notFound();
 
   const db = getSupabase();
   const { data: task } = await db.from("cse_task_submissions")

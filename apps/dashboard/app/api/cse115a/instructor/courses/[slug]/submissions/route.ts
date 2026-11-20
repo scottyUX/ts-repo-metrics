@@ -1,11 +1,14 @@
 import { NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase/server";
 import { guardCourse } from "@/lib/cse115a/instructorApi";
-import { effectiveTotal, slotsFromSnapshotPaths, submittedSprintScore, type TaskGradeRow } from "@/lib/cse115a/gradeReview";
+import { effectiveTotal, SNAPSHOT_SLOT_PATHS, slotsFromSnapshotPaths, snapshotSlotPathValues, submittedSprintScore, type TaskGradeRow } from "@/lib/cse115a/gradeReview";
+import { TASK_SLOTS, USUAL_TASKS_PER_SPRINT } from "@/lib/cse115a/taskSlots";
 
 export const runtime = "nodejs";
 
 type Params = { params: Promise<{ slug: string }> };
+/** A submission row with `slot_N` for each snapshot task slot selected as a JSON path (SNAPSHOT_SLOT_PATHS). */
+type ListedSubmission = { id: string; user_id: string; attempt: number; status: string; submitted_at: string } & Record<`slot_${number}`, unknown>;
 
 /** Every enrolled student with their active submission for one assignment, if any. */
 export async function GET(request: Request, { params }: Params) {
@@ -21,7 +24,7 @@ export async function GET(request: Request, { params }: Params) {
   const db = getSupabase();
   const [members, submissions] = await Promise.all([
     db.from("cse_course_memberships").select("user_id,ucsc_email").eq("course_id", course.id).order("ucsc_email"),
-    db.from("cse_assignment_submissions").select("id,user_id,attempt,status,submitted_at,first_slot:snapshot->tasks->0->slot,second_slot:snapshot->tasks->1->slot")
+    db.from("cse_assignment_submissions").select<string, ListedSubmission>(`id,user_id,attempt,status,submitted_at,${SNAPSHOT_SLOT_PATHS}`)
       .eq("course_id", course.id).eq("assignment_number", assignmentNumber).is("superseded_at", null),
   ]);
   if (members.error || submissions.error) return NextResponse.json({ error: "Could not load submissions." }, { status: 500 });
@@ -38,10 +41,12 @@ export async function GET(request: Request, { params }: Params) {
     const submission = submissions.data?.find((row) => row.user_id === member.user_id);
     if (!submission) return { userId: member.user_id, email: member.ucsc_email, submission: null };
     const taskGrades = (grades.data ?? []).filter((row) => row.assignment_submission_id === submission.id) as Array<Pick<TaskGradeRow, "task_slot" | "agent_total" | "instructor_total" | "needs_review" | "released_at">>;
-    // Only the tasks in the snapshot count: one task is the sprint score, and a missing grade shows no score yet (#348).
-    const slots = slotsFromSnapshotPaths(submission.first_slot, submission.second_slot);
+    // Only the tasks in the snapshot count: one task is the sprint score, every submitted task is averaged (#412), and
+    // a missing grade shows no score yet (#348). The usual two slots always have an entry; extra slots only when submitted.
+    const slots = slotsFromSnapshotPaths(...snapshotSlotPathValues(submission));
     const gradeJob = jobs.data?.find((row) => row.assignment_submission_id === submission.id && row.kind === "grade");
-    const tasks = [1, 2].map((slot) => {
+    const listed = TASK_SLOTS.filter((slot) => slot <= USUAL_TASKS_PER_SPRINT || slots.includes(slot));
+    const tasks = listed.map((slot) => {
       const grade = taskGrades.find((row) => row.task_slot === slot);
       return grade ? {
         slot,

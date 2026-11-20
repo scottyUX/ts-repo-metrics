@@ -5,16 +5,20 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { fetchJson, formatPoints, STATUS_LABELS, type StaffCourse } from "./shared";
 import { BIG_TASK_MIN_HOURS } from "@/lib/cse115a/processChecklist";
-import { nextSort, sortRows, type Sort, type SortKey, type SubmissionRow } from "./sortRows";
+import { nextSort, sortRows, taskColumnSlots, taskSortKey, type Sort, type SortKey, type SubmissionRow } from "./sortRows";
 
-const COLUMNS: Array<{ key: SortKey; label: string; numeric: boolean }> = [
-  { key: "student", label: "Student", numeric: false },
-  { key: "submitted", label: "Submitted", numeric: false },
-  { key: "status", label: "Status", numeric: false },
-  { key: "task1", label: "Task 1", numeric: true },
-  { key: "task2", label: "Task 2", numeric: true },
-  { key: "sprint", label: "Sprint", numeric: true },
-];
+type Column = { key: SortKey; label: string; numeric: boolean };
+
+/** Task 1 and Task 2 always; a further task column only when a listed submission has that slot (#412). */
+function columnsFor(taskSlots: number[]): Column[] {
+  return [
+    { key: "student", label: "Student", numeric: false },
+    { key: "submitted", label: "Submitted", numeric: false },
+    { key: "status", label: "Status", numeric: false },
+    ...taskSlots.map((slot) => ({ key: taskSortKey(slot), label: `Task ${slot}`, numeric: true })),
+    { key: "sprint", label: "Sprint", numeric: true },
+  ];
+}
 
 type Row = SubmissionRow;
 
@@ -75,6 +79,9 @@ export function InstructorHome() {
 
   const visible = useMemo(() => sortRows((rows ?? []).filter((row) => matches(row, filter)), sort), [rows, filter, sort]);
   const counts = useMemo(() => Object.fromEntries(FILTERS.map((item) => [item, (rows ?? []).filter((row) => matches(row, item)).length])), [rows]);
+  // Extra task columns follow the listed rows, so a filter that hides every Task 3 hides its column too.
+  const taskSlots = useMemo(() => taskColumnSlots(visible), [visible]);
+  const columns = useMemo(() => columnsFor(taskSlots), [taskSlots]);
 
   if (courses && courses.length === 0) {
     return <div className="w-full max-w-3xl py-10"><h1 className="text-2xl font-semibold">Instructor</h1><p className="mt-2 text-muted-foreground">Your account is not on the staff of any course. Ask an instructor to add your UCSC email.</p></div>;
@@ -122,7 +129,7 @@ export function InstructorHome() {
         <table className="w-full min-w-[720px] text-left text-sm">
           <thead className="border-b border-border text-xs uppercase tracking-wide text-muted-foreground">
             <tr>
-              {COLUMNS.map((column) => {
+              {columns.map((column) => {
                 const active = sort?.key === column.key ? sort.direction : null;
                 return (
                   <th key={column.key} scope="col" aria-sort={active === "asc" ? "ascending" : active === "desc" ? "descending" : "none"} className={`px-4 py-3 font-medium${column.numeric ? " text-right" : ""}`}>
@@ -137,8 +144,8 @@ export function InstructorHome() {
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
-            {rows === null && !error ? <tr><td colSpan={7} className="px-4 py-6 text-muted-foreground">Loading…</td></tr> : null}
-            {rows && visible.length === 0 ? <tr><td colSpan={7} className="px-4 py-6 text-muted-foreground">No students match.</td></tr> : null}
+            {rows === null && !error ? <tr><td colSpan={columns.length + 1} className="px-4 py-6 text-muted-foreground">Loading…</td></tr> : null}
+            {rows && visible.length === 0 ? <tr><td colSpan={columns.length + 1} className="px-4 py-6 text-muted-foreground">No students match.</td></tr> : null}
             {visible.map((row) => {
               const submission = row.submission;
               return (
@@ -154,7 +161,7 @@ export function InstructorHome() {
                     ) : <span className="text-muted-foreground">Not submitted</span>}
                     {submission?.jobError ? <p className="mt-1 max-w-xs truncate text-xs text-destructive" title={submission.jobError}>{submission.jobError}</p> : null}
                   </td>
-                  {[1, 2].map((slot) => {
+                  {taskSlots.map((slot) => {
                     const task = submission?.tasks.find((item) => item.slot === slot);
                     return (
                       <td key={slot} className="px-4 py-3 text-right tabular-nums">
@@ -172,7 +179,7 @@ export function InstructorHome() {
           </tbody>
         </table>
       </div>
-      <p className="text-sm text-muted-foreground">Gray totals are the agent&apos;s draft; dark totals include instructor edits. Sprint is the average of two tasks, or one big task (estimate {BIG_TASK_MIN_HOURS} hours or more) scored on its own. Students see nothing until you release. Click a column heading to sort; click again to reverse, a third time to go back to the original order. Rows with no value go last.</p>
+      <p className="text-sm text-muted-foreground">Gray totals are the agent&apos;s draft; dark totals include instructor edits. Sprint is the average of every task the student submitted: usually two, or one big task (estimate {BIG_TASK_MIN_HOURS} hours or more) scored on its own; a Task 3 or later column appears when a student submitted extra tasks. Students see nothing until you release. Click a column heading to sort; click again to reverse, a third time to go back to the original order. Rows with no value go last.</p>
     </div>
   );
 }

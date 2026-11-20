@@ -1,4 +1,5 @@
 import type { SubmissionStatus } from "./shared";
+import { isTaskSlot, TASK_SLOTS, USUAL_TASKS_PER_SPRINT } from "@/lib/cse115a/taskSlots";
 
 /** One student's row on the instructor Submissions table. */
 export type SubmissionRow = {
@@ -17,8 +18,30 @@ export type SubmissionRow = {
   };
 };
 
-export const SORT_KEYS = ["student", "submitted", "status", "task1", "task2", "sprint"] as const;
-export type SortKey = (typeof SORT_KEYS)[number];
+/** A task column's sort key: `task1`, `task2`, … one per slot up to MAX_TASKS_PER_SPRINT (#412). */
+export type TaskSortKey = `task${number}`;
+export type SortKey = "student" | "submitted" | "status" | TaskSortKey | "sprint";
+
+export function taskSortKey(slot: number): TaskSortKey {
+  return `task${slot}`;
+}
+
+/** The slot a task column sorts by, or null for any other column. */
+function taskSortSlot(key: SortKey): number | null {
+  const slot = key.startsWith("task") ? Number(key.slice("task".length)) : NaN;
+  return isTaskSlot(slot) ? slot : null;
+}
+
+export const SORT_KEYS: readonly SortKey[] = ["student", "submitted", "status", ...TASK_SLOTS.map(taskSortKey), "sprint"];
+
+/**
+ * The task columns the table shows: Task 1 and Task 2 always, and a column for each further slot only when at
+ * least one listed submission has a task in it (#412).
+ */
+export function taskColumnSlots(rows: SubmissionRow[]): number[] {
+  const used = new Set(rows.flatMap((row) => row.submission?.tasks.map((task) => task.slot) ?? []));
+  return TASK_SLOTS.filter((slot) => slot <= USUAL_TASKS_PER_SPRINT || used.has(slot));
+}
 export type SortDirection = "asc" | "desc";
 export type Sort = { key: SortKey; direction: SortDirection } | null;
 
@@ -42,10 +65,10 @@ function value(row: SubmissionRow, key: SortKey): string | number | null {
     case "student": return row.email.toLowerCase();
     case "submitted": return row.submission ? Date.parse(row.submission.submittedAt) : null;
     case "status": return statusRank(row);
-    case "task1": return shownTaskTotal(row, 1);
-    case "task2": return shownTaskTotal(row, 2);
     case "sprint": return row.submission?.sprint ?? null;
   }
+  const slot = taskSortSlot(key);
+  return slot === null ? null : shownTaskTotal(row, slot);
 }
 
 /**
@@ -70,7 +93,7 @@ export function sortRows(rows: SubmissionRow[], sort: Sort): SubmissionRow[] {
 
 /** The next sort after clicking a column: ascending first (descending for scores), then the other way, then off. */
 export function nextSort(current: Sort, key: SortKey): Sort {
-  const first: SortDirection = key === "task1" || key === "task2" || key === "sprint" || key === "submitted" ? "desc" : "asc";
+  const first: SortDirection = taskSortSlot(key) !== null || key === "sprint" || key === "submitted" ? "desc" : "asc";
   if (!current || current.key !== key) return { key, direction: first };
   if (current.direction === first) return { key, direction: first === "asc" ? "desc" : "asc" };
   return null;
