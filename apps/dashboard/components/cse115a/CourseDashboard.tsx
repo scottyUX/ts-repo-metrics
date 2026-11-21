@@ -9,7 +9,9 @@ import { parsePullRequestUrl, type TaskSpec } from "@/lib/cse115a/taskSpec";
 import { runAnalyzeFromUrl } from "@/lib/runAnalyze";
 import { sprintScore, type StudentTaskGrade } from "@/lib/cse115a/gradeReview";
 import { RUBRIC } from "@/lib/cse115a/rubric";
-import { CONSENT_TEXT, CONSENT_VERSION } from "@/lib/cse115a/consent";
+import { CONSENT_VERSION, currentConsent, type StoredConsent } from "@/lib/cse115a/consent";
+import { saveConsentAnswer } from "@/lib/cse115a/consentClient";
+import { ResearchConsentQuestion } from "@/components/cse115a/ResearchConsentQuestion";
 import { needsCourseInstallPrompt, repoFullNameFromPullRequest } from "@/lib/cse115a/installPrompt";
 import { oauthHashError } from "@/lib/cse115a/oauthError";
 import { prTaskFileLines } from "@/lib/cse115a/sharedPr";
@@ -73,7 +75,7 @@ type AssignmentSubmission = {
 };
 export type PreviewState = "joined" | "draft" | "ready" | "submitted" | "needs-fixes" | "grading" | "released";
 type ReleasedGrade = StudentTaskGrade & { assignmentSubmissionId: string };
-type Consent = { course_id: string; consented: boolean; consent_version: string; updated_at: string };
+type Consent = StoredConsent;
 /** A merged PR that adds several task files: the student chooses one for the slot (one PR, two tasks). */
 type TaskFileChoices = { prUrl: string; choices: Array<{ path: string; taskId: string; takenBySlot: number | null }> };
 type Me = { email: string; courses: Course[]; submissions: Submission[]; assignmentSubmissions: AssignmentSubmission[]; grades: ReleasedGrade[]; consent: Consent[] };
@@ -281,8 +283,7 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
   const releasedGrades = assignmentSubmission?.status === "released"
     ? (me?.grades ?? []).filter((grade) => grade.assignmentSubmissionId === assignmentSubmission.id) : [];
   // An answer to older wording does not count, so the card asks again.
-  const storedConsent = me?.consent.find((item) => item.course_id === course?.id) ?? null;
-  const consent = storedConsent?.consent_version === CONSENT_VERSION ? storedConsent : null;
+  const consent = currentConsent(me?.consent, course?.id);
 
   async function saveConsent(consented: boolean) {
     if (!course) return;
@@ -290,12 +291,7 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
     setSavingConsent(true);
     setError(null);
     try {
-      const response = await fetch("/api/cse115a/consent", {
-        method: "PUT", headers: { "Content-Type": "application/json" }, credentials: "include",
-        body: JSON.stringify({ courseSlug: course.slug, consented }),
-      });
-      const body = await jsonResponse<{ consent: Consent }>(response);
-      if (!response.ok) throw new Error(body.error ?? "Could not save your choice.");
+      await saveConsentAnswer(course.slug, consented);
       setEditingConsent(false);
       await load({ quiet: true });
     } catch (caught) {
@@ -648,15 +644,13 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
               ) : null}
             </div>
             {!consent || editingConsent ? (
-              <section className="rounded-2xl border border-slate-200 bg-white p-5" aria-labelledby="consent-heading">
-                <h2 id="consent-heading" className="font-semibold">Research use of your tasks</h2>
-                <p className="mt-1 max-w-3xl text-sm text-slate-600">{CONSENT_TEXT}</p>
-                <div className="mt-4 flex flex-wrap gap-3">
-                  <button type="button" disabled={savingConsent} onClick={() => void saveConsent(true)} className={`rounded-lg px-4 py-2 text-sm font-semibold disabled:opacity-50 ${consent?.consented ? "bg-slate-900 text-white" : "border border-slate-300"}`}>Yes, include my tasks</button>
-                  <button type="button" disabled={savingConsent} onClick={() => void saveConsent(false)} className={`rounded-lg px-4 py-2 text-sm font-semibold disabled:opacity-50 ${consent && !consent.consented ? "bg-slate-900 text-white" : "border border-slate-300"}`}>No, keep them out</button>
-                  {editingConsent ? <button type="button" onClick={() => setEditingConsent(false)} className="px-2 text-sm text-slate-600 underline">Cancel</button> : null}
-                </div>
-              </section>
+              <ResearchConsentQuestion
+                headingId="consent-heading"
+                consent={consent}
+                saving={savingConsent}
+                onAnswer={(consented) => void saveConsent(consented)}
+                onCancel={editingConsent ? () => setEditingConsent(false) : undefined}
+              />
             ) : null}
             {githubInstallUrl && !locked ? (
               <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-900 bg-slate-900 px-5 py-4 text-white">
@@ -886,7 +880,7 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
             </Dialog>
           </section>
           {consent && !editingConsent ? (
-            <p className="text-sm text-slate-600">Research use: {consent.consented ? "your tasks may be included" : "your tasks are kept out"}. <button type="button" onClick={() => setEditingConsent(true)} className="text-blue-700 underline">Change</button></p>
+            <p className="text-sm text-slate-600">Research use: {consent.consented ? "you agreed" : "you did not agree"}. <button type="button" onClick={() => setEditingConsent(true)} className="text-blue-700 underline">Change</button></p>
           ) : null}
           <SprintChecklistDialog open={checklistSlot !== null} onOpenChange={(open) => { if (!open) setChecklistSlot(null); }} courseSlug={course.slug} sprint={assignmentNumber} slot={checklistSlot ?? 1} />
         </>

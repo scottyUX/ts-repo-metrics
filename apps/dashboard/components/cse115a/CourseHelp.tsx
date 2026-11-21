@@ -94,7 +94,11 @@ const FAQS = [
   },
   {
     q: "Does the research question affect my grade?",
-    a: "No. Yes or no only decides whether your tasks may be included in a research dataset. You can change the answer later.",
+    a: "No. Your answer only decides whether the Hecate Lab may use your CSE 115A code for research. You can change the answer later.",
+  },
+  {
+    q: "Where do I answer the research consent question?",
+    a: "On its own page, /cse115a/consent (the Research consent link at the top of your course page). Sign in with your UCSC account and choose an answer. You can change your answer there at any time.",
   },
   {
     q: "What does the Scrum board checkbox do?",

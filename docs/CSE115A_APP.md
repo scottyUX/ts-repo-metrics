@@ -392,7 +392,8 @@ SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... \
 - **Regrade** requeues the grade job and keeps instructor edits. **Unlock**
   (instructors only, reason required) supersedes the attempt so the student can
   change tasks and submit again; the old attempt stays as history.
-- **Benchmark**: counts by status and consent, a preview of the newest rows,
+- **Benchmark**: counts by status and consent, one line of research consent
+  totals (see Research consent below), a preview of the newest rows,
   JSONL download, and the repo copies (each task stored, queued, running or
   failed; "Save missing repo copies" and per-task "Retry" queue copy jobs when
   `CSE115A_REPO_COPIES=on`).
@@ -407,16 +408,47 @@ polls `/api/cse115a/me` every 20 seconds. After release it shows each task's
 score and the sprint score, and the task's Results tab shows points, the
 grader's rationale, and instructor notes per criterion. `/me` returns only
 released grades of the current attempt.
-
-A research consent card appears until the student answers (`PUT
-/api/cse115a/consent`), and a **Change** link stays below the assignments.
-The wording lives in `lib/cse115a/consent.ts` and is a placeholder for now.
-To go live, paste the IRB-approved text, set `CONSENT_VERSION` to its
-identifier, and set `CONSENT_APPROVED = true`. Until then JSONL export is
-off. Answers to older wording don't count, so students are asked again when
-the version changes.
 Preview states: `/cse115a/preview?state=draft|ready|submitted|grading|released`
 and `/cse115a/preview/results?state=released`.
+
+### Research consent
+
+The wording and its version live only in `apps/dashboard/lib/cse115a/consent.ts`
+(`CONSENT_TEXT`, `CONSENT_VERSION`, the two choices, `CONSENT_APPROVED`). The
+approved wording went in on Nov 20 as version `2026-11-20`, replacing the
+placeholder, so every student is asked again. Answers are saved with the version
+shown; an answer to an older version counts as no answer everywhere (course page,
+consent page, staff totals, export). If the wording changes, bump
+`CONSENT_VERSION`. Export stays off while `CONSENT_APPROVED` is false.
+
+The question is one component, `components/cse115a/ResearchConsentQuestion.tsx`,
+used in two places, both saving through `PUT /api/cse115a/consent` and both
+reading the answer from `GET /api/cse115a/me`, so an answer given in one place
+shows in the other:
+
+- **Course page.** The card appears once setup is done (joined, GitHub linked)
+  until the student answers the current version; after that a "Research use:"
+  line with **Change** stays below the assignments. A **Research consent** link
+  in the student bar at the top of the course page is always there.
+- **`/cse115a/consent`.** Its own address, so staff can email one link. Signed
+  in and enrolled: per course, the question, the current answer ("You said yes
+  on …", "You said no on …", "You have not answered yet."), the two choices, and
+  after saving "Your answer is saved." Signed in but in no course: a line saying
+  so with a link to the course page to join. Signed out: the UCSC Google button.
+  The site sends no email; staff send the link.
+
+**Return after sign-in.** Sign-in normally lands on `/cse115a/dashboard`. The
+Google button on the consent page passes `returnTo="/cse115a/consent"`;
+`signInReturnPath` (`lib/cse115a/signInReturn.ts`) returns that path only when
+the value equals it exactly, and the dashboard for anything else. The result is
+stored in the existing `repo_metrics_oauth_next` cookie, which `/auth/callback`
+reads. This return takes no URL parameter, and the UCSC Google button only ever
+stores one of those two constants.
+
+**Staff totals.** `GET /api/cse115a/instructor/courses/<slug>/consent-totals`
+(course staff) returns `{ enrolled, yes, no, notAnswered }` for the current
+version: counts only, no ids, emails or names. The Benchmark page shows them as
+one line. No page or route shows which student answered what.
 
 ## Before enabling student access
 
