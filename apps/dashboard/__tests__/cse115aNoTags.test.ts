@@ -5,12 +5,10 @@ import { describe, expect, it } from "vitest";
 import { criterion, LLM_CRITERIA } from "@/lib/cse115a/rubric";
 import { GRADER_PROMPT_VERSION, SYSTEM_PROMPT } from "@/lib/cse115a/grader/llmGrader";
 
-// Students push no -base or -done tags (#392). No course page or component tells them to, except the one FAQ
-// entry that says they are no longer needed.
+// Students push no -base or -done tags (#392). No course page or component mentions them.
 
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
 const COURSE_SOURCES = ["app/cse115a", "app/course", "components/cse115a"];
-const FAQ_QUESTION = "Do I still need the -base and -done tags?";
 
 function sourceFiles(dir: string): string[] {
   return readdirSync(join(ROOT, dir)).flatMap((name) => {
@@ -30,21 +28,19 @@ describe("no tags in course pages (#392)", () => {
     expect(files).toEqual(expect.arrayContaining(["components/cse115a/CourseHelp.tsx", "components/cse115a/SprintChecklistDialog.tsx", "app/course/[courseId]/analyze/page.tsx"]));
   });
 
-  it("has no -base, -done or git tag outside the FAQ entry that says they are not needed", () => {
+  it("has no -base, -done or git tag anywhere", () => {
     const found: string[] = [];
     for (const file of files) {
       readFileSync(join(ROOT, file), "utf8").split("\n").forEach((line, index) => {
-        if (line.includes(FAQ_QUESTION)) return;
         if (TAG.test(line) || /git tag/i.test(line)) found.push(`${file}:${index + 1}: ${line.trim()}`);
       });
     }
     expect(found).toEqual([]);
   });
 
-  it("keeps the FAQ entry, with its answer", () => {
+  it("has no FAQ entry about tags", () => {
     const help = readFileSync(join(ROOT, "components/cse115a/CourseHelp.tsx"), "utf8");
-    expect(help).toContain(`q: "${FAQ_QUESTION}",`);
-    expect(help).toContain(`a: "No. The site finds your pull request's first commit and its merge commit itself. Tags you already pushed are ignored and can stay.",`);
+    expect(help).not.toMatch(/tags\?"/);
     expect(help).not.toContain("What are the two tags?");
   });
 

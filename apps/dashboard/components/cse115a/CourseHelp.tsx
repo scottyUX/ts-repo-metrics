@@ -61,10 +61,6 @@ const FAQS = [
     a: "You do, from the GitHub account you connected. A teammate can review it. If someone else opened it, that check cannot be fixed on this pull request.",
   },
   {
-    q: "Do I still need the -base and -done tags?",
-    a: "No. The site finds your pull request's first commit and its merge commit itself. Tags you already pushed are ignored and can stay.",
-  },
-  {
     q: "I added a pull request. Can I replace it?",
     a: "Yes, until you submit the sprint. Click Change PR and paste a merged pull request. It can be from the same repository or a different one.",
   },
