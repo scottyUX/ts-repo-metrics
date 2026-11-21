@@ -236,7 +236,8 @@ SWE-bench instances in `cse_benchmark_tasks` (the SWE-bench columns plus
 `repo_metrics`, the task's Repo Metrics report). Every task is captured,
 including superseded attempts; `cse_benchmark_task_sources` records who
 submitted it, a `validation_status`, and flags such as
-`base_commit_from_pr_base` or `no_test_patch`. A task whose PR adds more than
+`base_commit_from_pr_base` or `no_test_patch` (and `recaptured_same_patch`, set only by the
+staff re-capture below on a kept row; it does not change `task_file_first`). A task whose PR adds more than
 one task file (counted at import, in `facts_json.prTaskFiles`) is flagged
 `pr_holds_two_tasks`, even when the student uses only one of the files: its
 `patch` also holds the other file's work, so export leaves it out (as it does
@@ -281,6 +282,8 @@ Saved submissions are unchanged: snapshots taken before #382 have no
 `first_commit` or `pr_base` start and flags. Snapshots taken before #392 may
 say `base_tag`, for a base tag on that same task-file-only first commit; the
 range was the same as `first_commit`, and those rows get neither flag.
+Staff can re-capture those saved diffs on today's rule; see "Re-capturing old
+diffs" under Instructor tools.
 
 - `patch` and `test_patch` split the diff by test path
   (`lib/cse115a/diff.ts`).
@@ -397,6 +400,52 @@ SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... \
   JSONL download, and the repo copies (each task stored, queued, running or
   failed; "Save missing repo copies" and per-task "Retry" queue copy jobs when
   `CSE115A_REPO_COPIES=on`).
+
+### Re-capturing old diffs (#418)
+
+"Diffs saved before the PR-own-diff rule", on the Benchmark page, re-runs
+today's diff capture (#382) on submissions already saved, for every task whose
+snapshot has no `diffEnd` (an old-rule task), in every submission of the course
+that is not superseded. It runs on the site, because private repos need the
+course GitHub App; no student does anything. It reads GitHub only with what the
+snapshot holds (repo, PR number, task path, `taskFilePr`, `prTaskFiles`).
+
+- **Check all (dry run)** asks for each submission in turn and writes nothing.
+  The table shows each task's old and new file lists, whether a file outside
+  `docs/tasks/` changed, the benchmark row's status and what would happen to
+  it, and "consider Regrade" for an unreleased submission whose code files
+  changed. "Copy totals" is a line of counts only, for a status update.
+- **Re-capture all** is enabled only after a dry run finished in that page
+  load, asks once more ("Yes, re-capture N submissions"), and stops at the
+  first failure.
+- Only the diff fields of a task change (`baseCommit`, `baseCommitSource`,
+  `taskFileFirstCommit`, `headCommit`, `diffEnd`, `diff`, `diffBytes`,
+  `diffTruncated`, `diffError`). The spec, validation, comments, checks and PR
+  details saved at Submit stay. The snapshot gets a top-level `recapturedAt`.
+  A task whose PR can't be read, is no longer merged, has another merge commit
+  than the saved one, or whose new diff fails to load is an error and keeps its
+  saved diff; the submission's other tasks still go ahead. When the merge base
+  can't be read, the task is re-captured on the old range (`diffEnd`
+  `merge_commit`) and the table says so.
+- The snapshot as it was is kept, whole, in
+  `cse_assignment_submissions.snapshot_before_recapture`, written once (the
+  first apply) and never overwritten. The write is guarded: the row must not be
+  superseded and must still hold the snapshot that was read. Needs migration
+  `20261120000000_cse115a_snapshot_before_recapture.sql`; the tool refuses to
+  write without it.
+- Benchmark rows: a candidate row (or none) is replaced. A validated or
+  rejected row is kept untouched when the new `patch` and `test_patch` are
+  byte-for-byte the stored ones (its source gains `recaptured_same_patch`);
+  otherwise it is replaced and goes back to candidate. When a row's
+  `base_commit` changes and `CSE115A_REPO_COPIES=on`, the submission's
+  `repo_copy` job is set back to queued, so a copy is made under the new base's
+  name; the old copy is kept.
+- Grades, grade status and grading jobs are not touched; nothing is regraded.
+  Staff press Regrade themselves where the dry run suggests it.
+
+Routes: `GET /api/cse115a/instructor/courses/<slug>/recapture` (the list and
+counts) and `POST` the same with `{ submissionId, apply }` (`apply` defaults to
+false, the dry run). Staff of that course only.
 
 TAs can do everything except unlock and manage staff.
 

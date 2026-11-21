@@ -797,6 +797,17 @@ A later Submit does not undo this: re-capture keeps an instance whose source is 
 (both or neither flagged `base_commit_from_merge_base`, #382) (`lib/cse115a/jobs/benchmarkSave.ts`). A row
 captured before #382 is captured again on the merge-base rule and goes back to `candidate`.
 
+The staff re-capture of diffs saved before #382 (#418, "Diffs saved before the PR-own-diff rule" on the
+Benchmark page) has its own keep rule, for the submission being re-captured only: a `validated` or `rejected`
+row is kept untouched only when the re-captured instance's `patch` and `test_patch` are byte-for-byte the
+stored row's. Then the `cse_benchmark_tasks` row is not written at all (its `base_commit`, lists, `harbor_env`
+and `validation_detail` stay), and the source row keeps its status and flags and gains the flag
+`recaptured_same_patch`. Any difference, even one line, replaces the row with the new capture and sends it
+back to `candidate`, with `harbor_env` and `validation_detail` null and only the new capture's flags. That
+includes a staff-rebuilt row (`staff_rebuilt:merge-parent`), whose patch came from the rebuild, so check the dry run for
+rebuilt rows before applying. A `candidate` row is always replaced. Other source rows of the same instance
+(older, superseded attempts) are left as they are (`lib/cse115a/benchmark/recapture.ts`).
+
 Rebuilt so far: `JoKHerre__Bookworm-COL-04-T-4` (PR #115, M `96798e0b`, M^1 `40b28261`, the
 head of PR #114). `JoKHerre__Bookworm-COL-04-T-2` (PR #114) is not rebuilt: the PR changes no
 test file, so it stays rejected.
