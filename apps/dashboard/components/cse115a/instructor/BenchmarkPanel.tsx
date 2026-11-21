@@ -24,14 +24,25 @@ type Summary = {
   preview: Preview[];
   exportEnabled: boolean;
 };
+type ConsentTotals = { enrolled: number; yes: number; no: number; notAnswered: number };
+
+/** One line of research consent totals for the course; counts only, never who answered what. */
+export function consentTotalsLine(totals: ConsentTotals): string {
+  return `Research consent (current wording): ${totals.enrolled} enrolled · ${totals.yes} answered yes · ${totals.no} answered no · ${totals.notAnswered} not answered`;
+}
 
 export function BenchmarkPanel({ slug }: { slug: string }) {
   const [summary, setSummary] = useState<Summary | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [consentTotals, setConsentTotals] = useState<ConsentTotals | null>(null);
+  const [consentTotalsError, setConsentTotalsError] = useState<string | null>(null);
   useEffect(() => {
     fetchJson<Summary>(`/api/cse115a/instructor/courses/${encodeURIComponent(slug)}/benchmark`)
       .then(setSummary)
       .catch((caught: Error) => setError(caught.message));
+    fetchJson<ConsentTotals>(`/api/cse115a/instructor/courses/${encodeURIComponent(slug)}/consent-totals`)
+      .then(setConsentTotals)
+      .catch((caught: Error) => setConsentTotalsError(caught.message));
   }, [slug]);
 
   if (error) return <p role="alert" className="py-10 text-destructive">{error}</p>;
@@ -60,7 +71,8 @@ export function BenchmarkPanel({ slug }: { slug: string }) {
           </div>
         ))}
       </dl>
-      {!summary.exportEnabled ? <p className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-sm">Export is off until the IRB-approved consent wording replaces the placeholder. Tasks are still captured, with personal information removed.</p> : null}
+      <p className="text-sm text-muted-foreground">{consentTotals ? consentTotalsLine(consentTotals) : consentTotalsError ? `Research consent totals: ${consentTotalsError}` : "Research consent totals: loading…"}</p>
+      {!summary.exportEnabled ? <p className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-sm">Export is off while CONSENT_APPROVED is false in lib/cse115a/consent.ts. Tasks are still captured, with personal information removed.</p> : null}
       <div className={`flex flex-wrap gap-3 ${summary.exportEnabled ? "" : "pointer-events-none opacity-50"}`} aria-disabled={!summary.exportEnabled}>
         <a href={exportUrl} className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">Download JSONL</a>
         <a href={`${exportUrl}?validated=1`} className="rounded-lg border border-input px-4 py-2 text-sm font-medium">Validated only</a>
