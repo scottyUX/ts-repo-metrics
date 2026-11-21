@@ -19,6 +19,7 @@ export function Cse115aStudentBar({
       <nav className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-700" aria-label="Account">
         <Link href="/cse115a/help" className="font-medium underline">Help</Link>
         <a href={INSTRUCTIONS} target="_blank" rel="noopener noreferrer" className="font-medium underline">Instructions</a>
+        <Link href="/cse115a/consent" className="font-medium underline">Research consent</Link>
         {email ? <span>{email}</span> : null}
         <button type="button" onClick={onSignOut} className="font-medium underline">Sign out</button>
       </nav>

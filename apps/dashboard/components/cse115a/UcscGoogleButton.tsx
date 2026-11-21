@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { createUserSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { isBrowserSupabaseConfigured } from "@/lib/supabase/browserConfigured";
 import { buildOAuthCallbackUrl, getOAuthRedirectOrigin, stashOAuthNextPath, stashOAuthProvider } from "@/lib/oauthRedirectOrigin";
+import { signInReturnPath } from "@/lib/cse115a/signInReturn";
 
 function GoogleMark() {
   return (
@@ -16,7 +17,8 @@ function GoogleMark() {
   );
 }
 
-export function UcscGoogleButton({ fullWidth = false }: { fullWidth?: boolean }) {
+/** `returnTo` may only be "/cse115a/consent"; anything else, or nothing, returns to the dashboard. */
+export function UcscGoogleButton({ fullWidth = false, returnTo }: { fullWidth?: boolean; returnTo?: string }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [googleEnabled, setGoogleEnabled] = useState<boolean | null>(null);
@@ -45,7 +47,7 @@ export function UcscGoogleButton({ fullWidth = false }: { fullWidth?: boolean })
     try {
       const supabase = createUserSupabaseBrowserClient();
       const { data: { user } } = await supabase.auth.getUser();
-      stashOAuthNextPath("/cse115a/dashboard");
+      stashOAuthNextPath(signInReturnPath(returnTo));
       stashOAuthProvider("google");
       const options = {
         redirectTo: buildOAuthCallbackUrl(getOAuthRedirectOrigin()),
