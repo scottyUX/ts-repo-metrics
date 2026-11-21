@@ -146,22 +146,50 @@ export async function readMergeBase(gh: GitHubReader, owner: string, repo: strin
   }
 }
 
-/** `samePrTaskPaths`: the task files of the student's other tasks from this same PR (two tasks, one PR). */
-export async function captureTaskSnapshot(gh: GitHubReader, task: SubmittedTaskRow, samePrTaskPaths: string[] = []): Promise<TaskSnapshot> {
-  const taskFilePr = savedTaskFilePr(task.facts_json);
-  const [owner, repo] = task.repo_full_name.split("/") as [string, string];
-  const base = `/repos/${owner}/${repo}`;
-  const pull = await gh.json<Pull>(`${base}/pulls/${task.pr_number}`);
-  if (!pull?.merged_at || !pull.merge_commit_sha) throw new Error(`Task ${task.task_slot}: the pull request is no longer merged.`);
+/** The fields of a task snapshot that the diff capture writes; a re-capture (recaptureTaskDiff) replaces only these. */
+export const DIFF_FIELDS = [
+  "baseCommit", "baseCommitSource", "taskFileFirstCommit", "headCommit", "diffEnd", "diff", "diffBytes", "diffTruncated", "diffError",
+] as const satisfies readonly (keyof TaskSnapshot)[];
+
+export type TaskDiffFields = Required<Pick<TaskSnapshot, (typeof DIFF_FIELDS)[number]>>;
+
+/** What the diff capture needs to know about a task, from its task row at Submit or from its saved snapshot. */
+export type TaskDiffInput = {
+  repoFullName: string;
+  prNumber: number;
+  taskPath: string;
+  /** The task files this PR adds (`prTaskFiles`), from import. */
+  prTaskFiles?: string[];
+  /** Set for a paired task: its task file came from a separate PR. */
+  taskFilePr?: TaskFilePr;
+  /** The task files of the student's other tasks from this same PR (two tasks, one PR). */
+  samePrTaskPaths: string[];
+};
+
+/** Reads the pull request; throws when it is no longer merged. */
+async function readMergedPull(gh: GitHubReader, input: Pick<TaskDiffInput, "repoFullName" | "prNumber">, slot: number): Promise<Pull & { merge_commit_sha: string; merged_at: string }> {
+  const pull = await gh.json<Pull>(`${repoPath(input.repoFullName)}/pulls/${input.prNumber}`);
+  if (!pull?.merged_at || !pull.merge_commit_sha) throw new Error(`Task ${slot}: the pull request is no longer merged.`);
+  return pull as Pull & { merge_commit_sha: string; merged_at: string };
+}
+
+function repoPath(repoFullName: string): string {
+  const [owner, repo] = repoFullName.split("/") as [string, string];
+  return `/repos/${owner}/${repo}`;
+}
+
+/**
+ * The diff part of a capture, shared by Submit (captureTaskSnapshot) and the staff re-capture
+ * (recaptureTaskDiff): the merge base, the PR's first commit, and the diff. Never throws: a diff that
+ * fails to load is `diffError`.
+ */
+async function captureDiff(gh: GitHubReader, input: TaskDiffInput, pull: Pull & { merge_commit_sha: string }): Promise<TaskDiffFields> {
+  const [owner, repo] = input.repoFullName.split("/") as [string, string];
+  const base = repoPath(input.repoFullName);
   const mergeSha = pull.merge_commit_sha;
   const headSha = pull.head.sha ?? null;
-
-  const [commits, issueComments, reviews, reviewComments, checks, mergeBase] = await Promise.all([
-    gh.json<Array<{ sha: string }>>(`${base}/pulls/${task.pr_number}/commits?per_page=1&page=1`),
-    gh.json<Comment[]>(`${base}/issues/${task.pr_number}/comments?per_page=100`),
-    gh.json<Comment[]>(`${base}/pulls/${task.pr_number}/reviews?per_page=100`),
-    gh.json<Comment[]>(`${base}/pulls/${task.pr_number}/comments?per_page=100`),
-    readCommitChecks(gh, owner, repo, mergeSha),
+  const [commits, mergeBase] = await Promise.all([
+    gh.json<Array<{ sha: string }>>(`${base}/pulls/${input.prNumber}/commits?per_page=1&page=1`),
     readMergeBase(gh, owner, repo, pull.base.sha, headSha),
   ]);
   // The rule before #382, kept only as the fallback: the diff starts after the PR's first commit when the task
@@ -172,11 +200,11 @@ export async function captureTaskSnapshot(gh: GitHubReader, task: SubmittedTaskR
   let fallbackBase = pull.base.sha;
   let fallbackSource: TaskSnapshot["baseCommitSource"] = "pr_base";
   let taskFileFirstCommit = false;
-  if (firstSha && !taskFilePr) {
+  if (firstSha && !input.taskFilePr) {
     // A paired task's PR has no task file, so its first commit is never the task file alone.
     const first = await gh.json<{ files?: Array<{ filename: string }> }>(`${base}/commits/${firstSha}`);
-    const taskFilesOnly = firstCommitHoldsOnlyTaskFiles(first?.files, task.task_path, [...samePrTaskPaths, ...(task.facts_json?.prTaskFiles ?? [])]);
-    taskFileFirstCommit = taskFileFirst(taskFilesOnly, taskFilePr);
+    const taskFilesOnly = firstCommitHoldsOnlyTaskFiles(first?.files, input.taskPath, [...input.samePrTaskPaths, ...(input.prTaskFiles ?? [])]);
+    taskFileFirstCommit = taskFileFirst(taskFilesOnly, input.taskFilePr);
     if (taskFileFirstCommit) {
       fallbackBase = firstSha;
       fallbackSource = "first_commit";
@@ -202,6 +230,39 @@ export async function captureTaskSnapshot(gh: GitHubReader, task: SubmittedTaskR
   } catch (error) {
     diffError = error instanceof Error ? error.message : "The diff could not be loaded.";
   }
+  return {
+    baseCommit,
+    baseCommitSource,
+    taskFileFirstCommit,
+    headCommit: headSha,
+    diffEnd: fromMergeBase ? "head" : "merge_commit",
+    diff, diffBytes, diffTruncated, diffError,
+  };
+}
+
+/** `samePrTaskPaths`: the task files of the student's other tasks from this same PR (two tasks, one PR). */
+export async function captureTaskSnapshot(gh: GitHubReader, task: SubmittedTaskRow, samePrTaskPaths: string[] = []): Promise<TaskSnapshot> {
+  const taskFilePr = savedTaskFilePr(task.facts_json);
+  const [owner, repo] = task.repo_full_name.split("/") as [string, string];
+  const base = `/repos/${owner}/${repo}`;
+  const input: TaskDiffInput = {
+    repoFullName: task.repo_full_name,
+    prNumber: task.pr_number,
+    taskPath: task.task_path,
+    prTaskFiles: task.facts_json?.prTaskFiles,
+    taskFilePr: taskFilePr ?? undefined,
+    samePrTaskPaths,
+  };
+  const pull = await readMergedPull(gh, input, task.task_slot);
+  const mergeSha = pull.merge_commit_sha;
+
+  const [diffFields, issueComments, reviews, reviewComments, checks] = await Promise.all([
+    captureDiff(gh, input, pull),
+    gh.json<Comment[]>(`${base}/issues/${task.pr_number}/comments?per_page=100`),
+    gh.json<Comment[]>(`${base}/pulls/${task.pr_number}/reviews?per_page=100`),
+    gh.json<Comment[]>(`${base}/pulls/${task.pr_number}/comments?per_page=100`),
+    readCommitChecks(gh, owner, repo, mergeSha),
+  ]);
 
   const comments = [
     ...(issueComments ?? []).map((item) => comment("issue", item)),
@@ -233,15 +294,57 @@ export async function captureTaskSnapshot(gh: GitHubReader, task: SubmittedTaskR
       baseSha: pull.base.sha,
       mergeCommitSha: mergeSha,
     },
-    baseCommit,
-    baseCommitSource,
-    taskFileFirstCommit,
-    headCommit: headSha,
-    diffEnd: fromMergeBase ? "head" : "merge_commit",
-    diff, diffBytes, diffTruncated, diffError,
+    ...diffFields,
     comments,
     checks,
   };
+}
+
+/** An old-rule task: saved before #382, so its snapshot has no `diffEnd`. */
+export function isOldRuleTask(task: Pick<TaskSnapshot, "diffEnd">): boolean {
+  return task.diffEnd === undefined || task.diffEnd === null;
+}
+
+export type RecaptureResult = { ok: true; task: TaskSnapshot } | { ok: false; error: string };
+
+/**
+ * Today's diff capture again, for a task already saved (staff re-capture of old-rule diffs). Reads GitHub only
+ * with what the snapshot holds (`repoFullName`, `prNumber`, `taskPath`, `taskFilePr`, `prTaskFiles`), never the
+ * task tables. Returns the saved task with only DIFF_FIELDS replaced; every other field (`pr`, `spec`,
+ * `validation`, `comments`, `checks`, ...) is the saved value. An error, and nothing changed, when the PR can't be
+ * read, is no longer merged, has another merge commit than the saved `pr.mergeCommitSha`, or the new diff fails to
+ * load. `samePrTaskPaths`: the task paths of the same submission's other tasks from the same PR, as
+ * captureSubmissionSnapshot passes them.
+ */
+export async function recaptureTaskDiff(gh: GitHubReader, saved: TaskSnapshot, samePrTaskPaths: string[] = []): Promise<RecaptureResult> {
+  const input: TaskDiffInput = {
+    repoFullName: saved.repoFullName,
+    prNumber: saved.prNumber,
+    taskPath: saved.taskPath,
+    prTaskFiles: Array.isArray(saved.prTaskFiles) ? saved.prTaskFiles : undefined,
+    taskFilePr: saved.taskFilePr,
+    samePrTaskPaths,
+  };
+  let read: Pull | null;
+  try {
+    read = await gh.json<Pull>(`${repoPath(input.repoFullName)}/pulls/${input.prNumber}`);
+  } catch (error) {
+    const text = error instanceof Error ? error.message : String(error);
+    return { ok: false, error: `Task ${saved.slot}: the pull request could not be read (${text.slice(0, 300)}).` };
+  }
+  if (!read?.merged_at || !read.merge_commit_sha) return { ok: false, error: `Task ${saved.slot}: the pull request is no longer merged.` };
+  const pull = read as Pull & { merge_commit_sha: string };
+  if (pull.merge_commit_sha !== saved.pr.mergeCommitSha) {
+    return { ok: false, error: `Task ${saved.slot}: the pull request's merge commit is not the one saved at Submit.` };
+  }
+  const fields = await captureDiff(gh, input, pull);
+  if (fields.diffError) return { ok: false, error: `Task ${saved.slot}: the new diff could not be loaded (${fields.diffError.slice(0, 300)}).` };
+  return { ok: true, task: { ...saved, ...fields } };
+}
+
+/** The task paths of the submission's other tasks from the same PR as `task` (as captureSubmissionSnapshot passes them). */
+export function samePrTaskPathsOf(tasks: Array<Pick<TaskSnapshot, "slot" | "prUrl" | "taskPath">>, task: Pick<TaskSnapshot, "slot" | "prUrl">): string[] {
+  return tasks.filter((other) => other.slot !== task.slot && other.prUrl.toLowerCase() === task.prUrl.toLowerCase()).map((other) => other.taskPath);
 }
 
 export async function captureSubmissionSnapshot(gh: GitHubReader, tasks: SubmittedTaskRow[], now = new Date()): Promise<SubmissionSnapshot> {
