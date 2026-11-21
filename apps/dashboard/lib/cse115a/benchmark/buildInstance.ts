@@ -48,7 +48,12 @@ export const SWE_BENCH_FIELDS = [
   "eval_type", "image", "eval_script", "log_parser", "difficulty", "repo_metrics",
 ] as const satisfies readonly (keyof BenchmarkInstance)[];
 
-export type BuildFlag = "base_commit_from_pr_base" | "base_commit_from_first_commit" | "base_commit_from_merge_base" | "diff_from_merge_commit" | "task_file_not_first" | "task_files_dropped" | "diff_missing" | "diff_truncated" | "no_test_patch" | "no_source_patch" | "no_tests_found" | "pii_scrubbed_from_patch" | "ai_tool_files_dropped" | "pr_holds_two_tasks" | "task_file_from_other_pr";
+export type BuildFlag = "base_commit_from_pr_base" | "base_commit_from_first_commit" | "base_commit_from_merge_base" | "diff_from_merge_commit" | "task_file_not_first" | "task_files_dropped" | "diff_missing" | "diff_truncated" | "no_test_patch" | "no_source_patch" | "no_tests_found" | "pii_scrubbed_from_patch" | "ai_tool_files_dropped" | "pr_holds_two_tasks" | "task_file_from_other_pr"
+  /**
+   * Never set by buildInstance: the staff re-capture of an old-rule diff (benchmark/recapture.ts) adds it to a validated
+   * or rejected source whose new `patch` and `test_patch` are byte-for-byte the stored ones, so the row was kept.
+   */
+  | "recaptured_same_patch";
 
 /** SWE-bench Verified difficulty labels, from the student's estimate. */
 export function difficultyFor(estimateHours: number | undefined): string | null {

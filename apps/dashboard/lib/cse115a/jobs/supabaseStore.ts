@@ -1,9 +1,51 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { planBenchmarkSave, snapshotCopyRefs, snapshotMergeCommit, type StoredSource } from "./benchmarkSave";
-import type { Job, JobStore, Submission } from "./runner";
+import type { BenchmarkInstance } from "@/lib/cse115a/benchmark/buildInstance";
+import { planBenchmarkSave, snapshotCopyRefs, snapshotMergeCommit, type SourceUpsert, type StoredSource } from "./benchmarkSave";
+import type { Job, JobStore, RepoCopyRequeue, Submission } from "./runner";
 
 function check(error: { message: string } | null, what: string) {
   if (error) throw new Error(`Could not ${what}: ${error.message}`);
+}
+
+/**
+ * Upserts instances into cse_benchmark_tasks and source rows into cse_benchmark_task_sources, as a benchmark
+ * job saves them; the staff re-capture (benchmark/recapture.ts) writes through the same path.
+ */
+export async function writeBenchmarkRows(db: SupabaseClient, tasks: BenchmarkInstance[], sources: SourceUpsert[]): Promise<void> {
+  if (tasks.length > 0) {
+    const { error } = await db.from("cse_benchmark_tasks").upsert(tasks, { onConflict: "instance_id" });
+    check(error, "save benchmark tasks");
+  }
+  // One upsert per source row: some carry validation_status and some do not, and a bulk upsert
+  // would set the missing column to null.
+  for (const source of sources) {
+    const { error } = await db.from("cse_benchmark_task_sources").upsert(source, { onConflict: "assignment_submission_id,task_slot" });
+    check(error, "save benchmark sources");
+  }
+}
+
+/**
+ * Makes a submission's repo_copy job run again: inserted when missing; a failed or succeeded one is set
+ * back to queued (attempts 0, no error, runnable now); a queued one is left as it is, and so is a running
+ * one (its worker would overwrite the reset when it finishes; it is reported instead).
+ */
+export async function requeueRepoCopyJob(db: SupabaseClient, submissionId: string): Promise<RepoCopyRequeue> {
+  const inserted = await db.from("cse_grading_jobs")
+    .upsert({ assignment_submission_id: submissionId, kind: "repo_copy" }, { onConflict: "assignment_submission_id,kind", ignoreDuplicates: true })
+    .select("id");
+  check(inserted.error, "queue the repo copy job");
+  if ((inserted.data ?? []).length > 0) return "inserted";
+  const now = new Date().toISOString();
+  const reset = await db.from("cse_grading_jobs")
+    .update({ status: "queued", attempts: 0, run_after: now, locked_at: null, last_error: null, updated_at: now })
+    .eq("assignment_submission_id", submissionId).eq("kind", "repo_copy").in("status", ["failed", "succeeded"])
+    .select("id");
+  check(reset.error, "queue the repo copy job again");
+  if ((reset.data ?? []).length > 0) return "reset";
+  const { data, error } = await db.from("cse_grading_jobs").select("status")
+    .eq("assignment_submission_id", submissionId).eq("kind", "repo_copy").maybeSingle();
+  check(error, "read the repo copy job");
+  return (data as { status?: string } | null)?.status === "running" ? "running" : "already queued";
 }
 
 /** JobStore backed by the service-role Supabase client. */
@@ -69,6 +111,9 @@ export function supabaseJobStore(db: SupabaseClient): JobStore {
         .upsert({ assignment_submission_id: submissionId, kind: "repo_copy" }, { onConflict: "assignment_submission_id,kind", ignoreDuplicates: true });
       check(error, "queue the repo copy job");
     },
+    async requeueRepoCopy(submissionId) {
+      return requeueRepoCopyJob(db, submissionId);
+    },
     async loadSubmissionCopyTasks(submissionId) {
       const { data: sources, error: sourceError } = await db.from("cse_benchmark_task_sources")
         .select("instance_id,task_slot").eq("assignment_submission_id", submissionId).order("task_slot");
@@ -100,16 +145,7 @@ export function supabaseJobStore(db: SupabaseClient): JobStore {
         merge_commit: snapshotMergeCommit(sub?.snapshot, source.task_slot),
       }));
       const plan = planBenchmarkSave(submission, rows, stored, new Date().toISOString());
-      if (plan.tasks.length > 0) {
-        const { error } = await db.from("cse_benchmark_tasks").upsert(plan.tasks, { onConflict: "instance_id" });
-        check(error, "save benchmark tasks");
-      }
-      // One upsert per source row: some carry validation_status and some do not, and a bulk upsert
-      // would set the missing column to null.
-      for (const source of plan.sources) {
-        const { error } = await db.from("cse_benchmark_task_sources").upsert(source, { onConflict: "assignment_submission_id,task_slot" });
-        check(error, "save benchmark sources");
-      }
+      await writeBenchmarkRows(db, plan.tasks, plan.sources);
     },
   };
 }
