@@ -2,6 +2,7 @@ import { describe, expect, it, vi, afterEach } from "vitest";
 import {
   buildOAuthCallbackUrl,
   getOAuthRedirectOrigin,
+  oauthNextPath,
   readOAuthNextPathFromCookie,
   stashOAuthNextPath,
 } from "@/lib/oauthRedirectOrigin";
@@ -61,5 +62,27 @@ describe("oauth next cookie", () => {
     vi.stubGlobal("document", { cookie: "" });
     stashOAuthNextPath("/repos");
     expect(document.cookie).toContain("repo_metrics_oauth_next=%2Frepos");
+  });
+});
+
+describe("oauthNextPath", () => {
+  const cookie = "repo_metrics_oauth_next=%2Fcse115a%2Fdashboard";
+
+  it("uses a ?next= path on this site", () => {
+    expect(oauthNextPath("/cse115a/consent", cookie)).toBe("/cse115a/consent");
+  });
+
+  it("falls back to the cookie without ?next=", () => {
+    expect(oauthNextPath(null, cookie)).toBe("/cse115a/dashboard");
+    expect(oauthNextPath(null, null)).toBe("/repos");
+  });
+
+  it("never sends someone to another host", () => {
+    const origin = "https://course.example.app";
+    for (const next of ["@evil.example", ".evil.example", "evil.example", "https://evil.example", ":443@evil.example", "", "//evil.example", "/\\evil.example"]) {
+      const path = oauthNextPath(next, cookie);
+      expect(new URL(`${origin}${path}`).host).toBe("course.example.app");
+    }
+    expect(oauthNextPath("@evil.example", cookie)).toBe("/cse115a/dashboard");
   });
 });

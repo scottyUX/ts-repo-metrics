@@ -9,7 +9,7 @@ import {
   clearOAuthNextCookieHeader,
   clearOAuthProviderCookieHeader,
   readOAuthProviderFromCookie,
-  readOAuthNextPathFromCookie,
+  oauthNextPath,
 } from "@/lib/oauthRedirectOrigin";
 import { verifiedUcscGoogleEmail } from "@/lib/courseUcscAuth";
 import { getSupabase, isSupabaseConfigured } from "@/lib/supabase/server";
@@ -32,9 +32,7 @@ export async function GET(request: Request) {
   const code = searchParams.get("code");
   const cookieHeader = request.headers.get("cookie");
   const oauthProvider = readOAuthProviderFromCookie(cookieHeader);
-  const nextPath =
-    searchParams.get("next") ??
-    readOAuthNextPathFromCookie(cookieHeader);
+  const nextPath = oauthNextPath(searchParams.get("next"), cookieHeader);
 
   if (!code) {
     return redirectWithClearedNextCookie(origin, nextPath);

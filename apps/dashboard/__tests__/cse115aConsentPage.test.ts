@@ -351,6 +351,6 @@ describe("staff consent totals", () => {
 
   it("the Benchmark page shows one line of counts", () => {
     expect(consentTotalsLine({ enrolled: 6, yes: 2, no: 1, notAnswered: 3 }))
-      .toBe("Research consent (current wording): 6 enrolled · 2 answered yes · 1 answered no · 3 not answered");
+      .toBe("Research consent: 6 enrolled · 2 answered yes · 1 answered no · 3 not answered");
   });
 });

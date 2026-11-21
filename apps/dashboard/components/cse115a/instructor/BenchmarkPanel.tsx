@@ -28,7 +28,7 @@ type ConsentTotals = { enrolled: number; yes: number; no: number; notAnswered: n
 
 /** One line of research consent totals for the course; counts only, never who answered what. */
 export function consentTotalsLine(totals: ConsentTotals): string {
-  return `Research consent (current wording): ${totals.enrolled} enrolled · ${totals.yes} answered yes · ${totals.no} answered no · ${totals.notAnswered} not answered`;
+  return `Research consent: ${totals.enrolled} enrolled · ${totals.yes} answered yes · ${totals.no} answered no · ${totals.notAnswered} not answered`;
 }
 
 export function BenchmarkPanel({ slug }: { slug: string }) {
