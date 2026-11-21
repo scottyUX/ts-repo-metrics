@@ -70,6 +70,15 @@ export function readOAuthNextPathFromCookie(cookieHeader: string | null): string
   }
 }
 
+/**
+ * Where to send someone after sign-in. A `?next=` value is used only when it is a path on this site
+ * (starts with "/"); anything else falls back to the cookie, so the callback can't redirect off-site.
+ */
+export function oauthNextPath(nextParam: string | null, cookieHeader: string | null): string {
+  if (nextParam !== null && nextParam.startsWith("/")) return nextParam;
+  return readOAuthNextPathFromCookie(cookieHeader);
+}
+
 export function clearOAuthNextCookieHeader(): string {
   return `${OAUTH_NEXT_COOKIE}=; path=/; max-age=0; SameSite=Lax`;
 }
