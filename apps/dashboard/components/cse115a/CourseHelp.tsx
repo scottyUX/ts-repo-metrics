@@ -66,7 +66,7 @@ const FAQS = [
   },
   {
     q: "I merged my PR without a task file. What now?",
-    a: "A merged pull request can't be changed. Open a new pull request, from your own GitHub account in the same repository, that adds only your task file (docs/tasks/sprint-N/YOUR-ID.md) and changes nothing else, and merge it. Paste the first pull request and click Add PR. A second box asks for the task-file PR: paste its link and click Add both PRs. Your task is graded on the code in the first pull request. If your pull request is not merged yet, add the task file to it before you merge instead.",
+    a: "A merged pull request can't be changed. Open a new pull request, from your own GitHub account in the same repository, that adds only your task file (docs/tasks/sprint-N/YOUR-ID.md) and changes nothing else, and merge it. Paste the first pull request and click Add PR. A second box asks for the task-file PR: paste its link and click Add both PRs. Your task is graded on the code in the first pull request. If your merged pull request has a task file with problems (for example, a missing section), do the same with a new pull request that corrects only that task file. If your pull request is not merged yet, add or fix the task file in it before you merge instead.",
   },
   {
     q: "My pull request has two of my task files. How do I submit both tasks?",

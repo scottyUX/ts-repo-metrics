@@ -59,7 +59,7 @@ type Stub = {
   work?: Record<string, unknown>;
   workFiles?: Array<{ filename: string; status: string }>;
   /** Task-file PRs by number: the PR, its files, and the task file's text at its merge commit. */
-  filePrs?: Record<number, { pr?: Record<string, unknown>; files?: Array<{ filename: string; status: string }>; text?: string; folder?: string[] }>;
+  filePrs?: Record<number, { pr?: Record<string, unknown>; files?: Array<{ filename: string; status: string; previous_filename?: string }>; text?: string; folder?: string[] }>;
   routes?: Record<string, unknown>;
 };
 
@@ -102,7 +102,7 @@ const importPair = (taskFilePrUrl?: string | null, login = "student", prUrl = WO
   importTaskFromPullRequest(prUrl, 2, githubReader("token"), login, { taskFilePrUrl });
 
 const NEED = "This merged PR does not add a task file in docs/tasks/sprint-2/. A merged PR can't be changed, so open a new PR that adds only your task file, merge it, and paste its link below. If you don't see a second box, refresh the page.";
-const ONE_FILE = "The task-file PR must add one task file in docs/tasks/sprint-2/ and change nothing else. This one changes: ";
+const ONE_FILE = "The task-file PR must add or correct one task file in docs/tasks/sprint-2/ and change nothing else. This one changes: ";
 
 describe("1. a merged PR with no task file and no second URL", () => {
   afterEach(() => vi.unstubAllGlobals());
@@ -174,7 +174,13 @@ describe("3. each task-file PR refusal, in order", () => {
       `${ONE_FILE}docs/tasks/sprint-2/X-T-7.md, src/a.ts.`],
     ["many files", { filePrs: { 13: { files: [T7, "a", "b", "c", "d", "e", "f"].map((filename) => ({ filename, status: "added" })) } } }, FILE_URL,
       `${ONE_FILE}docs/tasks/sprint-2/X-T-7.md, a, b, c, d, and 2 more.`],
-    ["a modified task file", { filePrs: { 13: { files: [{ filename: T7, status: "modified" }] } } }, FILE_URL, `${ONE_FILE}docs/tasks/sprint-2/X-T-7.md.`],
+    // A modified or renamed task file is taken since #420 (a PR that corrects a malformed task file); a removed one is not.
+    ["a removed task file", { filePrs: { 13: { files: [{ filename: T7, status: "removed" }] } } }, FILE_URL, `${ONE_FILE}docs/tasks/sprint-2/X-T-7.md.`],
+    // A rename is checked at its new path (GitHub's filename), which must be a task file in this sprint's folder.
+    ["a rename out of the sprint folder", { filePrs: { 13: { files: [{ filename: "docs/tasks/sprint-3/X-T-7.md", status: "renamed", previous_filename: T7 }] } } }, FILE_URL,
+      `${ONE_FILE}docs/tasks/sprint-3/X-T-7.md.`],
+    ["a rename to a name that is not a task ID", { filePrs: { 13: { files: [{ filename: "docs/tasks/sprint-2/notes.md", status: "renamed", previous_filename: T7 }] } } }, FILE_URL,
+      `${ONE_FILE}docs/tasks/sprint-2/notes.md.`],
     ["the wrong sprint folder", { filePrs: { 13: { files: [{ filename: "docs/tasks/sprint-3/X-T-7.md", status: "added" }] } } }, FILE_URL,
       `${ONE_FILE}docs/tasks/sprint-3/X-T-7.md.`],
     ["a task file with format problems", { filePrs: { 13: { text: spec("X-T-7").replace("## Specs", "## Steps") } } }, FILE_URL,
@@ -186,6 +192,19 @@ describe("3. each task-file PR refusal, in order", () => {
   it.each(cases)("refuses %s", async (_label, options, url, message) => {
     stub(options);
     await expect(importPair(url)).rejects.toThrow(new Error(message));
+  });
+
+  it("accepts a renamed task file, with and without edits to its content, read at its new path", async () => {
+    const notes = "docs/tasks/sprint-2/notes.md";
+    // Without edits: the file's text is what it was under its old name.
+    let requests = stub({ filePrs: { 13: { files: [{ filename: T7, status: "renamed", previous_filename: notes }], text: spec("X-T-7") } } });
+    await expect(importPair(FILE_URL)).resolves.toMatchObject({ taskPath: T7, markdown: spec("X-T-7"), facts: { taskFilePr: { url: FILE_URL, number: 13, mergeSha: "spec13" } } });
+    expect(requests).toContain(`/repos/team/app/contents/${T7}?ref=spec13`);
+    expect(requests.some((path) => path.includes("notes.md"))).toBe(false);
+    // With edits, and from any old name (here another task ID's file).
+    const edited = spec("X-T-7").replace("Serves X.", "Serves X, and now Y.");
+    requests = stub({ filePrs: { 13: { files: [{ filename: T7, status: "renamed", previous_filename: "docs/tasks/sprint-2/Z-T-1.md" }], text: edited } } });
+    await expect(importPair(FILE_URL)).resolves.toMatchObject({ taskPath: T7, markdown: edited, spec: { id: "X-T-7" } });
   });
 
   it("checks the repository before reading anything about the task-file PR", async () => {
@@ -210,17 +229,32 @@ describe("4–6. PRs that never take the pairing path", () => {
     expect(requests.some((path) => path.includes("/pulls/13"))).toBe(false);
   });
 
-  it("5. a wrongly named .md in the sprint folder keeps today's message, with or without a second URL", async () => {
+  it("5. a single wrongly named .md in the sprint folder gets the second box with its problems, and pairs (#420); two stay refused", async () => {
     const notes = "docs/tasks/sprint-2/notes.md";
     const requests = stub({ workFiles: [{ filename: notes, status: "added" }], routes: { [`/repos/team/app/contents/${notes}?ref=squash`]: content(spec("X-T-7")) } });
-    const message = "The file is named “notes.md” but the id inside it is “X-T-7”. Name the file X-T-7.md.";
-    await expect(importPair()).rejects.toThrow(new Error(message));
-    await expect(importPair(FILE_URL)).rejects.toThrow(new Error(message));
-    stub({ workFiles: [{ filename: notes, status: "added" }, { filename: "docs/tasks/sprint-2/plan.md", status: "added" }] });
+    const naming = "The file is named “notes.md” but the id inside it is “X-T-7”. Name the file X-T-7.md.";
+    await expect(importPair()).rejects.toMatchObject({
+      code: "need_task_file_pr", reason: "task_file_problems", problems: [naming],
+      message: `The task file in this merged PR, notes.md, has problems:\n- ${naming}\nA merged PR can't be changed, so open a new PR that corrects only that task file, merge it, and paste its link below. If you don't see a second box, refresh the page.`,
+    });
+    expect(requests.some((path) => path.includes("/pulls/13"))).toBe(false);
+    const paired = await importPair(FILE_URL);
+    expect(paired).toMatchObject({ taskPath: T7, spec: { id: "X-T-7" } });
+    expect(paired.facts).toMatchObject({ prTaskFiles: [T7], taskFilePr: { url: FILE_URL, number: 13, mergeSha: "spec13", fixesTaskPath: notes } });
+    // An open PR and someone else's PR are refused with the problems, and get no box.
+    stub({ work: { state: "open", merged_at: null, merge_commit_sha: null, head: { ref: "feature/x-t-7", sha: "head12" } }, workFiles: [{ filename: notes, status: "added" }], routes: { [`/repos/team/app/contents/${notes}?ref=head12`]: content(spec("X-T-7")) } });
+    await expect(importPair(FILE_URL)).rejects.toThrow(new Error(`This pull request is not merged yet. Before you merge, fix:\n- ${naming}`));
+    stub({ work: { user: { login: "teammate" } }, workFiles: [{ filename: notes, status: "added" }], routes: { [`/repos/team/app/contents/${notes}?ref=squash`]: content(spec("X-T-7")) } });
+    for (const url of [undefined, FILE_URL]) {
+      const error = await importPair(url).catch((caught: unknown) => caught);
+      expect(error).not.toBeInstanceOf(NeedTaskFilePrError);
+      expect((error as Error).message).toBe(`${naming}\nA merged PR whose task file has problems can be paired with a task-file PR only by the student who opened it.`);
+    }
+    const twoRequests = stub({ workFiles: [{ filename: notes, status: "added" }, { filename: "docs/tasks/sprint-2/plan.md", status: "added" }] });
     const two = await importPair(FILE_URL).catch((caught: unknown) => caught);
     expect(two).not.toBeInstanceOf(NeedTaskFilePrError);
     expect((two as Error).message).toBe("No task file was found in docs/tasks/sprint-2/ in this PR. It adds 2 other .md files there (notes.md, plan.md); a task file is named after its task ID, for example US-2-T-1.md.");
-    expect(requests.some((path) => path.includes("/pulls/13"))).toBe(false);
+    expect(twoRequests.some((path) => path.includes("/pulls/13"))).toBe(false);
   });
 
   it("6. an open PR with no task file is told to add it before merging, with no pairing", async () => {
@@ -400,7 +434,7 @@ describe("9. card and review-page lines", () => {
     const card = readFileSync(new URL("../components/cse115a/CourseDashboard.tsx", import.meta.url), "utf8");
     expect(card).toContain("{pair && prNumber ? (");
     const review = readFileSync(new URL("../components/cse115a/instructor/SubmissionReview.tsx", import.meta.url), "utf8");
-    expect(review).toContain("{task.taskFilePr ? <p className=\"mt-2 text-sm text-amber-700 dark:text-amber-300\">{taskFilePrReviewLine(task.taskFilePr.number, task.prNumber)}</p> : null}");
+    expect(review).toContain("{task.taskFilePr ? <p className=\"mt-2 text-sm text-amber-700 dark:text-amber-300\">{taskFilePrReviewLine(task.taskFilePr.number, task.prNumber, task.taskFilePr.fixesTaskPath)}</p> : null}");
   });
 
   it("adds no shared-PR line for a paired task alone in its PR", () => {

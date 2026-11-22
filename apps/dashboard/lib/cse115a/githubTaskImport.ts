@@ -5,7 +5,9 @@ import { readCommitChecks, readMergeBase } from "@/lib/cse115a/submissionSnapsho
 import { canonicalHeadings, checkTaskSpec, filenameMatchesId, isTaskFilePath, parsePullRequestUrl, taskIdProblem, type TaskSpec } from "@/lib/cse115a/taskSpec";
 import type { GitHubReader } from "@/lib/cse115a/githubClient";
 import { firstCommitHoldsOnlyTaskFiles, type TaskFileCommitter } from "@/lib/cse115a/sharedPr";
-import { NEED_TASK_FILE_PR_CODE, needTaskFilePrMessage, PAIR_NOT_AUTHOR, type TaskFilePr } from "@/lib/cse115a/taskFilePr";
+import {
+  NEED_TASK_FILE_PR_CODE, needTaskFileFixMessage, needTaskFilePrMessage, PAIR_FIX_NOT_AUTHOR, PAIR_NOT_AUTHOR, type NeedTaskFilePrReason, type TaskFilePr,
+} from "@/lib/cse115a/taskFilePr";
 
 type GitHubPull = {
   title: string;
@@ -60,14 +62,22 @@ export class ChooseTaskFileError extends Error {
 }
 
 /**
- * A merged PR adds no task file, and the request did not name a task-file PR to pair it with. The route turns it
- * into a `need_task_file_pr` answer, and the form asks for the second PR; it is not a failed check.
+ * A merged PR adds no task file, or its task file has format problems (`fix`), and the request did not name a
+ * task-file PR to pair it with. The route turns it into a `need_task_file_pr` answer with the `reason` (and the
+ * problems), and the form asks for the second PR; it is not a failed check.
  */
 export class NeedTaskFilePrError extends Error {
   readonly code = NEED_TASK_FILE_PR_CODE;
-  constructor(sprint: number, changedNote: string | null, readonly repoFullName: string, readonly prNumber: number) {
-    super(needTaskFilePrMessage(sprint, changedNote));
+  readonly reason: NeedTaskFilePrReason;
+  readonly problems: string[];
+  constructor(
+    sprint: number, changedNote: string | null, readonly repoFullName: string, readonly prNumber: number,
+    fix: { taskPath: string; problems: string[] } | null = null,
+  ) {
+    super(fix ? needTaskFileFixMessage(fix.taskPath, fix.problems) : needTaskFilePrMessage(sprint, changedNote));
     this.name = "NeedTaskFilePrError";
+    this.reason = fix ? "task_file_problems" : "no_task_file";
+    this.problems = fix ? fix.problems : [];
   }
 }
 
@@ -87,6 +97,8 @@ type NoTaskFile = { problem: string; pairable?: { changedNote: string | null } }
 /**
  * `pairable` is set when the PR adds no file in the sprint folder that could be a task file: then a merged PR can be
  * paired with a task-file PR. `changedNote` is the "It changes X…" sentence, when the PR changes a task file there.
+ * A single .md file not named after a task ID is returned as `path`: it fails the checks, so a merged PR by the
+ * student is paired like any PR whose task file has problems (#420).
  */
 function chooseTaskFile(files: GitHubFile[], sprint: number): { path: string } | { several: string[] } | NoTaskFile {
   const added = files.filter((file) => file.status === "added" && isTaskFilePath(file.filename, sprint));
@@ -237,9 +249,12 @@ function listChanged(paths: string[]): string {
 }
 
 /**
- * The task file from a task-file PR, paired with a merged work PR that adds none. Checked in order: same
- * repository, not the work PR, merged, opened by the student, adds exactly one task file for this sprint and
- * changes nothing else, and that file passes every task-file check at the task-file PR's merge commit.
+ * The task file from a task-file PR, paired with a merged work PR that adds none or whose task file has format
+ * problems. Checked in order: same repository, not the work PR, merged, opened by the student, adds, modifies or
+ * renames exactly one task file for this sprint and changes nothing else, and that file passes every task-file check
+ * at the task-file PR's merge commit. Its name need not match the work PR's file: a correctly named new file is taken
+ * too. A renamed file is checked at its new path (GitHub's `filename`); its old path (`previous_filename`) may be
+ * anything. A removed file is refused.
  */
 async function readTaskFilePr(
   gh: GitHubReader, owner: string, repo: string, workNumber: number, taskFilePrUrl: string, sprint: number, githubLogin: string,
@@ -254,8 +269,8 @@ async function readTaskFilePr(
   if (pull.user?.login.toLowerCase() !== githubLogin.toLowerCase()) throw new Error("The task-file PR must be opened from your GitHub account.");
   const files = await pullRequestFiles(gh, owner, repo, parsed.number);
   const only = files.length === 1 ? files[0]! : null;
-  if (!only || only.status !== "added" || !isTaskFilePath(only.filename, sprint)) {
-    throw new Error(`The task-file PR must add one task file in docs/tasks/sprint-${sprint}/ and change nothing else. This one changes: ${listChanged(files.map((file) => file.filename))}.`);
+  if (!only || !["added", "modified", "renamed"].includes(only.status ?? "") || !isTaskFilePath(only.filename, sprint)) {
+    throw new Error(`The task-file PR must add or correct one task file in docs/tasks/sprint-${sprint}/ and change nothing else. This one changes: ${listChanged(files.map((file) => file.filename))}.`);
   }
   const taskPath = only.filename;
   const mergeSha = pull.merge_commit_sha;
@@ -274,6 +289,9 @@ async function readTaskFilePr(
  * student's own files to choose from, or imports the only one that is theirs.
  * `taskFilePrUrl` pairs a merged PR that adds no task file with a merged PR that adds only the task file: the
  * task file comes from that PR, everything else from this one. Without it such a PR throws NeedTaskFilePrError.
+ * The same holds for a merged PR whose task file (the only one, or the one chosen from several) has format
+ * problems: the task-file PR may add or correct one task file, and `taskFilePr.fixesTaskPath` records the work
+ * PR's file. A PR whose task file passes ignores `taskFilePrUrl`, as before.
  */
 export async function importTaskFromPullRequest(
   prUrl: string,
@@ -293,6 +311,7 @@ export async function importTaskFromPullRequest(
 
   const chosen = chooseTaskFile(await pullRequestFiles(gh, owner, repo, number), assignmentNumber);
   const prAuthoredByStudent = pull.user?.login.toLowerCase() === githubLogin.toLowerCase();
+  const taskFilePrUrl = options.taskFilePrUrl?.trim() || null;
   let taskFilePr: TaskFilePr | null = null;
   let taskPath: string | null;
   let markdown: string;
@@ -304,7 +323,6 @@ export async function importTaskFromPullRequest(
     // A merged PR with no task file: its task file comes from a separate task-file PR, by the same student.
     if (!chosen.pairable) throw new Error(chosen.problem);
     if (!prAuthoredByStudent) throw new Error(PAIR_NOT_AUTHOR);
-    const taskFilePrUrl = options.taskFilePrUrl?.trim() || null;
     if (!taskFilePrUrl) throw new NeedTaskFilePrError(assignmentNumber, chosen.pairable.changedNote, `${owner}/${repo}`, number);
     const fromPr = await readTaskFilePr(gh, owner, repo, number, taskFilePrUrl, assignmentNumber, githubLogin);
     taskFilePr = fromPr.pr;
@@ -342,9 +360,30 @@ export async function importTaskFromPullRequest(
     const read = await readTaskFile(gh, owner, repo, taskPath, pull.merge_commit_sha);
     if (read === null) throw new Error("The task file could not be imported from the merged PR.");
     const checked = taskFileProblems(read, taskPath, assignmentNumber);
-    if (!checked.spec) throw new Error(checked.problems.join("\n"));
-    markdown = read;
-    spec = checked.spec;
+    if (checked.spec) {
+      markdown = read;
+      spec = checked.spec;
+    } else {
+      // A merged PR whose task file has format problems: like a PR with no task file, its task file comes from a
+      // task-file PR by the same student, which corrects that file or adds a correct one.
+      if (!prAuthoredByStudent) throw new Error(`${checked.problems.join("\n")}\n${PAIR_FIX_NOT_AUTHOR}`);
+      if (!taskFilePrUrl) {
+        throw new NeedTaskFilePrError(assignmentNumber, null, `${owner}/${repo}`, number, { taskPath, problems: checked.problems });
+      }
+      const fromPr = await readTaskFilePr(gh, owner, repo, number, taskFilePrUrl, assignmentNumber, githubLogin);
+      const fixed = taskPath;
+      taskFilePr = { ...fromPr.pr, fixesTaskPath: fixed };
+      taskPath = fromPr.taskPath;
+      markdown = fromPr.markdown;
+      spec = fromPr.spec;
+      // The corrected file stands in for the malformed one, so shared-PR lines and notes treat it as this task's.
+      const corrected = taskPath;
+      addedTaskPaths = [...new Set(addedTaskPaths.map((path) => path === fixed ? corrected : path))];
+      if (committers && corrected !== fixed) {
+        const { [fixed]: who, ...rest } = committers;
+        committers = { ...rest, [corrected]: who ?? "unknown" };
+      }
+    }
   }
   if (!taskPath) throw new Error("The task file could not be imported from the merged PR.");
 
