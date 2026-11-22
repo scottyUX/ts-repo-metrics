@@ -22,6 +22,8 @@ export type Submission = {
   snapshot: SubmissionSnapshot;
   superseded_at: string | null;
 };
+/** What requeueRepoCopy found and did with the submission's repo_copy job. */
+export type RepoCopyRequeue = "inserted" | "reset" | "already queued" | "running";
 /** One captured task: its instance, the capture flags, and the PR merge commit it was captured from. */
 export type BenchmarkSave = { slot: number; instance: BenchmarkInstance; flags: BuildFlag[]; mergeCommit: string };
 
@@ -62,6 +64,13 @@ export interface JobStore {
    * for its grade and benchmark jobs); an existing job is left as it is. Needs the repo_copy migration.
    */
   queueRepoCopy?(submissionId: string): Promise<void>;
+  /**
+   * Makes the submission's existing `repo_copy` job run again (#418): inserted when missing, a failed or
+   * succeeded one set back to queued; a queued or running one is left and reported. queueRepoCopy's
+   * insert-if-missing does nothing for a job that already ran. Used by the staff re-capture when a row's
+   * base commit changed, so the copy under the new base's name gets made.
+   */
+  requeueRepoCopy?(submissionId: string): Promise<RepoCopyRequeue>;
   /** Every benchmark task of a submission with its repo and base commit as stored (a staff rebuild may have moved it). */
   loadSubmissionCopyTasks?(submissionId: string): Promise<RepoCopyTask[]>;
 }
