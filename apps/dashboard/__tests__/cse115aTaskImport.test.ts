@@ -258,16 +258,17 @@ describe("CSE 115A task import: the task file is checked before the merge (#388)
     expect(requested).toEqual(["/repos/team/repo/pulls/1"]);
   });
 
-  it("finds a wrongly named task file on a merged PR and names the problem", async () => {
+  it("finds a wrongly named task file on a merged PR and names the problem, offering the task-file PR box (#420)", async () => {
     const path = `${FOLDER}/my task.md`;
     stubGitHub([path], [{ filename: path, status: "added" }]);
     const github = globalThis.fetch;
     vi.stubGlobal("fetch", vi.fn(async (url: string) => (url.endsWith("/contents/docs/tasks/sprint-1/my%20task.md?ref=squash")
       ? new Response(JSON.stringify({ encoding: "base64", size: SPEC.length, content: Buffer.from(SPEC).toString("base64") }))
       : github(url))));
-    await expect(importPull()).rejects.toThrow(new Error(
-      "The file is named “my task.md” but the id inside it is “US-1-T-1”. Name the file US-1-T-1.md.",
-    ));
+    await expect(importPull()).rejects.toMatchObject({
+      code: "need_task_file_pr", reason: "task_file_problems",
+      problems: ["The file is named “my task.md” but the id inside it is “US-1-T-1”. Name the file US-1-T-1.md."],
+    });
   });
 });
 

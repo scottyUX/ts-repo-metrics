@@ -212,17 +212,32 @@ describe("4–6. PRs that never take the pairing path", () => {
     expect(requests.some((path) => path.includes("/pulls/13"))).toBe(false);
   });
 
-  it("5. a wrongly named .md in the sprint folder keeps today's message, with or without a second URL", async () => {
+  it("5. a single wrongly named .md in the sprint folder gets the second box with its problems, and pairs (#420); two stay refused", async () => {
     const notes = "docs/tasks/sprint-2/notes.md";
     const requests = stub({ workFiles: [{ filename: notes, status: "added" }], routes: { [`/repos/team/app/contents/${notes}?ref=squash`]: content(spec("X-T-7")) } });
-    const message = "The file is named “notes.md” but the id inside it is “X-T-7”. Name the file X-T-7.md.";
-    await expect(importPair()).rejects.toThrow(new Error(message));
-    await expect(importPair(FILE_URL)).rejects.toThrow(new Error(message));
-    stub({ workFiles: [{ filename: notes, status: "added" }, { filename: "docs/tasks/sprint-2/plan.md", status: "added" }] });
+    const naming = "The file is named “notes.md” but the id inside it is “X-T-7”. Name the file X-T-7.md.";
+    await expect(importPair()).rejects.toMatchObject({
+      code: "need_task_file_pr", reason: "task_file_problems", problems: [naming],
+      message: `The task file in this merged PR, notes.md, has problems:\n- ${naming}\nA merged PR can't be changed, so open a new PR that corrects only that task file, merge it, and paste its link below. If you don't see a second box, refresh the page.`,
+    });
+    expect(requests.some((path) => path.includes("/pulls/13"))).toBe(false);
+    const paired = await importPair(FILE_URL);
+    expect(paired).toMatchObject({ taskPath: T7, spec: { id: "X-T-7" } });
+    expect(paired.facts).toMatchObject({ prTaskFiles: [T7], taskFilePr: { url: FILE_URL, number: 13, mergeSha: "spec13", fixesTaskPath: notes } });
+    // An open PR and someone else's PR are refused with the problems, and get no box.
+    stub({ work: { state: "open", merged_at: null, merge_commit_sha: null, head: { ref: "feature/x-t-7", sha: "head12" } }, workFiles: [{ filename: notes, status: "added" }], routes: { [`/repos/team/app/contents/${notes}?ref=head12`]: content(spec("X-T-7")) } });
+    await expect(importPair(FILE_URL)).rejects.toThrow(new Error(`This pull request is not merged yet. Before you merge, fix:\n- ${naming}`));
+    stub({ work: { user: { login: "teammate" } }, workFiles: [{ filename: notes, status: "added" }], routes: { [`/repos/team/app/contents/${notes}?ref=squash`]: content(spec("X-T-7")) } });
+    for (const url of [undefined, FILE_URL]) {
+      const error = await importPair(url).catch((caught: unknown) => caught);
+      expect(error).not.toBeInstanceOf(NeedTaskFilePrError);
+      expect((error as Error).message).toBe(`${naming}\nA merged PR whose task file has problems can be paired with a task-file PR only by the student who opened it.`);
+    }
+    const twoRequests = stub({ workFiles: [{ filename: notes, status: "added" }, { filename: "docs/tasks/sprint-2/plan.md", status: "added" }] });
     const two = await importPair(FILE_URL).catch((caught: unknown) => caught);
     expect(two).not.toBeInstanceOf(NeedTaskFilePrError);
     expect((two as Error).message).toBe("No task file was found in docs/tasks/sprint-2/ in this PR. It adds 2 other .md files there (notes.md, plan.md); a task file is named after its task ID, for example US-2-T-1.md.");
-    expect(requests.some((path) => path.includes("/pulls/13"))).toBe(false);
+    expect(twoRequests.some((path) => path.includes("/pulls/13"))).toBe(false);
   });
 
   it("6. an open PR with no task file is told to add it before merging, with no pairing", async () => {

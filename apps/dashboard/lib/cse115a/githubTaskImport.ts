@@ -97,10 +97,10 @@ type NoTaskFile = { problem: string; pairable?: { changedNote: string | null } }
 /**
  * `pairable` is set when the PR adds no file in the sprint folder that could be a task file: then a merged PR can be
  * paired with a task-file PR. `changedNote` is the "It changes X…" sentence, when the PR changes a task file there.
- * `otherMd` marks a single .md file not named after a task ID, taken only to say what is wrong with it: it is never
- * paired, since its problems start with its name.
+ * A single .md file not named after a task ID is returned as `path`: it fails the checks, so a merged PR by the
+ * student is paired like any PR whose task file has problems (#420).
  */
-function chooseTaskFile(files: GitHubFile[], sprint: number): { path: string; otherMd?: true } | { several: string[] } | NoTaskFile {
+function chooseTaskFile(files: GitHubFile[], sprint: number): { path: string } | { several: string[] } | NoTaskFile {
   const added = files.filter((file) => file.status === "added" && isTaskFilePath(file.filename, sprint));
   if (added.length === 1) return { path: added[0]!.filename };
   if (added.length > 1) return { several: added.map((file) => file.filename) };
@@ -108,7 +108,7 @@ function chooseTaskFile(files: GitHubFile[], sprint: number): { path: string; ot
   const folder = new RegExp(`^docs/tasks/sprint-${sprint}/[^/]+\\.md$`, "i");
   const others = files.filter((file) => file.status === "added" && folder.test(file.filename)
     && fileName(file.filename).toLowerCase() !== "readme.md");
-  if (others.length === 1) return { path: others[0]!.filename, otherMd: true };
+  if (others.length === 1) return { path: others[0]!.filename };
   if (others.length === 0) {
     const changed = files.filter((file) => isTaskFilePath(file.filename, sprint)).map((file) => fileName(file.filename));
     if (changed.length === 0) return { problem: notFound, pairable: { changedNote: null } };
@@ -364,7 +364,6 @@ export async function importTaskFromPullRequest(
     } else {
       // A merged PR whose task file has format problems: like a PR with no task file, its task file comes from a
       // task-file PR by the same student, which corrects that file or adds a correct one.
-      if ("otherMd" in chosen) throw new Error(checked.problems.join("\n"));
       if (!prAuthoredByStudent) throw new Error(`${checked.problems.join("\n")}\n${PAIR_FIX_NOT_AUTHOR}`);
       if (!taskFilePrUrl) {
         throw new NeedTaskFilePrError(assignmentNumber, null, `${owner}/${repo}`, number, { taskPath, problems: checked.problems });

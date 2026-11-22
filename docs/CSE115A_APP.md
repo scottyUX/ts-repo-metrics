@@ -181,8 +181,8 @@ branch checks, diff and analysis come from the work PR. "Task file committed
 first" fails (the work PR has none). The task-file PR is saved in
 `facts_json.taskFilePr` (`url`, `number`, `mergeSha`); Re-check re-imports the
 pair. Neither PR can already be another student's, and the task-file PR can't
-be one of the student's other tasks. A PR that adds a wrongly named `.md` in
-the sprint folder is not paired; an open PR with no task file is told to add it
+be one of the student's other tasks. A PR that adds two or more wrongly named
+`.md` files in the sprint folder is not paired; an open PR with no task file is told to add it
 before merging. The card, the review page and the snapshot say the task file
 came from a separate PR.
 
@@ -196,8 +196,10 @@ sends it as the chosen file). `prTaskFiles` lists the corrected file in place of
 the malformed one. The card and review page say the task file was corrected. The
 work PR's diff still holds the old file: the benchmark row drops it
 (`task_files_dropped`), the grader reads it last, and the review page's Source
-tab shows it in diff order. Someone else's PR, a wrongly named `.md`, and an
-open PR are refused with the problems, as before.
+tab shows it in diff order. A single `.md` not named after a task ID (the #388
+fallback) counts as a task file with problems and is paired the same way; the
+box tells the student to add the file under its new name, since a renamed file
+is not taken. Someone else's PR and an open PR are refused with the problems.
 
 Submissions are tied to the signed-in UCSC account and course membership. A
 task is marked analyzed only after its Repo Metrics result is saved and linked

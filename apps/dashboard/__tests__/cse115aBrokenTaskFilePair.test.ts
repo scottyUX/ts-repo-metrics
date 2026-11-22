@@ -202,6 +202,20 @@ describe("1. a merged PR whose task file has format problems", () => {
     expect(requests.some((path) => path.includes("/pulls/13"))).toBe(false);
   });
 
+  it("a file with no front matter and no sections at all gets the box with every problem, and pairs", async () => {
+    stub({ workTexts: { [T7]: "Just some notes about the thing.\n" } });
+    const problems = [
+      "The task file needs YAML front matter.",
+      "The task file needs a title.",
+      "The task file needs a nonempty “Description” section.",
+      "The task file needs a nonempty “Specs” section.",
+      "The task file needs a nonempty “Requirements” section.",
+      "The task file needs a nonempty “Acceptance criteria” section.",
+    ];
+    await expect(importWork()).rejects.toMatchObject({ code: "need_task_file_pr", reason: "task_file_problems", problems, message: needTaskFileFixMessage(T7, problems) });
+    await expect(importWork({ taskFilePrUrl: FIX_URL })).resolves.toMatchObject({ taskPath: T7, spec: { id: "X-T-7" }, facts: { taskFilePr: { fixesTaskPath: T7 } } });
+  });
+
   it("a PR whose task file passes ignores a task-file PR, as before", async () => {
     const requests = stub({ workTexts: { [T7]: spec("X-T-7") } });
     const task = await importWork({ taskFilePrUrl: FIX_URL });
@@ -356,11 +370,12 @@ describe("3. the Add PR route", () => {
 describe("4. page, card and review-page texts", () => {
   it("has the exact texts; the no-task-file texts are unchanged", () => {
     expect(TASK_FILE_FIX_BOX.heading).toBe("This merged PR's task file has problems");
-    expect(TASK_FILE_FIX_BOX.text(2)).toBe("A merged PR can't be changed. Open a new PR that corrects only your task file in docs/tasks/sprint-2/, merge it, and paste its link here. Your task is graded on the code in the PR above.");
+    expect(TASK_FILE_FIX_BOX.text(2)).toBe("A merged PR can't be changed. Open a new PR that corrects only your task file in docs/tasks/sprint-2/, merge it, and paste its link here. If the file needs a new name, add it under the new name and leave the old file: a renamed file is not taken. Your task is graded on the code in the PR above.");
     expect(TASK_FILE_FIX_CARD_NOTE).toBe("The task file was corrected in a separate PR, after the work was merged, because the PR's own task file had problems.");
     expect(taskFilePrCardNote({ fixesTaskPath: T7 })).toBe(TASK_FILE_FIX_CARD_NOTE);
     expect(taskFilePrCardNote({})).toBe(TASK_FILE_PR_CARD_NOTE);
     expect(taskFilePrReviewLine(13, 12, T7)).toBe("Task file from a separate PR, #13. The work is in PR #12, whose own task file, X-T-7.md, had format problems, so the task file was corrected after the work.");
+    expect(taskFilePrReviewLine(13, 12, "docs/tasks/sprint-2/notes.md")).toBe("Task file from a separate PR, #13. The work is in PR #12, whose own task file, notes.md, had format problems, so the task file was corrected after the work.");
     expect(taskFilePrReviewLine(13, 12)).toBe("Task file from a separate PR, #13. The work is in PR #12, which has no task file, so the task file was written or added after the work.");
   });
 
