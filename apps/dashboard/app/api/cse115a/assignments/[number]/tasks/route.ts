@@ -84,12 +84,15 @@ export async function POST(request: Request, params: Params) {
       return NextResponse.json({ error: error.message, code: error.code, choices }, { status: 409 });
     }
     if (error instanceof NeedTaskFilePrError) {
-      // A merged PR with no task file: the form asks for a task-file PR. Another student's PR is refused first.
+      // A merged PR with no task file, or whose task file has format problems: the form asks for a task-file PR.
+      // Another student's PR is refused first. For format problems the answer also carries the reason and the
+      // problems, so the box can say so; a PR with no task file gets the same answer as before.
       const { data: others, error: othersError } = await otherStudents(error.repoFullName);
       if (othersError) return NextResponse.json({ error: "Could not check this task against other students' tasks." }, { status: 500 });
       const duplicate = duplicateTaskMessage(others ?? [], { repoFullName: error.repoFullName, prNumber: error.prNumber, taskId: null });
       if (duplicate) return NextResponse.json({ error: duplicate, code: "taken_by_another_student" }, { status: 409 });
-      return NextResponse.json({ error: error.message, code: error.code }, { status: 409 });
+      const fix = error.reason === "task_file_problems" ? { reason: error.reason, problems: error.problems } : {};
+      return NextResponse.json({ error: error.message, code: error.code, ...fix }, { status: 409 });
     }
     return NextResponse.json({ error: error instanceof Error ? error.message : "Could not import this task." }, { status: 422 });
   }

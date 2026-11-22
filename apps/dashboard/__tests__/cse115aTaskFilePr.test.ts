@@ -102,7 +102,7 @@ const importPair = (taskFilePrUrl?: string | null, login = "student", prUrl = WO
   importTaskFromPullRequest(prUrl, 2, githubReader("token"), login, { taskFilePrUrl });
 
 const NEED = "This merged PR does not add a task file in docs/tasks/sprint-2/. A merged PR can't be changed, so open a new PR that adds only your task file, merge it, and paste its link below. If you don't see a second box, refresh the page.";
-const ONE_FILE = "The task-file PR must add one task file in docs/tasks/sprint-2/ and change nothing else. This one changes: ";
+const ONE_FILE = "The task-file PR must add or correct one task file in docs/tasks/sprint-2/ and change nothing else. This one changes: ";
 
 describe("1. a merged PR with no task file and no second URL", () => {
   afterEach(() => vi.unstubAllGlobals());
@@ -174,7 +174,9 @@ describe("3. each task-file PR refusal, in order", () => {
       `${ONE_FILE}docs/tasks/sprint-2/X-T-7.md, src/a.ts.`],
     ["many files", { filePrs: { 13: { files: [T7, "a", "b", "c", "d", "e", "f"].map((filename) => ({ filename, status: "added" })) } } }, FILE_URL,
       `${ONE_FILE}docs/tasks/sprint-2/X-T-7.md, a, b, c, d, and 2 more.`],
-    ["a modified task file", { filePrs: { 13: { files: [{ filename: T7, status: "modified" }] } } }, FILE_URL, `${ONE_FILE}docs/tasks/sprint-2/X-T-7.md.`],
+    // A modified task file is taken since #420 (a PR that corrects a malformed task file); a removed or renamed one is not.
+    ["a removed task file", { filePrs: { 13: { files: [{ filename: T7, status: "removed" }] } } }, FILE_URL, `${ONE_FILE}docs/tasks/sprint-2/X-T-7.md.`],
+    ["a renamed task file", { filePrs: { 13: { files: [{ filename: T7, status: "renamed" }] } } }, FILE_URL, `${ONE_FILE}docs/tasks/sprint-2/X-T-7.md.`],
     ["the wrong sprint folder", { filePrs: { 13: { files: [{ filename: "docs/tasks/sprint-3/X-T-7.md", status: "added" }] } } }, FILE_URL,
       `${ONE_FILE}docs/tasks/sprint-3/X-T-7.md.`],
     ["a task file with format problems", { filePrs: { 13: { text: spec("X-T-7").replace("## Specs", "## Steps") } } }, FILE_URL,
@@ -400,7 +402,7 @@ describe("9. card and review-page lines", () => {
     const card = readFileSync(new URL("../components/cse115a/CourseDashboard.tsx", import.meta.url), "utf8");
     expect(card).toContain("{pair && prNumber ? (");
     const review = readFileSync(new URL("../components/cse115a/instructor/SubmissionReview.tsx", import.meta.url), "utf8");
-    expect(review).toContain("{task.taskFilePr ? <p className=\"mt-2 text-sm text-amber-700 dark:text-amber-300\">{taskFilePrReviewLine(task.taskFilePr.number, task.prNumber)}</p> : null}");
+    expect(review).toContain("{task.taskFilePr ? <p className=\"mt-2 text-sm text-amber-700 dark:text-amber-300\">{taskFilePrReviewLine(task.taskFilePr.number, task.prNumber, task.taskFilePr.fixesTaskPath)}</p> : null}");
   });
 
   it("adds no shared-PR line for a paired task alone in its PR", () => {

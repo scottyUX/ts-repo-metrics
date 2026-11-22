@@ -15,7 +15,7 @@ import { ResearchConsentQuestion } from "@/components/cse115a/ResearchConsentQue
 import { needsCourseInstallPrompt, repoFullNameFromPullRequest } from "@/lib/cse115a/installPrompt";
 import { oauthHashError } from "@/lib/cse115a/oauthError";
 import { prTaskFileLines } from "@/lib/cse115a/sharedPr";
-import { NEED_TASK_FILE_PR_CODE, recheckRequest, savedTaskFilePr, TASK_FILE_PR_BOX, TASK_FILE_PR_CARD_NOTE } from "@/lib/cse115a/taskFilePr";
+import { NEED_TASK_FILE_PR_CODE, recheckRequest, savedTaskFilePr, TASK_FILE_FIX_BOX, TASK_FILE_PR_BOX, taskFilePrCardNote } from "@/lib/cse115a/taskFilePr";
 import {
   BIG_TASK_MIN_HOURS,
   firstOpenSprint,
@@ -182,8 +182,9 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
   const [assignmentNumber, setAssignmentNumber] = useState(2);
   const [prInputs, setPrInputs] = useState<Record<number, string>>({});
   const [taskFileChoices, setTaskFileChoices] = useState<Record<number, TaskFileChoices | null>>({});
-  // A merged PR with no task file asks for a second PR that adds it: the work PR's URL, and what is typed there.
-  const [taskFilePrBox, setTaskFilePrBox] = useState<Record<number, { prUrl: string } | null>>({});
+  // A merged PR with no task file, or whose task file has problems, asks for a second PR that adds or corrects it:
+  // the work PR's URL, the task file chosen from several (if any), the problems, and what is typed there.
+  const [taskFilePrBox, setTaskFilePrBox] = useState<Record<number, { prUrl: string; taskPath?: string; problems?: string[] } | null>>({});
   const [taskFilePrInputs, setTaskFilePrInputs] = useState<Record<number, string>>({});
   const [changing, setChanging] = useState<Record<number, boolean>>({});
   // Slots opened with Add another task (#412), and the slot whose Remove waits for a second click.
@@ -429,14 +430,16 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
         method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include",
         body: JSON.stringify({ courseSlug: course.slug, slot, prUrl, ...(taskPath ? { taskPath } : {}), ...(taskFilePrUrl ? { taskFilePrUrl } : {}) }),
       });
-      const imported = await jsonResponse<{ submission: Submission; code?: string; choices?: TaskFileChoices["choices"] }>(response);
+      const imported = await jsonResponse<{ submission: Submission; code?: string; choices?: TaskFileChoices["choices"]; reason?: string; problems?: string[] }>(response);
       if (!response.ok) {
         if (imported.code === "choose_task_file" && imported.choices) {
           setTaskFileChoices((previous) => ({ ...previous, [slot]: { prUrl, choices: imported.choices! } }));
           return;
         }
         if (imported.code === NEED_TASK_FILE_PR_CODE) {
-          setTaskFilePrBox((previous) => ({ ...previous, [slot]: { prUrl } }));
+          // A task file with problems keeps the file chosen from several, so the pair is sent for that file.
+          const problems = imported.reason === "task_file_problems" && Array.isArray(imported.problems) ? imported.problems : null;
+          setTaskFilePrBox((previous) => ({ ...previous, [slot]: problems ? { prUrl, ...(taskPath ? { taskPath } : {}), problems } : { prUrl } }));
           return;
         }
         if (imported.code === "github_app_not_installed") rememberInstallResult(prUrl, false);
@@ -697,7 +700,7 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
                                 Task file from <a href={pair.url} target="_blank" rel="noopener noreferrer" className="text-blue-700 underline">PR #{pair.number}</a>
                                 {" · "}work from <a href={item.pr_url} target="_blank" rel="noopener noreferrer" className="text-blue-700 underline">PR #{prNumber}</a>
                               </p>
-                              <p className="mt-1 text-slate-600">{TASK_FILE_PR_CARD_NOTE}</p>
+                              <p className="mt-1 text-slate-600">{taskFilePrCardNote(pair)}</p>
                             </>
                           ) : null}
                           {prLines.map((line) => <p key={line} className="mt-1 text-slate-600">{line}</p>)}
@@ -770,12 +773,24 @@ export function CourseDashboard({ preview = false, previewState = "draft" }: { p
                         ) : null}
                         {pairBox ? (
                           <fieldset className="mt-4 rounded-lg border border-slate-300 p-3 text-sm">
-                            <legend className="px-1 font-semibold">{TASK_FILE_PR_BOX.heading}</legend>
-                            <p className="text-slate-600">{TASK_FILE_PR_BOX.text(assignmentNumber)}</p>
+                            {pairBox.problems ? (
+                              <>
+                                <legend className="px-1 font-semibold">{TASK_FILE_FIX_BOX.heading}</legend>
+                                <ul className="list-disc pl-5 text-slate-600">
+                                  {pairBox.problems.map((problem) => <li key={problem}>{problem}</li>)}
+                                </ul>
+                                <p className="mt-2 text-slate-600">{TASK_FILE_FIX_BOX.text(assignmentNumber)}</p>
+                              </>
+                            ) : (
+                              <>
+                                <legend className="px-1 font-semibold">{TASK_FILE_PR_BOX.heading}</legend>
+                                <p className="text-slate-600">{TASK_FILE_PR_BOX.text(assignmentNumber)}</p>
+                              </>
+                            )}
                             <label htmlFor={`task-file-pr-${slot}`} className="mt-3 block font-medium">{TASK_FILE_PR_BOX.label}</label>
                             <input id={`task-file-pr-${slot}`} type="url" value={taskFilePrInputs[slot] ?? ""} onChange={(event) => setTaskFilePrInputs((previous) => ({ ...previous, [slot]: event.target.value }))} placeholder="https://github.com/team/repo/pull/13" className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
                             <button type="button" disabled={preview || Boolean(phase[slot])}
-                              onClick={() => void savePullRequest(slot, "add", { prUrl: pairBox.prUrl, taskFilePrUrl: (taskFilePrInputs[slot] ?? "").trim() })}
+                              onClick={() => void savePullRequest(slot, "add", { prUrl: pairBox.prUrl, ...(pairBox.taskPath ? { taskPath: pairBox.taskPath } : {}), taskFilePrUrl: (taskFilePrInputs[slot] ?? "").trim() })}
                               className="mt-3 w-full rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
                               {phase[slot] || TASK_FILE_PR_BOX.button}
                             </button>
