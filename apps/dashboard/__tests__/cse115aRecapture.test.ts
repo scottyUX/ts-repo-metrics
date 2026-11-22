@@ -220,10 +220,17 @@ describe("planRecapture", () => {
     expect(writes.sources[0]).toMatchObject({ validation_status: "candidate" });
   });
 
-  it("back_to_candidate with the same base commit: baseChanged is false", () => {
-    const task = oldTask();
+  it("back_to_candidate with the same base commit in the row and the saved task: baseChanged is false", () => {
+    const task = oldTask(1, { baseCommit: MB, baseCommitSource: "pr_base" });
     const { plan } = planRecapture(input(submission([task]), { sources: [source(1, "rejected")], storedTasks: [{ ...sameRow(task, MB), patch: "different" }] }));
     expect(plan.tasks[0]).toMatchObject({ action: "back_to_candidate", baseChanged: false });
+  });
+
+  it("a row already on the new base while the saved task is not (a rerun after a failed snapshot write): baseChanged is true", () => {
+    const task = oldTask();
+    const { plan, writes } = planRecapture(input(submission([task]), { sources: [source(1, "candidate")], storedTasks: [sameRow(task, MB)] }));
+    expect(plan.tasks[0]).toMatchObject({ action: "replace", baseChanged: true });
+    expect(writes.baseChanged).toEqual(["team__proj-US-1-T-1"]);
   });
 
   it("a task that has diffEnd → skip, and it is not re-captured or written", () => {
@@ -240,7 +247,7 @@ describe("planRecapture", () => {
     const { plan, writes } = planRecapture(input(submission([oldTask(1), oldTask(2)], { superseded_at: "2026-10-05T00:00:00Z" })));
     expect(plan.superseded).toBe(true);
     expect(plan.tasks.map((t) => t.action)).toEqual(["skip", "skip"]);
-    expect(writes).toEqual({ snapshot: null, tasks: [], sources: [], baseChanged: [] });
+    expect(writes).toEqual({ snapshot: null, tasks: [], sources: [], baseChanged: [], storedInstances: [] });
   });
 
   it("an error in one task keeps that task as saved and still re-captures the other", () => {
@@ -310,15 +317,15 @@ function planned(sub: Submission, overrides: Partial<RecaptureInput> = {}): Reca
 }
 
 describe("applyRecapture", () => {
-  it("writes in order: column check, backup, guarded snapshot with recapturedAt, benchmark rows, repo copy job", async () => {
+  it("writes in order: column check, backup, benchmark rows, guarded snapshot with recapturedAt last, repo copy job", async () => {
     const sub = submission([oldTask()]);
     const { store, writes } = fakeStore();
     const done = await applyRecapture(store, sub, planned(sub), { repoCopies: true, now: NOW });
-    expect(writes.map((w) => w.op)).toEqual(["assertBackupColumn", "backupSnapshot", "writeSnapshot", "writeBenchmark", "requeueRepoCopy"]);
+    expect(writes.map((w) => w.op)).toEqual(["assertBackupColumn", "backupSnapshot", "writeBenchmark", "writeSnapshot", "requeueRepoCopy"]);
     expect(done).toEqual({ backupWritten: true, snapshotWritten: true, benchmarkTasksWritten: 1, benchmarkSourcesWritten: 1, repoCopy: "reset" });
     // The backup is the snapshot as read; the guard is its capturedAt and no recapturedAt.
     expect(writes[1]!.args).toEqual([SUBMISSION_ID, sub.snapshot, { capturedAt: sub.snapshot.capturedAt, recapturedAt: null }]);
-    const next = writes[2]!.args[1] as SubmissionSnapshot & { recapturedAt: string };
+    const next = writes[3]!.args[1] as SubmissionSnapshot & { recapturedAt: string };
     expect(next.recapturedAt).toBe(NOW);
     expect(next.capturedAt).toBe(sub.snapshot.capturedAt);
     expect(next.tasks[0]!.diffEnd).toBe("head");
@@ -341,7 +348,7 @@ describe("applyRecapture", () => {
     (sub.snapshot as SubmissionSnapshot & { recapturedAt?: string }).recapturedAt = "2026-11-19T00:00:00.000Z";
     const { store, writes } = fakeStore({ backup: "kept" });
     await applyRecapture(store, sub, planned(sub), { repoCopies: false, now: NOW });
-    expect(writes[2]!.args[2]).toEqual({ capturedAt: sub.snapshot.capturedAt, recapturedAt: "2026-11-19T00:00:00.000Z" });
+    expect(writes.find((w) => w.op === "writeSnapshot")!.args[2]).toEqual({ capturedAt: sub.snapshot.capturedAt, recapturedAt: "2026-11-19T00:00:00.000Z" });
   });
 
   it("the guard failing at the snapshot writes nothing after it", async () => {
@@ -349,7 +356,8 @@ describe("applyRecapture", () => {
     const { store, writes } = fakeStore({ snapshotGuard: false });
     const done = await applyRecapture(store, sub, planned(sub), { repoCopies: true, now: NOW });
     expect(done.stopped).toBe(GUARD_MESSAGE);
-    expect(writes.map((w) => w.op)).toEqual(["assertBackupColumn", "backupSnapshot", "writeSnapshot"]);
+    expect(done.snapshotWritten).toBe(false);
+    expect(writes.map((w) => w.op)).toEqual(["assertBackupColumn", "backupSnapshot", "writeBenchmark", "writeSnapshot"]);
   });
 
   it("the guard failing at the backup writes nothing after it", async () => {
@@ -368,26 +376,28 @@ describe("applyRecapture", () => {
     expect(writes.map((w) => w.op)).toEqual(["assertBackupColumn"]);
   });
 
-  it("a failed benchmark write stops there; the repo copy job is not queued", async () => {
+  it("a failed benchmark write stops there: the snapshot is not written and the repo copy job is not queued", async () => {
     const sub = submission([oldTask()]);
     const { store, writes } = fakeStore({ failBenchmark: true });
     const done = await applyRecapture(store, sub, planned(sub), { repoCopies: true, now: NOW });
     expect(done.stopped).toMatch(/Could not save the benchmark rows/);
-    expect(done.snapshotWritten).toBe(true);
-    expect(writes.map((w) => w.op)).not.toContain("requeueRepoCopy");
+    expect(done.snapshotWritten).toBe(false);
+    expect(writes.map((w) => w.op)).toEqual(["assertBackupColumn", "backupSnapshot", "writeBenchmark"]);
   });
 
   it("the repo copy job is requeued only for a changed base, and only with copies on", async () => {
     const task = oldTask();
     const sub = submission([task]);
     const keep = planned(sub, { sources: [source(1, "validated")], storedTasks: [sameRow(task)] });
-    const sameBase = planned(sub, { sources: [source(1, "rejected")], storedTasks: [{ ...sameRow(task, MB), patch: "different" }] });
+    const onMb = oldTask(1, { baseCommit: MB, baseCommitSource: "pr_base" });
+    const sameBaseSub = submission([onMb]);
+    const sameBase = planned(sameBaseSub, { sources: [source(1, "rejected")], storedTasks: [{ ...sameRow(onMb, MB), patch: "different" }] });
     const changed = planned(sub);
-    for (const [writes, repoCopies, expected] of [
-      [keep, true, "not needed"], [sameBase, true, "not needed"], [changed, false, "copies off"], [changed, true, "reset"],
+    for (const [writes, repoCopies, expected, which] of [
+      [keep, true, "not needed", sub], [sameBase, true, "not needed", sameBaseSub], [changed, false, "copies off", sub], [changed, true, "reset", sub],
     ] as const) {
       const fake = fakeStore();
-      const done = await applyRecapture(fake.store, sub, writes, { repoCopies, now: NOW });
+      const done = await applyRecapture(fake.store, which, writes, { repoCopies, now: NOW });
       expect(done.repoCopy).toBe(expected);
       expect(fake.writes.some((w) => w.op === "requeueRepoCopy")).toBe(expected === "reset");
     }

@@ -806,7 +806,10 @@ and `validation_detail` stay), and the source row keeps its status and flags and
 back to `candidate`, with `harbor_env` and `validation_detail` null and only the new capture's flags. That
 includes a staff-rebuilt row (`staff_rebuilt:merge-parent`), whose patch came from the rebuild, so check the dry run for
 rebuilt rows before applying. A `candidate` row is always replaced. Other source rows of the same instance
-(older, superseded attempts) are left as they are (`lib/cse115a/benchmark/recapture.ts`).
+(older, superseded attempts) are left as they are (`lib/cse115a/benchmark/recapture.ts`). The rows are
+written before the snapshot, and a source going back to candidate is written before its row is replaced, so an
+apply that fails part-way never leaves a validated source over a replaced row; running the tool again ends in
+the same rows as an apply that did not fail.
 
 Rebuilt so far: `JoKHerre__Bookworm-COL-04-T-4` (PR #115, M `96798e0b`, M^1 `40b28261`, the
 head of PR #114). `JoKHerre__Bookworm-COL-04-T-2` (PR #114) is not rebuilt: the PR changes no

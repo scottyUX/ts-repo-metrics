@@ -440,6 +440,18 @@ snapshot holds (repo, PR number, task path, `taskFilePr`, `prTaskFiles`).
   `base_commit` changes and `CSE115A_REPO_COPIES=on`, the submission's
   `repo_copy` job is set back to queued, so a copy is made under the new base's
   name; the old copy is kept.
+- Apply order, stopping at the first failure: the column check; the backup,
+  under the guard (also the guard check before any other write); the
+  benchmark rows (source rows of instances already stored, then task rows,
+  then source rows of new instances, so a validated or rejected source is
+  sent back to candidate before its row is replaced); the new snapshot, under
+  the guard, last; the `repo_copy` job. Until the snapshot is written the
+  submission still holds its old-rule tasks and stays in the list, so after a
+  failure staff run the tool again and it redoes the submission: rows already
+  written are seen as candidate rows with the new patch and written the same
+  again, a kept row does not gain its flag twice, and the end state is the one
+  a clean apply gives. A rerun that finds the row already on the new base
+  still requeues the copy job, since the failed apply never got that far.
 - Grades, grade status and grading jobs are not touched; nothing is regraded.
   Staff press Regrade themselves where the dry run suggests it.
 

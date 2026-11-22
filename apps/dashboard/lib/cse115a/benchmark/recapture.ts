@@ -59,7 +59,12 @@ export type TaskPlan = {
   action: RecaptureAction;
   /** Why, for skip and error. */
   reason?: string;
-  /** The stored task row's base_commit changes (replace and back_to_candidate only; also true when no row is stored yet). */
+  /**
+   * A repo copy under the new base commit's name may be missing (replace and back_to_candidate only): the new
+   * base differs from the stored row's base_commit, or there is no stored row, or it differs from the saved
+   * task's own baseCommit. The last case is a rerun after an apply that wrote the rows but not the snapshot:
+   * the row already holds the new base, but the copy job was never requeued.
+   */
   baseChanged: boolean;
   /** The re-capture could not read the merge base and used the old range, ending at the merge commit. */
   fallback: boolean;
@@ -84,6 +89,13 @@ export type RecaptureWrites = {
   sources: SourceUpsert[];
   /** Instances whose base commit changed: the submission's repo_copy job must run again. */
   baseChanged: string[];
+  /**
+   * Instances whose cse_benchmark_tasks row is already stored. Their source rows are written before the task
+   * rows, so a validated or rejected source is sent back to candidate before its task row is replaced: an
+   * apply that fails in between never leaves a settled source over a replaced row, which a rerun would take for
+   * "same patch" and keep. Sources of new instances come after the task rows (the foreign key needs the row).
+   */
+  storedInstances: string[];
 };
 
 export type RecaptureInput = {
@@ -131,7 +143,7 @@ export function planRecapture(input: RecaptureInput): { plan: RecapturePlan; wri
   });
   const anyRecaptured = newTasks.some((task, index) => task !== saved[index]);
   const snapshot: SubmissionSnapshot | null = anyRecaptured ? { ...submission.snapshot, tasks: newTasks } : null;
-  const writes: RecaptureWrites = { snapshot, tasks: [], sources: [], baseChanged: [] };
+  const writes: RecaptureWrites = { snapshot, tasks: [], sources: [], baseChanged: [], storedInstances: [] };
 
   const tasks: TaskPlan[] = saved.map((task, index) => {
     const id = instanceId(task.repoFullName, task.taskId);
@@ -175,6 +187,7 @@ export function planRecapture(input: RecaptureInput): { plan: RecapturePlan; wri
       flags: built.flags,
       updated_at: input.now,
     };
+    if (stored !== null && !writes.storedInstances.includes(stored.instance_id)) writes.storedInstances.push(stored.instance_id);
     const settled = source !== null && source.validation_status !== "candidate";
     const samePatches = stored !== null && stored.patch === built.instance.patch && stored.test_patch === built.instance.test_patch;
     let action: RecaptureAction;
@@ -192,7 +205,8 @@ export function planRecapture(input: RecaptureInput): { plan: RecapturePlan; wri
       // replace: a candidate row stays candidate and a new row starts so; back_to_candidate says so.
       writes.sources.push(settled ? { ...upsert, validation_status: "candidate" } : upsert);
     }
-    const baseChanged = action !== "keep" && (stored === null || stored.base_commit !== built.instance.base_commit);
+    const baseChanged = action !== "keep"
+      && (stored === null || stored.base_commit !== built.instance.base_commit || task.baseCommit !== built.instance.base_commit);
     if (baseChanged) writes.baseChanged.push(built.instance.instance_id);
     return {
       ...base,
@@ -259,10 +273,15 @@ export function snapshotGuard(snapshot: RecapturedSnapshot): SnapshotGuard {
 }
 
 /**
- * Executes the writes for one submission, in order, stopping at the first failure: the column check, the
- * backup (only where null), the new snapshot (guarded), the benchmark rows, the repo_copy job (only for a
- * changed base and only with copies on). No grade job is queued and `status` is not changed. A failed step
- * or guard is reported in `stopped`, with what was done before it; nothing after it is written.
+ * Executes the writes for one submission, in order, stopping at the first failure: (1) the column check;
+ * (2) the backup, only where null, under the guard, which is also the guard check before any other write;
+ * (3) the benchmark task and source rows; (4) the new snapshot under the guard, last; (5) the repo_copy job
+ * (only for a changed base and only with copies on). Step 3 writes the source rows of instances already
+ * stored, then the task rows, then the source rows of new instances (see `storedInstances`). Until step 4 the snapshot is still the old-rule one, so
+ * a failure at step 3 or 4 leaves the submission in the list and a rerun redoes it: the plan then sees the rows
+ * step 3 wrote (a candidate row with the new patch is replaced by the same row; a kept source already has its
+ * flag) and ends in the same state as a clean apply. No grade job is queued and `status` is not changed. A
+ * failed step or guard is reported in `stopped`, with what was done before it; nothing after it is written.
  */
 export async function applyRecapture(
   store: RecaptureStore, submission: Submission, writes: RecaptureWrites, options: { repoCopies: boolean; now: string },
@@ -277,16 +296,29 @@ export async function applyRecapture(
     const backup = await store.backupSnapshot(submission.id, submission.snapshot, guard);
     if (backup === "guard") return { ...done, stopped: GUARD_MESSAGE };
     done.backupWritten = backup === "written";
+    if (writes.tasks.length || writes.sources.length) {
+      step = "save the benchmark rows";
+      // Sources of stored instances first (a demotion to candidate lands before its row is replaced), then
+      // the task rows, then sources of new instances.
+      const first = writes.sources.filter((s) => writes.storedInstances.includes(s.instance_id));
+      const after = writes.sources.filter((s) => !writes.storedInstances.includes(s.instance_id));
+      if (first.length) {
+        await store.writeBenchmark([], first);
+        done.benchmarkSourcesWritten += first.length;
+      }
+      if (writes.tasks.length || after.length) {
+        await store.writeBenchmark(writes.tasks, after);
+        done.benchmarkTasksWritten = writes.tasks.length;
+        done.benchmarkSourcesWritten += after.length;
+      }
+    }
     step = "save the new snapshot";
+    // A guard failing here comes after the rows: the submission was superseded or re-captured by someone else
+    // in between. The rows are what a clean apply writes for this snapshot (a superseded attempt's rows are
+    // kept like any other's), and a submission still listed is redone by a rerun.
     const next: RecapturedSnapshot = { ...writes.snapshot, recapturedAt: options.now };
     if (!(await store.writeSnapshot(submission.id, next, guard))) return { ...done, stopped: GUARD_MESSAGE };
     done.snapshotWritten = true;
-    if (writes.tasks.length || writes.sources.length) {
-      step = "save the benchmark rows";
-      await store.writeBenchmark(writes.tasks, writes.sources);
-      done.benchmarkTasksWritten = writes.tasks.length;
-      done.benchmarkSourcesWritten = writes.sources.length;
-    }
     if (writes.baseChanged.length) {
       step = "queue the repo copy job again";
       done.repoCopy = options.repoCopies ? await store.requeueRepoCopy(submission.id) : "copies off";
