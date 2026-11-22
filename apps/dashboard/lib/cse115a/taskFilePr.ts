@@ -52,7 +52,7 @@ export const TASK_FILE_PR_BOX = {
 /** The second box for a merged PR whose task file has problems; the label and button are TASK_FILE_PR_BOX's. */
 export const TASK_FILE_FIX_BOX = {
   heading: "This merged PR's task file has problems",
-  text: (sprint: number) => `A merged PR can't be changed. Open a new PR that corrects only your task file in docs/tasks/sprint-${sprint}/, merge it, and paste its link here. If the file needs a new name, add it under the new name and leave the old file: a renamed file is not taken. Your task is graded on the code in the PR above.`,
+  text: (sprint: number) => `A merged PR can't be changed. Open a new PR that corrects only your task file in docs/tasks/sprint-${sprint}/, merge it, and paste its link here. Your task is graded on the code in the PR above.`,
 } as const;
 
 /** The task card's second line for a paired task; the first is the two links. */

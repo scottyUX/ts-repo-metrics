@@ -59,7 +59,7 @@ type Stub = {
   work?: Record<string, unknown>;
   workFiles?: Array<{ filename: string; status: string }>;
   /** Task-file PRs by number: the PR, its files, and the task file's text at its merge commit. */
-  filePrs?: Record<number, { pr?: Record<string, unknown>; files?: Array<{ filename: string; status: string }>; text?: string; folder?: string[] }>;
+  filePrs?: Record<number, { pr?: Record<string, unknown>; files?: Array<{ filename: string; status: string; previous_filename?: string }>; text?: string; folder?: string[] }>;
   routes?: Record<string, unknown>;
 };
 
@@ -174,9 +174,13 @@ describe("3. each task-file PR refusal, in order", () => {
       `${ONE_FILE}docs/tasks/sprint-2/X-T-7.md, src/a.ts.`],
     ["many files", { filePrs: { 13: { files: [T7, "a", "b", "c", "d", "e", "f"].map((filename) => ({ filename, status: "added" })) } } }, FILE_URL,
       `${ONE_FILE}docs/tasks/sprint-2/X-T-7.md, a, b, c, d, and 2 more.`],
-    // A modified task file is taken since #420 (a PR that corrects a malformed task file); a removed or renamed one is not.
+    // A modified or renamed task file is taken since #420 (a PR that corrects a malformed task file); a removed one is not.
     ["a removed task file", { filePrs: { 13: { files: [{ filename: T7, status: "removed" }] } } }, FILE_URL, `${ONE_FILE}docs/tasks/sprint-2/X-T-7.md.`],
-    ["a renamed task file", { filePrs: { 13: { files: [{ filename: T7, status: "renamed" }] } } }, FILE_URL, `${ONE_FILE}docs/tasks/sprint-2/X-T-7.md.`],
+    // A rename is checked at its new path (GitHub's filename), which must be a task file in this sprint's folder.
+    ["a rename out of the sprint folder", { filePrs: { 13: { files: [{ filename: "docs/tasks/sprint-3/X-T-7.md", status: "renamed", previous_filename: T7 }] } } }, FILE_URL,
+      `${ONE_FILE}docs/tasks/sprint-3/X-T-7.md.`],
+    ["a rename to a name that is not a task ID", { filePrs: { 13: { files: [{ filename: "docs/tasks/sprint-2/notes.md", status: "renamed", previous_filename: T7 }] } } }, FILE_URL,
+      `${ONE_FILE}docs/tasks/sprint-2/notes.md.`],
     ["the wrong sprint folder", { filePrs: { 13: { files: [{ filename: "docs/tasks/sprint-3/X-T-7.md", status: "added" }] } } }, FILE_URL,
       `${ONE_FILE}docs/tasks/sprint-3/X-T-7.md.`],
     ["a task file with format problems", { filePrs: { 13: { text: spec("X-T-7").replace("## Specs", "## Steps") } } }, FILE_URL,
@@ -188,6 +192,19 @@ describe("3. each task-file PR refusal, in order", () => {
   it.each(cases)("refuses %s", async (_label, options, url, message) => {
     stub(options);
     await expect(importPair(url)).rejects.toThrow(new Error(message));
+  });
+
+  it("accepts a renamed task file, with and without edits to its content, read at its new path", async () => {
+    const notes = "docs/tasks/sprint-2/notes.md";
+    // Without edits: the file's text is what it was under its old name.
+    let requests = stub({ filePrs: { 13: { files: [{ filename: T7, status: "renamed", previous_filename: notes }], text: spec("X-T-7") } } });
+    await expect(importPair(FILE_URL)).resolves.toMatchObject({ taskPath: T7, markdown: spec("X-T-7"), facts: { taskFilePr: { url: FILE_URL, number: 13, mergeSha: "spec13" } } });
+    expect(requests).toContain(`/repos/team/app/contents/${T7}?ref=spec13`);
+    expect(requests.some((path) => path.includes("notes.md"))).toBe(false);
+    // With edits, and from any old name (here another task ID's file).
+    const edited = spec("X-T-7").replace("Serves X.", "Serves X, and now Y.");
+    requests = stub({ filePrs: { 13: { files: [{ filename: T7, status: "renamed", previous_filename: "docs/tasks/sprint-2/Z-T-1.md" }], text: edited } } });
+    await expect(importPair(FILE_URL)).resolves.toMatchObject({ taskPath: T7, markdown: edited, spec: { id: "X-T-7" } });
   });
 
   it("checks the repository before reading anything about the task-file PR", async () => {

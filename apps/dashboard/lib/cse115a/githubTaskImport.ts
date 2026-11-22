@@ -250,9 +250,11 @@ function listChanged(paths: string[]): string {
 
 /**
  * The task file from a task-file PR, paired with a merged work PR that adds none or whose task file has format
- * problems. Checked in order: same repository, not the work PR, merged, opened by the student, adds or modifies
- * exactly one task file for this sprint and changes nothing else, and that file passes every task-file check at the
- * task-file PR's merge commit. Its name need not match the work PR's file: a correctly named new file is taken too.
+ * problems. Checked in order: same repository, not the work PR, merged, opened by the student, adds, modifies or
+ * renames exactly one task file for this sprint and changes nothing else, and that file passes every task-file check
+ * at the task-file PR's merge commit. Its name need not match the work PR's file: a correctly named new file is taken
+ * too. A renamed file is checked at its new path (GitHub's `filename`); its old path (`previous_filename`) may be
+ * anything. A removed file is refused.
  */
 async function readTaskFilePr(
   gh: GitHubReader, owner: string, repo: string, workNumber: number, taskFilePrUrl: string, sprint: number, githubLogin: string,
@@ -267,7 +269,7 @@ async function readTaskFilePr(
   if (pull.user?.login.toLowerCase() !== githubLogin.toLowerCase()) throw new Error("The task-file PR must be opened from your GitHub account.");
   const files = await pullRequestFiles(gh, owner, repo, parsed.number);
   const only = files.length === 1 ? files[0]! : null;
-  if (!only || (only.status !== "added" && only.status !== "modified") || !isTaskFilePath(only.filename, sprint)) {
+  if (!only || !["added", "modified", "renamed"].includes(only.status ?? "") || !isTaskFilePath(only.filename, sprint)) {
     throw new Error(`The task-file PR must add or correct one task file in docs/tasks/sprint-${sprint}/ and change nothing else. This one changes: ${listChanged(files.map((file) => file.filename))}.`);
   }
   const taskPath = only.filename;

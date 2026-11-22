@@ -61,7 +61,7 @@ const pull = (fields: Record<string, unknown>) => ({
   state: "closed", merged_at: "2026-10-14T00:00:00Z", base: { sha: "main0" }, user: { login: "student" }, ...fields,
 });
 
-type FilePr = { pr?: Record<string, unknown>; files?: Array<{ filename: string; status: string }>; text?: string };
+type FilePr = { pr?: Record<string, unknown>; files?: Array<{ filename: string; status: string; previous_filename?: string }>; text?: string };
 type Stub = {
   work?: Record<string, unknown>;
   workFiles?: Array<{ filename: string; status: string }>;
@@ -214,6 +214,19 @@ describe("1. a merged PR whose task file has format problems", () => {
     ];
     await expect(importWork()).rejects.toMatchObject({ code: "need_task_file_pr", reason: "task_file_problems", problems, message: needTaskFileFixMessage(T7, problems) });
     await expect(importWork({ taskFilePrUrl: FIX_URL })).resolves.toMatchObject({ taskPath: T7, spec: { id: "X-T-7" }, facts: { taskFilePr: { fixesTaskPath: T7 } } });
+  });
+
+  it("pairs with a task-file PR that renames the work PR's misnamed file to its task ID", async () => {
+    const notes = "docs/tasks/sprint-2/notes.md";
+    stub({
+      workFiles: [{ filename: notes, status: "added" }, { filename: "src/app.ts", status: "modified" }],
+      workTexts: { [notes]: spec("X-T-7") },
+      filePrs: { 13: { files: [{ filename: T7, status: "renamed", previous_filename: notes }], text: spec("X-T-7") } },
+    });
+    await expect(importWork()).rejects.toMatchObject({ code: "need_task_file_pr", reason: "task_file_problems" });
+    const task = await importWork({ taskFilePrUrl: FIX_URL });
+    expect(task).toMatchObject({ taskPath: T7, spec: { id: "X-T-7" } });
+    expect(task.facts).toMatchObject({ prTaskFiles: [T7], taskFilePr: { number: 13, fixesTaskPath: notes } });
   });
 
   it("a PR whose task file passes ignores a task-file PR, as before", async () => {
@@ -370,7 +383,7 @@ describe("3. the Add PR route", () => {
 describe("4. page, card and review-page texts", () => {
   it("has the exact texts; the no-task-file texts are unchanged", () => {
     expect(TASK_FILE_FIX_BOX.heading).toBe("This merged PR's task file has problems");
-    expect(TASK_FILE_FIX_BOX.text(2)).toBe("A merged PR can't be changed. Open a new PR that corrects only your task file in docs/tasks/sprint-2/, merge it, and paste its link here. If the file needs a new name, add it under the new name and leave the old file: a renamed file is not taken. Your task is graded on the code in the PR above.");
+    expect(TASK_FILE_FIX_BOX.text(2)).toBe("A merged PR can't be changed. Open a new PR that corrects only your task file in docs/tasks/sprint-2/, merge it, and paste its link here. Your task is graded on the code in the PR above.");
     expect(TASK_FILE_FIX_CARD_NOTE).toBe("The task file was corrected in a separate PR, after the work was merged, because the PR's own task file had problems.");
     expect(taskFilePrCardNote({ fixesTaskPath: T7 })).toBe(TASK_FILE_FIX_CARD_NOTE);
     expect(taskFilePrCardNote({})).toBe(TASK_FILE_PR_CARD_NOTE);
