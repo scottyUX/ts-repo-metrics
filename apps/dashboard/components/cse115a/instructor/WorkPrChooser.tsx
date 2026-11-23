@@ -3,18 +3,67 @@
 import { useState } from "react";
 import type { TaskSnapshot } from "@/lib/cse115a/submissionSnapshot";
 import {
-  choiceDate, WORK_PR_TEXT, workPrChoiceLine, workPrReasonLine, workPrUndoneLine, type WorkPrCandidate,
+  choiceDate, extrasFirstMessage, WORK_PR_TEXT, workPrChoiceLine, workPrReasonLine, workPrUndoneLine, type WorkPrCandidate,
 } from "@/lib/cse115a/workPr";
 import { fetchJson } from "./shared";
 
-type Listed = { candidates: WorkPrCandidate[]; authorKnown: boolean; note: string | null; repoFullName: string };
+export type Listed = { candidates: WorkPrCandidate[]; authorKnown: boolean; note: string | null; repoFullName: string };
 type Preview = {
   prNumber: number; title: string; files: string[]; summary: string; diffTruncated: boolean;
   benchmark: { line: string }; warnings: string[];
 };
 
-const button = "rounded-lg border border-input px-3 py-1.5 text-sm font-medium disabled:opacity-50";
-const primary = "rounded-lg bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground disabled:opacity-50";
+export const button = "rounded-lg border border-input px-3 py-1.5 text-sm font-medium disabled:opacity-50";
+export const primary = "rounded-lg bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground disabled:opacity-50";
+
+/** What the page saw, sent with every write (#431; #437 adds the task's extra PRs). */
+export function seenState(task: TaskSnapshot, recapturedAt: string | null) {
+  return { prNumber: task.prNumber, recapturedAt, extraPrs: (task.extraCodePrs ?? []).map((extra) => extra.prNumber) };
+}
+
+/**
+ * The student's other merged PRs as radio buttons (the #431 chooser and #437's "Add another PR for the code"). A PR
+ * another task uses, or already added to this task, is shown and can't be picked.
+ */
+export function CandidateList({ name, listed, listError, picked, onPick }: {
+  name: string; listed: Listed | null; listError: string | null; picked: string; onPick: (value: string) => void;
+}) {
+  if (listError) return <p role="alert" className="text-destructive">{listError}</p>;
+  if (!listed) return <p className="text-muted-foreground">{WORK_PR_TEXT.loading}</p>;
+  return (
+    <div className="space-y-1">
+      {listed.note ? <p className="text-amber-700 dark:text-amber-300">{listed.note}</p> : null}
+      {listed.candidates.length === 0 ? <p className="text-muted-foreground">{WORK_PR_TEXT.noCandidates}</p> : (
+        <>
+          <p className="text-muted-foreground">{WORK_PR_TEXT.listLabel}</p>
+          <ul className="max-h-72 space-y-1 overflow-auto">
+            {listed.candidates.map((candidate) => {
+              const blocked = Boolean(candidate.usedBy) || candidate.attached === true;
+              return (
+                <li key={candidate.number}>
+                  <label className={`flex gap-2 rounded-md p-2 ${blocked ? "opacity-60" : "cursor-pointer hover:bg-muted"}`}>
+                    <input type="radio" name={name} disabled={blocked} checked={picked === String(candidate.number)}
+                      onChange={() => onPick(String(candidate.number))} className="mt-1" />
+                    <span className="min-w-0">
+                      <span className="font-medium">#{candidate.number} {candidate.title}</span>
+                      {candidate.likely ? <span className="ml-2 rounded-full bg-emerald-500/15 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:text-emerald-300">{WORK_PR_TEXT.likely}</span> : null}
+                      <span className="block break-all text-xs text-muted-foreground">
+                        {candidate.branch} · merged {choiceDate(candidate.mergedAt)} · {candidate.filesChanged}{candidate.filesCapped ? "+" : ""} file{candidate.filesChanged === 1 ? "" : "s"}
+                      </span>
+                      {candidate.reasons.map((item) => <span key={item} className="block text-xs text-emerald-700 dark:text-emerald-300">{item}</span>)}
+                      {candidate.attached ? <span className="block text-xs text-muted-foreground">{WORK_PR_TEXT.attached}</span> : null}
+                      {candidate.usedBy ? <span className="block text-xs text-destructive">{WORK_PR_TEXT.usedBy(candidate.usedBy)}</span> : null}
+                    </span>
+                  </label>
+                </li>
+              );
+            })}
+          </ul>
+        </>
+      )}
+    </div>
+  );
+}
 
 /**
  * A task's staff choice of the PR that holds its code (#431), under "Get the code": the line when staff have chosen
@@ -37,8 +86,11 @@ export function WorkPrChooser({ submissionId, task, recapturedAt, readOnly, onCh
   const [message, setMessage] = useState<string | null>(null);
 
   const url = `/api/cse115a/instructor/submissions/${submissionId}/work-pr`;
-  const seen = { prNumber: task.prNumber, recapturedAt };
+  const seen = seenState(task, recapturedAt);
   const choice = task.workPrChoice;
+  // #437: the main PR can't change while the task has extra PRs; they are removed first.
+  const extras = (task.extraCodePrs ?? []).map((extra) => extra.prNumber);
+  const locked = readOnly || extras.length > 0;
 
   async function openChooser() {
     setOpen(true);
@@ -115,7 +167,7 @@ export function WorkPrChooser({ submissionId, task, recapturedAt, readOnly, onCh
         <div className="space-y-1 rounded-lg border border-amber-500/40 bg-amber-500/5 p-3">
           <p className="text-amber-700 dark:text-amber-300">{workPrChoiceLine({ ...task, workPrChoice: choice })}</p>
           <p className="text-muted-foreground">{workPrReasonLine(choice)}</p>
-          {readOnly ? null : confirmingUndo ? (
+          {locked ? null : confirmingUndo ? (
             <div className="flex flex-wrap gap-2 pt-1">
               <button type="button" disabled={busy} onClick={() => void undo()} className={primary}>{WORK_PR_TEXT.confirmUndo(choice.before.prNumber)}</button>
               <button type="button" disabled={busy} onClick={() => setConfirmingUndo(false)} className={button}>{WORK_PR_TEXT.cancel}</button>
@@ -126,7 +178,8 @@ export function WorkPrChooser({ submissionId, task, recapturedAt, readOnly, onCh
         </div>
       ) : task.workPrUndone ? <p className="text-muted-foreground">{workPrUndoneLine(task.workPrUndone)}</p> : null}
 
-      {readOnly ? null : !open ? (
+      {!readOnly && extras.length ? <p className="text-muted-foreground">{extrasFirstMessage(extras)}</p> : null}
+      {locked ? null : !open ? (
         <button type="button" onClick={() => void openChooser()} className={button}>{WORK_PR_TEXT.open}</button>
       ) : (
         <div className="space-y-3 rounded-lg border border-border p-3">
@@ -135,35 +188,7 @@ export function WorkPrChooser({ submissionId, task, recapturedAt, readOnly, onCh
             <button type="button" onClick={() => { setOpen(false); setConfirming(false); }} className="text-xs text-primary underline">{WORK_PR_TEXT.close}</button>
           </div>
           <p className="text-muted-foreground">{WORK_PR_TEXT.intro}</p>
-          {listError ? <p role="alert" className="text-destructive">{listError}</p> : !listed ? <p className="text-muted-foreground">{WORK_PR_TEXT.loading}</p> : (
-            <div className="space-y-1">
-              {listed.note ? <p className="text-amber-700 dark:text-amber-300">{listed.note}</p> : null}
-              {listed.candidates.length === 0 ? <p className="text-muted-foreground">{WORK_PR_TEXT.noCandidates}</p> : (
-                <>
-                  <p className="text-muted-foreground">{WORK_PR_TEXT.listLabel}</p>
-                  <ul className="max-h-72 space-y-1 overflow-auto">
-                    {listed.candidates.map((candidate) => (
-                      <li key={candidate.number}>
-                        <label className={`flex gap-2 rounded-md p-2 ${candidate.usedBy ? "opacity-60" : "cursor-pointer hover:bg-muted"}`}>
-                          <input type="radio" name={`work-pr-${task.slot}`} disabled={Boolean(candidate.usedBy)} checked={pr.trim() === String(candidate.number)}
-                            onChange={() => choose(String(candidate.number))} className="mt-1" />
-                          <span className="min-w-0">
-                            <span className="font-medium">#{candidate.number} {candidate.title}</span>
-                            {candidate.likely ? <span className="ml-2 rounded-full bg-emerald-500/15 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:text-emerald-300">{WORK_PR_TEXT.likely}</span> : null}
-                            <span className="block break-all text-xs text-muted-foreground">
-                              {candidate.branch} · merged {choiceDate(candidate.mergedAt)} · {candidate.filesChanged}{candidate.filesCapped ? "+" : ""} file{candidate.filesChanged === 1 ? "" : "s"}
-                            </span>
-                            {candidate.reasons.map((item) => <span key={item} className="block text-xs text-emerald-700 dark:text-emerald-300">{item}</span>)}
-                            {candidate.usedBy ? <span className="block text-xs text-destructive">{WORK_PR_TEXT.usedBy(candidate.usedBy)}</span> : null}
-                          </span>
-                        </label>
-                      </li>
-                    ))}
-                  </ul>
-                </>
-              )}
-            </div>
-          )}
+          <CandidateList name={`work-pr-${task.slot}`} listed={listed} listError={listError} picked={pr.trim()} onPick={choose} />
           <label className="block">
             <span className="text-muted-foreground">{WORK_PR_TEXT.typedLabel}</span>
             <input type="text" value={pr} onChange={(event) => choose(event.target.value)} placeholder="12"

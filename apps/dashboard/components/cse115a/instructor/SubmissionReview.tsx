@@ -12,8 +12,11 @@ import { RUBRIC, TASK_POINTS } from "@/lib/cse115a/rubric";
 import { effectiveTotal, submittedSprintScore, type TaskGradeRow } from "@/lib/cse115a/gradeReview";
 import type { SubmissionSnapshot, TaskSnapshot } from "@/lib/cse115a/submissionSnapshot";
 import type { TaskCode } from "@/lib/cse115a/getTheCode";
-import { getTheCodeChoiceNote, staleAiGradeLine, workPrHeaderLine } from "@/lib/cse115a/workPr";
+import {
+  getTheCodeChoiceNote, getTheCodeExtrasNote, repoCopyFromNote, staleAiGradeLine, WORK_PR_TEXT, workPrHeaderLine,
+} from "@/lib/cse115a/workPr";
 import { AiGradeHistory, type AiGradeEntry } from "./AiGradeHistory";
+import { ExtraCodePrs } from "./ExtraCodePrs";
 import { GetTheCode } from "./GetTheCode";
 import { WorkPrChooser } from "./WorkPrChooser";
 import { fetchJson, formatPoints, STATUS_LABELS, type StaffCourse, type SubmissionStatus } from "./shared";
@@ -54,6 +57,30 @@ function DiffView({ diff, empty }: { diff: string; empty: string }) {
   );
 }
 
+/**
+ * The task's diff view in parts (#437): the main PR's diff, then each extra PR's under a heading naming the PR. A
+ * task without extra PRs is one part with no heading, as before.
+ */
+function diffSections(task: TaskSnapshot): Array<{ key: string; heading: string | null; split: ReturnType<typeof splitPatch> }> {
+  const extras = task.extraCodePrs ?? [];
+  if (extras.length === 0) return [{ key: "main", heading: null, split: splitPatch(task.diff) }];
+  return [
+    { key: "main", heading: WORK_PR_TEXT.mainDiffHeading(task.prNumber, task.pr.title), split: splitPatch(task.diff) },
+    ...extras.map((extra) => ({ key: `pr-${extra.prNumber}`, heading: WORK_PR_TEXT.extraDiffHeading(extra.prNumber, extra.title), split: splitPatch(extra.diff) })),
+  ];
+}
+
+function CheckList({ checks }: { checks: TaskSnapshot["checks"] }) {
+  if (checks.length === 0) return <p className="mt-1 text-sm text-muted-foreground">No checks recorded.</p>;
+  return (
+    <ul className="mt-1 space-y-1 text-sm">
+      {checks.map((check, index) => (
+        <li key={index} className="flex justify-between gap-3"><span className="truncate">{check.name}</span><span className={check.conclusion === "success" ? "text-emerald-600" : check.conclusion ? "text-destructive" : "text-muted-foreground"}>{check.conclusion ?? check.status}</span></li>
+      ))}
+    </ul>
+  );
+}
+
 type Draft = { values: Record<string, string>; notes: Record<string, string>; overall: string };
 
 function draftFrom(grade: TaskGradeRow): Draft {
@@ -70,7 +97,10 @@ function draftFrom(grade: TaskGradeRow): Draft {
 }
 
 function TaskPanel({ submissionId, task, grade, onSaved, readOnly, sharedPr, code, aiGrades, recapturedAt }: { submissionId: string; task: TaskSnapshot; grade: TaskGradeRow | undefined; onSaved: () => void; readOnly: boolean; sharedPr: string[]; code: TaskCode | undefined; aiGrades: AiGradeEntry[]; recapturedAt: string | null }) {
-  const split = useMemo(() => splitPatch(task.diff), [task.diff]);
+  const sections = useMemo(() => diffSections(task), [task]);
+  const sourceCount = sections.reduce((sum, section) => sum + section.split.sourceFiles.length, 0);
+  const testCount = sections.reduce((sum, section) => sum + section.split.testFiles.length, 0);
+  const extraNumbers = (task.extraCodePrs ?? []).map((extra) => extra.prNumber);
   const [draft, setDraft] = useState<Draft | null>(grade ? draftFrom(grade) : null);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -123,27 +153,44 @@ function TaskPanel({ submissionId, task, grade, onSaved, readOnly, sharedPr, cod
       </details>
 
       <GetTheCode submissionId={submissionId} slot={task.slot} repoFullName={task.repoFullName} mergeCommit={task.pr?.mergeCommitSha} code={code}
-        choiceNote={task.workPrChoice ? getTheCodeChoiceNote({ ...task, workPrChoice: task.workPrChoice }) : null} />
+        choiceNote={task.workPrChoice ? getTheCodeChoiceNote({ ...task, workPrChoice: task.workPrChoice }) : null}
+        extrasNote={extraNumbers.length ? getTheCodeExtrasNote(task.prNumber, extraNumbers) : null}
+        copyNote={task.repoCopyFrom && task.repoCopyFrom.prNumber !== task.prNumber ? repoCopyFromNote(task.repoCopyFrom.prNumber, task.prNumber) : null} />
       <WorkPrChooser submissionId={submissionId} task={task} recapturedAt={recapturedAt} readOnly={readOnly} onChanged={onSaved} />
+      <ExtraCodePrs submissionId={submissionId} task={task} recapturedAt={recapturedAt} readOnly={readOnly} onChanged={onSaved} />
 
       <Tabs defaultValue="patch" className="rounded-lg border border-border">
         <TabsList className="m-2">
-          <TabsTrigger value="patch">patch ({split.sourceFiles.length})</TabsTrigger>
-          <TabsTrigger value="test_patch">test_patch ({split.testFiles.length})</TabsTrigger>
+          <TabsTrigger value="patch">patch ({sourceCount})</TabsTrigger>
+          <TabsTrigger value="test_patch">test_patch ({testCount})</TabsTrigger>
         </TabsList>
-        <TabsContent value="patch"><DiffView diff={split.patch} empty="No source files changed." /></TabsContent>
-        <TabsContent value="test_patch"><DiffView diff={split.testPatch} empty="No test files changed." /></TabsContent>
+        <TabsContent value="patch">
+          {sections.map((section) => (
+            <div key={section.key}>
+              {section.heading ? <h4 className="border-t border-border px-3 pt-3 text-sm font-semibold first:border-t-0">{section.heading}</h4> : null}
+              <DiffView diff={section.split.patch} empty="No source files changed." />
+            </div>
+          ))}
+        </TabsContent>
+        <TabsContent value="test_patch">
+          {sections.map((section) => (
+            <div key={section.key}>
+              {section.heading ? <h4 className="border-t border-border px-3 pt-3 text-sm font-semibold first:border-t-0">{section.heading}</h4> : null}
+              <DiffView diff={section.split.testPatch} empty="No test files changed." />
+            </div>
+          ))}
+        </TabsContent>
       </Tabs>
 
       <div>
         <h3 className="text-sm font-semibold">CI on the merge commit</h3>
-        {task.checks.length === 0 ? <p className="mt-1 text-sm text-muted-foreground">No checks recorded.</p> : (
-          <ul className="mt-1 space-y-1 text-sm">
-            {task.checks.map((check, index) => (
-              <li key={index} className="flex justify-between gap-3"><span className="truncate">{check.name}</span><span className={check.conclusion === "success" ? "text-emerald-600" : check.conclusion ? "text-destructive" : "text-muted-foreground"}>{check.conclusion ?? check.status}</span></li>
-            ))}
-          </ul>
-        )}
+        <CheckList checks={task.checks} />
+        {(task.extraCodePrs ?? []).map((extra) => (
+          <div key={extra.prNumber} className="mt-3">
+            <h3 className="text-sm font-semibold">{WORK_PR_TEXT.extraChecksHeading(extra.prNumber)}</h3>
+            <CheckList checks={extra.checks} />
+          </div>
+        ))}
       </div>
 
       {!grade || !draft ? <p className="rounded-lg bg-muted p-3 text-sm text-muted-foreground">No agent grade yet.</p> : (
