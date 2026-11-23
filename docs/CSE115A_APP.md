@@ -512,9 +512,11 @@ TAs can do everything except unlock and manage staff.
 `/cse115a/instructor/courses/<slug>/grader`, linked as **Grader** between
 Benchmark and Staff, shows how the AI grader is doing. Course staff
 (instructors and TAs). It reads only what is already stored: no
-model call, no change to grading, saving or release. Counts only: no student
-names, emails, repos, PR numbers or task IDs. Since #429 it also reads the
-two save columns and, where needed, the AI grade history.
+model call, no change to grading, saving or release. No student names,
+emails, repos, PR numbers or task IDs. Since #429 it also reads the two save
+columns and, where needed, the AI grade history. Since #432 it is no longer
+counts only: it holds links to the staff review pages of the tasks staff
+changed (below).
 
 The **AI score** is what the grade job saved (`rubric`, `agent_total`). The
 **final score** is what staff saved (`instructor_rubric`, `instructor_total`),
@@ -534,29 +536,56 @@ second line counts the compared tasks that have staff points but no recorded
 save time. **What the AI gave** always uses the newest grade, and Progress's
 regraded-after-release column counts every such task.
 
-- **Totals**, per assignment and grader version (model and prompt version),
-  then all together: tasks released, same (final total equals AI total), final
+**By assignment or whole quarter (#432).** A toggle at the top, **By
+assignment** (the default) or **Whole quarter**, applies to every table. A
+course is one quarter (next quarter is a new course with its own Grader page),
+so the course's `term` is in the page heading ("Grader · Fall 2026"), in a line
+saying the numbers are for that quarter only, and at the start of every group
+label: "Fall 2026 · Assignment 2", "Fall 2026 · all assignments". The route
+returns the course's title and term with the numbers; `graderStats` returns
+every table both ways (`byAssignment`, one per assignment, and `quarter`).
+
+- **Totals**, a row per grader version (model and prompt version), then the
+  assignment's row, or, for the whole quarter, a row per grader version and
+  the quarter's row: tasks released, same (final total equals AI total), final
   higher, final lower, points added (final minus AI, summed), the share that
   were the same, and **accepted as it stood** (the final equals the AI on all
   six boxes and the AI left none blank; a staff save with no number changed
   counts, a blank box filled by staff does not) as a count and a share.
-- **By rubric box**, all six boxes, per group: tasks, AI left blank (no AI
-  score, or the box is missing from an older rubric; in neither same, higher
-  nor lower), same, final higher, final lower, Needs review flags, points added
+- **By rubric box**, all six boxes, one row per box per assignment (or one
+  per box for the quarter), with no grader version (versions are compared in
+  Totals): tasks, AI left blank (no AI score, or the box is missing from an
+  older rubric; in neither same, higher nor lower), same, final higher, final lower, Needs review flags, points added
   (a blank AI box counts as 0), and agreed (same, out of the tasks the AI
-  scored). Above it, the box agreed with most and least, or, with fewer than 10
-  released tasks, a line saying none is named; and which boxes the model scores
-  (Scope, Specs, Acceptance criteria, Test quality) and which come from
+  scored). Above it, per assignment or for the quarter (following the
+  toggle), the box agreed with most and least, or, with fewer than 10 released
+  tasks in that group, a line saying none is named; and which boxes the model
+  scores (Scope, Specs, Acceptance criteria, Test quality) and which come from
   recorded evidence (Tests pass, Process), read from each item's `source`.
-- **What the AI gave**: per box, how many current graded tasks (released or
-  not) got full, half, zero or blank.
-- **Progress**, per assignment: tasks submitted (from each current
-  submission's snapshot slots), graded by the AI, saved by staff but not
+- **What the AI gave**: per box and per assignment (or for the quarter), how
+  many current graded tasks (released or not) got full, half, zero or blank.
+- **Progress**, per assignment or for the quarter: tasks submitted (from each
+  current submission's snapshot slots), graded by the AI, saved by staff but not
   released, released (including regraded after release), regraded after
   release.
 - **Time**: per assignment, the median from submitted to the submission's
-  first release, labelled "waiting time, not grading time". The site does not
-  record time spent grading.
+  first release (for the quarter, the median over every released submission),
+  labelled "waiting time, not grading time". The site does not record time
+  spent grading.
+
+**The changed tasks (#432).** In the box table, the Final higher, Final lower
+and AI left blank cells, and in Totals the Final higher and Final lower cells,
+are buttons when not 0. Each opens a list under the row, one line per task,
+"Assignment 3 · Task 2: AI 1, final 2" ("AI blank" for a blank box; totals in
+Totals), linking to `/cse115a/instructor/submissions/<id>`, the submission's
+staff review page. That page shows every task of the submission and cannot be
+addressed to one task, so the link opens the submission and the task is the
+one with that number. Tasks kept as the AI scored them are not listed; tasks
+left out of the numbers (regraded after release with no recorded save,
+superseded, unreleased) are in no list. A line shows only the assignment and
+task number, never a name, email, repo or task ID; the review page is
+staff-only. The lists are built from the same compared tasks as the counts
+(the loader now passes `task_slot`), so each count equals its list's length.
 
 Limits, shown on the page: staff see the AI's score before deciding, so this
 measures how often staff changed it, not how often two independent graders
@@ -569,7 +598,9 @@ pressed, so a Regrade that finished while the review page was open is not
 noticed; the reason for a change is not stored.
 
 Route: `GET /api/cse115a/instructor/courses/<slug>/grader-stats` (course
-staff) returns only the counts from `graderStats`
+staff) returns the course's `title` and `term`, and from `graderStats` the
+counts plus, for each changed task, its submission id, task slot, assignment
+and the AI and final points, nothing else about the submission
 (`lib/cse115a/graderStats.ts`, pure, shared with the page and tests), read by
 `lib/cse115a/loadGraderStats.ts` page by page.
 
