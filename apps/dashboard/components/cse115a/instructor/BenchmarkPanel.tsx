@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { OldDiffRecapture } from "./OldDiffRecapture";
 import { RepoCopies } from "./RepoCopies";
 import { fetchJson, type StaffCourse } from "./shared";
 
@@ -81,8 +80,6 @@ export function BenchmarkPanel({ slug }: { slug: string }) {
       </div>
 
       <RepoCopies slug={slug} />
-
-      <OldDiffRecapture slug={slug} />
 
       <section className="space-y-3">
         <h2 className="font-semibold">Newest rows</h2>

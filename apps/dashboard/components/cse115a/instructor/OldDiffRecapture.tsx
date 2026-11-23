@@ -1,5 +1,13 @@
 "use client";
 
+// Not shown on any page since #422: every submission saved before the PR-own-diff rule (#382) has been
+// re-captured, the count stays 0 because new submissions are saved under that rule, and the panel only
+// made a list request on every Benchmark page load. The route, the library and the tests stay. To show it
+// again, put these two lines back in BenchmarkPanel.tsx: the import
+//   import { OldDiffRecapture } from "./OldDiffRecapture";
+// and, between <RepoCopies slug={slug} /> and the "Newest rows" section,
+//   <OldDiffRecapture slug={slug} />
+
 import { useEffect, useState } from "react";
 import type { RecapturePlan } from "@/lib/cse115a/benchmark/recapture";
 import {
