@@ -1,7 +1,9 @@
 import { LLM_CRITERIA, RUBRIC, type CriterionName } from "@/lib/cse115a/rubric";
 
 // How the AI grader is doing, from what is already stored (#423). Pure: no server imports, so the staff route,
-// the Grader page and the tests share it. Counts only: the output holds no id, email, repo, PR number or task ID.
+// the Grader page and the tests share it. Every table comes two ways (#432): per assignment, and for the whole
+// course (one course is one quarter). The output holds counts, plus, for the tasks staff changed, the submission
+// key and task slot so the staff page can link to the review page; never an email, repo, PR number or task ID.
 //
 // The AI score is what the grade job saved (`rubric`, `agent_total`). The final score is what staff saved
 // (`instructor_rubric`, `instructor_total`), or the AI score when staff saved nothing. A box is one rubric row.
@@ -10,7 +12,7 @@ import { LLM_CRITERIA, RUBRIC, type CriterionName } from "@/lib/cse115a/rubric";
 
 /** One current-or-superseded final submission, for the Progress table. */
 export type GraderSubmissionInput = {
-  /** Opaque key joining grades to their submission. Used only inside this function; never in the output. */
+  /** Opaque key joining grades to their submission (the loader uses the submission id). */
   key: string;
   assignmentNumber: number;
   submittedAt: string;
@@ -24,7 +26,10 @@ export type SeenAiGrade = { rubric: unknown; agentTotal: number | string; model:
 
 /** One `cse_task_grades` row with its submission's assignment, submitted time and superseded flag. */
 export type GraderGradeInput = {
+  /** The submission's key; returned only on the lists of changed tasks (#432), as the link's address. */
   submissionKey: string;
+  /** The task's slot in the submission (`task_slot`). */
+  taskSlot: number;
   assignmentNumber: number;
   submittedAt: string;
   superseded: boolean;
@@ -46,8 +51,23 @@ export type GraderGradeInput = {
 
 export type GraderStatsInput = { submissions: GraderSubmissionInput[]; grades: GraderGradeInput[] };
 
-/** A row's group: one assignment and grader version, or `null` in all three for every task together. */
+/**
+ * A row's group. `assignment` null is the whole quarter; `model` and `promptVersion` null is every grader
+ * version of that assignment (or of the quarter) together.
+ */
 export type GroupKey = { assignment: number | null; model: string | null; promptVersion: string | null };
+
+/** One compared task staff changed (or, for a box, one the AI left blank), for the links (#432). */
+export type ChangedTask = {
+  /** The submission key passed in; the route passes the submission id. */
+  submissionId: string;
+  taskSlot: number;
+  assignment: number;
+  /** The AI's points (a box's, or the total); null when the AI left the box blank. */
+  ai: number | null;
+  /** The final points; null when neither the AI nor staff gave the box a score. */
+  final: number | null;
+};
 
 export type TotalsRow = GroupKey & {
   /** Released tasks compared (regraded-after-release tasks left out). */
@@ -62,9 +82,19 @@ export type TotalsRow = GroupKey & {
   /** Final equals the AI on all six boxes and the AI left none blank. */
   accepted: number;
   acceptedShare: number | null;
+  /** The tasks counted in `higher` and in `lower`, with both totals. */
+  higherTasks: ChangedTask[];
+  lowerTasks: ChangedTask[];
 };
 
-export type BoxRow = GroupKey & {
+export type BoxSource = "llm" | "evidence";
+
+/** One box over one assignment's compared tasks, or the quarter's. No grader version (#432). */
+export type BoxRow = {
+  box: CriterionName;
+  points: number;
+  source: BoxSource;
+  assignment: number | null;
   tasks: number;
   blank: number;
   same: number;
@@ -75,38 +105,46 @@ export type BoxRow = GroupKey & {
   pointsAdded: number;
   /** same / (tasks - blank), or null when the AI scored none. */
   agreedShare: number | null;
+  /** The tasks counted in `higher`, `lower` and `blank`; the same ones are not listed. */
+  higherTasks: ChangedTask[];
+  lowerTasks: ChangedTask[];
+  blankTasks: ChangedTask[];
 };
-
-export type BoxSource = "llm" | "evidence";
-
-export type BoxTable = { box: CriterionName; points: number; source: BoxSource; rows: BoxRow[] };
 
 export type AiGaveRow = { box: CriterionName; points: number; full: number; half: number; zero: number; blank: number; other: number };
 
-export type ProgressRow = {
-  assignment: number;
-  submitted: number;
-  graded: number;
-  savedNotReleased: number;
-  released: number;
-  regradedAfterRelease: number;
+export type ProgressCounts = { submitted: number; graded: number; savedNotReleased: number; released: number; regradedAfterRelease: number };
+export type WaitCounts = { submissions: number; medianMs: number | null };
+
+/** Every table for one assignment (`assignment` a number) or for the whole quarter (`assignment` null). */
+export type ScopeStats = {
+  assignment: number | null;
+  /** Released tasks compared in this scope; the "fewer than 10" rule reads this. */
+  comparedTasks: number;
+  /** A row per grader version, then the scope's own row (model and prompt version null) last. */
+  totals: TotalsRow[];
+  /** The six boxes, in rubric order. */
+  boxes: BoxRow[];
+  aiGave: AiGaveRow[];
+  progress: ProgressCounts;
+  waiting: WaitCounts;
 };
 
-export type WaitRow = { assignment: number; submissions: number; medianMs: number | null };
-
 export type GraderStats = {
-  /** Released tasks compared, all assignments together; the "fewer than 10" rule reads this. */
+  /** Released tasks compared, all assignments together. */
   comparedTasks: number;
   /** Released tasks regraded after release with no recorded staff save to compare against, left out. */
   regradedAfterRelease: number;
   /** Compared tasks with staff points but no recorded save time (saves made before #429), compared with the newest AI grade. */
   noSaveTime: number;
-  totals: TotalsRow[];
-  boxes: BoxTable[];
-  aiGave: AiGaveRow[];
-  progress: ProgressRow[];
-  waiting: WaitRow[];
+  /** One per assignment with a submission or grade, in order. */
+  byAssignment: ScopeStats[];
+  /** Every assignment together. */
+  quarter: ScopeStats;
 };
+
+/** The staff route's answer (#432): the course's title and term (its quarter), and the numbers. */
+export type GraderStatsResponse = GraderStats & { course: { title: string; term: string } };
 
 /** Fewer released tasks than this and the page names no most- or least-agreed box. */
 export const MIN_TASKS_FOR_EXTREMES = 10;
@@ -181,77 +219,67 @@ export function median(values: number[]): number | null {
   return sorted.length % 2 === 1 ? sorted[middle]! : (sorted[middle - 1]! + sorted[middle]!) / 2;
 }
 
-const groupId = (key: GroupKey) => JSON.stringify([key.assignment, key.model, key.promptVersion]);
-const ALL: GroupKey = { assignment: null, model: null, promptVersion: null };
+const changed = (grade: GraderGradeInput, ai: number | null, final: number | null): ChangedTask =>
+  ({ submissionId: grade.submissionKey, taskSlot: grade.taskSlot, assignment: grade.assignmentNumber, ai, final });
 
-/** Groups in display order: by assignment, model, prompt version; the all-together row last. */
-function orderedGroups(keys: Iterable<GroupKey>): GroupKey[] {
-  const unique = new Map<string, GroupKey>();
-  for (const key of keys) unique.set(groupId(key), key);
-  const list = [...unique.values()].sort((a, b) =>
-    (a.assignment ?? 0) - (b.assignment ?? 0) || String(a.model).localeCompare(String(b.model)) || String(a.promptVersion).localeCompare(String(b.promptVersion)));
-  return [...list, ALL];
+/** Task order inside a list: assignment, then submission, then slot, so a reload shows the same order. */
+const byTask = (a: ChangedTask, b: ChangedTask) => a.assignment - b.assignment || a.submissionId.localeCompare(b.submissionId) || a.taskSlot - b.taskSlot;
+
+/** One Totals row over these compared tasks. */
+function totalsRow(key: GroupKey, rows: GraderGradeInput[]): TotalsRow {
+  let same = 0; let added = 0; let accepted = 0;
+  const higherTasks: ChangedTask[] = [];
+  const lowerTasks: ChangedTask[] = [];
+  for (const grade of rows) {
+    const ai = num(grade.agentTotal) ?? 0;
+    const final = num(grade.instructorTotal) ?? ai;
+    const diff = cents(final) - cents(ai);
+    if (diff === 0) same += 1;
+    else (diff > 0 ? higherTasks : lowerTasks).push(changed(grade, round2(ai), round2(final)));
+    added += final - ai;
+    const asItStood = RUBRIC.every((row) => {
+      const box = aiBox(grade.rubric, row.name);
+      const kept = finalBox(grade, row.name, box);
+      return box.awarded !== null && kept !== null && cents(kept) === cents(box.awarded);
+    });
+    if (asItStood) accepted += 1;
+  }
+  return {
+    ...key, released: rows.length, same, higher: higherTasks.length, lower: lowerTasks.length, pointsAdded: round2(added),
+    sameShare: share(same, rows.length), accepted, acceptedShare: share(accepted, rows.length),
+    higherTasks: higherTasks.sort(byTask), lowerTasks: lowerTasks.sort(byTask),
+  };
 }
 
-/** Everything the Grader page shows, from one course's submissions and grade rows. */
-export function graderStats(input: GraderStatsInput): GraderStats {
-  const current = input.grades.filter((grade) => !grade.superseded);
-  const compared = current.flatMap((grade) => comparedGrade(grade) ?? []);
-  const regraded = current.filter((grade) => grade.releasedAt && comparedGrade(grade) === null);
-  const noSaveTime = compared.filter((grade) => items(grade.instructorRubric).length > 0 && !grade.instructorSavedAt).length;
+/** One box over these compared tasks. */
+function boxRow(row: (typeof RUBRIC)[number], source: BoxSource, assignment: number | null, tasks: GraderGradeInput[]): BoxRow {
+  let same = 0; let needsReview = 0; let added = 0;
+  const higherTasks: ChangedTask[] = [];
+  const lowerTasks: ChangedTask[] = [];
+  const blankTasks: ChangedTask[] = [];
+  for (const grade of tasks) {
+    const ai = aiBox(grade.rubric, row.name);
+    const final = finalBox(grade, row.name, ai);
+    if (ai.needsReview) needsReview += 1;
+    added += (final ?? 0) - (ai.awarded ?? 0);
+    if (ai.awarded === null) { blankTasks.push(changed(grade, null, final === null ? null : round2(final))); continue; }
+    const diff = cents(final ?? 0) - cents(ai.awarded);
+    if (diff === 0) same += 1;
+    else (diff > 0 ? higherTasks : lowerTasks).push(changed(grade, round2(ai.awarded), round2(final ?? 0)));
+  }
+  const blank = blankTasks.length;
+  return {
+    box: row.name, points: row.points, source, assignment, tasks: tasks.length, blank, same, higher: higherTasks.length, lower: lowerTasks.length,
+    needsReview, pointsAdded: round2(added), agreedShare: share(same, tasks.length - blank),
+    higherTasks: higherTasks.sort(byTask), lowerTasks: lowerTasks.sort(byTask), blankTasks: blankTasks.sort(byTask),
+  };
+}
 
-  const keyOf = (grade: GraderGradeInput): GroupKey => ({ assignment: grade.assignmentNumber, model: grade.model, promptVersion: grade.promptVersion });
-  const groups = orderedGroups(compared.map(keyOf));
-  const inGroup = (key: GroupKey) => (grade: GraderGradeInput) => key.assignment === null || groupId(keyOf(grade)) === groupId(key);
-
-  // Table 1: totals.
-  const totals: TotalsRow[] = groups.map((key) => {
-    let same = 0; let higher = 0; let lower = 0; let added = 0; let accepted = 0;
-    const rows = compared.filter(inGroup(key));
-    for (const grade of rows) {
-      const ai = num(grade.agentTotal) ?? 0;
-      const final = num(grade.instructorTotal) ?? ai;
-      const diff = cents(final) - cents(ai);
-      if (diff === 0) same += 1; else if (diff > 0) higher += 1; else lower += 1;
-      added += final - ai;
-      const asItStood = RUBRIC.every((row) => {
-        const box = aiBox(grade.rubric, row.name);
-        const kept = finalBox(grade, row.name, box);
-        return box.awarded !== null && kept !== null && cents(kept) === cents(box.awarded);
-      });
-      if (asItStood) accepted += 1;
-    }
-    return {
-      ...key, released: rows.length, same, higher, lower, pointsAdded: round2(added),
-      sameShare: share(same, rows.length), accepted, acceptedShare: share(accepted, rows.length),
-    };
-  });
-
-  // Table 2: by rubric box.
-  const boxes: BoxTable[] = RUBRIC.map((row) => {
-    const sources = new Set(current.map((grade) => aiBox(grade.rubric, row.name).source).filter((source): source is BoxSource => source !== null));
-    const source: BoxSource = sources.size === 1 ? [...sources][0]! : (LLM_CRITERIA as readonly string[]).includes(row.name) ? "llm" : "evidence";
-    const rows: BoxRow[] = groups.map((key) => {
-      let blank = 0; let same = 0; let higher = 0; let lower = 0; let needsReview = 0; let added = 0;
-      const tasks = compared.filter(inGroup(key));
-      for (const grade of tasks) {
-        const ai = aiBox(grade.rubric, row.name);
-        const final = finalBox(grade, row.name, ai);
-        if (ai.needsReview) needsReview += 1;
-        added += (final ?? 0) - (ai.awarded ?? 0);
-        if (ai.awarded === null) { blank += 1; continue; }
-        const diff = cents(final ?? 0) - cents(ai.awarded);
-        if (diff === 0) same += 1; else if (diff > 0) higher += 1; else lower += 1;
-      }
-      return { ...key, tasks: tasks.length, blank, same, higher, lower, needsReview, pointsAdded: round2(added), agreedShare: share(same, tasks.length - blank) };
-    });
-    return { box: row.name, points: row.points, source, rows };
-  });
-
-  // Table 3: what the AI gave, on every current graded task, released or not.
-  const aiGave: AiGaveRow[] = RUBRIC.map((row) => {
+/** What the AI gave, per box, over these current graded tasks (released or not). */
+function aiGaveRows(grades: GraderGradeInput[]): AiGaveRow[] {
+  return RUBRIC.map((row) => {
     const counts = { full: 0, half: 0, zero: 0, blank: 0, other: 0 };
-    for (const grade of current) {
+    for (const grade of grades) {
       const awarded = aiBox(grade.rubric, row.name).awarded;
       if (awarded === null) counts.blank += 1;
       else if (cents(awarded) === cents(row.points)) counts.full += 1;
@@ -261,21 +289,24 @@ export function graderStats(input: GraderStatsInput): GraderStats {
     }
     return { box: row.name, points: row.points, ...counts };
   });
+}
 
-  // Progress and waiting time, per assignment.
+const versionId = (grade: GraderGradeInput) => JSON.stringify([grade.model, grade.promptVersion]);
+
+/** Everything the Grader page shows, from one course's submissions and grade rows. */
+export function graderStats(input: GraderStatsInput): GraderStats {
+  const current = input.grades.filter((grade) => !grade.superseded);
+  const compared = current.flatMap((grade) => comparedGrade(grade) ?? []);
+  const regraded = current.filter((grade) => grade.releasedAt && comparedGrade(grade) === null);
+  const noSaveTime = compared.filter((grade) => items(grade.instructorRubric).length > 0 && !grade.instructorSavedAt).length;
   const currentSubmissions = input.submissions.filter((submission) => !submission.superseded);
-  const assignments = [...new Set([...currentSubmissions.map((s) => s.assignmentNumber), ...current.map((g) => g.assignmentNumber)])].sort((a, b) => a - b);
-  const progress: ProgressRow[] = assignments.map((assignment) => {
-    const grades = current.filter((grade) => grade.assignmentNumber === assignment);
-    return {
-      assignment,
-      submitted: currentSubmissions.filter((s) => s.assignmentNumber === assignment).reduce((sum, s) => sum + s.taskCount, 0),
-      graded: grades.length,
-      savedNotReleased: grades.filter((grade) => !grade.releasedAt && items(grade.instructorRubric).length > 0).length,
-      released: grades.filter((grade) => grade.releasedAt).length,
-      regradedAfterRelease: grades.filter(regradedAfterRelease).length,
-    };
-  });
+
+  // A box's source is read over the whole course, so it is the same in every scope.
+  const sources = new Map(RUBRIC.map((row) => {
+    const seen = new Set(current.map((grade) => aiBox(grade.rubric, row.name).source).filter((source): source is BoxSource => source !== null));
+    const source: BoxSource = seen.size === 1 ? [...seen][0]! : (LLM_CRITERIA as readonly string[]).includes(row.name) ? "llm" : "evidence";
+    return [row.name, source];
+  }));
 
   // Waiting time: per current submission with a released task, submitted to first released.
   const firstRelease = new Map<string, { assignment: number; submittedAt: string; releasedAt: number }>();
@@ -285,12 +316,40 @@ export function graderStats(input: GraderStatsInput): GraderStats {
     const seen = firstRelease.get(grade.submissionKey);
     if (!seen || at < seen.releasedAt) firstRelease.set(grade.submissionKey, { assignment: grade.assignmentNumber, submittedAt: grade.submittedAt, releasedAt: at });
   }
-  const waiting: WaitRow[] = assignments.map((assignment) => {
-    const waits = [...firstRelease.values()].filter((item) => item.assignment === assignment).map((item) => item.releasedAt - Date.parse(item.submittedAt));
-    return { assignment, submissions: waits.length, medianMs: median(waits) };
-  });
 
-  return { comparedTasks: compared.length, regradedAfterRelease: regraded.length, noSaveTime, totals, boxes, aiGave, progress, waiting };
+  const scope = (assignment: number | null): ScopeStats => {
+    const mine = <T extends { assignmentNumber: number }>(rows: T[]) => (assignment === null ? rows : rows.filter((row) => row.assignmentNumber === assignment));
+    const tasks = mine(compared);
+    const grades = mine(current);
+
+    // Totals: a row per grader version, ordered by model then prompt version, then the scope's row.
+    const versions = new Map<string, GraderGradeInput[]>();
+    for (const grade of tasks) versions.set(versionId(grade), [...(versions.get(versionId(grade)) ?? []), grade]);
+    const versionRows = [...versions.values()]
+      .sort((a, b) => a[0]!.model.localeCompare(b[0]!.model) || a[0]!.promptVersion.localeCompare(b[0]!.promptVersion))
+      .map((rows) => totalsRow({ assignment, model: rows[0]!.model, promptVersion: rows[0]!.promptVersion }, rows));
+    const totals = [...versionRows, totalsRow({ assignment, model: null, promptVersion: null }, tasks)];
+
+    const waits = [...firstRelease.values()].filter((item) => assignment === null || item.assignment === assignment).map((item) => item.releasedAt - Date.parse(item.submittedAt));
+    return {
+      assignment,
+      comparedTasks: tasks.length,
+      totals,
+      boxes: RUBRIC.map((row) => boxRow(row, sources.get(row.name)!, assignment, tasks)),
+      aiGave: aiGaveRows(grades),
+      progress: {
+        submitted: mine(currentSubmissions).reduce((sum, s) => sum + s.taskCount, 0),
+        graded: grades.length,
+        savedNotReleased: grades.filter((grade) => !grade.releasedAt && items(grade.instructorRubric).length > 0).length,
+        released: grades.filter((grade) => grade.releasedAt).length,
+        regradedAfterRelease: grades.filter(regradedAfterRelease).length,
+      },
+      waiting: { submissions: waits.length, medianMs: median(waits) },
+    };
+  };
+
+  const assignments = [...new Set([...currentSubmissions.map((s) => s.assignmentNumber), ...current.map((g) => g.assignmentNumber)])].sort((a, b) => a - b);
+  return { comparedTasks: compared.length, regradedAfterRelease: regraded.length, noSaveTime, byAssignment: assignments.map(scope), quarter: scope(null) };
 }
 
 // ---- Wording shared by the page and the tests ----
@@ -312,43 +371,55 @@ export function formatDuration(ms: number | null): string {
   return unit(rest, "minute");
 }
 
-/** The All row of one box. */
-const allRow = (table: BoxTable) => table.rows[table.rows.length - 1]!;
-
-function boxLine(label: string, table: BoxTable): string {
-  const row = allRow(table);
-  return `${label}: ${table.box}, ${row.same} of ${row.tasks - row.blank} kept as the AI scored them (${formatShare(row.agreedShare)}).`;
+/** "Fall 2026 · Assignment 2" or "Fall 2026 · all assignments" (#432). */
+export function scopeLabel(term: string, assignment: number | null): string {
+  return assignment === null ? `${term} · all assignments` : `${term} · Assignment ${assignment}`;
 }
 
-/** The two lines above Table 2: the box agreed with most and least, or why none is named. */
-export function boxExtremesLines(stats: Pick<GraderStats, "comparedTasks" | "boxes">): string[] {
+/** A Totals row's label: the scope, then the grader version when the row is one version's. */
+export function groupLabel(term: string, key: GroupKey): string {
+  const scope = scopeLabel(term, key.assignment);
+  return key.model === null ? scope : `${scope} · ${key.model} · ${key.promptVersion}`;
+}
+
+function boxLine(label: string, scope: string, row: BoxRow): string {
+  return `${label} in ${scope}: ${row.box}, ${row.same} of ${row.tasks - row.blank} kept as the AI scored them (${formatShare(row.agreedShare)}).`;
+}
+
+/** The lines above the box table for one scope: the box agreed with most and least, or why none is named. */
+export function boxExtremesLines(term: string, stats: Pick<ScopeStats, "assignment" | "comparedTasks" | "boxes">): string[] {
+  const scope = scopeLabel(term, stats.assignment);
   if (stats.comparedTasks < MIN_TASKS_FOR_EXTREMES) {
-    return [`Only ${stats.comparedTasks} released ${stats.comparedTasks === 1 ? "task is" : "tasks are"} compared, fewer than ${MIN_TASKS_FOR_EXTREMES}, so no box is named as agreed with most or least.`];
+    return [`Only ${stats.comparedTasks} released ${stats.comparedTasks === 1 ? "task is" : "tasks are"} compared in ${scope}, fewer than ${MIN_TASKS_FOR_EXTREMES}, so no box is named as agreed with most or least.`];
   }
-  const scored = stats.boxes.filter((table) => allRow(table).agreedShare !== null);
-  if (scored.length === 0) return ["The AI left every box blank on the released tasks, so no box can be named."];
+  const scored = stats.boxes.filter((row) => row.agreedShare !== null);
+  if (scored.length === 0) return [`The AI left every box blank on the released tasks of ${scope}, so no box can be named.`];
   // Highest share first; on a tie, the box with more scored tasks, then rubric order.
-  const order = (a: BoxTable, b: BoxTable) => (allRow(b).agreedShare! - allRow(a).agreedShare!)
-    || ((allRow(b).tasks - allRow(b).blank) - (allRow(a).tasks - allRow(a).blank));
-  const sorted = [...scored].sort(order);
+  const sorted = [...scored].sort((a, b) => (b.agreedShare! - a.agreedShare!) || ((b.tasks - b.blank) - (a.tasks - a.blank)));
   const most = sorted[0]!;
   const least = sorted[sorted.length - 1]!;
-  if (allRow(most).agreedShare === allRow(least).agreedShare) {
-    return [`Every box the AI scored was kept as the AI scored it equally often (${formatShare(allRow(most).agreedShare)}).`];
+  if (most.agreedShare === least.agreedShare) {
+    return [`In ${scope}, every box the AI scored was kept as the AI scored it equally often (${formatShare(most.agreedShare)}).`];
   }
-  return [boxLine("Agreed with most", most), boxLine("Agreed with least", least)];
+  return [boxLine("Agreed with most", scope, most), boxLine("Agreed with least", scope, least)];
 }
 
 /** The line naming which boxes the model scores and which come from recorded evidence. */
-export function boxSourcesLine(boxes: Pick<BoxTable, "box" | "source">[]): string {
+export function boxSourcesLine(boxes: Pick<BoxRow, "box" | "source">[]): string {
   const list = (source: BoxSource) => {
-    const names = boxes.filter((table) => table.source === source).map((table) => table.box);
+    const names = boxes.filter((row) => row.source === source).map((row) => row.box);
     return names.length > 1 ? `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}` : names.join("");
   };
   return `The model scores ${list("llm")}. ${list("evidence")} come from recorded evidence (CI results and PR history), not the model.`;
 }
 
-/** A group's label: "Assignment 2 · gpt-4o · cse115a-grader-v3", or "All". */
-export function groupLabel(key: GroupKey): string {
-  return key.assignment === null ? "All" : `Assignment ${key.assignment} · ${key.model} · ${key.promptVersion}`;
+/** One line of a changed-task list: "Assignment 3 · Task 2: AI 1, final 2" (#432). */
+export function changedTaskLine(task: ChangedTask): string {
+  const points = (value: number | null) => (value === null ? "blank" : String(Number(value.toFixed(2))));
+  return `Assignment ${task.assignment} · Task ${task.taskSlot}: AI ${points(task.ai)}, final ${points(task.final)}`;
+}
+
+/** The staff review page a changed task links to. The review page has no per-task address, so this is the submission's page. */
+export function reviewHref(task: Pick<ChangedTask, "submissionId">): string {
+  return `/cse115a/instructor/submissions/${encodeURIComponent(task.submissionId)}`;
 }

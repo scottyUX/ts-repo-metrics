@@ -26,8 +26,9 @@ const needsSeen = (grade: GradeRow) => Boolean(grade.released_at && grade.instru
 const historyKey = (submissionId: string, slot: number, gradedAt: string) => `${submissionId}|${slot}|${Date.parse(gradedAt)}`;
 
 /**
- * Reads one course's final submissions and their grade rows, every page of each, and returns only graderStats'
- * counts. `cse_task_grades` has no course column, so the course's submissions come first. History entries
+ * Reads one course's final submissions and their grade rows, every page of each, and returns graderStats' numbers:
+ * counts, and for the tasks staff changed the submission id and task slot (#432), which the Grader page links to.
+ * `cse_task_grades` has no course column, so the course's submissions come first. History entries
  * (`cse_task_ai_grades`) are read only for released tasks whose recorded staff save saw an older AI grade (#429).
  */
 export async function loadGraderStats(db: SupabaseClient, courseId: string): Promise<GraderStats> {
@@ -68,6 +69,7 @@ export async function loadGraderStats(db: SupabaseClient, courseId: string): Pro
       if (!submission) return [];
       return [{
         submissionKey: grade.assignment_submission_id,
+        taskSlot: grade.task_slot,
         assignmentNumber: submission.assignment_number,
         submittedAt: submission.submitted_at,
         superseded: submission.superseded_at !== null,
