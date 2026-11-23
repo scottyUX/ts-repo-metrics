@@ -97,6 +97,7 @@ export function InstructorHome() {
         {course ? (
           <nav className="flex gap-3 text-sm" aria-label="Course tools">
             <Link href={`/cse115a/instructor/courses/${encodeURIComponent(course.slug)}/benchmark`} className="rounded-lg border border-border px-3 py-2 font-medium hover:bg-muted">Benchmark</Link>
+            <Link href={`/cse115a/instructor/courses/${encodeURIComponent(course.slug)}/grader`} className="rounded-lg border border-border px-3 py-2 font-medium hover:bg-muted">Grader</Link>
             <Link href={`/cse115a/instructor/courses/${encodeURIComponent(course.slug)}/staff`} className="rounded-lg border border-border px-3 py-2 font-medium hover:bg-muted">Staff</Link>
           </nav>
         ) : null}
