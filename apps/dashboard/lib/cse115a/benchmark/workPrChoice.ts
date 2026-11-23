@@ -11,7 +11,7 @@
 
 import { instanceId, isTaskFolderPath } from "@/lib/cse115a/benchmark/buildInstance";
 import {
-  applyRecapture, diffFileList, planRecapture, type RecaptureDb, type RecaptureDone, type TaskPlan,
+  applyRecapture, diffFileList, planRecapture, type RecaptureDb, type RecaptureDone, type RecaptureWrites, type StoredTaskRow, type TaskPlan,
 } from "@/lib/cse115a/benchmark/recapture";
 import { splitPatch } from "@/lib/cse115a/diff";
 import { duplicateTaskMessage } from "@/lib/cse115a/duplicateTask";
@@ -22,8 +22,8 @@ import {
   captureWorkPrTask, readPull, samePrTaskPathsOf, type Pull, type RecaptureResult, type TaskSnapshot, type WorkPrTarget,
 } from "@/lib/cse115a/submissionSnapshot";
 import {
-  benchmarkOutcomeLine, likelyReasons, orderCandidates, parsePrInput, previewSummary, WORK_PR_TEXT,
-  type WorkPrBefore, type WorkPrCandidate,
+  benchmarkOutcomeLine, extrasFirstMessage, likelyReasons, orderCandidates, parsePrInput, previewSummary, WORK_PR_TEXT,
+  type RepoCopyFrom, type WorkPrBefore, type WorkPrCandidate,
 } from "@/lib/cse115a/workPr";
 
 /** At most this many candidates are listed. */
@@ -41,6 +41,8 @@ export type CourseTaskRef = {
   repoFullName: string;
   prNumber: number;
   taskFilePrNumber: number | null;
+  /** #437: the task's extra PRs for its code (current submissions only; a task row has none). Missing means none. */
+  extraPrNumbers?: number[];
 };
 
 /** A PR another task uses, and where, as the page says it. */
@@ -50,6 +52,11 @@ export type UsedPr = { repoFullName: string; prNumber: number; where: string };
 export type WorkPrDb = RecaptureDb & {
   /** Every current submission's tasks and every saved task row in the course for this repository (any student). */
   loadCourseTaskRefs(courseId: string, repoFullName: string): Promise<CourseTaskRef[]>;
+  /**
+   * #437 (a fix to #431): whether a complete repo copy is stored for this instance at this base commit; null when it
+   * can't be asked (no Storage access, or an error). Optional: without it a staff change never records `repoCopyFrom`.
+   */
+  repoCopyStored?(instanceId: string, baseCommit: string): Promise<boolean | null>;
 };
 
 const same = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
@@ -74,6 +81,8 @@ export function usedPrs(refs: CourseTaskRef[], submission: Submission, slot: num
     const where = `Task ${task.slot} of this submission`;
     // Its task-file PR is not added: the same student's task in this sprint uses it only for the task file.
     add(task.repoFullName, task.prNumber, where);
+    // #437: an extra PR holds part of that task's code, so it counts as a code PR.
+    for (const extra of task.extraCodePrs ?? []) add(task.repoFullName, extra.prNumber, `${where}, as an extra PR for its code`);
   }
   for (const ref of refs) {
     if (ref.source === "submission" && ref.submissionId === submission.id) continue;
@@ -83,6 +92,7 @@ export function usedPrs(refs: CourseTaskRef[], submission: Submission, slot: num
     const where = ownStudent
       ? ownSprint ? `this student's Task ${ref.slot} in this sprint` : `this student's Task ${ref.slot} in Sprint ${ref.assignmentNumber}`
       : `another student's Task ${ref.slot} in Sprint ${ref.assignmentNumber}`;
+    for (const extra of ref.extraPrNumbers ?? []) add(ref.repoFullName, extra, `${where}, as an extra PR for its code`);
     if (!ownSprint) {
       add(ref.repoFullName, ref.prNumber, where);
       add(ref.repoFullName, ref.taskFilePrNumber, where);
@@ -116,12 +126,14 @@ function ownPrs(task: TaskSnapshot): Set<number> {
  * The student's merged PRs in the task's repository, newest merged first, likely ones first, at most
  * MAX_CANDIDATES, without the task's own PRs. The student is the author saved in the snapshot (`pr.author`); when
  * it is unknown every merged PR is listed and `authorKnown` is false. GitHub calls: up to MAX_LIST_PAGES pages of
- * closed PRs (stopping at a short page), then one file list per candidate; `calls` counts them.
+ * closed PRs (stopping at a short page), then one file list per candidate; `calls` counts them. The task's extra
+ * PRs (#437) are listed and marked `attached`.
  */
 export async function listWorkPrCandidates(gh: GitHubReader, task: TaskSnapshot, used: UsedPr[]): Promise<{ candidates: WorkPrCandidate[]; authorKnown: boolean; calls: number }> {
   const repo = `/repos/${task.repoFullName}`;
   const author = task.pr.author;
   const own = ownPrs(task);
+  const attached = new Set((task.extraCodePrs ?? []).map((extra) => extra.prNumber));
   let calls = 0;
   const merged: ListedPull[] = [];
   for (let page = 1; page <= MAX_LIST_PAGES; page++) {
@@ -144,6 +156,7 @@ export async function listWorkPrCandidates(gh: GitHubReader, task: TaskSnapshot,
       number: pull.number, title: pull.title, branch: pull.head.ref, mergedAt: pull.merged_at!,
       filesChanged: files.length, filesCapped: files.length >= 100,
       likely: reasons.length > 0, reasons, usedBy: usedBy(used, task.repoFullName, pull.number),
+      ...(attached.has(pull.number) ? { attached: true } : {}),
     };
   }));
   return { candidates: orderCandidates(candidates), authorKnown: Boolean(author), calls };
@@ -214,6 +227,46 @@ export function beforeOf(task: TaskSnapshot): WorkPrBefore {
   };
 }
 
+/**
+ * #437, a fix to #431: a stored copy is named for its instance and base commit and is never overwritten, so when a
+ * staff change keeps the copy's base commit, re-queuing the copy job finds it "already stored" and the copy keeps
+ * the earlier PR's commits. Before the apply: when a copy may already be stored at the base the row will have and the
+ * snapshot knows which PR it was made for (the task's PR before this change, or the PR the student submitted),
+ * Storage is asked. A copy is there: the task records `repoCopyFrom` (that PR), unless it is the chosen PR, and the
+ * review page says so. No copy: the copy job is queued so it is made for the chosen PR. Storage can't be asked: the
+ * copy job is queued and nothing is recorded. Changes only `writes`.
+ */
+export async function settleRepoCopy(
+  db: WorkPrDb, before: TaskSnapshot, planned: TaskPlan, storedTasks: StoredTaskRow[], writes: RecaptureWrites, repoCopies: boolean,
+): Promise<void> {
+  if (!writes.snapshot || (planned.action !== "replace" && planned.action !== "keep" && planned.action !== "back_to_candidate")) return;
+  const id = planned.task.instanceId;
+  const after = writes.snapshot.tasks.find((item) => item.slot === before.slot);
+  if (!after) return;
+  const stored = storedTasks.find((row) => row.instance_id === id) ?? null;
+  const copyBase = planned.action === "keep" && stored ? stored.base_commit : after.baseCommit;
+  let holder: RepoCopyFrom | null = null;
+  if (copyBase === before.baseCommit) holder = before.repoCopyFrom ?? { prNumber: before.prNumber, mergeCommitSha: before.pr.mergeCommitSha };
+  else if (before.workPrChoice && copyBase === before.workPrChoice.before.baseCommit) {
+    holder = { prNumber: before.workPrChoice.before.prNumber, mergeCommitSha: before.workPrChoice.before.mergeCommitSha };
+  }
+  let copyFrom: RepoCopyFrom | null = null;
+  if (holder && holder.mergeCommitSha !== after.pr.mergeCommitSha) {
+    let has: boolean | null = null;
+    try {
+      has = db.repoCopyStored ? await db.repoCopyStored(id, copyBase) : null;
+    } catch {
+      has = null;
+    }
+    if (has === true) copyFrom = holder;
+    else if (repoCopies && !writes.baseChanged.includes(id)) writes.baseChanged.push(id);
+  }
+  const next: TaskSnapshot = { ...after };
+  if (copyFrom) next.repoCopyFrom = copyFrom;
+  else delete next.repoCopyFrom;
+  writes.snapshot = { ...writes.snapshot, tasks: writes.snapshot.tasks.map((item) => (item.slot === before.slot ? next : item)) };
+}
+
 export const STALE_PAGE = "This page is out of date: the task changed since you opened it. Reload the page and try again.";
 export const NOTHING_TO_UNDO = "Staff have not chosen a PR for this task, so there is nothing to undo.";
 export const NO_REASON = "Give a reason. It is saved with the change.";
@@ -228,12 +281,20 @@ export function undoBlockedMessage(prNumber: number, holderSlot: number, slot: n
     : `PR #${prNumber} now holds the code of Task ${holderSlot}, so Task ${slot} can't take its code from it again.`;
 }
 
-/** What the page saw when it was loaded: the task's PR and the snapshot's last re-capture time. */
-export type SeenState = { prNumber: number; recapturedAt: string | null };
+/**
+ * What the page saw when it was loaded: the task's PR, the snapshot's last re-capture time and (#437) the task's
+ * extra PRs, in order. A page that sends no `extraPrs` saw none.
+ */
+export type SeenState = { prNumber: number; recapturedAt: string | null; extraPrs?: number[] };
 
 export type WorkPrRequest =
   | { kind: "choose"; slot: number; pr: unknown; reason: string; apply: boolean; seen: SeenState | null }
   | { kind: "undo"; slot: number; seen: SeenState | null };
+
+/** #437: add an extra PR for the task's code (preview or apply), or remove one (always applied). */
+export type ExtraPrRequest =
+  | { kind: "addExtra"; slot: number; pr: unknown; reason: string; apply: boolean; seen: SeenState | null }
+  | { kind: "removeExtra"; slot: number; prNumber: unknown; seen: SeenState | null };
 
 /** The preview's answer: the chosen PR's own files and what happens to the benchmark row. */
 export type WorkPrPreview = {
@@ -257,10 +318,13 @@ export type WorkPrResult =
   | { ok: true; status: 200; body: { apply: false; preview: WorkPrPreview } }
   | { ok: true; status: 200; body: { apply: true; preview: WorkPrPreview; done: RecaptureDone; message: string } };
 
-function seenMatches(task: TaskSnapshot, submission: Submission, seen: SeenState | null): boolean {
+export function seenMatches(task: TaskSnapshot, submission: Submission, seen: SeenState | null): boolean {
   if (!seen) return false;
   const recapturedAt = (submission.snapshot as { recapturedAt?: string }).recapturedAt ?? null;
-  return seen.prNumber === task.prNumber && (seen.recapturedAt ?? null) === recapturedAt;
+  const extras = (task.extraCodePrs ?? []).map((extra) => extra.prNumber);
+  const seenExtras = seen.extraPrs ?? [];
+  return seen.prNumber === task.prNumber && (seen.recapturedAt ?? null) === recapturedAt
+    && seenExtras.length === extras.length && seenExtras.every((n, index) => n === extras[index]);
 }
 
 /**
@@ -280,6 +344,8 @@ export async function runWorkPrChange(
   if (submission.superseded_at !== null) return { ok: false, status: 409, error: WORK_PR_TEXT.readOnly };
   const applying = request.kind === "undo" || request.apply;
   if ((applying || request.seen) && !seenMatches(task, submission, request.seen)) return { ok: false, status: 409, error: STALE_PAGE };
+  // #437: the extra PRs were checked against the main PR; they are removed first, never kept or dropped silently.
+  if (task.extraCodePrs?.length) return { ok: false, status: 409, error: extrasFirstMessage(task.extraCodePrs.map((extra) => extra.prNumber)) };
 
   let target: WorkPrTarget;
   let pull: Pull;
@@ -378,6 +444,7 @@ export async function runWorkPrChange(
     warnings,
   };
   if (!applying) return { ok: true, status: 200, body: { apply: false, preview } };
+  await settleRepoCopy(db, task, planned, storedTasks, writes, options.repoCopies);
   const done = await applyRecapture(db, submission, writes, { repoCopies: options.repoCopies, now });
   if (done.stopped) return { ok: false, status: 409, error: done.stopped };
   return {

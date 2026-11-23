@@ -4,7 +4,8 @@ import { guardSubmission } from "@/lib/cse115a/instructorApi";
 import { courseRepoReader, githubAppConfig } from "@/lib/cse115a/githubApp";
 import { STAFF_READER_LOGIN } from "@/lib/cse115a/benchmark/recapture";
 import { repoCopiesEnabled } from "@/lib/cse115a/benchmark/repoCopySwitch";
-import { listWorkPrCandidates, runWorkPrChange, usedPrs, type SeenState, type WorkPrRequest } from "@/lib/cse115a/benchmark/workPrChoice";
+import { runExtraPrChange } from "@/lib/cse115a/benchmark/extraCodePrs";
+import { listWorkPrCandidates, runWorkPrChange, usedPrs, type ExtraPrRequest, type SeenState, type WorkPrRequest } from "@/lib/cse115a/benchmark/workPrChoice";
 import { supabaseWorkPrDb } from "@/lib/cse115a/benchmark/workPrChoiceStore";
 import { supabaseJobStore } from "@/lib/cse115a/jobs/supabaseStore";
 import type { Submission } from "@/lib/cse115a/jobs/runner";
@@ -18,6 +19,9 @@ type Params = { params: Promise<{ id: string }> };
 // repository (read-only). POST previews a choice (`apply: false`, the default, writes nothing), applies it
 // (`apply: true`), or undoes the last choice (`undo: true`). Staff of the submission's course only. No grade row,
 // grade status or grade job is ever written.
+//
+// #437: POST also adds an extra PR for the task's code (`extra`, with `reason`; `apply: false` previews and writes
+// nothing) or removes one (`removeExtra`, always applied). GET marks the task's extra PRs `attached`.
 
 const NO_APP = "The course GitHub App is not set up on this site, so the student's PRs cannot be read.";
 
@@ -27,9 +31,11 @@ function slotOf(value: unknown): number | null {
 }
 
 function seenOf(value: unknown): SeenState | null {
-  const seen = value as { prNumber?: unknown; recapturedAt?: unknown } | null | undefined;
+  const seen = value as { prNumber?: unknown; recapturedAt?: unknown; extraPrs?: unknown } | null | undefined;
   if (!seen || typeof seen !== "object" || typeof seen.prNumber !== "number") return null;
-  return { prNumber: seen.prNumber, recapturedAt: typeof seen.recapturedAt === "string" ? seen.recapturedAt : null };
+  const out: SeenState = { prNumber: seen.prNumber, recapturedAt: typeof seen.recapturedAt === "string" ? seen.recapturedAt : null };
+  if (Array.isArray(seen.extraPrs) && seen.extraPrs.every((n) => typeof n === "number")) out.extraPrs = seen.extraPrs as number[];
+  return out;
 }
 
 async function load(id: string): Promise<{ submission: Submission | null } | { response: NextResponse }> {
@@ -70,20 +76,30 @@ export async function POST(request: Request, { params }: Params): Promise<NextRe
   const { id } = await params;
   const guard = await guardSubmission(id);
   if ("response" in guard) return guard.response;
-  const body = await request.json().catch(() => ({})) as { slot?: unknown; pr?: unknown; prNumber?: unknown; reason?: unknown; apply?: unknown; undo?: unknown; seen?: unknown };
+  const body = await request.json().catch(() => ({})) as {
+    slot?: unknown; pr?: unknown; prNumber?: unknown; reason?: unknown; apply?: unknown; undo?: unknown; seen?: unknown; extra?: unknown; removeExtra?: unknown;
+  };
   const slot = slotOf(body.slot);
   if (slot === null) return NextResponse.json({ error: "Say which task (slot)." }, { status: 400 });
-  const change: WorkPrRequest = body.undo === true
-    ? { kind: "undo", slot, seen: seenOf(body.seen) }
-    : { kind: "choose", slot, pr: body.pr ?? body.prNumber, reason: typeof body.reason === "string" ? body.reason : "", apply: body.apply === true, seen: seenOf(body.seen) };
+  const reason = typeof body.reason === "string" ? body.reason : "";
+  const change: WorkPrRequest | ExtraPrRequest = body.removeExtra !== undefined
+    ? { kind: "removeExtra", slot, prNumber: body.removeExtra, seen: seenOf(body.seen) }
+    : body.extra !== undefined
+      ? { kind: "addExtra", slot, pr: body.extra, reason, apply: body.apply === true, seen: seenOf(body.seen) }
+      : body.undo === true
+        ? { kind: "undo", slot, seen: seenOf(body.seen) }
+        : { kind: "choose", slot, pr: body.pr ?? body.prNumber, reason, apply: body.apply === true, seen: seenOf(body.seen) };
   if (!githubAppConfig()) return NextResponse.json({ error: NO_APP }, { status: 503 });
   const loaded = await load(id);
   if ("response" in loaded) return loaded.response;
   const submission = loaded.submission;
   if (!submission || submission.course_id !== guard.course.id) return NextResponse.json({ error: "Submission not found." }, { status: 404 });
   try {
-    const result = await runWorkPrChange(supabaseWorkPrDb(getSupabase()), courseRepoReader(STAFF_READER_LOGIN), submission, change,
-      { by: guard.identity.email, repoCopies: repoCopiesEnabled() });
+    const db = supabaseWorkPrDb(getSupabase());
+    const gh = courseRepoReader(STAFF_READER_LOGIN);
+    const result = change.kind === "addExtra" || change.kind === "removeExtra"
+      ? await runExtraPrChange(db, gh, submission, change, { by: guard.identity.email })
+      : await runWorkPrChange(db, gh, submission, change, { by: guard.identity.email, repoCopies: repoCopiesEnabled() });
     return result.ok ? NextResponse.json(result.body) : NextResponse.json({ error: result.error }, { status: result.status });
   } catch (error) {
     return NextResponse.json({ error: `Could not change the task's PR: ${error instanceof Error ? error.message : String(error)}`.slice(0, 500) }, { status: 500 });
