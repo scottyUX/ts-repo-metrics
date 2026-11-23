@@ -8,9 +8,9 @@ import { workPrGraderNote } from "@/lib/cse115a/workPr";
 // Every criterion must quote its evidence; a quote that does not appear in the
 // submission (or no quote at all) marks the criterion for instructor review.
 
-// Bump whenever the prompt or the rubric text in lib/cse115a/rubric.ts changes. v6 (#431): a task whose code PR
-// staff chose gets a note saying the code is from that PR and the task file from the submitted one.
-export const GRADER_PROMPT_VERSION = "cse115a-grader-v6";
+// Bump whenever the prompt or the rubric text in lib/cse115a/rubric.ts changes. A per-task note (like "The diff has
+// no test files." or #431's note for a task whose code PR staff chose) is not a prompt change and needs no bump.
+export const GRADER_PROMPT_VERSION = "cse115a-grader-v5";
 export const DEFAULT_GRADER_MODEL = "gpt-4o";
 
 const MAX_SPEC_CHARS = 20_000;

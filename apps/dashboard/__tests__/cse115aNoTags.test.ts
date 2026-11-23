@@ -65,6 +65,6 @@ describe("rubric Process row (#392)", () => {
     expect(LLM_CRITERIA).not.toContain("Tests pass");
     expect(SYSTEM_PROMPT).not.toContain("Task file first");
     expect(SYSTEM_PROMPT).not.toMatch(/\btags?\b/);
-    expect(GRADER_PROMPT_VERSION).toBe("cse115a-grader-v6");
+    expect(GRADER_PROMPT_VERSION).toBe("cse115a-grader-v5");
   });
 });

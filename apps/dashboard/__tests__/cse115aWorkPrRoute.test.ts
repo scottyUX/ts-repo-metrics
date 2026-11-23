@@ -43,7 +43,7 @@ beforeEach(() => {
 });
 
 describe("#431: the work-PR route", () => {
-  it("refuses a caller who is not staff of the submission's course (including staff of another course), for the list and for a change", async () => {
+  it("passes on the guard's refusal (403) for the list, a change and an undo, and does no work", async () => {
     state.guard = () => ({ response: NextResponse.json({ error: "You are not on this course's staff." }, { status: 403 }) });
     for (const response of [await get(), await post({ slot: 1, pr: 5, reason: "r", apply: true }), await post({ slot: 1, undo: true })]) {
       expect(response.status).toBe(403);

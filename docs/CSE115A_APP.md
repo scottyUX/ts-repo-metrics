@@ -573,7 +573,8 @@ it never chooses on its own. Nothing a student sees changes.
   from the grade's `graded_at` against the choice's or undo's time). Staff
   numbers already saved stay.
 - The grader's input for such a task says the code is from the chosen PR and the
-  task file from the submitted one (prompt version `cse115a-grader-v6`). Process
+  task file from the submitted one. This is a per-task note, like "The diff has
+  no test files.", so the prompt version stays `cse115a-grader-v5`. Process
   follows the paired rule: not "task file first", flagged for review, with a
   rationale that says staff chose the code PR.
 

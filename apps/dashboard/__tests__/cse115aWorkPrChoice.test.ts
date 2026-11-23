@@ -592,7 +592,7 @@ describe("7. grading a staff-chosen task", () => {
     return state.row.snapshot.tasks[0]!;
   }
 
-  it("the grader's input says the code is from the chosen PR and the task file from the submitted one; v6", async () => {
+  it("the grader's input says the code is from the chosen PR and the task file from the submitted one; the prompt version stays v5", async () => {
     const task = await switchedTask();
     const input = graderInput(task);
     expect(input.notes).toEqual([workPrGraderNote(5, 7)]);
@@ -600,7 +600,7 @@ describe("7. grading a staff-chosen task", () => {
     expect(buildMessages(input)[1]!.content).toContain(`Note: ${input.notes[0]}`);
     // A paired task the student made is unchanged.
     expect(graderInput({ ...task, workPrChoice: undefined }).notes).toEqual([]);
-    expect(GRADER_PROMPT_VERSION).toBe("cse115a-grader-v6");
+    expect(GRADER_PROMPT_VERSION).toBe("cse115a-grader-v5");
   });
 
   it("Process follows the paired rule: not task file first, flagged, and it does not blame the first commit", async () => {

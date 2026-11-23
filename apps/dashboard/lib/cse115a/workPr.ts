@@ -105,7 +105,7 @@ export function getTheCodeChoiceNote(task: ChoiceTask & { workPrChoice: WorkPrCh
   return `These commands check out the merge commit of PR #${task.prNumber}, which staff chose as the PR that holds this task's code. The task file is in PR #${taskFile}.`;
 }
 
-/** The grader's note for a staff-chosen task (added to its input; GRADER_PROMPT_VERSION v6). */
+/** The grader's note for a staff-chosen task (added to its input like the other per-task notes, so GRADER_PROMPT_VERSION is unchanged). */
 export function workPrGraderNote(workPrNumber: number, taskFilePrNumber: number): string {
   return `The code and tests below are from PR #${workPrNumber}, which course staff chose as the PR that holds this task's work. The task file was submitted in a separate PR, #${taskFilePrNumber}, so it is not in this diff. Judge the code and tests in PR #${workPrNumber} against that task file.`;
 }
