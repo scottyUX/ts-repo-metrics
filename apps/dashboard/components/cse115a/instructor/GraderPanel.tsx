@@ -1,12 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState, type ReactNode } from "react";
+import { Fragment, useEffect, useId, useState, type ReactNode } from "react";
 import {
-  boxExtremesLines, boxSourcesLine, formatDuration, formatShare, groupLabel,
-  type GraderStats,
+  boxExtremesLines, boxSourcesLine, changedTaskLine, formatDuration, formatShare, groupLabel, reviewHref, scopeLabel,
+  type ChangedTask, type GraderStats, type GraderStatsResponse, type ScopeStats,
 } from "@/lib/cse115a/graderStats";
-import { fetchJson, formatPoints, type StaffCourse } from "./shared";
+import { fetchJson, formatPoints } from "./shared";
+
+/** Which way every table is grouped (#432). */
+export type GraderScope = "assignment" | "quarter";
 
 /** Every fixed sentence on the Grader page (#423), in the order it appears. */
 export const GRADER_TEXT = {
@@ -18,20 +21,29 @@ export const GRADER_TEXT = {
     "The AI grade recorded is the one on the task when Save was pressed; a Regrade that finished while the review page was open is not noticed.",
     "The reason for a change is not stored.",
   ],
+  scopeLegend: "Show the numbers",
+  byAssignment: "By assignment",
+  wholeQuarter: "Whole quarter",
+  links: "A number of changed tasks that is not 0 opens the list of those tasks. Each links to its submission's staff review page, which shows every task of the submission; the task is the one with that number.",
   empty: "No grades are released in this course yet, so there is nothing to compare. What the AI gave and the progress so far are below.",
   nothingYet: "Nothing has been submitted in this course yet.",
   totalsHeading: "Totals",
-  totalsNote: "Per assignment and grader version, then all together. Same: the final total equals the AI total. Points added: final minus AI, summed. Accepted as it stood: the final equals the AI on all six boxes and the AI left none blank.",
+  totalsNote: "A row per grader version, then the assignment's row (or the quarter's). Same: the final total equals the AI total. Points added: final minus AI, summed. Accepted as it stood: the final equals the AI on all six boxes and the AI left none blank.",
   boxesHeading: "By rubric box",
-  boxesNote: "AI left blank: the AI gave no score, or an older grade has no such box; these count in neither same, higher nor lower. Agreed: same, out of the tasks where the AI gave a score. Points added counts a blank AI box as 0. Needs review: tasks where the AI flagged the box.",
+  boxesNote: "One row per box, for each assignment or for the quarter; grader versions are compared in Totals. AI left blank: the AI gave no score, or an older grade has no such box; these count in neither same, higher nor lower. Agreed: same, out of the tasks where the AI gave a score. Points added counts a blank AI box as 0. Needs review: tasks where the AI flagged the box.",
   aiGaveHeading: "What the AI gave",
   aiGaveNote: "Every current graded task, released or not. Full is all the box's points, half is half, zero is none, blank is no score.",
   progressHeading: "Progress",
   progressNote: "Current attempts only. Released includes the tasks regraded after release. Regraded after release counts every such task, including those compared with the AI grade staff saw.",
   timeHeading: "Time",
-  timeNote: "Waiting time, not grading time: the median from when a student submitted to when that submission was first released.",
+  timeNote: "Waiting time, not grading time: the median from when a student submitted to when that submission was first released. For the whole quarter, the median over every released submission.",
   noTimer: "The site does not record time spent grading.",
 } as const;
+
+/** The line under the heading naming the quarter (#432). */
+export function quarterLine(term: string): string {
+  return `These numbers are for ${term} only. Each quarter is its own course, with its own Grader page.`;
+}
 
 /** "12 released tasks were regraded after release …", always shown so a zero is visible too. */
 export function regradedLine(count: number): string {
@@ -48,6 +60,14 @@ export function signedPoints(value: number): string {
   if (value === 0) return "0";
   return `${value > 0 ? "+" : "−"}${formatPoints(Math.abs(value))}`;
 }
+
+/** The heading over one opened list: "Final higher than the AI: Specs, Fall 2026 · Assignment 2" (#432). */
+export function changedListHeading(kind: ChangeKind, what: string): string {
+  const lead = kind === "higher" ? "Final higher than the AI" : kind === "lower" ? "Final lower than the AI" : "AI left blank";
+  return `${lead}: ${what}`;
+}
+
+type ChangeKind = "higher" | "lower" | "blank";
 
 const cell = "px-3 py-2 text-right tabular-nums";
 const head = "px-3 py-2 font-medium";
@@ -75,18 +95,94 @@ function Section({ heading, note, children }: { heading: string; note: string; c
   );
 }
 
-const rowClass = (all: boolean) => (all ? "bg-muted/40 font-medium" : "");
+const rowClass = (scopeRow: boolean) => (scopeRow ? "bg-muted/40 font-medium" : "");
+
+type Cell = { text: ReactNode; className?: string } | { kind: ChangeKind; count: number };
+
+/**
+ * A table row whose changed-task counts are buttons, each opening a list of links in a row under it (#432).
+ * Every list is in the markup, hidden until opened, so a screen reader and the keyboard reach it like any button.
+ */
+function ExpandableRow({ cells, lists, what, className, columns }: {
+  cells: Cell[]; lists: Partial<Record<ChangeKind, ChangedTask[]>>; what: string; className: string; columns: number;
+}) {
+  const [open, setOpen] = useState<ChangeKind | null>(null);
+  const base = useId();
+  const listId = (kind: ChangeKind) => `${base}-${kind}`;
+  return (
+    <>
+      <tr className={className}>
+        {cells.map((item, index) => {
+          if (!("kind" in item)) return <td key={index} className={item.className ?? cell}>{item.text}</td>;
+          if (item.count === 0) return <td key={index} className={cell}>0</td>;
+          return (
+            <td key={index} className={cell}>
+              <button type="button" aria-expanded={open === item.kind} aria-controls={listId(item.kind)}
+                aria-label={`${item.count}, ${open === item.kind ? "hide" : "show"} the tasks: ${changedListHeading(item.kind, what)}`}
+                onClick={() => setOpen(open === item.kind ? null : item.kind)}
+                className="font-medium text-primary underline underline-offset-2">
+                {item.count}
+              </button>
+            </td>
+          );
+        })}
+      </tr>
+      {(["higher", "lower", "blank"] as const).map((kind) => {
+        const tasks = lists[kind];
+        if (!tasks || tasks.length === 0) return null;
+        return (
+          <tr key={kind} id={listId(kind)} hidden={open !== kind} className="bg-muted/20">
+            <td colSpan={columns} className="px-3 py-2">
+              <p className="text-xs font-medium text-muted-foreground">{changedListHeading(kind, what)}</p>
+              <ul className="mt-1 space-y-0.5">
+                {tasks.map((task) => (
+                  <li key={`${task.submissionId}-${task.taskSlot}`}>
+                    <Link href={reviewHref(task)} className="text-primary underline">{changedTaskLine(task)}</Link>
+                  </li>
+                ))}
+              </ul>
+            </td>
+          </tr>
+        );
+      })}
+    </>
+  );
+}
+
+/** The two buttons choosing By assignment or Whole quarter. */
+function ScopeToggle({ scope, onChange }: { scope: GraderScope; onChange: (scope: GraderScope) => void }) {
+  const option = (value: GraderScope, label: string) => (
+    <button type="button" aria-pressed={scope === value} onClick={() => onChange(value)}
+      className={`rounded-md px-3 py-1.5 text-sm font-medium ${scope === value ? "bg-primary text-primary-foreground" : "hover:bg-muted"}`}>
+      {label}
+    </button>
+  );
+  return (
+    <div role="group" aria-label={GRADER_TEXT.scopeLegend} className="inline-flex gap-1 rounded-lg border border-border bg-card p-1">
+      {option("assignment", GRADER_TEXT.byAssignment)}
+      {option("quarter", GRADER_TEXT.wholeQuarter)}
+    </div>
+  );
+}
 
 /** The Grader page for one course's numbers; no fetching, so tests can render it. */
-export function GraderView({ heading, stats }: { heading: string; stats: GraderStats }) {
+export function GraderView({ course, stats, initialScope = "assignment" }: {
+  course: { title: string; term: string }; stats: GraderStats; initialScope?: GraderScope;
+}) {
+  const [scope, setScope] = useState<GraderScope>(initialScope);
+  const term = course.term;
   const anyCompared = stats.comparedTasks > 0;
-  const anything = stats.progress.length > 0;
-  const showOther = stats.aiGave.some((row) => row.other > 0);
+  const anything = stats.byAssignment.length > 0;
+  const scopes: ScopeStats[] = scope === "quarter" ? [stats.quarter] : stats.byAssignment;
+  const comparedScopes = scopes.filter((item) => item.comparedTasks > 0);
+  const showOther = scopes.some((item) => item.aiGave.some((row) => row.other > 0));
+  const groupColumn = scope === "quarter" ? "Quarter" : "Assignment";
   return (
     <div className="w-full max-w-6xl space-y-6 py-6">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-wide text-primary">{heading}</p>
-        <h1 className="mt-1 text-2xl font-semibold">{GRADER_TEXT.title}</h1>
+        <p className="text-xs font-semibold uppercase tracking-wide text-primary">{course.title}</p>
+        <h1 className="mt-1 text-2xl font-semibold">{GRADER_TEXT.title} · {term}</h1>
+        <p className="mt-1 max-w-3xl text-sm text-muted-foreground">{quarterLine(term)}</p>
         <p className="mt-1 max-w-3xl text-sm text-muted-foreground">{GRADER_TEXT.intro}</p>
         <ul className="mt-2 max-w-3xl list-disc space-y-1 pl-5 text-sm text-muted-foreground">
           {GRADER_TEXT.limits.map((line) => <li key={line}>{line}</li>)}
@@ -98,22 +194,30 @@ export function GraderView({ heading, stats }: { heading: string; stats: GraderS
       {anything ? <p className="text-sm">{regradedLine(stats.regradedAfterRelease)}</p> : null}
       {anyCompared ? <p className="text-sm">{noSaveTimeLine(stats.noSaveTime, stats.comparedTasks)}</p> : null}
 
+      {anything ? (
+        <div className="space-y-2">
+          <ScopeToggle scope={scope} onChange={setScope} />
+          {anyCompared ? <p className="max-w-3xl text-sm text-muted-foreground">{GRADER_TEXT.links}</p> : null}
+        </div>
+      ) : null}
+
       {anyCompared ? (
         <Section heading={GRADER_TEXT.totalsHeading} note={GRADER_TEXT.totalsNote}>
           <Table columns={["Group", "Tasks released", "Same", "Final higher", "Final lower", "Points added", "Same (share)", "Accepted as it stood", "Accepted (share)"]}>
-            {stats.totals.map((row) => (
-              <tr key={groupLabel(row)} className={rowClass(row.assignment === null)}>
-                <td className="px-3 py-2">{groupLabel(row)}</td>
-                <td className={cell}>{row.released}</td>
-                <td className={cell}>{row.same}</td>
-                <td className={cell}>{row.higher}</td>
-                <td className={cell}>{row.lower}</td>
-                <td className={cell}>{signedPoints(row.pointsAdded)}</td>
-                <td className={cell}>{formatShare(row.sameShare)}</td>
-                <td className={cell}>{row.accepted}</td>
-                <td className={cell}>{formatShare(row.acceptedShare)}</td>
-              </tr>
-            ))}
+            {comparedScopes.flatMap((item) => item.totals.map((row) => {
+              const label = groupLabel(term, row);
+              return (
+                <ExpandableRow key={label} what={`total, ${label}`} className={rowClass(row.model === null)} columns={9}
+                  lists={{ higher: row.higherTasks, lower: row.lowerTasks }}
+                  cells={[
+                    { text: label, className: "px-3 py-2" },
+                    { text: row.released }, { text: row.same },
+                    { kind: "higher", count: row.higher }, { kind: "lower", count: row.lower },
+                    { text: signedPoints(row.pointsAdded) }, { text: formatShare(row.sameShare) },
+                    { text: row.accepted }, { text: formatShare(row.acceptedShare) },
+                  ]} />
+              );
+            }))}
           </Table>
         </Section>
       ) : null}
@@ -121,22 +225,45 @@ export function GraderView({ heading, stats }: { heading: string; stats: GraderS
       {anyCompared ? (
         <Section heading={GRADER_TEXT.boxesHeading} note={GRADER_TEXT.boxesNote}>
           <div className="space-y-1 text-sm">
-            {boxExtremesLines(stats).map((line) => <p key={line} className="font-medium">{line}</p>)}
-            <p className="text-muted-foreground">{boxSourcesLine(stats.boxes)}</p>
+            {comparedScopes.flatMap((item) => boxExtremesLines(term, item)).map((line) => <p key={line} className="font-medium">{line}</p>)}
+            <p className="text-muted-foreground">{boxSourcesLine(stats.quarter.boxes)}</p>
           </div>
-          <Table columns={["Box", "Group", "Tasks", "AI left blank", "Same", "Final higher", "Final lower", "Needs review", "Points added", "Agreed"]} minWidth="min-w-[900px]">
-            {stats.boxes.flatMap((table) => table.rows.map((row, index) => (
-              <tr key={`${table.box}-${groupLabel(row)}`} className={rowClass(row.assignment === null)}>
-                <td className="px-3 py-2 font-medium">{index === 0 ? `${table.box} (${table.points})` : ""}</td>
-                <td className="px-3 py-2 text-right">{groupLabel(row)}</td>
-                <td className={cell}>{row.tasks}</td>
+          <Table columns={["Box", groupColumn, "Tasks", "AI left blank", "Same", "Final higher", "Final lower", "Needs review", "Points added", "Agreed"]} minWidth="min-w-[900px]">
+            {stats.quarter.boxes.map((quarterBox, boxIndex) => (
+              <Fragment key={quarterBox.box}>
+                {comparedScopes.map((item, index) => {
+                  const row = item.boxes[boxIndex]!;
+                  const label = scopeLabel(term, item.assignment);
+                  return (
+                    <ExpandableRow key={label} what={`${row.box}, ${label}`} className="" columns={10}
+                      lists={{ higher: row.higherTasks, lower: row.lowerTasks, blank: row.blankTasks }}
+                      cells={[
+                        { text: index === 0 ? `${row.box} (${row.points})` : "", className: "px-3 py-2 font-medium" },
+                        { text: label, className: "px-3 py-2 text-right" },
+                        { text: row.tasks }, { kind: "blank", count: row.blank }, { text: row.same },
+                        { kind: "higher", count: row.higher }, { kind: "lower", count: row.lower },
+                        { text: row.needsReview }, { text: signedPoints(row.pointsAdded) }, { text: formatShare(row.agreedShare) },
+                      ]} />
+                  );
+                })}
+              </Fragment>
+            ))}
+          </Table>
+        </Section>
+      ) : null}
+
+      {anything ? (
+        <Section heading={GRADER_TEXT.aiGaveHeading} note={GRADER_TEXT.aiGaveNote}>
+          <Table columns={["Box", groupColumn, "Full", "Half", "Zero", "Blank", ...(showOther ? ["Other"] : [])]} minWidth="min-w-[640px]">
+            {scopes.flatMap((item) => item.aiGave.map((row, index) => (
+              <tr key={`${item.assignment}-${row.box}`} className={index === 0 && item !== scopes[0] ? "border-t-2 border-border" : ""}>
+                <td className="px-3 py-2 font-medium">{row.box} ({row.points})</td>
+                <td className="px-3 py-2 text-right">{scopeLabel(term, item.assignment)}</td>
+                <td className={cell}>{row.full}</td>
+                <td className={cell}>{row.half}</td>
+                <td className={cell}>{row.zero}</td>
                 <td className={cell}>{row.blank}</td>
-                <td className={cell}>{row.same}</td>
-                <td className={cell}>{row.higher}</td>
-                <td className={cell}>{row.lower}</td>
-                <td className={cell}>{row.needsReview}</td>
-                <td className={cell}>{signedPoints(row.pointsAdded)}</td>
-                <td className={cell}>{formatShare(row.agreedShare)}</td>
+                {showOther ? <td className={cell}>{row.other}</td> : null}
               </tr>
             )))}
           </Table>
@@ -144,33 +271,16 @@ export function GraderView({ heading, stats }: { heading: string; stats: GraderS
       ) : null}
 
       {anything ? (
-        <Section heading={GRADER_TEXT.aiGaveHeading} note={GRADER_TEXT.aiGaveNote}>
-          <Table columns={["Box", "Full", "Half", "Zero", "Blank", ...(showOther ? ["Other"] : [])]} minWidth="min-w-[480px]">
-            {stats.aiGave.map((row) => (
-              <tr key={row.box}>
-                <td className="px-3 py-2 font-medium">{row.box} ({row.points})</td>
-                <td className={cell}>{row.full}</td>
-                <td className={cell}>{row.half}</td>
-                <td className={cell}>{row.zero}</td>
-                <td className={cell}>{row.blank}</td>
-                {showOther ? <td className={cell}>{row.other}</td> : null}
-              </tr>
-            ))}
-          </Table>
-        </Section>
-      ) : null}
-
-      {anything ? (
         <Section heading={GRADER_TEXT.progressHeading} note={GRADER_TEXT.progressNote}>
-          <Table columns={["Assignment", "Tasks submitted", "Graded by the AI", "Saved by staff, not released", "Released", "Regraded after release"]} minWidth="min-w-[640px]">
-            {stats.progress.map((row) => (
-              <tr key={row.assignment}>
-                <td className="px-3 py-2 font-medium">Assignment {row.assignment}</td>
-                <td className={cell}>{row.submitted}</td>
-                <td className={cell}>{row.graded}</td>
-                <td className={cell}>{row.savedNotReleased}</td>
-                <td className={cell}>{row.released}</td>
-                <td className={cell}>{row.regradedAfterRelease}</td>
+          <Table columns={[groupColumn, "Tasks submitted", "Graded by the AI", "Saved by staff, not released", "Released", "Regraded after release"]} minWidth="min-w-[640px]">
+            {scopes.map((item) => (
+              <tr key={String(item.assignment)} className={rowClass(item.assignment === null)}>
+                <td className="px-3 py-2 font-medium">{scopeLabel(term, item.assignment)}</td>
+                <td className={cell}>{item.progress.submitted}</td>
+                <td className={cell}>{item.progress.graded}</td>
+                <td className={cell}>{item.progress.savedNotReleased}</td>
+                <td className={cell}>{item.progress.released}</td>
+                <td className={cell}>{item.progress.regradedAfterRelease}</td>
               </tr>
             ))}
           </Table>
@@ -179,12 +289,12 @@ export function GraderView({ heading, stats }: { heading: string; stats: GraderS
 
       {anything ? (
         <Section heading={GRADER_TEXT.timeHeading} note={GRADER_TEXT.timeNote}>
-          <Table columns={["Assignment", "Submissions released", "Waiting time, not grading time (median)"]} minWidth="min-w-[480px]">
-            {stats.waiting.map((row) => (
-              <tr key={row.assignment}>
-                <td className="px-3 py-2 font-medium">Assignment {row.assignment}</td>
-                <td className={cell}>{row.submissions}</td>
-                <td className={cell}>{formatDuration(row.medianMs)}</td>
+          <Table columns={[groupColumn, "Submissions released", "Waiting time, not grading time (median)"]} minWidth="min-w-[480px]">
+            {scopes.map((item) => (
+              <tr key={String(item.assignment)} className={rowClass(item.assignment === null)}>
+                <td className="px-3 py-2 font-medium">{scopeLabel(term, item.assignment)}</td>
+                <td className={cell}>{item.waiting.submissions}</td>
+                <td className={cell}>{formatDuration(item.waiting.medianMs)}</td>
               </tr>
             ))}
           </Table>
@@ -196,26 +306,22 @@ export function GraderView({ heading, stats }: { heading: string; stats: GraderS
 }
 
 export function GraderPanel({ slug }: { slug: string }) {
-  const [stats, setStats] = useState<GraderStats | null>(null);
-  const [course, setCourse] = useState<StaffCourse | null>(null);
+  const [body, setBody] = useState<GraderStatsResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   useEffect(() => {
-    fetchJson<GraderStats>(`/api/cse115a/instructor/courses/${encodeURIComponent(slug)}/grader-stats`)
-      .then(setStats)
+    // The route returns the course's title and term with the numbers (#432).
+    fetchJson<GraderStatsResponse>(`/api/cse115a/instructor/courses/${encodeURIComponent(slug)}/grader-stats`)
+      .then(setBody)
       .catch((caught: Error) => setError(caught.message));
-    // The course's name for the heading; the numbers route returns counts only.
-    fetchJson<{ courses: StaffCourse[] }>("/api/cse115a/instructor/courses")
-      .then((body) => setCourse(body.courses.find((item) => item.slug === slug) ?? null))
-      .catch(() => setCourse(null));
   }, [slug]);
 
   const back = <Link href={`/cse115a/instructor?course=${encodeURIComponent(slug)}`} className="text-sm font-medium text-primary underline">← Submissions</Link>;
   if (error) return <div className="w-full max-w-6xl space-y-4 py-6">{back}<p role="alert" className="text-destructive">{error}</p></div>;
-  if (!stats) return <p className="py-10 text-muted-foreground">Loading…</p>;
+  if (!body) return <p className="py-10 text-muted-foreground">Loading…</p>;
   return (
     <div className="w-full max-w-6xl pt-6">
       {back}
-      <GraderView heading={course ? `${course.title} · ${course.term}` : slug} stats={stats} />
+      <GraderView course={body.course} stats={body} />
     </div>
   );
 }

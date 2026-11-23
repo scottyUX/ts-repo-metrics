@@ -2,18 +2,25 @@ import { NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase/server";
 import { guardCourse } from "@/lib/cse115a/instructorApi";
 import { loadGraderStats } from "@/lib/cse115a/loadGraderStats";
+import type { GraderStatsResponse } from "@/lib/cse115a/graderStats";
 
 export const runtime = "nodejs";
 
 type Params = { params: Promise<{ slug: string }> };
 
-/** How the AI grader is doing in this course (#423). Course staff. Counts only: never a row, an id, an email or a task. */
+/**
+ * How the AI grader is doing in this course (#423). Course staff. Counts, plus, for each task staff changed, its
+ * submission id and task slot so the page can link to the staff review page (#432); never an email, user id, repo,
+ * PR number, task ID, note or rationale.
+ */
 export async function GET(_request: Request, { params }: Params) {
   const { slug } = await params;
   const guard = await guardCourse(slug);
   if ("response" in guard) return guard.response;
   try {
-    return NextResponse.json(await loadGraderStats(getSupabase(), guard.course.id), { headers: { "cache-control": "no-store" } });
+    const stats = await loadGraderStats(getSupabase(), guard.course.id);
+    const body: GraderStatsResponse = { course: { title: guard.course.title, term: guard.course.term }, ...stats };
+    return NextResponse.json(body, { headers: { "cache-control": "no-store" } });
   } catch {
     return NextResponse.json({ error: "Could not load the grader numbers." }, { status: 500 });
   }
