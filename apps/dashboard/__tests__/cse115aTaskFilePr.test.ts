@@ -434,7 +434,8 @@ describe("9. card and review-page lines", () => {
     const card = readFileSync(new URL("../components/cse115a/CourseDashboard.tsx", import.meta.url), "utf8");
     expect(card).toContain("{pair && prNumber ? (");
     const review = readFileSync(new URL("../components/cse115a/instructor/SubmissionReview.tsx", import.meta.url), "utf8");
-    expect(review).toContain("{task.taskFilePr ? <p className=\"mt-2 text-sm text-amber-700 dark:text-amber-300\">{taskFilePrReviewLine(task.taskFilePr.number, task.prNumber, task.taskFilePr.fixesTaskPath)}</p> : null}");
+    // #431: a staff-made pair shows its own line first (workPrHeaderLine); every other paired task shows this one.
+    expect(review).toContain(": task.taskFilePr ? <p className=\"mt-2 text-sm text-amber-700 dark:text-amber-300\">{taskFilePrReviewLine(task.taskFilePr.number, task.prNumber, task.taskFilePr.fixesTaskPath)}</p> : null}");
   });
 
   it("adds no shared-PR line for a paired task alone in its PR", () => {

@@ -12,15 +12,17 @@ import { RUBRIC, TASK_POINTS } from "@/lib/cse115a/rubric";
 import { effectiveTotal, submittedSprintScore, type TaskGradeRow } from "@/lib/cse115a/gradeReview";
 import type { SubmissionSnapshot, TaskSnapshot } from "@/lib/cse115a/submissionSnapshot";
 import type { TaskCode } from "@/lib/cse115a/getTheCode";
+import { getTheCodeChoiceNote, staleAiGradeLine, workPrHeaderLine } from "@/lib/cse115a/workPr";
 import { AiGradeHistory, type AiGradeEntry } from "./AiGradeHistory";
 import { GetTheCode } from "./GetTheCode";
+import { WorkPrChooser } from "./WorkPrChooser";
 import { fetchJson, formatPoints, STATUS_LABELS, type StaffCourse, type SubmissionStatus } from "./shared";
 
 type Detail = {
   course: StaffCourse;
   submission: {
     id: string; assignment_number: number; attempt: number; status: SubmissionStatus; email: string | null;
-    snapshot: SubmissionSnapshot; submitted_at: string; superseded_at: string | null; unlock_reason: string | null;
+    snapshot: SubmissionSnapshot & { recapturedAt?: string }; submitted_at: string; superseded_at: string | null; unlock_reason: string | null;
   };
   grades: TaskGradeRow[];
   releaseBlockers: string[];
@@ -67,13 +69,15 @@ function draftFrom(grade: TaskGradeRow): Draft {
   return { values, notes, overall: grade.instructor_notes ?? "" };
 }
 
-function TaskPanel({ submissionId, task, grade, onSaved, readOnly, sharedPr, code, aiGrades }: { submissionId: string; task: TaskSnapshot; grade: TaskGradeRow | undefined; onSaved: () => void; readOnly: boolean; sharedPr: string[]; code: TaskCode | undefined; aiGrades: AiGradeEntry[] }) {
+function TaskPanel({ submissionId, task, grade, onSaved, readOnly, sharedPr, code, aiGrades, recapturedAt }: { submissionId: string; task: TaskSnapshot; grade: TaskGradeRow | undefined; onSaved: () => void; readOnly: boolean; sharedPr: string[]; code: TaskCode | undefined; aiGrades: AiGradeEntry[]; recapturedAt: string | null }) {
   const split = useMemo(() => splitPatch(task.diff), [task.diff]);
   const [draft, setDraft] = useState<Draft | null>(grade ? draftFrom(grade) : null);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   useEffect(() => { setDraft(grade ? draftFrom(grade) : null); }, [grade]);
 
+  // #431: the AI grade is older than the last switch or undo of the task's code PR.
+  const staleGrade = grade ? staleAiGradeLine(task, grade.graded_at) : null;
   const draftTotal = draft ? RUBRIC.reduce((sum, row) => sum + (Number(draft.values[row.name]) || 0), 0) : null;
 
   async function save(clear = false) {
@@ -106,7 +110,8 @@ function TaskPanel({ submissionId, task, grade, onSaved, readOnly, sharedPr, cod
           <Link href={`/cse115a/instructor/submissions/${submissionId}/tasks/${task.slot}/metrics`} className="text-primary underline">Repo Metrics</Link>
           <span className="font-mono text-xs text-muted-foreground">{baseCommitLine(task.baseCommit, task.baseCommitSource)}</span>
         </div>
-        {task.taskFilePr ? <p className="mt-2 text-sm text-amber-700 dark:text-amber-300">{taskFilePrReviewLine(task.taskFilePr.number, task.prNumber, task.taskFilePr.fixesTaskPath)}</p> : null}
+        {task.workPrChoice ? <p className="mt-2 text-sm text-amber-700 dark:text-amber-300">{workPrHeaderLine({ ...task, workPrChoice: task.workPrChoice })}</p>
+          : task.taskFilePr ? <p className="mt-2 text-sm text-amber-700 dark:text-amber-300">{taskFilePrReviewLine(task.taskFilePr.number, task.prNumber, task.taskFilePr.fixesTaskPath)}</p> : null}
         {sharedPr.map((line) => <p key={line} className="mt-2 text-sm text-amber-700 dark:text-amber-300">{line}</p>)}
         {task.diffError ? <p className="mt-2 text-sm text-destructive">Diff not captured: {task.diffError}</p> : null}
         {task.diffTruncated ? <p className="mt-2 text-sm text-amber-700 dark:text-amber-300">The diff was over 1 MB and was cut off.</p> : null}
@@ -117,7 +122,9 @@ function TaskPanel({ submissionId, task, grade, onSaved, readOnly, sharedPr, cod
         <pre className="max-h-96 overflow-auto whitespace-pre-wrap border-t border-border p-3 text-sm">{task.specMarkdown}</pre>
       </details>
 
-      <GetTheCode submissionId={submissionId} slot={task.slot} repoFullName={task.repoFullName} mergeCommit={task.pr?.mergeCommitSha} code={code} />
+      <GetTheCode submissionId={submissionId} slot={task.slot} repoFullName={task.repoFullName} mergeCommit={task.pr?.mergeCommitSha} code={code}
+        choiceNote={task.workPrChoice ? getTheCodeChoiceNote({ ...task, workPrChoice: task.workPrChoice }) : null} />
+      <WorkPrChooser submissionId={submissionId} task={task} recapturedAt={recapturedAt} readOnly={readOnly} onChanged={onSaved} />
 
       <Tabs defaultValue="patch" className="rounded-lg border border-border">
         <TabsList className="m-2">
@@ -145,6 +152,7 @@ function TaskPanel({ submissionId, task, grade, onSaved, readOnly, sharedPr, cod
             <h3 className="text-sm font-semibold">Rubric</h3>
             <p className="text-sm tabular-nums">Agent {formatPoints(Number(grade.agent_total), TASK_POINTS)} · Your total <strong>{formatPoints(draftTotal, TASK_POINTS)}</strong></p>
           </div>
+          {staleGrade ? <p role="status" className="rounded-lg bg-amber-500/10 p-3 text-sm text-amber-800 dark:text-amber-200">{staleGrade}</p> : null}
           <div className="divide-y divide-border rounded-lg border border-border">
             {RUBRIC.map((row) => {
               const agent = grade.rubric.find((item) => item.name === row.name);
@@ -276,7 +284,7 @@ export function SubmissionReview({ id }: { id: string }) {
       ) : <p className="rounded-lg bg-muted p-3 text-sm text-muted-foreground">This attempt was unlocked and is read-only.</p>}
 
       <div className="grid gap-6 xl:grid-cols-2">
-        {tasks.map((task) => <TaskPanel key={task.slot} submissionId={submission.id} task={task} grade={grades.find((row) => row.task_slot === task.slot)} onSaved={() => void load()} readOnly={!active} sharedPr={prTaskFileLines(tasks, task, "staff")} code={detail.code?.find((item) => item.slot === task.slot)} aiGrades={(detail.aiGrades ?? []).filter((item) => item.task_slot === task.slot)} />)}
+        {tasks.map((task) => <TaskPanel key={task.slot} submissionId={submission.id} task={task} grade={grades.find((row) => row.task_slot === task.slot)} onSaved={() => void load()} readOnly={!active} sharedPr={prTaskFileLines(tasks, task, "staff")} code={detail.code?.find((item) => item.slot === task.slot)} aiGrades={(detail.aiGrades ?? []).filter((item) => item.task_slot === task.slot)} recapturedAt={submission.snapshot.recapturedAt ?? null} />)}
       </div>
       {oneTask ? <p className={oneTask.warn ? "text-sm text-amber-700 dark:text-amber-300" : "text-sm text-muted-foreground"}>{oneTask.text}</p> : null}
       {manyTasks ? <p className="text-sm text-muted-foreground">{manyTasks}</p> : null}
