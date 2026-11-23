@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import { buildInstance } from "@/lib/cse115a/benchmark/buildInstance";
 import { RECAPTURED_SAME_PATCH_FLAG, type StoredTaskRow } from "@/lib/cse115a/benchmark/recapture";
 import {
-  listWorkPrCandidates, MAX_CANDIDATES, NO_REASON, NOTHING_TO_UNDO, runWorkPrChange, STALE_PAGE, usedPrs,
+  listWorkPrCandidates, MAX_CANDIDATES, NO_REASON, NOTHING_TO_UNDO, runWorkPrChange, STALE_PAGE, undoBlockedMessage, usedPrs,
   type CourseTaskRef, type WorkPrDb, type WorkPrRequest,
 } from "@/lib/cse115a/benchmark/workPrChoice";
 import { submissionTaskRefs, WORK_PR_TASK_PATHS } from "@/lib/cse115a/benchmark/workPrChoiceStore";
@@ -648,5 +648,147 @@ describe("8. page texts", () => {
       { source: "submission", submissionId: "s", userId: "u", assignmentNumber: 2, slot: 1, repoFullName: REPO, prNumber: 4, taskFilePrNumber: null },
       { source: "submission", submissionId: "s", userId: "u", assignmentNumber: 2, slot: 3, repoFullName: REPO, prNumber: 8, taskFilePrNumber: 6 },
     ]);
+  });
+});
+
+// ---- 9. #435: a sibling task's task-file PR holds this task's code. ----
+// Task 1 (US-4-T-2) was submitted with PR #21, its task file only. Task 2 (US-4-T-7) was submitted with PR #20, which
+// holds Task 2's task file and Task 1's code. Staff move Task 2's code to PR #22; PR #20 is then Task 2's task-file
+// PR and may hold Task 1's code.
+describe("9. a sibling task's task-file PR (#435)", () => {
+  const SIBLING_ID = "US-4-T-7";
+  const SIBLING_PATH = `docs/tasks/sprint-4/${SIBLING_ID}.md`;
+  const A_DIFF = fileDiff(SIBLING_PATH, "# sibling spec") + CODE_DIFF;
+  const C_DIFF = fileDiff("src/ship.ts", "export const ship = 2;") + fileDiff("src/__tests__/ship.test.ts", "it('ships', () => { expect(ship).toBe(2); });");
+  const prs = () => [
+    pr(20, { title: "Cart tax and the shipping task file", branch: "feature/cart-tax", diff: A_DIFF, files: [SIBLING_PATH, "src/cart.ts", "src/__tests__/cart.test.ts"] }),
+    pr(21, { title: `Add ${TASK_ID} task file`, branch: "task-file", diff: TASK_ONLY_DIFF, files: [TASK_PATH] }),
+    pr(22, { title: "Shipping", branch: "feature/shipping", diff: C_DIFF, files: ["src/ship.ts", "src/__tests__/ship.test.ts"] }),
+  ];
+  const twentyOne = () => prs()[1]!;
+  const task1 = () => savedTask({ prNumber: 21, prUrl: `https://github.com/${REPO}/pull/21`, pr: { ...savedTask().pr, mergeCommitSha: twentyOne().merge, baseSha: twentyOne().base } });
+  const task2 = () => otherTask(2, 20, {
+    taskId: SIBLING_ID, taskPath: SIBLING_PATH, prTaskFiles: [SIBLING_PATH], specMarkdown: `# ${SIBLING_ID}: Shipping\n\nAdd src/ship.ts.\n`,
+    pr: { ...savedTask().pr, title: prs()[0]!.title, mergeCommitSha: prs()[0]!.merge, baseSha: prs()[0]!.base },
+    diff: A_DIFF, diffBytes: Buffer.byteLength(A_DIFF),
+  });
+  const pick = (sub: Submission, slot: number, prNumber: number, apply: boolean): WorkPrRequest =>
+    ({ kind: "choose", slot, pr: prNumber, reason: `The code is in PR #${prNumber}.`, apply, seen: seenOf(sub, slot) });
+  const undoSlot = (sub: Submission, slot: number): WorkPrRequest => ({ kind: "undo", slot, seen: seenOf(sub, slot) });
+  const taskOf = (sub: Submission, slot: number) => sub.snapshot.tasks.find((task) => task.slot === slot)!;
+  const ownRow = (slot: number, prNumber: number, assignmentNumber = 4, taskFilePrNumber: number | null = null): CourseTaskRef =>
+    ({ source: "task_row", submissionId: null, userId: "user-1", assignmentNumber, slot, repoFullName: REPO, prNumber, taskFilePrNumber });
+
+  /** Task 2's code moved to PR #22, as staff did it. */
+  async function afterTask2Switch(refs: CourseTaskRef[] = []) {
+    const sub = submission([task1(), task2()]);
+    const store = fakeDb(sub, { refs });
+    const moved = await runWorkPrChange(store.db, gitHub(prs()).reader, sub, pick(sub, 2, 22, true), options());
+    expect(moved.ok).toBe(true);
+    return store;
+  }
+
+  it("usedPrs: a sibling's task-file PR does not block, from the snapshot and from the student's own task rows", async () => {
+    const { state } = await afterTask2Switch();
+    const sub = state.row;
+    expect(taskOf(sub, 2)).toMatchObject({ prNumber: 22, taskFilePr: { number: 20 } });
+    // Task 2's own task row still holds PR #20, the PR the student submitted; the snapshot says it is now only the task file.
+    expect(usedPrs([ownRow(2, 20)], sub, 1)).toEqual([{ repoFullName: REPO, prNumber: 22, where: "Task 2 of this submission" }]);
+    // A pair the student made in this sprint: its task-file PR does not block, its code PR does.
+    expect(usedPrs([ownRow(3, 30, 4, 31)], sub, 1).map((row) => row.prNumber)).toEqual([22, 30]);
+  });
+
+  it("usedPrs: a PR used as any task's code PR still blocks, and so does another student's task or another sprint", async () => {
+    const { state } = await afterTask2Switch();
+    const sub = state.row;
+    // A task row whose code PR is #20 with no staff choice behind it (another slot): it blocks.
+    expect(usedPrs([ownRow(3, 20)], sub, 1).map((row) => [row.prNumber, row.where])).toEqual([[22, "Task 2 of this submission"], [20, "this student's Task 3 in this sprint"]]);
+    // The same student in another sprint, and another student, block on the task-file PR too.
+    expect(usedPrs([ownRow(2, 19, 3, 20)], sub, 1).map((row) => [row.prNumber, row.where])).toEqual([[22, "Task 2 of this submission"], [19, "this student's Task 2 in Sprint 3"], [20, "this student's Task 2 in Sprint 3"]]);
+    const other: CourseTaskRef = { source: "submission", submissionId: "sub-other", userId: "user-2", assignmentNumber: 4, slot: 2, repoFullName: REPO, prNumber: 19, taskFilePrNumber: 20 };
+    expect(usedPrs([other], sub, 1).map((row) => row.where)).toContain("another student's Task 2 in Sprint 4");
+    const refused = await runWorkPrChange(fakeDb(sub, { refs: [other] }).db, gitHub(prs()).reader, sub, pick(sub, 1, 20, false), options());
+    expect(refused).toEqual({ ok: false, status: 409, error: "PR #20 is already used by another student's Task 2 in Sprint 4." });
+    // Before Task 2 was switched, PR #20 was Task 2's code PR, so it is refused.
+    const fresh = submission([task1(), task2()]);
+    expect(await runWorkPrChange(fakeDb(fresh).db, gitHub(prs()).reader, fresh, pick(fresh, 1, 20, false), options()))
+      .toEqual({ ok: false, status: 409, error: "PR #20 is already used by Task 2 of this submission." });
+  });
+
+  it("the candidate list shows the sibling's task-file PR as choosable", async () => {
+    const { state } = await afterTask2Switch();
+    const sub = state.row;
+    const used = usedPrs([ownRow(2, 20)], sub, 1);
+    const { candidates } = await listWorkPrCandidates(gitHub(prs()).reader, taskOf(sub, 1), used);
+    expect(candidates.find((item) => item.number === 20)).toMatchObject({ usedBy: null, likely: true });
+    expect(candidates.find((item) => item.number === 22)!.usedBy).toBe("Task 2 of this submission");
+  });
+
+  it("Task 1's capture from PR #20: the sibling's task file is not its code and the row stays exportable", async () => {
+    const store = await afterTask2Switch([ownRow(2, 20)]);
+    const sub = store.state.row;
+    const preview = await runWorkPrChange(store.db, gitHub(prs()).reader, sub, pick(sub, 1, 20, false), options());
+    expect(preview).toMatchObject({ ok: true, body: { preview: {
+      files: [SIBLING_PATH, "src/__tests__/cart.test.ts", "src/cart.ts"].sort(), testFiles: 1, sourceFiles: 1, taskFiles: 1,
+      summary: "PR #20 changes 3 files: 1 test file, 1 source file and 1 task file.",
+    } } });
+    const applied = await runWorkPrChange(store.db, gitHub(prs()).reader, sub, pick(sub, 1, 20, true), options(LATER));
+    expect(applied.ok).toBe(true);
+    const one = taskOf(store.state.row, 1);
+    expect(one).toMatchObject({ prNumber: 20, taskFilePr: { number: 21 }, prTaskFiles: [] });
+    // The diff is the PR's own, so it holds the sibling's task file; the benchmark row leaves it out.
+    expect(one.diff).toContain(SIBLING_PATH);
+    const row = store.state.storedTasks.find((item) => item.instance_id.endsWith(TASK_ID))!;
+    expect(row.patch).toContain("src/cart.ts");
+    expect(row.patch).not.toContain("docs/tasks/");
+    expect(row.test_patch).toContain("src/__tests__/cart.test.ts");
+    const flags = store.state.sources.find((item) => item.task_slot === 1)!.flags;
+    expect(flags).toEqual(expect.arrayContaining(["task_files_dropped", WORK_PR_FLAG, "task_file_from_other_pr"]));
+    expect(flags).not.toContain("pr_holds_two_tasks");
+    expect(store.state.sources.find((item) => item.task_slot === 2)!.flags).not.toContain("pr_holds_two_tasks");
+    // The grader reads Task 1's own files first; the sibling's task file comes last, with the other task files.
+    const input = graderInput(one);
+    expect(input.patch.indexOf("src/cart.ts")).toBeLessThan(input.patch.indexOf(SIBLING_PATH));
+  });
+
+  it("the full sequence: switch Task 2, switch Task 1 to PR #20, the refused undo, then undo in the right order", async () => {
+    const store = await afterTask2Switch([ownRow(2, 20), ownRow(1, 21)]);
+    const gh = () => gitHub(prs()).reader;
+    let sub = store.state.row;
+    expect((await runWorkPrChange(store.db, gh(), sub, pick(sub, 1, 20, true), options(LATER))).ok).toBe(true);
+    sub = store.state.row;
+    expect(taskOf(sub, 1)).toMatchObject({ prNumber: 20, taskFilePr: { number: 21 } });
+    expect(taskOf(sub, 2)).toMatchObject({ prNumber: 22, taskFilePr: { number: 20 } });
+
+    // Undoing Task 2 would make PR #20 the code PR of both tasks: refused before GitHub is read, nothing written.
+    const opsBefore = store.ops.length;
+    const blocked = await runWorkPrChange(store.db, gh(), sub, undoSlot(sub, 2), options(LATER));
+    expect(blocked).toEqual({ ok: false, status: 409, error: "PR #20 now holds the code of Task 1, which staff chose. Undo Task 1's choice first, then undo this one." });
+    expect(blocked).toEqual({ ok: false, status: 409, error: undoBlockedMessage(20, 1, 2, true) });
+    expect(writeOps(store.ops.slice(opsBefore))).toEqual([]);
+    expect(store.state.row).toBe(sub);
+
+    // Undo Task 1 first: back to PR #21, which holds only its task file.
+    expect((await runWorkPrChange(store.db, gh(), sub, undoSlot(sub, 1), options(LATER))).ok).toBe(true);
+    sub = store.state.row;
+    expect(taskOf(sub, 1)).toMatchObject({ prNumber: 21, workPrUndone: { prNumber: 20, backToPrNumber: 21 } });
+    expect(taskOf(sub, 1).workPrChoice).toBeUndefined();
+    expect("taskFilePr" in taskOf(sub, 1)).toBe(false);
+
+    // Then Task 2: back to PR #20 for its code and its task file, as the student submitted it.
+    const undone = await runWorkPrChange(store.db, gh(), sub, undoSlot(sub, 2), options(LATER));
+    expect(undone).toMatchObject({ ok: true, body: { message: "Undone. The code is from PR #20 again. Press Regrade to grade this task on it." } });
+    sub = store.state.row;
+    expect(taskOf(sub, 2)).toMatchObject({ prNumber: 20, prTaskFiles: [SIBLING_PATH], diff: A_DIFF, workPrUndone: { prNumber: 22, backToPrNumber: 20 } });
+    expect("taskFilePr" in taskOf(sub, 2)).toBe(false);
+    // PR #20 is Task 2's code PR again, so Task 1 can't take it.
+    expect(await runWorkPrChange(store.db, gh(), sub, pick(sub, 1, 20, false), options(LATER)))
+      .toEqual({ ok: false, status: 409, error: "PR #20 is already used by Task 2 of this submission." });
+  });
+
+  it("the undo refusal when the other task's code PR was not chosen by staff", () => {
+    expect(undoBlockedMessage(20, 1, 2, false)).toBe("PR #20 now holds the code of Task 1, so Task 2 can't take its code from it again.");
+    expect(previewSummary(9, 2, 0, 1, 1)).toBe("PR #9 changes 2 files: 0 test files, 1 source file and 1 task file.");
+    expect(previewSummary(9, 1, 0, 1, 0)).toBe("PR #9 changes 1 file: 0 test files and 1 source file.");
   });
 });

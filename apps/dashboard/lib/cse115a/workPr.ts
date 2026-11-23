@@ -143,10 +143,17 @@ export const WORK_PR_TEXT = {
   readOnly: "This attempt was unlocked and is read-only.",
 } as const;
 
-/** "PR #8 changes 5 files: 2 test files and 3 source files." */
-export function previewSummary(prNumber: number, files: number, testFiles: number, sourceFiles: number): string {
+/**
+ * "PR #8 changes 5 files: 2 test files and 3 source files." Task files (docs/tasks/...) are counted on their own,
+ * "..., 1 source file and 1 task file.", and only when there are any (#435: a chosen PR can hold another task's
+ * task file, which is not this task's code).
+ */
+export function previewSummary(prNumber: number, files: number, testFiles: number, sourceFiles: number, taskFiles = 0): string {
   const plural = (count: number, word: string) => `${count} ${word}${count === 1 ? "" : "s"}`;
-  return `PR #${prNumber} changes ${plural(files, "file")}: ${plural(testFiles, "test file")} and ${plural(sourceFiles, "source file")}.`;
+  const parts = taskFiles > 0
+    ? `${plural(testFiles, "test file")}, ${plural(sourceFiles, "source file")} and ${plural(taskFiles, "task file")}`
+    : `${plural(testFiles, "test file")} and ${plural(sourceFiles, "source file")}`;
+  return `PR #${prNumber} changes ${plural(files, "file")}: ${parts}.`;
 }
 
 export type BenchmarkOutcome = "replace" | "keep" | "back_to_candidate";
