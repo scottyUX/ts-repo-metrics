@@ -9,7 +9,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { RUBRIC, type CriterionName } from "@/lib/cse115a/rubric";
-import { comparedGrade, graderStats, type GraderGradeInput } from "@/lib/cse115a/graderStats";
+import { comparedGrade, graderStats, type GraderGradeInput, type GraderStats } from "@/lib/cse115a/graderStats";
 import { GRADER_TEXT, GraderView, noSaveTimeLine, regradedLine } from "@/components/cse115a/instructor/GraderPanel";
 import { AiGradeHistory, aiGradeHistoryLabel, type AiGradeEntry } from "@/components/cse115a/instructor/AiGradeHistory";
 import { supabaseJobStore } from "@/lib/cse115a/jobs/supabaseStore";
@@ -314,7 +314,7 @@ function compared(options: {
     : RUBRIC.map((row) => ({ name: row.name, awarded: options.staff![row.name] ?? row.points, note: "" }));
   const seenRubric = options.seen ? aiRubric(options.seen.ai) : null;
   return {
-    submissionKey: `s-${Math.random()}`, assignmentNumber: 3, submittedAt: "2026-11-18T12:00:00.000Z", superseded: false,
+    submissionKey: `s-${Math.random()}`, taskSlot: 1, assignmentNumber: 3, submittedAt: "2026-11-18T12:00:00.000Z", superseded: false,
     rubric, agentTotal: total(rubric).toFixed(2), model: "model-a", promptVersion: options.aiPrompt ?? "prompt-v5",
     gradedAt: options.gradedAt ?? "2026-11-19T12:00:00.000Z",
     instructorRubric: staff, instructorTotal: staff ? String(total(staff)) : null, releasedAt: RELEASED,
@@ -322,7 +322,10 @@ function compared(options: {
     seen: options.seen && seenRubric ? { rubric: seenRubric, agentTotal: total(seenRubric).toFixed(2), model: "model-a", promptVersion: options.seen.prompt, gradedAt: options.seen.gradedAt } : null,
   };
 }
-const allRow = <T extends { assignment: number | null }>(rows: T[]) => rows.find((row) => row.assignment === null)!;
+/** The quarter's own Totals row (#432: the tables come per assignment and for the quarter). */
+const allTotals = (stats: GraderStats) => stats.quarter.totals[stats.quarter.totals.length - 1]!;
+/** The Totals rows per grader version inside each assignment. */
+const versionRows = (stats: GraderStats) => stats.byAssignment.flatMap((item) => item.totals.filter((row) => row.model !== null));
 
 describe("graderStats compares the final with the AI grade staff saw (#429)", () => {
   // Staff saw prompt-v4 giving Specs 1 and raised it to 2; after release a prompt-v5 Regrade gave Specs 2.
@@ -336,13 +339,13 @@ describe("graderStats compares the final with the AI grade staff saw (#429)", ()
     const stats = graderStats({ submissions: [], grades: [regradedAfterSave()] });
     expect(stats.comparedTasks).toBe(1);
     expect(stats.regradedAfterRelease).toBe(0);
-    expect(stats.totals.filter((row) => row.assignment !== null).map((row) => [row.promptVersion, row.released, row.higher, row.pointsAdded])).toEqual([["prompt-v4", 1, 1, 1]]);
-    const specs = stats.boxes.find((table) => table.box === "Specs")!;
-    expect(allRow(specs.rows)).toMatchObject({ tasks: 1, higher: 1, same: 0, pointsAdded: 1 });
+    expect(versionRows(stats).map((row) => [row.promptVersion, row.released, row.higher, row.pointsAdded])).toEqual([["prompt-v4", 1, 1, 1]]);
+    const specs = stats.quarter.boxes.find((row) => row.box === "Specs")!;
+    expect(specs).toMatchObject({ tasks: 1, higher: 1, same: 0, pointsAdded: 1 });
     // What the AI gave stays the newest grade.
-    expect(stats.aiGave.find((row) => row.box === "Specs")).toMatchObject({ full: 1, half: 0 });
+    expect(stats.quarter.aiGave.find((row) => row.box === "Specs")).toMatchObject({ full: 1, half: 0 });
     // Progress still counts it as regraded after release.
-    expect(stats.progress[0]).toMatchObject({ released: 1, regradedAfterRelease: 1 });
+    expect(stats.byAssignment[0]!.progress).toMatchObject({ released: 1, regradedAfterRelease: 1 });
   });
 
   it("the same task with no recorded save is as before: left out and counted on the regraded line", () => {
@@ -361,15 +364,15 @@ describe("graderStats compares the final with the AI grade staff saw (#429)", ()
     });
     expect(comparedGrade(grade)).toMatchObject({ promptVersion: "prompt-v4", agentTotal: "9.00" });
     const before = graderStats({ submissions: [], grades: [{ ...grade, instructorSavedAt: null, instructorSawGradedAt: null, seen: null }] });
-    expect(allRow(before.totals)).toMatchObject({ same: 1, higher: 0 }); // what the page showed before: staff vs. the newest
-    expect(allRow(graderStats({ submissions: [], grades: [grade] }).totals)).toMatchObject({ same: 0, higher: 1 });
+    expect(allTotals(before)).toMatchObject({ same: 1, higher: 0 }); // what the page showed before: staff vs. the newest
+    expect(allTotals(graderStats({ submissions: [], grades: [grade] }))).toMatchObject({ same: 0, higher: 1 });
   });
 
   it("a recorded save that saw the newest grade is compared with it, even when that grade came after release", () => {
     const grade = compared({ gradedAt: "2026-11-23T10:00:00.000Z", staff: { Specs: 1 }, savedAt: "2026-11-23T11:00:00.000Z", sawGradedAt: "2026-11-23T10:00:00.000Z" });
     expect(comparedGrade(grade)).toBe(grade);
     const stats = graderStats({ submissions: [], grades: [grade] });
-    expect([stats.comparedTasks, stats.regradedAfterRelease, allRow(stats.totals).lower]).toEqual([1, 0, 1]);
+    expect([stats.comparedTasks, stats.regradedAfterRelease, allTotals(stats).lower]).toEqual([1, 0, 1]);
   });
 
   it("a recorded save whose history entry was not found falls back to today's rule", () => {
@@ -405,11 +408,11 @@ describe("the Grader page's new wording (#429)", () => {
 
   it("shows the no-save-time line when tasks are compared, and not when none are", () => {
     const text = (html: string) => html.replace(/<[^>]+>/g, " ").replace(/&#x27;/g, "'").replace(/\s+/g, " ");
-    const shown = text(renderToStaticMarkup(createElement(GraderView, { heading: "x", stats: graderStats({ submissions: [], grades: [compared({ staff: { Specs: 1 } }), compared()] }) })));
+    const shown = text(renderToStaticMarkup(createElement(GraderView, { course: { title: "CSE 115A", term: "Fall 2026" }, stats: graderStats({ submissions: [], grades: [compared({ staff: { Specs: 1 } }), compared()] }) })));
     expect(shown).toContain(noSaveTimeLine(1, 2));
     expect(shown).toContain(regradedLine(0));
     for (const line of [GRADER_TEXT.intro, ...GRADER_TEXT.limits, GRADER_TEXT.progressNote]) expect(shown).toContain(line);
-    const none = text(renderToStaticMarkup(createElement(GraderView, { heading: "x", stats: graderStats({ submissions: [], grades: [{ ...compared(), releasedAt: null }] }) })));
+    const none = text(renderToStaticMarkup(createElement(GraderView, { course: { title: "CSE 115A", term: "Fall 2026" }, stats: graderStats({ submissions: [], grades: [{ ...compared(), releasedAt: null }] }) })));
     expect(none).not.toContain("no recorded save time");
   });
 });
@@ -438,7 +441,7 @@ describe("loadGraderStats reads the grade staff saw from cse_task_ai_grades (#42
     };
     const { loadGraderStats } = await import("@/lib/cse115a/loadGraderStats");
     const stats = await loadGraderStats(fakeDb, "course-1");
-    expect(stats.totals.filter((row) => row.assignment !== null).map((row) => [row.promptVersion, row.released, row.same, row.higher])).toEqual([
+    expect(versionRows(stats).map((row) => [row.promptVersion, row.released, row.same, row.higher])).toEqual([
       ["prompt-v4", 1, 0, 1],
       ["prompt-v5", 1, 1, 0],
     ]);
