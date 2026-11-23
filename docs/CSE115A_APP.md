@@ -476,6 +476,57 @@ false, the dry run). Staff of that course only.
 
 TAs can do everything except unlock and manage staff.
 
+### Grader page (#423)
+
+`/cse115a/instructor/courses/<slug>/grader`, linked as **Grader** between
+Benchmark and Staff, shows how the AI grader is doing. Course staff
+(instructors and TAs). It reads only what is already stored: no migration, no
+model call, no change to grading, saving or release. Counts only: no student
+names, emails, repos, PR numbers or task IDs.
+
+The **AI score** is what the grade job saved (`rubric`, `agent_total`). The
+**final score** is what staff saved (`instructor_rubric`, `instructor_total`),
+or the AI score when staff saved nothing. A **box** is one rubric row. Only
+current attempts count. Agreement is counted on released tasks, leaving out
+tasks **regraded after release** (`graded_at` later than `released_at`: staff
+never saw that AI score), which get their own line.
+
+- **Totals**, per assignment and grader version (model and prompt version),
+  then all together: tasks released, same (final total equals AI total), final
+  higher, final lower, points added (final minus AI, summed), the share that
+  were the same, and **accepted as it stood** (the final equals the AI on all
+  six boxes and the AI left none blank; a staff save with no number changed
+  counts, a blank box filled by staff does not) as a count and a share.
+- **By rubric box**, all six boxes, per group: tasks, AI left blank (no AI
+  score, or the box is missing from an older rubric; in neither same, higher
+  nor lower), same, final higher, final lower, Needs review flags, points added
+  (a blank AI box counts as 0), and agreed (same, out of the tasks the AI
+  scored). Above it, the box agreed with most and least, or, with fewer than 10
+  released tasks, a line saying none is named; and which boxes the model scores
+  (Scope, Specs, Acceptance criteria, Test quality) and which come from
+  recorded evidence (Tests pass, Process), read from each item's `source`.
+- **What the AI gave**: per box, how many current graded tasks (released or
+  not) got full, half, zero or blank.
+- **Progress**, per assignment: tasks submitted (from each current
+  submission's snapshot slots), graded by the AI, saved by staff but not
+  released, released (including regraded after release), regraded after
+  release.
+- **Time**: per assignment, the median from submitted to the submission's
+  first release, labelled "waiting time, not grading time". The site does not
+  record time spent grading.
+
+Limits, shown on the page: staff see the AI's score before deciding, so this
+measures how often staff changed it, not how often two independent graders
+agree; a Regrade overwrites the AI's earlier score, so two versions cannot be
+compared on the same task; a task regraded after staff saved but before release
+cannot be told apart, so a few rows may compare staff's numbers with an AI
+score they did not see; the reason for a change is not stored.
+
+Route: `GET /api/cse115a/instructor/courses/<slug>/grader-stats` (course
+staff) returns only the counts from `graderStats`
+(`lib/cse115a/graderStats.ts`, pure, shared with the page and tests), read by
+`lib/cse115a/loadGraderStats.ts` page by page.
+
 ## Student grade view
 
 While an assignment is submitted but not released, the dashboard shows
