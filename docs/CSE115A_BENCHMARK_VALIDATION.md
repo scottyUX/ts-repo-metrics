@@ -823,8 +823,27 @@ flag, `work_pr_chosen_by_staff`. The flag does not keep a row out of export. The
 #418 apply path above, for that one task, with the same keep rule: a `validated` or `rejected` row whose `patch`
 and `test_patch` are byte-for-byte the new ones is kept (its source gains `work_pr_chosen_by_staff` and
 `recaptured_same_patch`); otherwise the row is replaced and goes back to `candidate`. Undo does the same from the
-original PR and drops the flag. Known gap: a repo copy is named by instance and base commit, so if the chosen PR
-had the same base commit as the old one, the stored copy still holds the old PR's refs.
+original PR and drops the flag. A repo copy is named by instance and base commit and never overwritten, so if the
+chosen PR has the same base commit as the old one the stored copy still holds the old PR's refs; since #437 the
+apply asks Storage, records `repoCopyFrom` on the task when such a copy is there (the review page says so), and
+queues the copy job when there is none.
+
+### A task with extra PRs for its code (#437)
+
+Staff can attach up to three extra PRs to a task (`docs/CSE115A_APP.md`, "Extra PRs for a task's code"). The row is
+still built from the main PR only: `patch`, `test_patch` and `base_commit` do not change, and a `validated` or
+`rejected` row keeps its status. Its source gains the flag `extra_code_prs` (removed with the last extra PR), which
+does not keep it out of export. The extra PRs are recorded where the row's provenance is: the source row names its
+submission and slot, and that submission's snapshot holds each extra PR's number, merge commit, base commit and head
+commit (`snapshotExtraCodePrs`). No extra PR's diff text goes into the exported row.
+
+Combining them into one row is not done. A validator step would need to: read the extra PRs from the snapshot;
+fetch each PR's head and merge commit (the repo copy holds the main PR's refs only, so they come from GitHub or a
+copy extended to fetch `refs/pull/N/head` for each); take the last merged PR's merge commit as the solved state and
+the main PR's base as `base_commit`, checking that every extra PR was merged after the main PR's base and that no
+unrelated PR merged in between touches the same files (else the combined diff holds a teammate's work); build `patch`
+and `test_patch` from `base_commit` to that merge commit minus unrelated files, or apply each PR's own diff in merge
+order and stop on a conflict; then validate as usual (FAIL_TO_PASS from the combined tests).
 
 Rebuilt so far: `JoKHerre__Bookworm-COL-04-T-4` (PR #115, M `96798e0b`, M^1 `40b28261`, the
 head of PR #114). `JoKHerre__Bookworm-COL-04-T-2` (PR #114) is not rebuilt: the PR changes no
