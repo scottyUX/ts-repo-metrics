@@ -233,6 +233,19 @@ grade only after an instructor releases it.
   come last. Nothing is dropped, and the benchmark row keeps the diff's order.
 - Failed jobs retry after 1 and 4 minutes. After the third failure the job is
   `failed` and the submission is `grading_failed`.
+- **Every AI grade is kept** (#429). `cse_task_grades` holds the newest AI
+  grade of each task and the staff's numbers, as before. Each grade the job
+  saves is first added to `cse_task_ai_grades` (one row per AI grade:
+  submission, slot, `rubric`, `agent_total`, `needs_review`, `model`,
+  `prompt_version`, `graded_at`; unique on submission, slot and `graded_at`),
+  then written to `cse_task_grades` with the same `graded_at`. A Regrade adds a
+  row and never replaces one. If the history write fails, the job fails before
+  `cse_task_grades` changes and retries as usual; the retry grades again, so
+  its grade has a new `graded_at` and is a new row. The same row written twice
+  is kept once. The migration copied every grade that existed then as the
+  first entries; run its backfill insert again to add grades saved by older
+  code after it was applied. Row level security is on with no policy and no
+  client grant: students cannot read it, staff read it through API routes.
 
 Environment on the service that runs the worker:
 
@@ -387,7 +400,15 @@ SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... \
   task is the sprint score" with its estimate (amber when under 4 hours) and
   releases with one grade. Three or more tasks show "N tasks: the sprint score
   is the average of all N." Edits saved
-  after release are visible to the student right away.
+  after release are visible to the student right away. A save with points
+  records `instructor_saved_at` (when) and `instructor_saw_graded_at` (the
+  `graded_at` of the AI grade on the task then; the save only lands while that
+  is still the task's grade, and reads again if a Regrade finished in
+  between). **Use agent grade** sets both back to null. Saves made before #429
+  have both null ("not recorded"). Under a task's rubric, a task the AI graded
+  more than once shows a closed line, "Graded N times by the AI", opening a
+  read-only table of every AI grade, newest first: date, model, prompt
+  version, total and the six boxes.
 - **Get the code** (a closed section in each task on the Review page), for
   running a team's tests or checking a diff: the commands to clone the repo
   from GitHub and check out the PR's merge commit (works when the repo is
@@ -490,16 +511,28 @@ TAs can do everything except unlock and manage staff.
 
 `/cse115a/instructor/courses/<slug>/grader`, linked as **Grader** between
 Benchmark and Staff, shows how the AI grader is doing. Course staff
-(instructors and TAs). It reads only what is already stored: no migration, no
+(instructors and TAs). It reads only what is already stored: no
 model call, no change to grading, saving or release. Counts only: no student
-names, emails, repos, PR numbers or task IDs.
+names, emails, repos, PR numbers or task IDs. Since #429 it also reads the
+two save columns and, where needed, the AI grade history.
 
 The **AI score** is what the grade job saved (`rubric`, `agent_total`). The
 **final score** is what staff saved (`instructor_rubric`, `instructor_total`),
 or the AI score when staff saved nothing. A **box** is one rubric row. Only
-current attempts count. Agreement is counted on released tasks, leaving out
-tasks **regraded after release** (`graded_at` later than `released_at`: staff
-never saw that AI score), which get their own line.
+current attempts count. Agreement is counted on released tasks.
+
+Which AI grade a task is compared with (#429): when staff's save is recorded
+(`instructor_saved_at` and `instructor_saw_graded_at` set), the grade staff
+saw. That is the newest when `instructor_saw_graded_at` equals `graded_at`;
+otherwise it is the `cse_task_ai_grades` entry with that `graded_at`, whose
+rubric, total, model and prompt version are used, and the task is grouped
+under that entry's version. With no recorded save (no save, or one made before
+#429), or when that entry is not found, the newest grade is used and tasks
+**regraded after release** (`graded_at` later than `released_at`: staff never
+saw that AI score) are left out and counted on their own line, as before. A
+second line counts the compared tasks that have staff points but no recorded
+save time. **What the AI gave** always uses the newest grade, and Progress's
+regraded-after-release column counts every such task.
 
 - **Totals**, per assignment and grader version (model and prompt version),
   then all together: tasks released, same (final total equals AI total), final
@@ -527,10 +560,13 @@ never saw that AI score), which get their own line.
 
 Limits, shown on the page: staff see the AI's score before deciding, so this
 measures how often staff changed it, not how often two independent graders
-agree; a Regrade overwrites the AI's earlier score, so two versions cannot be
-compared on the same task; a task regraded after staff saved but before release
-cannot be told apart, so a few rows may compare staff's numbers with an AI
-score they did not see; the reason for a change is not stored.
+agree; every AI grade is now kept, but a score a Regrade replaced before the
+history began is gone, and the page does not yet compare two grader versions on
+the same task; saves made before save times were kept have none, so a task
+regraded after one of them may compare staff's numbers with an AI score they
+did not see; the AI grade recorded is the one on the task when Save was
+pressed, so a Regrade that finished while the review page was open is not
+noticed; the reason for a change is not stored.
 
 Route: `GET /api/cse115a/instructor/courses/<slug>/grader-stats` (course
 staff) returns only the counts from `graderStats`

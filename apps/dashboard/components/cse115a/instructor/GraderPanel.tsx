@@ -11,10 +11,11 @@ import { fetchJson, formatPoints, type StaffCourse } from "./shared";
 /** Every fixed sentence on the Grader page (#423), in the order it appears. */
 export const GRADER_TEXT = {
   title: "Grader",
-  intro: "How the AI score (what the grade job saved) compares with the final score (what staff saved, or the AI score when staff saved no change), on released tasks of current attempts. Staff see the AI's score before deciding, so this measures how often staff changed it, not how often two independent graders agree.",
+  intro: "How the AI score (the AI grade staff saw when they saved, or the newest AI grade when no save was recorded) compares with the final score (what staff saved, or the AI score when staff saved no change), on released tasks of current attempts. Staff see the AI's score before deciding, so this measures how often staff changed it, not how often two independent graders agree.",
   limits: [
-    "A Regrade overwrites the AI's earlier score, so two grader versions cannot be compared on the same task.",
-    "A task regraded after staff saved but before release cannot be told apart, so a few rows may compare staff's numbers with an AI score they did not see.",
+    "Every AI grade is now kept, but a score a Regrade replaced before the history began is gone, and this page does not yet compare two grader versions on the same task.",
+    "A staff save records its time and the AI grade on the task at that moment; a task regraded after it is compared with that grade and grouped under its version. Saves made before save times were kept have none, so a task regraded after one of them may compare staff's numbers with an AI score they did not see.",
+    "The AI grade recorded is the one on the task when Save was pressed; a Regrade that finished while the review page was open is not noticed.",
     "The reason for a change is not stored.",
   ],
   empty: "No grades are released in this course yet, so there is nothing to compare. What the AI gave and the progress so far are below.",
@@ -26,7 +27,7 @@ export const GRADER_TEXT = {
   aiGaveHeading: "What the AI gave",
   aiGaveNote: "Every current graded task, released or not. Full is all the box's points, half is half, zero is none, blank is no score.",
   progressHeading: "Progress",
-  progressNote: "Current attempts only. Released includes the tasks regraded after release.",
+  progressNote: "Current attempts only. Released includes the tasks regraded after release. Regraded after release counts every such task, including those compared with the AI grade staff saw.",
   timeHeading: "Time",
   timeNote: "Waiting time, not grading time: the median from when a student submitted to when that submission was first released.",
   noTimer: "The site does not record time spent grading.",
@@ -35,6 +36,11 @@ export const GRADER_TEXT = {
 /** "12 released tasks were regraded after release …", always shown so a zero is visible too. */
 export function regradedLine(count: number): string {
   return `${count} released ${count === 1 ? "task was" : "tasks were"} regraded after release. Staff never saw that AI score, so ${count === 1 ? "it is" : "they are"} left out of every agreement number.`;
+}
+
+/** How many compared tasks hold staff points with no recorded save time (#429), always shown so a zero is visible too. */
+export function noSaveTimeLine(count: number, compared: number): string {
+  return `${count} of ${compared} compared ${compared === 1 ? "task has" : "tasks have"} staff points with no recorded save time (saved before save times were kept), so ${count === 1 ? "it is" : "they are"} compared with the newest AI grade.`;
 }
 
 /** "+14", "−2", "0". */
@@ -90,6 +96,7 @@ export function GraderView({ heading, stats }: { heading: string; stats: GraderS
       {!anything ? <p className="rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground">{GRADER_TEXT.nothingYet}</p> : null}
       {anything && !anyCompared ? <p className="rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground">{GRADER_TEXT.empty}</p> : null}
       {anything ? <p className="text-sm">{regradedLine(stats.regradedAfterRelease)}</p> : null}
+      {anyCompared ? <p className="text-sm">{noSaveTimeLine(stats.noSaveTime, stats.comparedTasks)}</p> : null}
 
       {anyCompared ? (
         <Section heading={GRADER_TEXT.totalsHeading} note={GRADER_TEXT.totalsNote}>

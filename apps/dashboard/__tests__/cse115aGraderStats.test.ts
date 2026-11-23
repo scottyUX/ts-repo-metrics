@@ -500,7 +500,7 @@ describe("GET /api/cse115a/instructor/courses/[slug]/grader-stats", () => {
     expect(response.status).toBe(200);
     const raw = await response.text();
     const body = JSON.parse(raw) as GraderStats;
-    expect(Object.keys(body).sort()).toEqual(["aiGave", "boxes", "comparedTasks", "progress", "regradedAfterRelease", "totals", "waiting"]);
+    expect(Object.keys(body).sort()).toEqual(["aiGave", "boxes", "comparedTasks", "noSaveTime", "progress", "regradedAfterRelease", "totals", "waiting"]);
     const keys = new Set<string>();
     const values: unknown[] = [];
     const walk = (value: unknown) => {
@@ -533,7 +533,8 @@ describe("GET /api/cse115a/instructor/courses/[slug]/grader-stats", () => {
 
   it("selects only the named columns", () => {
     const loader = readFileSync(path.resolve(__dirname, "../lib/cse115a/loadGraderStats.ts"), "utf8");
-    expect(loader).toContain('"assignment_submission_id,rubric,agent_total,model,prompt_version,graded_at,instructor_rubric,instructor_total,released_at"');
+    expect(loader).toContain('"assignment_submission_id,task_slot,rubric,agent_total,model,prompt_version,graded_at,instructor_rubric,instructor_total,released_at,instructor_saved_at,instructor_saw_graded_at"');
+    expect(loader).toContain('"assignment_submission_id,task_slot,rubric,agent_total,model,prompt_version,graded_at"');
     expect(loader).toContain("id,assignment_number,submitted_at,superseded_at,${SNAPSHOT_SLOT_PATHS}");
     expect(loader).not.toMatch(/select\("\*"\)|instructor_notes|user_id|snapshot"/);
   });
