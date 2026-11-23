@@ -239,15 +239,17 @@ describe("#298 follow-up: time limits", () => {
     expect(await files.names()).toEqual([]);
   });
 
+  // 1 s, not 0.2 s: the limit applies to every step, and on a busy machine the local git steps before
+  // the hanging call can take longer than 0.2 s, which times out the wrong step.
   it("a Storage call that hangs is abandoned at its limit", async () => {
     const { tmp } = await setup();
     const never = new Promise<never>(() => {});
     const askHangs: SnapshotStore = { has: () => never, upload: async () => "uploaded", download: async () => false, list: async () => new Set<string>() };
-    expect(await copyTaskRepo(task("team/public-app"), { store: askHangs, access: standIn().access, tmp, stepTimeoutMs: 200 }))
-      .toMatchObject({ reason: "timeout", line: "Timed out: the check for a stored copy took longer than 0.2 s." });
+    expect(await copyTaskRepo(task("team/public-app"), { store: askHangs, access: standIn().access, tmp, stepTimeoutMs: 1000 }))
+      .toMatchObject({ reason: "timeout", line: "Timed out: the check for a stored copy took longer than 1 s." });
     const uploadHangs: SnapshotStore = { has: async () => false, upload: () => never, download: async () => false, list: async () => new Set<string>() };
-    expect(await copyTaskRepo(task("team/public-app"), { store: uploadHangs, access: standIn().access, tmp, stepTimeoutMs: 200 }))
-      .toMatchObject({ reason: "timeout", line: "Timed out: the upload took longer than 0.2 s." });
+    expect(await copyTaskRepo(task("team/public-app"), { store: uploadHangs, access: standIn().access, tmp, stepTimeoutMs: 1000 }))
+      .toMatchObject({ reason: "timeout", line: "Timed out: the upload took longer than 1 s." });
     expect(await readdir(tmp)).toEqual([]);
   });
 });
