@@ -810,6 +810,8 @@ rebuilt rows before applying. A `candidate` row is always replaced. Other source
 written before the snapshot, and a source going back to candidate is written before its row is replaced, so an
 apply that fails part-way never leaves a validated source over a replaced row; running the tool again ends in
 the same rows as an apply that did not fail.
+Since #422 that panel is no longer on the Benchmark page (the count stays 0); the route and code remain, and
+putting its import and `<OldDiffRecapture slug={slug} />` back in `BenchmarkPanel.tsx` shows it again.
 
 Rebuilt so far: `JoKHerre__Bookworm-COL-04-T-4` (PR #115, M `96798e0b`, M^1 `40b28261`, the
 head of PR #114). `JoKHerre__Bookworm-COL-04-T-2` (PR #114) is not rebuilt: the PR changes no
