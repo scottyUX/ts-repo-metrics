@@ -418,7 +418,17 @@ SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... \
 
 ### Re-capturing old diffs (#418)
 
-"Diffs saved before the PR-own-diff rule", on the Benchmark page, re-runs
+Since #422 the panel is no longer on the Benchmark page: every old-rule
+submission has been re-captured and the count stays 0, since new submissions
+are saved under the PR-own-diff rule. The route, the library, the component
+(`components/cse115a/instructor/OldDiffRecapture.tsx`) and their tests remain,
+and `snapshot_before_recapture` is kept. To bring the panel back, put
+`import { OldDiffRecapture } from "./OldDiffRecapture";` back in
+`components/cse115a/instructor/BenchmarkPanel.tsx` and
+`<OldDiffRecapture slug={slug} />` between `<RepoCopies slug={slug} />` and
+the "Newest rows" section. What follows describes the panel as it worked.
+
+"Diffs saved before the PR-own-diff rule", formerly on the Benchmark page, re-runs
 today's diff capture (#382) on submissions already saved, for every task whose
 snapshot has no `diffEnd` (an old-rule task), in every submission of the course
 that is not superseded. It runs on the site, because private repos need the
