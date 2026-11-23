@@ -2,14 +2,16 @@ import type { ChatCompletionCreateParamsNonStreaming } from "openai/resources/ch
 import { LLM_CRITERIA, criterion, pointsFor, type CriterionGrade, type Level } from "@/lib/cse115a/rubric";
 import { isTestPath, parseDiffFiles, type DiffFile } from "@/lib/cse115a/diff";
 import type { TaskSnapshot } from "@/lib/cse115a/submissionSnapshot";
-import { workPrGraderNote } from "@/lib/cse115a/workPr";
+import { inMergeOrder } from "@/lib/cse115a/submissionSnapshot";
+import { extraCodePrsGraderNote, extraCodePrTruncatedNote, workPrGraderNote } from "@/lib/cse115a/workPr";
 
 // Scores the five judgment criteria of one task with a single OpenAI call.
 // Every criterion must quote its evidence; a quote that does not appear in the
 // submission (or no quote at all) marks the criterion for instructor review.
 
 // Bump whenever the prompt or the rubric text in lib/cse115a/rubric.ts changes. A per-task note (like "The diff has
-// no test files." or #431's note for a task whose code PR staff chose) is not a prompt change and needs no bump.
+// no test files.", #431's note for a task whose code PR staff chose, or #437's note for a task with extra PRs) is
+// not a prompt change and needs no bump.
 export const GRADER_PROMPT_VERSION = "cse115a-grader-v5";
 export const DEFAULT_GRADER_MODEL = "gpt-4o";
 
@@ -144,16 +146,32 @@ export function graderPatches(diff: string, specMarkdown: string): { testPatch: 
 }
 
 /**
+ * The diff the grader reads (#437): the task's own diff, then each extra PR's in merge order, each ending in a
+ * newline so the next one's `diff --git` starts a line. Without extra PRs it is the task's diff, unchanged.
+ */
+export function graderDiff(task: Pick<TaskSnapshot, "diff" | "extraCodePrs">): string {
+  const extras = task.extraCodePrs ?? [];
+  if (extras.length === 0) return task.diff;
+  const ended = (diff: string) => (diff === "" || diff.endsWith("\n") ? diff : `${diff}\n`);
+  return [task.diff, ...inMergeOrder(extras).map((extra) => extra.diff)].map(ended).join("");
+}
+
+/**
  * `prNotes`: notes for a task whose PR adds more than one task file (prTaskFileGraderNotes). The test and source
- * text read this task's own files first (graderPatches), so another task's files can't fill the window.
+ * text read this task's own files first (graderPatches), so another task's files can't fill the window. #437: a
+ * task with extra PRs is read as one diff, the main PR's then each extra PR's (graderDiff), split and cut to the
+ * same limits; a file changed in two of the PRs is two `diff --git` sections, in that order.
  */
 export function graderInput(task: TaskSnapshot, prNotes: string[] = []): GraderInput {
-  const split = graderPatches(task.diff, task.specMarkdown);
+  const split = graderPatches(graderDiff(task), task.specMarkdown);
   const notes: string[] = [...prNotes];
   // #431: staff chose the PR that holds the code; the spec is the task file the student submitted in another PR.
   if (task.workPrChoice) notes.push(workPrGraderNote(task.prNumber, task.taskFilePr?.number ?? task.workPrChoice.before.prNumber));
+  const extras = inMergeOrder(task.extraCodePrs ?? []);
+  if (extras.length) notes.push(extraCodePrsGraderNote(task.prNumber, extras.map((extra) => extra.prNumber)));
   if (task.diffError) notes.push(`The diff could not be loaded: ${task.diffError}`);
   if (task.diffTruncated) notes.push("The diff was over 1 MB and was cut off.");
+  for (const extra of extras) if (extra.diffTruncated) notes.push(extraCodePrTruncatedNote(extra.prNumber));
   if (!split.testPatch) notes.push("The diff has no test files.");
   return { specMarkdown: task.specMarkdown, testPatch: split.testPatch, patch: split.patch, notes };
 }
