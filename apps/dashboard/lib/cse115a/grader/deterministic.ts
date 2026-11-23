@@ -1,5 +1,6 @@
 import { criterion, pointsFor, type CriterionGrade, type Level } from "@/lib/cse115a/rubric";
 import type { SnapshotCheck, TaskSnapshot } from "@/lib/cse115a/submissionSnapshot";
+import { workPrProcessRationale } from "@/lib/cse115a/workPr";
 
 // Tests pass and Process come from evidence recorded at submit time, not from
 // the language model.
@@ -40,10 +41,19 @@ export function gradeTestsPass(checks: SnapshotCheck[]): CriterionGrade {
  * with the task file alone and first. A `merge_base` snapshot (#382) starts at the merge base whatever came first,
  * so `first_commit` never applies to it; capture's own first-commit answer (`taskFileFirstCommit`, on snapshots
  * since #382) covers the same stale value instead. Code before the task file is always confirmed by a person.
+ *
+ * `staffChoice` (#431): staff chose the PR that holds the code, so the saved validation describes the PR the
+ * student submitted (which holds the task file), not the code. Such a task follows the paired rule: never "task
+ * file first", flagged for review, with a rationale that says what happened instead of blaming the first commit.
  */
 export function gradeProcess(
   validation: Record<string, boolean>, baseCommitSource?: TaskSnapshot["baseCommitSource"], taskFileFirstCommit?: boolean,
+  staffChoice?: { workPrNumber: number; taskFilePrNumber: number | null },
 ): CriterionGrade {
+  if (staffChoice) {
+    return evidenceGrade("Process", "none", workPrProcessRationale(staffChoice.workPrNumber, staffChoice.taskFilePrNumber),
+      [`PR merged: ${validation.prMerged === true ? "yes" : "no"}`, "task file first: no", `code PR chosen by staff: #${staffChoice.workPrNumber}`], true);
+  }
   const merged = validation.prMerged === true;
   const fileFirst = validation.specCommittedFirst === true || baseCommitSource === "first_commit" || taskFileFirstCommit === true;
   const quotes = [`PR merged: ${merged ? "yes" : "no"}`, `task file first: ${fileFirst ? "yes" : "no"}`];

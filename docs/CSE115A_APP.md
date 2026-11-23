@@ -273,6 +273,9 @@ rejected rows) until a later rebuild splits the diff by task. Two tasks from
 one PR still get a row each. A task whose task file came from a separate
 task-file PR is flagged `task_file_from_other_pr` and still exported: its task
 text and its diff are each complete, but the spec was written after the code.
+A task whose code PR staff chose (#431, see "Choosing the PR that holds a
+task's code" below) is built the same way from the chosen PR and also gets
+`work_pr_chosen_by_staff`; it is exported like any paired task.
 
 The diff is the PR's own, the way GitHub's "Files changed" tab computes it
 (#382): from the merge base of the PR's base and its head, to the PR's head.
@@ -504,6 +507,76 @@ snapshot holds (repo, PR number, task path, `taskFilePr`, `prTaskFiles`).
 Routes: `GET /api/cse115a/instructor/courses/<slug>/recapture` (the list and
 counts) and `POST` the same with `{ submissionId, apply }` (`apply` defaults to
 false, the dry run). Staff of that course only.
+
+### Choosing the PR that holds a task's code (#431)
+
+Some submitted tasks point at a PR that only adds or moves the task file, while
+the student's code was merged in one or two earlier PRs. The saved diff is then
+right for that PR and useless for grading. On the staff review page, each task
+has **Use a different PR for the code** under "Get the code". The site suggests;
+it never chooses on its own. Nothing a student sees changes.
+
+- **The list** (`GET /api/cse115a/instructor/submissions/<id>/work-pr?slot=N`):
+  the merged PRs in the task's repository that the task's student opened (the
+  author saved in the snapshot, `pr.author`), newest merged first, at most 30,
+  without the task's own PR and task-file PR. Each shows its number, title,
+  branch, merged date and files changed. A PR is marked **Likely**, and listed
+  first, when its title, branch or description names the task ID, or it changes
+  a file the task file names (the grader's own `namedInSpec` rule); the page says
+  why. A PR another task already uses is shown but can't be picked. When the
+  author is not saved, every merged PR is listed and the page says so. GitHub
+  calls: up to three pages of 100 closed PRs (stopping at a short page), then
+  one file list per candidate, so at most 33.
+- Staff can also type a PR number (or paste its link). Every PR, listed or
+  typed, must be in the task's repository, merged, opened by the task's student,
+  not the task's current PR or task-file PR, and not used by another task: this
+  submission's other tasks, any current submission in the course, or any saved
+  task row (anyone's), compared as the students' duplicate check does (same
+  repository ignoring case, same PR number, as the PR or the task-file PR). A
+  reason is required.
+- **Preview** (`POST …/work-pr` with `{ slot, pr, reason, apply: false }`) writes
+  nothing. It shows the chosen PR's own file list (the merge-base rule, as
+  Submit captures it), test and source files counted, whether the diff was cut
+  at 1 MB, and what will happen to the task's benchmark row. **Use this PR** is
+  enabled only after a preview of the same PR, and asks once more ("Yes, take
+  the code from PR #X"); there is no browser confirm.
+- **Apply** (`apply: true`) captures the task again as a paired task (#403): the
+  chosen PR is the work PR (its diff, PR details, comments and checks) and the PR
+  the student submitted becomes `taskFilePr`. A task the student had already
+  paired keeps its own task-file PR. The spec, task path, task ID and validation
+  saved at Submit stay exactly as they are; `prTaskFiles` is saved as `[]` for
+  the chosen PR (the submitted PR's list is kept in the record). The task
+  snapshot gets `workPrChoice`: the chosen PR, who (staff email), when, the
+  reason, the PR it replaced, and `before`, what the task pointed at before the
+  first choice (PR number and URL, its own task-file PR if any, `prTaskFiles`,
+  merge commit, base and head commits, base source, `diffEnd`, the old file list,
+  the old diff's size). The old diff text is not kept a second time; the whole
+  first snapshot is also in `snapshot_before_recapture` when that was still
+  empty.
+- The writes go through the re-capture's apply path (#418, above), for this one
+  task only: the column check, the backup (only where empty, guarded), the
+  benchmark rows, the new snapshot under the guard last, and the `repo_copy` job
+  when the base commit changed and copies are on. A failed apply leaves the old
+  snapshot, and the same request again repairs it. Every request also carries
+  what the page saw (the task's PR and the snapshot's `recapturedAt`); a page
+  that is out of date is refused before anything is read.
+- **Undo** (`POST …/work-pr` with `{ slot, undo: true }`, two steps on the page)
+  captures the task again from the PR it pointed at before, through the same
+  path, removes `workPrChoice` and keeps one line, `workPrUndone` (who undid
+  which PR, when). It is refused when there is nothing to undo, or when the
+  original PR no longer has the saved merge commit. An undo captures on today's
+  rule.
+- **Grades:** nothing is regraded and no grade row, grade status or grade job is
+  written, on a released submission too. After a switch or an undo, until the
+  task is graded again, the page shows above the rubric "This AI grade was made
+  on PR #Y, before the code was switched to PR #X. Press Regrade." (worked out
+  from the grade's `graded_at` against the choice's or undo's time). Staff
+  numbers already saved stay.
+- The grader's input for such a task says the code is from the chosen PR and the
+  task file from the submitted one. This is a per-task note, like "The diff has
+  no test files.", so the prompt version stays `cse115a-grader-v5`. Process
+  follows the paired rule: not "task file first", flagged for review, with a
+  rationale that says staff chose the code PR.
 
 TAs can do everything except unlock and manage staff.
 

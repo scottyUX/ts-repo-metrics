@@ -813,6 +813,19 @@ the same rows as an apply that did not fail.
 Since #422 that panel is no longer on the Benchmark page (the count stays 0); the route and code remain, and
 putting its import and `<OldDiffRecapture slug={slug} />` back in `BenchmarkPanel.tsx` shows it again.
 
+### A task whose code PR staff chose (#431)
+
+On the staff review page, staff can choose the PR that holds a task's code when the submitted PR only adds the
+task file (`docs/CSE115A_APP.md`, "Choosing the PR that holds a task's code"). The task is captured again as a
+paired task (the chosen PR is the work PR, the submitted one `taskFilePr`), and its row is built by `buildInstance`
+like any paired task's, so it carries `task_file_from_other_pr` (and `task_file_first: false` in export) and one more
+flag, `work_pr_chosen_by_staff`. The flag does not keep a row out of export. The rows are written through the
+#418 apply path above, for that one task, with the same keep rule: a `validated` or `rejected` row whose `patch`
+and `test_patch` are byte-for-byte the new ones is kept (its source gains `work_pr_chosen_by_staff` and
+`recaptured_same_patch`); otherwise the row is replaced and goes back to `candidate`. Undo does the same from the
+original PR and drops the flag. Known gap: a repo copy is named by instance and base commit, so if the chosen PR
+had the same base commit as the old one, the stored copy still holds the old PR's refs.
+
 Rebuilt so far: `JoKHerre__Bookworm-COL-04-T-4` (PR #115, M `96798e0b`, M^1 `40b28261`, the
 head of PR #114). `JoKHerre__Bookworm-COL-04-T-2` (PR #114) is not rebuilt: the PR changes no
 test file, so it stays rejected.

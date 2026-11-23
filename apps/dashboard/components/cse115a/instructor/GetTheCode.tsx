@@ -7,8 +7,10 @@ import {
 const block = "overflow-auto whitespace-pre-wrap break-all rounded-md bg-muted p-3 font-mono text-xs select-all";
 
 /** A task's "Get the code" section on the staff review page (closed until opened). */
-export function GetTheCode({ submissionId, slot, repoFullName, mergeCommit, code }: {
+export function GetTheCode({ submissionId, slot, repoFullName, mergeCommit, code, choiceNote = null }: {
   submissionId: string; slot: number; repoFullName: string; mergeCommit: string | null | undefined; code: TaskCode | undefined;
+  /** #431: which PR the commands check out, when staff chose the PR that holds the task's code. */
+  choiceNote?: string | null;
 }) {
   const copy = code?.repoCopy ?? NO_COPY;
   const instanceId = code?.instanceId ?? null;
@@ -21,6 +23,7 @@ export function GetTheCode({ submissionId, slot, repoFullName, mergeCommit, code
           <h4 className="font-semibold">{FROM_GITHUB_TITLE}</h4>
           <p>{PASTE_STEP}</p>
           <pre className={block}>{githubCommands(repoFullName, mergeCommit)}</pre>
+          {choiceNote ? <p className="text-amber-700 dark:text-amber-300">{choiceNote}</p> : null}
           <p className="text-muted-foreground">{GITHUB_NOTE}</p>
         </div>
         <div className="space-y-2">

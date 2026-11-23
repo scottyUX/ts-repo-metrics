@@ -53,7 +53,9 @@ export type BuildFlag = "base_commit_from_pr_base" | "base_commit_from_first_com
    * Never set by buildInstance: the staff re-capture of an old-rule diff (benchmark/recapture.ts) adds it to a validated
    * or rejected source whose new `patch` and `test_patch` are byte-for-byte the stored ones, so the row was kept.
    */
-  | "recaptured_same_patch";
+  | "recaptured_same_patch"
+  /** Staff chose the PR that holds this task's code (#431): the row is built like a paired task's from that PR. */
+  | "work_pr_chosen_by_staff";
 
 /** SWE-bench Verified difficulty labels, from the student's estimate. */
 export function difficultyFor(estimateHours: number | undefined): string | null {
@@ -124,6 +126,8 @@ export function buildInstance(
   // The task file came from a separate PR merged after the work. The row is still exportable: the task text
   // and the diff are each complete; the flag says the spec was written or added after the code.
   if (task.taskFilePr) flags.push("task_file_from_other_pr");
+  // Staff chose the PR the code comes from (#431); the student submitted another PR, which holds the task file.
+  if (task.workPrChoice) flags.push("work_pr_chosen_by_staff");
   return {
     instance: {
       instance_id: instanceId(task.repoFullName, task.taskId),
