@@ -5,6 +5,8 @@ import { LLM_CRITERIA, RUBRIC, type CriterionName } from "@/lib/cse115a/rubric";
 //
 // The AI score is what the grade job saved (`rubric`, `agent_total`). The final score is what staff saved
 // (`instructor_rubric`, `instructor_total`), or the AI score when staff saved nothing. A box is one rubric row.
+// Since #429 a staff save records the AI grade on the task at that moment; a task regraded after such a save is
+// compared with the grade staff saw, from the AI grade history, and grouped under that grade's version.
 
 /** One current-or-superseded final submission, for the Progress table. */
 export type GraderSubmissionInput = {
@@ -16,6 +18,9 @@ export type GraderSubmissionInput = {
   /** How many tasks the submission holds (its snapshot's task slots). */
   taskCount: number;
 };
+
+/** An entry of the AI grade history (`cse_task_ai_grades`), in the same shape as a grade's AI fields. */
+export type SeenAiGrade = { rubric: unknown; agentTotal: number | string; model: string; promptVersion: string; gradedAt: string };
 
 /** One `cse_task_grades` row with its submission's assignment, submitted time and superseded flag. */
 export type GraderGradeInput = {
@@ -31,6 +36,12 @@ export type GraderGradeInput = {
   instructorRubric: unknown;
   instructorTotal: number | string | null;
   releasedAt: string | null;
+  /** When staff last saved points (#429). Null or missing: no save, or one made before save times were kept. */
+  instructorSavedAt?: string | null;
+  /** The graded_at of the AI grade on the task at that save (#429). */
+  instructorSawGradedAt?: string | null;
+  /** The history entry whose graded_at is instructorSawGradedAt, when that is not the newest grade; else null or missing. */
+  seen?: SeenAiGrade | null;
 };
 
 export type GraderStatsInput = { submissions: GraderSubmissionInput[]; grades: GraderGradeInput[] };
@@ -86,7 +97,10 @@ export type WaitRow = { assignment: number; submissions: number; medianMs: numbe
 export type GraderStats = {
   /** Released tasks compared, all assignments together; the "fewer than 10" rule reads this. */
   comparedTasks: number;
+  /** Released tasks regraded after release with no recorded staff save to compare against, left out. */
   regradedAfterRelease: number;
+  /** Compared tasks with staff points but no recorded save time (saves made before #429), compared with the newest AI grade. */
+  noSaveTime: number;
   totals: TotalsRow[];
   boxes: BoxTable[];
   aiGave: AiGaveRow[];
@@ -134,6 +148,31 @@ export function regradedAfterRelease(grade: Pick<GraderGradeInput, "releasedAt" 
   return Date.parse(grade.gradedAt) > Date.parse(grade.releasedAt);
 }
 
+/** A staff save whose time and the AI grade then on the task were recorded (#429). */
+export function hasRecordedSave(grade: Pick<GraderGradeInput, "instructorSavedAt" | "instructorSawGradedAt">): boolean {
+  return Boolean(grade.instructorSavedAt && grade.instructorSawGradedAt);
+}
+
+/**
+ * A released task as it is compared, or null when it is left out (unreleased, or regraded after release with
+ * nothing recorded to compare against). After a recorded save, the AI side is the grade staff saw: the newest
+ * when its graded_at is the one recorded, else the history entry `seen` (rubric, total, model and prompt
+ * version). Otherwise (no save, a save made before save times were kept, or the entry not found) the AI side
+ * is the newest grade, and a task regraded after release is left out, as before #429.
+ */
+export function comparedGrade(grade: GraderGradeInput): GraderGradeInput | null {
+  if (!grade.releasedAt) return null;
+  if (hasRecordedSave(grade)) {
+    const saw = Date.parse(grade.instructorSawGradedAt!);
+    if (saw === Date.parse(grade.gradedAt)) return grade;
+    const seen = grade.seen;
+    if (seen && Date.parse(seen.gradedAt) === saw) {
+      return { ...grade, rubric: seen.rubric, agentTotal: seen.agentTotal, model: seen.model, promptVersion: seen.promptVersion, gradedAt: seen.gradedAt };
+    }
+  }
+  return regradedAfterRelease(grade) ? null : grade;
+}
+
 /** The median of a list; the mean of the middle two for an even count; null for none. */
 export function median(values: number[]): number | null {
   if (values.length === 0) return null;
@@ -157,8 +196,9 @@ function orderedGroups(keys: Iterable<GroupKey>): GroupKey[] {
 /** Everything the Grader page shows, from one course's submissions and grade rows. */
 export function graderStats(input: GraderStatsInput): GraderStats {
   const current = input.grades.filter((grade) => !grade.superseded);
-  const compared = current.filter((grade) => grade.releasedAt && !regradedAfterRelease(grade));
-  const regraded = current.filter(regradedAfterRelease);
+  const compared = current.flatMap((grade) => comparedGrade(grade) ?? []);
+  const regraded = current.filter((grade) => grade.releasedAt && comparedGrade(grade) === null);
+  const noSaveTime = compared.filter((grade) => items(grade.instructorRubric).length > 0 && !grade.instructorSavedAt).length;
 
   const keyOf = (grade: GraderGradeInput): GroupKey => ({ assignment: grade.assignmentNumber, model: grade.model, promptVersion: grade.promptVersion });
   const groups = orderedGroups(compared.map(keyOf));
@@ -250,7 +290,7 @@ export function graderStats(input: GraderStatsInput): GraderStats {
     return { assignment, submissions: waits.length, medianMs: median(waits) };
   });
 
-  return { comparedTasks: compared.length, regradedAfterRelease: regraded.length, totals, boxes, aiGave, progress, waiting };
+  return { comparedTasks: compared.length, regradedAfterRelease: regraded.length, noSaveTime, totals, boxes, aiGave, progress, waiting };
 }
 
 // ---- Wording shared by the page and the tests ----

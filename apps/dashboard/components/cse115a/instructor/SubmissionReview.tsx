@@ -12,6 +12,7 @@ import { RUBRIC, TASK_POINTS } from "@/lib/cse115a/rubric";
 import { effectiveTotal, submittedSprintScore, type TaskGradeRow } from "@/lib/cse115a/gradeReview";
 import type { SubmissionSnapshot, TaskSnapshot } from "@/lib/cse115a/submissionSnapshot";
 import type { TaskCode } from "@/lib/cse115a/getTheCode";
+import { AiGradeHistory, type AiGradeEntry } from "./AiGradeHistory";
 import { GetTheCode } from "./GetTheCode";
 import { fetchJson, formatPoints, STATUS_LABELS, type StaffCourse, type SubmissionStatus } from "./shared";
 
@@ -27,6 +28,8 @@ type Detail = {
   history: Array<{ id: string; attempt: number; status: SubmissionStatus; submitted_at: string; superseded_at: string | null; unlock_reason: string | null }>;
   /** Each slot's "Get the code" entry; missing from a response made before it existed. */
   code?: TaskCode[];
+  /** Every AI grade of each task, newest first (#429); missing from a response made before it existed. */
+  aiGrades?: AiGradeEntry[];
 };
 
 const MAX_DIFF_DISPLAY = 200_000;
@@ -64,7 +67,7 @@ function draftFrom(grade: TaskGradeRow): Draft {
   return { values, notes, overall: grade.instructor_notes ?? "" };
 }
 
-function TaskPanel({ submissionId, task, grade, onSaved, readOnly, sharedPr, code }: { submissionId: string; task: TaskSnapshot; grade: TaskGradeRow | undefined; onSaved: () => void; readOnly: boolean; sharedPr: string[]; code: TaskCode | undefined }) {
+function TaskPanel({ submissionId, task, grade, onSaved, readOnly, sharedPr, code, aiGrades }: { submissionId: string; task: TaskSnapshot; grade: TaskGradeRow | undefined; onSaved: () => void; readOnly: boolean; sharedPr: string[]; code: TaskCode | undefined; aiGrades: AiGradeEntry[] }) {
   const split = useMemo(() => splitPatch(task.diff), [task.diff]);
   const [draft, setDraft] = useState<Draft | null>(grade ? draftFrom(grade) : null);
   const [saving, setSaving] = useState(false);
@@ -173,6 +176,7 @@ function TaskPanel({ submissionId, task, grade, onSaved, readOnly, sharedPr, cod
               );
             })}
           </div>
+          <AiGradeHistory entries={aiGrades} />
           <label className="block text-sm">
             <span className="text-muted-foreground">Notes to the student</span>
             <textarea value={draft.overall} disabled={readOnly} onChange={(event) => setDraft({ ...draft, overall: event.target.value })} rows={3}
@@ -272,7 +276,7 @@ export function SubmissionReview({ id }: { id: string }) {
       ) : <p className="rounded-lg bg-muted p-3 text-sm text-muted-foreground">This attempt was unlocked and is read-only.</p>}
 
       <div className="grid gap-6 xl:grid-cols-2">
-        {tasks.map((task) => <TaskPanel key={task.slot} submissionId={submission.id} task={task} grade={grades.find((row) => row.task_slot === task.slot)} onSaved={() => void load()} readOnly={!active} sharedPr={prTaskFileLines(tasks, task, "staff")} code={detail.code?.find((item) => item.slot === task.slot)} />)}
+        {tasks.map((task) => <TaskPanel key={task.slot} submissionId={submission.id} task={task} grade={grades.find((row) => row.task_slot === task.slot)} onSaved={() => void load()} readOnly={!active} sharedPr={prTaskFileLines(tasks, task, "staff")} code={detail.code?.find((item) => item.slot === task.slot)} aiGrades={(detail.aiGrades ?? []).filter((item) => item.task_slot === task.slot)} />)}
       </div>
       {oneTask ? <p className={oneTask.warn ? "text-sm text-amber-700 dark:text-amber-300" : "text-sm text-muted-foreground"}>{oneTask.text}</p> : null}
       {manyTasks ? <p className="text-sm text-muted-foreground">{manyTasks}</p> : null}

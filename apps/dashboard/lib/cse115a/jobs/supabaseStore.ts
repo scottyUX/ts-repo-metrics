@@ -69,19 +69,23 @@ export function supabaseJobStore(db: SupabaseClient): JobStore {
     },
     async saveGrades(submissionId, grades) {
       const now = new Date().toISOString();
-      const { error } = await db.from("cse_task_grades").upsert(
-        grades.map((grade) => ({
-          assignment_submission_id: submissionId,
-          task_slot: grade.slot,
-          rubric: grade.rubric,
-          agent_total: grade.agentTotal,
-          needs_review: grade.needsReview,
-          model: grade.model,
-          prompt_version: grade.promptVersion,
-          graded_at: now,
-        })),
-        { onConflict: "assignment_submission_id,task_slot" },
-      );
+      const rows = grades.map((grade) => ({
+        assignment_submission_id: submissionId,
+        task_slot: grade.slot,
+        rubric: grade.rubric,
+        agent_total: grade.agentTotal,
+        needs_review: grade.needsReview,
+        model: grade.model,
+        prompt_version: grade.promptVersion,
+        graded_at: now,
+      }));
+      // #429: the history first, so a grade that reaches cse_task_grades always has its history row. The same
+      // row written twice (same graded_at) is kept once. A failure here fails the job before cse_task_grades
+      // changes; its retry grades again, with a new graded_at, and adds that grade as a new row.
+      const history = await db.from("cse_task_ai_grades")
+        .upsert(rows, { onConflict: "assignment_submission_id,task_slot,graded_at", ignoreDuplicates: true });
+      check(history.error, "save the grade history");
+      const { error } = await db.from("cse_task_grades").upsert(rows, { onConflict: "assignment_submission_id,task_slot" });
       check(error, "save grades");
     },
     async finishJob(id, outcome) {

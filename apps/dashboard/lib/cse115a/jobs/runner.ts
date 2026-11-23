@@ -46,7 +46,10 @@ export interface JobStore {
   loadSubmission(id: string): Promise<Submission | null>;
   /** Sets the status unless the submission is already released. */
   setSubmissionStatus(id: string, status: AssignmentSubmissionStatus): Promise<void>;
-  /** Writes the agent's fields only; instructor edits and release are kept. */
+  /**
+   * Writes the agent's fields only; instructor edits and release are kept. Each grade is also added to the
+   * AI grade history (cse_task_ai_grades, #429) with the same graded_at.
+   */
   saveGrades(submissionId: string, grades: TaskGrade[]): Promise<void>;
   finishJob(id: string, outcome: JobOutcome): Promise<void>;
   /** The Repo Metrics report saved for an analysis, or null. */
