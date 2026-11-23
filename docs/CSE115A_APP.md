@@ -275,7 +275,10 @@ task-file PR is flagged `task_file_from_other_pr` and still exported: its task
 text and its diff are each complete, but the spec was written after the code.
 A task whose code PR staff chose (#431, see "Choosing the PR that holds a
 task's code" below) is built the same way from the chosen PR and also gets
-`work_pr_chosen_by_staff`; it is exported like any paired task.
+`work_pr_chosen_by_staff`; it is exported like any paired task. A task with
+extra PRs for its code (#437, see "Extra PRs for a task's code" below) is still
+built from its main PR only and gets `extra_code_prs`; the flag does not keep
+it out of export.
 
 The diff is the PR's own, the way GitHub's "Files changed" tab computes it
 (#382): from the merge base of the PR's base and its head, to the PR's head.
@@ -577,6 +580,97 @@ it never chooses on its own. Nothing a student sees changes.
   no test files.", so the prompt version stays `cse115a-grader-v5`. Process
   follows the paired rule: not "task file first", flagged for review, with a
   rationale that says staff chose the code PR.
+- **Repo copy at the same base commit** (fixed in #437): a stored copy is named
+  by instance and base commit and never overwritten, so when the chosen PR has
+  the same base commit as the old one, the copy job would find it "already
+  stored". The apply now asks Storage first. A complete copy is there: the task
+  records `repoCopyFrom` (the PR the copy was made for), and "Get the code"
+  says above the stored-copy steps: "This stored copy was made for PR #A, before
+  staff chose PR #B for this task's code. Both start at the same commit, so the
+  copy was not made again: its refs/hecate/merge is PR #A's merge commit. For
+  PR #B, use From GitHub above." No copy yet (or Storage can't be asked): the
+  copy job is queued, so it is made for the chosen PR. An undo back to that PR
+  clears `repoCopyFrom`.
+- **Two tasks from one submitted PR** (fixed in #437): when staff switch one of
+  them, the other task's staff-only note says "This PR also adds US-3-T-1.md, the
+  task file of US-3-T-1 (Task 1), whose code is in PR #16, which staff chose." instead of
+  calling it "not one of this student's tasks". The student's card and the
+  grader's notes are unchanged.
+
+### Extra PRs for a task's code (#437)
+
+Students split one task over several PRs: most of the code in one PR and a
+smaller part in a later one, or the code in one PR and its tests in later ones.
+#431 picks one PR; the AI then grades part of the work (no tests, Test quality
+0). Staff can now attach **extra code PRs** to a task. The task keeps one
+**main PR** (`prNumber`, the student's or staff's choice). Extra PRs add to what
+staff and the AI see; they never change the benchmark row's patch.
+
+- **Data.** `TaskSnapshot.extraCodePrs`, in merge order (oldest first), at most
+  3 (`MAX_EXTRA_CODE_PRS`). Each entry: `prNumber`, `prUrl`, `title`,
+  `mergedAt`, `mergeCommitSha`, `baseCommit`, `headCommit`, `diffEnd`, `diff`,
+  `diffBytes`, `diffTruncated` (its own diff on the PR-own-diff rule, as Submit
+  captures it), `checks` (CI on its merge commit), `addedBy` (staff email),
+  `addedAt`, `reason`. `extraCodePrChange` keeps the last add or remove (who,
+  which PR, when). Missing on every other snapshot, which behaves as before. No
+  migration.
+- **Rules.** Same repository, merged, opened by the task's student (or a
+  warning when the author is not saved), not the task's main PR, not its
+  task-file PR, not already one of its extra PRs, and not used by another task.
+  An extra PR counts as a code PR everywhere `usedPrs` is used, so it can't be a
+  main PR or an extra PR of another task; #435's exception (a sibling's
+  task-file-only PR) holds. A reason is required. Allowed on any task of a
+  current attempt, whether or not staff chose its main PR. While a task has
+  extra PRs, changing or undoing its main PR is refused: "This task has extra
+  PRs for its code (PR #12 and PR #14). Remove them first, then change or undo
+  the main PR."
+- **Routes** (`/api/cse115a/instructor/submissions/<id>/work-pr`, staff of the
+  course): `POST { slot, extra, reason, apply, seen }` previews (`apply` not
+  true, writes nothing) or adds; `POST { slot, removeExtra, seen }` removes. The
+  stale-page check compares the task's PR, `recapturedAt` and the extra PR
+  numbers (`seen.extraPrs`). GET marks the task's extra PRs `attached` and lists
+  the rest. GitHub calls: an add (preview or apply) makes 5 (the PR, its merge
+  base, its diff, its check runs, its commit status); a remove makes none; the
+  list makes at most 33, as before.
+- **Writes**, in order: this submission's benchmark source row for the slot
+  gains or loses `extra_code_prs` (only when there is a row and the flag
+  changes; its status, patches and other flags stay), then the snapshot under
+  the re-capture's guard, with only this task's extra PRs changed and
+  `recapturedAt` set. The main PR's diff, the task row, the repo copy and every
+  grade row, grade status and grade job are untouched; staff press Regrade.
+- **Grading.** The AI is given the main PR's diff followed by each extra PR's,
+  in merge order, then the usual split into test and source files and the usual
+  size limits, with the note "This task's code is in PR #A plus PRs #B and #C,
+  as course staff recorded. …". A file changed in two of the PRs appears as two
+  sections, the main PR's first. Prompt version stays `cse115a-grader-v5`; a
+  task without extra PRs gets byte-for-byte the same input as before (pinned by
+  a test). **Tests pass** reads the checks of the last merged of the main and
+  extra PRs, and says so: "All 2 CI checks passed on the merge commit of PR
+  #14, the last merged of this task's PRs." with the quote "checks read on the
+  merge commit of PR #14". Process is unchanged. Above the rubric, after an add
+  or a remove: "This AI grade was made before PR #B was added to this task's
+  code. Press Regrade." (or "removed from").
+- **Review page** (staff only): the extra PRs are listed under the main PR
+  ("PR #12 Title · merged Oct 12, 2026 · added by … on Nov 23, 2026", "Reason:
+  …", **Remove** then "Yes, remove PR #12"). **Add another PR for the code**
+  opens the same candidate list ("Already added to this task" on attached
+  ones), a typed number or link, a reason, **Preview** (files, test and source
+  counts, warnings, including a file the main PR also changes) and **Add this
+  PR** then "Yes, add PR #12 to this task's code". The diff tabs show the main
+  PR's diff, then each extra PR's under "PR #12: Title (extra PR for this
+  task's code)"; CI shows each extra PR's checks. "Get the code" says: "The
+  stored copy and these commands hold PR #10 only. This task's code is also in
+  PR #12 and PR #14, which they do not include." Student pages show nothing new.
+- **Benchmark.** The row is still built from the main PR only. Its source gets
+  `extra_code_prs` while the task has any. The extra PRs (number, merge, base
+  and head commit) are read from the source's submission snapshot, where the
+  row's other provenance lives (`snapshotExtraCodePrs` in
+  `jobs/benchmarkSave.ts`); no diff text of them goes into the export. A new
+  attempt with the same main PR does not carry the flag over.
+- **A new attempt** (unlock, resubmit) carries over neither a staff choice nor
+  extra PRs. The old attempt stays readable (Attempts list): its page shows the
+  choice, the extra PRs and their reasons, read-only, without Remove. Its extra
+  PRs no longer count as used (only current attempts do).
 
 TAs can do everything except unlock and manage staff.
 

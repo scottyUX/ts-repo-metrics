@@ -21,17 +21,40 @@ function evidenceGrade(name: "Tests pass" | "Process", level: Level | null, rati
   };
 }
 
-/** Grades "Tests pass" from check runs and commit statuses on the merge commit. Neutral, skipped, and pending checks are ignored. */
-export function gradeTestsPass(checks: SnapshotCheck[]): CriterionGrade {
+/**
+ * Grades "Tests pass" from check runs and commit statuses on the merge commit. Neutral, skipped, and pending checks
+ * are ignored. `from` (#437): the PR whose merge commit the checks are from, for a task with extra PRs; the rationale
+ * names it and the first evidence quote says it. Without it the grade is as before.
+ */
+export function gradeTestsPass(checks: SnapshotCheck[], from?: { prNumber: number }): CriterionGrade {
   const passed = checks.filter((check) => check.conclusion && PASSING.has(check.conclusion));
   const failed = checks.filter((check) => check.conclusion && FAILING.has(check.conclusion));
-  const quotes = [...passed, ...failed].map((check) => `${check.name}: ${check.conclusion}`);
+  const where = from ? `the merge commit of PR #${from.prNumber}, the last merged of this task's PRs` : "the merge commit";
+  const source = from ? [`checks read on the merge commit of PR #${from.prNumber}`] : [];
+  const quotes = [...source, ...[...passed, ...failed].map((check) => `${check.name}: ${check.conclusion}`)];
   if (passed.length + failed.length === 0) {
-    return evidenceGrade("Tests pass", null, "No finished CI checks were recorded on the merge commit, so test results need a manual check.", []);
+    return evidenceGrade("Tests pass", null, `No finished CI checks were recorded on ${where}, so test results need a manual check.`, source);
   }
-  if (failed.length === 0) return evidenceGrade("Tests pass", "full", `All ${passed.length} CI checks passed on the merge commit.`, quotes);
-  if (passed.length === 0) return evidenceGrade("Tests pass", "none", `All ${failed.length} CI checks failed on the merge commit.`, quotes);
-  return evidenceGrade("Tests pass", "partial", `${failed.length} of ${passed.length + failed.length} CI checks failed on the merge commit.`, quotes);
+  if (failed.length === 0) return evidenceGrade("Tests pass", "full", `All ${passed.length} CI checks passed on ${where}.`, quotes);
+  if (passed.length === 0) return evidenceGrade("Tests pass", "none", `All ${failed.length} CI checks failed on ${where}.`, quotes);
+  return evidenceGrade("Tests pass", "partial", `${failed.length} of ${passed.length + failed.length} CI checks failed on ${where}.`, quotes);
+}
+
+/**
+ * #437: the checks "Tests pass" reads for a task with extra PRs: those of the last merged among the main PR and the
+ * extra PRs, since that merge commit holds all of the task's code. Null for a task without extra PRs. A main PR
+ * whose merge time is unknown counts as merged first.
+ */
+export function lastMergedChecks(task: Pick<TaskSnapshot, "prNumber" | "pr" | "checks" | "extraCodePrs">): { prNumber: number; checks: SnapshotCheck[] } | null {
+  const extras = task.extraCodePrs ?? [];
+  if (extras.length === 0) return null;
+  const time = (at: string | null | undefined) => (at && Number.isFinite(Date.parse(at)) ? Date.parse(at) : -Infinity);
+  let last = { prNumber: task.prNumber, checks: task.checks, at: time(task.pr.mergedAt) };
+  for (const extra of extras) {
+    const at = time(extra.mergedAt);
+    if (at > last.at || (at === last.at && extra.prNumber > last.prNumber)) last = { prNumber: extra.prNumber, checks: extra.checks, at };
+  }
+  return { prNumber: last.prNumber, checks: last.checks };
 }
 
 /**

@@ -27,7 +27,11 @@ export type TaskFileCommitter = "student" | "someone_else" | "unknown";
  * (facts_json); missing on tasks saved before it was recorded. `prTaskFileCommitters` says who committed each, for
  * a PR that adds several; missing on older tasks.
  */
-export type PrTask = SlotTask & { taskPath: string; prTaskFiles?: string[] | null; prTaskFileCommitters?: Record<string, TaskFileCommitter> | null };
+export type PrTask = SlotTask & {
+  taskPath: string; prTaskFiles?: string[] | null; prTaskFileCommitters?: Record<string, TaskFileCommitter> | null;
+  /** Read only by the staff line (#437, a fix to #431): a task whose task file came from a separate PR. */
+  prNumber?: number; taskFilePr?: { url: string; number: number } | null; workPrChoice?: unknown;
+};
 
 const samePr = (a: string, b: string) => a.trim().toLowerCase() === b.trim().toLowerCase();
 const fileName = (path: string) => path.split("/").pop()!;
@@ -97,10 +101,30 @@ function committersLine(task: PrTask): string | null {
   return whoOf(task.taskPath) === "unknown" ? `${line} Check that ${fileName(task.taskPath)} is this student's own.` : line;
 }
 
+/**
+ * The student's other tasks here whose task file comes from this task's PR while their code is in another PR: a
+ * pair the student made (#403), or a task whose code PR staff chose (#431), from a PR that held two tasks.
+ */
+function tasksPairedWithThisPr<T extends PrTask>(tasks: T[], task: T): T[] {
+  return tasks.filter((other) => other.slot !== task.slot && other.taskFilePr && samePr(other.taskFilePr.url, task.prUrl)).sort((a, b) => a.slot - b.slot);
+}
+
+/**
+ * The staff line for a task file of this PR that belongs to the student's other task whose code is in another PR.
+ * #437, a fix to #431: it used to be called "not one of this student's tasks".
+ */
+export function pairedTaskFileLine(path: string, other: { taskId: string; slot: number; prNumber?: number; workPrChoice?: unknown }): string {
+  const code = typeof other.prNumber === "number" ? `PR #${other.prNumber}${other.workPrChoice ? ", which staff chose" : ""}` : "another PR";
+  return `This PR also adds ${fileName(path)}, the task file of ${other.taskId} (Task ${other.slot}), whose code is in ${code}.`;
+}
+
 /** The lines shown on the student's task card or the staff review page for a task whose PR adds more than one task file. */
 export function prTaskFileLines<T extends PrTask>(tasks: T[], task: T, audience: LineAudience): string[] {
   const sharing = prTaskFileSharing(tasks, task);
   if (!sharing) return [];
+  // Staff only: a task file of this PR that is the student's other task's (paired with this PR) is said to be so.
+  const paired = audience === "staff" ? tasksPairedWithThisPr(tasks, task).filter((other) => sharing.unused.includes(other.taskPath)) : [];
+  const unused = sharing.unused.filter((path) => !paired.some((other) => other.taskPath === path));
   const lines: string[] = [];
   if (sharing.otherTasks.length === 1) {
     const [first, second] = [task, sharing.otherTasks[0]!].sort((a, b) => a.slot - b.slot) as [T, T];
@@ -110,7 +134,8 @@ export function prTaskFileLines<T extends PrTask>(tasks: T[], task: T, audience:
     const all = [task, ...sharing.otherTasks].sort((a, b) => a.slot - b.slot);
     lines.push(`This PR holds ${all.length} tasks: ${listed(all.map((item) => `${item.taskId} (Task ${item.slot})`))}. They share one diff.`);
   }
-  if (sharing.unused.length) lines.push(unusedLine(sharing.unused, audience));
+  if (unused.length) lines.push(unusedLine(unused, audience));
+  for (const other of paired) lines.push(pairedTaskFileLine(other.taskPath, other));
   const committers = audience === "staff" ? committersLine(task) : null;
   if (committers) lines.push(committers);
   return lines;

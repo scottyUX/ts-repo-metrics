@@ -1,6 +1,6 @@
 import { RUBRIC, type CriterionGrade } from "@/lib/cse115a/rubric";
 import type { TaskSnapshot } from "@/lib/cse115a/submissionSnapshot";
-import { gradeProcess, gradeTestsPass } from "./deterministic";
+import { gradeProcess, gradeTestsPass, lastMergedChecks } from "./deterministic";
 import { gradeWithLlm, type ChatClient } from "./llmGrader";
 
 export type TaskGrade = {
@@ -18,9 +18,11 @@ export type TaskGrade = {
  */
 export async function gradeTask(client: ChatClient, task: TaskSnapshot, model?: string, prNotes: string[] = []): Promise<TaskGrade> {
   const llm = await gradeWithLlm(client, task, model, prNotes);
+  // #437: a task with extra PRs reads the checks of the last merged of its PRs.
+  const last = lastMergedChecks(task);
   const byName = new Map<string, CriterionGrade>([
     ...llm.criteria.map((grade) => [grade.name, grade] as const),
-    ["Tests pass", gradeTestsPass(task.checks)],
+    ["Tests pass", last ? gradeTestsPass(last.checks, { prNumber: last.prNumber }) : gradeTestsPass(task.checks)],
     ["Process", gradeProcess(task.validation, task.baseCommitSource, task.taskFileFirstCommit, task.workPrChoice
       ? { workPrNumber: task.prNumber, taskFilePrNumber: task.taskFilePr?.number ?? null } : undefined)],
   ]);

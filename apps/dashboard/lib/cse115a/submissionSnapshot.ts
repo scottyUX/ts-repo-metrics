@@ -3,7 +3,7 @@ import { taskFileFirst, type TaskFacts } from "@/lib/cse115a/processChecklist";
 import type { GitHubReader } from "@/lib/cse115a/githubClient";
 import { firstCommitHoldsOnlyTaskFiles } from "@/lib/cse115a/sharedPr";
 import { savedTaskFilePr, type TaskFilePr } from "@/lib/cse115a/taskFilePr";
-import type { WorkPrChoice, WorkPrUndone } from "@/lib/cse115a/workPr";
+import type { ExtraCodePrChange, RepoCopyFrom, WorkPrChoice, WorkPrUndone } from "@/lib/cse115a/workPr";
 
 // Everything grading and benchmark capture need, copied from GitHub when the
 // student submits. Later jobs never call GitHub with the student's token.
@@ -91,7 +91,48 @@ export type TaskSnapshot = {
   workPrChoice?: WorkPrChoice;
   /** The last staff choice that was undone (#431): one line of history. Missing unless a choice was undone. */
   workPrUndone?: WorkPrUndone;
+  /**
+   * #437: more PRs that hold part of this task's code, added by staff, in merge order (oldest first), at most
+   * MAX_EXTRA_CODE_PRS. The task's own PR (`prNumber`) stays its main PR: the benchmark row's patch, the repo copy and
+   * "Get the code" are the main PR's. The grader reads the main PR's diff and then each of these. Missing on every
+   * task staff have not added one to.
+   */
+  extraCodePrs?: ExtraCodePr[];
+  /** #437: the last add or remove of an extra PR, for the review page's out-of-date AI grade line. */
+  extraCodePrChange?: ExtraCodePrChange;
+  /**
+   * #437 (a fix to #431): set when a staff change kept the repo copy's base commit, so the stored copy was not made
+   * again and still holds this earlier PR's commits. Missing when the copy matches the task's PR (or is unknown).
+   */
+  repoCopyFrom?: RepoCopyFrom;
 };
+
+/**
+ * An extra PR for a task's code (#437), captured like the task's own PR: its details, its own diff on the PR-own-diff
+ * rule (captureDiff, #382) and the CI checks on its merge commit. Who added it, when and why are kept with it.
+ */
+export type ExtraCodePr = {
+  prNumber: number;
+  prUrl: string;
+  title: string;
+  mergedAt: string;
+  mergeCommitSha: string;
+  baseCommit: string;
+  headCommit: string | null;
+  diffEnd: "head" | "merge_commit";
+  diff: string;
+  diffBytes: number;
+  diffTruncated: boolean;
+  checks: SnapshotCheck[];
+  /** The staff member's email. Staff only. */
+  addedBy: string;
+  addedAt: string;
+  /** Staff only. */
+  reason: string;
+};
+
+/** The most extra PRs one task can have. */
+export const MAX_EXTRA_CODE_PRS = 3;
 
 export type SubmissionSnapshot = { version: 1; capturedAt: string; tasks: TaskSnapshot[] };
 
@@ -174,6 +215,11 @@ export type TaskDiffInput = {
   taskFilePr?: TaskFilePr;
   /** The task files of the student's other tasks from this same PR (two tasks, one PR). */
   samePrTaskPaths: string[];
+  /**
+   * False for an extra PR (#437): its first commit says nothing about this task's task file, so it is not read and
+   * the fallback (no merge base) starts at the PR base. Missing everywhere else.
+   */
+  readFirstCommit?: false;
 };
 
 /** Reads the pull request; throws when it is no longer merged. */
@@ -198,8 +244,9 @@ async function captureDiff(gh: GitHubReader, input: TaskDiffInput, pull: Pull & 
   const base = repoPath(input.repoFullName);
   const mergeSha = pull.merge_commit_sha;
   const headSha = pull.head.sha ?? null;
+  const readFirst = input.readFirstCommit !== false;
   const [commits, mergeBase] = await Promise.all([
-    gh.json<Array<{ sha: string }>>(`${base}/pulls/${input.prNumber}/commits?per_page=1&page=1`),
+    readFirst ? gh.json<Array<{ sha: string }>>(`${base}/pulls/${input.prNumber}/commits?per_page=1&page=1`) : Promise.resolve(null),
     readMergeBase(gh, owner, repo, pull.base.sha, headSha),
   ]);
   // The rule before #382, kept only as the fallback: the diff starts after the PR's first commit when the task
@@ -439,4 +486,48 @@ export async function captureWorkPrTask(
       checks,
     },
   };
+}
+
+/**
+ * Captures an extra PR for a task's code (#437): the PR's own diff on today's rule (captureDiff, as Submit, without
+ * reading its first commit) and the CI checks on its merge commit. `pull` is the PR as read by readPull and must be
+ * merged. GitHub calls: the merge base (compare JSON), the diff, the check runs and the commit status (4). An error
+ * when the diff can't be loaded; nothing is saved then.
+ */
+export async function captureExtraCodePr(
+  gh: GitHubReader, saved: Pick<TaskSnapshot, "repoFullName" | "taskPath">, prNumber: number, pull: Pull,
+  added: { addedBy: string; addedAt: string; reason: string },
+): Promise<{ ok: true; extra: ExtraCodePr } | { ok: false; error: string }> {
+  if (!pull.merged_at || !pull.merge_commit_sha) return { ok: false, error: `PR #${prNumber} is not merged.` };
+  const merged = pull as Pull & { merge_commit_sha: string; merged_at: string };
+  const [owner, repo] = saved.repoFullName.split("/") as [string, string];
+  const input: TaskDiffInput = { repoFullName: saved.repoFullName, prNumber, taskPath: saved.taskPath, samePrTaskPaths: [], readFirstCommit: false };
+  const [fields, checks] = await Promise.all([
+    captureDiff(gh, input, merged),
+    readCommitChecks(gh, owner, repo, merged.merge_commit_sha),
+  ]);
+  if (fields.diffError) return { ok: false, error: `PR #${prNumber}: the diff could not be loaded (${fields.diffError.slice(0, 300)}).` };
+  return {
+    ok: true,
+    extra: {
+      prNumber,
+      prUrl: `https://github.com/${saved.repoFullName}/pull/${prNumber}`,
+      title: merged.title,
+      mergedAt: merged.merged_at,
+      mergeCommitSha: merged.merge_commit_sha,
+      baseCommit: fields.baseCommit,
+      headCommit: fields.headCommit,
+      diffEnd: fields.diffEnd,
+      diff: fields.diff,
+      diffBytes: fields.diffBytes,
+      diffTruncated: fields.diffTruncated,
+      checks,
+      ...added,
+    },
+  };
+}
+
+/** Extra PRs in merge order: oldest merged first, then by number. Pure. */
+export function inMergeOrder<T extends { mergedAt: string; prNumber: number }>(extras: T[]): T[] {
+  return [...extras].sort((a, b) => Date.parse(a.mergedAt) - Date.parse(b.mergedAt) || a.prNumber - b.prNumber);
 }

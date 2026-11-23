@@ -7,10 +7,14 @@ import {
 const block = "overflow-auto whitespace-pre-wrap break-all rounded-md bg-muted p-3 font-mono text-xs select-all";
 
 /** A task's "Get the code" section on the staff review page (closed until opened). */
-export function GetTheCode({ submissionId, slot, repoFullName, mergeCommit, code, choiceNote = null }: {
+export function GetTheCode({ submissionId, slot, repoFullName, mergeCommit, code, choiceNote = null, extrasNote = null, copyNote = null }: {
   submissionId: string; slot: number; repoFullName: string; mergeCommit: string | null | undefined; code: TaskCode | undefined;
   /** #431: which PR the commands check out, when staff chose the PR that holds the task's code. */
   choiceNote?: string | null;
+  /** #437: the commands and the stored copy are the main PR only, for a task with extra PRs. */
+  extrasNote?: string | null;
+  /** #437 (a fix to #431): the stored copy was made for an earlier PR at the same base commit. Shown with a stored copy. */
+  copyNote?: string | null;
 }) {
   const copy = code?.repoCopy ?? NO_COPY;
   const instanceId = code?.instanceId ?? null;
@@ -24,12 +28,14 @@ export function GetTheCode({ submissionId, slot, repoFullName, mergeCommit, code
           <p>{PASTE_STEP}</p>
           <pre className={block}>{githubCommands(repoFullName, mergeCommit)}</pre>
           {choiceNote ? <p className="text-amber-700 dark:text-amber-300">{choiceNote}</p> : null}
+          {extrasNote ? <p className="text-amber-700 dark:text-amber-300">{extrasNote}</p> : null}
           <p className="text-muted-foreground">{GITHUB_NOTE}</p>
         </div>
         <div className="space-y-2">
           <h4 className="font-semibold">{FROM_COPY_TITLE}</h4>
           {copy.stored && instanceId ? (
             <>
+              {copyNote ? <p className="text-amber-700 dark:text-amber-300">{copyNote}</p> : null}
               <ol className="list-decimal space-y-2 pl-5">
                 <li>Click <a href={repoCopyDownloadPath(submissionId, slot)} className="text-primary underline">{DOWNLOAD_LABEL}</a>.{downloadStepRest(instanceId)}</li>
                 <li>{PASTE_STEP}<pre className={`${block} mt-2`}>{storedCopyCommands(instanceId, copy.complete)}</pre></li>

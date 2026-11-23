@@ -47,6 +47,12 @@ export type BenchmarkSavePlan = {
 /** The flag of a row captured on the merge-base rule (#382); its presence tells the two capture rules apart. */
 const MERGE_BASE_FLAG = "base_commit_from_merge_base";
 
+/**
+ * #437: the flag of a row whose task has extra PRs. It follows this capture's task, never a settled source's: a new
+ * attempt with the same main PR carries no extra PRs over, so it does not carry the flag over either.
+ */
+const EXTRA_CODE_PRS_FLAG = "extra_code_prs";
+
 export function planBenchmarkSave(submission: Submission, rows: BenchmarkSave[], stored: StoredSource[], now: string): BenchmarkSavePlan {
   const plan: BenchmarkSavePlan = { tasks: [], sources: [], kept: [] };
   for (const row of rows) {
@@ -68,7 +74,7 @@ export function planBenchmarkSave(submission: Submission, rows: BenchmarkSave[],
       // Unchanged PR: keep the instance (validated lists, a staff rebuild) and carry the status and
       // every flag the settled source has (validator and staff flags) onto this source row.
       plan.kept.push(id);
-      plan.sources.push({ ...base, flags: [...new Set([...row.flags, ...same.flags])], validation_status: same.validation_status });
+      plan.sources.push({ ...base, flags: [...new Set([...row.flags, ...same.flags.filter((flag) => flag !== EXTRA_CODE_PRS_FLAG)])], validation_status: same.validation_status });
     } else if (settled.length > 0) {
       // The PR changed since the row was judged, or the row was captured under the other diff rule (#382):
       // capture it again and send it back to the validator.
@@ -87,6 +93,32 @@ export function planBenchmarkSave(submission: Submission, rows: BenchmarkSave[],
 export function snapshotMergeCommit(snapshot: unknown, slot: number): string | null {
   const tasks = (snapshot as { tasks?: Array<{ slot?: number; pr?: { mergeCommitSha?: string } }> } | null)?.tasks ?? [];
   return tasks.find((task) => task.slot === slot)?.pr?.mergeCommitSha ?? null;
+}
+
+/** One extra PR of a task as the benchmark records it (#437): no diff text. */
+export type ExtraPrProvenance = { pr_number: number; merge_commit: string; base_commit: string; head_commit: string | null };
+
+/**
+ * #437: the extra PRs of the task in `slot` of a stored submission snapshot, in merge order, as a later validator
+ * step would need them to try to combine them with the main PR: each one's number, merge commit, base commit and
+ * head commit. They live where the row's other provenance lives: the source row (cse_benchmark_task_sources) names
+ * its submission and slot, and that submission's snapshot holds the task (its merge commit, snapshotMergeCommit; its
+ * PR refs, snapshotCopyRefs; and these). Nothing of them goes into the exported row. Empty when there are none.
+ */
+export function snapshotExtraCodePrs(snapshot: unknown, slot: number): ExtraPrProvenance[] {
+  type Saved = { slot?: number; extraCodePrs?: Array<{ prNumber?: unknown; mergeCommitSha?: unknown; baseCommit?: unknown; headCommit?: unknown; mergedAt?: unknown }> };
+  const tasks = (snapshot as { tasks?: Saved[] } | null)?.tasks ?? [];
+  const task = Array.isArray(tasks) ? tasks.find((t) => t?.slot === slot) : undefined;
+  const extras = Array.isArray(task?.extraCodePrs) ? task.extraCodePrs : [];
+  return extras
+    .filter((extra) => typeof extra?.prNumber === "number" && typeof extra.mergeCommitSha === "string" && typeof extra.baseCommit === "string")
+    .sort((a, b) => Date.parse(String(a.mergedAt)) - Date.parse(String(b.mergedAt)) || (a.prNumber as number) - (b.prNumber as number))
+    .map((extra) => ({
+      pr_number: extra.prNumber as number,
+      merge_commit: extra.mergeCommitSha as string,
+      base_commit: extra.baseCommit as string,
+      head_commit: typeof extra.headCommit === "string" ? extra.headCommit : null,
+    }));
 }
 
 /**
