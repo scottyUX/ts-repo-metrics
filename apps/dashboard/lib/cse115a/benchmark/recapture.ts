@@ -23,7 +23,7 @@ import type { RepoCopyRequeue, Submission } from "@/lib/cse115a/jobs/runner";
 import { prHoldsMoreThanThisTask } from "@/lib/cse115a/sharedPr";
 import { TASK_SLOTS } from "@/lib/cse115a/taskSlots";
 import type { GitHubReader } from "@/lib/cse115a/githubClient";
-import { WORK_PR_FLAG } from "@/lib/cse115a/workPr";
+import { EXTRA_CODE_PRS_FLAG, WORK_PR_FLAG } from "@/lib/cse115a/workPr";
 import { isOldRuleTask, recaptureTaskDiff, samePrTaskPathsOf, type RecaptureResult, type SubmissionSnapshot, type TaskSnapshot } from "@/lib/cse115a/submissionSnapshot";
 
 export const RECAPTURED_SAME_PATCH_FLAG = "recaptured_same_patch" satisfies BuildFlag;
@@ -206,9 +206,11 @@ export function planRecapture(input: RecaptureInput): { plan: RecapturePlan; wri
     if (settled && samePatches) {
       // Kept: the task row is not written at all; the source keeps its status and flags and gains one flag.
       action = "keep";
-      // A staff change (#431) also sets or clears the staff-choice flag to match the task; #418 never does.
+      // A staff change (#431) also sets or clears the staff-choice flag, and #437's extra-PR flag, to match the
+      // task; #418 never does.
+      const follows = (flag: string) => flag === WORK_PR_FLAG || flag === EXTRA_CODE_PRS_FLAG;
       const kept = changed
-        ? [...source.flags.filter((flag) => flag !== WORK_PR_FLAG), ...built.flags.filter((flag) => flag === WORK_PR_FLAG)]
+        ? [...source.flags.filter((flag) => !follows(flag)), ...built.flags.filter(follows)]
         : source.flags;
       writes.sources.push({
         ...upsert,

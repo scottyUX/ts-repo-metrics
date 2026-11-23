@@ -55,7 +55,12 @@ export type BuildFlag = "base_commit_from_pr_base" | "base_commit_from_first_com
    */
   | "recaptured_same_patch"
   /** Staff chose the PR that holds this task's code (#431): the row is built like a paired task's from that PR. */
-  | "work_pr_chosen_by_staff";
+  | "work_pr_chosen_by_staff"
+  /**
+   * Staff added extra PRs for this task's code (#437). The row is still built from the main PR only; the extra PRs
+   * are recorded in the source's submission snapshot (snapshotExtraCodePrs in jobs/benchmarkSave.ts).
+   */
+  | "extra_code_prs";
 
 /** SWE-bench Verified difficulty labels, from the student's estimate. */
 export function difficultyFor(estimateHours: number | undefined): string | null {
@@ -128,6 +133,8 @@ export function buildInstance(
   if (task.taskFilePr) flags.push("task_file_from_other_pr");
   // Staff chose the PR the code comes from (#431); the student submitted another PR, which holds the task file.
   if (task.workPrChoice) flags.push("work_pr_chosen_by_staff");
+  // Staff added extra PRs for the code (#437); patch and test_patch are still the main PR's.
+  if (task.extraCodePrs?.length) flags.push("extra_code_prs");
   return {
     instance: {
       instance_id: instanceId(task.repoFullName, task.taskId),
