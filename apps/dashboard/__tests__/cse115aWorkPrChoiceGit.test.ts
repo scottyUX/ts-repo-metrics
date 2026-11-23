@@ -11,6 +11,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { buildInstance } from "@/lib/cse115a/benchmark/buildInstance";
 import { runWorkPrChange, type WorkPrDb } from "@/lib/cse115a/benchmark/workPrChoice";
 import { parseDiffFiles } from "@/lib/cse115a/diff";
+import { prHoldsMoreThanThisTask } from "@/lib/cse115a/sharedPr";
 import type { GitHubReader } from "@/lib/cse115a/githubClient";
 import type { Submission } from "@/lib/cse115a/jobs/runner";
 import { captureTaskSnapshot, type SubmissionSnapshot, type TaskSnapshot } from "@/lib/cse115a/submissionSnapshot";
@@ -167,5 +168,55 @@ describe("#431 on real git: the chosen PR's own files", () => {
     expect(preview).toMatchObject({ ok: true, body: { preview: { files: CODE } } });
     // The range from the PR's base to its merge commit would also hold the teammate's file.
     expect(files(await git("diff", "--no-color", five.first + "^", five.merge))).toContain("src/teammate.ts");
+  });
+});
+
+describe("#435 on real git: Task 1's code in the PR that holds Task 2's task file", () => {
+  it("Task 1 takes its code from that PR after Task 2's code moved: the sibling's task file is not Task 1's code and the row stays exportable", async () => {
+    const { git, commit } = await newRepo();
+    const SIBLING = "docs/tasks/sprint-2/US-2-T-5.md";
+    // PR #20: Task 2's task file and Task 1's code. PR #21: Task 1's task file. PR #22: Task 2's code.
+    await git("checkout", "-q", "-b", "water-and-task");
+    await commit([SIBLING], "task 2 file");
+    await commit(["src/water.ts"], "water");
+    await commit(["src/__tests__/water.test.ts"], "water test");
+    const twenty = await mergePr(git, "water-and-task", "Water plants, and the US-2-T-5 task file");
+    await git("checkout", "-q", "-b", "task-file");
+    await commit([TASK], "task 1 file");
+    const twentyOne = await mergePr(git, "task-file", "US-2-T-4 task file");
+    await git("checkout", "-q", "-b", "sun");
+    await commit(["src/sun.ts"], "sun");
+    const twentyTwo = await mergePr(git, "sun", "Sun");
+    const gh = gitHub(git, { 20: twenty, 21: twentyOne, 22: twentyTwo });
+
+    const one = await captureTaskSnapshot(gh, {
+      task_slot: 1, task_id: "US-2-T-4", pr_url: `https://github.com/${REPO}/pull/21`, repo_full_name: REPO, pr_number: 21, task_path: TASK,
+      task_spec_markdown: "# US-2-T-4\n\nWater the plants in src/water.ts.\n", task_spec_json: { id: "US-2-T-4", estimateHours: 2 } as TaskSpec,
+      validation_json: { prMerged: true, specCommittedFirst: true }, analysis_result_id: "result-1", facts_json: { prTaskFiles: [TASK] },
+    });
+    const two = await captureTaskSnapshot(gh, {
+      task_slot: 2, task_id: "US-2-T-5", pr_url: `https://github.com/${REPO}/pull/20`, repo_full_name: REPO, pr_number: 20, task_path: SIBLING,
+      task_spec_markdown: "# US-2-T-5\n\nLet the sun in, in src/sun.ts.\n", task_spec_json: { id: "US-2-T-5", estimateHours: 1 } as TaskSpec,
+      validation_json: { prMerged: true, specCommittedFirst: true }, analysis_result_id: "result-1", facts_json: { prTaskFiles: [SIBLING] },
+    });
+    const store = db();
+    let sub: Submission = { ...submission(one), snapshot: { version: 1, capturedAt: "2026-10-02T00:00:00.000Z", tasks: [one, two] } };
+    const by = { by: "ta@ucsc.edu", repoCopies: true };
+    const moved = await runWorkPrChange(store.db, gh, sub, { kind: "choose", slot: 2, pr: 22, reason: "Sun code is in #22.", apply: true, seen: { prNumber: 20, recapturedAt: null } }, by);
+    expect(moved.ok).toBe(true);
+    sub = { ...sub, snapshot: store.written.at(-1)! };
+
+    const chosen = await runWorkPrChange(store.db, gh, sub, { kind: "choose", slot: 1, pr: 20, reason: "Water code is in #20.", apply: true, seen: { prNumber: 21, recapturedAt: (sub.snapshot as { recapturedAt?: string }).recapturedAt ?? null } }, by);
+    expect(chosen).toMatchObject({ ok: true, body: { preview: { files: [SIBLING, ...CODE].sort(), testFiles: 1, sourceFiles: 1, taskFiles: 1 } } });
+    const task = store.written.at(-1)!.tasks.find((item) => item.slot === 1)!;
+    // The PR's own diff, as GitHub shows it: Task 2's task file is in it.
+    expect(files(task.diff)).toEqual([SIBLING, ...CODE].sort());
+    expect(task).toMatchObject({ prNumber: 20, taskFilePr: { number: 21 }, prTaskFiles: [] });
+    // The benchmark row leaves the task file out and is not a shared-PR row.
+    const built = buildInstance(task, 2, null, null, { prHoldsTwoTasks: prHoldsMoreThanThisTask(store.written.at(-1)!.tasks, task) });
+    expect(files(built.instance.patch)).toEqual(["src/water.ts"]);
+    expect(files(built.instance.test_patch)).toEqual(["src/__tests__/water.test.ts"]);
+    expect(built.flags).toContain("task_files_dropped");
+    expect(built.flags).not.toContain("pr_holds_two_tasks");
   });
 });

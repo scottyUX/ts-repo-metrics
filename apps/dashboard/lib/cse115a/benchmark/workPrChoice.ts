@@ -2,14 +2,14 @@
 //
 // - listWorkPrCandidates: the student's other merged PRs in the task's repository, likely ones first (read-only).
 // - checkChosenPr: the rules a chosen or typed PR must meet (same repository, merged, opened by the task's student,
-//   not the task's own PR, not used by another task).
+//   not the task's own PR, not used by another task; a sibling task's task-file PR may be chosen, #435).
 // - runWorkPrChange: the preview, the apply and the undo, one code path. The task is captured again as a paired task
 //   (captureWorkPrTask) and goes through the staff re-capture's plan and apply (recapture.ts, with `changedSlots`):
 //   the guarded write, benchmark rows before the snapshot, the snapshot last, the repo-copy job requeued when the
 //   base commit changes, and the keep / replace / back-to-candidate rule. No grade row, grade status or grade job is
 //   written; staff press Regrade.
 
-import { instanceId } from "@/lib/cse115a/benchmark/buildInstance";
+import { instanceId, isTaskFolderPath } from "@/lib/cse115a/benchmark/buildInstance";
 import {
   applyRecapture, diffFileList, planRecapture, type RecaptureDb, type RecaptureDone, type TaskPlan,
 } from "@/lib/cse115a/benchmark/recapture";
@@ -57,27 +57,41 @@ const same = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
 /**
  * The PRs other tasks use, with where. This submission's other tasks come from its snapshot; this task's own task
  * row (which still holds the PR the student submitted) and this submission's rows from `refs` are left out.
+ *
+ * #435: a PR that another task of the same student in the same sprint uses only as its task-file PR (its code is in
+ * a different PR) is not listed: it may hold this task's code. A PR any task uses for its code is always listed, and
+ * so is every PR of another student's task or of another sprint. A task row still holds the PR the student
+ * submitted; when staff have since made that PR the task's task-file PR, this submission's snapshot says so.
  */
 export function usedPrs(refs: CourseTaskRef[], submission: Submission, slot: number): UsedPr[] {
   const out: UsedPr[] = [];
   const add = (repoFullName: string, prNumber: number | null | undefined, where: string) => {
     if (typeof prNumber === "number") out.push({ repoFullName, prNumber, where });
   };
-  for (const task of submission.snapshot.tasks ?? []) {
+  const tasks = submission.snapshot.tasks ?? [];
+  for (const task of tasks) {
     if (task.slot === slot) continue;
     const where = `Task ${task.slot} of this submission`;
+    // Its task-file PR is not added: the same student's task in this sprint uses it only for the task file.
     add(task.repoFullName, task.prNumber, where);
-    add(task.repoFullName, task.taskFilePr?.number, where);
   }
   for (const ref of refs) {
     if (ref.source === "submission" && ref.submissionId === submission.id) continue;
     const ownStudent = ref.userId === submission.user_id;
-    if (ref.source === "task_row" && ownStudent && ref.assignmentNumber === submission.assignment_number && ref.slot === slot) continue;
+    const ownSprint = ownStudent && ref.assignmentNumber === submission.assignment_number;
+    if (ref.source === "task_row" && ownSprint && ref.slot === slot) continue;
     const where = ownStudent
-      ? ref.assignmentNumber === submission.assignment_number ? `this student's Task ${ref.slot} in this sprint` : `this student's Task ${ref.slot} in Sprint ${ref.assignmentNumber}`
+      ? ownSprint ? `this student's Task ${ref.slot} in this sprint` : `this student's Task ${ref.slot} in Sprint ${ref.assignmentNumber}`
       : `another student's Task ${ref.slot} in Sprint ${ref.assignmentNumber}`;
-    add(ref.repoFullName, ref.prNumber, where);
-    add(ref.repoFullName, ref.taskFilePrNumber, where);
+    if (!ownSprint) {
+      add(ref.repoFullName, ref.prNumber, where);
+      add(ref.repoFullName, ref.taskFilePrNumber, where);
+      continue;
+    }
+    const now = ref.source === "task_row" ? tasks.find((task) => task.slot === ref.slot && same(task.repoFullName, ref.repoFullName)) : undefined;
+    const nowTaskFileOnly = now !== undefined && now.taskFilePr?.number === ref.prNumber && now.prNumber !== ref.prNumber;
+    // The row's own task-file PR (a pair the student made) holds only that task's task file, so it is not added.
+    if (!nowTaskFileOnly) add(ref.repoFullName, ref.prNumber, where);
   }
   return out;
 }
@@ -204,6 +218,16 @@ export const STALE_PAGE = "This page is out of date: the task changed since you 
 export const NOTHING_TO_UNDO = "Staff have not chosen a PR for this task, so there is nothing to undo.";
 export const NO_REASON = "Give a reason. It is saved with the change.";
 
+/**
+ * The refusal when undoing this task's choice would put its code back to a PR another task of this submission now
+ * takes its code from (#435).
+ */
+export function undoBlockedMessage(prNumber: number, holderSlot: number, slot: number, holderChosenByStaff: boolean): string {
+  return holderChosenByStaff
+    ? `PR #${prNumber} now holds the code of Task ${holderSlot}, which staff chose. Undo Task ${holderSlot}'s choice first, then undo this one.`
+    : `PR #${prNumber} now holds the code of Task ${holderSlot}, so Task ${slot} can't take its code from it again.`;
+}
+
 /** What the page saw when it was loaded: the task's PR and the snapshot's last re-capture time. */
 export type SeenState = { prNumber: number; recapturedAt: string | null };
 
@@ -219,7 +243,9 @@ export type WorkPrPreview = {
   title: string;
   files: string[];
   testFiles: number;
+  /** Source files, without task files (docs/tasks/...), which are counted in `taskFiles` (#435). */
   sourceFiles: number;
+  taskFiles: number;
   diffTruncated: boolean;
   summary: string;
   benchmark: { action: TaskPlan["action"]; row: TaskPlan["row"]; line: string; baseChanged: boolean };
@@ -289,6 +315,10 @@ export async function runWorkPrChange(
     const choice = task.workPrChoice;
     if (!choice) return { ok: false, status: 409, error: NOTHING_TO_UNDO };
     const before = choice.before;
+    // #435: the PR this undo goes back to may since have been chosen as another task's code PR. Undoing would give
+    // two tasks the same code PR, so that task's choice is undone first.
+    const holder = tasks.find((other) => other.slot !== task.slot && same(other.repoFullName, task.repoFullName) && other.prNumber === before.prNumber);
+    if (holder) return { ok: false, status: 409, error: undoBlockedMessage(before.prNumber, holder.slot, task.slot, Boolean(holder.workPrChoice)) };
     let read: Pull | null;
     try {
       read = await readPull(gh, task.repoFullName, before.prNumber);
@@ -330,6 +360,8 @@ export async function runWorkPrChange(
   const planned = plan.tasks.find((item) => item.task.slot === task.slot)!;
   const split = splitPatch(changed.diff);
   const files = diffFileList(changed.diff);
+  const taskFiles = split.sourceFiles.filter(isTaskFolderPath).length;
+  const sourceFiles = split.sourceFiles.length - taskFiles;
   const action = planned.action as "replace" | "keep" | "back_to_candidate";
   const preview: WorkPrPreview = {
     slot: task.slot,
@@ -338,9 +370,10 @@ export async function runWorkPrChange(
     title: changed.pr.title,
     files,
     testFiles: split.testFiles.length,
-    sourceFiles: split.sourceFiles.length,
+    sourceFiles,
+    taskFiles,
     diffTruncated: changed.diffTruncated,
-    summary: previewSummary(target.prNumber, files.length, split.testFiles.length, split.sourceFiles.length),
+    summary: previewSummary(target.prNumber, files.length, split.testFiles.length, sourceFiles, taskFiles),
     benchmark: { action: planned.action, row: planned.row, line: benchmarkOutcomeLine(target.prNumber, action, planned.row), baseChanged: planned.baseChanged },
     warnings,
   };
