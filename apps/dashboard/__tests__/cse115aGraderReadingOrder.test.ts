@@ -124,6 +124,6 @@ describe("quotes and everything else", () => {
     const task = snapshot(diff, specNaming("handler.ts"));
     expect(order(splitPatch(diff).patch)).toEqual(["src/other.ts", "src/handler.ts"]);
     expect(order(buildInstance(task, 2, null).instance.patch)).toEqual(["src/other.ts", "src/handler.ts"]);
-    expect(GRADER_PROMPT_VERSION).toBe("cse115a-grader-v5");
+    expect(GRADER_PROMPT_VERSION).toBe("cse115a-grader-v6");
   });
 });

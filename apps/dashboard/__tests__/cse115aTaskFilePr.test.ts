@@ -531,6 +531,6 @@ describe("11. grader input", () => {
     const pairedInput = graderInput(paired, prTaskFileGraderNotes([paired], paired));
     expect(pairedInput).toEqual(graderInput(normal, prTaskFileGraderNotes([normal], normal)));
     expect(buildMessages(pairedInput)).toEqual(buildMessages(graderInput(normal)));
-    expect(GRADER_PROMPT_VERSION).toBe("cse115a-grader-v5");
+    expect(GRADER_PROMPT_VERSION).toBe("cse115a-grader-v6");
   });
 });

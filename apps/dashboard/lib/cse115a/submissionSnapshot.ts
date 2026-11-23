@@ -3,6 +3,7 @@ import { taskFileFirst, type TaskFacts } from "@/lib/cse115a/processChecklist";
 import type { GitHubReader } from "@/lib/cse115a/githubClient";
 import { firstCommitHoldsOnlyTaskFiles } from "@/lib/cse115a/sharedPr";
 import { savedTaskFilePr, type TaskFilePr } from "@/lib/cse115a/taskFilePr";
+import type { WorkPrChoice, WorkPrUndone } from "@/lib/cse115a/workPr";
 
 // Everything grading and benchmark capture need, copied from GitHub when the
 // student submits. Later jobs never call GitHub with the student's token.
@@ -82,11 +83,20 @@ export type TaskSnapshot = {
   diffError: string | null;
   comments: SnapshotComment[];
   checks: SnapshotCheck[];
+  /**
+   * Set when staff chose the PR that holds this task's code (#431): `prNumber`, `prUrl`, `pr`, the diff fields,
+   * `comments` and `checks` are that PR's, `taskFilePr` is the PR the student submitted, and this records who, when,
+   * why and what the task pointed at before. Missing on every other task.
+   */
+  workPrChoice?: WorkPrChoice;
+  /** The last staff choice that was undone (#431): one line of history. Missing unless a choice was undone. */
+  workPrUndone?: WorkPrUndone;
 };
 
 export type SubmissionSnapshot = { version: 1; capturedAt: string; tasks: TaskSnapshot[] };
 
-type Pull = {
+/** A pull request as GitHub's `GET /repos/{owner}/{repo}/pulls/{number}` returns it, as far as capture reads it. */
+export type Pull = {
   title: string;
   body: string | null;
   merged_at: string | null;
@@ -240,6 +250,20 @@ async function captureDiff(gh: GitHubReader, input: TaskDiffInput, pull: Pull & 
   };
 }
 
+/** The PR's conversation, review and review comments, as Submit saves them (at most MAX_COMMENTS). */
+async function readPrComments(gh: GitHubReader, base: string, prNumber: number): Promise<SnapshotComment[]> {
+  const [issueComments, reviews, reviewComments] = await Promise.all([
+    gh.json<Comment[]>(`${base}/issues/${prNumber}/comments?per_page=100`),
+    gh.json<Comment[]>(`${base}/pulls/${prNumber}/reviews?per_page=100`),
+    gh.json<Comment[]>(`${base}/pulls/${prNumber}/comments?per_page=100`),
+  ]);
+  return [
+    ...(issueComments ?? []).map((item) => comment("issue", item)),
+    ...(reviews ?? []).map((item) => comment("review", item)),
+    ...(reviewComments ?? []).map((item) => comment("review_comment", item)),
+  ].filter((item): item is SnapshotComment => item !== null).slice(0, MAX_COMMENTS);
+}
+
 /** `samePrTaskPaths`: the task files of the student's other tasks from this same PR (two tasks, one PR). */
 export async function captureTaskSnapshot(gh: GitHubReader, task: SubmittedTaskRow, samePrTaskPaths: string[] = []): Promise<TaskSnapshot> {
   const taskFilePr = savedTaskFilePr(task.facts_json);
@@ -256,19 +280,11 @@ export async function captureTaskSnapshot(gh: GitHubReader, task: SubmittedTaskR
   const pull = await readMergedPull(gh, input, task.task_slot);
   const mergeSha = pull.merge_commit_sha;
 
-  const [diffFields, issueComments, reviews, reviewComments, checks] = await Promise.all([
+  const [diffFields, comments, checks] = await Promise.all([
     captureDiff(gh, input, pull),
-    gh.json<Comment[]>(`${base}/issues/${task.pr_number}/comments?per_page=100`),
-    gh.json<Comment[]>(`${base}/pulls/${task.pr_number}/reviews?per_page=100`),
-    gh.json<Comment[]>(`${base}/pulls/${task.pr_number}/comments?per_page=100`),
+    readPrComments(gh, base, task.pr_number),
     readCommitChecks(gh, owner, repo, mergeSha),
   ]);
-
-  const comments = [
-    ...(issueComments ?? []).map((item) => comment("issue", item)),
-    ...(reviews ?? []).map((item) => comment("review", item)),
-    ...(reviewComments ?? []).map((item) => comment("review_comment", item)),
-  ].filter((item): item is SnapshotComment => item !== null).slice(0, MAX_COMMENTS);
 
   return {
     slot: task.task_slot,
@@ -353,4 +369,74 @@ export async function captureSubmissionSnapshot(gh: GitHubReader, tasks: Submitt
     .filter((other) => other.task_slot !== task.task_slot && other.pr_url.toLowerCase() === task.pr_url.toLowerCase())
     .map((other) => other.task_path))));
   return { version: 1, capturedAt: now.toISOString(), tasks: snapshots };
+}
+
+/** Reads a pull request of the repository; null when GitHub says it does not exist. Throws when it can't be read. */
+export async function readPull(gh: GitHubReader, repoFullName: string, prNumber: number): Promise<Pull | null> {
+  return gh.json<Pull>(`${repoPath(repoFullName)}/pulls/${prNumber}`, { optional: true });
+}
+
+/** Where a staff change (#431) points a task's code: the work PR and, for a pair, the task-file PR. */
+export type WorkPrTarget = {
+  prNumber: number;
+  prUrl: string;
+  /** The task-file PR, or undefined to capture the PR as a normal task (an undo of a task that was not paired). */
+  taskFilePr?: TaskFilePr;
+  /** `prTaskFiles` to save: none for a chosen PR, the saved list again on an undo. */
+  prTaskFiles?: string[] | null;
+};
+
+/**
+ * Captures a saved task again from another PR of the same repository (#431): the PR's details, its diff on today's
+ * rule (captureDiff, as Submit), its comments and its checks. Every other field is the saved value: the spec, task
+ * path, task ID, validation, analysis and the task-file committers. `pull` is the PR as read by readPull and must be
+ * merged. `samePrTaskPaths` matters only for a task captured without a task-file PR. The caller sets or clears the
+ * staff-choice record.
+ */
+export async function captureWorkPrTask(
+  gh: GitHubReader, saved: TaskSnapshot, target: WorkPrTarget, pull: Pull, samePrTaskPaths: string[] = [],
+): Promise<RecaptureResult> {
+  if (!pull.merged_at || !pull.merge_commit_sha) return { ok: false, error: `PR #${target.prNumber} is not merged.` };
+  const merged = pull as Pull & { merge_commit_sha: string; merged_at: string };
+  const [owner, repo] = saved.repoFullName.split("/") as [string, string];
+  const input: TaskDiffInput = {
+    repoFullName: saved.repoFullName,
+    prNumber: target.prNumber,
+    taskPath: saved.taskPath,
+    prTaskFiles: Array.isArray(target.prTaskFiles) ? target.prTaskFiles : undefined,
+    taskFilePr: target.taskFilePr,
+    samePrTaskPaths,
+  };
+  const [fields, comments, checks] = await Promise.all([
+    captureDiff(gh, input, merged),
+    readPrComments(gh, repoPath(saved.repoFullName), target.prNumber),
+    readCommitChecks(gh, owner, repo, merged.merge_commit_sha),
+  ]);
+  if (fields.diffError) return { ok: false, error: `PR #${target.prNumber}: the diff could not be loaded (${fields.diffError.slice(0, 300)}).` };
+  // The pair and the task-file list are the target's: a chosen PR is paired, an undo puts the saved ones back.
+  const rest: TaskSnapshot = { ...saved };
+  delete rest.taskFilePr;
+  delete rest.prTaskFiles;
+  return {
+    ok: true,
+    task: {
+      ...rest,
+      prNumber: target.prNumber,
+      prUrl: target.prUrl,
+      ...(Array.isArray(target.prTaskFiles) ? { prTaskFiles: target.prTaskFiles } : {}),
+      ...(target.taskFilePr ? { taskFilePr: target.taskFilePr } : {}),
+      pr: {
+        title: merged.title,
+        body: merged.body ?? "",
+        headRef: merged.head.ref,
+        author: merged.user?.login ?? null,
+        mergedAt: merged.merged_at,
+        baseSha: merged.base.sha,
+        mergeCommitSha: merged.merge_commit_sha,
+      },
+      ...fields,
+      comments,
+      checks,
+    },
+  };
 }

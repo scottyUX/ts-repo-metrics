@@ -11,6 +11,10 @@
 // Benchmark rows: a candidate row (or none) is replaced. A validated or rejected row is kept untouched only
 // when the new `patch` and `test_patch` are byte-for-byte the stored ones (the source gains the flag
 // `recaptured_same_patch`); otherwise it is replaced and goes back to candidate.
+//
+// Staff choosing a task's code PR (#431, benchmark/workPrChoice.ts) uses the same plan and apply for one task
+// that is not old-rule: `changedSlots` names it, and only it is planned. Without `changedSlots` (#418) nothing
+// differs.
 
 import { parseDiffFiles } from "@/lib/cse115a/diff";
 import { buildInstance, instanceId, isTaskFolderPath, type BenchmarkInstance, type BuildFlag } from "@/lib/cse115a/benchmark/buildInstance";
@@ -19,6 +23,7 @@ import type { RepoCopyRequeue, Submission } from "@/lib/cse115a/jobs/runner";
 import { prHoldsMoreThanThisTask } from "@/lib/cse115a/sharedPr";
 import { TASK_SLOTS } from "@/lib/cse115a/taskSlots";
 import type { GitHubReader } from "@/lib/cse115a/githubClient";
+import { WORK_PR_FLAG } from "@/lib/cse115a/workPr";
 import { isOldRuleTask, recaptureTaskDiff, samePrTaskPathsOf, type RecaptureResult, type SubmissionSnapshot, type TaskSnapshot } from "@/lib/cse115a/submissionSnapshot";
 
 export const RECAPTURED_SAME_PATCH_FLAG = "recaptured_same_patch" satisfies BuildFlag;
@@ -110,6 +115,11 @@ export type RecaptureInput = {
   repoMetrics: Map<string, unknown>;
   studentEmail: string | null;
   now: string;
+  /**
+   * #431: the slots a staff change re-captured (in `recaptured`). When set, only these slots are planned, whether
+   * old-rule or not, and every other slot is skipped; when missing, the old-rule tasks are planned (#418).
+   */
+  changedSlots?: ReadonlySet<number>;
 };
 
 /** The paths a diff touches, from its `diff --git` headers (diff.ts parseDiffFiles), sorted. */
@@ -137,9 +147,11 @@ export function planRecapture(input: RecaptureInput): { plan: RecapturePlan; wri
   const { submission } = input;
   const saved = [...submission.snapshot.tasks].sort((a, b) => a.slot - b.slot);
   const superseded = submission.superseded_at !== null;
+  const changed = input.changedSlots;
+  const planned = (task: TaskSnapshot) => (changed ? changed.has(task.slot) : isOldRuleTask(task));
   const newTasks = saved.map((task) => {
     const result = input.recaptured.get(task.slot);
-    return !superseded && isOldRuleTask(task) && result?.ok ? result.task : task;
+    return !superseded && planned(task) && result?.ok ? result.task : task;
   });
   const anyRecaptured = newTasks.some((task, index) => task !== saved[index]);
   const snapshot: SubmissionSnapshot | null = anyRecaptured ? { ...submission.snapshot, tasks: newTasks } : null;
@@ -161,7 +173,7 @@ export function planRecapture(input: RecaptureInput): { plan: RecapturePlan; wri
       fallback: false,
     };
     if (superseded) return { ...base, reason: "The submission is superseded." };
-    if (!isOldRuleTask(task)) return { ...base, reason: "Already saved on the PR-own-diff rule." };
+    if (!planned(task)) return { ...base, reason: changed ? "Not changed by this staff choice." : "Already saved on the PR-own-diff rule." };
     const result = input.recaptured.get(task.slot);
     if (!result) return { ...base, action: "error", reason: `Task ${task.slot} was not re-captured.` };
     if (!result.ok) return { ...base, action: "error", reason: result.error };
@@ -194,9 +206,13 @@ export function planRecapture(input: RecaptureInput): { plan: RecapturePlan; wri
     if (settled && samePatches) {
       // Kept: the task row is not written at all; the source keeps its status and flags and gains one flag.
       action = "keep";
+      // A staff change (#431) also sets or clears the staff-choice flag to match the task; #418 never does.
+      const kept = changed
+        ? [...source.flags.filter((flag) => flag !== WORK_PR_FLAG), ...built.flags.filter((flag) => flag === WORK_PR_FLAG)]
+        : source.flags;
       writes.sources.push({
         ...upsert,
-        flags: source.flags.includes(RECAPTURED_SAME_PATCH_FLAG) ? source.flags : [...source.flags, RECAPTURED_SAME_PATCH_FLAG],
+        flags: kept.includes(RECAPTURED_SAME_PATCH_FLAG) ? kept : [...kept, RECAPTURED_SAME_PATCH_FLAG],
         validation_status: source.validation_status,
       });
     } else {
