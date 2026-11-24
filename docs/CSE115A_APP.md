@@ -397,7 +397,8 @@ SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... \
 ```
 
 - **Submissions**: every enrolled student for an assignment, with status, agent
-  and instructor totals, and a needs-review flag. Filter by status.
+  and instructor totals, and a needs-review flag. Filter by status. The team
+  and the "no code in PR" marker are described under #440 below.
 - **Review**: the submitted tasks side by side with the spec, `patch`/`test_patch`
   diffs, CI results, the Repo Metrics report, and the agent's rationale and
   quotes. Staff can override points (half steps) and add notes, then
@@ -673,6 +674,45 @@ staff and the AI see; they never change the benchmark row's patch.
   PRs no longer count as used (only current attempts do).
 
 TAs can do everything except unlock and manage staff.
+
+### A readable review page, teams and "no code in PR" (#440)
+
+Staff only; nothing a student sees changes.
+
+- **Task spec** on the Review page is shown formatted (front matter as a small
+  list, then headings, lists, code, tables, quotes, bold, italic and links) with
+  a **Formatted / Raw** switch; Raw is the stored text as before. The renderer is
+  our own (`lib/cse115a/markdownView.ts` and `MarkdownView.tsx`): it builds React
+  elements and never inserts HTML, so HTML in a spec shows as text; only `http`,
+  `https` and `mailto` links are clickable and open in a new tab
+  (`rel="noopener noreferrer"`); images are never loaded (the alt text and the
+  address are shown). Nesting deeper than 16 levels is shown as written.
+- Each diff box and the spec box have **Show full height / Show less** (not
+  saved). **Copy all** on `patch` and `test_patch` copies the tab's stored text,
+  including anything past the 200,000-character display limit; with extra PRs
+  (#437) each section has its own **Copy**, and Copy all puts every section in
+  page order under its one-line PR heading. A refused copy says "Could not copy.
+  Select the text and copy it by hand."
+- **Team** is the repository of the student's tasks (`repoFullName`); there is
+  no team table and no roster. The Submissions table has a sortable **Team**
+  column (repository name linked to GitHub, `owner/repo` as its title, "—" with
+  no submission) and a **Team** filter. The list reads it as JSON paths
+  (`SNAPSHOT_REPO_PATHS`), never the diffs. The Review page header says
+  "Team: …" and "GitHub: …" (the PR author), each linked, leaving out a part
+  with no value.
+- **No code in PR**: a task whose submitted PR changes only task files
+  (`docs/tasks/...`) is marked "Task N: no code in PR" on the Submissions table;
+  a task with a staff-chosen code PR (#431) says "Task N: code PR chosen by
+  staff" instead, and a task with extra PRs (#437) is not marked. The **Needs a
+  code PR** filter shows rows with a marked task. The table asks
+  `GET /api/cse115a/instructor/courses/<slug>/no-code-prs?assignment=<n>` (same
+  staff guard as the list) after it loads; it answers submission ids and slot
+  numbers only and writes nothing. It reads small JSON paths of each active
+  submission and the `flags` of its benchmark source rows
+  (`task_files_dropped`, `no_source_patch` and `no_test_patch`, without
+  `ai_tool_files_dropped` or `diff_missing`); only a task with no source row yet
+  has its own diff read. If the route fails, the table still works and says
+  the marker could not be loaded.
 
 ### Grader page (#423)
 
