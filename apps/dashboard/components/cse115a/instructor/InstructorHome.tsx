@@ -5,7 +5,8 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { fetchJson, formatPoints, STATUS_LABELS, type StaffCourse } from "./shared";
 import { BIG_TASK_MIN_HOURS } from "@/lib/cse115a/processChecklist";
-import { nextSort, sortRows, taskColumnSlots, taskSortKey, type Sort, type SortKey, type SubmissionRow } from "./sortRows";
+import { markerLines, markersFrom, matchesTeam, needsCodePr, nextSort, rowTeams, sortRows, taskColumnSlots, taskSortKey, teamOptions, type MarkerBody, type Markers, type Sort, type SortKey, type SubmissionRow } from "./sortRows";
+import { REVIEW_TEXT, teamLink } from "@/lib/cse115a/reviewText";
 
 type Column = { key: SortKey; label: string; numeric: boolean };
 
@@ -13,6 +14,7 @@ type Column = { key: SortKey; label: string; numeric: boolean };
 function columnsFor(taskSlots: number[]): Column[] {
   return [
     { key: "student", label: "Student", numeric: false },
+    { key: "team", label: REVIEW_TEXT.team, numeric: false },
     { key: "submitted", label: "Submitted", numeric: false },
     { key: "status", label: "Status", numeric: false },
     ...taskSlots.map((slot) => ({ key: taskSortKey(slot), label: `Task ${slot}`, numeric: true })),
@@ -22,12 +24,13 @@ function columnsFor(taskSlots: number[]): Column[] {
 
 type Row = SubmissionRow;
 
-const FILTERS = ["all", "not_submitted", "needs_review", "submitted", "grading", "graded", "grading_failed", "released"] as const;
+const FILTERS = ["all", "not_submitted", "needs_review", "needs_code_pr", "submitted", "grading", "graded", "grading_failed", "released"] as const;
 type Filter = (typeof FILTERS)[number];
 const FILTER_LABELS: Record<Filter, string> = {
   all: "All students",
   not_submitted: "Not submitted",
   needs_review: "Needs review",
+  needs_code_pr: REVIEW_TEXT.needsCodePr,
   submitted: STATUS_LABELS.submitted,
   grading: STATUS_LABELS.grading,
   graded: STATUS_LABELS.graded,
@@ -35,11 +38,23 @@ const FILTER_LABELS: Record<Filter, string> = {
   released: STATUS_LABELS.released,
 };
 
-function matches(row: Row, filter: Filter): boolean {
+function matches(row: Row, filter: Filter, markers: Markers | null = null): boolean {
   if (filter === "all") return true;
   if (filter === "not_submitted") return !row.submission;
   if (filter === "needs_review") return Boolean(row.submission?.needsReview && row.submission.status !== "released");
+  if (filter === "needs_code_pr") return needsCodePr(row, markers);
   return row.submission?.status === filter;
+}
+
+/** The Team cell: each repository's name, linked, with its `owner/repo` as the title; "—" for none. */
+export function TeamCell({ row }: { row: Row }) {
+  const teams = rowTeams(row).map(teamLink).filter((team) => team !== null);
+  if (!teams.length) return <span className="text-muted-foreground">—</span>;
+  return (
+    <span className="flex flex-col gap-0.5">
+      {teams.map((team) => <a key={team.fullName} href={team.url} target="_blank" rel="noopener noreferrer" title={team.fullName} className="text-primary underline">{team.name}</a>)}
+    </span>
+  );
 }
 
 export function InstructorHome() {
@@ -49,12 +64,18 @@ export function InstructorHome() {
   const [loaded, setLoaded] = useState<{ key: string; rows: Row[] } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<Filter>("all");
+  const [team, setTeam] = useState<string>("all");
+  const [marked, setMarked] = useState<{ key: string; markers: Markers | null; failed: boolean } | null>(null);
   const [sort, setSort] = useState<Sort>(null);
   const slug = searchParams.get("course") ?? courses?.[0]?.slug ?? null;
   const assignment = Number(searchParams.get("assignment") ?? 1);
   const course = courses?.find((item) => item.slug === slug) ?? null;
   const rowsUrl = course ? `/api/cse115a/instructor/courses/${encodeURIComponent(course.slug)}/submissions?assignment=${assignment}` : null;
   const rows = loaded && loaded.key === rowsUrl ? loaded.rows : null;
+  // #440: the "no code in PR" marker comes from its own route, asked once the table has loaded.
+  const markersUrl = course && rows ? `/api/cse115a/instructor/courses/${encodeURIComponent(course.slug)}/no-code-prs?assignment=${assignment}` : null;
+  const markers = marked && marked.key === markersUrl ? marked.markers : null;
+  const markersFailed = Boolean(marked && marked.key === markersUrl && marked.failed);
 
   const select = useCallback((next: { course?: string; assignment?: number }) => {
     const params = new URLSearchParams({ course: next.course ?? slug ?? "", assignment: String(next.assignment ?? assignment) });
@@ -77,8 +98,17 @@ export function InstructorHome() {
       .catch((caught: Error) => setError(caught.message));
   }, [rowsUrl]);
 
-  const visible = useMemo(() => sortRows((rows ?? []).filter((row) => matches(row, filter)), sort), [rows, filter, sort]);
-  const counts = useMemo(() => Object.fromEntries(FILTERS.map((item) => [item, (rows ?? []).filter((row) => matches(row, item)).length])), [rows]);
+  useEffect(() => {
+    if (!markersUrl) return;
+    fetchJson<MarkerBody>(markersUrl)
+      .then((body) => setMarked({ key: markersUrl, markers: markersFrom(body), failed: false }))
+      .catch(() => setMarked({ key: markersUrl, markers: null, failed: true }));
+  }, [markersUrl]);
+
+  const teams = useMemo(() => teamOptions(rows ?? []), [rows]);
+  const shownTeam = team === "all" || teams.includes(team) ? team : "all";
+  const visible = useMemo(() => sortRows((rows ?? []).filter((row) => matches(row, filter, markers) && matchesTeam(row, shownTeam)), sort), [rows, filter, markers, shownTeam, sort]);
+  const counts = useMemo(() => Object.fromEntries(FILTERS.map((item) => [item, (rows ?? []).filter((row) => matches(row, item, markers) && matchesTeam(row, shownTeam)).length])), [rows, markers, shownTeam]);
   // Extra task columns follow the listed rows, so a filter that hides every Task 3 hides its column too.
   const taskSlots = useMemo(() => taskColumnSlots(visible), [visible]);
   const columns = useMemo(() => columnsFor(taskSlots), [taskSlots]);
@@ -122,8 +152,16 @@ export function InstructorHome() {
             {FILTERS.map((item) => <option key={item} value={item}>{FILTER_LABELS[item]} ({counts[item] ?? 0})</option>)}
           </select>
         </label>
+        <label className="text-sm">
+          <span className="mb-1 block text-muted-foreground">{REVIEW_TEXT.team}</span>
+          <select value={shownTeam} onChange={(event) => setTeam(event.target.value)} className="rounded-lg border border-input bg-background px-3 py-2">
+            <option value="all">{REVIEW_TEXT.allTeams}</option>
+            {teams.map((item) => <option key={item} value={item} title={item}>{teamLink(item)?.name ?? item}</option>)}
+          </select>
+        </label>
       </div>
 
+      {markersFailed ? <p role="status" className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-800 dark:text-amber-200">{REVIEW_TEXT.noCodeFailed}</p> : null}
       {error ? <p role="alert" className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">{error}</p> : null}
 
       <div className="overflow-x-auto rounded-xl border border-border bg-card">
@@ -152,6 +190,7 @@ export function InstructorHome() {
               return (
                 <tr key={row.userId} className="hover:bg-muted/40">
                   <td className="px-4 py-3 font-medium">{row.email}</td>
+                  <td className="px-4 py-3"><TeamCell row={row} /></td>
                   <td className="px-4 py-3 text-muted-foreground">{submission ? `${new Date(submission.submittedAt).toLocaleString()}${submission.attempt > 1 ? ` · attempt ${submission.attempt}` : ""}` : "—"}</td>
                   <td className="px-4 py-3">
                     {submission ? (
@@ -161,6 +200,7 @@ export function InstructorHome() {
                       </span>
                     ) : <span className="text-muted-foreground">Not submitted</span>}
                     {submission?.jobError ? <p className="mt-1 max-w-xs truncate text-xs text-destructive" title={submission.jobError}>{submission.jobError}</p> : null}
+                    {markerLines(row, markers).map((line) => <p key={line.slot} className={line.noCode ? "mt-1 text-xs font-medium text-amber-700 dark:text-amber-300" : "mt-1 text-xs text-muted-foreground"}>{line.text}</p>)}
                   </td>
                   {taskSlots.map((slot) => {
                     const task = submission?.tasks.find((item) => item.slot === slot);
@@ -180,7 +220,7 @@ export function InstructorHome() {
           </tbody>
         </table>
       </div>
-      <p className="text-sm text-muted-foreground">Gray totals are the agent&apos;s draft; dark totals include instructor edits. Sprint is the average of every task the student submitted: usually two, or one big task (estimate {BIG_TASK_MIN_HOURS} hours or more) scored on its own; a Task 3 or later column appears when a student submitted extra tasks. Students see nothing until you release. Click a column heading to sort; click again to reverse, a third time to go back to the original order. Rows with no value go last.</p>
+      <p className="text-sm text-muted-foreground">Gray totals are the agent&apos;s draft; dark totals include instructor edits. Sprint is the average of every task the student submitted: usually two, or one big task (estimate {BIG_TASK_MIN_HOURS} hours or more) scored on its own; a Task 3 or later column appears when a student submitted extra tasks. Students see nothing until you release. Click a column heading to sort; click again to reverse, a third time to go back to the original order. Rows with no value go last. {REVIEW_TEXT.tableNote}</p>
     </div>
   );
 }

@@ -1,14 +1,21 @@
 import { NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase/server";
 import { guardCourse } from "@/lib/cse115a/instructorApi";
-import { effectiveTotal, SNAPSHOT_SLOT_PATHS, slotsFromSnapshotPaths, snapshotSlotPathValues, submittedSprintScore, type TaskGradeRow } from "@/lib/cse115a/gradeReview";
+import {
+  effectiveTotal, SNAPSHOT_REPO_PATHS, SNAPSHOT_SLOT_PATHS, slotsFromSnapshotPaths, snapshotRepoPathValues, snapshotSlotPathValues, submittedSprintScore,
+  type TaskGradeRow,
+} from "@/lib/cse115a/gradeReview";
+import { teamLinks } from "@/lib/cse115a/reviewText";
 import { TASK_SLOTS, USUAL_TASKS_PER_SPRINT } from "@/lib/cse115a/taskSlots";
 
 export const runtime = "nodejs";
 
 type Params = { params: Promise<{ slug: string }> };
-/** A submission row with `slot_N` for each snapshot task slot selected as a JSON path (SNAPSHOT_SLOT_PATHS). */
-type ListedSubmission = { id: string; user_id: string; attempt: number; status: string; submitted_at: string } & Record<`slot_${number}`, unknown>;
+/**
+ * A submission row with `slot_N` for each snapshot task slot and `repo_N` for its repository, selected as JSON paths
+ * (SNAPSHOT_SLOT_PATHS, SNAPSHOT_REPO_PATHS, #440).
+ */
+type ListedSubmission = { id: string; user_id: string; attempt: number; status: string; submitted_at: string } & Record<`slot_${number}` | `repo_${number}`, unknown>;
 
 /** Every enrolled student with their active submission for one assignment, if any. */
 export async function GET(request: Request, { params }: Params) {
@@ -24,7 +31,7 @@ export async function GET(request: Request, { params }: Params) {
   const db = getSupabase();
   const [members, submissions] = await Promise.all([
     db.from("cse_course_memberships").select("user_id,ucsc_email").eq("course_id", course.id).order("ucsc_email"),
-    db.from("cse_assignment_submissions").select<string, ListedSubmission>(`id,user_id,attempt,status,submitted_at,${SNAPSHOT_SLOT_PATHS}`)
+    db.from("cse_assignment_submissions").select<string, ListedSubmission>(`id,user_id,attempt,status,submitted_at,${SNAPSHOT_SLOT_PATHS},${SNAPSHOT_REPO_PATHS}`)
       .eq("course_id", course.id).eq("assignment_number", assignmentNumber).is("superseded_at", null),
   ]);
   if (members.error || submissions.error) return NextResponse.json({ error: "Could not load submissions." }, { status: 500 });
@@ -63,6 +70,8 @@ export async function GET(request: Request, { params }: Params) {
         attempt: submission.attempt,
         status: submission.status,
         submittedAt: submission.submitted_at,
+        // #440: the team is the repository of the student's tasks (`owner/repo`); one per distinct repository.
+        teams: teamLinks(snapshotRepoPathValues(submission)).map((team) => team.fullName),
         tasks,
         agentSprint: submittedSprintScore(slots, (slot) => tasks.find((task) => task.slot === slot)?.agentTotal),
         sprint: submittedSprintScore(slots, (slot) => {

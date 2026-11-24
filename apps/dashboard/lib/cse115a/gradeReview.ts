@@ -110,6 +110,17 @@ export function submittedSprintScore(slots: number[], totalFor: (slot: number) =
  */
 export const SNAPSHOT_SLOT_PATHS = TASK_SLOTS.map((slot) => `slot_${slot}:snapshot->tasks->${slot - 1}->slot`).join(",");
 
+/**
+ * #440: each task's repository (its team) as a JSON path, `repo_1:snapshot->tasks->0->>repoFullName`, … the same
+ * positions as SNAPSHOT_SLOT_PATHS, so the list reads the team without the diffs.
+ */
+export const SNAPSHOT_REPO_PATHS = TASK_SLOTS.map((slot) => `repo_${slot}:snapshot->tasks->${slot - 1}->>repoFullName`).join(",");
+
+/** The values SNAPSHOT_REPO_PATHS selected from one row, in order. */
+export function snapshotRepoPathValues(row: Record<string, unknown>): unknown[] {
+  return TASK_SLOTS.map((slot) => row[`repo_${slot}`]);
+}
+
 /** The values SNAPSHOT_SLOT_PATHS selected from one row, in order. */
 export function snapshotSlotPathValues(row: Record<string, unknown>): unknown[] {
   return TASK_SLOTS.map((slot) => row[`slot_${slot}`]);
