@@ -192,7 +192,7 @@ describe("1. task spec markdown", () => {
       "| <u>cell</u> |",
     ].join("\n");
     const out = html(evil);
-    expect(out).not.toMatch(/<script|<iframe|<style|<b |<img|<u>/);
+    expect(out).not.toMatch(/<script|<iframe|<style|<b |<img|<u>/i);
     expect(out).toContain("&lt;script&gt;alert(1)&lt;/script&gt;");
     expect(out).toContain("&lt;iframe src=&quot;https://example.com&quot;&gt;&lt;/iframe&gt;");
     expect(out).toContain("&lt;style&gt;body { display: none }&lt;/style&gt;");
