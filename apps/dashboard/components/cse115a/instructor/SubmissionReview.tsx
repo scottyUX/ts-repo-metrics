@@ -19,6 +19,8 @@ import { AiGradeHistory, type AiGradeEntry } from "./AiGradeHistory";
 import { ExtraCodePrs } from "./ExtraCodePrs";
 import { GetTheCode } from "./GetTheCode";
 import { WorkPrChooser } from "./WorkPrChooser";
+import { CopyButton, DiffBox, SpecBox } from "./ReviewBoxes";
+import { copyAllText, EMPTY_TAB_TEXT, githubProfiles, REVIEW_TEXT, teamLinks, type DiffTab } from "@/lib/cse115a/reviewText";
 import { fetchJson, formatPoints, STATUS_LABELS, type StaffCourse, type SubmissionStatus } from "./shared";
 
 type Detail = {
@@ -39,11 +41,12 @@ type Detail = {
 
 const MAX_DIFF_DISPLAY = 200_000;
 
-function DiffView({ diff, empty }: { diff: string; empty: string }) {
+/** `full`: the box shows every line instead of today's 28rem (#440). */
+function DiffView({ diff, empty, full = false }: { diff: string; empty: string; full?: boolean }) {
   if (!diff) return <p className="p-4 text-sm text-muted-foreground">{empty}</p>;
   const shown = diff.length > MAX_DIFF_DISPLAY ? diff.slice(0, MAX_DIFF_DISPLAY) : diff;
   return (
-    <pre className="max-h-[28rem] overflow-auto p-3 font-mono text-xs leading-relaxed">
+    <pre className={`${full ? "" : "max-h-[28rem] "}overflow-auto p-3 font-mono text-xs leading-relaxed`}>
       {shown.split("\n").map((line, index) => (
         <div key={index} className={
           line.startsWith("diff --git") ? "mt-3 font-semibold text-foreground first:mt-0"
@@ -57,17 +60,61 @@ function DiffView({ diff, empty }: { diff: string; empty: string }) {
   );
 }
 
+type DiffSection = { key: string; prNumber: number; heading: string | null; split: ReturnType<typeof splitPatch> };
+
 /**
  * The task's diff view in parts (#437): the main PR's diff, then each extra PR's under a heading naming the PR. A
  * task without extra PRs is one part with no heading, as before.
  */
-function diffSections(task: TaskSnapshot): Array<{ key: string; heading: string | null; split: ReturnType<typeof splitPatch> }> {
+export function diffSections(task: TaskSnapshot): DiffSection[] {
   const extras = task.extraCodePrs ?? [];
-  if (extras.length === 0) return [{ key: "main", heading: null, split: splitPatch(task.diff) }];
+  if (extras.length === 0) return [{ key: "main", prNumber: task.prNumber, heading: null, split: splitPatch(task.diff) }];
   return [
-    { key: "main", heading: WORK_PR_TEXT.mainDiffHeading(task.prNumber, task.pr.title), split: splitPatch(task.diff) },
-    ...extras.map((extra) => ({ key: `pr-${extra.prNumber}`, heading: WORK_PR_TEXT.extraDiffHeading(extra.prNumber, extra.title), split: splitPatch(extra.diff) })),
+    { key: "main", prNumber: task.prNumber, heading: WORK_PR_TEXT.mainDiffHeading(task.prNumber, task.pr.title), split: splitPatch(task.diff) },
+    ...extras.map((extra) => ({ key: `pr-${extra.prNumber}`, prNumber: extra.prNumber, heading: WORK_PR_TEXT.extraDiffHeading(extra.prNumber, extra.title), split: splitPatch(extra.diff) })),
   ];
+}
+
+/** A section's stored text for one tab: the whole split, never the part the box shows. */
+function sectionText(section: DiffSection, tab: DiffTab): string {
+  return tab === "patch" ? section.split.patch : section.split.testPatch;
+}
+
+/** What a tab's "Copy all" copies (#440): every section's stored text, in the order shown, under its heading. */
+export function tabCopyAll(sections: DiffSection[], tab: DiffTab): string {
+  return copyAllText(sections.map((section) => ({ heading: section.heading, text: sectionText(section, tab) })), tab);
+}
+
+/**
+ * One diff tab (#440): "Copy all" for the tab's whole stored text, and each section with its own full-height switch
+ * and, when the task has extra PRs, its own Copy.
+ */
+function DiffTabBody({ sections, tab, slot }: { sections: DiffSection[]; tab: DiffTab; slot: number }) {
+  const several = sections.length > 1;
+  const anyText = sections.some((section) => sectionText(section, tab));
+  return (
+    <>
+      {anyText ? (
+        <div className="flex flex-wrap items-center gap-2 px-3">
+          <CopyButton text={() => tabCopyAll(sections, tab)} label={REVIEW_TEXT.copyAll} ariaLabel={REVIEW_TEXT.copyAllLabel(tab)} />
+        </div>
+      ) : null}
+      {sections.map((section) => {
+        const text = sectionText(section, tab);
+        return (
+          <div key={section.key}>
+            {section.heading ? <h4 className="mt-2 border-t border-border px-3 pt-3 text-sm font-semibold">{section.heading}</h4> : null}
+            {text ? (
+              <DiffBox what={several ? `PR #${section.prNumber}'s ${tab}` : `the ${tab}`} boxId={`task-${slot}-${tab}-${section.key}`}
+                tools={several ? <CopyButton text={() => sectionText(section, tab)} label={REVIEW_TEXT.copy} ariaLabel={REVIEW_TEXT.copySectionLabel(tab, section.prNumber)} /> : null}>
+                {(full) => <DiffView diff={text} empty={EMPTY_TAB_TEXT[tab]} full={full} />}
+              </DiffBox>
+            ) : <DiffView diff="" empty={EMPTY_TAB_TEXT[tab]} />}
+          </div>
+        );
+      })}
+    </>
+  );
 }
 
 function CheckList({ checks }: { checks: TaskSnapshot["checks"] }) {
@@ -147,10 +194,7 @@ function TaskPanel({ submissionId, task, grade, onSaved, readOnly, sharedPr, cod
         {task.diffTruncated ? <p className="mt-2 text-sm text-amber-700 dark:text-amber-300">The diff was over 1 MB and was cut off.</p> : null}
       </div>
 
-      <details className="rounded-lg border border-border">
-        <summary className="cursor-pointer px-3 py-2 text-sm font-medium">Task spec · {task.taskPath}</summary>
-        <pre className="max-h-96 overflow-auto whitespace-pre-wrap border-t border-border p-3 text-sm">{task.specMarkdown}</pre>
-      </details>
+      <SpecBox markdown={task.specMarkdown} taskPath={task.taskPath} boxId={`task-${task.slot}-spec`} />
 
       <GetTheCode submissionId={submissionId} slot={task.slot} repoFullName={task.repoFullName} mergeCommit={task.pr?.mergeCommitSha} code={code}
         choiceNote={task.workPrChoice ? getTheCodeChoiceNote({ ...task, workPrChoice: task.workPrChoice }) : null}
@@ -164,22 +208,8 @@ function TaskPanel({ submissionId, task, grade, onSaved, readOnly, sharedPr, cod
           <TabsTrigger value="patch">patch ({sourceCount})</TabsTrigger>
           <TabsTrigger value="test_patch">test_patch ({testCount})</TabsTrigger>
         </TabsList>
-        <TabsContent value="patch">
-          {sections.map((section) => (
-            <div key={section.key}>
-              {section.heading ? <h4 className="border-t border-border px-3 pt-3 text-sm font-semibold first:border-t-0">{section.heading}</h4> : null}
-              <DiffView diff={section.split.patch} empty="No source files changed." />
-            </div>
-          ))}
-        </TabsContent>
-        <TabsContent value="test_patch">
-          {sections.map((section) => (
-            <div key={section.key}>
-              {section.heading ? <h4 className="border-t border-border px-3 pt-3 text-sm font-semibold first:border-t-0">{section.heading}</h4> : null}
-              <DiffView diff={section.split.testPatch} empty="No test files changed." />
-            </div>
-          ))}
-        </TabsContent>
+        <TabsContent value="patch"><DiffTabBody sections={sections} tab="patch" slot={task.slot} /></TabsContent>
+        <TabsContent value="test_patch"><DiffTabBody sections={sections} tab="test_patch" slot={task.slot} /></TabsContent>
       </Tabs>
 
       <div>
@@ -251,6 +281,30 @@ function TaskPanel({ submissionId, task, grade, onSaved, readOnly, sharedPr, cod
   );
 }
 
+/**
+ * "Team: <repo>" and "GitHub: <username>" under the student's email (#440): the tasks' repositories and their PR
+ * authors, each linked. A part with no value is left out.
+ */
+export function TeamLines({ tasks }: { tasks: Array<Pick<TaskSnapshot, "repoFullName"> & { pr?: { author?: string | null } | null }> }) {
+  const teams = teamLinks(tasks.map((task) => task.repoFullName));
+  const logins = githubProfiles(tasks.map((task) => task.pr?.author));
+  if (!teams.length && !logins.length) return null;
+  return (
+    <p className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-sm">
+      {teams.length ? (
+        <span>{REVIEW_TEXT.teamLine}{" "}{teams.map((team, index) => (
+          <span key={team.fullName}>{index ? ", " : ""}<a href={team.url} target="_blank" rel="noopener noreferrer" title={team.fullName} className="text-primary underline">{team.name}</a></span>
+        ))}</span>
+      ) : null}
+      {logins.length ? (
+        <span>{REVIEW_TEXT.githubLine}{" "}{logins.map((profile, index) => (
+          <span key={profile.login}>{index ? ", " : ""}<a href={profile.url} target="_blank" rel="noopener noreferrer" className="text-primary underline">{profile.login}</a></span>
+        ))}</span>
+      ) : null}
+    </p>
+  );
+}
+
 export function SubmissionReview({ id }: { id: string }) {
   const [detail, setDetail] = useState<Detail | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -305,6 +359,7 @@ export function SubmissionReview({ id }: { id: string }) {
         <div>
           <p className="text-xs font-semibold uppercase tracking-wide text-primary">{course.title} · {course.term} · Assignment {submission.assignment_number}</p>
           <h1 className="mt-1 text-2xl font-semibold">{submission.email ?? "Unknown student"}</h1>
+          <TeamLines tasks={tasks} />
           <p className="mt-1 text-sm text-muted-foreground">
             Attempt {submission.attempt} · submitted {new Date(submission.submitted_at).toLocaleString()} · {active ? STATUS_LABELS[submission.status] : `Unlocked: ${submission.unlock_reason}`}
           </p>
