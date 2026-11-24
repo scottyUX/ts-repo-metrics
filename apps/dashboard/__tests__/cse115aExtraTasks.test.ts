@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  releaseBlockers, SNAPSHOT_SLOT_PATHS, slotsFromSnapshotPaths, snapshotSlotPathValues, sprintScore, submittedSlots,
+  releaseBlockers, SNAPSHOT_REPO_PATHS, SNAPSHOT_SLOT_PATHS, slotsFromSnapshotPaths, snapshotSlotPathValues, sprintScore, submittedSlots,
   submittedSprintScore, type TaskGradeRow,
 } from "@/lib/cse115a/gradeReview";
 import {
@@ -301,7 +301,7 @@ describe("instructor table columns and sorting (#412)", () => {
     expect(nextSort(null, "task3")).toEqual({ key: "task3", direction: "desc" });
     expect(names(sortRows(rows, { key: "task3", direction: "desc" }))).toEqual(["student-d", "student-b", "student-a", "student-c"]);
     expect(names(sortRows(rows, { key: "task3", direction: "asc" }))).toEqual(["student-b", "student-d", "student-a", "student-c"]);
-    expect(SORT_KEYS).toEqual(["student", "submitted", "status", "task1", "task2", "task3", "task4", "task5", "task6", "sprint"]);
+    expect(SORT_KEYS).toEqual(["student", "team", "submitted", "status", "task1", "task2", "task3", "task4", "task5", "task6", "sprint"]);
   });
 });
 
@@ -430,7 +430,8 @@ describe("routes take slots 1 to 6 (#412)", () => {
     expect(b!.submission!.sprint).toBe(7);
     expect(taskColumnSlots(body.rows)).toEqual([1, 2, 3, 4]);
     const select = routeState.calls.find((call) => call.table === "cse_assignment_submissions" && call.op === "select");
-    expect(select?.args[0]).toBe(`id,user_id,attempt,status,submitted_at,${SNAPSHOT_SLOT_PATHS}`);
+    // #440 adds each task's repository (the team) as a JSON path, still never the diff.
+    expect(select?.args[0]).toBe(`id,user_id,attempt,status,submitted_at,${SNAPSHOT_SLOT_PATHS},${SNAPSHOT_REPO_PATHS}`);
   });
 });
 
