@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { Fragment, useEffect, useId, useState, type ReactNode } from "react";
 import {
-  boxExtremesLines, boxSourcesLine, changedTaskLine, formatDuration, formatShare, groupLabel, reviewHref, scopeLabel,
-  type ChangedTask, type GraderStats, type GraderStatsResponse, type ScopeStats,
+  aiGaveTaskLine, boxExtremesLines, boxSourcesLine, changedTaskLine, formatDuration, formatShare, groupLabel, reviewHref, scopeLabel,
+  type AiGaveRow, type ChangedTask, type GraderStats, type GraderStatsResponse, type ScopeStats,
 } from "@/lib/cse115a/graderStats";
 import { fetchJson, formatPoints } from "./shared";
 
@@ -32,7 +32,7 @@ export const GRADER_TEXT = {
   boxesHeading: "By rubric box",
   boxesNote: "One row per box, for each assignment or for the quarter; grader versions are compared in Totals. AI left blank: the AI gave no score, or an older grade has no such box; these count in neither same, higher nor lower. Agreed: same, out of the tasks where the AI gave a score. Points added counts a blank AI box as 0. Needs review: tasks where the AI flagged the box.",
   aiGaveHeading: "What the AI gave",
-  aiGaveNote: "Every current graded task, released or not. Full is all the box's points, half is half, zero is none, blank is no score.",
+  aiGaveNote: "Every current graded task, released or not. Full is all the box's points, half is half, zero is none, blank is no score. A number under Full, Half, Zero or Blank that is not 0 opens the list of those tasks, each linked to its submission's staff review page.",
   progressHeading: "Progress",
   progressNote: "Current attempts only. Released includes the tasks regraded after release. Regraded after release counts every such task, including those compared with the AI grade staff saw.",
   timeHeading: "Time",
@@ -69,6 +69,15 @@ export function changedListHeading(kind: ChangeKind, what: string): string {
 
 type ChangeKind = "higher" | "lower" | "blank";
 
+/** A "What the AI gave" column with a list (#442). Other has none. */
+export type AiGaveKind = "full" | "half" | "zero" | "blank";
+
+/** The heading over one opened "What the AI gave" list: "AI gave half: Specs, Fall 2026 · Assignment 3" (#442). */
+export function aiGaveListHeading(kind: AiGaveKind, what: string): string {
+  const lead = kind === "blank" ? "AI gave no score" : `AI gave ${kind}`;
+  return `${lead}: ${what}`;
+}
+
 const cell = "px-3 py-2 text-right tabular-nums";
 const head = "px-3 py-2 font-medium";
 
@@ -97,28 +106,48 @@ function Section({ heading, note, children }: { heading: string; note: string; c
 
 const rowClass = (scopeRow: boolean) => (scopeRow ? "bg-muted/40 font-medium" : "");
 
-type Cell = { text: ReactNode; className?: string } | { kind: ChangeKind; count: number };
+type Cell = { text: ReactNode; className?: string } | { kind: string; count: number };
+
+/** One openable list: its heading and its lines, each a link to the task's staff review page. */
+type TaskList = { heading: string; tasks: Array<{ submissionId: string; taskSlot: number; line: string }> };
+
+/** The changed-task lists of a Totals or box row (#432), in the order higher, lower, blank. */
+function changedLists(what: string, lists: Partial<Record<ChangeKind, ChangedTask[]>>): Record<string, TaskList> {
+  return Object.fromEntries((["higher", "lower", "blank"] as const).flatMap((kind) => {
+    const tasks = lists[kind];
+    return tasks ? [[kind, { heading: changedListHeading(kind, what), tasks: tasks.map((task) => ({ ...task, line: changedTaskLine(task) })) }]] : [];
+  }));
+}
+
+/** The four lists of a "What the AI gave" row (#442). */
+function aiGaveLists(what: string, row: AiGaveRow): Record<AiGaveKind, TaskList> {
+  const list = (kind: AiGaveKind, tasks: AiGaveRow["fullTasks"]): TaskList =>
+    ({ heading: aiGaveListHeading(kind, what), tasks: tasks.map((task) => ({ ...task, line: aiGaveTaskLine(task, row.points) })) });
+  return { full: list("full", row.fullTasks), half: list("half", row.halfTasks), zero: list("zero", row.zeroTasks), blank: list("blank", row.blankTasks) };
+}
 
 /**
- * A table row whose changed-task counts are buttons, each opening a list of links in a row under it (#432).
- * Every list is in the markup, hidden until opened, so a screen reader and the keyboard reach it like any button.
+ * A table row whose counts are buttons, each opening a list of links in a row under it (#432; "What the AI gave"
+ * since #442). Every list is in the markup, hidden until opened, so a screen reader and the keyboard reach it like
+ * any button. `scroll` keeps a long list inside a fixed height.
  */
-function ExpandableRow({ cells, lists, what, className, columns }: {
-  cells: Cell[]; lists: Partial<Record<ChangeKind, ChangedTask[]>>; what: string; className: string; columns: number;
+function ExpandableRow({ cells, lists, className, columns, scroll = false }: {
+  cells: Cell[]; lists: Record<string, TaskList>; className: string; columns: number; scroll?: boolean;
 }) {
-  const [open, setOpen] = useState<ChangeKind | null>(null);
+  const [open, setOpen] = useState<string | null>(null);
   const base = useId();
-  const listId = (kind: ChangeKind) => `${base}-${kind}`;
+  const listId = (kind: string) => `${base}-${kind}`;
   return (
     <>
       <tr className={className}>
         {cells.map((item, index) => {
           if (!("kind" in item)) return <td key={index} className={item.className ?? cell}>{item.text}</td>;
-          if (item.count === 0) return <td key={index} className={cell}>0</td>;
+          const list = lists[item.kind];
+          if (item.count === 0 || !list) return <td key={index} className={cell}>{item.count}</td>;
           return (
             <td key={index} className={cell}>
               <button type="button" aria-expanded={open === item.kind} aria-controls={listId(item.kind)}
-                aria-label={`${item.count}, ${open === item.kind ? "hide" : "show"} the tasks: ${changedListHeading(item.kind, what)}`}
+                aria-label={`${item.count}, ${open === item.kind ? "hide" : "show"} the tasks: ${list.heading}`}
                 onClick={() => setOpen(open === item.kind ? null : item.kind)}
                 className="font-medium text-primary underline underline-offset-2">
                 {item.count}
@@ -127,17 +156,16 @@ function ExpandableRow({ cells, lists, what, className, columns }: {
           );
         })}
       </tr>
-      {(["higher", "lower", "blank"] as const).map((kind) => {
-        const tasks = lists[kind];
-        if (!tasks || tasks.length === 0) return null;
+      {Object.entries(lists).map(([kind, list]) => {
+        if (list.tasks.length === 0) return null;
         return (
           <tr key={kind} id={listId(kind)} hidden={open !== kind} className="bg-muted/20">
             <td colSpan={columns} className="px-3 py-2">
-              <p className="text-xs font-medium text-muted-foreground">{changedListHeading(kind, what)}</p>
-              <ul className="mt-1 space-y-0.5">
-                {tasks.map((task) => (
+              <p className="text-xs font-medium text-muted-foreground">{list.heading}</p>
+              <ul className={scroll ? "mt-1 max-h-64 space-y-0.5 overflow-y-auto" : "mt-1 space-y-0.5"}>
+                {list.tasks.map((task) => (
                   <li key={`${task.submissionId}-${task.taskSlot}`}>
-                    <Link href={reviewHref(task)} className="text-primary underline">{changedTaskLine(task)}</Link>
+                    <Link href={reviewHref(task)} className="text-primary underline">{task.line}</Link>
                   </li>
                 ))}
               </ul>
@@ -207,8 +235,8 @@ export function GraderView({ course, stats, initialScope = "assignment" }: {
             {comparedScopes.flatMap((item) => item.totals.map((row) => {
               const label = groupLabel(term, row);
               return (
-                <ExpandableRow key={label} what={`total, ${label}`} className={rowClass(row.model === null)} columns={9}
-                  lists={{ higher: row.higherTasks, lower: row.lowerTasks }}
+                <ExpandableRow key={label} className={rowClass(row.model === null)} columns={9}
+                  lists={changedLists(`total, ${label}`, { higher: row.higherTasks, lower: row.lowerTasks })}
                   cells={[
                     { text: label, className: "px-3 py-2" },
                     { text: row.released }, { text: row.same },
@@ -235,8 +263,8 @@ export function GraderView({ course, stats, initialScope = "assignment" }: {
                   const row = item.boxes[boxIndex]!;
                   const label = scopeLabel(term, item.assignment);
                   return (
-                    <ExpandableRow key={label} what={`${row.box}, ${label}`} className="" columns={10}
-                      lists={{ higher: row.higherTasks, lower: row.lowerTasks, blank: row.blankTasks }}
+                    <ExpandableRow key={label} className="" columns={10}
+                      lists={changedLists(`${row.box}, ${label}`, { higher: row.higherTasks, lower: row.lowerTasks, blank: row.blankTasks })}
                       cells={[
                         { text: index === 0 ? `${row.box} (${row.points})` : "", className: "px-3 py-2 font-medium" },
                         { text: label, className: "px-3 py-2 text-right" },
@@ -255,17 +283,20 @@ export function GraderView({ course, stats, initialScope = "assignment" }: {
       {anything ? (
         <Section heading={GRADER_TEXT.aiGaveHeading} note={GRADER_TEXT.aiGaveNote}>
           <Table columns={["Box", groupColumn, "Full", "Half", "Zero", "Blank", ...(showOther ? ["Other"] : [])]} minWidth="min-w-[640px]">
-            {scopes.flatMap((item) => item.aiGave.map((row, index) => (
-              <tr key={`${item.assignment}-${row.box}`} className={index === 0 && item !== scopes[0] ? "border-t-2 border-border" : ""}>
-                <td className="px-3 py-2 font-medium">{row.box} ({row.points})</td>
-                <td className="px-3 py-2 text-right">{scopeLabel(term, item.assignment)}</td>
-                <td className={cell}>{row.full}</td>
-                <td className={cell}>{row.half}</td>
-                <td className={cell}>{row.zero}</td>
-                <td className={cell}>{row.blank}</td>
-                {showOther ? <td className={cell}>{row.other}</td> : null}
-              </tr>
-            )))}
+            {scopes.flatMap((item) => item.aiGave.map((row, index) => {
+              const label = scopeLabel(term, item.assignment);
+              return (
+                <ExpandableRow key={`${item.assignment}-${row.box}`} className={index === 0 && item !== scopes[0] ? "border-t-2 border-border" : ""}
+                  columns={showOther ? 7 : 6} scroll lists={aiGaveLists(`${row.box}, ${label}`, row)}
+                  cells={[
+                    { text: `${row.box} (${row.points})`, className: "px-3 py-2 font-medium" },
+                    { text: label, className: "px-3 py-2 text-right" },
+                    { kind: "full", count: row.full }, { kind: "half", count: row.half },
+                    { kind: "zero", count: row.zero }, { kind: "blank", count: row.blank },
+                    ...(showOther ? [{ text: row.other }] : []),
+                  ]} />
+              );
+            }))}
           </Table>
         </Section>
       ) : null}
