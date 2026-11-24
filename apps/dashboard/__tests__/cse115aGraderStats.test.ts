@@ -8,11 +8,11 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { RUBRIC, type CriterionName } from "@/lib/cse115a/rubric";
 import {
-  boxExtremesLines, boxSourcesLine, changedTaskLine, formatDuration, graderStats, groupLabel, median, MIN_TASKS_FOR_EXTREMES, reviewHref, scopeLabel,
+  aiGaveTaskLine, boxExtremesLines, boxSourcesLine, changedTaskLine, formatDuration, graderStats, groupLabel, median, MIN_TASKS_FOR_EXTREMES, reviewHref, scopeLabel,
   type GraderGradeInput, type GraderStats, type GraderStatsResponse, type GraderSubmissionInput,
 } from "@/lib/cse115a/graderStats";
 import {
-  changedListHeading, GRADER_TEXT, GraderView, noSaveTimeLine, quarterLine, regradedLine, signedPoints,
+  aiGaveListHeading, changedListHeading, GRADER_TEXT, GraderView, noSaveTimeLine, quarterLine, regradedLine, signedPoints,
 } from "@/components/cse115a/instructor/GraderPanel";
 
 vi.mock("server-only", () => ({}));
@@ -554,14 +554,19 @@ describe("GET /api/cse115a/instructor/courses/[slug]/grader-stats", () => {
     walk(body);
     for (const key of [...keys].filter((item) => item !== "submissionId")) expect(key).not.toMatch(/(^|_)id$|Id$|email|user|repo|^pr($|_|N)|url|task_?id|note|rationale|key/i);
     expect(keys.has("submissionId") && keys.has("taskSlot")).toBe(true);
-    const allowedStrings = new Set<unknown>(["model-a", "prompt-v1", "llm", "evidence", "CSE 115A", "Fall 2026", changedSub, ...RUBRIC.map((row) => row.name)]);
+    // #442: the "What the AI gave" lists add the id of every current submission with a graded task (here 1 to 3;
+    // submission 0 is superseded and "other-sub" is another course's).
+    const currentSubs = [1, 2, 3].map((i) => `00000000-0000-4000-8000-${String(i).padStart(12, "0")}`);
+    const allowedStrings = new Set<unknown>(["model-a", "prompt-v1", "llm", "evidence", "CSE 115A", "Fall 2026", ...currentSubs, ...RUBRIC.map((row) => row.name)]);
     for (const value of values) {
       if (typeof value === "string") expect(allowedStrings.has(value)).toBe(true);
       else expect(value === null || typeof value === "number").toBe(true);
     }
     expect(raw).not.toMatch(/user-|@|example|github|TEAM-|pull|made-up|course-|slot_/);
-    // The only ids are those of current submissions with a changed task.
-    expect([...raw.matchAll(/00000000-[0-9a-f-]+/g)].every((match) => match[0] === changedSub)).toBe(true);
+    // The only ids are those of current submissions of this course (#442; before it, only those with a changed task).
+    expect([...raw.matchAll(/00000000-[0-9a-f-]+/g)].every((match) => currentSubs.includes(match[0]))).toBe(true);
+    expect(raw).not.toContain("00000000-0000-4000-8000-000000000000");
+    expect(raw).not.toContain("other-sub");
   });
 
   it("reads every row past 1,000: 1,099 current submissions and over 1,000 current grade rows", async () => {
@@ -784,15 +789,21 @@ describe("#432: the page", () => {
     const lists = [...html.matchAll(/<tr id="([^"]+)" hidden=""/g)].map((match) => match[1]!);
     expect(controls.length).toBeGreaterThan(0);
     expect(controls.sort()).toEqual(lists.sort());
-    // As many buttons as non-zero changed-task cells: Totals (higher, lower) and boxes (blank, higher, lower), by assignment.
+    // As many buttons as non-zero changed-task cells: Totals (higher, lower) and boxes (blank, higher, lower), by assignment;
+    // since #442 also What the AI gave (full, half, zero, blank), by assignment.
     const expected = stats.byAssignment.filter((item) => item.comparedTasks > 0).reduce((count, item) =>
       count + item.totals.reduce((n, row) => n + Number(row.higher > 0) + Number(row.lower > 0), 0)
-      + item.boxes.reduce((n, row) => n + Number(row.higher > 0) + Number(row.lower > 0) + Number(row.blank > 0), 0), 0);
+      + item.boxes.reduce((n, row) => n + Number(row.higher > 0) + Number(row.lower > 0) + Number(row.blank > 0), 0), 0)
+      + stats.byAssignment.reduce((count, item) =>
+        count + item.aiGave.reduce((n, row) => n + Number(row.full > 0) + Number(row.half > 0) + Number(row.zero > 0) + Number(row.blank > 0), 0), 0);
     expect(controls).toHaveLength(expected);
     // A box with nothing changed shows plain zeros and no list.
     expect(text(html)).not.toContain(changedListHeading("higher", "Process, Fall 2026 · Assignment 2"));
     expect(text(html)).toContain(changedListHeading("higher", "Specs, Fall 2026 · Assignment 2"));
-    expect(html).not.toMatch(/sub-old|sub-d|sub-e/);
+    // Regraded-after-release and unreleased tasks are in no changed-task list; since #442 What the AI gave, which
+    // counts every current graded task, lists them. A superseded task is nowhere.
+    expect(html.slice(0, html.indexOf(`>${GRADER_TEXT.aiGaveHeading}<`))).not.toMatch(/sub-old|sub-d|sub-e/);
+    expect(html).not.toContain("sub-old");
     expect(text(html)).toContain(GRADER_TEXT.links);
   });
 
@@ -802,5 +813,153 @@ describe("#432: the page", () => {
     expect(text(render(stats))).toContain(noSaveTimeLine(stats.noSaveTime, stats.comparedTasks));
     const review = readFileSync(path.resolve(__dirname, "../components/cse115a/instructor/SubmissionReview.tsx"), "utf8");
     expect(review).not.toMatch(/location\.hash|scrollIntoView|searchParams/);
+  });
+});
+
+// ---- 6. The counts in "What the AI gave" open their tasks (#442) ----
+
+/** A made-up course for What the AI gave: every kind of AI box, two assignments, and tasks that must be in no list. */
+function aiGaveCourse() {
+  return [
+    grade({ assignment: 2, key: "sub-p", slot: 1 }), // every box full
+    grade({ assignment: 2, key: "sub-p", slot: 2, ai: { Specs: 1, Scope: 0.5 } }), // Specs half, Scope half
+    grade({ assignment: 2, key: "sub-q", slot: 1, ai: { Specs: 0, Scope: null }, released: false }), // Specs zero, Scope blank, unreleased
+    grade({ assignment: 3, key: "sub-r", slot: 2, ai: { Specs: null }, staff: { Specs: 2 } }), // Specs blank, staff filled it
+    grade({ assignment: 3, key: "sub-r", slot: 1, ai: { Specs: 1.5 } }), // Specs "other": in no list
+    grade({ assignment: 3, key: "sub-t", slot: 1, ai: { Specs: "missing" }, regradedAfter: true }), // older row, no Specs box: blank
+    grade({ assignment: 3, key: "sub-gone", slot: 1, superseded: true, ai: { Specs: 0 } }), // superseded: in no list
+  ];
+}
+const KINDS = ["full", "half", "zero", "blank"] as const;
+const listOf = (row: GraderStats["quarter"]["aiGave"][number], kind: (typeof KINDS)[number]) => row[`${kind}Tasks`];
+const specsGave = (item: GraderStats["quarter"]) => item.aiGave.find((row) => row.box === "Specs")!;
+
+describe("#442: What the AI gave lists its tasks", () => {
+  const stats = statsOf(aiGaveCourse());
+
+  it("lists the tasks behind each count, newest AI grade, released or not, current attempts only", () => {
+    const specs = specsGave(stats.quarter);
+    expect(specs).toMatchObject({ full: 1, half: 1, zero: 1, blank: 2, other: 1 });
+    expect(specs.fullTasks).toEqual([{ submissionId: "sub-p", taskSlot: 1, assignment: 2, ai: 2 }]);
+    expect(specs.halfTasks).toEqual([{ submissionId: "sub-p", taskSlot: 2, assignment: 2, ai: 1 }]);
+    expect(specs.zeroTasks).toEqual([{ submissionId: "sub-q", taskSlot: 1, assignment: 2, ai: 0 }]);
+    expect(specs.blankTasks).toEqual([
+      { submissionId: "sub-r", taskSlot: 2, assignment: 3, ai: null },
+      { submissionId: "sub-t", taskSlot: 1, assignment: 3, ai: null },
+    ]);
+    expect(stats.quarter.aiGave.find((row) => row.box === "Scope")!.halfTasks).toEqual([{ submissionId: "sub-p", taskSlot: 2, assignment: 2, ai: 0.5 }]);
+    const everyListed = [stats.quarter, ...stats.byAssignment].flatMap((item) => item.aiGave.flatMap((row) => KINDS.flatMap((kind) => listOf(row, kind))));
+    expect(everyListed.some((task) => task.submissionId === "sub-gone")).toBe(false);
+  });
+
+  it("every count equals its list's length, in every scope and box", () => {
+    for (const item of [stats.quarter, ...stats.byAssignment]) {
+      for (const row of item.aiGave) for (const kind of KINDS) expect(listOf(row, kind), `${row.box} ${kind}`).toHaveLength(row[kind]);
+    }
+  });
+
+  it("the assignments' lists add up to the quarter's", () => {
+    stats.quarter.aiGave.forEach((row, index) => {
+      for (const kind of KINDS) {
+        const parts = stats.byAssignment.flatMap((item) => listOf(item.aiGave[index]!, kind));
+        expect(parts, `${row.box} ${kind}`).toEqual(listOf(row, kind));
+      }
+    });
+  });
+
+  it("each list holds only the submission id, task slot, assignment and the AI's points", () => {
+    for (const row of stats.quarter.aiGave) {
+      for (const kind of KINDS) for (const task of listOf(row, kind)) expect(Object.keys(task).sort()).toEqual(["ai", "assignment", "submissionId", "taskSlot"]);
+    }
+  });
+
+  it("writes a line as the AI's points out of the box's, or blank, and heads a list with what it holds", () => {
+    expect(aiGaveTaskLine({ submissionId: "sub-p", taskSlot: 2, assignment: 3, ai: 1 }, 2)).toBe("Assignment 3 · Task 2: AI 1 of 2");
+    expect(aiGaveTaskLine({ submissionId: "sub-p", taskSlot: 1, assignment: 2, ai: 0.5 }, 1)).toBe("Assignment 2 · Task 1: AI 0.5 of 1");
+    expect(aiGaveTaskLine({ submissionId: "sub-p", taskSlot: 1, assignment: 2, ai: 0 }, 2)).toBe("Assignment 2 · Task 1: AI 0 of 2");
+    expect(aiGaveTaskLine({ submissionId: "sub-r", taskSlot: 2, assignment: 3, ai: null }, 2)).toBe("Assignment 3 · Task 2: AI blank");
+    expect(aiGaveListHeading("full", "Specs, Fall 2026 · Assignment 3")).toBe("AI gave full: Specs, Fall 2026 · Assignment 3");
+    expect(aiGaveListHeading("half", "Specs, Fall 2026 · Assignment 3")).toBe("AI gave half: Specs, Fall 2026 · Assignment 3");
+    expect(aiGaveListHeading("zero", "Specs, Fall 2026 · Assignment 3")).toBe("AI gave zero: Specs, Fall 2026 · Assignment 3");
+    expect(aiGaveListHeading("blank", "Specs, Fall 2026 · Assignment 3")).toBe("AI gave no score: Specs, Fall 2026 · Assignment 3");
+  });
+});
+
+describe("#442: the What the AI gave buttons and lists on the page", () => {
+  const stats = statsOf(aiGaveCourse());
+  /** The What the AI gave section's markup, cut at its heading and the next. */
+  const aiGaveHtml = (html: string) => html.slice(html.indexOf(`>${GRADER_TEXT.aiGaveHeading}<`), html.indexOf(`>${GRADER_TEXT.progressHeading}<`));
+
+  for (const scope of ["assignment", "quarter"] as const) {
+    it(`every non-zero Full, Half, Zero and Blank is a button over a list of that length, and a 0 has neither (${scope})`, () => {
+      const html = aiGaveHtml(render(stats, scope));
+      const scopes = scope === "quarter" ? [stats.quarter] : stats.byAssignment;
+      const buttons = [...html.matchAll(/<button type="button" aria-expanded="false" aria-controls="([^"]+)" aria-label="([^"]+)"[^>]*>(\d+)<\/button>/g)];
+      const nonZero = scopes.flatMap((item) => item.aiGave.flatMap((row) => KINDS.filter((kind) => row[kind] > 0).map((kind) => ({ item, row, kind }))));
+      expect(buttons).toHaveLength(nonZero.length);
+      for (const { item, row, kind } of nonZero) {
+        const heading = aiGaveListHeading(kind, `${row.box}, ${scopeLabel("Fall 2026", item.assignment)}`);
+        const button = buttons.find((match) => match[2] === `${row[kind]}, show the tasks: ${heading}`);
+        expect(button, heading).toBeDefined();
+        expect(button![3]).toBe(String(row[kind]));
+        // The list row the button controls: hidden, headed, scrolling, one link per task.
+        const start = html.indexOf(`<tr id="${button![1]}" hidden=""`);
+        expect(start, heading).toBeGreaterThan(0);
+        const listRow = html.slice(start, html.indexOf("</tr>", start));
+        expect(listRow).toContain(`>${heading}</p>`);
+        expect(listRow).toContain("max-h-64");
+        expect(listRow).toContain("overflow-y-auto");
+        const links = [...listRow.matchAll(/<a class="text-primary underline" href="([^"]+)">([^<]+)<\/a>/g)];
+        expect(links).toHaveLength(row[kind]);
+        expect(links.map((link) => [link[1], link[2]])).toEqual(listOf(row, kind).map((task) => [reviewHref(task), aiGaveTaskLine(task, row.points)]));
+      }
+      // A 0 is plain text: as many hidden list rows as buttons, and none for a zero cell.
+      expect([...html.matchAll(/<tr id="[^"]+" hidden=""/g)]).toHaveLength(nonZero.length);
+      const zeroHeading = aiGaveListHeading("zero", `Process, ${scopeLabel("Fall 2026", scopes[0]!.assignment)}`);
+      expect(html).not.toContain(zeroHeading);
+    });
+  }
+
+  it("shows the lines and headings word for word, and the note on what opens", () => {
+    const html = render(stats);
+    const shown = text(html);
+    expect(shown).toContain(GRADER_TEXT.aiGaveNote);
+    expect(GRADER_TEXT.aiGaveNote).toContain("A number under Full, Half, Zero or Blank that is not 0 opens the list of those tasks, each linked to its submission's staff review page.");
+    expect(html).toContain('<a class="text-primary underline" href="/cse115a/instructor/submissions/sub-p">Assignment 2 · Task 2: AI 1 of 2</a>');
+    expect(html).toContain('href="/cse115a/instructor/submissions/sub-p">Assignment 2 · Task 2: AI 0.5 of 1</a>');
+    expect(html).toContain('href="/cse115a/instructor/submissions/sub-r">Assignment 3 · Task 2: AI blank</a>');
+    expect(shown).toContain("AI gave half: Specs, Fall 2026 · Assignment 2");
+    expect(shown).toContain("AI gave no score: Specs, Fall 2026 · Assignment 3");
+    expect(html).not.toContain("sub-gone");
+    // The Other column, shown because one task has 1.5 on Specs, stays a plain number.
+    expect(aiGaveHtml(html)).toContain(">Other</th>");
+    expect(aiGaveHtml(render(stats, "quarter"))).toContain("AI gave full: Specs, Fall 2026 · all assignments");
+  });
+
+  it("changes no number in the table: the counts are those of before #442", () => {
+    const counts = (item: GraderStats["quarter"]) => item.aiGave.map((row) => [row.box, row.full, row.half, row.zero, row.blank, row.other]);
+    expect(counts(stats.quarter)).toEqual([
+      ["Scope", 4, 1, 0, 1, 0], ["Specs", 1, 1, 1, 2, 1], ["Acceptance criteria", 6, 0, 0, 0, 0],
+      ["Test quality", 6, 0, 0, 0, 0], ["Tests pass", 6, 0, 0, 0, 0], ["Process", 6, 0, 0, 0, 0],
+    ]);
+  });
+});
+
+describe("#442: the route's What the AI gave lists", () => {
+  beforeEach(() => { state.identity = null; state.requests = []; seed(4); });
+
+  it("hold only the submission id, task slot, assignment and AI points, and each count equals its list", async () => {
+    state.identity = TA;
+    const body = await (await callRoute()).json() as GraderStatsResponse;
+    for (const item of [body.quarter, ...body.byAssignment]) {
+      for (const row of item.aiGave) {
+        for (const kind of KINDS) {
+          expect(listOf(row, kind)).toHaveLength(row[kind]);
+          for (const task of listOf(row, kind)) expect(Object.keys(task).sort()).toEqual(["ai", "assignment", "submissionId", "taskSlot"]);
+        }
+      }
+    }
+    // Six current graded tasks (submissions 1 to 3, two slots each), every box full.
+    expect(body.quarter.aiGave.map((row) => row.fullTasks.length)).toEqual([6, 6, 6, 6, 6, 6]);
   });
 });
