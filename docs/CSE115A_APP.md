@@ -770,7 +770,9 @@ every table both ways (`byAssignment`, one per assignment, and `quarter`).
   scores (Scope, Specs, Acceptance criteria, Test quality) and which come from
   recorded evidence (Tests pass, Process), read from each item's `source`.
 - **What the AI gave**: per box and per assignment (or for the quarter), how
-  many current graded tasks (released or not) got full, half, zero or blank.
+  many current graded tasks (released or not) got full, half, zero or blank,
+  from the newest AI grade. Since #442 each count that is not 0 opens its tasks
+  (below).
 - **Progress**, per assignment or for the quarter: tasks submitted (from each
   current submission's snapshot slots), graded by the AI, saved by staff but not
   released, released (including regraded after release), regraded after
@@ -794,6 +796,19 @@ task number, never a name, email, repo or task ID; the review page is
 staff-only. The lists are built from the same compared tasks as the counts
 (the loader now passes `task_slot`), so each count equals its list's length.
 
+**What the AI gave, opened (#442).** In What the AI gave, the Full, Half, Zero
+and Blank cells are buttons when not 0, with the same markup and accessibility
+attributes as the changed-task lists. Each opens a list under the row headed,
+for example, "AI gave half: Specs, Fall 2026 · Assignment 3" ("AI gave no
+score: …" for Blank), one line per task, "Assignment 3 · Task 2: AI 1 of 2"
+(the AI's points for the box out of the box's points) or "Assignment 3 · Task
+2: AI blank", linking to the submission's staff review page. A long list
+scrolls inside a fixed height. The lists follow the toggle and are built from
+the same tasks as the counts (every current graded task, released or not,
+newest AI grade), so each count equals its list's length and the assignments'
+lists together are the quarter's. Other (a score that is not full, half or
+zero) stays a plain number. No number on the page changed.
+
 Limits, shown on the page: staff see the AI's score before deciding, so this
 measures how often staff changed it, not how often two independent graders
 agree; every AI grade is now kept, but a score a Regrade replaced before the
@@ -807,7 +822,9 @@ noticed; the reason for a change is not stored.
 Route: `GET /api/cse115a/instructor/courses/<slug>/grader-stats` (course
 staff) returns the course's `title` and `term`, and from `graderStats` the
 counts plus, for each changed task, its submission id, task slot, assignment
-and the AI and final points, nothing else about the submission
+and the AI and final points, and for each task behind a What the AI gave count
+(#442) its submission id, task slot, assignment and the AI's points for the
+box, nothing else about the submission
 (`lib/cse115a/graderStats.ts`, pure, shared with the page and tests), read by
 `lib/cse115a/loadGraderStats.ts` page by page.
 
