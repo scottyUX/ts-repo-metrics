@@ -2,8 +2,9 @@ import { LLM_CRITERIA, RUBRIC, type CriterionName } from "@/lib/cse115a/rubric";
 
 // How the AI grader is doing, from what is already stored (#423). Pure: no server imports, so the staff route,
 // the Grader page and the tests share it. Every table comes two ways (#432): per assignment, and for the whole
-// course (one course is one quarter). The output holds counts, plus, for the tasks staff changed, the submission
-// key and task slot so the staff page can link to the review page; never an email, repo, PR number or task ID.
+// course (one course is one quarter). The output holds counts, plus, for the tasks staff changed (#432) and for each
+// non-zero "What the AI gave" cell (#442), the submission key and task slot so the staff page can link to the review
+// page; never an email, repo, PR number or task ID.
 //
 // The AI score is what the grade job saved (`rubric`, `agent_total`). The final score is what staff saved
 // (`instructor_rubric`, `instructor_total`), or the AI score when staff saved nothing. A box is one rubric row.
@@ -111,7 +112,24 @@ export type BoxRow = {
   blankTasks: ChangedTask[];
 };
 
-export type AiGaveRow = { box: CriterionName; points: number; full: number; half: number; zero: number; blank: number; other: number };
+/** One task behind a "What the AI gave" count (#442): the #432 link fields and the AI's points for the box, no final. */
+export type AiGaveTask = {
+  /** The submission key passed in; the route passes the submission id. */
+  submissionId: string;
+  taskSlot: number;
+  assignment: number;
+  /** The AI's points for the box; null when the AI left it blank. */
+  ai: number | null;
+};
+
+export type AiGaveRow = {
+  box: CriterionName; points: number; full: number; half: number; zero: number; blank: number; other: number;
+  /** The tasks counted in `full`, `half`, `zero` and `blank` (#442); each count is its list's length. Other has no list. */
+  fullTasks: AiGaveTask[];
+  halfTasks: AiGaveTask[];
+  zeroTasks: AiGaveTask[];
+  blankTasks: AiGaveTask[];
+};
 
 export type ProgressCounts = { submitted: number; graded: number; savedNotReleased: number; released: number; regradedAfterRelease: number };
 export type WaitCounts = { submissions: number; medianMs: number | null };
@@ -223,7 +241,7 @@ const changed = (grade: GraderGradeInput, ai: number | null, final: number | nul
   ({ submissionId: grade.submissionKey, taskSlot: grade.taskSlot, assignment: grade.assignmentNumber, ai, final });
 
 /** Task order inside a list: assignment, then submission, then slot, so a reload shows the same order. */
-const byTask = (a: ChangedTask, b: ChangedTask) => a.assignment - b.assignment || a.submissionId.localeCompare(b.submissionId) || a.taskSlot - b.taskSlot;
+const byTask = (a: Pick<ChangedTask, "assignment" | "submissionId" | "taskSlot">, b: Pick<ChangedTask, "assignment" | "submissionId" | "taskSlot">) => a.assignment - b.assignment || a.submissionId.localeCompare(b.submissionId) || a.taskSlot - b.taskSlot;
 
 /** One Totals row over these compared tasks. */
 function totalsRow(key: GroupKey, rows: GraderGradeInput[]): TotalsRow {
@@ -275,19 +293,25 @@ function boxRow(row: (typeof RUBRIC)[number], source: BoxSource, assignment: num
   };
 }
 
-/** What the AI gave, per box, over these current graded tasks (released or not). */
+/** What the AI gave, per box, over these current graded tasks (released or not), with the tasks behind each count (#442). */
 function aiGaveRows(grades: GraderGradeInput[]): AiGaveRow[] {
   return RUBRIC.map((row) => {
-    const counts = { full: 0, half: 0, zero: 0, blank: 0, other: 0 };
+    const lists = { full: [] as AiGaveTask[], half: [] as AiGaveTask[], zero: [] as AiGaveTask[], blank: [] as AiGaveTask[] };
+    let other = 0;
     for (const grade of grades) {
       const awarded = aiBox(grade.rubric, row.name).awarded;
-      if (awarded === null) counts.blank += 1;
-      else if (cents(awarded) === cents(row.points)) counts.full += 1;
-      else if (cents(awarded) === cents(row.points / 2)) counts.half += 1;
-      else if (cents(awarded) === 0) counts.zero += 1;
-      else counts.other += 1;
+      const task: AiGaveTask = { submissionId: grade.submissionKey, taskSlot: grade.taskSlot, assignment: grade.assignmentNumber, ai: awarded === null ? null : round2(awarded) };
+      if (awarded === null) lists.blank.push(task);
+      else if (cents(awarded) === cents(row.points)) lists.full.push(task);
+      else if (cents(awarded) === cents(row.points / 2)) lists.half.push(task);
+      else if (cents(awarded) === 0) lists.zero.push(task);
+      else other += 1;
     }
-    return { box: row.name, points: row.points, ...counts };
+    return {
+      box: row.name, points: row.points,
+      full: lists.full.length, half: lists.half.length, zero: lists.zero.length, blank: lists.blank.length, other,
+      fullTasks: lists.full.sort(byTask), halfTasks: lists.half.sort(byTask), zeroTasks: lists.zero.sort(byTask), blankTasks: lists.blank.sort(byTask),
+    };
   });
 }
 
@@ -417,6 +441,12 @@ export function boxSourcesLine(boxes: Pick<BoxRow, "box" | "source">[]): string 
 export function changedTaskLine(task: ChangedTask): string {
   const points = (value: number | null) => (value === null ? "blank" : String(Number(value.toFixed(2))));
   return `Assignment ${task.assignment} · Task ${task.taskSlot}: AI ${points(task.ai)}, final ${points(task.final)}`;
+}
+
+/** One line of a "What the AI gave" list (#442): "Assignment 3 · Task 2: AI 1 of 2", or "…: AI blank". */
+export function aiGaveTaskLine(task: AiGaveTask, boxPoints: number): string {
+  const points = (value: number) => String(Number(value.toFixed(2)));
+  return `Assignment ${task.assignment} · Task ${task.taskSlot}: ${task.ai === null ? "AI blank" : `AI ${points(task.ai)} of ${points(boxPoints)}`}`;
 }
 
 /** The staff review page a changed task links to. The review page has no per-task address, so this is the submission's page. */

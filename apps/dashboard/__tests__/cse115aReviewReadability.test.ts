@@ -291,7 +291,7 @@ describe("2. copy", () => {
     expect(copied).toBe(long);
     expect(copied.endsWith("+THE-LAST-LINE\n")).toBe(true);
     expect(tabCopyAll(diffSections(task), "test_patch")).toBe(fileDiff("src/__tests__/big.test.ts", "it()"));
-  });
+  }, 20_000); // the first test to import the review page; it timed out once at 5 seconds on a busy machine (#442)
 
   it("with extra PRs, Copy all copies every section in the order shown, each under a one-line heading naming the PR", async () => {
     const { diffSections, tabCopyAll } = await import("@/components/cse115a/instructor/SubmissionReview");

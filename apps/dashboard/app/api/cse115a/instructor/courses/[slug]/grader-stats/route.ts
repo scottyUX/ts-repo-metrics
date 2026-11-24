@@ -9,9 +9,10 @@ export const runtime = "nodejs";
 type Params = { params: Promise<{ slug: string }> };
 
 /**
- * How the AI grader is doing in this course (#423). Course staff. Counts, plus, for each task staff changed, its
- * submission id and task slot so the page can link to the staff review page (#432); never an email, user id, repo,
- * PR number, task ID, note or rationale.
+ * How the AI grader is doing in this course (#423). Course staff. Counts, plus, for each task staff changed (#432)
+ * and each task behind a non-zero "What the AI gave" count (#442), its submission id, task slot, assignment and the
+ * AI's points so the page can link to the staff review page; never an email, user id, repo, PR number, task ID, note
+ * or rationale.
  */
 export async function GET(_request: Request, { params }: Params) {
   const { slug } = await params;
