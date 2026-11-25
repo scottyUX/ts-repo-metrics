@@ -16,9 +16,8 @@ import {
   getTheCodeChoiceNote, getTheCodeExtrasNote, repoCopyFromNote, staleAiGradeLine, WORK_PR_TEXT, workPrHeaderLine,
 } from "@/lib/cse115a/workPr";
 import { AiGradeHistory, type AiGradeEntry } from "./AiGradeHistory";
-import { ExtraCodePrs } from "./ExtraCodePrs";
+import { FixCodePr } from "./FixCodePr";
 import { GetTheCode } from "./GetTheCode";
-import { WorkPrChooser } from "./WorkPrChooser";
 import { CopyButton, DiffBox, SpecBox } from "./ReviewBoxes";
 import { copyAllText, EMPTY_TAB_TEXT, githubProfiles, REVIEW_TEXT, teamLinks, type DiffTab } from "@/lib/cse115a/reviewText";
 import { fetchJson, formatPoints, STATUS_LABELS, type StaffCourse, type SubmissionStatus } from "./shared";
@@ -86,10 +85,11 @@ export function tabCopyAll(sections: DiffSection[], tab: DiffTab): string {
 }
 
 /**
- * One diff tab (#440): "Copy all" for the tab's whole stored text, and each section with its own full-height switch
- * and, when the task has extra PRs, its own Copy.
+ * One diff tab (#440): "Copy all" for the tab's whole stored text, and each section with its own full-height switch,
+ * Full screen and Collapse (#448, #454) and, when the task has extra PRs, its own Copy. Copy all reads the stored
+ * text, so it copies every section whole, collapsed or not.
  */
-function DiffTabBody({ sections, tab, slot }: { sections: DiffSection[]; tab: DiffTab; slot: number }) {
+export function DiffTabBody({ sections, tab, slot }: { sections: DiffSection[]; tab: DiffTab; slot: number }) {
   const several = sections.length > 1;
   const anyText = sections.some((section) => sectionText(section, tab));
   return (
@@ -203,8 +203,7 @@ function TaskPanel({ submissionId, task, grade, onSaved, readOnly, sharedPr, cod
         choiceNote={task.workPrChoice ? getTheCodeChoiceNote({ ...task, workPrChoice: task.workPrChoice }) : null}
         extrasNote={extraNumbers.length ? getTheCodeExtrasNote(task.prNumber, extraNumbers) : null}
         copyNote={task.repoCopyFrom && task.repoCopyFrom.prNumber !== task.prNumber ? repoCopyFromNote(task.repoCopyFrom.prNumber, task.prNumber) : null} />
-      <WorkPrChooser submissionId={submissionId} task={task} recapturedAt={recapturedAt} readOnly={readOnly} onChanged={onSaved} />
-      <ExtraCodePrs submissionId={submissionId} task={task} recapturedAt={recapturedAt} readOnly={readOnly} onChanged={onSaved} />
+      <FixCodePr submissionId={submissionId} task={task} recapturedAt={recapturedAt} readOnly={readOnly} onChanged={onSaved} />
 
       <Tabs defaultValue="patch" className="rounded-lg border border-border">
         <TabsList className="m-2">

@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useImperativeHandle, useState } from "react";
 import type { TaskSnapshot } from "@/lib/cse115a/submissionSnapshot";
 import { extraCodePrLine, extraCodePrReasonLine, WORK_PR_TEXT } from "@/lib/cse115a/workPr";
 import { fetchJson } from "./shared";
-import { button, CandidateList, primary, seenState, type Listed } from "./WorkPrChooser";
+import { button, CandidateList, primary, seenState, type FlowProps, type Listed } from "./WorkPrChooser";
 
 type Preview = {
   prNumber: number; title: string; files: string[]; summary: string; diffTruncated: boolean;
@@ -12,13 +12,14 @@ type Preview = {
 };
 
 /**
- * #437, staff only: a task's extra PRs for its code, listed under the main PR (each with a two-step Remove), and
- * "Add another PR for the code" with the same candidate list, a typed PR number or link, a required reason, a
- * preview and Apply. Every write sends what the page saw (`seen`, with the task's extra PRs).
+ * #437, staff only: a task's extra PRs for its code, listed under the main PR (each with a two-step Remove), and the
+ * adder, which "Fix the code PR" opens (#454: "The code is spread over more PRs"), with the same candidate list, a
+ * typed PR number or link, a required reason, a preview and Apply. Every write sends what the page saw (`seen`, with
+ * the task's extra PRs).
  */
-export function ExtraCodePrs({ submissionId, task, recapturedAt, readOnly, onChanged }: {
+export function ExtraCodePrs({ submissionId, task, recapturedAt, readOnly, onChanged, ref, onOpenChange }: {
   submissionId: string; task: TaskSnapshot; recapturedAt: string | null; readOnly: boolean; onChanged: () => void;
-}) {
+} & FlowProps) {
   const [open, setOpen] = useState(false);
   const [listed, setListed] = useState<Listed | null>(null);
   const [listError, setListError] = useState<string | null>(null);
@@ -35,8 +36,16 @@ export function ExtraCodePrs({ submissionId, task, recapturedAt, readOnly, onCha
   const seen = seenState(task, recapturedAt);
   const extras = task.extraCodePrs ?? [];
 
+  function show(next: boolean) {
+    setOpen(next);
+    onOpenChange?.(next);
+  }
+
+  // The opener is "Fix the code PR" (FixCodePr).
+  useImperativeHandle(ref, () => ({ open: () => { if (!readOnly) void openAdder(); } }));
+
   async function openAdder() {
-    setOpen(true);
+    show(true);
     setMessage(null);
     setListError(null);
     if (listed) return;
@@ -77,7 +86,7 @@ export function ExtraCodePrs({ submissionId, task, recapturedAt, readOnly, onCha
     const answer = await send({ slot: task.slot, extra: previewedPr, reason, apply: true, seen });
     setConfirming(false);
     if (!answer) return;
-    setOpen(false);
+    show(false);
     setPreview(null);
     setPreviewedPr(null);
     setPr("");
@@ -123,13 +132,11 @@ export function ExtraCodePrs({ submissionId, task, recapturedAt, readOnly, onCha
         </div>
       ) : null}
 
-      {readOnly ? null : !open ? (
-        <button type="button" onClick={() => void openAdder()} className={button}>{WORK_PR_TEXT.extraOpen}</button>
-      ) : (
+      {readOnly || !open ? null : (
         <div className="space-y-3 rounded-lg border border-border p-3">
           <div className="flex items-start justify-between gap-2">
             <h4 className="font-semibold">{WORK_PR_TEXT.extraHeading}</h4>
-            <button type="button" onClick={() => { setOpen(false); setConfirming(false); }} className="text-xs text-primary underline">{WORK_PR_TEXT.close}</button>
+            <button type="button" onClick={() => { show(false); setConfirming(false); }} className="text-xs text-primary underline">{WORK_PR_TEXT.close}</button>
           </div>
           <p className="text-muted-foreground">{WORK_PR_TEXT.extraIntro}</p>
           <CandidateList name={`extra-pr-${task.slot}`} listed={listed} listError={listError} picked={pr.trim()} onPick={pick} />
