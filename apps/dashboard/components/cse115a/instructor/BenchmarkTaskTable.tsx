@@ -1,34 +1,48 @@
 "use client";
 
 import Link from "next/link";
-import { Fragment, useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState, type ReactNode } from "react";
 import { REVIEW_TEXT, teamLink } from "@/lib/cse115a/reviewText";
 import {
-  assignmentOptions, changedByStaffLines, coverageCell, DEFAULT_FILTERS, flagText, goldCell, gradeCell, longDate,
-  metricsHref, nextTaskSort, repoCell, repoSourceLine, reportDateText, reviewHref, staffChangeLines, statusCell, summarize,
-  TASK_TABLE_TEXT, taskCell, teamOptions, visibleRows, withStatus,
-  type Changed, type Filters, type People, type StatusKey, type TaskDetail, type TaskSort, type TaskSortKey, type TaskTableRow,
+  assignmentOptions, changedByStaffLines, consentCounts, consentedCell, coverageCell, DEFAULT_FILTERS, flagText, goldCell, gradeBoxLines, gradeCell,
+  longDate, metricsHref, nextTaskSort, repoCell, repoSourceLine, reportDateText, reviewHref, scoreText, staffChangeLines, statusCell, statusHelpLines,
+  summarize, TASK_TABLE_TEXT, taskCell, teamOptions, visibleRows, withStatus,
+  type Changed, type Consented, type Filters, type People, type StatusKey, type TaskDetail, type TaskGrade, type TaskSort, type TaskSortKey, type TaskTableRow,
 } from "@/lib/cse115a/benchmark/taskTable";
-import { CopyButton, SpecBody } from "./ReviewBoxes";
+import { FullScreenBox } from "./FullScreenBox";
+import { HelpTip } from "./HelpTip";
+import { CopyButton, SpecBody, SpecViewSwitch } from "./ReviewBoxes";
 import { fetchJson } from "./shared";
 
-// The Benchmark page's summary of validation results (#444) and its table of every current task (#445). Staff only.
-// No cell, filter or opened row says whether a student consented.
+// The Benchmark page's summary of validation results (#444) and its table of every current task (#445), with the
+// Consented column, heading help, the two benchmark columns and the opened row's grade and scores (#449). Staff only.
 
 const T = TASK_TABLE_TEXT;
 const SELECT = "rounded-lg border border-input bg-background px-3 py-2";
 
-const COLUMNS: Array<{ key: TaskSortKey; label: string; note?: string; title?: string }> = [
-  { key: "assignment", label: T.columns.assignment },
-  { key: "team", label: T.columns.team },
-  { key: "student", label: T.columns.student },
-  { key: "task", label: T.columns.task },
-  { key: "status", label: T.columns.status },
-  { key: "coverage", label: T.columns.coverage },
-  { key: "gold", label: T.columns.gold },
-  { key: "grade", label: T.columns.grade },
-  { key: "staffChanges", label: T.columns.staffChanges },
-  { key: "repo", label: T.columns.repo, note: T.repoColumnNote, title: T.repoColumnTitle },
+/** The Status heading's help: one line per result, in the summary box's own words (statusHelpLines). */
+export function StatusHelp() {
+  return <ul className="space-y-1">{statusHelpLines().map((line) => <li key={line.label}><span className="font-semibold">{line.label}</span>: {line.meaning}</li>)}</ul>;
+}
+
+/** A column: `sort` is its sort key; a column without one does not sort. `help` is its "?" panel. */
+export type Column = { id: string; label: string; sort?: TaskSortKey; note?: string; title?: string; help?: ReactNode };
+
+export const COLUMNS: Column[] = [
+  { id: "assignment", sort: "assignment", label: T.columns.assignment },
+  { id: "team", sort: "team", label: T.columns.team },
+  { id: "student", sort: "student", label: T.columns.student },
+  { id: "consented", sort: "consented", label: T.columns.consented },
+  { id: "task", sort: "task", label: T.columns.task },
+  { id: "status", sort: "status", label: T.columns.status, help: <StatusHelp /> },
+  { id: "coverage", sort: "coverage", label: T.columns.coverage, help: T.coverageHelp },
+  { id: "gold", sort: "gold", label: T.columns.gold, help: T.goldHelp },
+  { id: "grade", sort: "grade", label: T.columns.grade },
+  // Placeholders (#449): no data, no route field and no migration yet; every cell reads "Not set". They do not sort or filter.
+  { id: "benchmarkGrade", label: T.columns.benchmarkGrade, help: T.benchmarkGradeHelp },
+  { id: "benchmarkInclude", label: T.columns.benchmarkInclude, help: T.benchmarkIncludeHelp },
+  { id: "staffChanges", sort: "staffChanges", label: T.columns.staffChanges },
+  { id: "repo", sort: "repo", label: T.columns.repo, note: T.repoColumnNote, title: T.repoColumnTitle },
 ];
 
 /** The summary box: one line per status, its count and meaning; a line's button shows those tasks in the table. */
@@ -51,7 +65,20 @@ export function SummaryBox({ rows, selected, onPick }: { rows: readonly TaskTabl
         ))}
       </ul>
       <p className="mt-2 border-t border-border px-2 pt-2 text-sm font-medium">{T.summaryTotal(total)}</p>
+      <ConsentCountLines rows={rows} />
     </section>
+  );
+}
+
+/** The foot of the summary box: validated tasks by consent, apart from the lines that add up to the total. */
+export function ConsentCountLines({ rows }: { rows: readonly TaskTableRow[] }) {
+  const counts = consentCounts(rows);
+  return (
+    <div className="mt-3 rounded-lg bg-muted/50 px-2 py-2 text-sm">
+      <p>{T.validatedConsented(counts.consented)}</p>
+      <p>{T.validatedNotConsented(counts.notConsented)}</p>
+      <p className="mt-1 text-muted-foreground">{T.consentCountsNote}</p>
+    </div>
   );
 }
 
@@ -85,6 +112,14 @@ export function TaskFilters({ rows, filters, onChange }: { rows: readonly TaskTa
         </select>
       </label>
       <label className="text-sm">
+        <span className="mb-1 block text-muted-foreground">{T.consentedLabel}</span>
+        <select value={filters.consented} onChange={(event) => set({ consented: event.target.value as Consented })} className={SELECT}>
+          <option value="any">{T.consentedAny}</option>
+          <option value="yes">{T.consentedYes}</option>
+          <option value="no">{T.consentedNo}</option>
+        </select>
+      </label>
+      <label className="text-sm">
         <span className="mb-1 block text-muted-foreground">{T.changedLabel}</span>
         <select value={filters.changed} onChange={(event) => set({ changed: event.target.value as Changed })} className={SELECT}>
           <option value="any">{T.changedAny}</option>
@@ -108,6 +143,11 @@ export function TaskFilters({ rows, filters, onChange }: { rows: readonly TaskTa
   );
 }
 
+/** The six box lines, as the Final grade cell's hover and focus text. */
+export function GradeBoxesPanel({ grade }: { grade: TaskGrade }) {
+  return <ul>{gradeBoxLines(grade).map((line) => <li key={line} className="tabular-nums">{line}</li>)}</ul>;
+}
+
 /** One row's cells, in column order. */
 export function TaskCells({ row }: { row: TaskTableRow }) {
   const team = teamLink(row.team);
@@ -119,11 +159,12 @@ export function TaskCells({ row }: { row: TaskTableRow }) {
   return (
     <>
       <td className="px-3 py-3 tabular-nums">{row.assignment}</td>
-      <td className="px-3 py-3">{team ? <a href={team.url} target="_blank" rel="noopener noreferrer" title={team.fullName} className="text-primary underline">{team.name}</a> : <span className="text-muted-foreground">—</span>}</td>
+      <td className="whitespace-nowrap px-3 py-3">{team ? <a href={team.url} target="_blank" rel="noopener noreferrer" title={team.fullName} className="text-primary underline">{team.name}</a> : <span className="text-muted-foreground">—</span>}</td>
       <td className="px-3 py-3">
         <span className="break-all">{row.email || "—"}</span>
         {row.staff ? <span className="ml-2 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">{T.staffTag}</span> : null}
       </td>
+      <td className={`px-3 py-3${row.consented ? "" : " text-muted-foreground"}`}>{consentedCell(row.consented)}</td>
       <td className="px-3 py-3"><span className="font-medium">{task.slot}</span>{task.name ? <span className="block text-xs text-muted-foreground">{task.name}</span> : null}</td>
       <td className="px-3 py-3"><span>{status.label}</span>{status.detail ? <span className="block text-xs text-muted-foreground">{status.detail}</span> : null}</td>
       <td className="px-3 py-3">
@@ -133,25 +174,69 @@ export function TaskCells({ row }: { row: TaskTableRow }) {
       </td>
       <td className="px-3 py-3">{goldCell(row.gold)}</td>
       <td className="px-3 py-3 tabular-nums">
-        <span className={row.grade ? "" : "text-muted-foreground"}>{grade.text}</span>
+        {row.grade
+          ? <HelpTip id={`grade-boxes-${row.id}`} kind="text" panel={<GradeBoxesPanel grade={row.grade} />}><span>{grade.text}</span></HelpTip>
+          : <span className="text-muted-foreground">{grade.text}</span>}
         {grade.unreleased ? <span className="ml-2 rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">{T.notReleased}</span> : null}
       </td>
+      <td className="px-3 py-3 text-muted-foreground">{T.notSet}</td>
+      <td className="px-3 py-3 text-muted-foreground">{T.notSet}</td>
       <td className="px-3 py-3">{staffChangeLines(row).map((line) => <span key={line} className="block text-xs font-medium">{line}</span>)}</td>
       <td className="px-3 py-3"><span className={row.hasReport ? "" : "text-muted-foreground"}>{repo.text}</span>{repo.date ? <span className="block text-xs text-muted-foreground">{repo.date}</span> : null}</td>
     </>
   );
 }
 
-/** A patch in a scrolling box with a Copy button that copies it whole. */
-function PatchBox({ what, text, boxId }: { what: string; text: string; boxId: string }) {
+/** A patch in a scrolling box with a Copy button that copies it whole, and Full screen (#448). */
+function PatchBox({ what, text, boxId, title }: { what: string; text: string; boxId: string; title: string }) {
+  const copy = <CopyButton text={() => text} label={REVIEW_TEXT.copy} ariaLabel={T.copyPatch(what.toLowerCase())} />;
   return (
     <div className="space-y-1">
       <div className="flex flex-wrap items-center gap-2">
         <h4 className="text-sm font-medium">{what}</h4>
-        <CopyButton text={() => text} label={REVIEW_TEXT.copy} ariaLabel={T.copyPatch(what.toLowerCase())} />
+        {copy}
+        <FullScreenBox title={title} what={`the ${what.toLowerCase()}`} tools={copy}>
+          <pre className="whitespace-pre p-3 text-xs">{text || T.emptyPatch}</pre>
+        </FullScreenBox>
       </div>
       <pre id={boxId} className="max-h-96 overflow-auto rounded-md bg-muted p-2 text-xs">{text || T.emptyPatch}</pre>
     </div>
+  );
+}
+
+/** The opened row's grade: each box's final points, the total, and "not released" as the table marks it. */
+export function GradeSection({ grade }: { grade: TaskGrade | null }) {
+  const cell = gradeCell(grade);
+  return (
+    <section>
+      <h4 className="font-medium">{T.gradeHeading}</h4>
+      {grade ? (
+        <>
+          <ul className="mt-1 tabular-nums">{gradeBoxLines(grade).map((line) => <li key={line}>{line}</li>)}</ul>
+          <p className="mt-1 font-medium tabular-nums">
+            {T.gradeTotal(grade.total)}
+            {cell.unreleased ? <span className="ml-2 rounded-full bg-muted px-2 py-0.5 text-xs font-normal text-muted-foreground">{T.notReleased}</span> : null}
+          </p>
+        </>
+      ) : <p className="text-muted-foreground">{T.notGraded}</p>}
+    </section>
+  );
+}
+
+/** The opened row's Repo Metrics scores from the stored report, with the report's date; nothing without a report. */
+export function ScoresSection({ detail }: { detail: Pick<TaskDetail, "hasReport" | "reportDate" | "scores"> }) {
+  if (!detail.hasReport) return null;
+  return (
+    <section>
+      <h4 className="font-medium">{T.scoresHeading} <span className="text-xs font-normal text-muted-foreground">{reportDateText(detail.reportDate)}</span></h4>
+      {detail.scores ? (
+        <dl className="mt-1 flex flex-wrap gap-x-6 gap-y-1">
+          {detail.scores.map((item) => (
+            <div key={item.id} className="flex gap-2"><dt className="text-muted-foreground">{item.title}</dt><dd className="font-medium tabular-nums">{scoreText(item.score)}</dd></div>
+          ))}
+        </dl>
+      ) : <p className="text-muted-foreground">{T.scoresFailed}</p>}
+    </section>
   );
 }
 
@@ -159,6 +244,13 @@ function PatchBox({ what, text, boxId }: { what: string; text: string; boxId: st
 export function TaskDetailView({ detail, raw = false, onRaw }: { detail: TaskDetail; raw?: boolean; onRaw?: (raw: boolean) => void }) {
   const changes = changedByStaffLines(detail);
   const idBase = `task-${detail.id}`;
+  // The same switch and Copy on the page and in the full-screen dialog; both drive one Formatted / Raw choice.
+  const specTools = (
+    <>
+      <SpecViewSwitch raw={raw} onRaw={(next) => onRaw?.(next)} />
+      <CopyButton text={() => detail.problemStatement} label={REVIEW_TEXT.copy} ariaLabel={REVIEW_TEXT.copySpecLabel} />
+    </>
+  );
   return (
     <div className="space-y-4 p-4 text-sm">
       <div className="flex flex-wrap gap-4">
@@ -181,20 +273,26 @@ export function TaskDetailView({ detail, raw = false, onRaw }: { detail: TaskDet
         </section>
       ) : null}
 
+      <div className="grid gap-4 sm:grid-cols-2">
+        <GradeSection grade={detail.grade} />
+        <ScoresSection detail={detail} />
+      </div>
+
       <section className="space-y-1">
         <div className="flex flex-wrap items-center gap-2">
           <h4 className="font-medium">{T.spec}</h4>
-          <div role="group" aria-label={REVIEW_TEXT.specViewLabel} className="inline-flex overflow-hidden rounded-md border border-input text-xs">
-            <button type="button" aria-pressed={!raw} onClick={() => onRaw?.(false)} className={`px-2 py-1 font-medium ${raw ? "hover:bg-muted" : "bg-primary text-primary-foreground"}`}>{REVIEW_TEXT.formatted}</button>
-            <button type="button" aria-pressed={raw} onClick={() => onRaw?.(true)} className={`border-l border-input px-2 py-1 font-medium ${raw ? "bg-primary text-primary-foreground" : "hover:bg-muted"}`}>{REVIEW_TEXT.raw}</button>
-          </div>
-          <CopyButton text={() => detail.problemStatement} label={REVIEW_TEXT.copy} ariaLabel={REVIEW_TEXT.copySpecLabel} />
+          {specTools}
+          {detail.problemStatement ? (
+            <FullScreenBox title={`${T.spec} · Task ${detail.slot}`} what="the spec" tools={specTools}>
+              <SpecBody markdown={detail.problemStatement} raw={raw} full boxId={`${idBase}-spec-full`} />
+            </FullScreenBox>
+          ) : null}
         </div>
         {detail.problemStatement ? <div className="rounded-md border border-border"><SpecBody markdown={detail.problemStatement} raw={raw} full={false} boxId={`${idBase}-spec`} /></div> : <p className="text-muted-foreground">{T.noSpec}</p>}
       </section>
 
-      <PatchBox what={T.codePatch} text={detail.patch} boxId={`${idBase}-patch`} />
-      <PatchBox what={T.testPatch} text={detail.testPatch} boxId={`${idBase}-test-patch`} />
+      <PatchBox what={T.codePatch} text={detail.patch} boxId={`${idBase}-patch`} title={`${T.codePatch} · Task ${detail.slot}`} />
+      <PatchBox what={T.testPatch} text={detail.testPatch} boxId={`${idBase}-test-patch`} title={`${T.testPatch} · Task ${detail.slot}`} />
 
       <section>
         <h4 className="font-medium">{T.provingHeading(detail.failToPass.length)}</h4>
@@ -230,19 +328,24 @@ export function OpenedRow({ opened, raw, onRaw }: { opened: Opened; raw: boolean
   return <TaskDetailView detail={opened.detail} raw={raw} onRaw={onRaw} />;
 }
 
-/** The sortable header, as the Submissions table's. */
-function Header({ sort, onSort }: { sort: TaskSort; onSort: (key: TaskSortKey) => void }) {
+/** The header, as the Submissions table's: a sorting button per sortable column, and "?" help beside some. */
+export function Header({ sort, onSort }: { sort: TaskSort; onSort: (key: TaskSortKey) => void }) {
   return (
     <thead className="border-b border-border text-xs uppercase tracking-wide text-muted-foreground">
       <tr>
         {COLUMNS.map((column) => {
-          const active = sort?.key === column.key ? sort.direction : null;
+          const active = column.sort && sort?.key === column.sort ? sort.direction : null;
           return (
-            <th key={column.key} scope="col" title={column.title} aria-sort={active === "asc" ? "ascending" : active === "desc" ? "descending" : "none"} className="px-3 py-3 align-bottom font-medium">
-              <button type="button" onClick={() => onSort(column.key)} className="inline-flex items-center gap-1 uppercase tracking-wide hover:text-foreground">
-                {column.label}
-                <span aria-hidden="true">{active === "asc" ? "▲" : active === "desc" ? "▼" : "↕"}</span>
-              </button>
+            <th key={column.id} scope="col" title={column.title} aria-sort={column.sort ? (active === "asc" ? "ascending" : active === "desc" ? "descending" : "none") : undefined} className="px-3 py-3 align-bottom font-medium">
+              <span className="inline-flex items-center gap-1.5">
+                {column.sort ? (
+                  <button type="button" onClick={() => onSort(column.sort!)} className="inline-flex items-center gap-1 whitespace-nowrap uppercase tracking-wide hover:text-foreground">
+                    {column.label}
+                    <span aria-hidden="true">{active === "asc" ? "▲" : active === "desc" ? "▼" : "↕"}</span>
+                  </button>
+                ) : <span className="whitespace-nowrap">{column.label}</span>}
+                {column.help ? <HelpTip id={`help-${column.id}`} kind="button" label={T.helpLabel(column.label)} panel={column.help} /> : null}
+              </span>
               {column.note ? <span className="block text-[11px] font-normal normal-case tracking-normal">{column.note}</span> : null}
             </th>
           );
@@ -287,11 +390,14 @@ export function BenchmarkTaskTable({ slug }: { slug: string }) {
   return (
     <div className="space-y-4">
       <SummaryBox rows={rows} selected={filters.status} onPick={(key) => setFilters((current) => withStatus(current, key))} />
-      <h2 className="font-semibold">{T.tableHeading}</h2>
+      <div>
+        <h2 className="font-semibold">{T.tableHeading}</h2>
+        <p className="mt-1 text-sm text-muted-foreground">{T.tableIntro}</p>
+      </div>
       <TaskFilters rows={rows} filters={filters} onChange={setFilters} />
       <p className="text-sm text-muted-foreground" role="status">{T.showing(visible.length, rows.length)}</p>
       <div className="overflow-x-auto rounded-xl border border-border bg-card">
-        <table className="w-full min-w-[1100px] text-left text-sm">
+        <table className="w-full min-w-[1500px] text-left text-sm">
           <Header sort={sort} onSort={(key) => setSort((current) => nextTaskSort(current, key))} />
           <tbody className="divide-y divide-border">
             {rows.length === 0 ? <tr><td colSpan={COLUMNS.length} className="px-3 py-6 text-muted-foreground">{T.noTasks}</td></tr> : null}
