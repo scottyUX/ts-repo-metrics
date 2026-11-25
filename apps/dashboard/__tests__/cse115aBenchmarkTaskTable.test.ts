@@ -1,6 +1,9 @@
 // #444 and #445: the staff Benchmark page's summary of validation results and its table of every current task, with
 // the two staff routes behind them; #449: the Consented column and counts, Sprint wording, heading help, the two
-// benchmark columns, and the opened row's grade by box and Repo Metrics scores. The database and the sign-in are fakes;
+// benchmark columns, and the opened row's grade by box and Repo Metrics scores; #452: the box as a table of results
+// with who can fix it and the tasks behind each count, the last-run flag, three consent values, the new headings and
+// column order, and "Tests and criteria" in the opened row.
+// The database and the sign-in are fakes;
 // nothing reaches GitHub or Supabase. Names, emails, repos, PR numbers, task ids and reports are made up.
 import { readFileSync } from "node:fs";
 import path from "node:path";
@@ -8,19 +11,20 @@ import { createElement, isValidElement, type ReactElement, type ReactNode } from
 import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  changedByStaffLines, consentCounts, consentedCell, coverageCell, DEFAULT_FILTERS, FLAG_TEXT, flagText, goldCell, gradeBoxes, gradeBoxLines, gradeCell,
-  matchesFilters, nextTaskSort, REASON_FLAG_PREFIX, REASON_TEXT, repoCell, reportDateText, sortTaskRows, staffChangeLines, statusCell, statusHelpLines,
-  statusKey, statusLabel, statusMeaning, summarize, TASK_SORT_KEYS, TASK_TABLE_TEXT, taskCell, visibleRows, withStatus,
-  type Filters, type GradeBox, type StatusKey, type TaskDetail, type TaskGrade, type TaskTableRow,
+  ATTEMPT_FLAG_PREFIX, changedByStaffLines, consentCell, countSplit, coverageFileLine, coverageNotes, matchesPeople, taskListLine, taskListRows, type CoverageDetail, type StatusKey, consentCounts, coverageCell, DEFAULT_FILTERS, FLAG_TEXT, flagText, goldCell, gradeBoxes, gradeBoxLines, gradeCell,
+  matchesFilters, nextTaskSort, REASON_FLAG_PREFIX, REASON_RESULT, repoCell, reportDateText, RESULTS, sortTaskRows, staffChangeLines, statusCell, statusHelpLines,
+  statusKey, summarize, TASK_SORT_KEYS, TASK_TABLE_TEXT, taskCell, visibleRows, withStatus,
+  type Filters, type GradeBox, type TaskDetail, type TaskGrade, type TaskTableRow,
 } from "@/lib/cse115a/benchmark/taskTable";
 import { buildOverviewScoreStrip } from "@/lib/buildOverviewCards";
 import { CONSENT_VERSION } from "@/lib/cse115a/consent";
-import { REPORT_SCORE_IDS, reportScores, TASK_TABLE_CONSENT_COLUMNS, TASK_TABLE_TABLES } from "@/lib/cse115a/benchmark/loadTaskTable";
+import { coverageDetail, REPORT_SCORE_IDS, reportScores, TASK_TABLE_CONSENT_COLUMNS, TASK_TABLE_TABLES } from "@/lib/cse115a/benchmark/loadTaskTable";
 import type { RepoReport } from "@/lib/reportTypes";
-import { REASON_FLAG_PREFIX as WRITEBACK_REASON_PREFIX } from "@/lib/cse115a/benchmark/validation/writeback";
+import { ATTEMPT_FLAG_PREFIX as WRITEBACK_ATTEMPT_PREFIX, REASON_FLAG_PREFIX as WRITEBACK_REASON_PREFIX } from "@/lib/cse115a/benchmark/validation/writeback";
+import { ATTEMPT_REASONS } from "@/lib/cse115a/benchmark/validation/attempts";
 import { noCodeFromFlags } from "@/lib/cse115a/noCodePr";
 import { TASK_POINTS } from "@/lib/cse115a/rubric";
-import { COLUMNS, GradeSection, Header, OpenedRow, ScoresSection, StatusHelp, SummaryBox, TaskCells, TaskDetailView } from "@/components/cse115a/instructor/BenchmarkTaskTable";
+import { COLUMNS, GradeSection, Header, OpenedRow, ScoresSection, StatusHelp, SummaryBoxView, TaskCells, TaskDetailView, TaskFilters, TestsSection } from "@/components/cse115a/instructor/BenchmarkTaskTable";
 import { HelpTip, HelpTipView, nextTipOpen, tipPosition, type TipEvent } from "@/components/cse115a/instructor/HelpTip";
 import { GET as listGet } from "@/app/api/cse115a/instructor/courses/[slug]/benchmark/tasks/route";
 import { GET as detailGet } from "@/app/api/cse115a/instructor/courses/[slug]/benchmark/tasks/[id]/route";
@@ -204,7 +208,7 @@ async function detail(id: string): Promise<TaskDetail> {
 /** A row with every field, for the pure tests. */
 function row(patch: Partial<TaskTableRow> = {}): TaskTableRow {
   return {
-    id: "r", submissionId: "s", assignment: 1, slot: 1, team: "kettle-co/kettle-app", email: "ann.example@ucsc.edu", staff: false, consented: false, taskId: "US-1-T-1", title: "Kettle alarm",
+    id: "r", submissionId: "s", assignment: 1, slot: 1, team: "kettle-co/kettle-app", email: "ann.example@ucsc.edu", staff: false, consent: "not_yet", taskId: "US-1-T-1", title: "Kettle alarm",
     validationStatus: "candidate", flags: [], provingTests: 0, coverage: null, untestedFiles: 0, gold: null, grade: null, extraCodePrs: 0, hasReport: false, reportDate: null,
     ...patch,
   };
@@ -217,7 +221,7 @@ function allKeys(value: unknown, keys: string[] = []): string[] {
   return keys;
 }
 
-const ROW_KEYS = ["id", "submissionId", "assignment", "slot", "team", "email", "staff", "consented", "taskId", "title", "validationStatus", "flags", "provingTests", "coverage", "untestedFiles", "gold", "grade", "extraCodePrs", "hasReport", "reportDate"].sort();
+const ROW_KEYS = ["id", "submissionId", "assignment", "slot", "team", "email", "staff", "consent", "taskId", "title", "validationStatus", "flags", "provingTests", "coverage", "untestedFiles", "gold", "grade", "extraCodePrs", "hasReport", "reportDate"].sort();
 
 /** Walks a rendered element tree (function components called, hooks-free ones only; HelpTip is not) and returns every element. */
 function elements(node: ReactNode, out: ReactElement[] = []): ReactElement[] {
@@ -239,13 +243,14 @@ const grade = (total: number, released: boolean, awarded: Array<number | null> =
 describe("1. summary of validation results", () => {
   it("each rule gives its row, in first-match order", () => {
     expect(statusKey(row({ validationStatus: "validated", flags: ["no_test_patch", "task_files_dropped", "no_source_patch"] }))).toBe("validated");
-    expect(statusKey(row({ validationStatus: "rejected", flags: ["task_files_dropped", "no_source_patch", "no_test_patch", "validation_reason:no_test_patch"] }))).toBe("rejected:no_test_patch");
-    expect(statusKey(row({ validationStatus: "rejected", flags: [] }))).toBe("rejected:no reason recorded");
+    expect(statusKey(row({ validationStatus: "rejected", flags: ["task_files_dropped", "no_source_patch", "no_test_patch", "validation_reason:no_test_patch"] }))).toBe("no_tests");
+    // #452: a rejection with no reason this page knows is "Another result".
+    expect(statusKey(row({ validationStatus: "rejected", flags: [] }))).toBe("other");
     // The "no code" marker comes before "no tests" (a no-code PR also has no test patch).
     expect(statusKey(row({ flags: ["task_files_dropped", "no_source_patch", "no_test_patch"] }))).toBe("no_code");
     expect(statusKey(row({ flags: ["task_files_dropped", "no_source_patch", "no_test_patch", "diff_missing"] }))).toBe("no_tests");
     expect(statusKey(row({ flags: ["no_test_patch"] }))).toBe("no_tests");
-    expect(statusKey(row({ flags: ["pr_holds_two_tasks"] }))).toBe("no_result");
+    expect(statusKey(row({ flags: ["pr_holds_two_tasks"] }))).toBe("not_tried");
   });
 
   it("uses the same no-code rule as noCodePr.ts and the same reason prefix as write-back", () => {
@@ -268,15 +273,12 @@ describe("1. summary of validation results", () => {
     const { lines, total } = summarize(rows);
     expect(total).toBe(9);
     expect(lines.reduce((sum, line) => sum + line.count, 0)).toBe(total);
-    expect(lines.map((line) => [line.label, line.count, line.meaning])).toEqual([
-      ["Validated", 2, "Its tests fail before the student's change and pass after it."],
-      ["Not accepted: cosmic_rays", 1, "The validator gave the reason \"cosmic_rays\", which has no description here yet."],
-      ["Not accepted: no proving test", 1, "No test fails before the student's change and passes after it."],
-      ["Not accepted: breaks other tests", 1, "Tests that passed before the student's change fail after it."],
-      ["No code in the PR", 1, "The PR holds only the task file. Staff can choose the PR that holds the code."],
-      ["No tests in the PR", 1, "The PR changes code but no test file."],
-      ["No result yet", 2, "Not run by the validator yet, or the run could not finish."],
+    // #452: the box's fixed order and labels; an unknown reason goes to "Another result" and its cell shows its name.
+    expect(lines.map((line) => [line.label, line.count])).toEqual([
+      ["Validated", 2], ["No tests in the PR", 1], ["No test proves the change", 1], ["The change breaks other tests", 1],
+      ["No code in the submitted PR", 1], ["Not tried yet", 2], ["Another result", 1],
     ]);
+    expect(statusCell(rows[4]!).label).toBe("Not accepted: cosmic_rays");
   });
 
   it("leaves older attempts out: the route's rows are current attempts only", async () => {
@@ -287,12 +289,13 @@ describe("1. summary of validation results", () => {
     expect(TASK_TABLE_TEXT.summaryNote).toContain("Current attempts only");
   });
 
-  it("a click on a summary row sets the table's status filter and keeps the others", () => {
+  it("\"Show in the table\" sets the table's status filter and keeps the others", () => {
     const filters: Filters = { ...DEFAULT_FILTERS, team: "kettle-co/kettle-app", search: "ann" };
     expect(withStatus(filters, "no_code")).toEqual({ ...filters, status: "no_code" });
     const picked: string[] = [];
     const rows = [row({ validationStatus: "validated" }), row({ flags: ["no_test_patch"] })];
-    const buttons = elements(SummaryBox({ rows, selected: "all", onPick: (key) => picked.push(key) })).filter((element) => element.type === "button");
+    const buttons = elements(SummaryBoxView({ rows, people: "students", open: null, onToggle: () => {}, idBase: "b", onPick: (key) => picked.push(key) }))
+      .filter((element) => element.type === "button" && (element.props as { children?: unknown }).children === TASK_TABLE_TEXT.showInTable);
     expect(buttons).toHaveLength(2);
     (buttons[1]!.props as { onClick: () => void }).onClick();
     expect(picked).toEqual(["no_tests"]);
@@ -300,12 +303,11 @@ describe("1. summary of validation results", () => {
     expect(visibleRows(rows, next, null)).toEqual([rows[1]]);
   });
 
-  it("renders the box with counts, meanings and the total", () => {
-    const markup = renderToStaticMarkup(createElement(SummaryBox, { rows: [row({ validationStatus: "validated" }), row()], selected: "validated", onPick: () => {} }));
+  it("renders the box with counts, labels and the total", () => {
+    const markup = renderToStaticMarkup(createElement(SummaryBoxView, { rows: [row({ validationStatus: "validated" }), row()], people: "students", open: null, onToggle: () => {}, idBase: "b", onPick: () => {} }));
     expect(markup).toContain("Validation results");
-    expect(markup).toContain("Not run by the validator yet, or the run could not finish.");
-    expect(markup).toContain("Total: 2 tasks");
-    expect(markup).toContain("aria-pressed=\"true\"");
+    expect(markup).toContain("Not tried yet");
+    expect(markup).toContain("Total: 2 tasks (students only)");
   });
 
   it("the tiles stay and the panel says they count older attempts too", () => {
@@ -343,10 +345,10 @@ describe("2. table rows from the list route", () => {
     expect(Object.keys(body)).toEqual(["rows"]);
     for (const item of body.rows) expect(Object.keys(item).sort()).toEqual(ROW_KEYS);
     const keys = allKeys(body);
-    // #449: `consented` is the one consent field (a boolean); never the answer, its version or its date.
-    for (const key of keys) expect(key).not.toMatch(/consent_version|consentVersion|problem_statement|^patch$|test_patch|testPatch|exportable|download|rationale|note/i);
-    for (const item of body.rows) expect(typeof item.consented).toBe("boolean");
-    expect(keys.filter((key) => /consent/i.test(key)).every((key) => key === "consented")).toBe(true);
+    // #449, #452: `consent` is the one consent field (yes, no or not yet); never its wording version or a date.
+    for (const key of keys) expect(key).not.toMatch(/consent_version|consentVersion|consented|problem_statement|^patch$|test_patch|testPatch|exportable|download|rationale|note|updated_at|date_/i);
+    for (const item of body.rows) expect(["yes", "no", "not_yet"]).toContain(item.consent);
+    expect(keys.filter((key) => /consent/i.test(key)).every((key) => key === "consent")).toBe(true);
     for (const text of ["SECRET_DIFF", "EXTRA_DIFF", "beep()", "The kettle **beeps**", "BIG", "SECRET_RATIONALE", "SECRET_QUOTE", "SECRET_NOTE", "2026-09-01"]) expect(raw).not.toContain(text);
     // Reads consent once, three columns only, for this course; never selects the spec or the patches or the whole report.
     const consentCalls = state.calls.filter((call) => call.table === "cse_research_consent");
@@ -383,10 +385,11 @@ describe("2. each column's wording", () => {
   it("Status: validated with its proving tests, each candidate kind, rejected", () => {
     expect(statusCell(row({ validationStatus: "validated", provingTests: 3 }))).toEqual({ label: "Validated", detail: "3 proving tests" });
     expect(statusCell(row({ validationStatus: "validated", provingTests: 1 }))).toEqual({ label: "Validated", detail: "1 proving test" });
-    expect(statusCell(row({ flags: ["task_files_dropped", "no_source_patch", "no_test_patch"] })).label).toBe("No code in the PR");
+    expect(statusCell(row({ flags: ["task_files_dropped", "no_source_patch", "no_test_patch"] })).label).toBe("No code in the submitted PR");
     expect(statusCell(row({ flags: ["no_test_patch"] })).label).toBe("No tests in the PR");
-    expect(statusCell(row()).label).toBe("No result yet");
-    expect(statusCell(row({ validationStatus: "rejected", flags: ["validation_reason:env_unsupported"] }))).toEqual({ label: "Not accepted: repository not supported", detail: null });
+    expect(statusCell(row()).label).toBe("Not tried yet");
+    expect(statusCell(row({ validationStatus: "rejected", flags: ["validation_reason:env_unsupported"] }))).toEqual({ label: "Not accepted: repository type not supported", detail: null });
+    expect(statusCell(row({ flags: ["validation_attempt:env_error"] }))).toEqual({ label: "No result yet · last run: our run failed", detail: null });
   });
 
   it("Coverage: measured, partly measured, not measured, and untested files", () => {
@@ -427,7 +430,7 @@ describe("2. each column's wording", () => {
     expect(taskCell(row({ taskId: "US-1-T-2", title: null })).name).toBe("US-1-T-2");
   });
 
-  it("renders a row's cells: staff tag, team link, consented, not released tag, the two empty columns", async () => {
+  it("renders a row's cells: staff tag, team link, consent, not released tag, the two empty columns", async () => {
     const rows = await listRows();
     const table = (item: TaskTableRow) => renderToStaticMarkup(createElement("table", null, createElement("tbody", null, createElement("tr", null, createElement(TaskCells, { row: item })))));
     const ann = table(rows.find((item) => item.id === "src-1")!);
@@ -446,14 +449,16 @@ describe("2. each column's wording", () => {
     expect(ungraded).toContain("date unknown");
     expect(table(rows.find((item) => item.id === "src-5")!)).toContain(">Staff<");
     expect(table(rows.find((item) => item.id === "src-3")!)).toContain("Not graded yet");
-    // Cells in column order: the Consented cell is fourth, after Student; the two benchmark cells read "Not set".
+    // Cells in column order (#452): Consent is fourth, after Who; Score and Include read "Not set", around Gold check.
     const cells = (markup: string) => markup.split("<td").slice(1).map((cell) => cell.replace(/^[^>]*>/, "").replace(/<[^>]+>/g, "").replace(/<\/td>[\s\S]*/, ""));
     const annCells = cells(ann);
     expect(annCells).toHaveLength(COLUMNS.length);
     expect(annCells[3]).toBe("Yes");
-    expect(annCells[9]).toBe("Not set");
+    expect(annCells[8]).toBe("Not set");
+    expect(annCells[9]).toBe("Passed");
     expect(annCells[10]).toBe("Not set");
-    expect(cells(table(rows.find((item) => item.id === "src-3")!))[3]).toBe("No");
+    expect(annCells[12]).toBe("Code PR chosen by staff2 extra code PRs");
+    expect(cells(table(rows.find((item) => item.id === "src-3")!))[3]).toBe("Not yet");
     // The Team cell stays on one line.
     expect(ann).toMatch(/<td class="whitespace-nowrap px-3 py-3"><a href="https:\/\/github.com\/kettle-co\/kettle-app"/);
   });
@@ -463,6 +468,7 @@ describe("2. each column's wording", () => {
     expect(panel).not.toContain("Newest rows");
     expect(panel).not.toContain("no consent");
     expect(panel).not.toContain("row.consented");
+    expect(panel).not.toContain("row.consent");
     expect(panel).toContain(">Download JSONL</a>");
     expect(panel).toContain(">Validated only</a>");
     expect(panel).toContain(">Download Harbor tasks (.zip)</a>");
@@ -474,10 +480,10 @@ describe("2. each column's wording", () => {
 
 describe("2. filters, search, sorting and the Showing line", () => {
   const rows = [
-    row({ id: "a", assignment: 1, team: "kettle-co/kettle-app", email: "ann.example@ucsc.edu", consented: true, title: "Kettle alarm", validationStatus: "validated", grade: grade(9, true), coverage: { status: "measured", covered: 1, executable: 2 }, gold: "passed", hasReport: true, reportDate: "2026-11-12T00:00:00Z" }),
+    row({ id: "a", assignment: 1, team: "kettle-co/kettle-app", email: "ann.example@ucsc.edu", consent: "yes", title: "Kettle alarm", validationStatus: "validated", grade: grade(9, true), coverage: { status: "measured", covered: 1, executable: 2 }, gold: "passed", hasReport: true, reportDate: "2026-11-12T00:00:00Z" }),
     row({ id: "b", assignment: 2, team: "teapot-co/teapot", email: "bo.example@ucsc.edu", taskId: "US-2-T-1", title: "Teapot API", flags: ["work_pr_chosen_by_staff"], grade: grade(6, false), gold: "failed", hasReport: true, reportDate: null }),
     row({ id: "c", assignment: 2, team: "teapot-co/teapot", email: "ta-one@ucsc.edu", staff: true, title: "Staff trial", flags: ["no_test_patch"], coverage: { status: "measured", covered: 4, executable: 4 }, hasReport: true, reportDate: "2026-11-20T00:00:00Z" }),
-    row({ id: "d", assignment: 1, team: "kettle-co/kettle-app", email: "cy.example@ucsc.edu", consented: true, title: "Boil timer", flags: ["extra_code_prs"], extraCodePrs: 1, validationStatus: "rejected" }),
+    row({ id: "d", assignment: 1, team: "kettle-co/kettle-app", email: "cy.example@ucsc.edu", consent: "yes", title: "Boil timer", flags: ["extra_code_prs"], extraCodePrs: 1, validationStatus: "rejected" }),
   ];
   const ids = (filters: Partial<Filters>, sort: Parameters<typeof visibleRows>[2] = null) => visibleRows(rows, { ...DEFAULT_FILTERS, ...filters }, sort).map((item) => item.id);
 
@@ -505,9 +511,9 @@ describe("2. filters, search, sorting and the Showing line", () => {
   });
 
   it("the grade is not a filter: no filter reads it", () => {
-    expect(Object.keys(DEFAULT_FILTERS).sort()).toEqual(["assignment", "changed", "consented", "people", "search", "status", "team"]);
+    expect(Object.keys(DEFAULT_FILTERS).sort()).toEqual(["assignment", "changed", "consent", "people", "search", "status", "team"]);
     expect(matchesFilters(row({ grade: grade(0, false) }), DEFAULT_FILTERS)).toBe(true);
-    expect(statusKey(row({ grade: grade(10, true) }))).toBe("no_result");
+    expect(statusKey(row({ grade: grade(10, true) }))).toBe("not_tried");
   });
 
   it("every column sorts; no value goes last both ways; three clicks go back", () => {
@@ -519,14 +525,15 @@ describe("2. filters, search, sorting and the Showing line", () => {
     expect(ids({ people: "everyone" }, { key: "grade", direction: "asc" })).toEqual(["b", "a", "c", "d"]);
     expect(ids({ people: "everyone" }, { key: "coverage", direction: "desc" })).toEqual(["c", "a", "b", "d"]);
     expect(ids({ people: "everyone" }, { key: "repo", direction: "desc" })).toEqual(["c", "a", "b", "d"]);
-    expect(ids({ people: "everyone" }, { key: "student", direction: "asc" })).toEqual(["a", "b", "d", "c"]);
-    expect(ids({ people: "everyone" }, { key: "status", direction: "asc" })).toEqual(["a", "d", "c", "b"]);
+    expect(ids({ people: "everyone" }, { key: "who", direction: "asc" })).toEqual(["a", "b", "d", "c"]);
+    // #452: the box's order: Validated, No tests in the PR, Not tried yet, Another result (d is rejected with no reason).
+    expect(ids({ people: "everyone" }, { key: "status", direction: "asc" })).toEqual(["a", "c", "b", "d"]);
     expect(ids({ people: "everyone" }, { key: "gold", direction: "asc" })).toEqual(["a", "b", "c", "d"]);
     expect(ids({ people: "everyone" }, { key: "staffChanges", direction: "asc" })).toEqual(["d", "b", "a", "c"]);
     expect(ids({ people: "everyone" }, { key: "assignment", direction: "desc" })).toEqual(["b", "c", "a", "d"]);
-    expect(nextTaskSort(null, "student")).toEqual({ key: "student", direction: "asc" });
-    expect(nextTaskSort({ key: "student", direction: "asc" }, "student")).toEqual({ key: "student", direction: "desc" });
-    expect(nextTaskSort({ key: "student", direction: "desc" }, "student")).toBeNull();
+    expect(nextTaskSort(null, "who")).toEqual({ key: "who", direction: "asc" });
+    expect(nextTaskSort({ key: "who", direction: "asc" }, "who")).toEqual({ key: "who", direction: "desc" });
+    expect(nextTaskSort({ key: "who", direction: "desc" }, "who")).toBeNull();
     expect(nextTaskSort(null, "grade")).toEqual({ key: "grade", direction: "desc" });
   });
 
@@ -636,7 +643,7 @@ describe("3. opening a row", () => {
 
   const base: TaskDetail = {
     id: "x", submissionId: "sub-x", slot: 1, validationStatus: "candidate", flags: [], problemStatement: "Spec", patch: "p", testPatch: "t", failToPass: [], passToPass: 0,
-    validation: null, workPrChoice: null, extraCodePrs: [], hasReport: true, reportDate: "2026-11-12T00:00:00Z", grade: null, scores: null,
+    validation: null, workPrChoice: null, extraCodePrs: [], hasReport: true, reportDate: "2026-11-12T00:00:00Z", grade: null, scores: null, coverage: null,
   };
   const choice = { prNumber: 12, submittedPrNumber: 9, reason: "Code is in #12.", chosenBy: "ta-one@ucsc.edu", chosenAt: "2026-11-20T18:00:00Z" };
   const extras = [{ prNumber: 14, reason: "Timer part.", addedBy: "ta-one@ucsc.edu", addedAt: "2026-11-21T10:00:00Z" }];
@@ -682,86 +689,93 @@ describe("3. opening a row", () => {
 
 // ---- 4. Polish (#449) ----
 
-describe("4. Consented column and counts (#449)", () => {
+describe("4. Consent column and counts (#449, three values since #452)", () => {
   const consentFor = (answer: Record<string, unknown> | null) => {
     state.tables.cse_research_consent = answer ? [{ course_id: "course-1", user_id: "u-ann", ...answer }] : [];
   };
   const annRow = async () => (await listRows()).find((item) => item.id === "src-1")!;
 
-  it("Yes only for a yes to the current, approved wording; No for a no, no answer, or a yes to an older wording", async () => {
+  it("Yes for a yes to the current, approved wording; No for a no to it; Not yet for no answer or an older wording", async () => {
     consentFor({ consented: true, consent_version: CONSENT_VERSION });
-    expect((await annRow()).consented).toBe(true);
+    expect((await annRow()).consent).toBe("yes");
     consentFor({ consented: false, consent_version: CONSENT_VERSION });
-    expect((await annRow()).consented).toBe(false);
+    expect((await annRow()).consent).toBe("no");
     consentFor(null);
-    expect((await annRow()).consented).toBe(false);
+    expect((await annRow()).consent).toBe("not_yet");
     consentFor({ consented: true, consent_version: "2026-09-01" });
-    expect((await annRow()).consented).toBe(false);
+    expect((await annRow()).consent).toBe("not_yet");
+    consentFor({ consented: false, consent_version: "2026-09-01" });
+    expect((await annRow()).consent).toBe("not_yet");
     // Another course's yes does not count here.
     state.tables.cse_research_consent = [{ course_id: "course-2", user_id: "u-ann", consented: true, consent_version: CONSENT_VERSION }];
-    expect((await annRow()).consented).toBe(false);
+    expect((await annRow()).consent).toBe("not_yet");
   });
 
-  it("from the seeded route: Ann (current yes) Yes, Bo (older wording) No, the TA (no answer) No", async () => {
+  it("from the seeded route: Ann (current yes) Yes, Bo (older wording) Not yet, the TA (no answer) Not yet", async () => {
     const rows = await listRows();
-    const by = (id: string) => rows.find((item) => item.id === id)!.consented;
-    expect([by("src-1"), by("src-2"), by("src-3"), by("src-4"), by("src-5")]).toEqual([true, true, false, false, false]);
-    expect([consentedCell(true), consentedCell(false)]).toEqual(["Yes", "No"]);
+    const by = (id: string) => rows.find((item) => item.id === id)!.consent;
+    expect([by("src-1"), by("src-2"), by("src-3"), by("src-4"), by("src-5")]).toEqual(["yes", "yes", "not_yet", "not_yet", "not_yet"]);
+    expect([consentCell("yes"), consentCell("no"), consentCell("not_yet")]).toEqual(["Yes", "No", "Not yet"]);
   });
 
-  it("the Consented filter: Any, Yes, No", () => {
-    const rows = [row({ id: "y", consented: true }), row({ id: "n", consented: false })];
-    const ids = (consented: Filters["consented"]) => visibleRows(rows, { ...DEFAULT_FILTERS, consented }, null).map((item) => item.id);
-    expect(ids("any")).toEqual(["y", "n"]);
+  it("the Consent filter: Any, Yes, No, Not yet", () => {
+    const rows = [row({ id: "y", consent: "yes" }), row({ id: "n", consent: "no" }), row({ id: "w", consent: "not_yet" })];
+    const ids = (consent: Filters["consent"]) => visibleRows(rows, { ...DEFAULT_FILTERS, consent }, null).map((item) => item.id);
+    expect(ids("any")).toEqual(["y", "n", "w"]);
     expect(ids("yes")).toEqual(["y"]);
     expect(ids("no")).toEqual(["n"]);
-    expect([TASK_TABLE_TEXT.consentedLabel, TASK_TABLE_TEXT.consentedAny, TASK_TABLE_TEXT.consentedYes, TASK_TABLE_TEXT.consentedNo]).toEqual(["Consented", "Any", "Yes", "No"]);
+    expect(ids("not_yet")).toEqual(["w"]);
+    expect([TASK_TABLE_TEXT.consentLabel, TASK_TABLE_TEXT.consentAny, TASK_TABLE_TEXT.consentYes, TASK_TABLE_TEXT.consentNo, TASK_TABLE_TEXT.consentNotYet]).toEqual(["Consent", "Any", "Yes", "No", "Not yet"]);
     const component = readFileSync(path.resolve(__dirname, "../components/cse115a/instructor/BenchmarkTaskTable.tsx"), "utf8");
-    expect(component).toContain("<select value={filters.consented} onChange={(event) => set({ consented: event.target.value as Consented })}");
+    expect(component).toContain("<select value={filters.consent} onChange={(event) => set({ consent: event.target.value as ConsentFilter })}");
+    expect(component).toContain("<option value=\"not_yet\">{T.consentNotYet}</option>");
   });
 
-  it("the Consented column sorts: Yes first ascending, No first descending, ties keep the server's order", () => {
-    const rows = [row({ id: "n1" }), row({ id: "y1", consented: true }), row({ id: "n2" }), row({ id: "y2", consented: true })];
-    expect(TASK_SORT_KEYS).toContain("consented");
-    expect(nextTaskSort(null, "consented")).toEqual({ key: "consented", direction: "asc" });
-    expect(sortTaskRows(rows, { key: "consented", direction: "asc" }).map((item) => item.id)).toEqual(["y1", "y2", "n1", "n2"]);
-    expect(sortTaskRows(rows, { key: "consented", direction: "desc" }).map((item) => item.id)).toEqual(["n1", "n2", "y1", "y2"]);
+  it("the Consent column sorts: Yes, No, Not yet ascending, reversed descending, ties keep the server's order", () => {
+    const rows = [row({ id: "w1" }), row({ id: "y1", consent: "yes" }), row({ id: "n1", consent: "no" }), row({ id: "y2", consent: "yes" })];
+    expect(TASK_SORT_KEYS).toContain("consent");
+    expect(nextTaskSort(null, "consent")).toEqual({ key: "consent", direction: "asc" });
+    expect(sortTaskRows(rows, { key: "consent", direction: "asc" }).map((item) => item.id)).toEqual(["y1", "y2", "n1", "w1"]);
+    expect(sortTaskRows(rows, { key: "consent", direction: "desc" }).map((item) => item.id)).toEqual(["w1", "n1", "y1", "y2"]);
   });
 
-  it("the column follows Student, its heading sorts", () => {
+  it("the headings and their order (#452); Consent follows Who and sorts", () => {
     expect(COLUMNS.map((column) => column.label)).toEqual([
-      "Sprint", "Team", "Student", "Consented", "Task", "Status", "Coverage (experimental)", "Gold check", "Final grade",
-      "Benchmark grade", "Benchmark include", "Staff changes", "Repo",
+      "Sprint", "Team", "Who", "Consent", "Task", "Status", "Coverage (experimental)", "Final grade", "Score", "Gold check", "Include", "Repo", "Staff changes",
     ]);
-    expect(COLUMNS.find((column) => column.id === "consented")!.sort).toBe("consented");
+    expect(COLUMNS.find((column) => column.id === "consent")!.sort).toBe("consent");
   });
 
-  it("two lines at the foot of the summary box, apart from the total, which they do not change", () => {
+  it("two lines at the foot of the summary box count Yes only, apart from the total, which they do not change", () => {
     const rows = [
-      row({ validationStatus: "validated", consented: true }), row({ validationStatus: "validated", consented: true }),
-      row({ validationStatus: "validated", consented: false }), row({ consented: true }), row({ validationStatus: "rejected", consented: true, flags: ["validation_reason:regressions"] }),
+      row({ validationStatus: "validated", consent: "yes" }), row({ validationStatus: "validated", consent: "yes" }),
+      row({ validationStatus: "validated", consent: "no" }), row({ validationStatus: "validated", consent: "not_yet" }),
+      row({ consent: "yes" }), row({ validationStatus: "rejected", consent: "yes", flags: ["validation_reason:regressions"] }),
     ];
-    expect(consentCounts(rows)).toEqual({ consented: 2, notConsented: 1 });
+    expect(consentCounts(rows)).toEqual({ consented: 2, notConsented: 2 });
     const { lines, total } = summarize(rows);
-    expect(total).toBe(5);
-    expect(lines.reduce((sum, line) => sum + line.count, 0)).toBe(5);
-    // Without consent on any row, the box's lines and total are the same.
-    expect(summarize(rows.map((item) => ({ ...item, consented: false })))).toEqual({ lines, total });
-    const markup = renderToStaticMarkup(createElement(SummaryBox, { rows, selected: "all", onPick: () => {} }));
-    expect(markup).toContain("Total: 5 tasks");
+    expect(total).toBe(6);
+    expect(lines.reduce((sum, line) => sum + line.count, 0)).toBe(6);
+    // Without consent on any row, the box's lines and total are the same counts.
+    const without = summarize(rows.map((item) => ({ ...item, consent: "not_yet" as const })));
+    expect(without.lines.map((line) => [line.key, line.count])).toEqual(lines.map((line) => [line.key, line.count]));
+    const markup = renderToStaticMarkup(createElement(SummaryBoxView, { rows, people: "students", open: null, onToggle: () => {}, idBase: "b", onPick: () => {} }));
+    expect(markup).toContain("Total: 6 tasks (students only)");
     expect(markup).toContain("<p>Validated and consented: 2</p>");
-    expect(markup).toContain("<p>Validated, not consented: 1</p>");
+    expect(markup).toContain("<p>Validated, not consented: 2</p>");
     expect(markup).toContain("A download holds a validated task only when its student consented.");
-    expect(markup.indexOf("Total: 5 tasks")).toBeLessThan(markup.indexOf("Validated and consented"));
-    // The two lines are not buttons: clicking the box's lines is unchanged.
-    const buttons = elements(SummaryBox({ rows, selected: "all", onPick: () => {} })).filter((element) => element.type === "button");
-    expect(buttons).toHaveLength(lines.length);
+    expect(markup.indexOf("Total: 6 tasks")).toBeLessThan(markup.indexOf("Validated and consented"));
+    // The two lines are not buttons: the box's only buttons are each row's Show tasks and Show in the table.
+    const buttons = elements(SummaryBoxView({ rows, people: "students", open: null, onToggle: () => {}, idBase: "b", onPick: () => {} })).filter((element) => element.type === "button");
+    expect(buttons).toHaveLength(2 * lines.filter((line) => line.count > 0).length);
   });
 
   it("the download tests' rule is the same one: countsAsConsent, imported, not copied", () => {
     const loader = readFileSync(path.resolve(__dirname, "../lib/cse115a/benchmark/loadTaskTable.ts"), "utf8");
-    expect(loader).toContain("import { countsAsConsent } from \"@/lib/cse115a/consent\";");
-    expect(loader).not.toContain("CONSENT_VERSION");
+    expect(loader).toContain("import { CONSENT_VERSION, countsAsConsent } from \"@/lib/cse115a/consent\";");
+    expect(loader).toContain("if (countsAsConsent(answer)) return \"yes\";");
+    // CONSENT_VERSION is read only to tell a no to the current wording from a no to an older one.
+    expect(loader.match(/CONSENT_VERSION/g)).toHaveLength(2);
   });
 });
 
@@ -784,13 +798,16 @@ describe("4. wording: Sprint, Coverage (experimental), the line under Tasks (#44
 describe("4. help on the headings (#449)", () => {
   const header = () => renderToStaticMarkup(createElement("table", null, createElement(Header, { sort: null, onSort: () => {} })));
 
-  it("Status, Coverage, Gold check, Benchmark grade and Benchmark include have a ? button pointing at their panel", () => {
+  it("Status, Coverage, Score, Gold check, Include and Repo have a ? button pointing at their panel", () => {
     const markup = header();
-    for (const [id, label] of [["status", "Status"], ["coverage", "Coverage (experimental)"], ["gold", "Gold check"], ["benchmarkGrade", "Benchmark grade"], ["benchmarkInclude", "Benchmark include"]]) {
+    for (const [id, label] of [["status", "Status"], ["coverage", "Coverage (experimental)"], ["score", "Score"], ["gold", "Gold check"], ["include", "Include"], ["repo", "Repo"]]) {
       expect(markup).toContain(`<button type="button" aria-label="What ${label} means" aria-describedby="help-${id}"`);
       expect(markup).toMatch(new RegExp(`<span id="help-${id}" role="tooltip" hidden=""`));
     }
-    expect(markup.match(/role="tooltip"/g)).toHaveLength(5);
+    expect(markup.match(/role="tooltip"/g)).toHaveLength(6);
+    // #452: the Repo heading has no tagline and no title attribute; its text is in the help.
+    expect(markup).not.toContain("Repo Metrics report stored at submit time");
+    expect(markup).not.toContain("title=");
     // Not a title attribute alone: the help is in the page, named by aria-describedby.
     expect(markup).not.toMatch(/title="[^"]*proving tests ran/);
   });
@@ -799,24 +816,29 @@ describe("4. help on the headings (#449)", () => {
     const markup = header();
     expect(TASK_TABLE_TEXT.coverageHelp).toBe("Of the code lines this task changes, the share the proving tests ran. Measured by a coverage run in the validator. Experimental: nobody has checked these numbers by hand yet. \"Not measured\" means the coverage run has not been done for this task.");
     expect(TASK_TABLE_TEXT.goldHelp).toBe("Harbor is the format coding agents are run in. The gold check builds this task as a Harbor task and applies the student's own change. Passed means the task's tests pass there, so the task can be solved as packaged. Not run means it has not been tried yet. The Harbor download holds only tasks that passed.");
-    expect(TASK_TABLE_TEXT.benchmarkGradeHelp).toBe("How good the task is as a benchmark item. It is separate from the student's grade and never changes it. Not scored yet.");
-    expect(TASK_TABLE_TEXT.benchmarkIncludeHelp).toBe("Staff's decision to put the task in the benchmark or leave it out, with a reason. Not decided yet.");
-    for (const text of [TASK_TABLE_TEXT.coverageHelp, TASK_TABLE_TEXT.goldHelp, TASK_TABLE_TEXT.benchmarkGradeHelp, TASK_TABLE_TEXT.benchmarkIncludeHelp]) {
+    expect(TASK_TABLE_TEXT.scoreHelp).toBe("How good the task is as a benchmark item. It is separate from the student's grade and never changes it. Not scored yet.");
+    expect(TASK_TABLE_TEXT.includeHelp).toBe("Staff's decision to put the task in the benchmark or leave it out, with a reason. Not decided yet.");
+    expect(TASK_TABLE_TEXT.repoHelp).toBe("The Repo Metrics report stored with the task when it was submitted. It is not made again when staff change the task's PRs. Open a row for the link.");
+    for (const text of [TASK_TABLE_TEXT.coverageHelp, TASK_TABLE_TEXT.goldHelp, TASK_TABLE_TEXT.scoreHelp, TASK_TABLE_TEXT.includeHelp, TASK_TABLE_TEXT.repoHelp]) {
       expect(markup).toContain(text.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/'/g, "&#x27;"));
     }
   });
 
-  it("the Status help uses the summary box's own sentences, one line per result", () => {
+  it("the Status help uses the summary box's own labels and sentences, one line per result", () => {
     const lines = statusHelpLines();
-    const keys: StatusKey[] = ["validated", ...Object.keys(REASON_TEXT).map((reason) => `rejected:${reason}` as StatusKey), "no_code", "no_tests", "no_result"];
-    expect(lines).toEqual(keys.map((key) => ({ label: statusLabel(key), meaning: statusMeaning(key) })));
-    expect(lines).toHaveLength(Object.keys(REASON_TEXT).length + 4);
+    expect(lines.slice(0, RESULTS.length)).toEqual(RESULTS.map((result) => ({ label: result.label, meaning: result.meaning })));
+    expect(lines.slice(RESULTS.length)).toEqual([
+      { label: "Not accepted: …", meaning: "Staff wrote this result back as the validator's decision." },
+      { label: "No result yet · last run: …", meaning: "The validator's last run of the task ended this way. The task is still waiting for a result." },
+    ]);
+    // Every reason the validator writes has its row.
+    for (const reason of ["no_fail_to_pass", "regressions", "regression_skip", "env_unsupported", "env_error", "no_source_patch", "no_test_patch", "test_file_never_loaded"]) expect(REASON_RESULT[reason]).toBeDefined();
     // The box's lines for the same results carry the very same words.
     const box = summarize([row({ validationStatus: "validated" }), row({ flags: ["no_test_patch"] }), row({ validationStatus: "rejected", flags: ["validation_reason:env_error"] })]).lines;
     for (const line of box) expect(lines).toContainEqual({ label: line.label, meaning: line.meaning });
     const markup = renderToStaticMarkup(createElement(StatusHelp));
     expect(markup).toContain("<span class=\"font-semibold\">Validated</span>: Its tests fail before the student&#x27;s change and pass after it.");
-    expect(markup).toContain("Not run by the validator yet, or the run could not finish.");
+    expect(markup).toContain("<span class=\"font-semibold\">Our run failed</span>: Our test run failed; this says nothing about the student&#x27;s work.");
     const source = readFileSync(path.resolve(__dirname, "../lib/cse115a/benchmark/taskTable.ts"), "utf8");
     // One source: the sentences appear once in the code.
     expect(source.split("Its tests fail before the student's change and pass after it.").length - 1).toBe(1);
@@ -867,29 +889,32 @@ describe("4. help on the headings (#449)", () => {
     expect(sortButtons).toHaveLength(COLUMNS.filter((column) => column.sort).length);
     for (const button of sortButtons) (button.props as { onClick: () => void }).onClick();
     expect(sorted).toEqual(COLUMNS.filter((column) => column.sort).map((column) => column.sort));
-    expect(tree.filter((element) => element.type === HelpTip)).toHaveLength(5);
+    expect(tree.filter((element) => element.type === HelpTip)).toHaveLength(6);
     const markup = renderToStaticMarkup(createElement("table", null, createElement(Header, { sort: { key: "status", direction: "asc" }, onSort: () => {} })));
     expect(markup).toContain("aria-sort=\"ascending\"");
   });
 });
 
-describe("4. the two empty benchmark columns (#449)", () => {
-  it("sit after Final grade and before Staff changes, read Not set in every row, do not sort or filter", async () => {
+describe("4. the two empty benchmark columns (#449; Score and Include since #452)", () => {
+  it("Score sits after Final grade, Include after Gold check; both read Not set in every row, do not sort or filter", async () => {
     const ids = COLUMNS.map((column) => column.id);
-    expect(ids.indexOf("benchmarkGrade")).toBe(ids.indexOf("grade") + 1);
-    expect(ids.indexOf("benchmarkInclude")).toBe(ids.indexOf("grade") + 2);
-    expect(ids.indexOf("staffChanges")).toBe(ids.indexOf("grade") + 3);
-    for (const id of ["benchmarkGrade", "benchmarkInclude"]) expect(COLUMNS.find((column) => column.id === id)!.sort).toBeUndefined();
-    expect(TASK_SORT_KEYS).not.toContain("benchmarkGrade");
-    expect(Object.keys(DEFAULT_FILTERS)).not.toContain("benchmarkGrade");
+    expect(ids.indexOf("score")).toBe(ids.indexOf("grade") + 1);
+    expect(ids.indexOf("gold")).toBe(ids.indexOf("grade") + 2);
+    expect(ids.indexOf("include")).toBe(ids.indexOf("grade") + 3);
+    for (const id of ["score", "include"]) expect(COLUMNS.find((column) => column.id === id)!.sort).toBeUndefined();
+    expect(TASK_SORT_KEYS).not.toContain("score");
+    expect(TASK_SORT_KEYS).not.toContain("include");
+    expect(Object.keys(DEFAULT_FILTERS)).not.toContain("score");
     for (const item of await listRows()) {
       const markup = renderToStaticMarkup(createElement("table", null, createElement("tbody", null, createElement("tr", null, createElement(TaskCells, { row: item })))));
       expect(markup.match(/>Not set<\/td>/g)).toHaveLength(2);
-      expect(Object.keys(item).some((key) => /benchmark/i.test(key))).toBe(false);
+      expect(Object.keys(item).some((key) => /benchmark|score|include/i.test(key))).toBe(false);
     }
     const header = renderToStaticMarkup(createElement("table", null, createElement(Header, { sort: null, onSort: () => {} })));
-    expect(header).toContain("<span class=\"whitespace-nowrap\">Benchmark grade</span>");
-    expect(header).not.toMatch(/aria-sort="none"[^>]*><span class="inline-flex items-center gap-1.5"><span class="whitespace-nowrap">Benchmark/);
+    expect(header).toContain("<span class=\"whitespace-nowrap\">Score</span>");
+    expect(header).toContain("<span class=\"whitespace-nowrap\">Include</span>");
+    expect(header).not.toContain("Benchmark grade");
+    expect(header).not.toContain("Benchmark include");
     const component = readFileSync(path.resolve(__dirname, "../components/cse115a/instructor/BenchmarkTaskTable.tsx"), "utf8");
     expect(component).toContain("// Placeholders (#449): no data, no route field and no migration yet");
   });
@@ -987,5 +1012,246 @@ describe("4. the opened row's grade and scores (#449)", () => {
     for (const item of rows) expect(Object.keys(item)).not.toContain("scores");
     const component = readFileSync(path.resolve(__dirname, "../components/cse115a/instructor/BenchmarkTaskTable.tsx"), "utf8");
     expect(component.match(/fetchJson</g)).toHaveLength(2);
+  });
+});
+
+// ---- #452: the results box ----
+
+describe("5. the results box (#452)", () => {
+  const view = (rows: TaskTableRow[], extra: Partial<Parameters<typeof SummaryBoxView>[0]> = {}) =>
+    createElement(SummaryBoxView, { rows, people: "students", open: null, onToggle: () => {}, idBase: "box", onPick: () => {}, ...extra });
+  const candidate = (flags: string[], patch: Partial<TaskTableRow> = {}) => row({ flags, ...patch });
+  const rejected = (reason: string, patch: Partial<TaskTableRow> = {}) => row({ validationStatus: "rejected", flags: [`validation_reason:${reason}`], ...patch });
+  const attempt = (reason: string, patch: Partial<TaskTableRow> = {}) => candidate([`validation_attempt:${reason}`], patch);
+
+  it("each row's rule, by a decision, by the last run, and by the capture's flags", () => {
+    const cases: Array<[TaskTableRow, StatusKey]> = [
+      [row({ validationStatus: "validated", flags: ["validation_attempt:env_error"] }), "validated"],
+      [rejected("no_test_patch"), "no_tests"], [attempt("no_test_patch"), "no_tests"], [candidate(["no_test_patch"]), "no_tests"],
+      [rejected("no_fail_to_pass"), "no_fail_to_pass"], [attempt("no_fail_to_pass"), "no_fail_to_pass"],
+      [rejected("regressions"), "regressions"], [attempt("regressions"), "regressions"],
+      [rejected("regression_skip"), "regression_skip"], [attempt("regression_skip"), "regression_skip"],
+      [rejected("no_source_patch"), "no_code"], [attempt("no_source_patch"), "no_code"], [candidate(["task_files_dropped", "no_source_patch", "no_test_patch"]), "no_code"],
+      [attempt("test_file_never_loaded"), "never_loaded"],
+      [rejected("env_unsupported"), "env_unsupported"], [attempt("env_unsupported"), "env_unsupported"],
+      [attempt("env_error"), "env_error"],
+      [candidate([]), "not_tried"], [candidate(["pr_holds_two_tasks", "untested_files"]), "not_tried"],
+      [rejected("cosmic_rays"), "other"], [attempt("cosmic_rays"), "other"],
+    ];
+    for (const [item, key] of cases) expect([item.flags, statusKey(item)]).toEqual([item.flags, key]);
+    // A decision or a last run is newer than the capture's flags: it wins.
+    expect(statusKey(candidate(["no_test_patch", "validation_attempt:env_error"]))).toBe("env_error");
+    expect(statusKey(row({ validationStatus: "rejected", flags: ["no_test_patch", "validation_reason:regressions", "validation_attempt:env_error"] }))).toBe("regressions");
+    // Every reason write-back can note has its row.
+    for (const reason of ATTEMPT_REASONS) expect(statusKey(attempt(reason))).not.toBe("other");
+  });
+
+  it("the order, the labels and who can fix it", () => {
+    expect(RESULTS.map((result) => [result.label, result.who])).toEqual([
+      ["Validated", ""],
+      ["No tests in the PR", "The student"],
+      ["No test proves the change", "The student"],
+      ["The change breaks other tests", "The student"],
+      ["The change turns tests off", "The student"],
+      ["No code in the submitted PR", "Staff, by choosing the PR that holds the code"],
+      ["A test file never loaded", "The validator"],
+      ["Repository type not supported", "The validator"],
+      ["Our run failed", "The validator"],
+      ["Not tried yet", ""],
+      ["Another result", ""],
+    ]);
+    const markup = renderToStaticMarkup(view([attempt("env_error"), row({ validationStatus: "validated" }), rejected("regressions")]));
+    const order = ["Validated", "The change breaks other tests", "Our run failed", "Not tried yet"].map((label) => markup.indexOf(`<th scope="row" class="px-3 py-3 font-medium">${label}</th>`));
+    expect(order.every((at) => at >= 0)).toBe(true);
+    expect([...order].sort((a, b) => a - b)).toEqual(order);
+    for (const heading of ["Result", "Tasks", "Who can fix it"]) expect(markup).toContain(`>${heading}</th>`);
+    expect(markup).toContain("<span class=\"sr-only\">List of tasks</span>");
+    expect(markup).toContain("<td class=\"px-3 py-3\">The validator</td>");
+  });
+
+  it("exactly one row per task, the rows add up to the total, and a 0-count row is hidden but Validated and Not tried yet", () => {
+    const rows = [rejected("no_test_patch"), attempt("no_test_patch"), candidate(["no_test_patch"]), attempt("env_error"), attempt("env_error"), attempt("test_file_never_loaded"), rejected("cosmic_rays")];
+    const { lines, total } = summarize(rows);
+    expect(total).toBe(7);
+    expect(lines.reduce((sum, line) => sum + line.count, 0)).toBe(total);
+    expect(lines.flatMap((line) => line.tasks)).toHaveLength(total);
+    expect(new Set(lines.flatMap((line) => line.tasks)).size).toBe(total);
+    expect(lines.map((line) => [line.key, line.count])).toEqual([["validated", 0], ["no_tests", 3], ["never_loaded", 1], ["env_error", 2], ["not_tried", 0], ["other", 1]]);
+    const markup = renderToStaticMarkup(view(rows));
+    expect(markup).not.toContain("The change breaks other tests");
+    expect(markup).toContain(">Validated</th>");
+    expect(markup).toContain(">Not tried yet</th>");
+    // A 0-count row has no Show tasks button and no list.
+    expect(markup.match(/>Show tasks</g)).toHaveLength(4);
+    expect(summarize([]).lines.map((line) => line.key)).toEqual(["validated", "not_tried"]);
+  });
+
+  it("\"3 decided, 6 from the last run\" under a count only when both kinds are present", () => {
+    const rows = [...Array.from({ length: 3 }, () => rejected("regressions")), ...Array.from({ length: 6 }, () => attempt("regressions")), rejected("no_test_patch"), candidate(["no_test_patch"])];
+    const { lines } = summarize(rows);
+    const by = (key: StatusKey) => lines.find((line) => line.key === key)!;
+    expect(countSplit(by("regressions"))).toBe("3 decided, 6 from the last run");
+    expect(countSplit(by("no_tests"))).toBeNull();
+    expect(countSplit(by("validated"))).toBeNull();
+    const markup = renderToStaticMarkup(view(rows));
+    expect(markup).toContain("<span class=\"text-2xl font-semibold tabular-nums\">9</span><span class=\"block text-xs text-muted-foreground\">3 decided, 6 from the last run</span>");
+  });
+
+  it("follows the People filter: the counts and the total line", async () => {
+    const rows = await listRows();
+    const forPeople = (people: Filters["people"]) => rows.filter((item) => matchesPeople(item, people));
+    const total = (people: Filters["people"]) => renderToStaticMarkup(view(forPeople(people), { people })).match(/Total: [^<]*/)![0];
+    expect(total("students")).toBe("Total: 4 tasks (students only)");
+    expect(total("staff")).toBe("Total: 1 task (staff only)");
+    expect(total("everyone")).toBe("Total: 5 tasks (everyone)");
+    // The TA's test task is "Not tried yet": counted only when staff are.
+    expect(summarize(forPeople("students")).lines.find((line) => line.key === "not_tried")!.count).toBe(0);
+    expect(summarize(forPeople("everyone")).lines.find((line) => line.key === "not_tried")!.count).toBe(1);
+    const component = readFileSync(path.resolve(__dirname, "../components/cse115a/instructor/BenchmarkTaskTable.tsx"), "utf8");
+    expect(component).toContain("<SummaryBox rows={people} people={filters.people} onPick={(key) => setFilters((current) => withStatus(current, key))} />");
+    expect(component).toContain("const people = useMemo(() => (rows ?? []).filter((row) => matchesPeople(row, filters.people)), [rows, filters.people]);");
+  });
+
+  it("Show tasks opens a list under the row like the Grader tab's: aria-expanded, aria-controls, a name, links, (decided), a fixed height", () => {
+    const rows = [
+      attempt("env_error", { id: "t1", submissionId: "sub-9", assignment: 3, slot: 2, team: "pond-co/duck-app", email: "dee.example@ucsc.edu" }),
+      rejected("env_unsupported", { id: "t2", submissionId: "sub 7", assignment: 1, slot: 1, team: null, email: "" }),
+      attempt("env_unsupported", { id: "t3", submissionId: "sub-8", assignment: 1, slot: 3, team: "pond-co/duck-app", email: "eli.example@ucsc.edu" }),
+    ];
+    const closed = renderToStaticMarkup(view(rows));
+    expect(closed).toContain("<button type=\"button\" aria-expanded=\"false\" aria-controls=\"box-env_error\" aria-label=\"Show the 1 task: Our run failed\"");
+    expect(closed).toContain("<tr id=\"box-env_error\" hidden=\"\"");
+    const open = renderToStaticMarkup(view(rows, { open: "env_unsupported" }));
+    expect(open).toContain("<button type=\"button\" aria-expanded=\"true\" aria-controls=\"box-env_unsupported\" aria-label=\"Hide the tasks: Repository type not supported\"");
+    expect(open).toContain(">Hide tasks</button>");
+    expect(open).toMatch(/<tr id="box-env_unsupported" class="bg-muted\/20">/);
+    expect(open).toContain("Tasks with this result: Repository type not supported");
+    expect(open).toContain("<ul class=\"mt-1 max-h-64 space-y-0.5 overflow-y-auto text-sm\">");
+    // Lines by sprint and task; a rejected one says "(decided)"; each links to the staff review page.
+    expect(open).toContain("<a class=\"text-primary underline\" href=\"/cse115a/instructor/submissions/sub%207\">Sprint 1 · Task 1 · — · — (decided)</a>");
+    expect(open).toContain("<a class=\"text-primary underline\" href=\"/cse115a/instructor/submissions/sub-8\">Sprint 1 · Task 3 · duck-app · eli.example@ucsc.edu</a>");
+    expect(open.indexOf("Sprint 1 · Task 1")).toBeLessThan(open.indexOf("Sprint 1 · Task 3"));
+    expect(taskListLine(rows[0]!)).toBe("Sprint 3 · Task 2 · duck-app · dee.example@ucsc.edu");
+    expect(taskListRows(rows).map((item) => item.id)).toEqual(["t2", "t3", "t1"]);
+    // The toggle reports which row; the box keeps one list open at a time.
+    const toggled: string[] = [];
+    const show = elements(SummaryBoxView({ rows, people: "students", open: null, onToggle: (key) => toggled.push(key), idBase: "box", onPick: () => {} }))
+      .filter((element) => element.type === "button" && (element.props as { children?: unknown }).children === TASK_TABLE_TEXT.showTasks);
+    (show[0]!.props as { onClick: () => void }).onClick();
+    expect(toggled).toEqual(["env_unsupported"]);
+    const component = readFileSync(path.resolve(__dirname, "../components/cse115a/instructor/BenchmarkTaskTable.tsx"), "utf8");
+    expect(component).toContain("onToggle={(key) => setOpen((current) => current === key ? null : key)}");
+  });
+
+  it("\"Show in the table\" in an opened list sets the Status filter to that result", () => {
+    const rows = [attempt("env_error"), rejected("env_error"), row({ validationStatus: "validated" })];
+    const picked: StatusKey[] = [];
+    const markup = renderToStaticMarkup(view(rows, { open: "env_error" }));
+    expect(markup).toContain("aria-label=\"Show in the table the tasks with this result: Our run failed\"");
+    const buttons = elements(SummaryBoxView({ rows, people: "students", open: "env_error", onToggle: () => {}, idBase: "box", onPick: (key) => picked.push(key) }))
+      .filter((element) => element.type === "button" && (element.props as { children?: unknown }).children === TASK_TABLE_TEXT.showInTable);
+    (buttons[1]!.props as { onClick: () => void }).onClick();
+    expect(picked).toEqual(["env_error"]);
+    expect(visibleRows(rows, withStatus(DEFAULT_FILTERS, "env_error"), null)).toEqual([rows[0], rows[1]]);
+  });
+
+  it("the Status cell, filter and help use the box's labels; a last run reads No result yet · last run, a decision Not accepted", () => {
+    expect(statusCell(attempt("env_error")).label).toBe("No result yet · last run: our run failed");
+    expect(statusCell(attempt("test_file_never_loaded")).label).toBe("No result yet · last run: a test file never loaded");
+    expect(statusCell(attempt("cosmic_rays")).label).toBe("No result yet · last run: cosmic_rays");
+    expect(statusCell(rejected("no_fail_to_pass")).label).toBe("Not accepted: no test proves the change");
+    expect(statusCell(rejected("no_source_patch")).label).toBe("Not accepted: no code in the submitted PR");
+    for (const result of RESULTS) {
+      if (result.key === "validated" || result.key === "not_tried" || result.key === "other") continue;
+      const lower = result.label[0]!.toLowerCase() + result.label.slice(1);
+      const reason = Object.keys(REASON_RESULT).find((key) => REASON_RESULT[key] === result.key)!;
+      expect(statusCell(attempt(reason)).label).toBe(`No result yet · last run: ${lower}`);
+      expect(statusCell(rejected(reason)).label).toBe(`Not accepted: ${lower}`);
+    }
+    // The filter's options are the box's lines, with counts, for the rows the People filter keeps.
+    const rows = [attempt("env_error"), attempt("env_error", { staff: true }), row({ validationStatus: "validated" })];
+    const options = (people: Filters["people"]) => elements(TaskFilters({ rows, filters: { ...DEFAULT_FILTERS, people }, onChange: () => {} }))
+      .filter((element) => element.type === "option" && /^(validated|env_error|not_tried)$/.test(String((element.props as { value?: unknown }).value)))
+      .map((element) => (element.props as { children: unknown[] }).children.join(""));
+    expect(options("students")).toEqual(["Validated (1)", "Our run failed (1)", "Not tried yet (0)"]);
+    expect(options("everyone")).toEqual(["Validated (1)", "Our run failed (2)", "Not tried yet (0)"]);
+    expect(statusHelpLines().map((line) => line.label)).toEqual([...RESULTS.map((result) => result.label), "Not accepted: …", "No result yet · last run: …"]);
+  });
+
+  it("the attempt flag: the same prefix as write-back, and in plain words in the opened row's Flags", () => {
+    expect(ATTEMPT_FLAG_PREFIX).toBe(WRITEBACK_ATTEMPT_PREFIX);
+    expect(flagText("validation_attempt:env_error")).toBe("Last run: Our test run failed; this says nothing about the student's work.");
+    expect(flagText("validation_reason:regressions")).toBe("Not accepted: Tests that passed before the student's change fail after it.");
+    expect(flagText("validation_attempt:cosmic_rays")).toBe("Last run: cosmic_rays");
+  });
+});
+
+// ---- #452: Tests and criteria ----
+
+describe("6. Tests and criteria in the opened row (#452)", () => {
+  const RUN = {
+    status: "measured", tools: ["vitest 4.1.12 (v8)"],
+    files: [
+      { path: "src/kettle.ts", state: "run", changed_lines: 14, executable: 12, covered: 9, uncovered: "40-42" },
+      { path: "src/timer.ts", state: "not_run", changed_lines: 5, executable: null, covered: null, uncovered: null },
+      { path: "src/types.ts", state: "no_code", changed_lines: 3, executable: 0, covered: 0, uncovered: "" },
+    ],
+    files_changed: 2, files_run: 1, files_not_run: 1, files_not_measured: 0, files_no_code: 1, lines_executable: 12, lines_covered: 9,
+  };
+  const render = (task: TaskDetail) => renderToStaticMarkup(createElement(TaskDetailView, { detail: task, raw: false }));
+
+  it("the detail route sends the stored run's files and totals, copied, and nothing else of it", async () => {
+    state.tables.cse_benchmark_tasks![0]!.validation_detail = { ...(state.tables.cse_benchmark_tasks![0]!.validation_detail as object), fix_coverage: RUN };
+    const task = await detail("src-1");
+    expect(task.coverage).toEqual({
+      status: "measured", reason: null, filesChanged: 2, filesRun: 1, linesCovered: 9, linesExecutable: 12,
+      files: [
+        { path: "src/kettle.ts", state: "run", covered: 9, executable: 12 },
+        { path: "src/timer.ts", state: "not_run", covered: null, executable: null },
+        { path: "src/types.ts", state: "no_code", covered: 0, executable: 0 },
+      ],
+    });
+    expect(JSON.stringify(task)).not.toContain("40-42");
+    expect((await detail("src-3")).coverage).toBeNull();
+    expect(coverageDetail({ status: "weird" })).toBeNull();
+    expect(coverageDetail(null)).toBeNull();
+    expect(state.writes).toBe(0);
+  });
+
+  it("sits directly under the spec, above the patches, with the proving tests, per-file coverage and the foot line", async () => {
+    state.tables.cse_benchmark_tasks![0]!.validation_detail = { ...(state.tables.cse_benchmark_tasks![0]!.validation_detail as object), fix_coverage: RUN };
+    const markup = render(await detail("src-1"));
+    const at = (text: string) => markup.indexOf(text);
+    expect(at(">Spec</h4>")).toBeGreaterThan(-1);
+    expect(at(">Tests and criteria</h4>")).toBeGreaterThan(at(">Spec</h4>"));
+    expect(at(">Tests and criteria</h4>")).toBeLessThan(at(">Code patch</h4>"));
+    expect(at(">Proving tests (2)</h5>")).toBeGreaterThan(at(">Tests and criteria</h4>"));
+    expect(at("<li>test/kettle.test.ts &gt; beeps</li>")).toBeGreaterThan(at(">Tests and criteria</h4>"));
+    expect(at("<li>test/kettle.test.ts &gt; beeps</li>")).toBeLessThan(at(">Code patch</h4>"));
+    expect(markup.match(/Proving tests \(/g)).toHaveLength(1);
+    expect(markup).toContain("3 tests still pass after the change.");
+    expect(markup).toContain(">Coverage (experimental)</h5>");
+    expect(markup).toContain("<li><span class=\"font-mono text-xs\">src/kettle.ts</span>: run by the proving tests<span class=\"text-muted-foreground tabular-nums\">, 9 of 12 changed lines</span></li>");
+    expect(markup).toContain("<li><span class=\"font-mono text-xs\">src/timer.ts</span>: not run</li>");
+    expect(markup).toContain("In total, the proving tests run 1 of 2 changed code files.");
+    expect(markup).toContain("In the files they run, they run 9 of 12 changed lines.");
+    expect(markup).toContain("Which acceptance criteria each test checks is not shown here yet.");
+    expect(at("Which acceptance criteria")).toBeLessThan(at(">Code patch</h4>"));
+  });
+
+  it("Not measured yet without a stored run; the 0-runnable-lines sentence; partial and unavailable runs say so", () => {
+    expect(coverageNotes(null)).toEqual(["Not measured yet."]);
+    const none: CoverageDetail = { status: "measured", reason: null, files: [{ path: "src/types.ts", state: "no_code", covered: 0, executable: 0 }], filesChanged: 0, filesRun: 0, linesCovered: 0, linesExecutable: 0 };
+    expect(coverageNotes(none)).toEqual(["The coverage run found no runnable changed lines. This can be a limit of the coverage run for this repository."]);
+    expect(coverageFileLine(none.files[0]!)).toEqual({ path: "src/types.ts", state: "no runnable changed lines", lines: "0 of 0 changed lines" });
+    // Changed files none of which ran: not "no runnable lines", just the files total.
+    expect(coverageNotes({ ...none, filesChanged: 2 })).toEqual(["In total, the proving tests run 0 of 2 changed code files."]);
+    expect(coverageNotes({ ...none, status: "unavailable", reason: "no coverage tool for this runner" })).toEqual(["The coverage run could not measure this task.", "The coverage run says: no coverage tool for this runner"]);
+    expect(coverageNotes({ ...none, status: "partial", filesChanged: 1, filesRun: 1, linesCovered: 1, linesExecutable: 4, reason: "one step failed" }))
+      .toEqual(["In total, the proving tests run 1 of 1 changed code file.", "In the files they run, they run 1 of 4 changed lines.", "Partly measured.", "The coverage run says: one step failed"]);
+    const markup = renderToStaticMarkup(createElement(TestsSection, { detail: { validationStatus: "candidate", failToPass: [], passToPass: 0, coverage: null } }));
+    expect(markup).toContain("Read from the test patch; no test run has proven them yet.");
+    expect(markup).toContain("<p class=\"mt-1\">Not measured yet.</p>");
+    expect(markup).toContain("Which acceptance criteria each test checks is not shown here yet.");
   });
 });

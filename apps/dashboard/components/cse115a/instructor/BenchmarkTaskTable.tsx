@@ -1,13 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { Fragment, useEffect, useMemo, useState, type ReactNode } from "react";
+import { Fragment, useEffect, useId, useMemo, useState, type ReactNode } from "react";
 import { REVIEW_TEXT, teamLink } from "@/lib/cse115a/reviewText";
 import {
-  assignmentOptions, changedByStaffLines, consentCounts, consentedCell, coverageCell, DEFAULT_FILTERS, flagText, goldCell, gradeBoxLines, gradeCell,
-  longDate, metricsHref, nextTaskSort, repoCell, repoSourceLine, reportDateText, reviewHref, scoreText, staffChangeLines, statusCell, statusHelpLines,
-  summarize, TASK_TABLE_TEXT, taskCell, teamOptions, visibleRows, withStatus,
-  type Changed, type Consented, type Filters, type People, type StatusKey, type TaskDetail, type TaskGrade, type TaskSort, type TaskSortKey, type TaskTableRow,
+  assignmentOptions, changedByStaffLines, consentCell, consentCounts, countSplit, coverageCell, coverageFileLine, coverageNotes, DEFAULT_FILTERS, flagText, goldCell,
+  gradeBoxLines, gradeCell, longDate, matchesPeople, metricsHref, nextTaskSort, repoCell, repoSourceLine, reportDateText, reviewHref, scoreText, staffChangeLines,
+  statusCell, statusHelpLines, summarize, TASK_TABLE_TEXT, taskCell, taskListLine, taskListRows, teamOptions, visibleRows, withStatus,
+  type Changed, type ConsentFilter, type Filters, type People, type StatusKey, type SummaryLine, type TaskDetail, type TaskGrade, type TaskSort, type TaskSortKey, type TaskTableRow,
 } from "@/lib/cse115a/benchmark/taskTable";
 import { FullScreenBox } from "./FullScreenBox";
 import { HelpTip } from "./HelpTip";
@@ -15,59 +15,131 @@ import { CopyButton, SpecBody, SpecViewSwitch } from "./ReviewBoxes";
 import { fetchJson } from "./shared";
 
 // The Benchmark page's summary of validation results (#444) and its table of every current task (#445), with the
-// Consented column, heading help, the two benchmark columns and the opened row's grade and scores (#449). Staff only.
+// Consented column, heading help, the two benchmark columns and the opened row's grade and scores (#449). Since #452
+// the box is a table of results, each with who can fix it and a list of its tasks; Consent has three values; the
+// opened row has "Tests and criteria". Staff only.
 
 const T = TASK_TABLE_TEXT;
 const SELECT = "rounded-lg border border-input bg-background px-3 py-2";
 
-/** The Status heading's help: one line per result, in the summary box's own words (statusHelpLines). */
+/** The Status heading's help: one line per result, in the box's own words, then what the two prefixes mean (statusHelpLines). */
 export function StatusHelp() {
   return <ul className="space-y-1">{statusHelpLines().map((line) => <li key={line.label}><span className="font-semibold">{line.label}</span>: {line.meaning}</li>)}</ul>;
 }
 
 /** A column: `sort` is its sort key; a column without one does not sort. `help` is its "?" panel. */
-export type Column = { id: string; label: string; sort?: TaskSortKey; note?: string; title?: string; help?: ReactNode };
+export type Column = { id: string; label: string; sort?: TaskSortKey; help?: ReactNode };
 
+/** The columns in order (#452); TaskCells follows the same order. */
 export const COLUMNS: Column[] = [
   { id: "assignment", sort: "assignment", label: T.columns.assignment },
   { id: "team", sort: "team", label: T.columns.team },
-  { id: "student", sort: "student", label: T.columns.student },
-  { id: "consented", sort: "consented", label: T.columns.consented },
+  { id: "who", sort: "who", label: T.columns.who },
+  { id: "consent", sort: "consent", label: T.columns.consent },
   { id: "task", sort: "task", label: T.columns.task },
   { id: "status", sort: "status", label: T.columns.status, help: <StatusHelp /> },
   { id: "coverage", sort: "coverage", label: T.columns.coverage, help: T.coverageHelp },
-  { id: "gold", sort: "gold", label: T.columns.gold, help: T.goldHelp },
   { id: "grade", sort: "grade", label: T.columns.grade },
   // Placeholders (#449): no data, no route field and no migration yet; every cell reads "Not set". They do not sort or filter.
-  { id: "benchmarkGrade", label: T.columns.benchmarkGrade, help: T.benchmarkGradeHelp },
-  { id: "benchmarkInclude", label: T.columns.benchmarkInclude, help: T.benchmarkIncludeHelp },
+  { id: "score", label: T.columns.score, help: T.scoreHelp },
+  { id: "gold", sort: "gold", label: T.columns.gold, help: T.goldHelp },
+  { id: "include", label: T.columns.include, help: T.includeHelp },
+  { id: "repo", sort: "repo", label: T.columns.repo, help: T.repoHelp },
   { id: "staffChanges", sort: "staffChanges", label: T.columns.staffChanges },
-  { id: "repo", sort: "repo", label: T.columns.repo, note: T.repoColumnNote, title: T.repoColumnTitle },
 ];
 
-/** The summary box: one line per status, its count and meaning; a line's button shows those tasks in the table. */
-export function SummaryBox({ rows, selected, onPick }: { rows: readonly TaskTableRow[]; selected: StatusKey | "all"; onPick: (key: StatusKey) => void }) {
+type SummaryProps = {
+  /** The rows the People filter keeps: the box follows it. */
+  rows: readonly TaskTableRow[];
+  people: People;
+  onPick: (key: StatusKey) => void;
+};
+
+/**
+ * The "Validation results" box (#452): a table of results in a fixed order, each with its count, who can fix it, and
+ * a "Show tasks" button opening the list of those tasks in a row under it, built like the Grader tab's lists (#432).
+ * Every list is in the markup, hidden until opened. "Show in the table" sets the table's Status filter.
+ */
+export function SummaryBoxView({ rows, people, onPick, open, onToggle, idBase }: SummaryProps & { open: StatusKey | null; onToggle: (key: StatusKey) => void; idBase: string }) {
   const { lines, total } = summarize(rows);
+  const listId = (key: StatusKey) => `${idBase}-${key}`;
   return (
     <section aria-labelledby="validation-results" className="rounded-xl border border-border bg-card p-4">
-      <h2 id="validation-results" className="font-semibold">{T.summaryHeading}</h2>
+      <h2 id="validation-results" className="text-lg font-semibold">{T.summaryHeading}</h2>
       <p className="mt-1 text-sm text-muted-foreground">{T.summaryNote}</p>
-      <ul className="mt-3 divide-y divide-border">
-        {lines.map((line) => (
-          <li key={line.key}>
-            <button type="button" onClick={() => onPick(line.key)} aria-pressed={selected === line.key}
-              className={`grid w-full grid-cols-[4rem_minmax(10rem,16rem)_1fr] items-baseline gap-3 px-2 py-2 text-left text-sm hover:bg-muted/50${selected === line.key ? " bg-muted" : ""}`}>
-              <span className="text-right font-semibold tabular-nums">{line.count}</span>
-              <span className="font-medium">{line.label}</span>
-              <span className="text-muted-foreground">{line.meaning}</span>
-            </button>
-          </li>
-        ))}
-      </ul>
-      <p className="mt-2 border-t border-border px-2 pt-2 text-sm font-medium">{T.summaryTotal(total)}</p>
+      <div className="mt-3 overflow-x-auto">
+        <table className="w-full text-left text-base">
+          <thead className="border-b border-border text-sm text-muted-foreground">
+            <tr>
+              <th scope="col" className="px-3 py-2 font-medium">{T.resultColumn}</th>
+              <th scope="col" className="px-3 py-2 text-right font-medium">{T.tasksColumn}</th>
+              <th scope="col" className="px-3 py-2 font-medium">{T.whoColumn}</th>
+              <th scope="col" className="px-3 py-2"><span className="sr-only">{T.listColumn}</span></th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-border">
+            {lines.map((line) => <SummaryRow key={line.key} line={line} isOpen={open === line.key} listId={listId(line.key)} onToggle={onToggle} onPick={onPick} />)}
+          </tbody>
+        </table>
+      </div>
+      <p className="mt-2 border-t border-border px-3 pt-2 text-base font-medium">{T.summaryTotal(total, people)}</p>
       <ConsentCountLines rows={rows} />
     </section>
   );
+}
+
+/** One result: its row, and its list of tasks in a row under it. */
+function SummaryRow({ line, isOpen, listId, onToggle, onPick }: { line: SummaryLine; isOpen: boolean; listId: string; onToggle: (key: StatusKey) => void; onPick: (key: StatusKey) => void }) {
+  const split = countSplit(line);
+  return (
+    <>
+      <tr className="align-top">
+        <th scope="row" className="px-3 py-3 font-medium">{line.label}</th>
+        <td className="px-3 py-3 text-right">
+          <span className="text-2xl font-semibold tabular-nums">{line.count}</span>
+          {split ? <span className="block text-xs text-muted-foreground">{split}</span> : null}
+        </td>
+        <td className="px-3 py-3">{line.who}</td>
+        <td className="px-3 py-3 text-right">
+          {line.count > 0 ? (
+            <button type="button" aria-expanded={isOpen} aria-controls={listId}
+              aria-label={isOpen ? T.hideTasksLabel(line.label) : T.showTasksLabel(line.count, line.label)}
+              onClick={() => onToggle(line.key)}
+              className="whitespace-nowrap text-sm font-medium text-primary underline underline-offset-2">
+              {isOpen ? T.hideTasks : T.showTasks}
+            </button>
+          ) : null}
+        </td>
+      </tr>
+      {line.count > 0 ? (
+        <tr id={listId} hidden={!isOpen} className="bg-muted/20">
+          <td colSpan={4} className="px-3 py-2">
+            <div className="flex flex-wrap items-center gap-3">
+              <p className="text-xs font-medium text-muted-foreground">{T.listHeading(line.label)}</p>
+              <button type="button" onClick={() => onPick(line.key)} aria-label={T.showInTableLabel(line.label)}
+                className="rounded-md border border-border px-2 py-0.5 text-xs font-medium hover:bg-muted">
+                {T.showInTable}
+              </button>
+            </div>
+            <ul className="mt-1 max-h-64 space-y-0.5 overflow-y-auto text-sm">
+              {taskListRows(line.tasks).map((task) => (
+                <li key={task.id}>
+                  <Link href={reviewHref(task.submissionId)} className="text-primary underline">{taskListLine(task)}</Link>
+                </li>
+              ))}
+            </ul>
+          </td>
+        </tr>
+      ) : null}
+    </>
+  );
+}
+
+/** The box with its one open list. */
+export function SummaryBox(props: SummaryProps) {
+  const [open, setOpen] = useState<StatusKey | null>(null);
+  const idBase = useId();
+  return <SummaryBoxView {...props} open={open} idBase={idBase} onToggle={(key) => setOpen((current) => current === key ? null : key)} />;
 }
 
 /** The foot of the summary box: validated tasks by consent, apart from the lines that add up to the total. */
@@ -84,7 +156,8 @@ export function ConsentCountLines({ rows }: { rows: readonly TaskTableRow[] }) {
 
 /** The filters, as the Submissions table lays them out. */
 export function TaskFilters({ rows, filters, onChange }: { rows: readonly TaskTableRow[]; filters: Filters; onChange: (next: Filters) => void }) {
-  const statuses = summarize(rows).lines;
+  // The box's results and counts, for the rows the People filter keeps, as the box shows them.
+  const statuses = summarize(rows.filter((row) => matchesPeople(row, filters.people))).lines;
   const teams = teamOptions(rows);
   const set = (patch: Partial<Filters>) => onChange({ ...filters, ...patch });
   return (
@@ -112,11 +185,12 @@ export function TaskFilters({ rows, filters, onChange }: { rows: readonly TaskTa
         </select>
       </label>
       <label className="text-sm">
-        <span className="mb-1 block text-muted-foreground">{T.consentedLabel}</span>
-        <select value={filters.consented} onChange={(event) => set({ consented: event.target.value as Consented })} className={SELECT}>
-          <option value="any">{T.consentedAny}</option>
-          <option value="yes">{T.consentedYes}</option>
-          <option value="no">{T.consentedNo}</option>
+        <span className="mb-1 block text-muted-foreground">{T.consentLabel}</span>
+        <select value={filters.consent} onChange={(event) => set({ consent: event.target.value as ConsentFilter })} className={SELECT}>
+          <option value="any">{T.consentAny}</option>
+          <option value="yes">{T.consentYes}</option>
+          <option value="no">{T.consentNo}</option>
+          <option value="not_yet">{T.consentNotYet}</option>
         </select>
       </label>
       <label className="text-sm">
@@ -164,7 +238,7 @@ export function TaskCells({ row }: { row: TaskTableRow }) {
         <span className="break-all">{row.email || "—"}</span>
         {row.staff ? <span className="ml-2 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">{T.staffTag}</span> : null}
       </td>
-      <td className={`px-3 py-3${row.consented ? "" : " text-muted-foreground"}`}>{consentedCell(row.consented)}</td>
+      <td className={`whitespace-nowrap px-3 py-3${row.consent === "yes" ? "" : " text-muted-foreground"}`}>{consentCell(row.consent)}</td>
       <td className="px-3 py-3"><span className="font-medium">{task.slot}</span>{task.name ? <span className="block text-xs text-muted-foreground">{task.name}</span> : null}</td>
       <td className="px-3 py-3"><span>{status.label}</span>{status.detail ? <span className="block text-xs text-muted-foreground">{status.detail}</span> : null}</td>
       <td className="px-3 py-3">
@@ -172,7 +246,6 @@ export function TaskCells({ row }: { row: TaskTableRow }) {
         {coverage.detail ? <span className="block text-xs text-muted-foreground">{coverage.detail}</span> : null}
         {coverage.untested ? <span className="block text-xs text-amber-700 dark:text-amber-300">{coverage.untested}</span> : null}
       </td>
-      <td className="px-3 py-3">{goldCell(row.gold)}</td>
       <td className="px-3 py-3 tabular-nums">
         {row.grade
           ? <HelpTip id={`grade-boxes-${row.id}`} kind="text" panel={<GradeBoxesPanel grade={row.grade} />}><span>{grade.text}</span></HelpTip>
@@ -180,9 +253,10 @@ export function TaskCells({ row }: { row: TaskTableRow }) {
         {grade.unreleased ? <span className="ml-2 rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">{T.notReleased}</span> : null}
       </td>
       <td className="px-3 py-3 text-muted-foreground">{T.notSet}</td>
+      <td className="px-3 py-3">{goldCell(row.gold)}</td>
       <td className="px-3 py-3 text-muted-foreground">{T.notSet}</td>
-      <td className="px-3 py-3">{staffChangeLines(row).map((line) => <span key={line} className="block text-xs font-medium">{line}</span>)}</td>
       <td className="px-3 py-3"><span className={row.hasReport ? "" : "text-muted-foreground"}>{repo.text}</span>{repo.date ? <span className="block text-xs text-muted-foreground">{repo.date}</span> : null}</td>
+      <td className="px-3 py-3">{staffChangeLines(row).map((line) => <span key={line} className="block text-xs font-medium">{line}</span>)}</td>
     </>
   );
 }
@@ -223,6 +297,42 @@ export function GradeSection({ grade }: { grade: TaskGrade | null }) {
   );
 }
 
+/**
+ * "Tests and criteria" (#452), directly under the spec: the proving tests, the stored coverage run file by file, and
+ * a line saying the criteria are not linked yet. Shows what the validator stored; nothing is computed here.
+ */
+export function TestsSection({ detail }: { detail: Pick<TaskDetail, "validationStatus" | "failToPass" | "passToPass" | "coverage"> }) {
+  return (
+    <section aria-labelledby="tests-and-criteria" className="space-y-3 rounded-lg border border-border p-3">
+      <h4 id="tests-and-criteria" className="font-medium">{T.testsHeading}</h4>
+      <div>
+        <h5 className="font-medium">{T.provingHeading(detail.failToPass.length)}</h5>
+        {detail.validationStatus !== "validated" ? <p className="text-xs text-muted-foreground">{T.provingGuess}</p> : null}
+        {detail.failToPass.length ? <ul className="mt-1 max-h-48 list-disc overflow-auto pl-5 font-mono text-xs">{detail.failToPass.map((test) => <li key={test}>{test}</li>)}</ul> : <p className="text-muted-foreground">{T.noProvingTests}</p>}
+        <p className="mt-1 text-muted-foreground">{T.stillPass(detail.passToPass)}</p>
+      </div>
+      <div>
+        <h5 className="font-medium">{T.coverageHeading}</h5>
+        {detail.coverage?.files.length ? (
+          <ul className="mt-1 space-y-0.5">
+            {detail.coverage.files.map((file) => {
+              const line = coverageFileLine(file);
+              return (
+                <li key={file.path}>
+                  <span className="font-mono text-xs">{line.path}</span>: {line.state}
+                  {line.lines ? <span className="text-muted-foreground tabular-nums">, {line.lines}</span> : null}
+                </li>
+              );
+            })}
+          </ul>
+        ) : null}
+        {coverageNotes(detail.coverage).map((note) => <p key={note} className="mt-1">{note}</p>)}
+      </div>
+      <p className="text-xs text-muted-foreground">{T.criteriaNote}</p>
+    </section>
+  );
+}
+
 /** The opened row's Repo Metrics scores from the stored report, with the report's date; nothing without a report. */
 export function ScoresSection({ detail }: { detail: Pick<TaskDetail, "hasReport" | "reportDate" | "scores"> }) {
   if (!detail.hasReport) return null;
@@ -240,7 +350,7 @@ export function ScoresSection({ detail }: { detail: Pick<TaskDetail, "hasReport"
   );
 }
 
-/** The opened row: spec, patches, proving tests, flags, validation, staff changes and the links. */
+/** The opened row: spec, tests and criteria, patches, flags, validation, staff changes and the links. */
 export function TaskDetailView({ detail, raw = false, onRaw }: { detail: TaskDetail; raw?: boolean; onRaw?: (raw: boolean) => void }) {
   const changes = changedByStaffLines(detail);
   const idBase = `task-${detail.id}`;
@@ -291,15 +401,10 @@ export function TaskDetailView({ detail, raw = false, onRaw }: { detail: TaskDet
         {detail.problemStatement ? <div className="rounded-md border border-border"><SpecBody markdown={detail.problemStatement} raw={raw} full={false} boxId={`${idBase}-spec`} /></div> : <p className="text-muted-foreground">{T.noSpec}</p>}
       </section>
 
+      <TestsSection detail={detail} />
+
       <PatchBox what={T.codePatch} text={detail.patch} boxId={`${idBase}-patch`} title={`${T.codePatch} · Task ${detail.slot}`} />
       <PatchBox what={T.testPatch} text={detail.testPatch} boxId={`${idBase}-test-patch`} title={`${T.testPatch} · Task ${detail.slot}`} />
-
-      <section>
-        <h4 className="font-medium">{T.provingHeading(detail.failToPass.length)}</h4>
-        {detail.validationStatus !== "validated" ? <p className="text-xs text-muted-foreground">{T.provingGuess}</p> : null}
-        {detail.failToPass.length ? <ul className="mt-1 max-h-48 list-disc overflow-auto pl-5 font-mono text-xs">{detail.failToPass.map((test) => <li key={test}>{test}</li>)}</ul> : <p className="text-muted-foreground">{T.noProvingTests}</p>}
-        <p className="mt-1 text-muted-foreground">{T.stillPass(detail.passToPass)}</p>
-      </section>
 
       <section>
         <h4 className="font-medium">{T.flagsHeading}</h4>
@@ -336,7 +441,7 @@ export function Header({ sort, onSort }: { sort: TaskSort; onSort: (key: TaskSor
         {COLUMNS.map((column) => {
           const active = column.sort && sort?.key === column.sort ? sort.direction : null;
           return (
-            <th key={column.id} scope="col" title={column.title} aria-sort={column.sort ? (active === "asc" ? "ascending" : active === "desc" ? "descending" : "none") : undefined} className="px-3 py-3 align-bottom font-medium">
+            <th key={column.id} scope="col" aria-sort={column.sort ? (active === "asc" ? "ascending" : active === "desc" ? "descending" : "none") : undefined} className="px-3 py-3 align-bottom font-medium">
               <span className="inline-flex items-center gap-1.5">
                 {column.sort ? (
                   <button type="button" onClick={() => onSort(column.sort!)} className="inline-flex items-center gap-1 whitespace-nowrap uppercase tracking-wide hover:text-foreground">
@@ -346,7 +451,6 @@ export function Header({ sort, onSort }: { sort: TaskSort; onSort: (key: TaskSor
                 ) : <span className="whitespace-nowrap">{column.label}</span>}
                 {column.help ? <HelpTip id={`help-${column.id}`} kind="button" label={T.helpLabel(column.label)} panel={column.help} /> : null}
               </span>
-              {column.note ? <span className="block text-[11px] font-normal normal-case tracking-normal">{column.note}</span> : null}
             </th>
           );
         })}
@@ -372,6 +476,7 @@ export function BenchmarkTaskTable({ slug }: { slug: string }) {
   }, [base]);
 
   const visible = useMemo(() => visibleRows(rows ?? [], filters, sort), [rows, filters, sort]);
+  const people = useMemo(() => (rows ?? []).filter((row) => matchesPeople(row, filters.people)), [rows, filters.people]);
 
   function toggle(id: string) {
     if (openId === id) { setOpenId(null); return; }
@@ -389,7 +494,7 @@ export function BenchmarkTaskTable({ slug }: { slug: string }) {
 
   return (
     <div className="space-y-4">
-      <SummaryBox rows={rows} selected={filters.status} onPick={(key) => setFilters((current) => withStatus(current, key))} />
+      <SummaryBox rows={people} people={filters.people} onPick={(key) => setFilters((current) => withStatus(current, key))} />
       <div>
         <h2 className="font-semibold">{T.tableHeading}</h2>
         <p className="mt-1 text-sm text-muted-foreground">{T.tableIntro}</p>
