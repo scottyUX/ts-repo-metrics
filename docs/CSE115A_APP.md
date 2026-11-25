@@ -439,10 +439,40 @@ SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... \
   (instructors only, reason required) supersedes the attempt so the student can
   change tasks and submit again; the old attempt stays as history.
 - **Benchmark**: counts by status and consent, one line of research consent
-  totals (see Research consent below), a preview of the newest rows,
-  JSONL download, and the repo copies (each task stored, queued, running or
-  failed; "Save missing repo copies" and per-task "Retry" queue copy jobs when
-  `CSE115A_REPO_COPIES=on`).
+  totals (see Research consent below), JSONL download, the repo copies (each
+  task stored, queued, running or failed; "Save missing repo copies" and
+  per-task "Retry" queue copy jobs when `CSE115A_REPO_COPIES=on`), and the
+  task table (#444, #445; below). The tiles count every captured task, older
+  attempts included; the summary box and the table count current attempts only,
+  and a line under the tiles says so.
+
+### The Benchmark page's task table (#444, #445)
+
+A "Validation results" box and a table of every current task (one row per
+benchmark source whose submission has `superseded_at is null`, every
+assignment). The box has one line per result, first match wins: Validated;
+Not accepted, one line per `validation_reason:` flag; No code in the PR (the
+flags `noCodePr.ts` reads); No tests in the PR (`no_test_patch`); No result yet.
+The lines add up to the total. Clicking a line sets the table's status filter.
+
+Columns: Assignment, Team, Student (with a "Staff" tag for an email in
+`cse_course_roles`), Task, Status, Coverage (`validation_detail.fix_coverage`),
+Gold check (`harbor_env.gold`), Final grade (display only), Staff changes
+(#431, #437) and Repo ("Report" with the stored report's own date, or "No
+report"). Filters: assignment, team, status, changed by staff, people (default
+Students only) and a search over email, team and task. Every column sorts like
+the Submissions table. Clicking a row opens it in place: the spec (Formatted /
+Raw), both patches whole with Copy, the proving tests, the flags in plain words
+(`FLAG_TEXT` in `lib/cse115a/benchmark/taskTable.ts`), the validation detail, a
+"Changed by staff" block read from the snapshot, and links to the review page
+and the Repo Metrics report.
+
+Routes (course staff, read only): `GET .../courses/<slug>/benchmark/tasks`
+returns the rows without `problem_statement`, `patch`, `test_patch`, the diff or
+anything about consent; `GET .../courses/<slug>/benchmark/tasks/<source id>`
+returns one task for the opened row. No cell, filter or route says whether a
+student consented: consent stays in the "Consented" tile, the totals line and
+the download rules, which did not change.
 
 ### Re-capturing old diffs (#418)
 
@@ -454,7 +484,7 @@ and `snapshot_before_recapture` is kept. To bring the panel back, put
 `import { OldDiffRecapture } from "./OldDiffRecapture";` back in
 `components/cse115a/instructor/BenchmarkPanel.tsx` and
 `<OldDiffRecapture slug={slug} />` between `<RepoCopies slug={slug} />` and
-the "Newest rows" section. What follows describes the panel as it worked.
+the task table's section. What follows describes the panel as it worked.
 
 "Diffs saved before the PR-own-diff rule", formerly on the Benchmark page, re-runs
 today's diff capture (#382) on submissions already saved, for every task whose
