@@ -116,7 +116,7 @@ describe("#454 Fix the code PR", () => {
   it("with extra PRs, the list and its Remove stay on the page, and the message waits on the disabled choice", () => {
     const task = pinTask({ extraCodePrs: [extra(12)] });
     const markup = renderToStaticMarkup(createElement(FixCodePr, { submissionId: "sub-4", task, recapturedAt: null, readOnly: false, onChanged: () => {} }));
-    expect(markup).toContain(WORK_PR_TEXT.extraListHeading.replace("'", "&#x27;"));
+    expect(markup).toContain(WORK_PR_TEXT.extraListHeading.replaceAll("'", "&#x27;"));
     expect(markup).toContain(">Remove</button>");
     expect(markup.match(/This task has extra PRs for its code/g)).toHaveLength(1);
     expect(markup).toMatch(/<ul id="[^"]*-choices" hidden=""/);
