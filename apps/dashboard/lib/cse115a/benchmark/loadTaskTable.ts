@@ -1,19 +1,21 @@
 import "server-only";
 import { buildOverviewScoreStrip } from "@/lib/buildOverviewCards";
-import { countsAsConsent } from "@/lib/cse115a/consent";
+import { CONSENT_VERSION, countsAsConsent } from "@/lib/cse115a/consent";
 import { effectiveTotal } from "@/lib/cse115a/gradeReview";
 import { teamLink } from "@/lib/cse115a/reviewText";
 import { RUBRIC } from "@/lib/cse115a/rubric";
 import { isTaskSlot, TASK_SLOTS } from "@/lib/cse115a/taskSlots";
 import { MAX_EXTRA_CODE_PRS } from "@/lib/cse115a/submissionSnapshot";
 import type { RepoReport } from "@/lib/reportTypes";
-import { gradeBoxes, type ExtraPrDetail, type ReportScore, type TaskDetail, type TaskGrade, type TaskTableRow } from "./taskTable";
+import { gradeBoxes, type ConsentValue, type CoverageDetail, type CoverageFileDetail, type ExtraPrDetail, type ReportScore, type TaskDetail, type TaskGrade, type TaskTableRow } from "./taskTable";
 
 // The two staff routes behind the Benchmark page's task table (#444, #445, #449). Both read; neither writes. The list
 // reads small columns and JSON paths only: never `problem_statement`, `patch` or `test_patch`, and never a diff. Since
 // #449 it reads `cse_research_consent` (user, yes or no, wording version) to send each row's yes or no by the
-// downloads' rule, `countsAsConsent`; nothing else about consent is sent. The detail route reads one task's spec,
-// patches and stored report when a row is opened, and sends the report's scores, never the report.
+// downloads' rule, `countsAsConsent`; since #452 one of three values (Yes, No to the current wording, Not yet), and
+// still never the wording version or a date. The detail route reads one task's spec,
+// patches and stored report when a row is opened, and sends the report's scores, never the report, and since #452 the
+// stored coverage run's per-file states and totals.
 
 const PAGE = 500;
 const CHUNK = 100;
@@ -132,6 +134,41 @@ function hasReport(task: Record<string, unknown> | undefined): boolean {
   return Boolean(task) && (task!.report_files !== null && task!.report_files !== undefined || text(task!.report_source) !== null || text(task!.report_date) !== null);
 }
 
+/**
+ * A stored answer as the Consent column shows it. Yes: the downloads' rule (a yes to the current, approved wording).
+ * No: a no to the current wording. Not yet: anything else, an answer to an older wording included.
+ */
+export function consentValue(row: { consented?: unknown; consent_version?: unknown } | null | undefined): ConsentValue {
+  if (!row) return "not_yet";
+  const answer = { consented: row.consented === true, consent_version: String(row.consent_version ?? "") };
+  if (countsAsConsent(answer)) return "yes";
+  return row.consented === false && answer.consent_version === CONSENT_VERSION ? "no" : "not_yet";
+}
+
+const FILE_STATES: ReadonlyArray<CoverageFileDetail["state"]> = ["run", "not_run", "not_measured", "no_code"];
+
+/**
+ * The stored coverage run (`validation_detail.fix_coverage`, fixCoverage.ts) as the opened row shows it: each file's
+ * path, state and lines, and the run's own totals, copied, never recomputed. Null when there is none or it is unreadable.
+ */
+export function coverageDetail(value: unknown): CoverageDetail | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const run = value as Record<string, unknown>;
+  if (run.status !== "measured" && run.status !== "partial" && run.status !== "unavailable") return null;
+  const files = list(run.files).flatMap((item): CoverageFileDetail[] => {
+    if (!item || typeof item !== "object") return [];
+    const file = item as Record<string, unknown>;
+    const path = text(file.path);
+    const state = FILE_STATES.find((value) => value === file.state);
+    return path && state ? [{ path, state, covered: num(file.covered), executable: num(file.executable) }] : [];
+  });
+  return {
+    status: run.status, reason: text(run.reason), files,
+    filesChanged: num(run.files_changed) ?? 0, filesRun: num(run.files_run) ?? 0,
+    linesCovered: num(run.lines_covered) ?? 0, linesExecutable: num(run.lines_executable) ?? 0,
+  };
+}
+
 function status(value: unknown): TaskTableRow["validationStatus"] {
   return value === "validated" || value === "rejected" ? value : "candidate";
 }
@@ -162,10 +199,7 @@ export async function loadTaskTable(db: TaskTableDb, courseId: string): Promise<
   const gradeBy = new Map(grades.map((row) => [`${row.assignment_submission_id}:${row.task_slot}`, row]));
   const emailBy = new Map(members.map((row) => [String(row.user_id), String(row.ucsc_email ?? "")]));
   const staffEmails = new Set(roles.map((row) => String(row.email ?? "").toLowerCase()));
-  // The downloads' rule: a yes to the current, approved wording. No answer, a no, or an older wording is not consent.
-  const consentedUsers = new Set(consent
-    .filter((row) => countsAsConsent({ consented: row.consented === true, consent_version: String(row.consent_version ?? "") }))
-    .map((row) => String(row.user_id)));
+  const consentBy = new Map(consent.map((row) => [String(row.user_id), consentValue(row)]));
   const snapshotBy = new Map(submissions.map((row) => [String(row.id), snapshotTasksBySlot(row)]));
 
   const rows = listed.map((source): TaskTableRow => {
@@ -184,7 +218,7 @@ export async function loadTaskTable(db: TaskTableDb, courseId: string): Promise<
       team: snapshot?.team ?? null,
       email,
       staff: email !== "" && staffEmails.has(email.toLowerCase()),
-      consented: consentedUsers.has(String(source.user_id)),
+      consent: consentBy.get(String(source.user_id)) ?? "not_yet",
       taskId: snapshot?.taskId ?? null,
       title: snapshot?.title ?? null,
       validationStatus: status(source.validation_status),
@@ -234,6 +268,7 @@ export const TASK_DETAIL_TASK_COLUMNS = [
   "validated_at:validation_detail->>validated_at",
   "repo_source:validation_detail->>repo_source",
   "untested:validation_detail->untested_files",
+  "fix_coverage:validation_detail->fix_coverage",
   "report_files:repo_metrics->filesAnalyzed",
   "report_source:repo_metrics->source->>type",
   "report_date:repo_metrics->>analysis_timestamp",
@@ -304,6 +339,7 @@ export async function loadTaskDetail(db: TaskTableDb, courseId: string, sourceId
     failToPass: list(task.FAIL_TO_PASS).map(String),
     passToPass: list(task.PASS_TO_PASS).length,
     validation: validated ? { validatedAt: text(task.validated_at), repoSource, untestedFiles: list(task.untested).map(String) } : null,
+    coverage: coverageDetail(task.fix_coverage),
     workPrChoice: choicePr === null ? null : {
       prNumber: choicePr,
       // The PR the student submitted, kept as the task-file PR: as the review page's workPrHeaderLine names it.

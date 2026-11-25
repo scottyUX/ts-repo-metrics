@@ -5,9 +5,13 @@ import { EXTRA_CODE_PRS_FLAG, WORK_PR_FLAG } from "@/lib/cse115a/workPr";
 // The staff Benchmark page's task table (#445) and its summary of validation results (#444): one row per current
 // task, its status in plain words, and the filters, search and sorting. Client-safe: no server imports. Staff only.
 // Since #449 each row says whether its student consented, by the downloads' rule (`countsAsConsent`): a yes to the
-// current, approved wording. Only that yes or no is sent, never the answer itself or its wording version.
+// current, approved wording. Since #452 it is one of three values (Yes, No to the current wording, Not yet), never
+// the wording version or a date; the box sorts every task into one result row and lists the tasks behind each count.
 
 // ---- What the list route sends ----
+
+/** A row's consent: Yes, No, or Not yet. */
+export type ConsentValue = "yes" | "no" | "not_yet";
 
 /** One rubric box's final points: the instructor's where edited, else the AI's; null when neither scored it. */
 export type GradeBox = { name: string; points: number; awarded: number | null };
@@ -27,8 +31,11 @@ export type TaskTableRow = {
   email: string;
   /** The user has a row in `cse_course_roles`. */
   staff: boolean;
-  /** The student's consent counts by the downloads' rule (`countsAsConsent`). False for a no, no answer, or an older wording. */
-  consented: boolean;
+  /**
+   * `yes`: the downloads' rule (`countsAsConsent`), a yes to the current, approved wording. `no`: a no to the current
+   * wording. `not_yet`: no answer, or an answer to an older wording.
+   */
+  consent: ConsentValue;
   taskId: string | null;
   title: string | null;
   validationStatus: "candidate" | "validated" | "rejected";
@@ -53,8 +60,25 @@ export type TaskTableRow = {
 /** Every page text of the table and the summary box, word for word. */
 export const TASK_TABLE_TEXT = {
   summaryHeading: "Validation results",
-  summaryNote: "Current attempts only: a task from an attempt that was later unlocked and submitted again is not counted. Click a row to show those tasks in the table.",
-  summaryTotal: (total: number) => `Total: ${total} ${total === 1 ? "task" : "tasks"}`,
+  summaryNote: "Current attempts only: a task from an attempt that was later unlocked and submitted again is not counted. Each task is in one row. Show tasks lists them, each with a link to its review page.",
+  summaryTotal: (total: number, people: People) => `Total: ${total} ${total === 1 ? "task" : "tasks"} (${PEOPLE_TOTAL[people]})`,
+  resultColumn: "Result",
+  tasksColumn: "Tasks",
+  whoColumn: "Who can fix it",
+  listColumn: "List of tasks",
+  countSplit: (decided: number, lastRun: number) => `${decided} decided, ${lastRun} from the last run`,
+  showTasks: "Show tasks",
+  hideTasks: "Hide tasks",
+  showTasksLabel: (count: number, label: string) => `Show the ${count} ${count === 1 ? "task" : "tasks"}: ${label}`,
+  hideTasksLabel: (label: string) => `Hide the tasks: ${label}`,
+  listHeading: (label: string) => `Tasks with this result: ${label}`,
+  showInTable: "Show in the table",
+  showInTableLabel: (label: string) => `Show in the table the tasks with this result: ${label}`,
+  decided: "(decided)",
+  notAccepted: (label: string) => `Not accepted: ${label}`,
+  lastRun: (label: string) => `No result yet · last run: ${label}`,
+  notAcceptedHelp: "Staff wrote this result back as the validator's decision.",
+  lastRunHelp: "The validator's last run of the task ended this way. The task is still waiting for a result.",
   tilesNote: "The tiles above count every captured task, older attempts included. The results and the table below count current attempts only.",
   consentCountsNote: "A download holds a validated task only when its student consented.",
   validatedConsented: (count: number) => `Validated and consented: ${count}`,
@@ -76,10 +100,11 @@ export const TASK_TABLE_TEXT = {
   allTeams: "All teams",
   statusLabel: "Status",
   allStatuses: "All results",
-  consentedLabel: "Consented",
-  consentedAny: "Any",
-  consentedYes: "Yes",
-  consentedNo: "No",
+  consentLabel: "Consent",
+  consentAny: "Any",
+  consentYes: "Yes",
+  consentNo: "No",
+  consentNotYet: "Not yet",
   changedLabel: "Changed by staff",
   changedAny: "Any",
   changedYes: "Yes",
@@ -94,27 +119,26 @@ export const TASK_TABLE_TEXT = {
   columns: {
     assignment: "Sprint",
     team: "Team",
-    student: "Student",
-    consented: "Consented",
+    who: "Who",
+    consent: "Consent",
     task: "Task",
     status: "Status",
     coverage: "Coverage (experimental)",
     gold: "Gold check",
     grade: "Final grade",
-    benchmarkGrade: "Benchmark grade",
-    benchmarkInclude: "Benchmark include",
+    score: "Score",
+    include: "Include",
     staffChanges: "Staff changes",
     repo: "Repo",
   },
-  repoColumnNote: "Repo Metrics report stored at submit time",
-  repoColumnTitle: "The Repo Metrics report stored with the task when it was submitted. It is not made again when staff change the task's PRs. Open a row for the link.",
+  repoHelp: "The Repo Metrics report stored with the task when it was submitted. It is not made again when staff change the task's PRs. Open a row for the link.",
   staffTag: "Staff",
   // Help beside a heading ("?"). The Status help is built from statusLabel and statusMeaning (statusHelpLines).
   helpLabel: (column: string) => `What ${column} means`,
   coverageHelp: "Of the code lines this task changes, the share the proving tests ran. Measured by a coverage run in the validator. Experimental: nobody has checked these numbers by hand yet. \"Not measured\" means the coverage run has not been done for this task.",
   goldHelp: "Harbor is the format coding agents are run in. The gold check builds this task as a Harbor task and applies the student's own change. Passed means the task's tests pass there, so the task can be solved as packaged. Not run means it has not been tried yet. The Harbor download holds only tasks that passed.",
-  benchmarkGradeHelp: "How good the task is as a benchmark item. It is separate from the student's grade and never changes it. Not scored yet.",
-  benchmarkIncludeHelp: "Staff's decision to put the task in the benchmark or leave it out, with a reason. Not decided yet.",
+  scoreHelp: "How good the task is as a benchmark item. It is separate from the student's grade and never changes it. Not scored yet.",
+  includeHelp: "Staff's decision to put the task in the benchmark or leave it out, with a reason. Not decided yet.",
   notSet: "Not set",
   // Cells.
   provingTests: (count: number) => `${count} proving ${count === 1 ? "test" : "tests"}`,
@@ -148,6 +172,17 @@ export const TASK_TABLE_TEXT = {
   copyPatch: (what: string) => `Copy the whole ${what}`,
   provingHeading: (count: number) => `Proving tests (${count})`,
   provingGuess: "Read from the test patch; no test run has proven them yet.",
+  testsHeading: "Tests and criteria",
+  coverageHeading: "Coverage (experimental)",
+  coverageNotMeasured: "Not measured yet.",
+  coverageNoRunnable: "The coverage run found no runnable changed lines. This can be a limit of the coverage run for this repository.",
+  coverageUnavailable: "The coverage run could not measure this task.",
+  coveragePartial: "Partly measured.",
+  coverageReason: (reason: string) => `The coverage run says: ${reason}`,
+  coverageFileStates: { run: "run by the proving tests", not_run: "not run", not_measured: "not measured", no_code: "no runnable changed lines" },
+  coverageFilesTotal: (filesRun: number, filesChanged: number) => `In total, the proving tests run ${filesRun} of ${filesChanged} changed code ${filesChanged === 1 ? "file" : "files"}.`,
+  coverageLinesTotal: (covered: number, executable: number) => `In the files they run, they run ${covered} of ${executable} changed lines.`,
+  criteriaNote: "Which acceptance criteria each test checks is not shown here yet.",
   noProvingTests: "None.",
   stillPass: (count: number) => `${count} ${count === 1 ? "test still passes" : "tests still pass"} after the change.`,
   flagsHeading: "Flags",
@@ -176,6 +211,9 @@ export const TASK_TABLE_TEXT = {
   scoreNotMeasured: "Not measured",
   scoresFailed: "The scores could not be worked out from the stored report.",
 } as const;
+
+/** How the total line names the People filter's choice. */
+const PEOPLE_TOTAL: Record<People, string> = { students: "students only", staff: "staff only", everyone: "everyone" };
 
 /** Points as the table shows them: at most two decimals, no trailing zeros. */
 export function formatNumber(value: number): string {
@@ -206,20 +244,48 @@ export function reportDateText(reportDate: string | null): string {
 
 /** The same prefix as validation/writeback.ts's REASON_FLAG_PREFIX (a test checks); that file is not client-safe. */
 export const REASON_FLAG_PREFIX = "validation_reason:";
+/** The same prefix as validation/writeback.ts's ATTEMPT_FLAG_PREFIX (a test checks): the validator's last run, not a verdict (#452). */
+export const ATTEMPT_FLAG_PREFIX = "validation_attempt:";
 
-/** Each reason the validator writes, as a short name and a plain sentence. */
-export const REASON_TEXT: Record<string, { label: string; meaning: string }> = {
-  regressions: { label: "breaks other tests", meaning: "Tests that passed before the student's change fail after it." },
-  regression_skip: { label: "turns tests off", meaning: "The student's change skips tests that ran before it." },
-  no_fail_to_pass: { label: "no proving test", meaning: "No test fails before the student's change and passes after it." },
-  env_unsupported: { label: "repository not supported", meaning: "The validator cannot set up and run this repository's tests yet." },
-  no_source_patch: { label: "no code", meaning: "The task's row changes no code, so there is nothing to check." },
-  no_test_patch: { label: "no tests", meaning: "The task's row changes no test file, so nothing can prove the change." },
-  env_error: { label: "test run failed", meaning: "Our test run failed; this says nothing about the student's work." },
+/**
+ * The rows of the "Validation results" box (#452), in its order. Every task is in exactly one. The box, the Status
+ * cell, the Status filter and the Status help all use these labels and meanings. `other` holds a rejection or a last
+ * run whose reason this page does not know; it is shown only when it has tasks.
+ */
+export type StatusKey =
+  | "validated" | "no_tests" | "no_fail_to_pass" | "regressions" | "regression_skip" | "no_code"
+  | "never_loaded" | "env_unsupported" | "env_error" | "not_tried" | "other";
+
+export type ResultRow = { key: StatusKey; label: string; who: string; meaning: string };
+
+/** The box's rows: label, who can fix it, and the plain sentence the Status help shows. */
+export const RESULTS: readonly ResultRow[] = [
+  { key: "validated", label: "Validated", who: "", meaning: "Its tests fail before the student's change and pass after it." },
+  { key: "no_tests", label: "No tests in the PR", who: "The student", meaning: "The PR changes no test file, so nothing can prove the change." },
+  { key: "no_fail_to_pass", label: "No test proves the change", who: "The student", meaning: "No test fails before the student's change and passes after it." },
+  { key: "regressions", label: "The change breaks other tests", who: "The student", meaning: "Tests that passed before the student's change fail after it." },
+  { key: "regression_skip", label: "The change turns tests off", who: "The student", meaning: "The student's change skips tests that ran before it." },
+  { key: "no_code", label: "No code in the submitted PR", who: "Staff, by choosing the PR that holds the code", meaning: "The submitted PR changes no code outside its tests, often only the task file. Staff can choose the PR that holds the code." },
+  { key: "never_loaded", label: "A test file never loaded", who: "The validator", meaning: "A test file from the PR did not load after the change, so its tests could not run. This is usually the validator's setup, not the student's work." },
+  { key: "env_unsupported", label: "Repository type not supported", who: "The validator", meaning: "The validator cannot set up and run this repository's tests yet." },
+  { key: "env_error", label: "Our run failed", who: "The validator", meaning: "Our test run failed; this says nothing about the student's work." },
+  { key: "not_tried", label: "Not tried yet", who: "", meaning: "The validator has not run this task yet." },
+  { key: "other", label: "Another result", who: "", meaning: "The validator gave a reason this page has no description for yet; the Status cell shows its name." },
+];
+
+const RESULT_BY_KEY = new Map(RESULTS.map((result) => [result.key, result]));
+
+/** The result row each validator reason belongs to, for a rejection (`validation_reason:`) and a last run (`validation_attempt:`) alike. */
+export const REASON_RESULT: Record<string, StatusKey> = {
+  no_test_patch: "no_tests",
+  no_fail_to_pass: "no_fail_to_pass",
+  regressions: "regressions",
+  regression_skip: "regression_skip",
+  no_source_patch: "no_code",
+  test_file_never_loaded: "never_loaded",
+  env_unsupported: "env_unsupported",
+  env_error: "env_error",
 };
-
-/** The status of a row, first match wins: validated, rejected (by reason), no code, no tests, no result yet. */
-export type StatusKey = "validated" | `rejected:${string}` | "no_code" | "no_tests" | "no_result";
 
 /** The reason a rejected row carries; "no reason recorded" when it has no reason flag. */
 export function rejectionReason(flags: readonly string[]): string {
@@ -227,84 +293,157 @@ export function rejectionReason(flags: readonly string[]): string {
   return flag ? flag.slice(REASON_FLAG_PREFIX.length) || "no reason recorded" : "no reason recorded";
 }
 
+/** The reason of the validator's last run, from the row's attempt flag; null without one. */
+export function attemptReason(flags: readonly string[]): string | null {
+  const flag = flags.find((item) => item.startsWith(ATTEMPT_FLAG_PREFIX));
+  return flag ? flag.slice(ATTEMPT_FLAG_PREFIX.length) || null : null;
+}
+
 /** Whether the row's flags are the "no code in PR" marker's (noCodePr.ts: task files only). */
 export function isNoCode(flags: readonly string[]): boolean {
   return noCodeFromFlags(flags);
 }
 
+/**
+ * Where a row's result comes from: a verdict staff wrote back (`decided`, status rejected), the validator's last run
+ * on a candidate (`last_run`), the capture's own flags on a candidate (`capture`), or neither.
+ */
+export type ResultKind = "validated" | "decided" | "last_run" | "capture" | "none";
+
+export type RowResult = { key: StatusKey; kind: ResultKind; reason: string | null };
+
+/**
+ * A row's result, first match wins: validated; a rejection by its reason; a candidate's last run by its reason; a
+ * candidate with the "no code" marker; a candidate with the `no_test_patch` flag; else not tried yet. A decision or a
+ * run comes before the capture's flags, since it is the newer word on the task.
+ */
+export function rowResult(row: Pick<TaskTableRow, "validationStatus" | "flags">): RowResult {
+  if (row.validationStatus === "validated") return { key: "validated", kind: "validated", reason: null };
+  if (row.validationStatus === "rejected") {
+    const reason = rejectionReason(row.flags);
+    return { key: REASON_RESULT[reason] ?? "other", kind: "decided", reason };
+  }
+  const attempt = attemptReason(row.flags);
+  if (attempt) return { key: REASON_RESULT[attempt] ?? "other", kind: "last_run", reason: attempt };
+  if (isNoCode(row.flags)) return { key: "no_code", kind: "capture", reason: null };
+  if (row.flags.includes("no_test_patch")) return { key: "no_tests", kind: "capture", reason: null };
+  return { key: "not_tried", kind: "none", reason: null };
+}
+
 export function statusKey(row: Pick<TaskTableRow, "validationStatus" | "flags">): StatusKey {
-  if (row.validationStatus === "validated") return "validated";
-  if (row.validationStatus === "rejected") return `rejected:${rejectionReason(row.flags)}`;
-  if (isNoCode(row.flags)) return "no_code";
-  if (row.flags.includes("no_test_patch")) return "no_tests";
-  return "no_result";
+  return rowResult(row).key;
 }
 
-/** The status's words, as the summary box and the Status column both show them. */
+/** The result's label, as the box, the filter and the help show it. */
 export function statusLabel(key: StatusKey): string {
-  if (key === "validated") return "Validated";
-  if (key === "no_code") return "No code in the PR";
-  if (key === "no_tests") return "No tests in the PR";
-  if (key === "no_result") return "No result yet";
-  const reason = key.slice("rejected:".length);
-  return `Not accepted: ${REASON_TEXT[reason]?.label ?? reason}`;
+  return RESULT_BY_KEY.get(key)?.label ?? key;
 }
 
-/** The plain line of meaning beside each summary row. */
+/** The result's plain sentence, as the Status help shows it. */
 export function statusMeaning(key: StatusKey): string {
-  if (key === "validated") return "Its tests fail before the student's change and pass after it.";
-  if (key === "no_code") return "The PR holds only the task file. Staff can choose the PR that holds the code.";
-  if (key === "no_tests") return "The PR changes code but no test file.";
-  if (key === "no_result") return "Not run by the validator yet, or the run could not finish.";
-  const reason = key.slice("rejected:".length);
-  return REASON_TEXT[reason]?.meaning ?? `The validator gave the reason "${reason}", which has no description here yet.`;
+  return RESULT_BY_KEY.get(key)?.meaning ?? "";
+}
+
+/** Who can fix tasks with this result; "" when nobody needs to. */
+export function statusWho(key: StatusKey): string {
+  return RESULT_BY_KEY.get(key)?.who ?? "";
+}
+
+/** "Our run failed" → "our run failed", for use after "Not accepted:" and "last run:". */
+function lowerFirst(text: string): string {
+  return text ? text[0]!.toLowerCase() + text.slice(1) : text;
+}
+
+/** A label for use inside a sentence; an unknown reason by its own name. */
+function inlineLabel(result: RowResult): string {
+  return result.key === "other" ? result.reason ?? "" : lowerFirst(statusLabel(result.key));
+}
+
+/** The Status cell's main words: the box's label, with "Not accepted:" for a decision and "No result yet · last run:" for a run. */
+export function resultText(result: RowResult): string {
+  if (result.kind === "decided") return TASK_TABLE_TEXT.notAccepted(inlineLabel(result));
+  if (result.kind === "last_run") return TASK_TABLE_TEXT.lastRun(inlineLabel(result));
+  return statusLabel(result.key);
 }
 
 /**
- * The Status heading's help: one line per result, with the same words and sentences as the "Validation results" box
- * (statusLabel and statusMeaning are the one source). Every reason the validator writes is listed.
+ * The Status heading's help: one line per result, with the box's labels and sentences, then what "Not accepted" and
+ * "last run" mean. Every reason the validator writes has its row.
  */
 export function statusHelpLines(): Array<{ label: string; meaning: string }> {
-  const keys: StatusKey[] = ["validated", ...Object.keys(REASON_TEXT).map((reason) => `rejected:${reason}` as StatusKey), "no_code", "no_tests", "no_result"];
-  return keys.map((key) => ({ label: statusLabel(key), meaning: statusMeaning(key) }));
+  return [
+    ...RESULTS.map((result) => ({ label: result.label, meaning: result.meaning })),
+    { label: TASK_TABLE_TEXT.notAccepted("…"), meaning: TASK_TABLE_TEXT.notAcceptedHelp },
+    { label: TASK_TABLE_TEXT.lastRun("…"), meaning: TASK_TABLE_TEXT.lastRunHelp },
+  ];
 }
 
-/** Where a status sorts and lists: validated, the rejections by reason, then no code, no tests, no result. */
+/** Where a result sorts and lists: the box's order. */
 function statusRank(key: StatusKey): number {
-  if (key === "validated") return 0;
-  if (key.startsWith("rejected:")) return 1;
-  return { no_code: 2, no_tests: 3, no_result: 4 }[key as "no_code" | "no_tests" | "no_result"];
+  return RESULTS.findIndex((result) => result.key === key);
 }
+
+const KIND_RANK: Record<ResultKind, number> = { validated: 0, decided: 1, last_run: 2, capture: 3, none: 4 };
 
 export function compareStatus(a: StatusKey, b: StatusKey): number {
-  return statusRank(a) - statusRank(b) || a.localeCompare(b);
+  return statusRank(a) - statusRank(b);
 }
 
-export type SummaryLine = { key: StatusKey; label: string; meaning: string; count: number };
+export type SummaryLine = ResultRow & {
+  count: number;
+  /** Rejected rows: a verdict staff wrote back. */
+  decided: number;
+  /** Candidates whose result is the validator's last run. */
+  lastRun: number;
+  /** The rows, for the opened list. */
+  tasks: TaskTableRow[];
+};
 
-/** One line per status the rows have, in rank order; the counts add up to the rows' total. */
-export function summarize(rows: readonly Pick<TaskTableRow, "validationStatus" | "flags">[]): { lines: SummaryLine[]; total: number } {
-  const counts = new Map<StatusKey, number>();
+/** Rows always shown, even with 0 tasks. */
+const ALWAYS_SHOWN: readonly StatusKey[] = ["validated", "not_tried"];
+
+/** One line per result in the box's order, a line with no tasks left out (but Validated and Not tried yet); the counts add up to the total. */
+export function summarize(rows: readonly TaskTableRow[]): { lines: SummaryLine[]; total: number } {
+  const lines = RESULTS.map((result): SummaryLine => ({ ...result, count: 0, decided: 0, lastRun: 0, tasks: [] }));
+  const byKey = new Map(lines.map((line) => [line.key, line]));
   for (const row of rows) {
-    const key = statusKey(row);
-    counts.set(key, (counts.get(key) ?? 0) + 1);
+    const result = rowResult(row);
+    const line = byKey.get(result.key)!;
+    line.count++;
+    if (result.kind === "decided") line.decided++;
+    if (result.kind === "last_run") line.lastRun++;
+    line.tasks.push(row);
   }
-  const lines = [...counts].sort(([a], [b]) => compareStatus(a, b))
-    .map(([key, count]) => ({ key, label: statusLabel(key), meaning: statusMeaning(key), count }));
-  return { lines, total: rows.length };
+  return { lines: lines.filter((line) => line.count > 0 || ALWAYS_SHOWN.includes(line.key)), total: rows.length };
 }
 
-/** The two lines at the foot of the summary box: validated tasks whose student consented, and those whose did not. */
-export function consentCounts(rows: readonly Pick<TaskTableRow, "validationStatus" | "consented">[]): { consented: number; notConsented: number } {
+/** The small text under a count, only when it holds both decided and last-run tasks: "3 decided, 6 from the last run". */
+export function countSplit(line: Pick<SummaryLine, "decided" | "lastRun">): string | null {
+  return line.decided > 0 && line.lastRun > 0 ? TASK_TABLE_TEXT.countSplit(line.decided, line.lastRun) : null;
+}
+
+/** One line of an opened list: "Sprint 3 · Task 2 · <team> · <email>", with "(decided)" after a rejected one. */
+export function taskListLine(row: Pick<TaskTableRow, "assignment" | "slot" | "team" | "email" | "validationStatus">): string {
+  const line = [TASK_TABLE_TEXT.assignmentOption(row.assignment), `Task ${row.slot}`, row.team ? teamName(row.team) : "—", row.email || "—"].join(" · ");
+  return row.validationStatus === "rejected" ? `${line} ${TASK_TABLE_TEXT.decided}` : line;
+}
+
+/** An opened list's rows: by sprint, task, team and email. */
+export function taskListRows(tasks: readonly TaskTableRow[]): TaskTableRow[] {
+  return [...tasks].sort((a, b) => a.assignment - b.assignment || a.slot - b.slot || (a.team ?? "").localeCompare(b.team ?? "") || a.email.localeCompare(b.email));
+}
+
+/** The two lines at the foot of the summary box: validated tasks whose student consented ("Yes"), and the rest. */
+export function consentCounts(rows: readonly Pick<TaskTableRow, "validationStatus" | "consent">[]): { consented: number; notConsented: number } {
   const validated = rows.filter((row) => row.validationStatus === "validated");
-  const consented = validated.filter((row) => row.consented).length;
+  const consented = validated.filter((row) => row.consent === "yes").length;
   return { consented, notConsented: validated.length - consented };
 }
 
-/** The Status cell: the summary's words; for a validated row, the number of proving tests. */
+/** The Status cell: the result's words; for a validated row, the number of proving tests. */
 export function statusCell(row: TaskTableRow): { label: string; detail: string | null } {
-  const key = statusKey(row);
-  return { label: statusLabel(key), detail: key === "validated" ? TASK_TABLE_TEXT.provingTests(row.provingTests) : null };
+  const result = rowResult(row);
+  return { label: resultText(result), detail: result.key === "validated" ? TASK_TABLE_TEXT.provingTests(row.provingTests) : null };
 }
 
 // ---- The other cells ----
@@ -354,9 +493,9 @@ export function gradeBoxes(edited: ReadonlyArray<{ name: string; awarded: number
   });
 }
 
-/** The Consented cell. */
-export function consentedCell(consented: boolean): string {
-  return consented ? TASK_TABLE_TEXT.consentedYes : TASK_TABLE_TEXT.consentedNo;
+/** The Consent cell. */
+export function consentCell(consent: ConsentValue): string {
+  return consent === "yes" ? TASK_TABLE_TEXT.consentYes : consent === "no" ? TASK_TABLE_TEXT.consentNo : TASK_TABLE_TEXT.consentNotYet;
 }
 
 /** The Staff changes cell's lines, from the row's flags (#431, #437); empty for an unchanged row. */
@@ -417,9 +556,12 @@ export const FLAG_TEXT: Record<string, string> = {
 
 /** A flag in plain words: its sentence, a rejection's reason, or the flag's own name when it has no entry. */
 export function flagText(flag: string): string {
-  if (flag.startsWith(REASON_FLAG_PREFIX)) {
-    const reason = flag.slice(REASON_FLAG_PREFIX.length);
-    return `Not accepted: ${REASON_TEXT[reason]?.meaning ?? reason}`;
+  for (const [prefix, kind] of [[REASON_FLAG_PREFIX, "decided"], [ATTEMPT_FLAG_PREFIX, "last_run"]] as const) {
+    if (!flag.startsWith(prefix)) continue;
+    const reason = flag.slice(prefix.length);
+    const key = REASON_RESULT[reason];
+    const meaning = key ? statusMeaning(key) : reason;
+    return kind === "decided" ? `Not accepted: ${meaning}` : `Last run: ${meaning}`;
   }
   return FLAG_TEXT[flag] ?? flag;
 }
@@ -428,30 +570,34 @@ export function flagText(flag: string): string {
 
 export type People = "students" | "staff" | "everyone";
 export type Changed = "any" | "yes" | "no";
-export type Consented = "any" | "yes" | "no";
-export type Filters = { assignment: number | "all"; team: string | "all"; status: StatusKey | "all"; consented: Consented; changed: Changed; people: People; search: string };
+export type ConsentFilter = "any" | ConsentValue;
+export type Filters = { assignment: number | "all"; team: string | "all"; status: StatusKey | "all"; consent: ConsentFilter; changed: Changed; people: People; search: string };
 
-export const DEFAULT_FILTERS: Filters = { assignment: "all", team: "all", status: "all", consented: "any", changed: "any", people: "students", search: "" };
+export const DEFAULT_FILTERS: Filters = { assignment: "all", team: "all", status: "all", consent: "any", changed: "any", people: "students", search: "" };
 
 /** What the table searches: the email, the team (`owner/repo`) and the task as the Task cell shows it. */
 function searchText(row: TaskTableRow): string {
   return [row.email, row.team ?? "", taskCell(row).name].join("\n").toLowerCase();
 }
 
+/** The People filter alone, which the "Validation results" box follows too. */
+export function matchesPeople(row: Pick<TaskTableRow, "staff">, people: People): boolean {
+  return people === "everyone" || row.staff === (people === "staff");
+}
+
 export function matchesFilters(row: TaskTableRow, filters: Filters): boolean {
   if (filters.assignment !== "all" && row.assignment !== filters.assignment) return false;
   if (filters.team !== "all" && row.team !== filters.team) return false;
   if (filters.status !== "all" && statusKey(row) !== filters.status) return false;
-  if (filters.consented !== "any" && row.consented !== (filters.consented === "yes")) return false;
+  if (filters.consent !== "any" && row.consent !== filters.consent) return false;
   if (filters.changed !== "any" && changedByStaff(row) !== (filters.changed === "yes")) return false;
-  if (filters.people === "students" && row.staff) return false;
-  if (filters.people === "staff" && !row.staff) return false;
+  if (!matchesPeople(row, filters.people)) return false;
   const words = filters.search.trim().toLowerCase().split(/\s+/).filter(Boolean);
   if (words.length && !words.every((word) => searchText(row).includes(word))) return false;
   return true;
 }
 
-/** Clicking a summary row: the table shows that status, every other filter as it was. */
+/** "Show in the table" in a box row's list: the table shows that status, every other filter as it was. */
 export function withStatus(filters: Filters, key: StatusKey): Filters {
   return { ...filters, status: key };
 }
@@ -467,10 +613,10 @@ export function teamOptions(rows: readonly TaskTableRow[]): string[] {
   return all.sort((a, b) => teamName(a).toLowerCase().localeCompare(teamName(b).toLowerCase()) || a.toLowerCase().localeCompare(b.toLowerCase()));
 }
 
-export type TaskSortKey = "assignment" | "team" | "student" | "consented" | "task" | "status" | "coverage" | "gold" | "grade" | "staffChanges" | "repo";
+export type TaskSortKey = "assignment" | "team" | "who" | "consent" | "task" | "status" | "coverage" | "gold" | "grade" | "staffChanges" | "repo";
 export type TaskSort = { key: TaskSortKey; direction: "asc" | "desc" } | null;
 
-export const TASK_SORT_KEYS: readonly TaskSortKey[] = ["assignment", "team", "student", "consented", "task", "status", "coverage", "gold", "grade", "staffChanges", "repo"];
+export const TASK_SORT_KEYS: readonly TaskSortKey[] = ["assignment", "team", "who", "consent", "task", "status", "coverage", "gold", "grade", "staffChanges", "repo"];
 
 /** Numeric columns sort descending first, like the Submissions table's scores. */
 const NUMERIC_KEYS: readonly TaskSortKey[] = ["coverage", "grade", "repo"];
@@ -483,13 +629,14 @@ function sortValue(row: TaskTableRow, key: TaskSortKey): string | number | null 
   switch (key) {
     case "assignment": return row.assignment;
     case "team": return row.team ? `${teamName(row.team).toLowerCase()} ${row.team.toLowerCase()}` : null;
-    case "student": return row.email.toLowerCase();
-    // Yes before No when ascending.
-    case "consented": return row.consented ? 0 : 1;
+    case "who": return row.email.toLowerCase();
+    // Yes, then No, then Not yet when ascending.
+    case "consent": return row.consent === "yes" ? 0 : row.consent === "no" ? 1 : 2;
     case "task": return `${String(row.slot).padStart(2, "0")} ${taskCell(row).name.toLowerCase()}`;
     case "status": {
-      const status = statusKey(row);
-      return `${statusRank(status)} ${status}`;
+      // The box's order, then decided before last run before the capture's flags.
+      const result = rowResult(row);
+      return statusRank(result.key) * 10 + KIND_RANK[result.kind];
     }
     case "coverage": return coveragePercent(row);
     case "gold": return row.gold === "passed" ? 0 : row.gold === "failed" ? 1 : null;
@@ -556,6 +703,8 @@ export type TaskDetail = {
   failToPass: string[];
   passToPass: number;
   validation: null | { validatedAt: string | null; repoSource: "github" | "snapshot" | null; untestedFiles: string[] };
+  /** The stored coverage run (`validation_detail.fix_coverage`), as the validator wrote it; null when there is none. */
+  coverage: CoverageDetail | null;
   workPrChoice: null | { prNumber: number; submittedPrNumber: number; reason: string; chosenBy: string; chosenAt: string };
   extraCodePrs: ExtraPrDetail[];
   hasReport: boolean;
@@ -568,6 +717,42 @@ export type TaskDetail = {
    */
   scores: ReportScore[] | null;
 };
+
+/** One changed code file of a stored coverage run. `covered` and `executable` are null when the run does not hold them. */
+export type CoverageFileDetail = { path: string; state: "run" | "not_run" | "not_measured" | "no_code"; covered: number | null; executable: number | null };
+
+/** What the opened row shows of a stored coverage run: nothing recomputed, only what the validator stored. */
+export type CoverageDetail = {
+  status: "measured" | "partial" | "unavailable";
+  reason: string | null;
+  files: CoverageFileDetail[];
+  filesChanged: number;
+  filesRun: number;
+  linesCovered: number;
+  linesExecutable: number;
+};
+
+/** One file's line in "Tests and criteria": its state in words, and its lines when the run holds them. */
+export function coverageFileLine(file: CoverageFileDetail): { path: string; state: string; lines: string | null } {
+  return {
+    path: file.path,
+    state: TASK_TABLE_TEXT.coverageFileStates[file.state],
+    lines: file.covered !== null && file.executable !== null ? TASK_TABLE_TEXT.coverageLines(file.covered, file.executable) : null,
+  };
+}
+
+/** The coverage block's sentences, in order, under the file list. */
+export function coverageNotes(coverage: CoverageDetail | null): string[] {
+  if (!coverage) return [TASK_TABLE_TEXT.coverageNotMeasured];
+  const reason = coverage.reason ? [TASK_TABLE_TEXT.coverageReason(coverage.reason)] : [];
+  if (coverage.status === "unavailable") return [TASK_TABLE_TEXT.coverageUnavailable, ...reason];
+  const totals: string[] = [];
+  if (coverage.filesChanged > 0) totals.push(TASK_TABLE_TEXT.coverageFilesTotal(coverage.filesRun, coverage.filesChanged));
+  if (coverage.linesExecutable > 0) totals.push(TASK_TABLE_TEXT.coverageLinesTotal(coverage.linesCovered, coverage.linesExecutable));
+  // 0 executable lines with every changed file run (or none with a runnable line): the run found nothing to measure.
+  else if (coverage.filesRun === coverage.filesChanged) totals.push(TASK_TABLE_TEXT.coverageNoRunnable);
+  return coverage.status === "partial" ? [...totals, TASK_TABLE_TEXT.coveragePartial, ...reason] : totals;
+}
 
 /** A score as the opened row shows it: the number, or "Not measured". */
 export function scoreText(score: number | null): string {
