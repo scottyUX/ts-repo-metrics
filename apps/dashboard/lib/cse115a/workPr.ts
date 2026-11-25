@@ -202,7 +202,13 @@ export function extraOverlapWarning(prNumber: number, files: string[], otherPrs:
 
 /** Page texts, word for word. */
 export const WORK_PR_TEXT = {
-  open: "Use a different PR for the code",
+  // #454: one button for both staff fixes, opening two labelled choices.
+  fixOpen: "Fix the code PR",
+  fixChoicesLabel: "How to fix the code PR",
+  fixDifferent: "The code is in a different PR",
+  fixDifferentLine: "Use when the submitted PR holds only the task file, or is not where the work is. Replaces the code PR; the submitted PR is kept as the task-file PR.",
+  fixMore: "The code is spread over more PRs",
+  fixMoreLine: "Use when this PR is right but incomplete. Adds up to three more PRs; nothing is replaced.",
   heading: "Choose the PR that holds this task's code",
   intro: "The task file, its spec and the checks saved at Submit stay. Only where the code comes from changes. Nothing is regraded until you press Regrade.",
   listLabel: "The student's other merged PRs in this repository, likely ones first:",
@@ -226,7 +232,6 @@ export const WORK_PR_TEXT = {
   usedBy: (where: string) => `Used by ${where}`,
   readOnly: "This attempt was unlocked and is read-only.",
   // #437: extra PRs for the task's code.
-  extraOpen: "Add another PR for the code",
   extraHeading: "Add another PR that holds part of this task's code",
   extraIntro: "The task keeps its main PR. The AI reads the main PR's diff and then each extra PR's, in merge order. The benchmark row, the stored copy and \"Get the code\" stay the main PR's. Nothing is regraded until you press Regrade.",
   extraListHeading: "Extra PRs for this task's code",

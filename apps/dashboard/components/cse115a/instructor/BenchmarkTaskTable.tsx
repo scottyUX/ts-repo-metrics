@@ -11,13 +11,13 @@ import {
 } from "@/lib/cse115a/benchmark/taskTable";
 import { FullScreenBox } from "./FullScreenBox";
 import { HelpTip } from "./HelpTip";
-import { CopyButton, SpecBody, SpecViewSwitch } from "./ReviewBoxes";
+import { CollapseToggle, CopyButton, SpecBody, SpecViewSwitch } from "./ReviewBoxes";
 import { fetchJson } from "./shared";
 
 // The Benchmark page's summary of validation results (#444) and its table of every current task (#445), with the
 // Consented column, heading help, the two benchmark columns and the opened row's grade and scores (#449). Since #452
-// the box is a table of results, each with who can fix it and a list of its tasks; Consent has three values; the
-// opened row has "Tests and criteria". Staff only.
+// the box lists the tasks behind each count, Consent has three values and the opened row has "Tests and criteria";
+// #454 makes the box compact again and adds Collapse to the opened row's patch boxes. Staff only.
 
 const T = TASK_TABLE_TEXT;
 const SELECT = "rounded-lg border border-input bg-background px-3 py-2";
@@ -52,86 +52,76 @@ type SummaryProps = {
   /** The rows the People filter keeps: the box follows it. */
   rows: readonly TaskTableRow[];
   people: People;
+  /** The table's Status filter: its row is marked as pressed. */
+  selected: StatusKey | "all";
   onPick: (key: StatusKey) => void;
 };
 
 /**
- * The "Validation results" box (#452): a table of results in a fixed order, each with its count, who can fix it, and
- * a "Show tasks" button opening the list of those tasks in a row under it, built like the Grader tab's lists (#432).
- * Every list is in the markup, hidden until opened. "Show in the table" sets the table's Status filter.
+ * The "Validation results" box, compact again (#454, as before #452's table): one line per result in a fixed order,
+ * its count, label and one-line meaning; clicking a line sets the table's Status filter. Kept from #452: the result
+ * rows and their rules, "decided / from the last run" under a count, the People filter in the total, and a small
+ * "Show tasks" button per line opening the list of those tasks (built like the Grader tab's lists, #432) with "Show
+ * in the table" inside. Every list is in the markup, hidden until opened.
  */
-export function SummaryBoxView({ rows, people, onPick, open, onToggle, idBase }: SummaryProps & { open: StatusKey | null; onToggle: (key: StatusKey) => void; idBase: string }) {
+export function SummaryBoxView({ rows, people, selected, onPick, open, onToggle, idBase }: SummaryProps & { open: StatusKey | null; onToggle: (key: StatusKey) => void; idBase: string }) {
   const { lines, total } = summarize(rows);
-  const listId = (key: StatusKey) => `${idBase}-${key}`;
   return (
     <section aria-labelledby="validation-results" className="rounded-xl border border-border bg-card p-4">
-      <h2 id="validation-results" className="text-lg font-semibold">{T.summaryHeading}</h2>
+      <h2 id="validation-results" className="font-semibold">{T.summaryHeading}</h2>
       <p className="mt-1 text-sm text-muted-foreground">{T.summaryNote}</p>
-      <div className="mt-3 overflow-x-auto">
-        <table className="w-full text-left text-base">
-          <thead className="border-b border-border text-sm text-muted-foreground">
-            <tr>
-              <th scope="col" className="px-3 py-2 font-medium">{T.resultColumn}</th>
-              <th scope="col" className="px-3 py-2 text-right font-medium">{T.tasksColumn}</th>
-              <th scope="col" className="px-3 py-2 font-medium">{T.whoColumn}</th>
-              <th scope="col" className="px-3 py-2"><span className="sr-only">{T.listColumn}</span></th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border">
-            {lines.map((line) => <SummaryRow key={line.key} line={line} isOpen={open === line.key} listId={listId(line.key)} onToggle={onToggle} onPick={onPick} />)}
-          </tbody>
-        </table>
-      </div>
-      <p className="mt-2 border-t border-border px-3 pt-2 text-base font-medium">{T.summaryTotal(total, people)}</p>
+      <ul className="mt-3 divide-y divide-border text-sm">
+        {lines.map((line) => <SummaryRow key={line.key} line={line} selected={selected === line.key} isOpen={open === line.key} listId={`${idBase}-${line.key}`} onToggle={onToggle} onPick={onPick} />)}
+      </ul>
+      <p className="mt-2 border-t border-border px-2 pt-2 text-sm font-medium">{T.summaryTotal(total, people)}</p>
       <ConsentCountLines rows={rows} />
     </section>
   );
 }
 
-/** One result: its row, and its list of tasks in a row under it. */
-function SummaryRow({ line, isOpen, listId, onToggle, onPick }: { line: SummaryLine; isOpen: boolean; listId: string; onToggle: (key: StatusKey) => void; onPick: (key: StatusKey) => void }) {
+/** One result: its line (a button setting the Status filter), its "Show tasks" button, and its list of tasks under it. */
+function SummaryRow({ line, selected, isOpen, listId, onToggle, onPick }: { line: SummaryLine; selected: boolean; isOpen: boolean; listId: string; onToggle: (key: StatusKey) => void; onPick: (key: StatusKey) => void }) {
   const split = countSplit(line);
   return (
-    <>
-      <tr className="align-top">
-        <th scope="row" className="px-3 py-3 font-medium">{line.label}</th>
-        <td className="px-3 py-3 text-right">
-          <span className="text-2xl font-semibold tabular-nums">{line.count}</span>
-          {split ? <span className="block text-xs text-muted-foreground">{split}</span> : null}
-        </td>
-        <td className="px-3 py-3">{line.who}</td>
-        <td className="px-3 py-3 text-right">
-          {line.count > 0 ? (
-            <button type="button" aria-expanded={isOpen} aria-controls={listId}
-              aria-label={isOpen ? T.hideTasksLabel(line.label) : T.showTasksLabel(line.count, line.label)}
-              onClick={() => onToggle(line.key)}
-              className="whitespace-nowrap text-sm font-medium text-primary underline underline-offset-2">
-              {isOpen ? T.hideTasks : T.showTasks}
-            </button>
-          ) : null}
-        </td>
-      </tr>
+    <li>
+      <div className="flex items-start gap-2">
+        <button type="button" onClick={() => onPick(line.key)} aria-pressed={selected}
+          className={`grid min-w-0 flex-1 grid-cols-[4rem_minmax(10rem,16rem)_1fr] items-baseline gap-3 px-2 py-2 text-left hover:bg-muted/50${selected ? " bg-muted" : ""}`}>
+          <span className="text-right">
+            <span className="font-semibold tabular-nums">{line.count}</span>
+            {split ? <span className="block text-xs text-muted-foreground">{split}</span> : null}
+          </span>
+          <span className="font-medium">{line.label}</span>
+          <span className="text-muted-foreground">{line.meaning}</span>
+        </button>
+        {line.count > 0 ? (
+          <button type="button" aria-expanded={isOpen} aria-controls={listId}
+            aria-label={isOpen ? T.hideTasksLabel(line.label) : T.showTasksLabel(line.count, line.label)}
+            onClick={() => onToggle(line.key)}
+            className="mt-1.5 shrink-0 whitespace-nowrap rounded-md border border-input px-2 py-0.5 text-xs font-medium hover:bg-muted">
+            {isOpen ? T.hideTasks : T.showTasks}
+          </button>
+        ) : null}
+      </div>
       {line.count > 0 ? (
-        <tr id={listId} hidden={!isOpen} className="bg-muted/20">
-          <td colSpan={4} className="px-3 py-2">
-            <div className="flex flex-wrap items-center gap-3">
-              <p className="text-xs font-medium text-muted-foreground">{T.listHeading(line.label)}</p>
-              <button type="button" onClick={() => onPick(line.key)} aria-label={T.showInTableLabel(line.label)}
-                className="rounded-md border border-border px-2 py-0.5 text-xs font-medium hover:bg-muted">
-                {T.showInTable}
-              </button>
-            </div>
-            <ul className="mt-1 max-h-64 space-y-0.5 overflow-y-auto text-sm">
-              {taskListRows(line.tasks).map((task) => (
-                <li key={task.id}>
-                  <Link href={reviewHref(task.submissionId)} className="text-primary underline">{taskListLine(task)}</Link>
-                </li>
-              ))}
-            </ul>
-          </td>
-        </tr>
+        <div id={listId} hidden={!isOpen} className="bg-muted/20 px-2 py-2">
+          <div className="flex flex-wrap items-center gap-3">
+            <p className="text-xs font-medium text-muted-foreground">{T.listHeading(line.label)}</p>
+            <button type="button" onClick={() => onPick(line.key)} aria-label={T.showInTableLabel(line.label)}
+              className="rounded-md border border-border px-2 py-0.5 text-xs font-medium hover:bg-muted">
+              {T.showInTable}
+            </button>
+          </div>
+          <ul className="mt-1 max-h-64 space-y-0.5 overflow-y-auto">
+            {taskListRows(line.tasks).map((task) => (
+              <li key={task.id}>
+                <Link href={reviewHref(task.submissionId)} className="text-primary underline">{taskListLine(task)}</Link>
+              </li>
+            ))}
+          </ul>
+        </div>
       ) : null}
-    </>
+    </li>
   );
 }
 
@@ -261,8 +251,16 @@ export function TaskCells({ row }: { row: TaskTableRow }) {
   );
 }
 
-/** A patch in a scrolling box with a Copy button that copies it whole, and Full screen (#448). */
-function PatchBox({ what, text, boxId, title }: { what: string; text: string; boxId: string; title: string }) {
+type PatchBoxProps = { what: string; text: string; boxId: string; title: string };
+
+/** A patch in a scrolling box with a Copy button that copies it whole, Full screen (#448), and Collapse (#454). */
+function PatchBox(props: PatchBoxProps) {
+  const [collapsed, setCollapsed] = useState(false);
+  return <PatchBoxView {...props} collapsed={collapsed} onCollapse={() => setCollapsed(!collapsed)} />;
+}
+
+/** The patch box without state: its header line and toolbar, then the patch unless collapsed. Starts expanded. */
+export function PatchBoxView({ what, text, boxId, title, collapsed, onCollapse }: PatchBoxProps & { collapsed: boolean; onCollapse: () => void }) {
   const copy = <CopyButton text={() => text} label={REVIEW_TEXT.copy} ariaLabel={T.copyPatch(what.toLowerCase())} />;
   return (
     <div className="space-y-1">
@@ -272,8 +270,9 @@ function PatchBox({ what, text, boxId, title }: { what: string; text: string; bo
         <FullScreenBox title={title} what={`the ${what.toLowerCase()}`} tools={copy}>
           <pre className="whitespace-pre p-3 text-xs">{text || T.emptyPatch}</pre>
         </FullScreenBox>
+        <span className="ml-auto"><CollapseToggle collapsed={collapsed} onToggle={onCollapse} what={`the ${what.toLowerCase()}`} controls={boxId} /></span>
       </div>
-      <pre id={boxId} className="max-h-96 overflow-auto rounded-md bg-muted p-2 text-xs">{text || T.emptyPatch}</pre>
+      <pre id={boxId} hidden={collapsed} className="max-h-96 overflow-auto rounded-md bg-muted p-2 text-xs">{collapsed ? null : text || T.emptyPatch}</pre>
     </div>
   );
 }
@@ -494,7 +493,7 @@ export function BenchmarkTaskTable({ slug }: { slug: string }) {
 
   return (
     <div className="space-y-4">
-      <SummaryBox rows={people} people={filters.people} onPick={(key) => setFilters((current) => withStatus(current, key))} />
+      <SummaryBox rows={people} people={filters.people} selected={filters.status} onPick={(key) => setFilters((current) => withStatus(current, key))} />
       <div>
         <h2 className="font-semibold">{T.tableHeading}</h2>
         <p className="mt-1 text-sm text-muted-foreground">{T.tableIntro}</p>

@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useImperativeHandle, useState, type Ref } from "react";
 import type { TaskSnapshot } from "@/lib/cse115a/submissionSnapshot";
 import {
-  choiceDate, extrasFirstMessage, WORK_PR_TEXT, workPrChoiceLine, workPrReasonLine, workPrUndoneLine, type WorkPrCandidate,
+  choiceDate, WORK_PR_TEXT, workPrChoiceLine, workPrReasonLine, workPrUndoneLine, type WorkPrCandidate,
 } from "@/lib/cse115a/workPr";
 import { fetchJson } from "./shared";
 
@@ -16,13 +16,20 @@ type Preview = {
 export const button = "rounded-lg border border-input px-3 py-1.5 text-sm font-medium disabled:opacity-50";
 export const primary = "rounded-lg bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground disabled:opacity-50";
 
+/**
+ * #454: how "Fix the code PR" opens a flow. The flows draw no opener of their own; the page's one button opens one of
+ * them, and each says when it opens or closes so that button can step aside meanwhile.
+ */
+export type FlowHandle = { open: () => void };
+export type FlowProps = { ref?: Ref<FlowHandle>; onOpenChange?: (open: boolean) => void };
+
 /** What the page saw, sent with every write (#431; #437 adds the task's extra PRs). */
 export function seenState(task: TaskSnapshot, recapturedAt: string | null) {
   return { prNumber: task.prNumber, recapturedAt, extraPrs: (task.extraCodePrs ?? []).map((extra) => extra.prNumber) };
 }
 
 /**
- * The student's other merged PRs as radio buttons (the #431 chooser and #437's "Add another PR for the code"). A PR
+ * The student's other merged PRs as radio buttons (the #431 chooser and #437's extra PRs). A PR
  * another task uses, or already added to this task, is shown and can't be picked.
  */
 export function CandidateList({ name, listed, listError, picked, onPick }: {
@@ -67,12 +74,13 @@ export function CandidateList({ name, listed, listError, picked, onPick }: {
 
 /**
  * A task's staff choice of the PR that holds its code (#431), under "Get the code": the line when staff have chosen
- * (with Undo, in two steps), and the chooser. Every write sends what the page saw (`seen`), so a stale page is
- * refused by the server instead of changing a task that moved on.
+ * (with Undo, in two steps), and the chooser, which "Fix the code PR" opens (#454: "The code is in a different PR").
+ * Every write sends what the page saw (`seen`), so a stale page is refused by the server instead of changing a task
+ * that moved on.
  */
-export function WorkPrChooser({ submissionId, task, recapturedAt, readOnly, onChanged }: {
+export function WorkPrChooser({ submissionId, task, recapturedAt, readOnly, onChanged, ref, onOpenChange }: {
   submissionId: string; task: TaskSnapshot; recapturedAt: string | null; readOnly: boolean; onChanged: () => void;
-}) {
+} & FlowProps) {
   const [open, setOpen] = useState(false);
   const [listed, setListed] = useState<Listed | null>(null);
   const [listError, setListError] = useState<string | null>(null);
@@ -92,8 +100,16 @@ export function WorkPrChooser({ submissionId, task, recapturedAt, readOnly, onCh
   const extras = (task.extraCodePrs ?? []).map((extra) => extra.prNumber);
   const locked = readOnly || extras.length > 0;
 
+  function show(next: boolean) {
+    setOpen(next);
+    onOpenChange?.(next);
+  }
+
+  // The opener is "Fix the code PR" (FixCodePr); it offers this flow only when the task is not locked.
+  useImperativeHandle(ref, () => ({ open: () => { if (!locked) void openChooser(); } }));
+
   async function openChooser() {
-    setOpen(true);
+    show(true);
     setMessage(null);
     setListError(null);
     if (listed) return;
@@ -139,7 +155,7 @@ export function WorkPrChooser({ submissionId, task, recapturedAt, readOnly, onCh
     const answer = await send({ slot: task.slot, pr: previewedPr, reason, apply: true, seen });
     setConfirming(false);
     if (!answer) return;
-    setOpen(false);
+    show(false);
     setPreview(null);
     setPreviewedPr(null);
     setPr("");
@@ -178,14 +194,11 @@ export function WorkPrChooser({ submissionId, task, recapturedAt, readOnly, onCh
         </div>
       ) : task.workPrUndone ? <p className="text-muted-foreground">{workPrUndoneLine(task.workPrUndone)}</p> : null}
 
-      {!readOnly && extras.length ? <p className="text-muted-foreground">{extrasFirstMessage(extras)}</p> : null}
-      {locked ? null : !open ? (
-        <button type="button" onClick={() => void openChooser()} className={button}>{WORK_PR_TEXT.open}</button>
-      ) : (
+      {locked || !open ? null : (
         <div className="space-y-3 rounded-lg border border-border p-3">
           <div className="flex items-start justify-between gap-2">
             <h4 className="font-semibold">{WORK_PR_TEXT.heading}</h4>
-            <button type="button" onClick={() => { setOpen(false); setConfirming(false); }} className="text-xs text-primary underline">{WORK_PR_TEXT.close}</button>
+            <button type="button" onClick={() => { show(false); setConfirming(false); }} className="text-xs text-primary underline">{WORK_PR_TEXT.close}</button>
           </div>
           <p className="text-muted-foreground">{WORK_PR_TEXT.intro}</p>
           <CandidateList name={`work-pr-${task.slot}`} listed={listed} listError={listError} picked={pr.trim()} onPick={choose} />

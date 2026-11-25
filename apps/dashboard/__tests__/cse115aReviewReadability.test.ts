@@ -331,7 +331,8 @@ describe("2. copy", () => {
     expect(REVIEW_TEXT.copySectionLabel("patch", 12)).toBe("Copy PR #12's patch");
     expect(REVIEW_TEXT.fullHeightLabel("the patch")).toBe("Show the patch at full height");
     const boxes = await readFile(join(__dirname, "../components/cse115a/instructor/ReviewBoxes.tsx"), "utf8");
-    expect(boxes.match(/<button type="button"/g)?.length).toBe(4);
+    // #454 adds Collapse (CollapseToggle) to the four.
+    expect(boxes.match(/<button type="button"/g)?.length).toBe(5);
     expect(boxes).toContain('aria-live="polite"');
   });
 });

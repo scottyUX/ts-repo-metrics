@@ -62,10 +62,6 @@ export const TASK_TABLE_TEXT = {
   summaryHeading: "Validation results",
   summaryNote: "Current attempts only: a task from an attempt that was later unlocked and submitted again is not counted. Each task is in one row. Show tasks lists them, each with a link to its review page.",
   summaryTotal: (total: number, people: People) => `Total: ${total} ${total === 1 ? "task" : "tasks"} (${PEOPLE_TOTAL[people]})`,
-  resultColumn: "Result",
-  tasksColumn: "Tasks",
-  whoColumn: "Who can fix it",
-  listColumn: "List of tasks",
   countSplit: (decided: number, lastRun: number) => `${decided} decided, ${lastRun} from the last run`,
   showTasks: "Show tasks",
   hideTasks: "Hide tasks",
@@ -123,7 +119,7 @@ export const TASK_TABLE_TEXT = {
     consent: "Consent",
     task: "Task",
     status: "Status",
-    coverage: "Coverage (experimental)",
+    coverage: "Coverage",
     gold: "Gold check",
     grade: "Final grade",
     score: "Score",
@@ -173,7 +169,7 @@ export const TASK_TABLE_TEXT = {
   provingHeading: (count: number) => `Proving tests (${count})`,
   provingGuess: "Read from the test patch; no test run has proven them yet.",
   testsHeading: "Tests and criteria",
-  coverageHeading: "Coverage (experimental)",
+  coverageHeading: "Coverage",
   coverageNotMeasured: "Not measured yet.",
   coverageNoRunnable: "The coverage run found no runnable changed lines. This can be a limit of the coverage run for this repository.",
   coverageUnavailable: "The coverage run could not measure this task.",
@@ -256,21 +252,21 @@ export type StatusKey =
   | "validated" | "no_tests" | "no_fail_to_pass" | "regressions" | "regression_skip" | "no_code"
   | "never_loaded" | "env_unsupported" | "env_error" | "not_tried" | "other";
 
-export type ResultRow = { key: StatusKey; label: string; who: string; meaning: string };
+export type ResultRow = { key: StatusKey; label: string; meaning: string };
 
-/** The box's rows: label, who can fix it, and the plain sentence the Status help shows. */
+/** The box's rows: label and the plain sentence the box and the Status help show. */
 export const RESULTS: readonly ResultRow[] = [
-  { key: "validated", label: "Validated", who: "", meaning: "Its tests fail before the student's change and pass after it." },
-  { key: "no_tests", label: "No tests in the PR", who: "The student", meaning: "The PR changes no test file, so nothing can prove the change." },
-  { key: "no_fail_to_pass", label: "No test proves the change", who: "The student", meaning: "No test fails before the student's change and passes after it." },
-  { key: "regressions", label: "The change breaks other tests", who: "The student", meaning: "Tests that passed before the student's change fail after it." },
-  { key: "regression_skip", label: "The change turns tests off", who: "The student", meaning: "The student's change skips tests that ran before it." },
-  { key: "no_code", label: "No code in the submitted PR", who: "Staff, by choosing the PR that holds the code", meaning: "The submitted PR changes no code outside its tests, often only the task file. Staff can choose the PR that holds the code." },
-  { key: "never_loaded", label: "A test file never loaded", who: "The validator", meaning: "A test file from the PR did not load after the change, so its tests could not run. This is usually the validator's setup, not the student's work." },
-  { key: "env_unsupported", label: "Repository type not supported", who: "The validator", meaning: "The validator cannot set up and run this repository's tests yet." },
-  { key: "env_error", label: "Our run failed", who: "The validator", meaning: "Our test run failed; this says nothing about the student's work." },
-  { key: "not_tried", label: "Not tried yet", who: "", meaning: "The validator has not run this task yet." },
-  { key: "other", label: "Another result", who: "", meaning: "The validator gave a reason this page has no description for yet; the Status cell shows its name." },
+  { key: "validated", label: "Validated", meaning: "Its tests fail before the student's change and pass after it." },
+  { key: "no_tests", label: "No tests in the PR", meaning: "The PR changes no test file, so nothing can prove the change." },
+  { key: "no_fail_to_pass", label: "No test proves the change", meaning: "No test fails before the student's change and passes after it." },
+  { key: "regressions", label: "The change breaks other tests", meaning: "Tests that passed before the student's change fail after it." },
+  { key: "regression_skip", label: "The change turns tests off", meaning: "The student's change skips tests that ran before it." },
+  { key: "no_code", label: "No code in the submitted PR", meaning: "The submitted PR changes no code outside its tests, often only the task file. Staff can choose the PR that holds the code." },
+  { key: "never_loaded", label: "A test file never loaded", meaning: "A test file from the PR did not load after the change, so its tests could not run. This is usually the validator's setup, not the student's work." },
+  { key: "env_unsupported", label: "Repository type not supported", meaning: "The validator cannot set up and run this repository's tests yet." },
+  { key: "env_error", label: "Our run failed", meaning: "Our test run failed; this says nothing about the student's work." },
+  { key: "not_tried", label: "Not tried yet", meaning: "The validator has not run this task yet." },
+  { key: "other", label: "Another result", meaning: "The validator gave a reason this page has no description for yet; the Status cell shows its name." },
 ];
 
 const RESULT_BY_KEY = new Map(RESULTS.map((result) => [result.key, result]));
@@ -342,11 +338,6 @@ export function statusLabel(key: StatusKey): string {
 /** The result's plain sentence, as the Status help shows it. */
 export function statusMeaning(key: StatusKey): string {
   return RESULT_BY_KEY.get(key)?.meaning ?? "";
-}
-
-/** Who can fix tasks with this result; "" when nobody needs to. */
-export function statusWho(key: StatusKey): string {
-  return RESULT_BY_KEY.get(key)?.who ?? "";
 }
 
 /** "Our run failed" → "our run failed", for use after "Not accepted:" and "last run:". */

@@ -3,8 +3,8 @@ import { parseDiffFiles } from "@/lib/cse115a/diff";
 import { isTaskSlot, TASK_SLOTS } from "@/lib/cse115a/taskSlots";
 
 // The Submissions table's "no code in PR" marker (#440). A task whose submitted PR changes only task files
-// (docs/tasks/...) has nothing to grade; staff then use "Use a different PR for the code" (#431). Worked out for one
-// assignment by its own staff route, after the table has loaded, and never written anywhere.
+// (docs/tasks/...) has nothing to grade; staff then use "Fix the code PR", "The code is in a different PR" (#431,
+// #454). Worked out for one assignment by its own staff route, after the table has loaded, and never written anywhere.
 //
 // The answer comes from the benchmark source rows' flags first, which every captured task has (the benchmark job
 // runs for every submission; export filters by consent): buildInstance drops task files and AI-tool files from the

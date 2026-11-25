@@ -24,6 +24,11 @@ export const REVIEW_TEXT = {
   fullScreen: "Full screen",
   fullScreenLabel: (what: string) => `Show ${what} full screen`,
   close: "Close",
+  // Collapse (#454): a patch box down to its header line and toolbar.
+  collapse: "Collapse",
+  expand: "Expand",
+  collapseLabel: (what: string) => `Collapse ${what}`,
+  expandLabel: (what: string) => `Expand ${what}`,
   // Team and GitHub username.
   team: "Team",
   allTeams: "All teams",
@@ -33,7 +38,7 @@ export const REVIEW_TEXT = {
   noCode: (slot: number) => `Task ${slot}: no code in PR`,
   chosenByStaff: (slot: number) => `Task ${slot}: code PR chosen by staff`,
   needsCodePr: "Needs a code PR",
-  tableNote: "Team is the repository of the student's tasks. \"No code in PR\" means the task's PR changes only task files (docs/tasks/); open Review and use \"Use a different PR for the code\".",
+  tableNote: "Team is the repository of the student's tasks. \"No code in PR\" means the task's PR changes only task files (docs/tasks/); open Review and use \"Fix the code PR\", then \"The code is in a different PR\".",
   noCodeFailed: "The \"no code in PR\" marker could not be loaded. The rest of the table is up to date.",
 } as const;
 

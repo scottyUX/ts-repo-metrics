@@ -498,11 +498,11 @@ The validator prints one JSON object and writes nothing to the database:
 
 `untested_files` (validated rows only, present only when non-empty) lists the code files the
 source patch adds or modifies that the proving tests do not run. When the batch ran the coverage
-run (`--fix-coverage` / `--fix-coverage-only`) and it measured something, the list comes from it
-(see "Fix coverage"); otherwise from the import rule below. `untested_files_source` says which:
-`coverage`, `imports`, or `mixed` (coverage, plus the import rule for the files coverage could
-not measure). It is present only on results the coverage run was requested for, so a result made
-without it is unchanged; absent, the list is the import rule's. A row is validated when its tests fail
+run (on by default in a normal run since #454, or `--fix-coverage-only`) and it measured something,
+the list comes from it (see "Fix coverage"); otherwise from the import rule below.
+`untested_files_source` says which: `coverage`, `imports`, or `mixed` (coverage, plus the import
+rule for the files coverage could not measure). It is present only on results the coverage run ran
+for, so a result made with `--no-fix-coverage` is unchanged; absent, the list is the import rule's. A row is validated when its tests fail
 before the fix and pass after it, which proves the part of the fix the tests touch and nothing
 else: a PR whose tests exercise a back-end route can change four front-end files no test loads,
 and an agent graded on that row could leave the front end broken and still score 1.0. Such rows
@@ -536,8 +536,8 @@ the validator-owned flag `untested_files` to `cse_benchmark_task_sources.flags` 
 when a later result lists none. If the post-fix tree cannot be read, `detail` gets
 "untested_files not computed: …" and the field is left out.
 
-`fix_coverage` (batch with `--fix-coverage` or `--fix-coverage-only`, validated rows only) is the
-coverage run's outcome; see "Fix coverage".
+`fix_coverage` (batch, validated rows only: a normal run unless `--no-fix-coverage`, or
+`--fix-coverage-only`) is the coverage run's outcome; see "Fix coverage".
 
 `harbor_env` is the Harbor recipe for the environment the runs used (see "Harbor export"); the
 batch replaces its image with the digest it resolved.
@@ -730,8 +730,13 @@ unchanged (`imports`). The import rule (`untestedFiles.ts`) stays as that fallba
 unchanged: the `untested_files` flag is added when the list is non-empty and removed when it is
 empty; the per-file detail stays in the result JSON.
 
-**Batch.** `--fix-coverage` runs it after each row that validates (before the gold check, when
-both are on). `--fix-coverage-only` runs only it, for the rows in `--only` whose result file
+**Batch.** A normal run runs it after each row that validates (before the gold check, when both
+are on): it is on by default since #454. `--no-fix-coverage` turns it off, and the result is then
+the validator's alone, as before the coverage run existed. `--fix-coverage`, which turned it on
+before #454, is still accepted and changes nothing; it keeps its old checks (it does not go with
+`--fix-coverage-only`, `--snapshot-only` or `--gold-only`), and so does `--no-fix-coverage` with
+`--fix-coverage` and with `--fix-coverage-only`. `--snapshot-only` and `--gold-only` validate
+nothing, so they measure nothing either. `--fix-coverage-only` (unchanged) runs only it, for the rows in `--only` whose result file
 exists and is validated, and rewrites each such file with only `fix_coverage`, `untested_files` and
 `untested_files_source` changed, then `summary.json`, `summary.md` and `writeback.sql`. Unlike
 `--gold-only` it needs Docker and the checkout: the clone in `repos/` (cloned again when missing),
@@ -1299,8 +1304,8 @@ line, an error, or a response. Each copy logs one line with how long it took:
   `PASS_TO_PASS`. Visible in `modified_tests`.
 - **Without the coverage run, `untested_files` follows imports, not execution.** A file the tests
   import but never call counts as tested, and code loaded dynamically (string-built paths, framework
-  file routing, a front end exercised only over HTTP) counts as untested. `--fix-coverage` /
-  `--fix-coverage-only` measure it instead; their own limits are under "Fix coverage".
+  file routing, a front end exercised only over HTTP) counts as untested. The coverage run (on by
+  default, or `--fix-coverage-only`) measures it instead; its own limits are under "Fix coverage".
 
 ## Not yet
 

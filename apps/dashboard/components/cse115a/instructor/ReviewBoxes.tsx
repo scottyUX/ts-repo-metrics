@@ -6,7 +6,8 @@ import { FullScreenBox } from "./FullScreenBox";
 import { MarkdownView } from "./MarkdownView";
 
 // The review page's readable boxes (#440): the task spec as formatted markdown or raw text, a full-height switch per
-// box, and Copy buttons that copy the stored text; and "Full screen" for each box (#448). Staff only.
+// box, and Copy buttons that copy the stored text; "Full screen" for each box (#448); and "Collapse" for each diff
+// box (#454). Staff only.
 
 const SMALL_BUTTON = "rounded-md border border-input px-2 py-1 text-xs font-medium hover:bg-muted focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary";
 
@@ -46,6 +47,19 @@ export function HeightToggle({ full, onToggle, what, controls }: { full: boolean
     <button type="button" onClick={onToggle} aria-expanded={full} aria-controls={controls}
       aria-label={full ? REVIEW_TEXT.lessLabel(what) : REVIEW_TEXT.fullHeightLabel(what)} className={SMALL_BUTTON}>
       {full ? REVIEW_TEXT.less : REVIEW_TEXT.fullHeight}
+    </button>
+  );
+}
+
+/**
+ * "Collapse" / "Expand" for one patch box (#454), at the right end of its toolbar. Collapsed, the box shows only its
+ * header line and toolbar; Copy still copies the stored text. `controls` is the id of the part it hides.
+ */
+export function CollapseToggle({ collapsed, onToggle, what, controls }: { collapsed: boolean; onToggle: () => void; what: string; controls: string }) {
+  return (
+    <button type="button" onClick={onToggle} aria-expanded={!collapsed} aria-controls={controls}
+      aria-label={collapsed ? REVIEW_TEXT.expandLabel(what) : REVIEW_TEXT.collapseLabel(what)} className={SMALL_BUTTON}>
+      {collapsed ? REVIEW_TEXT.expand : REVIEW_TEXT.collapse}
     </button>
   );
 }
@@ -95,21 +109,31 @@ export function SpecBody({ markdown, raw, full, boxId }: { markdown: string; raw
     : <div id={boxId} className={`${height}overflow-auto border-t border-border p-3`}><MarkdownView markdown={markdown} /></div>;
 }
 
+type DiffBoxProps = { what: string; title: string; boxId: string; tools?: ReactNode; fullScreenTools?: ReactNode; children: (full: boolean) => ReactNode };
+
 /**
- * A diff box with its own full-height switch and Full screen (#448). `children` is the diff view, drawn at the height
- * this box chose, and at full height in the dialog. `title` heads the dialog; `fullScreenTools` are its buttons (a
- * Copy of this box's stored text), `tools` when not given.
+ * A diff box with its own full-height switch and Full screen (#448), and Collapse at the right end of its toolbar
+ * (#454). `children` is the diff view, drawn at the height this box chose, and at full height in the dialog; nothing
+ * is drawn while collapsed. `title` heads the dialog; `fullScreenTools` are its buttons (a Copy of this box's stored
+ * text), `tools` when not given. Starts expanded.
  */
-export function DiffBox({ what, title, boxId, tools, fullScreenTools, children }: { what: string; title: string; boxId: string; tools?: ReactNode; fullScreenTools?: ReactNode; children: (full: boolean) => ReactNode }) {
+export function DiffBox(props: DiffBoxProps) {
   const [full, setFull] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
+  return <DiffBoxView {...props} full={full} onFull={() => setFull(!full)} collapsed={collapsed} onCollapse={() => setCollapsed(!collapsed)} />;
+}
+
+/** The diff box without state, so a test can call it and look at what it builds. */
+export function DiffBoxView({ what, title, boxId, tools, fullScreenTools, children, full, onFull, collapsed, onCollapse }: DiffBoxProps & { full: boolean; onFull: () => void; collapsed: boolean; onCollapse: () => void }) {
   return (
     <div>
       <div className="flex flex-wrap items-center justify-end gap-2 px-3 pt-2">
         {tools}
-        <HeightToggle full={full} onToggle={() => setFull(!full)} what={what} controls={boxId} />
+        <HeightToggle full={full} onToggle={onFull} what={what} controls={boxId} />
         <FullScreenBox title={title} what={what} tools={fullScreenTools ?? tools}>{children(true)}</FullScreenBox>
+        <CollapseToggle collapsed={collapsed} onToggle={onCollapse} what={what} controls={boxId} />
       </div>
-      <div id={boxId}>{children(full)}</div>
+      <div id={boxId} hidden={collapsed}>{collapsed ? null : children(full)}</div>
     </div>
   );
 }

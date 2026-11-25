@@ -574,7 +574,9 @@ describe("6. the out-of-date AI grade line", () => {
     const review = readFileSync(new URL("../components/cse115a/instructor/SubmissionReview.tsx", import.meta.url), "utf8");
     expect(review).toContain("const staleGrade = grade ? staleAiGradeLine(task, grade.graded_at) : null;");
     expect(review.indexOf("{staleGrade ?")).toBeLessThan(review.indexOf("{RUBRIC.map((row) => {\n              const agent"));
-    expect(review).toContain("<WorkPrChooser ");
+    // #454: the chooser is opened from "Fix the code PR", which holds it.
+    expect(review).toContain("<FixCodePr ");
+    expect(readFileSync(new URL("../components/cse115a/instructor/FixCodePr.tsx", import.meta.url), "utf8")).toContain("<WorkPrChooser ");
     // No browser confirm anywhere in the chooser.
     const chooser = readFileSync(new URL("../components/cse115a/instructor/WorkPrChooser.tsx", import.meta.url), "utf8");
     expect(chooser).not.toMatch(/\bconfirm\(/);
