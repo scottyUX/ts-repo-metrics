@@ -455,24 +455,57 @@ Not accepted, one line per `validation_reason:` flag; No code in the PR (the
 flags `noCodePr.ts` reads); No tests in the PR (`no_test_patch`); No result yet.
 The lines add up to the total. Clicking a line sets the table's status filter.
 
-Columns: Assignment, Team, Student (with a "Staff" tag for an email in
-`cse_course_roles`), Task, Status, Coverage (`validation_detail.fix_coverage`),
-Gold check (`harbor_env.gold`), Final grade (display only), Staff changes
+Columns (#449 order): Sprint (the assignment number; only this table says
+"Sprint", the Submissions page keeps "Assignment"), Team (one line), Student
+(with a "Staff" tag for an email in `cse_course_roles`), Consented, Task, Status,
+Coverage (experimental) (`validation_detail.fix_coverage`), Gold check
+(`harbor_env.gold`), Final grade (display only; hovering or focusing it shows
+the six rubric boxes' points), Benchmark grade, Benchmark include, Staff changes
 (#431, #437) and Repo ("Report" with the stored report's own date, or "No
-report"). Filters: assignment, team, status, changed by staff, people (default
-Students only) and a search over email, team and task. Every column sorts like
-the Submissions table. Clicking a row opens it in place: the spec (Formatted /
-Raw), both patches whole with Copy, the proving tests, the flags in plain words
-(`FLAG_TEXT` in `lib/cse115a/benchmark/taskTable.ts`), the validation detail, a
-"Changed by staff" block read from the snapshot, and links to the review page
-and the Repo Metrics report.
+report"). Filters: sprint, team, status, consented (Any / Yes / No), changed by
+staff, people (default Students only) and a search over email, team and task.
+Every column but the two benchmark columns sorts like the Submissions table. A
+line under the "Tasks" heading says the grade, coverage and gold check are shown
+there only and are not in the downloads.
+
+- **Consented** (#449) is "Yes" only when the student's consent counts by the
+  downloads' rule, `countsAsConsent` in `lib/cse115a/consent.ts`: a yes to the
+  current, approved wording. A no, no answer, or a yes to an older wording is
+  "No". The foot of the "Validation results" box adds "Validated and consented:
+  N" and "Validated, not consented: N" (apart from the lines that add up to the
+  total, which they do not change) and "A download holds a validated task only
+  when its student consented." This reverses #444/#445's "no consent on a row"
+  rule, on the product owner's decision. Who counts as consented and the
+  downloads did not change.
+- **Help (?)** beside Status, Coverage, Gold check, Benchmark grade and
+  Benchmark include opens a short panel on hover and keyboard focus, closes on
+  Esc and on moving away, and is named by the button's `aria-describedby`
+  (`HelpTip.tsx`). The Status help is built from `statusLabel` and
+  `statusMeaning`, the same words as the "Validation results" box.
+- **Benchmark grade** and **Benchmark include** are placeholders: every cell
+  reads "Not set". No data, route field or migration exists for them yet.
+
+Clicking a row opens it in place: links to the review page and the Repo Metrics
+report; the **Grade** (each rubric box's final points, the instructor's where
+edited, else the AI's, the total, and "not released" as the table marks it);
+the **Repo Metrics scores** (Commit Habits, Testing, Code Quality, Code
+Complexity, worked out on the server from the stored `repo_metrics` with the
+metrics page's own `buildOverviewScoreStrip`, shown with the report's date; a
+stored report that cannot be scored says so, and the link stays); the spec
+(Formatted / Raw), both patches whole with Copy, each with **Full screen**
+(#448); the proving tests, the flags in plain words (`FLAG_TEXT` in
+`lib/cse115a/benchmark/taskTable.ts`), the validation detail, and a "Changed by
+staff" block read from the snapshot.
 
 Routes (course staff, read only): `GET .../courses/<slug>/benchmark/tasks`
-returns the rows without `problem_statement`, `patch`, `test_patch`, the diff or
-anything about consent; `GET .../courses/<slug>/benchmark/tasks/<source id>`
-returns one task for the opened row. No cell, filter or route says whether a
-student consented: consent stays in the "Consented" tile, the totals line and
-the download rules, which did not change.
+returns the rows without `problem_statement`, `patch`, `test_patch` or the diff.
+Since #449 it reads `cse_research_consent` (`user_id, consented,
+consent_version`) and sends each row's `consented`, a yes or no by
+`countsAsConsent`; never the answer itself, its version or its date. It reads
+each rubric box's name and points as JSON paths, never the rationales, quotes or
+notes. `GET .../courses/<slug>/benchmark/tasks/<source id>` returns one task
+for the opened row, with its grade by box and the four scores; it reads the
+stored report to score it and never sends the report.
 
 ### Re-capturing old diffs (#418)
 
@@ -718,7 +751,12 @@ Staff only; nothing a student sees changes.
   (`rel="noopener noreferrer"`); images are never loaded (the alt text and the
   address are shown). Nesting deeper than 16 levels is shown as written.
 - Each diff box and the spec box have **Show full height / Show less** (not
-  saved). **Copy all** on `patch` and `test_patch` copies the tab's stored text,
+  saved) and, since #448, **Full screen**: that one box in a modal dialog over
+  the whole window (a heading naming the box, focus kept inside, the page behind
+  not scrolling, closed by **Close** or Esc, focus back on the button), at full
+  width and scrolling, with Formatted / Raw (spec) and Copy working as on the
+  page. Copy still copies the stored text. Nothing is saved by opening or
+  closing it, and no score field is inside (`FullScreenBox.tsx`). **Copy all** on `patch` and `test_patch` copies the tab's stored text,
   including anything past the 200,000-character display limit; with extra PRs
   (#437) each section has its own **Copy**, and Copy all puts every section in
   page order under its one-line PR heading. A refused copy says "Could not copy.
@@ -906,7 +944,10 @@ stores one of those two constants.
 **Staff totals.** `GET /api/cse115a/instructor/courses/<slug>/consent-totals`
 (course staff) returns `{ enrolled, yes, no, notAnswered }` for the current
 version: counts only, no ids, emails or names. The Benchmark page shows them as
-one line. No page or route shows which student answered what.
+one line. Since #449 the staff Benchmark task table shows, per task, whether the
+student's consent counts ("Yes"), or not ("No": a no, no answer, or an older
+wording), by `countsAsConsent`; it does not show which of those a "No" is. No
+student page or route shows consent beyond the student's own answer.
 
 ## Before enabling student access
 

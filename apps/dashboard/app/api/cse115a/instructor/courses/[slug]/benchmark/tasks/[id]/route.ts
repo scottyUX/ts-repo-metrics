@@ -9,7 +9,8 @@ type Params = { params: Promise<{ slug: string; id: string }> };
 
 /**
  * Course staff: one task of the Benchmark page's table, opened in place (#445): its spec and patches whole, its
- * proving tests, flags, validation detail and staff changes. Only a task of this course. Writes nothing.
+ * proving tests, flags, validation detail and staff changes; its grade by box and its stored report's four scores (#449),
+ * never the report. Only a task of this course. Writes nothing.
  */
 export async function GET(_request: Request, { params }: Params) {
   const { slug, id } = await params;

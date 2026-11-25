@@ -1,14 +1,21 @@
 import { noCodeFromFlags } from "@/lib/cse115a/noCodePr";
-import { TASK_POINTS } from "@/lib/cse115a/rubric";
+import { RUBRIC, TASK_POINTS } from "@/lib/cse115a/rubric";
 import { EXTRA_CODE_PRS_FLAG, WORK_PR_FLAG } from "@/lib/cse115a/workPr";
 
 // The staff Benchmark page's task table (#445) and its summary of validation results (#444): one row per current
 // task, its status in plain words, and the filters, search and sorting. Client-safe: no server imports. Staff only.
-// Nothing here says whether a student consented; consent stays in the tiles, the totals line and the downloads.
+// Since #449 each row says whether its student consented, by the downloads' rule (`countsAsConsent`): a yes to the
+// current, approved wording. Only that yes or no is sent, never the answer itself or its wording version.
 
 // ---- What the list route sends ----
 
-/** One current task, as the list route sends it. Never the spec, the patches, or anything about consent. */
+/** One rubric box's final points: the instructor's where edited, else the AI's; null when neither scored it. */
+export type GradeBox = { name: string; points: number; awarded: number | null };
+
+/** A task's grade as the table shows it. Display only: no filter, status or download reads it. */
+export type TaskGrade = { total: number; released: boolean; boxes: GradeBox[] };
+
+/** One current task, as the list route sends it. Never the spec or the patches. */
 export type TaskTableRow = {
   /** The benchmark source row's id; the detail route takes it. */
   id: string;
@@ -20,6 +27,8 @@ export type TaskTableRow = {
   email: string;
   /** The user has a row in `cse_course_roles`. */
   staff: boolean;
+  /** The student's consent counts by the downloads' rule (`countsAsConsent`). False for a no, no answer, or an older wording. */
+  consented: boolean;
   taskId: string | null;
   title: string | null;
   validationStatus: "candidate" | "validated" | "rejected";
@@ -29,8 +38,8 @@ export type TaskTableRow = {
   coverage: { status: "measured" | "partial" | "unavailable"; covered: number; executable: number } | null;
   untestedFiles: number;
   gold: "passed" | "failed" | "skipped" | null;
-  /** effectiveTotal; null when the task has no grade yet. */
-  grade: { total: number; released: boolean } | null;
+  /** effectiveTotal and each box's final points; null when the task has no grade yet. */
+  grade: TaskGrade | null;
   /** How many extra code PRs the snapshot lists (#437). */
   extraCodePrs: number;
   /** A Repo Metrics report is stored with the task. */
@@ -47,7 +56,11 @@ export const TASK_TABLE_TEXT = {
   summaryNote: "Current attempts only: a task from an attempt that was later unlocked and submitted again is not counted. Click a row to show those tasks in the table.",
   summaryTotal: (total: number) => `Total: ${total} ${total === 1 ? "task" : "tasks"}`,
   tilesNote: "The tiles above count every captured task, older attempts included. The results and the table below count current attempts only.",
+  consentCountsNote: "A download holds a validated task only when its student consented.",
+  validatedConsented: (count: number) => `Validated and consented: ${count}`,
+  validatedNotConsented: (count: number) => `Validated, not consented: ${count}`,
   tableHeading: "Tasks",
+  tableIntro: "This table joins each benchmark task to its grade and its validation result. The grade, coverage and gold check are shown here only and are not in the downloads.",
   showing: (shown: number, total: number) => `Showing ${shown} of ${total} ${total === 1 ? "task" : "tasks"}`,
   loading: "Loading tasks…",
   noTasks: "No tasks captured yet.",
@@ -55,13 +68,18 @@ export const TASK_TABLE_TEXT = {
   tableNote: "Click a row to open it; click again to close it. Click a column heading to sort; click again to reverse, a third time to go back to the original order. Rows with no value go last. The final grade is for reading only: it is not a filter, it does not change a status, and no download carries it.",
   loadFailed: (message: string) => `The task table could not be loaded: ${message}`,
   // Filters.
-  assignmentLabel: "Assignment",
-  allAssignments: "All assignments",
-  assignmentOption: (number: number) => `Assignment ${number}`,
+  // "Sprint" here only; the number is the assignment number, and the Submissions page keeps "Assignment".
+  assignmentLabel: "Sprint",
+  allAssignments: "All sprints",
+  assignmentOption: (number: number) => `Sprint ${number}`,
   teamLabel: "Team",
   allTeams: "All teams",
   statusLabel: "Status",
   allStatuses: "All results",
+  consentedLabel: "Consented",
+  consentedAny: "Any",
+  consentedYes: "Yes",
+  consentedNo: "No",
   changedLabel: "Changed by staff",
   changedAny: "Any",
   changedYes: "Yes",
@@ -74,20 +92,30 @@ export const TASK_TABLE_TEXT = {
   searchPlaceholder: "Email, team or task",
   // Columns.
   columns: {
-    assignment: "Assignment",
+    assignment: "Sprint",
     team: "Team",
     student: "Student",
+    consented: "Consented",
     task: "Task",
     status: "Status",
-    coverage: "Coverage",
+    coverage: "Coverage (experimental)",
     gold: "Gold check",
     grade: "Final grade",
+    benchmarkGrade: "Benchmark grade",
+    benchmarkInclude: "Benchmark include",
     staffChanges: "Staff changes",
     repo: "Repo",
   },
   repoColumnNote: "Repo Metrics report stored at submit time",
   repoColumnTitle: "The Repo Metrics report stored with the task when it was submitted. It is not made again when staff change the task's PRs. Open a row for the link.",
   staffTag: "Staff",
+  // Help beside a heading ("?"). The Status help is built from statusLabel and statusMeaning (statusHelpLines).
+  helpLabel: (column: string) => `What ${column} means`,
+  coverageHelp: "Of the code lines this task changes, the share the proving tests ran. Measured by a coverage run in the validator. Experimental: nobody has checked these numbers by hand yet. \"Not measured\" means the coverage run has not been done for this task.",
+  goldHelp: "Harbor is the format coding agents are run in. The gold check builds this task as a Harbor task and applies the student's own change. Passed means the task's tests pass there, so the task can be solved as packaged. Not run means it has not been tried yet. The Harbor download holds only tasks that passed.",
+  benchmarkGradeHelp: "How good the task is as a benchmark item. It is separate from the student's grade and never changes it. Not scored yet.",
+  benchmarkIncludeHelp: "Staff's decision to put the task in the benchmark or leave it out, with a reason. Not decided yet.",
+  notSet: "Not set",
   // Cells.
   provingTests: (count: number) => `${count} proving ${count === 1 ? "test" : "tests"}`,
   notMeasured: "Not measured",
@@ -100,6 +128,7 @@ export const TASK_TABLE_TEXT = {
   goldNotRun: "Not run",
   notGraded: "Not graded yet",
   notReleased: "not released",
+  gradeBoxesLabel: (task: string) => `Grade by box for ${task}`,
   chosenByStaff: "Code PR chosen by staff",
   extraCodePrs: (count: number) => count > 0 ? `${count} extra code ${count === 1 ? "PR" : "PRs"}` : "Extra code PRs",
   report: "Report",
@@ -140,7 +169,18 @@ export const TASK_TABLE_TEXT = {
   reviewLink: "Open the review page",
   reportLink: "Open the Repo Metrics report",
   reportBeforeChange: "This report is from the original submission, before the staff change.",
+  gradeHeading: "Grade",
+  gradeBoxLine: (name: string, awarded: number | null, points: number) => `${name}: ${awarded === null ? "not scored" : formatNumber(awarded)} / ${points}`,
+  gradeTotal: (total: number) => `Total: ${formatNumber(total)} / ${TASK_POINTS}`,
+  scoresHeading: "Repo Metrics scores",
+  scoreNotMeasured: "Not measured",
+  scoresFailed: "The scores could not be worked out from the stored report.",
 } as const;
+
+/** Points as the table shows them: at most two decimals, no trailing zeros. */
+export function formatNumber(value: number): string {
+  return String(Number(value.toFixed(2)));
+}
 
 /** A date as the table shows it, "Nov 12" (UTC, so every viewer and a test read the same day); null when unreadable. */
 export function shortDate(iso: string | null | undefined): string | null {
@@ -220,6 +260,15 @@ export function statusMeaning(key: StatusKey): string {
   return REASON_TEXT[reason]?.meaning ?? `The validator gave the reason "${reason}", which has no description here yet.`;
 }
 
+/**
+ * The Status heading's help: one line per result, with the same words and sentences as the "Validation results" box
+ * (statusLabel and statusMeaning are the one source). Every reason the validator writes is listed.
+ */
+export function statusHelpLines(): Array<{ label: string; meaning: string }> {
+  const keys: StatusKey[] = ["validated", ...Object.keys(REASON_TEXT).map((reason) => `rejected:${reason}` as StatusKey), "no_code", "no_tests", "no_result"];
+  return keys.map((key) => ({ label: statusLabel(key), meaning: statusMeaning(key) }));
+}
+
 /** Where a status sorts and lists: validated, the rejections by reason, then no code, no tests, no result. */
 function statusRank(key: StatusKey): number {
   if (key === "validated") return 0;
@@ -243,6 +292,13 @@ export function summarize(rows: readonly Pick<TaskTableRow, "validationStatus" |
   const lines = [...counts].sort(([a], [b]) => compareStatus(a, b))
     .map(([key, count]) => ({ key, label: statusLabel(key), meaning: statusMeaning(key), count }));
   return { lines, total: rows.length };
+}
+
+/** The two lines at the foot of the summary box: validated tasks whose student consented, and those whose did not. */
+export function consentCounts(rows: readonly Pick<TaskTableRow, "validationStatus" | "consented">[]): { consented: number; notConsented: number } {
+  const validated = rows.filter((row) => row.validationStatus === "validated");
+  const consented = validated.filter((row) => row.consented).length;
+  return { consented, notConsented: validated.length - consented };
 }
 
 /** The Status cell: the summary's words; for a validated row, the number of proving tests. */
@@ -275,9 +331,32 @@ export function goldCell(gold: TaskTableRow["gold"]): string {
 }
 
 /** "8.5 / 10" and whether to add the "not released" tag; "Not graded yet" without a grade. Display only. */
-export function gradeCell(grade: TaskTableRow["grade"]): { text: string; unreleased: boolean } {
+export function gradeCell(grade: Pick<TaskGrade, "total" | "released"> | null): { text: string; unreleased: boolean } {
   if (!grade) return { text: TASK_TABLE_TEXT.notGraded, unreleased: false };
-  return { text: `${Number(grade.total.toFixed(2))} / ${TASK_POINTS}`, unreleased: !grade.released };
+  return { text: `${formatNumber(grade.total)} / ${TASK_POINTS}`, unreleased: !grade.released };
+}
+
+/** The six "Scope: 1 / 1" lines, in rubric order, for the Final grade cell's hover text and the opened row. */
+export function gradeBoxLines(grade: Pick<TaskGrade, "boxes"> | null): string[] {
+  if (!grade) return [];
+  return grade.boxes.map((box) => TASK_TABLE_TEXT.gradeBoxLine(box.name, box.awarded, box.points));
+}
+
+/**
+ * Each rubric box's final points, as the review page's grade form reads them (draftFrom): the instructor's points for
+ * a box they edited, else the AI's. `edited` and `ai` are the stored rubrics' `{ name, awarded }` entries.
+ */
+export function gradeBoxes(edited: ReadonlyArray<{ name: string; awarded: number | null }> | null, ai: ReadonlyArray<{ name: string; awarded: number | null }>): GradeBox[] {
+  return RUBRIC.map((row) => {
+    const mine = edited?.find((item) => item.name === row.name);
+    const theirs = ai.find((item) => item.name === row.name);
+    return { name: row.name, points: row.points, awarded: mine ? mine.awarded : theirs?.awarded ?? null };
+  });
+}
+
+/** The Consented cell. */
+export function consentedCell(consented: boolean): string {
+  return consented ? TASK_TABLE_TEXT.consentedYes : TASK_TABLE_TEXT.consentedNo;
 }
 
 /** The Staff changes cell's lines, from the row's flags (#431, #437); empty for an unchanged row. */
@@ -349,9 +428,10 @@ export function flagText(flag: string): string {
 
 export type People = "students" | "staff" | "everyone";
 export type Changed = "any" | "yes" | "no";
-export type Filters = { assignment: number | "all"; team: string | "all"; status: StatusKey | "all"; changed: Changed; people: People; search: string };
+export type Consented = "any" | "yes" | "no";
+export type Filters = { assignment: number | "all"; team: string | "all"; status: StatusKey | "all"; consented: Consented; changed: Changed; people: People; search: string };
 
-export const DEFAULT_FILTERS: Filters = { assignment: "all", team: "all", status: "all", changed: "any", people: "students", search: "" };
+export const DEFAULT_FILTERS: Filters = { assignment: "all", team: "all", status: "all", consented: "any", changed: "any", people: "students", search: "" };
 
 /** What the table searches: the email, the team (`owner/repo`) and the task as the Task cell shows it. */
 function searchText(row: TaskTableRow): string {
@@ -362,6 +442,7 @@ export function matchesFilters(row: TaskTableRow, filters: Filters): boolean {
   if (filters.assignment !== "all" && row.assignment !== filters.assignment) return false;
   if (filters.team !== "all" && row.team !== filters.team) return false;
   if (filters.status !== "all" && statusKey(row) !== filters.status) return false;
+  if (filters.consented !== "any" && row.consented !== (filters.consented === "yes")) return false;
   if (filters.changed !== "any" && changedByStaff(row) !== (filters.changed === "yes")) return false;
   if (filters.people === "students" && row.staff) return false;
   if (filters.people === "staff" && !row.staff) return false;
@@ -386,10 +467,10 @@ export function teamOptions(rows: readonly TaskTableRow[]): string[] {
   return all.sort((a, b) => teamName(a).toLowerCase().localeCompare(teamName(b).toLowerCase()) || a.toLowerCase().localeCompare(b.toLowerCase()));
 }
 
-export type TaskSortKey = "assignment" | "team" | "student" | "task" | "status" | "coverage" | "gold" | "grade" | "staffChanges" | "repo";
+export type TaskSortKey = "assignment" | "team" | "student" | "consented" | "task" | "status" | "coverage" | "gold" | "grade" | "staffChanges" | "repo";
 export type TaskSort = { key: TaskSortKey; direction: "asc" | "desc" } | null;
 
-export const TASK_SORT_KEYS: readonly TaskSortKey[] = ["assignment", "team", "student", "task", "status", "coverage", "gold", "grade", "staffChanges", "repo"];
+export const TASK_SORT_KEYS: readonly TaskSortKey[] = ["assignment", "team", "student", "consented", "task", "status", "coverage", "gold", "grade", "staffChanges", "repo"];
 
 /** Numeric columns sort descending first, like the Submissions table's scores. */
 const NUMERIC_KEYS: readonly TaskSortKey[] = ["coverage", "grade", "repo"];
@@ -403,6 +484,8 @@ function sortValue(row: TaskTableRow, key: TaskSortKey): string | number | null 
     case "assignment": return row.assignment;
     case "team": return row.team ? `${teamName(row.team).toLowerCase()} ${row.team.toLowerCase()}` : null;
     case "student": return row.email.toLowerCase();
+    // Yes before No when ascending.
+    case "consented": return row.consented ? 0 : 1;
     case "task": return `${String(row.slot).padStart(2, "0")} ${taskCell(row).name.toLowerCase()}`;
     case "status": {
       const status = statusKey(row);
@@ -457,7 +540,10 @@ export function visibleRows(rows: readonly TaskTableRow[], filters: Filters, sor
 /** One staff-added extra PR, as the detail route sends it. */
 export type ExtraPrDetail = { prNumber: number; reason: string; addedBy: string; addedAt: string };
 
-/** What the detail route sends for one task. Never anything about consent. */
+/** One Repo Metrics score, as the metrics page's score strip shows it (buildOverviewScoreStrip); null is "Not measured". */
+export type ReportScore = { id: string; title: string; score: number | null };
+
+/** What the detail route sends for one task. Never anything about consent: the list row already has its yes or no. */
 export type TaskDetail = {
   id: string;
   submissionId: string;
@@ -474,7 +560,19 @@ export type TaskDetail = {
   extraCodePrs: ExtraPrDetail[];
   hasReport: boolean;
   reportDate: string | null;
+  /** The task's grade with each box's final points; null when it has no grade yet. */
+  grade: TaskGrade | null;
+  /**
+   * Commit Habits, Testing, Code Quality and Code Complexity from the stored report, worked out on the server. Null
+   * with no report, or when the stored report could not be scored. The report itself is never sent.
+   */
+  scores: ReportScore[] | null;
 };
+
+/** A score as the opened row shows it: the number, or "Not measured". */
+export function scoreText(score: number | null): string {
+  return score === null ? TASK_TABLE_TEXT.scoreNotMeasured : String(score);
+}
 
 export function reviewHref(submissionId: string): string {
   return `/cse115a/instructor/submissions/${encodeURIComponent(submissionId)}`;

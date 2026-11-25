@@ -1,20 +1,27 @@
 // #444 and #445: the staff Benchmark page's summary of validation results and its table of every current task, with
-// the two staff routes behind them. The database and the sign-in are fakes; nothing reaches GitHub or Supabase.
-// Names, emails, repos, PR numbers and task ids are made up.
+// the two staff routes behind them; #449: the Consented column and counts, Sprint wording, heading help, the two
+// benchmark columns, and the opened row's grade by box and Repo Metrics scores. The database and the sign-in are fakes;
+// nothing reaches GitHub or Supabase. Names, emails, repos, PR numbers, task ids and reports are made up.
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { createElement, isValidElement, type ReactElement, type ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  changedByStaffLines, coverageCell, DEFAULT_FILTERS, FLAG_TEXT, flagText, goldCell, gradeCell, matchesFilters, nextTaskSort, REASON_FLAG_PREFIX,
-  repoCell, reportDateText, sortTaskRows, staffChangeLines, statusCell, statusKey, summarize, TASK_SORT_KEYS, TASK_TABLE_TEXT, taskCell,
-  visibleRows, withStatus, type Filters, type TaskDetail, type TaskTableRow,
+  changedByStaffLines, consentCounts, consentedCell, coverageCell, DEFAULT_FILTERS, FLAG_TEXT, flagText, goldCell, gradeBoxes, gradeBoxLines, gradeCell,
+  matchesFilters, nextTaskSort, REASON_FLAG_PREFIX, REASON_TEXT, repoCell, reportDateText, sortTaskRows, staffChangeLines, statusCell, statusHelpLines,
+  statusKey, statusLabel, statusMeaning, summarize, TASK_SORT_KEYS, TASK_TABLE_TEXT, taskCell, visibleRows, withStatus,
+  type Filters, type GradeBox, type StatusKey, type TaskDetail, type TaskGrade, type TaskTableRow,
 } from "@/lib/cse115a/benchmark/taskTable";
+import { buildOverviewScoreStrip } from "@/lib/buildOverviewCards";
+import { CONSENT_VERSION } from "@/lib/cse115a/consent";
+import { REPORT_SCORE_IDS, reportScores, TASK_TABLE_CONSENT_COLUMNS, TASK_TABLE_TABLES } from "@/lib/cse115a/benchmark/loadTaskTable";
+import type { RepoReport } from "@/lib/reportTypes";
 import { REASON_FLAG_PREFIX as WRITEBACK_REASON_PREFIX } from "@/lib/cse115a/benchmark/validation/writeback";
 import { noCodeFromFlags } from "@/lib/cse115a/noCodePr";
 import { TASK_POINTS } from "@/lib/cse115a/rubric";
-import { OpenedRow, SummaryBox, TaskCells, TaskDetailView } from "@/components/cse115a/instructor/BenchmarkTaskTable";
+import { COLUMNS, GradeSection, Header, OpenedRow, ScoresSection, StatusHelp, SummaryBox, TaskCells, TaskDetailView } from "@/components/cse115a/instructor/BenchmarkTaskTable";
+import { HelpTip, HelpTipView, nextTipOpen, tipPosition, type TipEvent } from "@/components/cse115a/instructor/HelpTip";
 import { GET as listGet } from "@/app/api/cse115a/instructor/courses/[slug]/benchmark/tasks/route";
 import { GET as detailGet } from "@/app/api/cse115a/instructor/courses/[slug]/benchmark/tasks/[id]/route";
 
@@ -95,6 +102,19 @@ const EXTRAS = [
   { prNumber: 15, title: "Timer fix", addedBy: "prof-x@ucsc.edu", addedAt: "2026-11-22T10:00:00Z", reason: "", diff: "" },
 ];
 
+const BOX_NAMES = ["Scope", "Specs", "Acceptance criteria", "Test quality", "Tests pass", "Process"];
+const BOX_POINTS = [1, 2, 2, 2, 2, 1];
+/** The AI's stored rubric, with a rationale and quote the routes must never send. */
+const aiRubric = (awarded: Array<number | null>) => BOX_NAMES.map((name, index) => ({ name, points: BOX_POINTS[index], level: null, awarded: awarded[index], rationale: "SECRET_RATIONALE", evidenceQuotes: ["SECRET_QUOTE"], needsReview: false, source: "llm" }));
+/** The instructor's edited rubric, stored in a different order from the rubric's. */
+const editedRubric = (awarded: number[]) => BOX_NAMES.map((name, index) => ({ name, points: BOX_POINTS[index], awarded: awarded[index], note: "SECRET_NOTE" })).reverse();
+
+/** A made-up stored Repo Metrics report: enough for the score strip, plus a part the route must never send. */
+const REPORT = {
+  filesAnalyzed: 12, source: { type: "github" }, analysis_timestamp: "2026-11-12T08:00:00Z", perFile: ["BIG"],
+  git: { totalCommits: 12, commitsPerWeek: 2 }, profile: { testFiles: 3 }, complexity: { highComplexityFunctions: 2 }, duplication: { percentage: 1.5 },
+};
+
 function seed() {
   state.tables = {
     cse_course_memberships: [
@@ -104,7 +124,12 @@ function seed() {
       { course_id: "course-2", user_id: "u-zed", ucsc_email: "zed.example@ucsc.edu" },
     ],
     cse_course_roles: [{ course_id: "course-1", email: "ta-one@ucsc.edu", role: "ta" }],
-    cse_research_consent: [{ course_id: "course-1", user_id: "u-ann", consented: true, consent_version: "v1" }],
+    // Ann: a yes to the current wording (counts). Bo: a yes to an older wording (does not). The TA: no answer.
+    cse_research_consent: [
+      { course_id: "course-1", user_id: "u-ann", consented: true, consent_version: CONSENT_VERSION },
+      { course_id: "course-1", user_id: "u-bo", consented: true, consent_version: "2026-09-01" },
+      { course_id: "course-2", user_id: "u-zed", consented: true, consent_version: CONSENT_VERSION },
+    ],
     cse_assignment_submissions: [
       { id: "sub-ann-1", course_id: "course-1", user_id: "u-ann", assignment_number: 1, submitted_at: "2026-11-10T00:00:00Z", superseded_at: null,
         snapshot: { tasks: [
@@ -133,9 +158,10 @@ function seed() {
       { instance_id: "kettle-co__kettle-app-US-1-T-1", problem_statement: "# Kettle alarm\n\nThe kettle **beeps**.", patch: "diff --git a/src/kettle.ts b/src/kettle.ts\n+beep()\n".repeat(200), test_patch: "diff --git a/test/kettle.test.ts b/test/kettle.test.ts\n+it('beeps')\n",
         FAIL_TO_PASS: ["test/kettle.test.ts > beeps", "test/kettle.test.ts > stops"], PASS_TO_PASS: ["a", "b", "c"],
         validation_detail: { fix_coverage: { status: "measured", files: [], lines_covered: 9, lines_executable: 12 }, untested_files: ["src/timer.ts", "src/led.ts"], untested_files_source: "coverage", repo_source: "snapshot", validated_at: "2026-11-18T09:30:00Z" },
-        harbor_env: { gold: { status: "passed" } }, repo_metrics: { filesAnalyzed: 12, source: { type: "github" }, analysis_timestamp: "2026-11-12T08:00:00Z", perFile: ["BIG"] } },
+        harbor_env: { gold: { status: "passed" } }, repo_metrics: REPORT },
+      // A stored report the score rule cannot read (a duplication share that is not a number).
       { instance_id: "kettle-co__kettle-app-US-1-T-2", problem_statement: "Boil", patch: "p", test_patch: "t", FAIL_TO_PASS: ["x"], PASS_TO_PASS: [],
-        validation_detail: null, harbor_env: { gold: { status: "failed" } }, repo_metrics: { filesAnalyzed: 3, source: { type: "github" } } },
+        validation_detail: null, harbor_env: { gold: { status: "failed" } }, repo_metrics: { filesAnalyzed: 3, source: { type: "github" }, duplication: { percentage: "lots" } } },
       { instance_id: "teapot-co__teapot-US-2-T-1", problem_statement: "Teapot", patch: "", test_patch: "", FAIL_TO_PASS: [], PASS_TO_PASS: [], validation_detail: null, harbor_env: null, repo_metrics: null },
       { instance_id: "teapot-co__teapot-US-2-T-3", problem_statement: "Cover", patch: "c", test_patch: "", FAIL_TO_PASS: [], PASS_TO_PASS: [],
         validation_detail: { fix_coverage: { status: "partial", lines_covered: 1, lines_executable: 4 }, untested_files: [] }, harbor_env: { gold: { status: "skipped" } }, repo_metrics: { filesAnalyzed: 0, source: { type: "github" }, analysis_timestamp: "2026-10-30T23:59:00Z" } },
@@ -143,9 +169,11 @@ function seed() {
       { instance_id: "other__other-US-0-T-1", problem_statement: "x", patch: "x", test_patch: "x", FAIL_TO_PASS: [], PASS_TO_PASS: [], validation_detail: null, harbor_env: null, repo_metrics: null },
     ],
     cse_task_grades: [
-      { assignment_submission_id: "sub-ann-1", task_slot: 1, agent_total: 7, instructor_total: 8.5, released_at: "2026-11-19T00:00:00Z" },
-      { assignment_submission_id: "sub-ann-1", task_slot: 2, agent_total: "6.5", instructor_total: null, released_at: null },
-      { assignment_submission_id: "sub-ann-0", task_slot: 1, agent_total: 2, instructor_total: null, released_at: null },
+      { assignment_submission_id: "sub-ann-1", task_slot: 1, agent_total: 7, instructor_total: 8.5, released_at: "2026-11-19T00:00:00Z",
+        rubric: aiRubric([1, 1, 1, 1, 2, 1]), instructor_rubric: editedRubric([1, 2, 1.5, 2, 1, 1]), instructor_notes: "SECRET_NOTE" },
+      { assignment_submission_id: "sub-ann-1", task_slot: 2, agent_total: "6.5", instructor_total: null, released_at: null,
+        rubric: aiRubric([1, 1.5, 2, null, 1, 1]), instructor_rubric: null },
+      { assignment_submission_id: "sub-ann-0", task_slot: 1, agent_total: 2, instructor_total: null, released_at: null, rubric: aiRubric([0, 0, 0, 0, 1, 1]), instructor_rubric: null },
     ],
   };
 }
@@ -176,7 +204,7 @@ async function detail(id: string): Promise<TaskDetail> {
 /** A row with every field, for the pure tests. */
 function row(patch: Partial<TaskTableRow> = {}): TaskTableRow {
   return {
-    id: "r", submissionId: "s", assignment: 1, slot: 1, team: "kettle-co/kettle-app", email: "ann.example@ucsc.edu", staff: false, taskId: "US-1-T-1", title: "Kettle alarm",
+    id: "r", submissionId: "s", assignment: 1, slot: 1, team: "kettle-co/kettle-app", email: "ann.example@ucsc.edu", staff: false, consented: false, taskId: "US-1-T-1", title: "Kettle alarm",
     validationStatus: "candidate", flags: [], provingTests: 0, coverage: null, untestedFiles: 0, gold: null, grade: null, extraCodePrs: 0, hasReport: false, reportDate: null,
     ...patch,
   };
@@ -189,18 +217,22 @@ function allKeys(value: unknown, keys: string[] = []): string[] {
   return keys;
 }
 
-const ROW_KEYS = ["id", "submissionId", "assignment", "slot", "team", "email", "staff", "taskId", "title", "validationStatus", "flags", "provingTests", "coverage", "untestedFiles", "gold", "grade", "extraCodePrs", "hasReport", "reportDate"].sort();
+const ROW_KEYS = ["id", "submissionId", "assignment", "slot", "team", "email", "staff", "consented", "taskId", "title", "validationStatus", "flags", "provingTests", "coverage", "untestedFiles", "gold", "grade", "extraCodePrs", "hasReport", "reportDate"].sort();
 
-/** Walks a rendered element tree (function components called, hooks-free ones only) and returns every element. */
+/** Walks a rendered element tree (function components called, hooks-free ones only; HelpTip is not) and returns every element. */
 function elements(node: ReactNode, out: ReactElement[] = []): ReactElement[] {
   if (Array.isArray(node)) { node.forEach((item) => elements(item, out)); return out; }
   if (!isValidElement(node)) return out;
   out.push(node);
   const props = node.props as { children?: ReactNode };
-  if (typeof node.type === "function") elements((node.type as (props: unknown) => ReactNode)(node.props), out);
+  if (typeof node.type === "function" && node.type !== HelpTip) elements((node.type as (props: unknown) => ReactNode)(node.props), out);
   elements(props.children, out);
   return out;
 }
+
+/** Six boxes with the given points, for the pure tests. */
+const boxes = (awarded: Array<number | null>): GradeBox[] => BOX_NAMES.map((name, index) => ({ name, points: BOX_POINTS[index]!, awarded: awarded[index]! }));
+const grade = (total: number, released: boolean, awarded: Array<number | null> = [1, 2, 2, 2, 2, 1]): TaskGrade => ({ total, released, boxes: boxes(awarded) });
 
 // ---- 1. Summary of validation results (#444) ----
 
@@ -294,26 +326,36 @@ describe("2. table rows from the list route", () => {
     const one = byId.get("src-1")!;
     expect(one).toMatchObject({ submissionId: "sub-ann-1", assignment: 1, slot: 1, team: "kettle-co/kettle-app", email: "ann.example@ucsc.edu", staff: false, taskId: "US-1-T-1", title: "Kettle alarm",
       validationStatus: "validated", provingTests: 2, coverage: { status: "measured", covered: 9, executable: 12 }, untestedFiles: 2, gold: "passed", grade: { total: 8.5, released: true }, extraCodePrs: 2, hasReport: true, reportDate: "2026-11-12T08:00:00Z" });
+    // The instructor's points per box, read by name though stored in another order.
+    expect(one.grade!.boxes).toEqual(boxes([1, 2, 1.5, 2, 1, 1]));
     expect(byId.get("src-2")).toMatchObject({ grade: { total: 6.5, released: false }, gold: "failed", coverage: null, hasReport: true, reportDate: null });
+    expect(byId.get("src-2")!.grade!.boxes).toEqual(boxes([1, 1.5, 2, null, 1, 1]));
     expect(byId.get("src-3")).toMatchObject({ grade: null, hasReport: false, gold: null, team: "teapot-co/teapot" });
     // Task 3 sits at the snapshot's second position: matched by slot, not by position.
     expect(byId.get("src-4")).toMatchObject({ slot: 3, taskId: "US-2-T-3", title: "Cosy cover", gold: "skipped", coverage: { status: "partial", covered: 1, executable: 4 } });
     expect(byId.get("src-5")).toMatchObject({ email: "ta-one@ucsc.edu", staff: true });
   });
 
-  it("holds no spec, no patch, no diff and nothing about consent; a new field fails this test", async () => {
+  it("holds no spec, no patch and no diff, and of consent only each row's yes or no; a new field fails this test", async () => {
     const response = await listRequest();
     const raw = await response.text();
     const body = JSON.parse(raw) as { rows: TaskTableRow[] };
     expect(Object.keys(body)).toEqual(["rows"]);
     for (const item of body.rows) expect(Object.keys(item).sort()).toEqual(ROW_KEYS);
     const keys = allKeys(body);
-    for (const key of keys) expect(key).not.toMatch(/consent|problem_statement|^patch$|test_patch|testPatch|exportable|download/i);
-    for (const text of ["SECRET_DIFF", "EXTRA_DIFF", "beep()", "The kettle **beeps**", "BIG"]) expect(raw).not.toContain(text);
-    // Never reads consent, and never selects the spec or the patches or the whole report.
-    expect(state.calls.some((call) => call.table === "cse_research_consent")).toBe(false);
+    // #449: `consented` is the one consent field (a boolean); never the answer, its version or its date.
+    for (const key of keys) expect(key).not.toMatch(/consent_version|consentVersion|problem_statement|^patch$|test_patch|testPatch|exportable|download|rationale|note/i);
+    for (const item of body.rows) expect(typeof item.consented).toBe("boolean");
+    expect(keys.filter((key) => /consent/i.test(key)).every((key) => key === "consented")).toBe(true);
+    for (const text of ["SECRET_DIFF", "EXTRA_DIFF", "beep()", "The kettle **beeps**", "BIG", "SECRET_RATIONALE", "SECRET_QUOTE", "SECRET_NOTE", "2026-09-01"]) expect(raw).not.toContain(text);
+    // Reads consent once, three columns only, for this course; never selects the spec or the patches or the whole report.
+    const consentCalls = state.calls.filter((call) => call.table === "cse_research_consent");
+    expect(consentCalls.map((call) => call.columns)).toEqual(["user_id,consented,consent_version"]);
+    expect(TASK_TABLE_CONSENT_COLUMNS).toBe("user_id,consented,consent_version");
+    expect(TASK_TABLE_TABLES).toContain("cse_research_consent");
+    expect(new Set(state.calls.map((call) => call.table))).toEqual(new Set(TASK_TABLE_TABLES));
     for (const call of state.calls) {
-      for (const column of call.columns.split(",")) expect(column).not.toMatch(/^(problem_statement|patch|test_patch|repo_metrics|snapshot|validation_detail|harbor_env)$/);
+      for (const column of call.columns.split(",")) expect(column).not.toMatch(/^(problem_statement|patch|test_patch|repo_metrics|snapshot|validation_detail|harbor_env|rubric|instructor_rubric|instructor_notes)$/);
       expect(call.columns).not.toMatch(/->>?diff\b/);
     }
     expect(state.writes).toBe(0);
@@ -360,7 +402,7 @@ describe("2. each column's wording", () => {
   });
 
   it("Final grade: graded, ungraded, unreleased", () => {
-    expect(gradeCell({ total: 8.5, released: true })).toEqual({ text: `8.5 / ${TASK_POINTS}`, unreleased: false });
+    expect(gradeCell(grade(8.5, true))).toEqual({ text: `8.5 / ${TASK_POINTS}`, unreleased: false });
     expect(gradeCell({ total: 6.5, released: false })).toEqual({ text: `6.5 / ${TASK_POINTS}`, unreleased: true });
     expect(gradeCell(null)).toEqual({ text: "Not graded yet", unreleased: false });
   });
@@ -385,7 +427,7 @@ describe("2. each column's wording", () => {
     expect(taskCell(row({ taskId: "US-1-T-2", title: null })).name).toBe("US-1-T-2");
   });
 
-  it("renders a row's cells: staff tag, team link, not released tag, no consent words", async () => {
+  it("renders a row's cells: staff tag, team link, consented, not released tag, the two empty columns", async () => {
     const rows = await listRows();
     const table = (item: TaskTableRow) => renderToStaticMarkup(createElement("table", null, createElement("tbody", null, createElement("tr", null, createElement(TaskCells, { row: item })))));
     const ann = table(rows.find((item) => item.id === "src-1")!);
@@ -404,18 +446,23 @@ describe("2. each column's wording", () => {
     expect(ungraded).toContain("date unknown");
     expect(table(rows.find((item) => item.id === "src-5")!)).toContain(">Staff<");
     expect(table(rows.find((item) => item.id === "src-3")!)).toContain("Not graded yet");
-    for (const item of rows) expect(table(item)).not.toMatch(/consent/i);
+    // Cells in column order: the Consented cell is fourth, after Student; the two benchmark cells read "Not set".
+    const cells = (markup: string) => markup.split("<td").slice(1).map((cell) => cell.replace(/^[^>]*>/, "").replace(/<[^>]+>/g, "").replace(/<\/td>[\s\S]*/, ""));
+    const annCells = cells(ann);
+    expect(annCells).toHaveLength(COLUMNS.length);
+    expect(annCells[3]).toBe("Yes");
+    expect(annCells[9]).toBe("Not set");
+    expect(annCells[10]).toBe("Not set");
+    expect(cells(table(rows.find((item) => item.id === "src-3")!))[3]).toBe("No");
+    // The Team cell stays on one line.
+    expect(ann).toMatch(/<td class="whitespace-nowrap px-3 py-3"><a href="https:\/\/github.com\/kettle-co\/kettle-app"/);
   });
 
-  it("the panel has no per-row consent and no Newest rows; downloads and the consent line are unchanged", () => {
+  it("the panel has no Newest rows; downloads and the consent line are unchanged", () => {
     const panel = readFileSync(path.resolve(__dirname, "../components/cse115a/instructor/BenchmarkPanel.tsx"), "utf8");
-    const component = readFileSync(path.resolve(__dirname, "../components/cse115a/instructor/BenchmarkTaskTable.tsx"), "utf8");
     expect(panel).not.toContain("Newest rows");
     expect(panel).not.toContain("no consent");
     expect(panel).not.toContain("row.consented");
-    // The code, not its comments (the header comment says the table shows nothing about consent).
-    const code = component.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
-    expect(code).not.toMatch(/consent/i);
     expect(panel).toContain(">Download JSONL</a>");
     expect(panel).toContain(">Validated only</a>");
     expect(panel).toContain(">Download Harbor tasks (.zip)</a>");
@@ -427,10 +474,10 @@ describe("2. each column's wording", () => {
 
 describe("2. filters, search, sorting and the Showing line", () => {
   const rows = [
-    row({ id: "a", assignment: 1, team: "kettle-co/kettle-app", email: "ann.example@ucsc.edu", title: "Kettle alarm", validationStatus: "validated", grade: { total: 9, released: true }, coverage: { status: "measured", covered: 1, executable: 2 }, gold: "passed", hasReport: true, reportDate: "2026-11-12T00:00:00Z" }),
-    row({ id: "b", assignment: 2, team: "teapot-co/teapot", email: "bo.example@ucsc.edu", taskId: "US-2-T-1", title: "Teapot API", flags: ["work_pr_chosen_by_staff"], grade: { total: 6, released: false }, gold: "failed", hasReport: true, reportDate: null }),
+    row({ id: "a", assignment: 1, team: "kettle-co/kettle-app", email: "ann.example@ucsc.edu", consented: true, title: "Kettle alarm", validationStatus: "validated", grade: grade(9, true), coverage: { status: "measured", covered: 1, executable: 2 }, gold: "passed", hasReport: true, reportDate: "2026-11-12T00:00:00Z" }),
+    row({ id: "b", assignment: 2, team: "teapot-co/teapot", email: "bo.example@ucsc.edu", taskId: "US-2-T-1", title: "Teapot API", flags: ["work_pr_chosen_by_staff"], grade: grade(6, false), gold: "failed", hasReport: true, reportDate: null }),
     row({ id: "c", assignment: 2, team: "teapot-co/teapot", email: "ta-one@ucsc.edu", staff: true, title: "Staff trial", flags: ["no_test_patch"], coverage: { status: "measured", covered: 4, executable: 4 }, hasReport: true, reportDate: "2026-11-20T00:00:00Z" }),
-    row({ id: "d", assignment: 1, team: "kettle-co/kettle-app", email: "cy.example@ucsc.edu", title: "Boil timer", flags: ["extra_code_prs"], extraCodePrs: 1, validationStatus: "rejected" }),
+    row({ id: "d", assignment: 1, team: "kettle-co/kettle-app", email: "cy.example@ucsc.edu", consented: true, title: "Boil timer", flags: ["extra_code_prs"], extraCodePrs: 1, validationStatus: "rejected" }),
   ];
   const ids = (filters: Partial<Filters>, sort: Parameters<typeof visibleRows>[2] = null) => visibleRows(rows, { ...DEFAULT_FILTERS, ...filters }, sort).map((item) => item.id);
 
@@ -458,9 +505,9 @@ describe("2. filters, search, sorting and the Showing line", () => {
   });
 
   it("the grade is not a filter: no filter reads it", () => {
-    expect(Object.keys(DEFAULT_FILTERS).sort()).toEqual(["assignment", "changed", "people", "search", "status", "team"]);
-    expect(matchesFilters(row({ grade: { total: 0, released: false } }), DEFAULT_FILTERS)).toBe(true);
-    expect(statusKey(row({ grade: { total: 10, released: true } }))).toBe("no_result");
+    expect(Object.keys(DEFAULT_FILTERS).sort()).toEqual(["assignment", "changed", "consented", "people", "search", "status", "team"]);
+    expect(matchesFilters(row({ grade: grade(0, false) }), DEFAULT_FILTERS)).toBe(true);
+    expect(statusKey(row({ grade: grade(10, true) }))).toBe("no_result");
   });
 
   it("every column sorts; no value goes last both ways; three clicks go back", () => {
@@ -589,7 +636,7 @@ describe("3. opening a row", () => {
 
   const base: TaskDetail = {
     id: "x", submissionId: "sub-x", slot: 1, validationStatus: "candidate", flags: [], problemStatement: "Spec", patch: "p", testPatch: "t", failToPass: [], passToPass: 0,
-    validation: null, workPrChoice: null, extraCodePrs: [], hasReport: true, reportDate: "2026-11-12T00:00:00Z",
+    validation: null, workPrChoice: null, extraCodePrs: [], hasReport: true, reportDate: "2026-11-12T00:00:00Z", grade: null, scores: null,
   };
   const choice = { prNumber: 12, submittedPrNumber: 9, reason: "Code is in #12.", chosenBy: "ta-one@ucsc.edu", chosenAt: "2026-11-20T18:00:00Z" };
   const extras = [{ prNumber: 14, reason: "Timer part.", addedBy: "ta-one@ucsc.edu", addedAt: "2026-11-21T10:00:00Z" }];
@@ -630,5 +677,315 @@ describe("3. opening a row", () => {
     const markup = render(base);
     expect(markup).not.toContain("Changed by staff");
     expect(markup).not.toContain("before the staff change");
+  });
+});
+
+// ---- 4. Polish (#449) ----
+
+describe("4. Consented column and counts (#449)", () => {
+  const consentFor = (answer: Record<string, unknown> | null) => {
+    state.tables.cse_research_consent = answer ? [{ course_id: "course-1", user_id: "u-ann", ...answer }] : [];
+  };
+  const annRow = async () => (await listRows()).find((item) => item.id === "src-1")!;
+
+  it("Yes only for a yes to the current, approved wording; No for a no, no answer, or a yes to an older wording", async () => {
+    consentFor({ consented: true, consent_version: CONSENT_VERSION });
+    expect((await annRow()).consented).toBe(true);
+    consentFor({ consented: false, consent_version: CONSENT_VERSION });
+    expect((await annRow()).consented).toBe(false);
+    consentFor(null);
+    expect((await annRow()).consented).toBe(false);
+    consentFor({ consented: true, consent_version: "2026-09-01" });
+    expect((await annRow()).consented).toBe(false);
+    // Another course's yes does not count here.
+    state.tables.cse_research_consent = [{ course_id: "course-2", user_id: "u-ann", consented: true, consent_version: CONSENT_VERSION }];
+    expect((await annRow()).consented).toBe(false);
+  });
+
+  it("from the seeded route: Ann (current yes) Yes, Bo (older wording) No, the TA (no answer) No", async () => {
+    const rows = await listRows();
+    const by = (id: string) => rows.find((item) => item.id === id)!.consented;
+    expect([by("src-1"), by("src-2"), by("src-3"), by("src-4"), by("src-5")]).toEqual([true, true, false, false, false]);
+    expect([consentedCell(true), consentedCell(false)]).toEqual(["Yes", "No"]);
+  });
+
+  it("the Consented filter: Any, Yes, No", () => {
+    const rows = [row({ id: "y", consented: true }), row({ id: "n", consented: false })];
+    const ids = (consented: Filters["consented"]) => visibleRows(rows, { ...DEFAULT_FILTERS, consented }, null).map((item) => item.id);
+    expect(ids("any")).toEqual(["y", "n"]);
+    expect(ids("yes")).toEqual(["y"]);
+    expect(ids("no")).toEqual(["n"]);
+    expect([TASK_TABLE_TEXT.consentedLabel, TASK_TABLE_TEXT.consentedAny, TASK_TABLE_TEXT.consentedYes, TASK_TABLE_TEXT.consentedNo]).toEqual(["Consented", "Any", "Yes", "No"]);
+    const component = readFileSync(path.resolve(__dirname, "../components/cse115a/instructor/BenchmarkTaskTable.tsx"), "utf8");
+    expect(component).toContain("<select value={filters.consented} onChange={(event) => set({ consented: event.target.value as Consented })}");
+  });
+
+  it("the Consented column sorts: Yes first ascending, No first descending, ties keep the server's order", () => {
+    const rows = [row({ id: "n1" }), row({ id: "y1", consented: true }), row({ id: "n2" }), row({ id: "y2", consented: true })];
+    expect(TASK_SORT_KEYS).toContain("consented");
+    expect(nextTaskSort(null, "consented")).toEqual({ key: "consented", direction: "asc" });
+    expect(sortTaskRows(rows, { key: "consented", direction: "asc" }).map((item) => item.id)).toEqual(["y1", "y2", "n1", "n2"]);
+    expect(sortTaskRows(rows, { key: "consented", direction: "desc" }).map((item) => item.id)).toEqual(["n1", "n2", "y1", "y2"]);
+  });
+
+  it("the column follows Student, its heading sorts", () => {
+    expect(COLUMNS.map((column) => column.label)).toEqual([
+      "Sprint", "Team", "Student", "Consented", "Task", "Status", "Coverage (experimental)", "Gold check", "Final grade",
+      "Benchmark grade", "Benchmark include", "Staff changes", "Repo",
+    ]);
+    expect(COLUMNS.find((column) => column.id === "consented")!.sort).toBe("consented");
+  });
+
+  it("two lines at the foot of the summary box, apart from the total, which they do not change", () => {
+    const rows = [
+      row({ validationStatus: "validated", consented: true }), row({ validationStatus: "validated", consented: true }),
+      row({ validationStatus: "validated", consented: false }), row({ consented: true }), row({ validationStatus: "rejected", consented: true, flags: ["validation_reason:regressions"] }),
+    ];
+    expect(consentCounts(rows)).toEqual({ consented: 2, notConsented: 1 });
+    const { lines, total } = summarize(rows);
+    expect(total).toBe(5);
+    expect(lines.reduce((sum, line) => sum + line.count, 0)).toBe(5);
+    // Without consent on any row, the box's lines and total are the same.
+    expect(summarize(rows.map((item) => ({ ...item, consented: false })))).toEqual({ lines, total });
+    const markup = renderToStaticMarkup(createElement(SummaryBox, { rows, selected: "all", onPick: () => {} }));
+    expect(markup).toContain("Total: 5 tasks");
+    expect(markup).toContain("<p>Validated and consented: 2</p>");
+    expect(markup).toContain("<p>Validated, not consented: 1</p>");
+    expect(markup).toContain("A download holds a validated task only when its student consented.");
+    expect(markup.indexOf("Total: 5 tasks")).toBeLessThan(markup.indexOf("Validated and consented"));
+    // The two lines are not buttons: clicking the box's lines is unchanged.
+    const buttons = elements(SummaryBox({ rows, selected: "all", onPick: () => {} })).filter((element) => element.type === "button");
+    expect(buttons).toHaveLength(lines.length);
+  });
+
+  it("the download tests' rule is the same one: countsAsConsent, imported, not copied", () => {
+    const loader = readFileSync(path.resolve(__dirname, "../lib/cse115a/benchmark/loadTaskTable.ts"), "utf8");
+    expect(loader).toContain("import { countsAsConsent } from \"@/lib/cse115a/consent\";");
+    expect(loader).not.toContain("CONSENT_VERSION");
+  });
+});
+
+describe("4. wording: Sprint, Coverage (experimental), the line under Tasks (#449)", () => {
+  it("Sprint in the heading and the filter; the Submissions page keeps Assignment", () => {
+    expect(TASK_TABLE_TEXT.columns.assignment).toBe("Sprint");
+    expect([TASK_TABLE_TEXT.assignmentLabel, TASK_TABLE_TEXT.allAssignments, TASK_TABLE_TEXT.assignmentOption(3)]).toEqual(["Sprint", "All sprints", "Sprint 3"]);
+    expect(TASK_TABLE_TEXT.columns.coverage).toBe("Coverage (experimental)");
+    const submissions = readFileSync(path.resolve(__dirname, "../components/cse115a/instructor/InstructorHome.tsx"), "utf8");
+    expect(submissions).not.toContain("All sprints");
+  });
+
+  it("the line under the Tasks heading", () => {
+    expect(TASK_TABLE_TEXT.tableIntro).toBe("This table joins each benchmark task to its grade and its validation result. The grade, coverage and gold check are shown here only and are not in the downloads.");
+    const component = readFileSync(path.resolve(__dirname, "../components/cse115a/instructor/BenchmarkTaskTable.tsx"), "utf8");
+    expect(component).toContain("<h2 className=\"font-semibold\">{T.tableHeading}</h2>\n        <p className=\"mt-1 text-sm text-muted-foreground\">{T.tableIntro}</p>");
+  });
+});
+
+describe("4. help on the headings (#449)", () => {
+  const header = () => renderToStaticMarkup(createElement("table", null, createElement(Header, { sort: null, onSort: () => {} })));
+
+  it("Status, Coverage, Gold check, Benchmark grade and Benchmark include have a ? button pointing at their panel", () => {
+    const markup = header();
+    for (const [id, label] of [["status", "Status"], ["coverage", "Coverage (experimental)"], ["gold", "Gold check"], ["benchmarkGrade", "Benchmark grade"], ["benchmarkInclude", "Benchmark include"]]) {
+      expect(markup).toContain(`<button type="button" aria-label="What ${label} means" aria-describedby="help-${id}"`);
+      expect(markup).toMatch(new RegExp(`<span id="help-${id}" role="tooltip" hidden=""`));
+    }
+    expect(markup.match(/role="tooltip"/g)).toHaveLength(5);
+    // Not a title attribute alone: the help is in the page, named by aria-describedby.
+    expect(markup).not.toMatch(/title="[^"]*proving tests ran/);
+  });
+
+  it("each panel's text", () => {
+    const markup = header();
+    expect(TASK_TABLE_TEXT.coverageHelp).toBe("Of the code lines this task changes, the share the proving tests ran. Measured by a coverage run in the validator. Experimental: nobody has checked these numbers by hand yet. \"Not measured\" means the coverage run has not been done for this task.");
+    expect(TASK_TABLE_TEXT.goldHelp).toBe("Harbor is the format coding agents are run in. The gold check builds this task as a Harbor task and applies the student's own change. Passed means the task's tests pass there, so the task can be solved as packaged. Not run means it has not been tried yet. The Harbor download holds only tasks that passed.");
+    expect(TASK_TABLE_TEXT.benchmarkGradeHelp).toBe("How good the task is as a benchmark item. It is separate from the student's grade and never changes it. Not scored yet.");
+    expect(TASK_TABLE_TEXT.benchmarkIncludeHelp).toBe("Staff's decision to put the task in the benchmark or leave it out, with a reason. Not decided yet.");
+    for (const text of [TASK_TABLE_TEXT.coverageHelp, TASK_TABLE_TEXT.goldHelp, TASK_TABLE_TEXT.benchmarkGradeHelp, TASK_TABLE_TEXT.benchmarkIncludeHelp]) {
+      expect(markup).toContain(text.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/'/g, "&#x27;"));
+    }
+  });
+
+  it("the Status help uses the summary box's own sentences, one line per result", () => {
+    const lines = statusHelpLines();
+    const keys: StatusKey[] = ["validated", ...Object.keys(REASON_TEXT).map((reason) => `rejected:${reason}` as StatusKey), "no_code", "no_tests", "no_result"];
+    expect(lines).toEqual(keys.map((key) => ({ label: statusLabel(key), meaning: statusMeaning(key) })));
+    expect(lines).toHaveLength(Object.keys(REASON_TEXT).length + 4);
+    // The box's lines for the same results carry the very same words.
+    const box = summarize([row({ validationStatus: "validated" }), row({ flags: ["no_test_patch"] }), row({ validationStatus: "rejected", flags: ["validation_reason:env_error"] })]).lines;
+    for (const line of box) expect(lines).toContainEqual({ label: line.label, meaning: line.meaning });
+    const markup = renderToStaticMarkup(createElement(StatusHelp));
+    expect(markup).toContain("<span class=\"font-semibold\">Validated</span>: Its tests fail before the student&#x27;s change and pass after it.");
+    expect(markup).toContain("Not run by the validator yet, or the run could not finish.");
+    const source = readFileSync(path.resolve(__dirname, "../lib/cse115a/benchmark/taskTable.ts"), "utf8");
+    // One source: the sentences appear once in the code.
+    expect(source.split("Its tests fail before the student's change and pass after it.").length - 1).toBe(1);
+  });
+
+  it("opens on focus and on hover, closes on Esc, on blur and on moving away", () => {
+    expect(nextTipOpen(false, "focus")).toBe(true);
+    expect(nextTipOpen(false, "enter")).toBe(true);
+    expect(nextTipOpen(false, "click")).toBe(true);
+    expect(nextTipOpen(true, "click")).toBe(true);
+    expect(nextTipOpen(true, "escape")).toBe(false);
+    expect(nextTipOpen(true, "blur")).toBe(false);
+    expect(nextTipOpen(true, "leave")).toBe(false);
+    const events: TipEvent[] = [];
+    const view = (open: boolean) => elements(HelpTipView({ id: "help-gold", open, position: null, onEvent: (event) => events.push(event), kind: "button", label: "What Gold check means", panel: TASK_TABLE_TEXT.goldHelp }));
+    const closed = view(false);
+    const wrapper = closed[0]!.props as { onMouseEnter: () => void; onMouseLeave: () => void };
+    const button = closed.find((element) => element.type === "button")!.props as { onFocus: () => void; onBlur: () => void; onKeyDown: (event: { key: string }) => void; onClick: (event: { stopPropagation: () => void }) => void; "aria-describedby": string };
+    expect(button["aria-describedby"]).toBe("help-gold");
+    button.onFocus();
+    wrapper.onMouseEnter();
+    wrapper.onMouseLeave();
+    button.onBlur();
+    // Esc on a closed panel does nothing; on an open one it closes it.
+    button.onKeyDown({ key: "Escape" });
+    const open = view(true).find((element) => element.type === "button")!.props as typeof button;
+    open.onKeyDown({ key: "Enter" });
+    open.onKeyDown({ key: "Escape" });
+    // A click on "?" opens the help and never reaches the heading's sort button or the row.
+    let stopped = false;
+    open.onClick({ stopPropagation: () => { stopped = true; } });
+    expect(events).toEqual(["focus", "enter", "leave", "blur", "escape", "click"]);
+    expect(stopped).toBe(true);
+    const panel = (state: boolean) => renderToStaticMarkup(HelpTipView({ id: "help-gold", open: state, position: null, onEvent: () => {}, kind: "button", label: "x", panel: "Gold" }));
+    expect(panel(false)).toContain("role=\"tooltip\" hidden=\"\"");
+    expect(panel(true)).not.toContain("hidden");
+    // Esc anywhere closes an open panel too (a panel opened by hover has no focus).
+    const tip = readFileSync(path.resolve(__dirname, "../components/cse115a/instructor/HelpTip.tsx"), "utf8");
+    expect(tip).toContain("const onKey = (event: KeyboardEvent) => { if (event.key === \"Escape\") close(); };");
+    expect(tipPosition({ bottom: 100, left: 2000 }, 1200)).toEqual({ top: 104, left: 1200 - 320 - 8 });
+    expect(tipPosition({ bottom: 10, left: 0 }, 1200)).toEqual({ top: 14, left: 8 });
+  });
+
+  it("the heading still sorts: the ? sits beside the sort button, not in it, and the sort button still calls onSort", () => {
+    const sorted: string[] = [];
+    const tree = elements(Header({ sort: { key: "status", direction: "asc" }, onSort: (key) => sorted.push(key) }));
+    const sortButtons = tree.filter((element) => element.type === "button");
+    expect(sortButtons).toHaveLength(COLUMNS.filter((column) => column.sort).length);
+    for (const button of sortButtons) (button.props as { onClick: () => void }).onClick();
+    expect(sorted).toEqual(COLUMNS.filter((column) => column.sort).map((column) => column.sort));
+    expect(tree.filter((element) => element.type === HelpTip)).toHaveLength(5);
+    const markup = renderToStaticMarkup(createElement("table", null, createElement(Header, { sort: { key: "status", direction: "asc" }, onSort: () => {} })));
+    expect(markup).toContain("aria-sort=\"ascending\"");
+  });
+});
+
+describe("4. the two empty benchmark columns (#449)", () => {
+  it("sit after Final grade and before Staff changes, read Not set in every row, do not sort or filter", async () => {
+    const ids = COLUMNS.map((column) => column.id);
+    expect(ids.indexOf("benchmarkGrade")).toBe(ids.indexOf("grade") + 1);
+    expect(ids.indexOf("benchmarkInclude")).toBe(ids.indexOf("grade") + 2);
+    expect(ids.indexOf("staffChanges")).toBe(ids.indexOf("grade") + 3);
+    for (const id of ["benchmarkGrade", "benchmarkInclude"]) expect(COLUMNS.find((column) => column.id === id)!.sort).toBeUndefined();
+    expect(TASK_SORT_KEYS).not.toContain("benchmarkGrade");
+    expect(Object.keys(DEFAULT_FILTERS)).not.toContain("benchmarkGrade");
+    for (const item of await listRows()) {
+      const markup = renderToStaticMarkup(createElement("table", null, createElement("tbody", null, createElement("tr", null, createElement(TaskCells, { row: item })))));
+      expect(markup.match(/>Not set<\/td>/g)).toHaveLength(2);
+      expect(Object.keys(item).some((key) => /benchmark/i.test(key))).toBe(false);
+    }
+    const header = renderToStaticMarkup(createElement("table", null, createElement(Header, { sort: null, onSort: () => {} })));
+    expect(header).toContain("<span class=\"whitespace-nowrap\">Benchmark grade</span>");
+    expect(header).not.toMatch(/aria-sort="none"[^>]*><span class="inline-flex items-center gap-1.5"><span class="whitespace-nowrap">Benchmark/);
+    const component = readFileSync(path.resolve(__dirname, "../components/cse115a/instructor/BenchmarkTaskTable.tsx"), "utf8");
+    expect(component).toContain("// Placeholders (#449): no data, no route field and no migration yet");
+  });
+});
+
+describe("4. the opened row's grade and scores (#449)", () => {
+  it("each box's final points: the instructor's where edited, else the AI's; a box nobody scored says so", () => {
+    expect(gradeBoxes([{ name: "Specs", awarded: 2 }, { name: "Scope", awarded: 0 }], [
+      { name: "Scope", awarded: 1 }, { name: "Specs", awarded: 1 }, { name: "Acceptance criteria", awarded: 2 }, { name: "Test quality", awarded: null }, { name: "Tests pass", awarded: 2 }, { name: "Process", awarded: 1 },
+    ])).toEqual(boxes([0, 2, 2, null, 2, 1]));
+    expect(gradeBoxLines(grade(8.5, true, [1, 2, 1.5, 2, 1, 1]))).toEqual([
+      "Scope: 1 / 1", "Specs: 2 / 2", "Acceptance criteria: 1.5 / 2", "Test quality: 2 / 2", "Tests pass: 1 / 2", "Process: 1 / 1",
+    ]);
+    expect(gradeBoxLines(grade(5, false, [1, 1, 1, null, 1, 1]))[3]).toBe("Test quality: not scored / 2");
+    expect(gradeBoxLines(null)).toEqual([]);
+  });
+
+  it("the detail route sends the grade by box and the total, and never the rationales or notes", async () => {
+    const task = await detail("src-1");
+    expect(task.grade).toEqual({ total: 8.5, released: true, boxes: boxes([1, 2, 1.5, 2, 1, 1]) });
+    expect((await detail("src-2")).grade).toEqual({ total: 6.5, released: false, boxes: boxes([1, 1.5, 2, null, 1, 1]) });
+    expect((await detail("src-3")).grade).toBeNull();
+    const raw = JSON.stringify(await detail("src-1"));
+    for (const text of ["SECRET_RATIONALE", "SECRET_QUOTE", "SECRET_NOTE", "BIG", "perFile"]) expect(raw).not.toContain(text);
+    for (const call of state.calls.filter((item) => item.table === "cse_task_grades")) {
+      for (const column of call.columns.split(",")) expect(column).not.toMatch(/^(rubric|instructor_rubric|instructor_notes)$/);
+    }
+    expect(state.writes).toBe(0);
+  });
+
+  it("shows six boxes, the total and not released under Grade; Not graded yet without a grade", async () => {
+    const released = renderToStaticMarkup(createElement(GradeSection, { grade: (await detail("src-1")).grade }));
+    expect(released).toContain("<h4 class=\"font-medium\">Grade</h4>");
+    for (const line of ["Scope: 1 / 1", "Specs: 2 / 2", "Acceptance criteria: 1.5 / 2", "Test quality: 2 / 2", "Tests pass: 1 / 2", "Process: 1 / 1"]) expect(released).toContain(`<li>${line}</li>`);
+    expect(released).toContain("Total: 8.5 / 10");
+    expect(released).not.toContain("not released");
+    const unreleased = renderToStaticMarkup(createElement(GradeSection, { grade: (await detail("src-2")).grade }));
+    expect(unreleased).toContain("Total: 6.5 / 10");
+    expect(unreleased).toContain("not released");
+    expect(unreleased).toContain("Test quality: not scored / 2");
+    expect(renderToStaticMarkup(createElement(GradeSection, { grade: null }))).toContain("Not graded yet");
+    expect(renderToStaticMarkup(createElement(TaskDetailView, { detail: await detail("src-1") }))).toContain("Total: 8.5 / 10");
+  });
+
+  it("the same six lines are the Final grade cell's hover and focus text", async () => {
+    const rows = await listRows();
+    const one = rows.find((item) => item.id === "src-1")!;
+    const markup = renderToStaticMarkup(createElement("table", null, createElement("tbody", null, createElement("tr", null, createElement(TaskCells, { row: one })))));
+    expect(markup).toContain("<span tabindex=\"0\" aria-describedby=\"grade-boxes-src-1\"");
+    const panel = markup.match(/<span id="grade-boxes-src-1" role="tooltip" hidden=""[^>]*>(.*?)<\/span>/)![1]!;
+    expect(panel.match(/<li[^>]*>([^<]+)<\/li>/g)!.map((item) => item.replace(/<[^>]+>/g, ""))).toEqual(gradeBoxLines(one.grade));
+    // No grade: no hover text.
+    const ungraded = renderToStaticMarkup(createElement("table", null, createElement("tbody", null, createElement("tr", null, createElement(TaskCells, { row: rows.find((item) => item.id === "src-3")! })))));
+    expect(ungraded).not.toContain("grade-boxes-");
+  });
+
+  it("the Repo Metrics scores, worked out on the server by the metrics page's rule, with the report's date", async () => {
+    const task = await detail("src-1");
+    const strip = buildOverviewScoreStrip(REPORT as unknown as RepoReport, false).items;
+    expect(task.scores).toEqual(REPORT_SCORE_IDS.map((id) => {
+      const item = strip.find((entry) => entry.id === id)!;
+      return { id, title: item.title, score: item.score };
+    }));
+    expect(task.scores!.map((item) => item.title)).toEqual(["Commit Habits", "Testing", "Code Quality", "Code Complexity"]);
+    expect(task.scores!.find((item) => item.id === "code-complexity")!.score).toBeNull();
+    const markup = renderToStaticMarkup(createElement(ScoresSection, { detail: task }));
+    expect(markup).toContain("Repo Metrics scores");
+    expect(markup).toContain("as of Nov 12");
+    expect(markup).toContain(`<dt class="text-muted-foreground">Commit Habits</dt><dd class="font-medium tabular-nums">${task.scores![0]!.score}</dd>`);
+    expect(markup).toContain("<dd class=\"font-medium tabular-nums\">Not measured</dd>");
+    // The opened row keeps the link to the report.
+    expect(renderToStaticMarkup(createElement(TaskDetailView, { detail: task }))).toContain(">Open the Repo Metrics report</a>");
+    // The detail route reads the stored report; the list never does.
+    expect(state.calls.some((call) => call.table === "cse_benchmark_tasks" && call.columns.split(",").includes("repo_metrics"))).toBe(true);
+  });
+
+  it("no scores: a report that cannot be scored says so and keeps the link; no report shows nothing", async () => {
+    const broken = await detail("src-2");
+    expect(broken.hasReport).toBe(true);
+    expect(broken.scores).toBeNull();
+    const markup = renderToStaticMarkup(createElement(TaskDetailView, { detail: broken }));
+    expect(markup).toContain("The scores could not be worked out from the stored report.");
+    expect(markup).toContain(">Open the Repo Metrics report</a>");
+    const none = await detail("src-3");
+    expect(none.scores).toBeNull();
+    expect(renderToStaticMarkup(createElement(TaskDetailView, { detail: none }))).not.toContain("Repo Metrics scores");
+    expect(reportScores(null)).toBeNull();
+    expect(reportScores(["not", "a", "report"])).toBeNull();
+    // A report the analysis skipped has no Testing or Code Quality, as on the metrics page.
+    expect(reportScores({ ...REPORT, analysisSkipped: true })!.map((item) => item.title)).toEqual(["Commit Habits", "Code Complexity"]);
+  });
+
+  it("the scores load with the opened row, not with the list", async () => {
+    const rows = await listRows();
+    for (const item of rows) expect(Object.keys(item)).not.toContain("scores");
+    const component = readFileSync(path.resolve(__dirname, "../components/cse115a/instructor/BenchmarkTaskTable.tsx"), "utf8");
+    expect(component.match(/fetchJson</g)).toHaveLength(2);
   });
 });

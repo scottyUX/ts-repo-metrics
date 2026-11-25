@@ -20,6 +20,10 @@ export const REVIEW_TEXT = {
   copySectionLabel: (tab: DiffTab, pr: number) => `Copy PR #${pr}'s ${tab}`,
   fullHeightLabel: (what: string) => `Show ${what} at full height`,
   lessLabel: (what: string) => `Show less of ${what}`,
+  // Full screen (#448).
+  fullScreen: "Full screen",
+  fullScreenLabel: (what: string) => `Show ${what} full screen`,
+  close: "Close",
   // Team and GitHub username.
   team: "Team",
   allTeams: "All teams",
