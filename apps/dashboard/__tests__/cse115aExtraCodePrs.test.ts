@@ -569,11 +569,11 @@ describe("10. page texts, word for word (part 7)", () => {
     expect(extraBenchmarkLine(null)).toBe("This task has no benchmark row yet. When it gets one, it is built from the main PR only and carries the flag extra_code_prs.");
     expect(extraOverlapWarning(15, ["a.ts", "b.ts"], [10, 12])).toBe("PR #15 also changes a.ts, b.ts, which PR #10 and PR #12 change too. The AI sees each PR's change to those files in turn, in merge order.");
     expect({
-      open: WORK_PR_TEXT.extraOpen, heading: WORK_PR_TEXT.extraHeading, list: WORK_PR_TEXT.extraListHeading, add: WORK_PR_TEXT.extraAdd,
+      heading: WORK_PR_TEXT.extraHeading, list: WORK_PR_TEXT.extraListHeading, add: WORK_PR_TEXT.extraAdd,
       confirm: WORK_PR_TEXT.confirmExtra(12), remove: WORK_PR_TEXT.extraRemove, confirmRemove: WORK_PR_TEXT.confirmRemove(12), attached: WORK_PR_TEXT.attached,
       extraDiff: WORK_PR_TEXT.extraDiffHeading(12, "Apple picker, part two"), mainDiff: WORK_PR_TEXT.mainDiffHeading(10, "Apple picker"), checks: WORK_PR_TEXT.extraChecksHeading(12),
     }).toEqual({
-      open: "Add another PR for the code", heading: "Add another PR that holds part of this task's code", list: "Extra PRs for this task's code", add: "Add this PR",
+      heading: "Add another PR that holds part of this task's code", list: "Extra PRs for this task's code", add: "Add this PR",
       confirm: "Yes, add PR #12 to this task's code", remove: "Remove", confirmRemove: "Yes, remove PR #12", attached: "Already added to this task",
       extraDiff: "PR #12: Apple picker, part two (extra PR for this task's code)", mainDiff: "PR #10: Apple picker (main PR)", checks: "CI on PR #12's merge commit",
     });

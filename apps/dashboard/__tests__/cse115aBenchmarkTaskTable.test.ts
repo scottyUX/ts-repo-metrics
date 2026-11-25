@@ -1,8 +1,8 @@
 // #444 and #445: the staff Benchmark page's summary of validation results and its table of every current task, with
 // the two staff routes behind them; #449: the Consented column and counts, Sprint wording, heading help, the two
-// benchmark columns, and the opened row's grade by box and Repo Metrics scores; #452: the box as a table of results
-// with who can fix it and the tasks behind each count, the last-run flag, three consent values, the new headings and
-// column order, and "Tests and criteria" in the opened row.
+// benchmark columns, and the opened row's grade by box and Repo Metrics scores; #452: the tasks behind each count in
+// the box, the last-run flag, three consent values, the new headings and column order, and "Tests and criteria" in
+// the opened row; #454: the box compact again (no "Who can fix it"), and "Coverage" without "(experimental)".
 // The database and the sign-in are fakes;
 // nothing reaches GitHub or Supabase. Names, emails, repos, PR numbers, task ids and reports are made up.
 import { readFileSync } from "node:fs";
@@ -294,7 +294,7 @@ describe("1. summary of validation results", () => {
     expect(withStatus(filters, "no_code")).toEqual({ ...filters, status: "no_code" });
     const picked: string[] = [];
     const rows = [row({ validationStatus: "validated" }), row({ flags: ["no_test_patch"] })];
-    const buttons = elements(SummaryBoxView({ rows, people: "students", open: null, onToggle: () => {}, idBase: "b", onPick: (key) => picked.push(key) }))
+    const buttons = elements(SummaryBoxView({ rows, people: "students", selected: "all", open: null, onToggle: () => {}, idBase: "b", onPick: (key) => picked.push(key) }))
       .filter((element) => element.type === "button" && (element.props as { children?: unknown }).children === TASK_TABLE_TEXT.showInTable);
     expect(buttons).toHaveLength(2);
     (buttons[1]!.props as { onClick: () => void }).onClick();
@@ -304,7 +304,7 @@ describe("1. summary of validation results", () => {
   });
 
   it("renders the box with counts, labels and the total", () => {
-    const markup = renderToStaticMarkup(createElement(SummaryBoxView, { rows: [row({ validationStatus: "validated" }), row()], people: "students", open: null, onToggle: () => {}, idBase: "b", onPick: () => {} }));
+    const markup = renderToStaticMarkup(createElement(SummaryBoxView, { rows: [row({ validationStatus: "validated" }), row()], people: "students", selected: "all", open: null, onToggle: () => {}, idBase: "b", onPick: () => {} }));
     expect(markup).toContain("Validation results");
     expect(markup).toContain("Not tried yet");
     expect(markup).toContain("Total: 2 tasks (students only)");
@@ -741,7 +741,7 @@ describe("4. Consent column and counts (#449, three values since #452)", () => {
 
   it("the headings and their order (#452); Consent follows Who and sorts", () => {
     expect(COLUMNS.map((column) => column.label)).toEqual([
-      "Sprint", "Team", "Who", "Consent", "Task", "Status", "Coverage (experimental)", "Final grade", "Score", "Gold check", "Include", "Repo", "Staff changes",
+      "Sprint", "Team", "Who", "Consent", "Task", "Status", "Coverage", "Final grade", "Score", "Gold check", "Include", "Repo", "Staff changes",
     ]);
     expect(COLUMNS.find((column) => column.id === "consent")!.sort).toBe("consent");
   });
@@ -759,15 +759,15 @@ describe("4. Consent column and counts (#449, three values since #452)", () => {
     // Without consent on any row, the box's lines and total are the same counts.
     const without = summarize(rows.map((item) => ({ ...item, consent: "not_yet" as const })));
     expect(without.lines.map((line) => [line.key, line.count])).toEqual(lines.map((line) => [line.key, line.count]));
-    const markup = renderToStaticMarkup(createElement(SummaryBoxView, { rows, people: "students", open: null, onToggle: () => {}, idBase: "b", onPick: () => {} }));
+    const markup = renderToStaticMarkup(createElement(SummaryBoxView, { rows, people: "students", selected: "all", open: null, onToggle: () => {}, idBase: "b", onPick: () => {} }));
     expect(markup).toContain("Total: 6 tasks (students only)");
     expect(markup).toContain("<p>Validated and consented: 2</p>");
     expect(markup).toContain("<p>Validated, not consented: 2</p>");
     expect(markup).toContain("A download holds a validated task only when its student consented.");
     expect(markup.indexOf("Total: 6 tasks")).toBeLessThan(markup.indexOf("Validated and consented"));
-    // The two lines are not buttons: the box's only buttons are each row's Show tasks and Show in the table.
-    const buttons = elements(SummaryBoxView({ rows, people: "students", open: null, onToggle: () => {}, idBase: "b", onPick: () => {} })).filter((element) => element.type === "button");
-    expect(buttons).toHaveLength(2 * lines.filter((line) => line.count > 0).length);
+    // The two lines are not buttons: the box's only buttons are each result line, and each Show tasks and Show in the table.
+    const buttons = elements(SummaryBoxView({ rows, people: "students", selected: "all", open: null, onToggle: () => {}, idBase: "b", onPick: () => {} })).filter((element) => element.type === "button");
+    expect(buttons).toHaveLength(lines.length + 2 * lines.filter((line) => line.count > 0).length);
   });
 
   it("the download tests' rule is the same one: countsAsConsent, imported, not copied", () => {
@@ -779,11 +779,14 @@ describe("4. Consent column and counts (#449, three values since #452)", () => {
   });
 });
 
-describe("4. wording: Sprint, Coverage (experimental), the line under Tasks (#449)", () => {
+describe("4. wording: Sprint, Coverage, the line under Tasks (#449, #454)", () => {
   it("Sprint in the heading and the filter; the Submissions page keeps Assignment", () => {
     expect(TASK_TABLE_TEXT.columns.assignment).toBe("Sprint");
     expect([TASK_TABLE_TEXT.assignmentLabel, TASK_TABLE_TEXT.allAssignments, TASK_TABLE_TEXT.assignmentOption(3)]).toEqual(["Sprint", "All sprints", "Sprint 3"]);
-    expect(TASK_TABLE_TEXT.columns.coverage).toBe("Coverage (experimental)");
+    // #454: "Coverage", not "Coverage (experimental)"; the help still says the numbers are experimental.
+    expect(TASK_TABLE_TEXT.columns.coverage).toBe("Coverage");
+    expect(TASK_TABLE_TEXT.coverageHeading).toBe("Coverage");
+    expect(TASK_TABLE_TEXT.coverageHelp).toContain("Experimental: nobody has checked these numbers by hand yet.");
     const submissions = readFileSync(path.resolve(__dirname, "../components/cse115a/instructor/InstructorHome.tsx"), "utf8");
     expect(submissions).not.toContain("All sprints");
   });
@@ -800,7 +803,7 @@ describe("4. help on the headings (#449)", () => {
 
   it("Status, Coverage, Score, Gold check, Include and Repo have a ? button pointing at their panel", () => {
     const markup = header();
-    for (const [id, label] of [["status", "Status"], ["coverage", "Coverage (experimental)"], ["score", "Score"], ["gold", "Gold check"], ["include", "Include"], ["repo", "Repo"]]) {
+    for (const [id, label] of [["status", "Status"], ["coverage", "Coverage"], ["score", "Score"], ["gold", "Gold check"], ["include", "Include"], ["repo", "Repo"]]) {
       expect(markup).toContain(`<button type="button" aria-label="What ${label} means" aria-describedby="help-${id}"`);
       expect(markup).toMatch(new RegExp(`<span id="help-${id}" role="tooltip" hidden=""`));
     }
@@ -1019,7 +1022,7 @@ describe("4. the opened row's grade and scores (#449)", () => {
 
 describe("5. the results box (#452)", () => {
   const view = (rows: TaskTableRow[], extra: Partial<Parameters<typeof SummaryBoxView>[0]> = {}) =>
-    createElement(SummaryBoxView, { rows, people: "students", open: null, onToggle: () => {}, idBase: "box", onPick: () => {}, ...extra });
+    createElement(SummaryBoxView, { rows, people: "students", selected: "all", open: null, onToggle: () => {}, idBase: "box", onPick: () => {}, ...extra });
   const candidate = (flags: string[], patch: Partial<TaskTableRow> = {}) => row({ flags, ...patch });
   const rejected = (reason: string, patch: Partial<TaskTableRow> = {}) => row({ validationStatus: "rejected", flags: [`validation_reason:${reason}`], ...patch });
   const attempt = (reason: string, patch: Partial<TaskTableRow> = {}) => candidate([`validation_attempt:${reason}`], patch);
@@ -1046,27 +1049,58 @@ describe("5. the results box (#452)", () => {
     for (const reason of ATTEMPT_REASONS) expect(statusKey(attempt(reason))).not.toBe("other");
   });
 
-  it("the order, the labels and who can fix it", () => {
-    expect(RESULTS.map((result) => [result.label, result.who])).toEqual([
-      ["Validated", ""],
-      ["No tests in the PR", "The student"],
-      ["No test proves the change", "The student"],
-      ["The change breaks other tests", "The student"],
-      ["The change turns tests off", "The student"],
-      ["No code in the submitted PR", "Staff, by choosing the PR that holds the code"],
-      ["A test file never loaded", "The validator"],
-      ["Repository type not supported", "The validator"],
-      ["Our run failed", "The validator"],
-      ["Not tried yet", ""],
-      ["Another result", ""],
+  it("the order and the labels; no \"Who can fix it\" anywhere (#454)", () => {
+    expect(RESULTS.map((result) => result.label)).toEqual([
+      "Validated", "No tests in the PR", "No test proves the change", "The change breaks other tests", "The change turns tests off",
+      "No code in the submitted PR", "A test file never loaded", "Repository type not supported", "Our run failed", "Not tried yet", "Another result",
     ]);
+    for (const result of RESULTS) expect(Object.keys(result).sort()).toEqual(["key", "label", "meaning"]);
     const markup = renderToStaticMarkup(view([attempt("env_error"), row({ validationStatus: "validated" }), rejected("regressions")]));
-    const order = ["Validated", "The change breaks other tests", "Our run failed", "Not tried yet"].map((label) => markup.indexOf(`<th scope="row" class="px-3 py-3 font-medium">${label}</th>`));
+    const order = ["Validated", "The change breaks other tests", "Our run failed", "Not tried yet"].map((label) => markup.indexOf(`<span class="font-medium">${label}</span>`));
     expect(order.every((at) => at >= 0)).toBe(true);
     expect([...order].sort((a, b) => a - b)).toEqual(order);
-    for (const heading of ["Result", "Tasks", "Who can fix it"]) expect(markup).toContain(`>${heading}</th>`);
-    expect(markup).toContain("<span class=\"sr-only\">List of tasks</span>");
-    expect(markup).toContain("<td class=\"px-3 py-3\">The validator</td>");
+    expect(markup).not.toContain("Who can fix it");
+    expect(markup).not.toContain("The validator</");
+    expect(markup).not.toContain("<table");
+    const sources = ["../components/cse115a/instructor/BenchmarkTaskTable.tsx", "../lib/cse115a/benchmark/taskTable.ts", "../../../docs/CSE115A_APP.md"]
+      .map((file) => readFileSync(path.resolve(__dirname, file), "utf8"));
+    expect(sources[0]).not.toMatch(/whoColumn|line\.who|statusWho/);
+    expect(sources[1]).not.toMatch(/Who can fix it|whoColumn|statusWho/);
+    expect(sources[2]).not.toContain("| Who can fix it |");
+  });
+
+  it("compact again (#454): small text, one line per result with its count, label and meaning, as before #452", () => {
+    const rows = [row({ validationStatus: "validated" }), attempt("env_error"), attempt("env_error")];
+    const markup = renderToStaticMarkup(view(rows));
+    expect(markup).toContain("<h2 id=\"validation-results\" class=\"font-semibold\">Validation results</h2>");
+    expect(markup).toContain("<ul class=\"mt-3 divide-y divide-border text-sm\">");
+    expect(markup).not.toContain("text-2xl");
+    expect(markup).not.toContain("text-base");
+    // One line: count, label, meaning, in a button setting the Status filter (the style before #452).
+    expect(markup).toContain("<button type=\"button\" aria-pressed=\"false\" class=\"grid min-w-0 flex-1 grid-cols-[4rem_minmax(10rem,16rem)_1fr] items-baseline gap-3 px-2 py-2 text-left hover:bg-muted/50\"><span class=\"text-right\"><span class=\"font-semibold tabular-nums\">2</span></span><span class=\"font-medium\">Our run failed</span><span class=\"text-muted-foreground\">Our test run failed; this says nothing about the student&#x27;s work.</span></button>");
+    // The Show tasks button is small, beside the line.
+    expect(markup).toContain("aria-label=\"Show the 2 tasks: Our run failed\" class=\"mt-1.5 shrink-0 whitespace-nowrap rounded-md border border-input px-2 py-0.5 text-xs font-medium hover:bg-muted\">Show tasks</button>");
+    // Exactly one rule above the Total line: the list draws rules only between lines, the Total line its own top one.
+    expect(markup).toContain("<p class=\"mt-2 border-t border-border px-2 pt-2 text-sm font-medium\">Total: 3 tasks (students only)</p>");
+    const beforeTotal = markup.slice(0, markup.indexOf("Total: 3 tasks"));
+    expect(beforeTotal).not.toMatch(/[" ]border-b[" ]|<thead|<table/);
+    expect(beforeTotal.match(/border-t/g)).toHaveLength(1);
+  });
+
+  it("clicking a line sets the table's Status filter, and the line of the current filter shows as pressed (#454)", () => {
+    const rows = [row({ validationStatus: "validated" }), attempt("env_error")];
+    const picked: StatusKey[] = [];
+    // Validated, Our run failed, Not tried yet.
+    const lines = elements(SummaryBoxView({ rows, people: "students", selected: "env_error", open: null, onToggle: () => {}, idBase: "box", onPick: (key) => picked.push(key) }))
+      .filter((element) => element.type === "button" && "aria-pressed" in (element.props as object));
+    expect(lines.map((element) => (element.props as { "aria-pressed": boolean })["aria-pressed"])).toEqual([false, true, false]);
+    (lines[1]!.props as { onClick: () => void }).onClick();
+    (lines[0]!.props as { onClick: () => void }).onClick();
+    expect(picked).toEqual(["env_error", "validated"]);
+    const markup = renderToStaticMarkup(view(rows, { selected: "env_error" }));
+    expect(markup).toContain("aria-pressed=\"true\" class=\"grid min-w-0 flex-1 grid-cols-[4rem_minmax(10rem,16rem)_1fr] items-baseline gap-3 px-2 py-2 text-left hover:bg-muted/50 bg-muted\"");
+    const component = readFileSync(path.resolve(__dirname, "../components/cse115a/instructor/BenchmarkTaskTable.tsx"), "utf8");
+    expect(component).toContain("selected={filters.status}");
   });
 
   it("exactly one row per task, the rows add up to the total, and a 0-count row is hidden but Validated and Not tried yet", () => {
@@ -1079,8 +1113,8 @@ describe("5. the results box (#452)", () => {
     expect(lines.map((line) => [line.key, line.count])).toEqual([["validated", 0], ["no_tests", 3], ["never_loaded", 1], ["env_error", 2], ["not_tried", 0], ["other", 1]]);
     const markup = renderToStaticMarkup(view(rows));
     expect(markup).not.toContain("The change breaks other tests");
-    expect(markup).toContain(">Validated</th>");
-    expect(markup).toContain(">Not tried yet</th>");
+    expect(markup).toContain(">Validated</span>");
+    expect(markup).toContain(">Not tried yet</span>");
     // A 0-count row has no Show tasks button and no list.
     expect(markup.match(/>Show tasks</g)).toHaveLength(4);
     expect(summarize([]).lines.map((line) => line.key)).toEqual(["validated", "not_tried"]);
@@ -1094,7 +1128,7 @@ describe("5. the results box (#452)", () => {
     expect(countSplit(by("no_tests"))).toBeNull();
     expect(countSplit(by("validated"))).toBeNull();
     const markup = renderToStaticMarkup(view(rows));
-    expect(markup).toContain("<span class=\"text-2xl font-semibold tabular-nums\">9</span><span class=\"block text-xs text-muted-foreground\">3 decided, 6 from the last run</span>");
+    expect(markup).toContain("<span class=\"font-semibold tabular-nums\">9</span><span class=\"block text-xs text-muted-foreground\">3 decided, 6 from the last run</span>");
   });
 
   it("follows the People filter: the counts and the total line", async () => {
@@ -1108,7 +1142,7 @@ describe("5. the results box (#452)", () => {
     expect(summarize(forPeople("students")).lines.find((line) => line.key === "not_tried")!.count).toBe(0);
     expect(summarize(forPeople("everyone")).lines.find((line) => line.key === "not_tried")!.count).toBe(1);
     const component = readFileSync(path.resolve(__dirname, "../components/cse115a/instructor/BenchmarkTaskTable.tsx"), "utf8");
-    expect(component).toContain("<SummaryBox rows={people} people={filters.people} onPick={(key) => setFilters((current) => withStatus(current, key))} />");
+    expect(component).toContain("<SummaryBox rows={people} people={filters.people} selected={filters.status} onPick={(key) => setFilters((current) => withStatus(current, key))} />");
     expect(component).toContain("const people = useMemo(() => (rows ?? []).filter((row) => matchesPeople(row, filters.people)), [rows, filters.people]);");
   });
 
@@ -1120,13 +1154,13 @@ describe("5. the results box (#452)", () => {
     ];
     const closed = renderToStaticMarkup(view(rows));
     expect(closed).toContain("<button type=\"button\" aria-expanded=\"false\" aria-controls=\"box-env_error\" aria-label=\"Show the 1 task: Our run failed\"");
-    expect(closed).toContain("<tr id=\"box-env_error\" hidden=\"\"");
+    expect(closed).toContain("<div id=\"box-env_error\" hidden=\"\"");
     const open = renderToStaticMarkup(view(rows, { open: "env_unsupported" }));
     expect(open).toContain("<button type=\"button\" aria-expanded=\"true\" aria-controls=\"box-env_unsupported\" aria-label=\"Hide the tasks: Repository type not supported\"");
     expect(open).toContain(">Hide tasks</button>");
-    expect(open).toMatch(/<tr id="box-env_unsupported" class="bg-muted\/20">/);
+    expect(open).toMatch(/<div id="box-env_unsupported" class="bg-muted\/20 px-2 py-2">/);
     expect(open).toContain("Tasks with this result: Repository type not supported");
-    expect(open).toContain("<ul class=\"mt-1 max-h-64 space-y-0.5 overflow-y-auto text-sm\">");
+    expect(open).toContain("<ul class=\"mt-1 max-h-64 space-y-0.5 overflow-y-auto\">");
     // Lines by sprint and task; a rejected one says "(decided)"; each links to the staff review page.
     expect(open).toContain("<a class=\"text-primary underline\" href=\"/cse115a/instructor/submissions/sub%207\">Sprint 1 · Task 1 · — · — (decided)</a>");
     expect(open).toContain("<a class=\"text-primary underline\" href=\"/cse115a/instructor/submissions/sub-8\">Sprint 1 · Task 3 · duck-app · eli.example@ucsc.edu</a>");
@@ -1135,7 +1169,7 @@ describe("5. the results box (#452)", () => {
     expect(taskListRows(rows).map((item) => item.id)).toEqual(["t2", "t3", "t1"]);
     // The toggle reports which row; the box keeps one list open at a time.
     const toggled: string[] = [];
-    const show = elements(SummaryBoxView({ rows, people: "students", open: null, onToggle: (key) => toggled.push(key), idBase: "box", onPick: () => {} }))
+    const show = elements(SummaryBoxView({ rows, people: "students", selected: "all", open: null, onToggle: (key) => toggled.push(key), idBase: "box", onPick: () => {} }))
       .filter((element) => element.type === "button" && (element.props as { children?: unknown }).children === TASK_TABLE_TEXT.showTasks);
     (show[0]!.props as { onClick: () => void }).onClick();
     expect(toggled).toEqual(["env_unsupported"]);
@@ -1148,7 +1182,7 @@ describe("5. the results box (#452)", () => {
     const picked: StatusKey[] = [];
     const markup = renderToStaticMarkup(view(rows, { open: "env_error" }));
     expect(markup).toContain("aria-label=\"Show in the table the tasks with this result: Our run failed\"");
-    const buttons = elements(SummaryBoxView({ rows, people: "students", open: "env_error", onToggle: () => {}, idBase: "box", onPick: (key) => picked.push(key) }))
+    const buttons = elements(SummaryBoxView({ rows, people: "students", selected: "all", open: "env_error", onToggle: () => {}, idBase: "box", onPick: (key) => picked.push(key) }))
       .filter((element) => element.type === "button" && (element.props as { children?: unknown }).children === TASK_TABLE_TEXT.showInTable);
     (buttons[1]!.props as { onClick: () => void }).onClick();
     expect(picked).toEqual(["env_error"]);
@@ -1230,7 +1264,8 @@ describe("6. Tests and criteria in the opened row (#452)", () => {
     expect(at("<li>test/kettle.test.ts &gt; beeps</li>")).toBeLessThan(at(">Code patch</h4>"));
     expect(markup.match(/Proving tests \(/g)).toHaveLength(1);
     expect(markup).toContain("3 tests still pass after the change.");
-    expect(markup).toContain(">Coverage (experimental)</h5>");
+    expect(markup).toContain(">Coverage</h5>");
+    expect(markup).not.toContain("(experimental)");
     expect(markup).toContain("<li><span class=\"font-mono text-xs\">src/kettle.ts</span>: run by the proving tests<span class=\"text-muted-foreground tabular-nums\">, 9 of 12 changed lines</span></li>");
     expect(markup).toContain("<li><span class=\"font-mono text-xs\">src/timer.ts</span>: not run</li>");
     expect(markup).toContain("In total, the proving tests run 1 of 2 changed code files.");
