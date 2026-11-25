@@ -106,7 +106,10 @@ function DiffTabBody({ sections, tab, slot }: { sections: DiffSection[]; tab: Di
             {section.heading ? <h4 className="mt-2 border-t border-border px-3 pt-3 text-sm font-semibold">{section.heading}</h4> : null}
             {text ? (
               <DiffBox what={several ? `PR #${section.prNumber}'s ${tab}` : `the ${tab}`} boxId={`task-${slot}-${tab}-${section.key}`}
-                tools={several ? <CopyButton text={() => sectionText(section, tab)} label={REVIEW_TEXT.copy} ariaLabel={REVIEW_TEXT.copySectionLabel(tab, section.prNumber)} /> : null}>
+                title={`Task ${slot} · ${several ? `PR #${section.prNumber}'s ${tab}` : tab}`}
+                tools={several ? <CopyButton text={() => sectionText(section, tab)} label={REVIEW_TEXT.copy} ariaLabel={REVIEW_TEXT.copySectionLabel(tab, section.prNumber)} /> : null}
+                fullScreenTools={<CopyButton text={() => sectionText(section, tab)} label={REVIEW_TEXT.copy}
+                  ariaLabel={several ? REVIEW_TEXT.copySectionLabel(tab, section.prNumber) : REVIEW_TEXT.copyAllLabel(tab)} />}>
                 {(full) => <DiffView diff={text} empty={EMPTY_TAB_TEXT[tab]} full={full} />}
               </DiffBox>
             ) : <DiffView diff="" empty={EMPTY_TAB_TEXT[tab]} />}
