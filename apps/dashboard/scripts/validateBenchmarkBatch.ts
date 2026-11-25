@@ -1,7 +1,7 @@
 // Validates a list of benchmark rows in Docker, one after another, and writes one result JSON per
 // row plus a summary. Dry run: it writes nothing to Supabase. Run from the repo root:
 //
-//   npx tsx --tsconfig apps/dashboard/tsconfig.json apps/dashboard/scripts/validateBenchmarkBatch.ts ROWS.json --out DIR [--snapshots | --snapshot-only] [--snapshots-from DIR] [--gold-check | --gold-only] [--gold-timeout SECONDS] [--fix-coverage | --fix-coverage-only] [--only id,id] [--redo] [--timeout SECONDS]
+//   npx tsx --tsconfig apps/dashboard/tsconfig.json apps/dashboard/scripts/validateBenchmarkBatch.ts ROWS.json --out DIR [--snapshots | --snapshot-only] [--snapshots-from DIR] [--gold-check | --gold-only] [--gold-timeout SECONDS] [--no-fix-coverage | --fix-coverage-only] [--only id,id] [--redo] [--timeout SECONDS]
 //
 // ROWS.json is a JSON array of rows (Supabase: `select json_agg(t) from (...) t`) or JSON Lines.
 // DIR gets: results/<instance_id>.json, logs/<instance_id>/<run>.log, repos/<owner>__<name> (one
@@ -35,13 +35,15 @@
 // 1200). --gold-only: only that, for the rows whose result file exists and is validated, updating
 // those files in place and rewriting the summary files; no clone, no Docker validation.
 //
-// --fix-coverage: after a row validates, one more R2 run per suite with line coverage on, running
-// only the proving test files (c8 for node --test, @vitest/coverage-v8 at the repository's Vitest
+// Fix coverage (on by default since #454): after a row validates, one more R2 run per suite with line
+// coverage on, running only the proving test files (c8 for node --test, @vitest/coverage-v8 at the repository's Vitest
 // version, Jest's own --coverage, coverage.py for pytest), in a clone made inside the container so
 // nothing it installs reaches repos/. Recorded as fix_coverage; untested_files is then derived from
 // it (untested_files_source says how). Never changes the verdict; any failure is fix_coverage
 // status "unavailable" with the reason, and untested_files stays the import rule's. Log:
-// logs/<instance_id>/coverage.log. --timeout applies to it. --fix-coverage-only: only that, for
+// logs/<instance_id>/coverage.log. --timeout applies to it. --no-fix-coverage turns it off, so the
+// result is the validator's alone, as before the coverage run existed. --fix-coverage is still
+// accepted and changes nothing, since the run is already on. --fix-coverage-only: only that, for
 // the rows whose result file exists and is validated, updating fix_coverage, untested_files and
 // untested_files_source in those files (nothing else) and rewriting the summary files. It needs
 // Docker and the checkout: the clone in repos/ (cloned again when missing), else the row's bundle
@@ -66,10 +68,16 @@ import { snapshotOnly } from "@/lib/cse115a/benchmark/validation/snapshots";
 import { SNAPSHOT_BUCKET, supabaseSnapshotStore } from "@/lib/cse115a/benchmark/validation/snapshotStore";
 import type { ValidationResult } from "@/lib/cse115a/benchmark/validation/validateTask";
 
-const USAGE = "Usage: validateBenchmarkBatch.ts ROWS.json --out DIR [--snapshots | --snapshot-only] [--snapshots-from DIR] [--gold-check | --gold-only] [--gold-timeout SECONDS] [--fix-coverage | --fix-coverage-only] [--only id,id] [--redo] [--timeout SECONDS]";
+const USAGE = "Usage: validateBenchmarkBatch.ts ROWS.json --out DIR [--snapshots | --snapshot-only] [--snapshots-from DIR] [--gold-check | --gold-only] [--gold-timeout SECONDS] [--no-fix-coverage | --fix-coverage-only] [--only id,id] [--redo] [--timeout SECONDS]";
 
-function parseArgs(argv: string[]) {
-  const args = { rowsPath: "", out: "", snapshots: false, snapshotOnly: false, snapshotsFrom: "", goldCheck: false, goldOnly: false, goldTimeoutSeconds: GOLD_TIMEOUT_SECONDS, fixCoverage: false, fixCoverageOnly: false, only: [] as string[], redo: false, timeoutSeconds: 900 };
+/**
+ * The command line. `fixCoverage` is whether a normal run measures fix coverage after each row that validates: on
+ * unless --no-fix-coverage (#454). --fix-coverage, the old way to turn it on, is still accepted with its old checks.
+ */
+export function parseArgs(argv: string[]) {
+  const args = { rowsPath: "", out: "", snapshots: false, snapshotOnly: false, snapshotsFrom: "", goldCheck: false, goldOnly: false, goldTimeoutSeconds: GOLD_TIMEOUT_SECONDS, fixCoverage: true, fixCoverageOnly: false, only: [] as string[], redo: false, timeoutSeconds: 900 };
+  let fixCoverageFlag = false;
+  let noFixCoverage = false;
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     if (arg === "--out") args.out = argv[++i] ?? "";
@@ -79,7 +87,8 @@ function parseArgs(argv: string[]) {
     else if (arg === "--gold-check") args.goldCheck = true;
     else if (arg === "--gold-only") args.goldOnly = true;
     else if (arg === "--gold-timeout") args.goldTimeoutSeconds = Number(argv[++i]);
-    else if (arg === "--fix-coverage") args.fixCoverage = true;
+    else if (arg === "--fix-coverage") fixCoverageFlag = true;
+    else if (arg === "--no-fix-coverage") noFixCoverage = true;
     else if (arg === "--fix-coverage-only") args.fixCoverageOnly = true;
     else if (arg === "--only") args.only = (argv[++i] ?? "").split(",").map((s) => s.trim()).filter(Boolean);
     else if (arg === "--redo") args.redo = true;
@@ -92,9 +101,13 @@ function parseArgs(argv: string[]) {
   if (args.goldOnly && (args.snapshotOnly || args.snapshots || args.redo || args.goldCheck)) throw new Error("--gold-only runs only the gold check on existing results: it does not go with --snapshots, --snapshot-only, --redo or --gold-check");
   if (args.snapshotOnly && args.goldCheck) throw new Error("--snapshot-only validates nothing, so there is nothing to gold-check");
   if (!(args.goldTimeoutSeconds > 0)) throw new Error("--gold-timeout needs a number of seconds");
-  if (args.fixCoverage && args.fixCoverageOnly) throw new Error("--fix-coverage and --fix-coverage-only do not go together: --fix-coverage-only already runs the coverage run");
+  if (fixCoverageFlag && noFixCoverage) throw new Error("--fix-coverage and --no-fix-coverage do not go together");
+  if (noFixCoverage && args.fixCoverageOnly) throw new Error("--no-fix-coverage and --fix-coverage-only do not go together: --fix-coverage-only runs only the coverage run");
+  if (fixCoverageFlag && args.fixCoverageOnly) throw new Error("--fix-coverage and --fix-coverage-only do not go together: --fix-coverage-only already runs the coverage run");
   if (args.fixCoverageOnly && (args.snapshotOnly || args.snapshots || args.redo || args.goldCheck || args.goldOnly)) throw new Error("--fix-coverage-only runs only the coverage run on existing results: it does not go with --snapshots, --snapshot-only, --redo, --gold-check or --gold-only");
-  if (args.fixCoverage && (args.snapshotOnly || args.goldOnly)) throw new Error("--fix-coverage runs after a validation, so it does not go with --snapshot-only or --gold-only (use --fix-coverage-only for existing results)");
+  if (fixCoverageFlag && (args.snapshotOnly || args.goldOnly)) throw new Error("--fix-coverage runs after a validation, so it does not go with --snapshot-only or --gold-only (use --fix-coverage-only for existing results)");
+  // Only a normal run validates rows, so only it measures after them; --fix-coverage-only measures on its own.
+  args.fixCoverage = !noFixCoverage && !args.snapshotOnly && !args.goldOnly && !args.fixCoverageOnly;
   return args;
 }
 
@@ -172,7 +185,10 @@ async function main() {
   log(`Done in ${Math.round((Date.now() - startedAt) / 1000)} s. Dry run, nothing written to the database.`);
 }
 
-main().catch((error) => {
-  console.error(error instanceof Error ? error.message : String(error));
-  process.exit(1);
-});
+// Run only as the script, so a test can import parseArgs.
+if (process.argv[1]?.endsWith("validateBenchmarkBatch.ts")) {
+  main().catch((error) => {
+    console.error(error instanceof Error ? error.message : String(error));
+    process.exit(1);
+  });
+}
