@@ -9,7 +9,9 @@ type Params = { params: Promise<{ slug: string }> };
 
 /**
  * Course staff: one row per current task of the course for the Benchmark page's table (#444, #445). Small fields
- * only: no spec, no patches (the detail route loads those when a row opens), and nothing about consent. Writes nothing.
+ * only: no spec, no patches (the detail route loads those when a row opens). Since #449 each row says whether its
+ * student's consent counts by the downloads' rule (`consented`, read from `cse_research_consent`); nothing else about
+ * consent is sent. Writes nothing.
  */
 export async function GET(_request: Request, { params }: Params) {
   const { slug } = await params;

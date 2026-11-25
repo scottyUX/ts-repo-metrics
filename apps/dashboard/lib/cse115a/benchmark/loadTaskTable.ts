@@ -1,13 +1,19 @@
 import "server-only";
+import { buildOverviewScoreStrip } from "@/lib/buildOverviewCards";
+import { countsAsConsent } from "@/lib/cse115a/consent";
 import { effectiveTotal } from "@/lib/cse115a/gradeReview";
 import { teamLink } from "@/lib/cse115a/reviewText";
+import { RUBRIC } from "@/lib/cse115a/rubric";
 import { isTaskSlot, TASK_SLOTS } from "@/lib/cse115a/taskSlots";
 import { MAX_EXTRA_CODE_PRS } from "@/lib/cse115a/submissionSnapshot";
-import type { ExtraPrDetail, TaskDetail, TaskTableRow } from "./taskTable";
+import type { RepoReport } from "@/lib/reportTypes";
+import { gradeBoxes, type ExtraPrDetail, type ReportScore, type TaskDetail, type TaskGrade, type TaskTableRow } from "./taskTable";
 
-// The two staff routes behind the Benchmark page's task table (#444, #445). Both read; neither writes. The list
-// reads small columns and JSON paths only: never `problem_statement`, `patch` or `test_patch`, never a diff, and never
-// `cse_research_consent`. The detail route reads one task's spec and patches when a row is opened.
+// The two staff routes behind the Benchmark page's task table (#444, #445, #449). Both read; neither writes. The list
+// reads small columns and JSON paths only: never `problem_statement`, `patch` or `test_patch`, and never a diff. Since
+// #449 it reads `cse_research_consent` (user, yes or no, wording version) to send each row's yes or no by the
+// downloads' rule, `countsAsConsent`; nothing else about consent is sent. The detail route reads one task's spec,
+// patches and stored report when a row is opened, and sends the report's scores, never the report.
 
 const PAGE = 500;
 const CHUNK = 100;
@@ -22,8 +28,11 @@ export type TaskTableQuery = PromiseLike<{ data: unknown[] | null; error: unknow
 };
 export type TaskTableDb = { from(table: string): { select(columns: string): TaskTableQuery } };
 
-/** The tables the list reads. The test checks consent is not among them. */
-export const TASK_TABLE_TABLES = ["cse_benchmark_task_sources", "cse_assignment_submissions", "cse_benchmark_tasks", "cse_task_grades", "cse_course_memberships", "cse_course_roles"] as const;
+/** The tables the list reads. `cse_research_consent` is read for the Consented column only (#449). */
+export const TASK_TABLE_TABLES = ["cse_benchmark_task_sources", "cse_assignment_submissions", "cse_benchmark_tasks", "cse_task_grades", "cse_course_memberships", "cse_course_roles", "cse_research_consent"] as const;
+
+/** The consent columns the list reads: who, yes or no, and the wording version, which countsAsConsent needs. */
+export const TASK_TABLE_CONSENT_COLUMNS = "user_id,consented,consent_version";
 
 async function pages(query: (from: number, to: number) => TaskTableQuery): Promise<Array<Record<string, unknown>>> {
   const rows: Array<Record<string, unknown>> = [];
@@ -74,6 +83,31 @@ const num = (value: unknown): number | null => {
 };
 const list = (value: unknown): unknown[] => Array.isArray(value) ? value : [];
 
+/**
+ * The grade columns both routes read: the totals and release, and each stored rubric entry's name and points as JSON
+ * paths (never the rationales or quotes).
+ */
+export const TASK_GRADE_COLUMNS = [
+  "assignment_submission_id", "task_slot", "agent_total", "instructor_total", "released_at",
+  ...RUBRIC.flatMap((_, index) => [
+    `ai_name_${index}:rubric->${index}->>name`, `ai_pts_${index}:rubric->${index}->awarded`,
+    `ed_name_${index}:instructor_rubric->${index}->>name`, `ed_pts_${index}:instructor_rubric->${index}->awarded`,
+  ]),
+].join(",");
+
+/** A grade row as the table shows it: effectiveTotal, released, and each box's final points. */
+export function taskGradeFrom(row: Record<string, unknown>): TaskGrade {
+  const entries = (prefix: "ai" | "ed") => RUBRIC.map((_, index) => ({ name: text(row[`${prefix}_name_${index}`]), awarded: num(row[`${prefix}_pts_${index}`]) }))
+    .filter((entry): entry is { name: string; awarded: number | null } => entry.name !== null);
+  const edited = entries("ed");
+  return {
+    total: effectiveTotal({ agent_total: row.agent_total as number, instructor_total: row.instructor_total as number | null }),
+    released: Boolean(row.released_at),
+    // The instructor's rubric holds every box when it exists (parseInstructorRubric), so an empty one means not edited.
+    boxes: gradeBoxes(edited.length ? edited : null, entries("ai")),
+  };
+}
+
 type SnapshotTask = { taskId: string | null; title: string | null; team: string | null; extraCodePrs: number };
 
 /** The snapshot task in each slot, from the paths TASK_TABLE_SNAPSHOT_PATHS selected. */
@@ -107,13 +141,14 @@ function status(value: unknown): TaskTableRow["validationStatus"] {
  * (`superseded_at is null`), every assignment, newest submission first. Throws on a read error.
  */
 export async function loadTaskTable(db: TaskTableDb, courseId: string): Promise<TaskTableRow[]> {
-  const [submissions, sources, members, roles] = await Promise.all([
+  const [submissions, sources, members, roles, consent] = await Promise.all([
     pages((from, to) => db.from("cse_assignment_submissions").select(`id,user_id,assignment_number,submitted_at,${TASK_TABLE_SNAPSHOT_PATHS}`)
       .eq("course_id", courseId).is("superseded_at", null).order("id").range(from, to)),
     pages((from, to) => db.from("cse_benchmark_task_sources").select("id,instance_id,user_id,assignment_submission_id,task_slot,validation_status,flags")
       .eq("course_id", courseId).order("id").range(from, to)),
     pages((from, to) => db.from("cse_course_memberships").select("user_id,ucsc_email").eq("course_id", courseId).order("user_id").range(from, to)),
     pages((from, to) => db.from("cse_course_roles").select("email").eq("course_id", courseId).order("email").range(from, to)),
+    pages((from, to) => db.from("cse_research_consent").select(TASK_TABLE_CONSENT_COLUMNS).eq("course_id", courseId).order("user_id").range(from, to)),
   ]);
   const current = new Map(submissions.map((row) => [String(row.id), row]));
   const listed = sources.filter((row) => current.has(String(row.assignment_submission_id)));
@@ -121,12 +156,16 @@ export async function loadTaskTable(db: TaskTableDb, courseId: string): Promise<
   const submissionIds = [...new Set(listed.map((row) => String(row.assignment_submission_id)))];
   const [tasks, grades] = await Promise.all([
     chunked(instanceIds, (chunk) => db.from("cse_benchmark_tasks").select(TASK_TABLE_TASK_COLUMNS).in("instance_id", chunk)),
-    chunked(submissionIds, (chunk) => db.from("cse_task_grades").select("assignment_submission_id,task_slot,agent_total,instructor_total,released_at").in("assignment_submission_id", chunk)),
+    chunked(submissionIds, (chunk) => db.from("cse_task_grades").select(TASK_GRADE_COLUMNS).in("assignment_submission_id", chunk)),
   ]);
   const taskBy = new Map(tasks.map((row) => [String(row.instance_id), row]));
   const gradeBy = new Map(grades.map((row) => [`${row.assignment_submission_id}:${row.task_slot}`, row]));
   const emailBy = new Map(members.map((row) => [String(row.user_id), String(row.ucsc_email ?? "")]));
   const staffEmails = new Set(roles.map((row) => String(row.email ?? "").toLowerCase()));
+  // The downloads' rule: a yes to the current, approved wording. No answer, a no, or an older wording is not consent.
+  const consentedUsers = new Set(consent
+    .filter((row) => countsAsConsent({ consented: row.consented === true, consent_version: String(row.consent_version ?? "") }))
+    .map((row) => String(row.user_id)));
   const snapshotBy = new Map(submissions.map((row) => [String(row.id), snapshotTasksBySlot(row)]));
 
   const rows = listed.map((source): TaskTableRow => {
@@ -145,6 +184,7 @@ export async function loadTaskTable(db: TaskTableDb, courseId: string): Promise<
       team: snapshot?.team ?? null,
       email,
       staff: email !== "" && staffEmails.has(email.toLowerCase()),
+      consented: consentedUsers.has(String(source.user_id)),
       taskId: snapshot?.taskId ?? null,
       title: snapshot?.title ?? null,
       validationStatus: status(source.validation_status),
@@ -155,7 +195,7 @@ export async function loadTaskTable(db: TaskTableDb, courseId: string): Promise<
         : null,
       untestedFiles: list(task?.untested).length,
       gold: task?.gold === "passed" || task?.gold === "failed" || task?.gold === "skipped" ? task.gold : null,
-      grade: grade ? { total: effectiveTotal({ agent_total: grade.agent_total as number, instructor_total: grade.instructor_total as number | null }), released: Boolean(grade.released_at) } : null,
+      grade: grade ? taskGradeFrom(grade) : null,
       extraCodePrs: snapshot?.extraCodePrs ?? 0,
       hasReport: hasReport(task),
       reportDate: text(task?.report_date),
@@ -185,9 +225,12 @@ export function detailSnapshotPaths(position: number): string {
   ].join(",");
 }
 
-/** The columns of the one task the detail route reads: the spec and patches whole, the lists, the detail, the report's date. */
+/**
+ * The columns of the one task the detail route reads: the spec and patches whole, the lists, the detail, the report's
+ * date, and the stored report itself, which is scored on the server and never sent.
+ */
 export const TASK_DETAIL_TASK_COLUMNS = [
-  "problem_statement", "patch", "test_patch", "FAIL_TO_PASS", "PASS_TO_PASS",
+  "problem_statement", "patch", "test_patch", "FAIL_TO_PASS", "PASS_TO_PASS", "repo_metrics",
   "validated_at:validation_detail->>validated_at",
   "repo_source:validation_detail->>repo_source",
   "untested:validation_detail->untested_files",
@@ -195,6 +238,27 @@ export const TASK_DETAIL_TASK_COLUMNS = [
   "report_source:repo_metrics->source->>type",
   "report_date:repo_metrics->>analysis_timestamp",
 ].join(",");
+
+/** The four scores the opened row shows, in this order, as the metrics page's score strip names them. */
+export const REPORT_SCORE_IDS = ["commit-habits", "testing", "code-quality", "code-complexity"] as const;
+
+/**
+ * Commit Habits, Testing, Code Quality and Code Complexity from a stored report, by the metrics page's own rule
+ * (buildOverviewScoreStrip; the React tile is left out). A report the analysis skipped has no Testing or Code Quality,
+ * as on the metrics page. Null when there is no report or it cannot be scored.
+ */
+export function reportScores(report: unknown): ReportScore[] | null {
+  if (!report || typeof report !== "object" || Array.isArray(report)) return null;
+  try {
+    const { items } = buildOverviewScoreStrip(report as RepoReport, false);
+    return REPORT_SCORE_IDS.flatMap((id) => {
+      const item = items.find((entry) => entry.id === id);
+      return item ? [{ id, title: item.title, score: typeof item.score === "number" && Number.isFinite(item.score) ? item.score : null }] : [];
+    });
+  } catch {
+    return null;
+  }
+}
 
 /**
  * One task of the course for the opened row, by its source id; null when the course has no such task. Throws on a
@@ -208,9 +272,10 @@ export async function loadTaskDetail(db: TaskTableDb, courseId: string, sourceId
   const slot = Number(source.task_slot);
   const submissionId = String(source.assignment_submission_id);
   const slotPaths = TASK_SLOTS.map((position) => `slot_${position}:snapshot->tasks->${position - 1}->slot`).join(",");
-  const [tasks, slotRows] = await Promise.all([
+  const [tasks, slotRows, grades] = await Promise.all([
     pages((from, to) => db.from("cse_benchmark_tasks").select(TASK_DETAIL_TASK_COLUMNS).eq("instance_id", String(source.instance_id)).order("instance_id").range(from, to)),
     pages((from, to) => db.from("cse_assignment_submissions").select(`id,${slotPaths}`).eq("course_id", courseId).eq("id", submissionId).order("id").range(from, to)),
+    pages((from, to) => db.from("cse_task_grades").select(TASK_GRADE_COLUMNS).eq("assignment_submission_id", submissionId).eq("task_slot", slot).order("task_slot").range(from, to)),
   ]);
   const task = tasks[0];
   if (!task) return null;
@@ -250,5 +315,7 @@ export async function loadTaskDetail(db: TaskTableDb, courseId: string, sourceId
     extraCodePrs: extras,
     hasReport: hasReport(task),
     reportDate: text(task.report_date),
+    grade: grades[0] ? taskGradeFrom(grades[0]) : null,
+    scores: hasReport(task) ? reportScores(task.repo_metrics) : null,
   };
 }
