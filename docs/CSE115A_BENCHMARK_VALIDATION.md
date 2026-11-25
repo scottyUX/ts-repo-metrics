@@ -588,6 +588,31 @@ it. To undo the migration:
 alter table public.cse_benchmark_tasks drop column if exists validation_detail; notify pgrst, 'reload schema';
 ```
 
+**The last attempt (#452): `validation_attempt:<reason>`.** A verdict write-back skips `env_error`
+and leaves a candidate as it is, so the Benchmark page could not tell a task whose run failed from
+one never tried. A second mode of the script notes what the last run ended with, without a verdict:
+
+```sh
+npx tsx --tsconfig apps/dashboard/tsconfig.json apps/dashboard/scripts/writebackValidation.ts --batch DIR --attempts --dry-run
+SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... npx tsx --tsconfig apps/dashboard/tsconfig.json apps/dashboard/scripts/writebackValidation.ts --batch DIR --attempts
+```
+
+- For every result that is not validated, `env_error` included, it sets
+  `validation_attempt:<reason>` on the task's source rows: the result's own reason, or
+  `test_file_never_loaded` when the result lists `test_files_never_loaded` (the summary's "test
+  patch file(s) never loaded after the fix" note). It writes `flags` only, one update per source
+  row by its id: no status, no task row, no `updated_at`, no other flag.
+- It skips validated results (write those back without `--attempts`) and says how many. It never
+  changes a source row already `validated` or `rejected`, and prints `skipped (already rejected)`
+  for it; the last line counts what was noted and what was skipped, by reason.
+- `--only` and `--dry-run` work as in the verdict mode. The dry run reads no database and prints
+  `<id>: <reason>` per task; the real run prints `<id>: <reason> noted`.
+- One run does one job: `--attempts` never writes a verdict, and without it the script behaves as
+  before. The flag is validator-owned (`isManagedFlag`), so a later write-back of the task in
+  either mode replaces it, and a validated one removes it. A row never has two attempt flags. No
+  migration: `flags` is an existing text array. The code is in `validation/attempts.ts` and
+  `validation/writebackCli.ts`; the script only reads the result files.
+
 ## Fix coverage
 
 The import rule guesses what the proving tests load, and it is wrong both ways: a test that imports

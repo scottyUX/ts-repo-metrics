@@ -446,44 +446,78 @@ SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... \
   attempts included; the summary box and the table count current attempts only,
   and a line under the tiles says so.
 
-### The Benchmark page's task table (#444, #445)
+### The Benchmark page's task table (#444, #445, #449, #452)
 
 A "Validation results" box and a table of every current task (one row per
 benchmark source whose submission has `superseded_at is null`, every
-assignment). The box has one line per result, first match wins: Validated;
-Not accepted, one line per `validation_reason:` flag; No code in the PR (the
-flags `noCodePr.ts` reads); No tests in the PR (`no_test_patch`); No result yet.
-The lines add up to the total. Clicking a line sets the table's status filter.
+assignment).
 
-Columns (#449 order): Sprint (the assignment number; only this table says
-"Sprint", the Submissions page keeps "Assignment"), Team (one line), Student
-(with a "Staff" tag for an email in `cse_course_roles`), Consented, Task, Status,
-Coverage (experimental) (`validation_detail.fix_coverage`), Gold check
-(`harbor_env.gold`), Final grade (display only; hovering or focusing it shows
-the six rubric boxes' points), Benchmark grade, Benchmark include, Staff changes
-(#431, #437) and Repo ("Report" with the stored report's own date, or "No
-report"). Filters: sprint, team, status, consented (Any / Yes / No), changed by
-staff, people (default Students only) and a search over email, team and task.
-Every column but the two benchmark columns sorts like the Submissions table. A
-line under the "Tasks" heading says the grade, coverage and gold check are shown
-there only and are not in the downloads.
+**The box (#452)** is a table: Result, Tasks (the count), Who can fix it, and a
+"Show tasks" button on every count above 0. Every task is in exactly one row
+and the rows add up to the total. Rows, in order (`RESULTS` in
+`lib/cse115a/benchmark/taskTable.ts`):
 
-- **Consented** (#449) is "Yes" only when the student's consent counts by the
-  downloads' rule, `countsAsConsent` in `lib/cse115a/consent.ts`: a yes to the
-  current, approved wording. A no, no answer, or a yes to an older wording is
-  "No". The foot of the "Validation results" box adds "Validated and consented:
-  N" and "Validated, not consented: N" (apart from the lines that add up to the
-  total, which they do not change) and "A download holds a validated task only
-  when its student consented." This reverses #444/#445's "no consent on a row"
-  rule, on the product owner's decision. Who counts as consented and the
-  downloads did not change.
-- **Help (?)** beside Status, Coverage, Gold check, Benchmark grade and
-  Benchmark include opens a short panel on hover and keyboard focus, closes on
-  Esc and on moving away, and is named by the button's `aria-describedby`
-  (`HelpTip.tsx`). The Status help is built from `statusLabel` and
-  `statusMeaning`, the same words as the "Validation results" box.
-- **Benchmark grade** and **Benchmark include** are placeholders: every cell
-  reads "Not set". No data, route field or migration exists for them yet.
+| Result | Rule | Who can fix it |
+|---|---|---|
+| Validated | status `validated` | |
+| No tests in the PR | reason or attempt `no_test_patch`, or a candidate with flag `no_test_patch` | The student |
+| No test proves the change | reason or attempt `no_fail_to_pass` | The student |
+| The change breaks other tests | reason or attempt `regressions` | The student |
+| The change turns tests off | reason or attempt `regression_skip` | The student |
+| No code in the submitted PR | reason or attempt `no_source_patch`, or the "no code" marker (`noCodePr.ts`) | Staff, by choosing the PR that holds the code |
+| A test file never loaded | attempt `test_file_never_loaded` | The validator |
+| Repository type not supported | reason or attempt `env_unsupported` | The validator |
+| Our run failed | attempt `env_error` | The validator |
+| Not tried yet | a candidate with none of the above | |
+| Another result | a reason or attempt this page does not know | |
+
+"Reason" is a rejected row's `validation_reason:` flag; "attempt" is a
+candidate's `validation_attempt:` flag, which `writebackValidation.ts
+--attempts` writes (see docs/CSE115A_BENCHMARK_VALIDATION.md). First match
+wins: validated, then a rejection by its reason, then a candidate's attempt,
+then the "no code" marker, then `no_test_patch`, so a decision or a run counts
+before the capture's flags. A row with 0 tasks is hidden, except Validated and
+Not tried yet. Under a count that holds both, small text says "3 decided, 6
+from the last run" (decided: rejected; last run: a candidate with an attempt
+flag). "Show tasks" opens a list under the row, built like the Grader tab's
+(#432): `aria-expanded`, `aria-controls`, a name, a list that scrolls in a
+fixed height; each line reads "Sprint 3 · Task 2 · <team> · <email>", with
+"(decided)" after a rejected one, and links to the review page. "Show in the
+table" in the list sets the table's Status filter. The box follows the table's
+People filter (default Students only), and the total says which: "Total: 131
+tasks (students only)". Its foot keeps "Validated and consented: N" and
+"Validated, not consented: N", counting Yes only.
+
+Columns (#452 order): Sprint (the assignment number; only this table says
+"Sprint", the Submissions page keeps "Assignment"), Team (one line), Who (with a
+"Staff" tag for an email in `cse_course_roles`), Consent, Task, Status, Coverage
+(experimental) (`validation_detail.fix_coverage`), Final grade (display only;
+hovering or focusing it shows the six rubric boxes' points), Score, Gold check
+(`harbor_env.gold`), Include, Repo ("Report" with the stored report's own date,
+or "No report") and Staff changes (#431, #437). Filters: sprint, team, status,
+consent (Any / Yes / No / Not yet), changed by staff, people (default Students
+only) and a search over email, team and task. Every column but Score and
+Include sorts like the Submissions table. A line under the "Tasks" heading says
+the grade, coverage and gold check are shown there only and are not in the
+downloads.
+
+- **Status** uses the box's labels: a rejected row reads "Not accepted: <label>",
+  a candidate with an attempt flag "No result yet · last run: <label>", any
+  other row the box's label. The Status filter lists the box's results with
+  their counts, and the Status help lists each result's sentence and what the
+  two prefixes mean (`statusHelpLines`).
+- **Consent** (#449, three values since #452): "Yes" when the student's consent
+  counts by the downloads' rule, `countsAsConsent` in `lib/cse115a/consent.ts`
+  (a yes to the current, approved wording); "No" for a no to the current
+  wording; "Not yet" for no answer or an answer to an older wording. Who counts
+  as consented and the downloads did not change.
+- **Help (?)** beside Status, Coverage, Score, Gold check, Include and Repo opens
+  a short panel on hover and keyboard focus, closes on Esc and on moving away,
+  and is named by the button's `aria-describedby` (`HelpTip.tsx`). The Repo
+  heading's former tagline is now its help.
+- **Score** and **Include** (formerly Benchmark grade and Benchmark include)
+  are placeholders: every cell reads "Not set". No data, route field or
+  migration exists for them yet.
 
 Clicking a row opens it in place: links to the review page and the Repo Metrics
 report; the **Grade** (each rubric box's final points, the instructor's where
@@ -492,20 +526,29 @@ the **Repo Metrics scores** (Commit Habits, Testing, Code Quality, Code
 Complexity, worked out on the server from the stored `repo_metrics` with the
 metrics page's own `buildOverviewScoreStrip`, shown with the report's date; a
 stored report that cannot be scored says so, and the link stays); the spec
-(Formatted / Raw), both patches whole with Copy, each with **Full screen**
-(#448); the proving tests, the flags in plain words (`FLAG_TEXT` in
-`lib/cse115a/benchmark/taskTable.ts`), the validation detail, and a "Changed by
-staff" block read from the snapshot.
+(Formatted / Raw); **Tests and criteria** (#452) directly under it; both
+patches whole with Copy, each with **Full screen** (#448); the flags in plain
+words (`FLAG_TEXT` in `lib/cse115a/benchmark/taskTable.ts`), the validation
+detail, and a "Changed by staff" block read from the snapshot.
+
+**Tests and criteria** shows the proving tests (as before), then Coverage
+(experimental) from the stored coverage run when there is one: each changed
+code file with "run by the proving tests", "not run", "not measured" or "no
+runnable changed lines", its "N of M changed lines" where the run holds them,
+and the run's own totals. Without a stored run it says "Not measured yet."; a
+run that measured no executable lines says so. A line at the foot says which
+acceptance criteria each test checks is not shown yet. Nothing is computed on
+the page.
 
 Routes (course staff, read only): `GET .../courses/<slug>/benchmark/tasks`
 returns the rows without `problem_statement`, `patch`, `test_patch` or the diff.
-Since #449 it reads `cse_research_consent` (`user_id, consented,
-consent_version`) and sends each row's `consented`, a yes or no by
-`countsAsConsent`; never the answer itself, its version or its date. It reads
-each rubric box's name and points as JSON paths, never the rationales, quotes or
-notes. `GET .../courses/<slug>/benchmark/tasks/<source id>` returns one task
-for the opened row, with its grade by box and the four scores; it reads the
-stored report to score it and never sends the report.
+It reads `cse_research_consent` (`user_id, consented, consent_version`) and
+sends each row's `consent` (`yes`, `no` or `not_yet`); never the wording version
+or a date. It reads each rubric box's name and points as JSON paths, never the
+rationales, quotes or notes. `GET .../courses/<slug>/benchmark/tasks/<source
+id>` returns one task for the opened row, with its grade by box, the four
+scores and the stored coverage run's files and totals; it reads the stored
+report to score it and never sends the report.
 
 ### Re-capturing old diffs (#418)
 
