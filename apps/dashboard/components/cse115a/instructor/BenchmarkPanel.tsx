@@ -2,26 +2,14 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { BenchmarkTaskTable } from "./BenchmarkTaskTable";
 import { RepoCopies } from "./RepoCopies";
+import { TASK_TABLE_TEXT } from "@/lib/cse115a/benchmark/taskTable";
 import { fetchJson, type StaffCourse } from "./shared";
 
-type Preview = {
-  instance_id: string;
-  user_id: string;
-  task_slot: number;
-  validation_status: "candidate" | "validated" | "rejected";
-  flags: string[];
-  created_at: string;
-  consented: boolean;
-  task: null | {
-    repo: string; base_commit: string; created_at: string | null; version: string; difficulty: string | null;
-    FAIL_TO_PASS: string[]; problem_statement: string; patch: string; test_patch: string;
-  };
-};
 type Summary = {
   course: StaffCourse;
   counts: { sources: number; instances: number; candidate: number; validated: number; rejected: number; consented: number; flagged: number };
-  preview: Preview[];
   exportEnabled: boolean;
 };
 type ConsentTotals = { enrolled: number; yes: number; no: number; notAnswered: number };
@@ -71,6 +59,7 @@ export function BenchmarkPanel({ slug }: { slug: string }) {
           </div>
         ))}
       </dl>
+      <p className="text-sm text-muted-foreground">{TASK_TABLE_TEXT.tilesNote}</p>
       <p className="text-sm text-muted-foreground">{consentTotals ? consentTotalsLine(consentTotals) : consentTotalsError ? `Research consent totals: ${consentTotalsError}` : "Research consent totals: loading…"}</p>
       {!summary.exportEnabled ? <p className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-sm">Export is off while CONSENT_APPROVED is false in lib/cse115a/consent.ts. Tasks are still captured, with personal information removed.</p> : null}
       <div className={`flex flex-wrap gap-3 ${summary.exportEnabled ? "" : "pointer-events-none opacity-50"}`} aria-disabled={!summary.exportEnabled}>
@@ -82,28 +71,7 @@ export function BenchmarkPanel({ slug }: { slug: string }) {
       <RepoCopies slug={slug} />
 
       <section className="space-y-3">
-        <h2 className="font-semibold">Newest rows</h2>
-        {summary.preview.length === 0 ? <p className="text-sm text-muted-foreground">No tasks captured yet.</p> : null}
-        {summary.preview.map((row) => (
-          <details key={`${row.instance_id}-${row.created_at}-${row.task_slot}`} className="rounded-xl border border-border bg-card">
-            <summary className="flex cursor-pointer flex-wrap items-center gap-x-4 gap-y-1 px-4 py-3 text-sm">
-              <span className="font-mono font-medium">{row.instance_id}</span>
-              <span className="text-muted-foreground">{row.task?.version} · {row.task?.difficulty ?? "no estimate"}</span>
-              <span className={row.consented ? "text-emerald-600" : "text-muted-foreground"}>{row.consented ? "consented" : "no consent"}</span>
-              <span className="text-muted-foreground">{row.validation_status}</span>
-              {row.flags.map((flag) => <span key={flag} className="rounded-full bg-amber-500/15 px-2 py-0.5 text-xs text-amber-700 dark:text-amber-300">{flag}</span>)}
-            </summary>
-            {row.task ? (
-              <div className="space-y-3 border-t border-border p-4 text-sm">
-                <p><span className="text-muted-foreground">repo</span> {row.task.repo} · <span className="text-muted-foreground">base_commit</span> <span className="font-mono">{row.task.base_commit}</span> · <span className="text-muted-foreground">created_at</span> {row.task.created_at ?? "—"}</p>
-                <div><p className="text-muted-foreground">FAIL_TO_PASS ({row.task.FAIL_TO_PASS.length})</p><ul className="font-mono text-xs">{row.task.FAIL_TO_PASS.map((test) => <li key={test}>{test}</li>)}</ul></div>
-                {(["problem_statement", "patch", "test_patch"] as const).map((field) => (
-                  <div key={field}><p className="text-muted-foreground">{field} (preview)</p><pre className="max-h-48 overflow-auto rounded-md bg-muted p-2 text-xs">{row.task![field] || "(empty)"}</pre></div>
-                ))}
-              </div>
-            ) : null}
-          </details>
-        ))}
+        <BenchmarkTaskTable slug={slug} />
       </section>
     </div>
   );
