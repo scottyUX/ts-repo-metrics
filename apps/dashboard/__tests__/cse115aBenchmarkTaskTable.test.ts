@@ -643,7 +643,7 @@ describe("3. opening a row", () => {
 
   const base: TaskDetail = {
     id: "x", submissionId: "sub-x", slot: 1, validationStatus: "candidate", flags: [], problemStatement: "Spec", patch: "p", testPatch: "t", failToPass: [], passToPass: 0,
-    validation: null, workPrChoice: null, extraCodePrs: [], hasReport: true, reportDate: "2026-11-12T00:00:00Z", grade: null, scores: null,
+    validation: null, workPrChoice: null, extraCodePrs: [], hasReport: true, reportDate: "2026-11-12T00:00:00Z", grade: null, scores: null, coverage: null,
   };
   const choice = { prNumber: 12, submittedPrNumber: 9, reason: "Code is in #12.", chosenBy: "ta-one@ucsc.edu", chosenAt: "2026-11-20T18:00:00Z" };
   const extras = [{ prNumber: 14, reason: "Timer part.", addedBy: "ta-one@ucsc.edu", addedAt: "2026-11-21T10:00:00Z" }];

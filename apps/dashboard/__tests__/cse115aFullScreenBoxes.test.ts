@@ -132,7 +132,7 @@ describe("#448 full screen", () => {
     const detail: TaskDetail = {
       id: "src-9", submissionId: "sub-9", slot: 2, validationStatus: "validated", flags: [], problemStatement: SPEC, patch: "diff --git a/src/lamp.ts b/src/lamp.ts\n+dim()\n",
       testPatch: "diff --git a/test/lamp.test.ts b/test/lamp.test.ts\n+it('dims')\n", failToPass: [], passToPass: 0, validation: null, workPrChoice: null, extraCodePrs: [],
-      hasReport: false, reportDate: null, grade: null, scores: null,
+      hasReport: false, reportDate: null, grade: null, scores: null, coverage: null,
     };
     const markup = renderToStaticMarkup(createElement(TaskDetailView, { detail }));
     expect(markup.match(/>Full screen<\/button>/g)).toHaveLength(3);

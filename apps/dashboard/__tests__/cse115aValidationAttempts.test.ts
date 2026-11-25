@@ -3,7 +3,7 @@
 // repositories are made up.
 import { describe, expect, it } from "vitest";
 import { rejectedWithoutRun } from "@/lib/cse115a/benchmark/validation/batch";
-import { applyAttempts, ATTEMPT_REASONS, attemptPlan, attemptReason, mergeAttemptFlag, NEVER_LOADED_REASON, type AttemptClient } from "@/lib/cse115a/benchmark/validation/attempts";
+import { ATTEMPT_REASONS, attemptPlan, attemptReason, mergeAttemptFlag, NEVER_LOADED_REASON, type AttemptClient } from "@/lib/cse115a/benchmark/validation/attempts";
 import type { TaskRow, ValidationResult } from "@/lib/cse115a/benchmark/validation/validateTask";
 import { applyWriteback, ATTEMPT_FLAG_PREFIX, isManagedFlag, writebackPlan, type ColumnProbeClient, type WritebackClient } from "@/lib/cse115a/benchmark/validation/writeback";
 import { parseWritebackArgs, runWriteback, type WritebackArgs } from "@/lib/cse115a/benchmark/validation/writebackCli";
