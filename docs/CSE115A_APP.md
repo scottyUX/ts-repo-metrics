@@ -446,52 +446,55 @@ SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... \
   attempts included; the summary box and the table count current attempts only,
   and a line under the tiles says so.
 
-### The Benchmark page's task table (#444, #445, #449, #452)
+### The Benchmark page's task table (#444, #445, #449, #452, #454)
 
 A "Validation results" box and a table of every current task (one row per
 benchmark source whose submission has `superseded_at is null`, every
 assignment).
 
-**The box (#452)** is a table: Result, Tasks (the count), Who can fix it, and a
-"Show tasks" button on every count above 0. Every task is in exactly one row
-and the rows add up to the total. Rows, in order (`RESULTS` in
-`lib/cse115a/benchmark/taskTable.ts`):
+**The box** (compact again since #454, as before #452) lists one line per
+result in small text: the count, the label and its one-line meaning. Clicking a
+line sets the table's Status filter (the line shows as pressed while it is the
+filter). Every task is in exactly one line and the lines add up to the total.
+Lines, in order (`RESULTS` in `lib/cse115a/benchmark/taskTable.ts`):
 
-| Result | Rule | Who can fix it |
-|---|---|---|
-| Validated | status `validated` | |
-| No tests in the PR | reason or attempt `no_test_patch`, or a candidate with flag `no_test_patch` | The student |
-| No test proves the change | reason or attempt `no_fail_to_pass` | The student |
-| The change breaks other tests | reason or attempt `regressions` | The student |
-| The change turns tests off | reason or attempt `regression_skip` | The student |
-| No code in the submitted PR | reason or attempt `no_source_patch`, or the "no code" marker (`noCodePr.ts`) | Staff, by choosing the PR that holds the code |
-| A test file never loaded | attempt `test_file_never_loaded` | The validator |
-| Repository type not supported | reason or attempt `env_unsupported` | The validator |
-| Our run failed | attempt `env_error` | The validator |
-| Not tried yet | a candidate with none of the above | |
-| Another result | a reason or attempt this page does not know | |
+| Result | Rule |
+|---|---|
+| Validated | status `validated` |
+| No tests in the PR | reason or attempt `no_test_patch`, or a candidate with flag `no_test_patch` |
+| No test proves the change | reason or attempt `no_fail_to_pass` |
+| The change breaks other tests | reason or attempt `regressions` |
+| The change turns tests off | reason or attempt `regression_skip` |
+| No code in the submitted PR | reason or attempt `no_source_patch`, or the "no code" marker (`noCodePr.ts`) |
+| A test file never loaded | attempt `test_file_never_loaded` |
+| Repository type not supported | reason or attempt `env_unsupported` |
+| Our run failed | attempt `env_error` |
+| Not tried yet | a candidate with none of the above |
+| Another result | a reason or attempt this page does not know |
 
 "Reason" is a rejected row's `validation_reason:` flag; "attempt" is a
 candidate's `validation_attempt:` flag, which `writebackValidation.ts
 --attempts` writes (see docs/CSE115A_BENCHMARK_VALIDATION.md). First match
 wins: validated, then a rejection by its reason, then a candidate's attempt,
 then the "no code" marker, then `no_test_patch`, so a decision or a run counts
-before the capture's flags. A row with 0 tasks is hidden, except Validated and
+before the capture's flags. A line with 0 tasks is hidden, except Validated and
 Not tried yet. Under a count that holds both, small text says "3 decided, 6
 from the last run" (decided: rejected; last run: a candidate with an attempt
-flag). "Show tasks" opens a list under the row, built like the Grader tab's
-(#432): `aria-expanded`, `aria-controls`, a name, a list that scrolls in a
-fixed height; each line reads "Sprint 3 · Task 2 · <team> · <email>", with
-"(decided)" after a rejected one, and links to the review page. "Show in the
-table" in the list sets the table's Status filter. The box follows the table's
-People filter (default Students only), and the total says which: "Total: 131
-tasks (students only)". Its foot keeps "Validated and consented: N" and
-"Validated, not consented: N", counting Yes only.
+flag). A small "Show tasks" button on every line with tasks opens a list under
+it, built like the Grader tab's (#432): `aria-expanded`, `aria-controls`, a
+name, a list that scrolls in a fixed height; each line reads "Sprint 3 · Task 2
+· <team> · <email>", with "(decided)" after a rejected one, and links to the
+review page. "Show in the table" in the list sets the table's Status filter too.
+The box follows the table's People filter (default Students only), and the
+total, under a single rule, says which: "Total: 131 tasks (students only)". Its
+foot keeps "Validated and consented: N" and "Validated, not consented: N",
+counting Yes only. (#452's "Who can fix it" column is gone.)
 
 Columns (#452 order): Sprint (the assignment number; only this table says
 "Sprint", the Submissions page keeps "Assignment"), Team (one line), Who (with a
 "Staff" tag for an email in `cse_course_roles`), Consent, Task, Status, Coverage
-(experimental) (`validation_detail.fix_coverage`), Final grade (display only;
+(`validation_detail.fix_coverage`; its help says the numbers are
+experimental; "Coverage (experimental)" until #454), Final grade (display only;
 hovering or focusing it shows the six rubric boxes' points), Score, Gold check
 (`harbor_env.gold`), Include, Repo ("Report" with the stored report's own date,
 or "No report") and Staff changes (#431, #437). Filters: sprint, team, status,
@@ -527,12 +530,13 @@ Complexity, worked out on the server from the stored `repo_metrics` with the
 metrics page's own `buildOverviewScoreStrip`, shown with the report's date; a
 stored report that cannot be scored says so, and the link stays); the spec
 (Formatted / Raw); **Tests and criteria** (#452) directly under it; both
-patches whole with Copy, each with **Full screen** (#448); the flags in plain
+patches whole with Copy, each with **Full screen** (#448) and **Collapse**
+(#454; see the review page); the flags in plain
 words (`FLAG_TEXT` in `lib/cse115a/benchmark/taskTable.ts`), the validation
 detail, and a "Changed by staff" block read from the snapshot.
 
 **Tests and criteria** shows the proving tests (as before), then Coverage
-(experimental) from the stored coverage run when there is one: each changed
+(headed "Coverage (experimental)" until #454) from the stored coverage run when there is one: each changed
 code file with "run by the proving tests", "not run", "not measured" or "no
 runnable changed lines", its "N of M changed lines" where the run holds them,
 and the run's own totals. Without a stored run it says "Not measured yet."; a
@@ -623,7 +627,8 @@ false, the dry run). Staff of that course only.
 Some submitted tasks point at a PR that only adds or moves the task file, while
 the student's code was merged in one or two earlier PRs. The saved diff is then
 right for that PR and useless for grading. On the staff review page, each task
-has **Use a different PR for the code** under "Get the code". The site suggests;
+has **Fix the code PR** under "Get the code" (#454; "Use a different PR for the
+code" before), then **The code is in a different PR**. The site suggests;
 it never chooses on its own. Nothing a student sees changes.
 
 - **The list** (`GET /api/cse115a/instructor/submissions/<id>/work-pr?slot=N`):
@@ -759,7 +764,8 @@ staff and the AI see; they never change the benchmark row's patch.
   code. Press Regrade." (or "removed from").
 - **Review page** (staff only): the extra PRs are listed under the main PR
   ("PR #12 Title · merged Oct 12, 2026 · added by … on Nov 23, 2026", "Reason:
-  …", **Remove** then "Yes, remove PR #12"). **Add another PR for the code**
+  …", **Remove** then "Yes, remove PR #12"). **Fix the code PR**, then **The
+  code is spread over more PRs** (#454; "Add another PR for the code" before)
   opens the same candidate list ("Already added to this task" on attached
   ones), a typed number or link, a reason, **Preview** (files, test and source
   counts, warnings, including a file the main PR also changes) and **Add this
@@ -804,6 +810,25 @@ Staff only; nothing a student sees changes.
   (#437) each section has its own **Copy**, and Copy all puts every section in
   page order under its one-line PR heading. A refused copy says "Could not copy.
   Select the text and copy it by hand."
+- **Collapse** (#454) sits at the right end of each `patch` and `test_patch`
+  box's toolbar, after Show full height and Full screen (one per section when
+  the task has extra PRs), and on the Benchmark task table's opened row's Code
+  patch and Test patch. Collapsed, the box shows only its header line and
+  toolbar and the button reads **Expand**; it has `aria-expanded` and
+  `aria-controls`, starts expanded and is not saved. Copy and Copy all still
+  copy the whole stored diff while a box is collapsed.
+- **Fix the code PR** (#454) replaces the two buttons "Use a different PR for
+  the code" and "Add another PR for the code" (`FixCodePr.tsx`). It opens two
+  labelled choices: **The code is in a different PR** ("Use when the submitted
+  PR holds only the task file, or is not where the work is. Replaces the code
+  PR; the submitted PR is kept as the task-file PR.") opens the #431 chooser,
+  and **The code is spread over more PRs** ("Use when this PR is right but
+  incomplete. Adds up to three more PRs; nothing is replaced.") opens the #437
+  adder. Each flow is unchanged (rules, routes, reason, preview, Undo, Remove).
+  While the task has extra PRs the first choice is disabled and shows "This task
+  has extra PRs for its code (…). Remove them first, then change or undo the
+  main PR." The button steps aside while a flow is open; read-only attempts do
+  not show it.
 - **Team** is the repository of the student's tasks (`repoFullName`); there is
   no team table and no roster. The Submissions table has a sortable **Team**
   column (repository name linked to GitHub, `owner/repo` as its title, "—" with
