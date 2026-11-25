@@ -1,7 +1,7 @@
 // Writes a batch's verdicts to Supabase with the service-role key: the unattended version of
 // writeback.sql, for the VM. Run from the repo root:
 //
-//   SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... npx tsx --tsconfig apps/dashboard/tsconfig.json apps/dashboard/scripts/writebackValidation.ts --batch DIR [--only id,id] [--dry-run]
+//   SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... npx tsx --tsconfig apps/dashboard/tsconfig.json apps/dashboard/scripts/writebackValidation.ts --batch DIR [--attempts] [--only id,id] [--dry-run]
 //
 // Reads DIR/results/*.json. Validated rows get verified FAIL_TO_PASS (with ABSENT_TO_PASS folded in),
 // PASS_TO_PASS, image (digest when known), eval_script, log_parser, harbor_env (the Harbor recipe, when
@@ -21,47 +21,40 @@
 // --dry-run prints the plan and touches nothing (each validated row ends with `detail: N/M files, N/M
 // lines` or `detail: no coverage`); it reads no database, so it
 // lists the capture flags it would drop "if present" rather than the ones the row has.
+//
+// --attempts (#452) does the other job, never both in one run: for every result that is not validated,
+// env_error included, it sets a validation_attempt:<reason> flag on the task's candidate source rows
+// (test_file_never_loaded in place of the reason when the test patch files never loaded after the fix),
+// replacing any earlier attempt flag, and changes nothing else: not the status, not the task row, not
+// any other flag. Validated results are skipped (write them back without --attempts), and so are source
+// rows already validated or rejected. --dry-run prints `<id>: <reason>` per task; the real run prints
+// the same line with "noted". Logic in lib/cse115a/benchmark/validation/attempts.ts and writebackCli.ts.
 
 import { readdir, readFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
-import { detailNote, goldNote, guardedWriteback, writebackPlan, type ColumnProbeClient, type WritebackClient } from "@/lib/cse115a/benchmark/validation/writeback";
+import type { AttemptClient } from "@/lib/cse115a/benchmark/validation/attempts";
 import type { ValidationResult } from "@/lib/cse115a/benchmark/validation/validateTask";
-
-function parseArgs(argv: string[]) {
-  const args = { batch: "", only: [] as string[], dryRun: false };
-  for (let i = 0; i < argv.length; i++) {
-    const arg = argv[i];
-    if (arg === "--batch") args.batch = argv[++i] ?? "";
-    else if (arg === "--only") args.only = (argv[++i] ?? "").split(",").map((s) => s.trim()).filter(Boolean);
-    else if (arg === "--dry-run") args.dryRun = true;
-    else throw new Error(`Unexpected argument: ${arg}`);
-  }
-  if (!args.batch) throw new Error("Usage: writebackValidation.ts --batch DIR [--only id,id] [--dry-run]");
-  return args;
-}
+import type { ColumnProbeClient, WritebackClient } from "@/lib/cse115a/benchmark/validation/writeback";
+import { parseWritebackArgs, runWriteback } from "@/lib/cse115a/benchmark/validation/writebackCli";
 
 async function main() {
-  const args = parseArgs(process.argv.slice(2));
+  const args = parseWritebackArgs(process.argv.slice(2));
   const resultsDir = join(resolve(args.batch), "results");
   const names = (await readdir(resultsDir)).filter((n) => n.endsWith(".json")).sort();
   const results: ValidationResult[] = [];
-  for (const name of names) {
-    const r = JSON.parse(await readFile(join(resultsDir, name), "utf8")) as ValidationResult;
-    if (args.only.length === 0 || args.only.includes(r.instance_id)) results.push(r);
-  }
-  const ops = writebackPlan(results);
-  console.error(`${results.length} result(s), ${ops.length} to write (${results.length - ops.length} env_error skipped)`);
-  if (args.dryRun) {
-    for (const op of ops) console.log(`${op.instance_id}: ${op.validation_status}${op.reasonFlag ? ` (${op.reasonFlag})` : ""}${op.task ? ` F2P=${op.task.FAIL_TO_PASS.length} P2P=${op.task.PASS_TO_PASS.length} image=${op.task.image}${op.task.harbor_env ? " harbor_env" : ""}, ${detailNote(op.task.validation_detail)}` : ""}${op.dropCaptureFlags.length ? `, drops capture flag(s) if present: ${op.dropCaptureFlags.join(", ")}` : ""}${goldNote(op.gold)}`);
-    console.error("Dry run: nothing written.");
-    return;
-  }
-  const url = process.env.SUPABASE_URL?.trim() || process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
-  if (!url || !key) throw new Error("Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY (or use --dry-run).");
-  const { createClient } = await import("@supabase/supabase-js");
-  const supabase = createClient(url, key, { auth: { persistSession: false } });
-  for (const line of await guardedWriteback(supabase as unknown as WritebackClient & ColumnProbeClient, ops)) console.log(line);
+  for (const name of names) results.push(JSON.parse(await readFile(join(resultsDir, name), "utf8")) as ValidationResult);
+  await runWriteback(args, {
+    results,
+    out: (line) => console.log(line),
+    err: (line) => console.error(line),
+    client: async () => {
+      const url = process.env.SUPABASE_URL?.trim() || process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
+      const key = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
+      if (!url || !key) throw new Error("Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY (or use --dry-run).");
+      const { createClient } = await import("@supabase/supabase-js");
+      return createClient(url, key, { auth: { persistSession: false } }) as unknown as WritebackClient & ColumnProbeClient & AttemptClient;
+    },
+  });
 }
 
 main().catch((error) => {

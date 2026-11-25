@@ -10,6 +10,12 @@ import { STAFF_REBUILT_FLAG } from "@/lib/cse115a/benchmark/validation/rebuildRo
 import type { ValidationResult } from "@/lib/cse115a/benchmark/validation/validateTask";
 
 export const REASON_FLAG_PREFIX = "validation_reason:";
+/**
+ * What the validator's last run of a task ended with, when it was not validated (#452): written by
+ * `writebackValidation.ts --attempts` (attempts.ts). Not a verdict: the row's status stays as it is.
+ * Validator-owned, so any later write-back of the task replaces it.
+ */
+export const ATTEMPT_FLAG_PREFIX = "validation_attempt:";
 /** Set on a row whose proving tests include one outside the files the test patch touched. */
 export const PROOF_OUTSIDE_FLAG = "proof_outside_test_patch";
 /**
@@ -22,7 +28,7 @@ export const HARBOR_GOLD_FAILED_FLAG = "harbor_gold_failed";
 
 /** Whether a flag is one the validator owns (and so replaces on every write-back). */
 export function isManagedFlag(flag: string): boolean {
-  return flag.startsWith(REASON_FLAG_PREFIX) || flag === PROOF_OUTSIDE_FLAG || flag === UNTESTED_FILES_FLAG || flag === HARBOR_GOLD_FAILED_FLAG;
+  return flag.startsWith(REASON_FLAG_PREFIX) || flag.startsWith(ATTEMPT_FLAG_PREFIX) || flag === PROOF_OUTSIDE_FLAG || flag === UNTESTED_FILES_FLAG || flag === HARBOR_GOLD_FAILED_FLAG;
 }
 
 /** A validated result's gold check: `harbor_gold`, else the copy in `harbor_env.gold`; null when none (or not validated). */
