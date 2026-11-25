@@ -1,7 +1,8 @@
 // #444 and #445: the staff Benchmark page's summary of validation results and its table of every current task, with
 // the two staff routes behind them; #449: the Consented column and counts, Sprint wording, heading help, the two
 // benchmark columns, and the opened row's grade by box and Repo Metrics scores; #452: the box as a table of results
-// (its own tests are in cse115aBenchmarkResultsBox.test.ts), three consent values, the new headings and column order.
+// with who can fix it and the tasks behind each count, the last-run flag, three consent values, the new headings and
+// column order, and "Tests and criteria" in the opened row.
 // The database and the sign-in are fakes;
 // nothing reaches GitHub or Supabase. Names, emails, repos, PR numbers, task ids and reports are made up.
 import { readFileSync } from "node:fs";
@@ -10,19 +11,20 @@ import { createElement, isValidElement, type ReactElement, type ReactNode } from
 import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  changedByStaffLines, consentCell, consentCounts, coverageCell, DEFAULT_FILTERS, FLAG_TEXT, flagText, goldCell, gradeBoxes, gradeBoxLines, gradeCell,
+  ATTEMPT_FLAG_PREFIX, changedByStaffLines, consentCell, countSplit, coverageFileLine, coverageNotes, matchesPeople, taskListLine, taskListRows, type CoverageDetail, type StatusKey, consentCounts, coverageCell, DEFAULT_FILTERS, FLAG_TEXT, flagText, goldCell, gradeBoxes, gradeBoxLines, gradeCell,
   matchesFilters, nextTaskSort, REASON_FLAG_PREFIX, REASON_RESULT, repoCell, reportDateText, RESULTS, sortTaskRows, staffChangeLines, statusCell, statusHelpLines,
   statusKey, summarize, TASK_SORT_KEYS, TASK_TABLE_TEXT, taskCell, visibleRows, withStatus,
   type Filters, type GradeBox, type TaskDetail, type TaskGrade, type TaskTableRow,
 } from "@/lib/cse115a/benchmark/taskTable";
 import { buildOverviewScoreStrip } from "@/lib/buildOverviewCards";
 import { CONSENT_VERSION } from "@/lib/cse115a/consent";
-import { REPORT_SCORE_IDS, reportScores, TASK_TABLE_CONSENT_COLUMNS, TASK_TABLE_TABLES } from "@/lib/cse115a/benchmark/loadTaskTable";
+import { coverageDetail, REPORT_SCORE_IDS, reportScores, TASK_TABLE_CONSENT_COLUMNS, TASK_TABLE_TABLES } from "@/lib/cse115a/benchmark/loadTaskTable";
 import type { RepoReport } from "@/lib/reportTypes";
-import { REASON_FLAG_PREFIX as WRITEBACK_REASON_PREFIX } from "@/lib/cse115a/benchmark/validation/writeback";
+import { ATTEMPT_FLAG_PREFIX as WRITEBACK_ATTEMPT_PREFIX, REASON_FLAG_PREFIX as WRITEBACK_REASON_PREFIX } from "@/lib/cse115a/benchmark/validation/writeback";
+import { ATTEMPT_REASONS } from "@/lib/cse115a/benchmark/validation/attempts";
 import { noCodeFromFlags } from "@/lib/cse115a/noCodePr";
 import { TASK_POINTS } from "@/lib/cse115a/rubric";
-import { COLUMNS, GradeSection, Header, OpenedRow, ScoresSection, StatusHelp, SummaryBoxView, TaskCells, TaskDetailView } from "@/components/cse115a/instructor/BenchmarkTaskTable";
+import { COLUMNS, GradeSection, Header, OpenedRow, ScoresSection, StatusHelp, SummaryBoxView, TaskCells, TaskDetailView, TaskFilters, TestsSection } from "@/components/cse115a/instructor/BenchmarkTaskTable";
 import { HelpTip, HelpTipView, nextTipOpen, tipPosition, type TipEvent } from "@/components/cse115a/instructor/HelpTip";
 import { GET as listGet } from "@/app/api/cse115a/instructor/courses/[slug]/benchmark/tasks/route";
 import { GET as detailGet } from "@/app/api/cse115a/instructor/courses/[slug]/benchmark/tasks/[id]/route";
@@ -1010,5 +1012,246 @@ describe("4. the opened row's grade and scores (#449)", () => {
     for (const item of rows) expect(Object.keys(item)).not.toContain("scores");
     const component = readFileSync(path.resolve(__dirname, "../components/cse115a/instructor/BenchmarkTaskTable.tsx"), "utf8");
     expect(component.match(/fetchJson</g)).toHaveLength(2);
+  });
+});
+
+// ---- #452: the results box ----
+
+describe("5. the results box (#452)", () => {
+  const view = (rows: TaskTableRow[], extra: Partial<Parameters<typeof SummaryBoxView>[0]> = {}) =>
+    createElement(SummaryBoxView, { rows, people: "students", open: null, onToggle: () => {}, idBase: "box", onPick: () => {}, ...extra });
+  const candidate = (flags: string[], patch: Partial<TaskTableRow> = {}) => row({ flags, ...patch });
+  const rejected = (reason: string, patch: Partial<TaskTableRow> = {}) => row({ validationStatus: "rejected", flags: [`validation_reason:${reason}`], ...patch });
+  const attempt = (reason: string, patch: Partial<TaskTableRow> = {}) => candidate([`validation_attempt:${reason}`], patch);
+
+  it("each row's rule, by a decision, by the last run, and by the capture's flags", () => {
+    const cases: Array<[TaskTableRow, StatusKey]> = [
+      [row({ validationStatus: "validated", flags: ["validation_attempt:env_error"] }), "validated"],
+      [rejected("no_test_patch"), "no_tests"], [attempt("no_test_patch"), "no_tests"], [candidate(["no_test_patch"]), "no_tests"],
+      [rejected("no_fail_to_pass"), "no_fail_to_pass"], [attempt("no_fail_to_pass"), "no_fail_to_pass"],
+      [rejected("regressions"), "regressions"], [attempt("regressions"), "regressions"],
+      [rejected("regression_skip"), "regression_skip"], [attempt("regression_skip"), "regression_skip"],
+      [rejected("no_source_patch"), "no_code"], [attempt("no_source_patch"), "no_code"], [candidate(["task_files_dropped", "no_source_patch", "no_test_patch"]), "no_code"],
+      [attempt("test_file_never_loaded"), "never_loaded"],
+      [rejected("env_unsupported"), "env_unsupported"], [attempt("env_unsupported"), "env_unsupported"],
+      [attempt("env_error"), "env_error"],
+      [candidate([]), "not_tried"], [candidate(["pr_holds_two_tasks", "untested_files"]), "not_tried"],
+      [rejected("cosmic_rays"), "other"], [attempt("cosmic_rays"), "other"],
+    ];
+    for (const [item, key] of cases) expect([item.flags, statusKey(item)]).toEqual([item.flags, key]);
+    // A decision or a last run is newer than the capture's flags: it wins.
+    expect(statusKey(candidate(["no_test_patch", "validation_attempt:env_error"]))).toBe("env_error");
+    expect(statusKey(row({ validationStatus: "rejected", flags: ["no_test_patch", "validation_reason:regressions", "validation_attempt:env_error"] }))).toBe("regressions");
+    // Every reason write-back can note has its row.
+    for (const reason of ATTEMPT_REASONS) expect(statusKey(attempt(reason))).not.toBe("other");
+  });
+
+  it("the order, the labels and who can fix it", () => {
+    expect(RESULTS.map((result) => [result.label, result.who])).toEqual([
+      ["Validated", ""],
+      ["No tests in the PR", "The student"],
+      ["No test proves the change", "The student"],
+      ["The change breaks other tests", "The student"],
+      ["The change turns tests off", "The student"],
+      ["No code in the submitted PR", "Staff, by choosing the PR that holds the code"],
+      ["A test file never loaded", "The validator"],
+      ["Repository type not supported", "The validator"],
+      ["Our run failed", "The validator"],
+      ["Not tried yet", ""],
+      ["Another result", ""],
+    ]);
+    const markup = renderToStaticMarkup(view([attempt("env_error"), row({ validationStatus: "validated" }), rejected("regressions")]));
+    const order = ["Validated", "The change breaks other tests", "Our run failed", "Not tried yet"].map((label) => markup.indexOf(`<th scope="row" class="px-3 py-3 font-medium">${label}</th>`));
+    expect(order.every((at) => at >= 0)).toBe(true);
+    expect([...order].sort((a, b) => a - b)).toEqual(order);
+    for (const heading of ["Result", "Tasks", "Who can fix it"]) expect(markup).toContain(`>${heading}</th>`);
+    expect(markup).toContain("<span class=\"sr-only\">List of tasks</span>");
+    expect(markup).toContain("<td class=\"px-3 py-3\">The validator</td>");
+  });
+
+  it("exactly one row per task, the rows add up to the total, and a 0-count row is hidden but Validated and Not tried yet", () => {
+    const rows = [rejected("no_test_patch"), attempt("no_test_patch"), candidate(["no_test_patch"]), attempt("env_error"), attempt("env_error"), attempt("test_file_never_loaded"), rejected("cosmic_rays")];
+    const { lines, total } = summarize(rows);
+    expect(total).toBe(7);
+    expect(lines.reduce((sum, line) => sum + line.count, 0)).toBe(total);
+    expect(lines.flatMap((line) => line.tasks)).toHaveLength(total);
+    expect(new Set(lines.flatMap((line) => line.tasks)).size).toBe(total);
+    expect(lines.map((line) => [line.key, line.count])).toEqual([["validated", 0], ["no_tests", 3], ["never_loaded", 1], ["env_error", 2], ["not_tried", 0], ["other", 1]]);
+    const markup = renderToStaticMarkup(view(rows));
+    expect(markup).not.toContain("The change breaks other tests");
+    expect(markup).toContain(">Validated</th>");
+    expect(markup).toContain(">Not tried yet</th>");
+    // A 0-count row has no Show tasks button and no list.
+    expect(markup.match(/>Show tasks</g)).toHaveLength(4);
+    expect(summarize([]).lines.map((line) => line.key)).toEqual(["validated", "not_tried"]);
+  });
+
+  it("\"3 decided, 6 from the last run\" under a count only when both kinds are present", () => {
+    const rows = [...Array.from({ length: 3 }, () => rejected("regressions")), ...Array.from({ length: 6 }, () => attempt("regressions")), rejected("no_test_patch"), candidate(["no_test_patch"])];
+    const { lines } = summarize(rows);
+    const by = (key: StatusKey) => lines.find((line) => line.key === key)!;
+    expect(countSplit(by("regressions"))).toBe("3 decided, 6 from the last run");
+    expect(countSplit(by("no_tests"))).toBeNull();
+    expect(countSplit(by("validated"))).toBeNull();
+    const markup = renderToStaticMarkup(view(rows));
+    expect(markup).toContain("<span class=\"text-2xl font-semibold tabular-nums\">9</span><span class=\"block text-xs text-muted-foreground\">3 decided, 6 from the last run</span>");
+  });
+
+  it("follows the People filter: the counts and the total line", async () => {
+    const rows = await listRows();
+    const forPeople = (people: Filters["people"]) => rows.filter((item) => matchesPeople(item, people));
+    const total = (people: Filters["people"]) => renderToStaticMarkup(view(forPeople(people), { people })).match(/Total: [^<]*/)![0];
+    expect(total("students")).toBe("Total: 4 tasks (students only)");
+    expect(total("staff")).toBe("Total: 1 task (staff only)");
+    expect(total("everyone")).toBe("Total: 5 tasks (everyone)");
+    // The TA's test task is "Not tried yet": counted only when staff are.
+    expect(summarize(forPeople("students")).lines.find((line) => line.key === "not_tried")!.count).toBe(0);
+    expect(summarize(forPeople("everyone")).lines.find((line) => line.key === "not_tried")!.count).toBe(1);
+    const component = readFileSync(path.resolve(__dirname, "../components/cse115a/instructor/BenchmarkTaskTable.tsx"), "utf8");
+    expect(component).toContain("<SummaryBox rows={people} people={filters.people} onPick={(key) => setFilters((current) => withStatus(current, key))} />");
+    expect(component).toContain("const people = useMemo(() => (rows ?? []).filter((row) => matchesPeople(row, filters.people)), [rows, filters.people]);");
+  });
+
+  it("Show tasks opens a list under the row like the Grader tab's: aria-expanded, aria-controls, a name, links, (decided), a fixed height", () => {
+    const rows = [
+      attempt("env_error", { id: "t1", submissionId: "sub-9", assignment: 3, slot: 2, team: "pond-co/duck-app", email: "dee.example@ucsc.edu" }),
+      rejected("env_unsupported", { id: "t2", submissionId: "sub 7", assignment: 1, slot: 1, team: null, email: "" }),
+      attempt("env_unsupported", { id: "t3", submissionId: "sub-8", assignment: 1, slot: 3, team: "pond-co/duck-app", email: "eli.example@ucsc.edu" }),
+    ];
+    const closed = renderToStaticMarkup(view(rows));
+    expect(closed).toContain("<button type=\"button\" aria-expanded=\"false\" aria-controls=\"box-env_error\" aria-label=\"Show the 1 task: Our run failed\"");
+    expect(closed).toContain("<tr id=\"box-env_error\" hidden=\"\"");
+    const open = renderToStaticMarkup(view(rows, { open: "env_unsupported" }));
+    expect(open).toContain("<button type=\"button\" aria-expanded=\"true\" aria-controls=\"box-env_unsupported\" aria-label=\"Hide the tasks: Repository type not supported\"");
+    expect(open).toContain(">Hide tasks</button>");
+    expect(open).toMatch(/<tr id="box-env_unsupported" class="bg-muted\/20">/);
+    expect(open).toContain("Tasks with this result: Repository type not supported");
+    expect(open).toContain("<ul class=\"mt-1 max-h-64 space-y-0.5 overflow-y-auto text-sm\">");
+    // Lines by sprint and task; a rejected one says "(decided)"; each links to the staff review page.
+    expect(open).toContain("<a class=\"text-primary underline\" href=\"/cse115a/instructor/submissions/sub%207\">Sprint 1 · Task 1 · — · — (decided)</a>");
+    expect(open).toContain("<a class=\"text-primary underline\" href=\"/cse115a/instructor/submissions/sub-8\">Sprint 1 · Task 3 · duck-app · eli.example@ucsc.edu</a>");
+    expect(open.indexOf("Sprint 1 · Task 1")).toBeLessThan(open.indexOf("Sprint 1 · Task 3"));
+    expect(taskListLine(rows[0]!)).toBe("Sprint 3 · Task 2 · duck-app · dee.example@ucsc.edu");
+    expect(taskListRows(rows).map((item) => item.id)).toEqual(["t2", "t3", "t1"]);
+    // The toggle reports which row; the box keeps one list open at a time.
+    const toggled: string[] = [];
+    const show = elements(SummaryBoxView({ rows, people: "students", open: null, onToggle: (key) => toggled.push(key), idBase: "box", onPick: () => {} }))
+      .filter((element) => element.type === "button" && (element.props as { children?: unknown }).children === TASK_TABLE_TEXT.showTasks);
+    (show[0]!.props as { onClick: () => void }).onClick();
+    expect(toggled).toEqual(["env_unsupported"]);
+    const component = readFileSync(path.resolve(__dirname, "../components/cse115a/instructor/BenchmarkTaskTable.tsx"), "utf8");
+    expect(component).toContain("onToggle={(key) => setOpen((current) => current === key ? null : key)}");
+  });
+
+  it("\"Show in the table\" in an opened list sets the Status filter to that result", () => {
+    const rows = [attempt("env_error"), rejected("env_error"), row({ validationStatus: "validated" })];
+    const picked: StatusKey[] = [];
+    const markup = renderToStaticMarkup(view(rows, { open: "env_error" }));
+    expect(markup).toContain("aria-label=\"Show in the table the tasks with this result: Our run failed\"");
+    const buttons = elements(SummaryBoxView({ rows, people: "students", open: "env_error", onToggle: () => {}, idBase: "box", onPick: (key) => picked.push(key) }))
+      .filter((element) => element.type === "button" && (element.props as { children?: unknown }).children === TASK_TABLE_TEXT.showInTable);
+    (buttons[1]!.props as { onClick: () => void }).onClick();
+    expect(picked).toEqual(["env_error"]);
+    expect(visibleRows(rows, withStatus(DEFAULT_FILTERS, "env_error"), null)).toEqual([rows[0], rows[1]]);
+  });
+
+  it("the Status cell, filter and help use the box's labels; a last run reads No result yet · last run, a decision Not accepted", () => {
+    expect(statusCell(attempt("env_error")).label).toBe("No result yet · last run: our run failed");
+    expect(statusCell(attempt("test_file_never_loaded")).label).toBe("No result yet · last run: a test file never loaded");
+    expect(statusCell(attempt("cosmic_rays")).label).toBe("No result yet · last run: cosmic_rays");
+    expect(statusCell(rejected("no_fail_to_pass")).label).toBe("Not accepted: no test proves the change");
+    expect(statusCell(rejected("no_source_patch")).label).toBe("Not accepted: no code in the submitted PR");
+    for (const result of RESULTS) {
+      if (result.key === "validated" || result.key === "not_tried" || result.key === "other") continue;
+      const lower = result.label[0]!.toLowerCase() + result.label.slice(1);
+      const reason = Object.keys(REASON_RESULT).find((key) => REASON_RESULT[key] === result.key)!;
+      expect(statusCell(attempt(reason)).label).toBe(`No result yet · last run: ${lower}`);
+      expect(statusCell(rejected(reason)).label).toBe(`Not accepted: ${lower}`);
+    }
+    // The filter's options are the box's lines, with counts, for the rows the People filter keeps.
+    const rows = [attempt("env_error"), attempt("env_error", { staff: true }), row({ validationStatus: "validated" })];
+    const options = (people: Filters["people"]) => elements(TaskFilters({ rows, filters: { ...DEFAULT_FILTERS, people }, onChange: () => {} }))
+      .filter((element) => element.type === "option" && /^(validated|env_error|not_tried)$/.test(String((element.props as { value?: unknown }).value)))
+      .map((element) => (element.props as { children: unknown[] }).children.join(""));
+    expect(options("students")).toEqual(["Validated (1)", "Our run failed (1)", "Not tried yet (0)"]);
+    expect(options("everyone")).toEqual(["Validated (1)", "Our run failed (2)", "Not tried yet (0)"]);
+    expect(statusHelpLines().map((line) => line.label)).toEqual([...RESULTS.map((result) => result.label), "Not accepted: …", "No result yet · last run: …"]);
+  });
+
+  it("the attempt flag: the same prefix as write-back, and in plain words in the opened row's Flags", () => {
+    expect(ATTEMPT_FLAG_PREFIX).toBe(WRITEBACK_ATTEMPT_PREFIX);
+    expect(flagText("validation_attempt:env_error")).toBe("Last run: Our test run failed; this says nothing about the student's work.");
+    expect(flagText("validation_reason:regressions")).toBe("Not accepted: Tests that passed before the student's change fail after it.");
+    expect(flagText("validation_attempt:cosmic_rays")).toBe("Last run: cosmic_rays");
+  });
+});
+
+// ---- #452: Tests and criteria ----
+
+describe("6. Tests and criteria in the opened row (#452)", () => {
+  const RUN = {
+    status: "measured", tools: ["vitest 4.1.12 (v8)"],
+    files: [
+      { path: "src/kettle.ts", state: "run", changed_lines: 14, executable: 12, covered: 9, uncovered: "40-42" },
+      { path: "src/timer.ts", state: "not_run", changed_lines: 5, executable: null, covered: null, uncovered: null },
+      { path: "src/types.ts", state: "no_code", changed_lines: 3, executable: 0, covered: 0, uncovered: "" },
+    ],
+    files_changed: 2, files_run: 1, files_not_run: 1, files_not_measured: 0, files_no_code: 1, lines_executable: 12, lines_covered: 9,
+  };
+  const render = (task: TaskDetail) => renderToStaticMarkup(createElement(TaskDetailView, { detail: task, raw: false }));
+
+  it("the detail route sends the stored run's files and totals, copied, and nothing else of it", async () => {
+    state.tables.cse_benchmark_tasks![0]!.validation_detail = { ...(state.tables.cse_benchmark_tasks![0]!.validation_detail as object), fix_coverage: RUN };
+    const task = await detail("src-1");
+    expect(task.coverage).toEqual({
+      status: "measured", reason: null, filesChanged: 2, filesRun: 1, linesCovered: 9, linesExecutable: 12,
+      files: [
+        { path: "src/kettle.ts", state: "run", covered: 9, executable: 12 },
+        { path: "src/timer.ts", state: "not_run", covered: null, executable: null },
+        { path: "src/types.ts", state: "no_code", covered: 0, executable: 0 },
+      ],
+    });
+    expect(JSON.stringify(task)).not.toContain("40-42");
+    expect((await detail("src-3")).coverage).toBeNull();
+    expect(coverageDetail({ status: "weird" })).toBeNull();
+    expect(coverageDetail(null)).toBeNull();
+    expect(state.writes).toBe(0);
+  });
+
+  it("sits directly under the spec, above the patches, with the proving tests, per-file coverage and the foot line", async () => {
+    state.tables.cse_benchmark_tasks![0]!.validation_detail = { ...(state.tables.cse_benchmark_tasks![0]!.validation_detail as object), fix_coverage: RUN };
+    const markup = render(await detail("src-1"));
+    const at = (text: string) => markup.indexOf(text);
+    expect(at(">Spec</h4>")).toBeGreaterThan(-1);
+    expect(at(">Tests and criteria</h4>")).toBeGreaterThan(at(">Spec</h4>"));
+    expect(at(">Tests and criteria</h4>")).toBeLessThan(at(">Code patch</h4>"));
+    expect(at(">Proving tests (2)</h5>")).toBeGreaterThan(at(">Tests and criteria</h4>"));
+    expect(at("<li>test/kettle.test.ts &gt; beeps</li>")).toBeGreaterThan(at(">Tests and criteria</h4>"));
+    expect(at("<li>test/kettle.test.ts &gt; beeps</li>")).toBeLessThan(at(">Code patch</h4>"));
+    expect(markup.match(/Proving tests \(/g)).toHaveLength(1);
+    expect(markup).toContain("3 tests still pass after the change.");
+    expect(markup).toContain(">Coverage (experimental)</h5>");
+    expect(markup).toContain("<li><span class=\"font-mono text-xs\">src/kettle.ts</span>: run by the proving tests<span class=\"text-muted-foreground tabular-nums\">, 9 of 12 changed lines</span></li>");
+    expect(markup).toContain("<li><span class=\"font-mono text-xs\">src/timer.ts</span>: not run</li>");
+    expect(markup).toContain("In total, the proving tests run 1 of 2 changed code files.");
+    expect(markup).toContain("In the files they run, they run 9 of 12 changed lines.");
+    expect(markup).toContain("Which acceptance criteria each test checks is not shown here yet.");
+    expect(at("Which acceptance criteria")).toBeLessThan(at(">Code patch</h4>"));
+  });
+
+  it("Not measured yet without a stored run; the 0-runnable-lines sentence; partial and unavailable runs say so", () => {
+    expect(coverageNotes(null)).toEqual(["Not measured yet."]);
+    const none: CoverageDetail = { status: "measured", reason: null, files: [{ path: "src/types.ts", state: "no_code", covered: 0, executable: 0 }], filesChanged: 0, filesRun: 0, linesCovered: 0, linesExecutable: 0 };
+    expect(coverageNotes(none)).toEqual(["The coverage run found no runnable changed lines. This can be a limit of the coverage run for this repository."]);
+    expect(coverageFileLine(none.files[0]!)).toEqual({ path: "src/types.ts", state: "no runnable changed lines", lines: "0 of 0 changed lines" });
+    // Changed files none of which ran: not "no runnable lines", just the files total.
+    expect(coverageNotes({ ...none, filesChanged: 2 })).toEqual(["In total, the proving tests run 0 of 2 changed code files."]);
+    expect(coverageNotes({ ...none, status: "unavailable", reason: "no coverage tool for this runner" })).toEqual(["The coverage run could not measure this task.", "The coverage run says: no coverage tool for this runner"]);
+    expect(coverageNotes({ ...none, status: "partial", filesChanged: 1, filesRun: 1, linesCovered: 1, linesExecutable: 4, reason: "one step failed" }))
+      .toEqual(["In total, the proving tests run 1 of 1 changed code file.", "In the files they run, they run 1 of 4 changed lines.", "Partly measured.", "The coverage run says: one step failed"]);
+    const markup = renderToStaticMarkup(createElement(TestsSection, { detail: { validationStatus: "candidate", failToPass: [], passToPass: 0, coverage: null } }));
+    expect(markup).toContain("Read from the test patch; no test run has proven them yet.");
+    expect(markup).toContain("<p class=\"mt-1\">Not measured yet.</p>");
+    expect(markup).toContain("Which acceptance criteria each test checks is not shown here yet.");
   });
 });
