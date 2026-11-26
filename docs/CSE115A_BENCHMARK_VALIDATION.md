@@ -309,6 +309,10 @@ inside `x` gets our reporter. The rules:
   past the third level stay as written.
 - A step whose script has no runner in it after expanding (`pnpm build` → `nest build`) stays as
   written: expanding it would only change how a build runs.
+- A step whose script changes the shell (`cd`, `export`, `set`, `source`, a bare `NAME=value`) stays
+  as written: every step is a line of one shell script, so lifted out of `npm run` (its own shell)
+  it would carry over into later steps. After a `cd` in the script, no later run step is followed,
+  since it would read another folder's `package.json`.
 - npm passes the words after `--` to the script; they go on the end of its last segment, as npm
   appends them. A pnpm or yarn step with words after the script name stays as written.
 - For npm only, `prex` and `postx` run around `x` as preparation steps (`npm run prex`,

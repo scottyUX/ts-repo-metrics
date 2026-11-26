@@ -222,21 +222,37 @@ type Segment = { text: string; inner: boolean; lifecycle?: boolean };
 const splitScript = (script: string) => script.split(/\s*&&\s*/).map((s) => s.trim()).filter(Boolean);
 
 /**
+ * A segment that changes the shell itself (`cd`, `export`, a bare `NAME=value`). Every step runs as
+ * a line of one shell script, so lifted out of an `npm run` (its own shell) it would carry over
+ * into every later step.
+ */
+const CHANGES_SHELL = /^(?:(?:cd|pushd|popd|export|unset|set|source|\.|alias|umask|ulimit|shopt|trap)(?:\s|$)|[A-Za-z_][A-Za-z0-9_]*=\S*$)/;
+/** A segment that changes directory: a later run step would read another folder's package.json. */
+const CHANGES_DIR = /^(?:cd|pushd|popd)(?:\s|$)/;
+
+/**
  * Replaces each run step by the named script's own segments, recursively, at most RUN_STEP_DEPTH
  * levels deep; a script already being expanded (one that calls itself) stays opaque, and so does
- * one with no runner in it, even after expanding (a build step). Words after
+ * one with no runner in it, even after expanding (a build step), and one with a segment that
+ * changes the shell (CHANGES_SHELL). After a `cd`, no later run step is followed. Words after
  * npm's `--` go on the end of the expanded script's last segment, as npm appends them to the
  * script. For npm, `prex` and `postx` run around `x` as `npm run prex` and `npm run postx`.
  */
 function expandRunSteps(segments: string[], scripts: Record<string, string>, stack: string[], depth: number): Segment[] {
   const out: Segment[] = [];
+  let moved = false;
   for (const segment of segments) {
-    const target = runTarget(segment, scripts);
+    if (CHANGES_DIR.test(segment)) moved = true;
+    const target = moved ? null : runTarget(segment, scripts);
     if (!target || depth >= RUN_STEP_DEPTH || stack.includes(target.name)) {
       out.push({ text: segment, inner: depth > 0 });
       continue;
     }
     const body = splitScript(scripts[target.name]);
+    if (body.some((s) => CHANGES_SHELL.test(s))) {
+      out.push({ text: segment, inner: depth > 0 });
+      continue;
+    }
     if (target.args.length && body.length) body[body.length - 1] += ` ${target.args.join(" ")}`;
     const inner = expandRunSteps(body, scripts, [...stack, target.name], depth + 1);
     // A script with no runner in it (a build) gains nothing from expanding: it runs as written.

@@ -118,6 +118,16 @@ describe("stepsFromTestScript: run steps are followed into their script", () => 
       expect(stepsFromTestScript(step, null, scripts), step).toEqual([prep(step)]);
     }
   });
+
+  it("leaves a script that changes the shell opaque, so its cd does not leak into later steps", () => {
+    const scripts = { api: "cd server && node --test spec/", env: "export TZ=UTC && node --test spec/", ui: "jest" };
+    expect(stepsFromTestScript("npm run api && npm run ui", null, scripts)).toEqual([prep("npm run api"), jest(1)]);
+    expect(stepsFromTestScript("npm run env", null, scripts)).toEqual([prep("npm run env")]);
+  });
+
+  it("does not follow a run step after a cd, which would read another folder's package.json", () => {
+    expect(stepsFromTestScript("cd server && npm run unit", null, { unit: "node --test spec/" })).toEqual([prep("cd server"), prep("npm run unit")]);
+  });
 });
 
 describe("stepsFromTestScript: scripts with no run step are unchanged", () => {
