@@ -290,7 +290,7 @@ suite per language and package (see "More than one test suite"). Four runners ar
 | Vitest | `npx vitest run --reporter=json --outputFile=$REPORT_DIR/vitest-<i>.json --passWithNoTests` | `vitest-json` |
 | Jest | `npx jest --ci --json --outputFile=$REPORT_DIR/jest-<i>.json --passWithNoTests`, plus the script's own arguments after `jest` (`--config`, test paths) minus `--watch`, `--watchAll`, `--coverage` and `--silent`; leading `NAME=value` assignments are kept | `jest-json` |
 | `node --test` | the script's command with `--test-reporter` set to our reporter | `node-test-json` |
-| pytest | `python -m pytest -p hecate_pytest_reporter -p no:cacheprovider --continue-on-collection-errors`, with `PYTHONPATH=/patches` and `REPORT=$REPORT_DIR/pytest-0.json`; through `uv run --no-sync` or `poetry run` when that manager owns the environment | `pytest-json` |
+| pytest | `python -m pytest -p hecate_pytest_reporter -p no:cacheprovider --continue-on-collection-errors`, with `PYTHONPATH=/patches` (plus the package's parent folder, see below) and `REPORT=$REPORT_DIR/pytest-0.json`; through `uv run --no-sync` or `poetry run` when that manager owns the environment | `pytest-json` |
 
 With no runner in the script, a `vitest` dependency (else a `jest` one) runs with the default
 command above. Jest's `--json` output has the same `testResults[].assertionResults[]` shape as
@@ -364,6 +364,13 @@ nearest file to `pipeline/tests/` is `pipeline/requirements.txt`, which CI never
 has no Alembic. Nothing installed lands in the mounted checkout, and
 `PYTHONDONTWRITEBYTECODE` keeps `.pyc` files out of it. pip, uv and Poetry downloads share the
 batch's cache folder like npm's.
+
+pytest runs from the package directory. When that directory is not the root and has an
+`__init__.py`, it is itself a Python package whose code imports itself by its own name
+(`from backend.models import Item`), as when the repository runs `pytest backend/tests` from the
+root; the folder above it is then added to `PYTHONPATH` too (`PYTHONPATH=/patches:$(dirname
+"$PWD")`). Without it such a test file never loads (`ModuleNotFoundError: No module named
+'backend'`). A file that still cannot import is reported as before.
 
 pytest has no JSON output of its own, so the runner writes a small plugin
 (`pytestReporter.ts`, standard library only, checked on pytest 7.4 and 8.4) into `/patches` and

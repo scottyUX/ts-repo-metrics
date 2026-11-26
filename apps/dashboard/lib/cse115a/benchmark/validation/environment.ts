@@ -589,13 +589,21 @@ export function pythonVersionFrom(pythonVersion: string | null, pyproject: strin
   return `${lowest[0]}.${lowest[1]}`;
 }
 
-/** The pytest command; `runPrefix` is `uv run --no-sync ` or `poetry run ` when the manager owns the environment. */
-export function pytestCommand(runPrefix = ""): string {
+/** The folder above the one pytest runs in, as the shell expands it at run time. */
+export const PARENT_DIR = '$(dirname "$PWD")';
+
+/**
+ * The pytest command; `runPrefix` is `uv run --no-sync ` or `poetry run ` when the manager owns the
+ * environment. `parentOnPath` adds the folder above the package directory to PYTHONPATH (see
+ * detectPythonEnvironment).
+ */
+export function pytestCommand(runPrefix = "", parentOnPath = false): string {
   const plugin = PYTEST_REPORTER_FILE.split("/").pop()!.replace(/\.py$/, "");
   const dir = PYTEST_REPORTER_FILE.slice(0, PYTEST_REPORTER_FILE.lastIndexOf("/"));
+  const path = parentOnPath ? `${dir}:${PARENT_DIR}` : dir;
   // --continue-on-collection-errors: without it one file that cannot import stops pytest before any
   // test runs, and every other test in the suite would be absent from that state.
-  return `PYTHONPATH=${dir} REPORT=$REPORT_DIR/pytest-0.json ${runPrefix}python -m pytest -p ${plugin} -p no:cacheprovider --continue-on-collection-errors`;
+  return `PYTHONPATH=${path} REPORT=$REPORT_DIR/pytest-0.json ${runPrefix}python -m pytest -p ${plugin} -p no:cacheprovider --continue-on-collection-errors`;
 }
 
 /**
@@ -662,7 +670,11 @@ export async function detectPythonEnvironment(probe: RepoProbe): Promise<Environ
   const manifests = await Promise.all([...PY_MANIFESTS, ...PY_EXTRA_REQUIREMENTS].map((n) => read(joinPath(packageDir!, n))));
   const pytestDeclared = manifests.some((text) => text != null && /\bpytest\b/i.test(text));
 
-  const testSteps: TestStep[] = [{ kind: "pytest", command: pytestCommand(runPrefix) }];
+  // A package directory with an __init__.py is a Python package, and its code imports itself by its
+  // own name (`from backend.models import Item`), as when the repository runs pytest from the folder
+  // above it. pytest runs from the package directory, so that folder goes on PYTHONPATH too.
+  const parentOnPath = packageDir !== "" && (await exists(packageDir, "__init__.py"));
+  const testSteps: TestStep[] = [{ kind: "pytest", command: pytestCommand(runPrefix, parentOnPath) }];
   const env = { ...CONTAINER_ENV, ...PYTHON_ENV };
   const dockerfile = [
     `FROM ${image}`, "WORKDIR /work",
