@@ -4,13 +4,13 @@
 // module is tested with FakeSuiteRunner and in-memory file contents.
 // Rules are in docs/CSE115A_BENCHMARK_VALIDATION.md.
 
-import { compareRuns, type Comparison } from "@/lib/cse115a/benchmark/validation/compareRuns";
+import { compareRuns, type Comparison, type RunResults } from "@/lib/cse115a/benchmark/validation/compareRuns";
 import { envLanguage, installPlan, suiteLabel, type Environment, type NodeSource, type SuiteLanguage, type Unsupported } from "@/lib/cse115a/benchmark/validation/environment";
 import { containerScript, InstallError, runThreeStates, SuiteCollisionError, type RunPlan, type SuiteRunner, type ThreeStates } from "@/lib/cse115a/benchmark/validation/runner";
 import type { FixCoverage, UntestedSource } from "@/lib/cse115a/benchmark/validation/fixCoverage";
 import { harborEnvFrom, type HarborEnv, type HarborGold } from "@/lib/cse115a/benchmark/validation/harbor";
 import type { RebuildProvenance } from "@/lib/cse115a/benchmark/validation/rebuildRow";
-import { modifiedTests, unmatchedStaticIds } from "@/lib/cse115a/benchmark/validation/testIds";
+import { loadFailureId, modifiedTests, unmatchedStaticIds } from "@/lib/cse115a/benchmark/validation/testIds";
 import { untestedFiles, type ReadFile } from "@/lib/cse115a/benchmark/validation/untestedFiles";
 
 /** The fields of a benchmark row the validator reads. */
@@ -82,6 +82,17 @@ export function proofOutsideTestPatch(proving: string[], testFiles: string[]): s
 }
 
 /**
+ * Proving ids (F2P + A2P) whose file the test patch writes but which no R1 run reported, and whose
+ * file did not fail to load there: the file was present and nothing ran it. See
+ * `proof_through_fix_script` on ValidationResult.
+ */
+export function proofThroughFixScript(proving: string[], testFiles: string[], r1: RunResults[]): string[] {
+  const touched = new Set(testFiles);
+  const reported = (id: string) => r1.some((run) => id in run);
+  return proving.filter((id) => touched.has(fileOfTestId(id)) && !reported(id) && !reported(loadFailureId(fileOfTestId(id)))).sort();
+}
+
+/**
  * Ids of pre-existing tests whose body the test patch changed, across every file it touches.
  * A file with no base source is new, so nothing in it is "modified".
  */
@@ -137,6 +148,13 @@ export type ValidationResult = {
    * `proof_outside_test_patch` flag so a reviewer can check the task is not proven only by accident.
    */
   proof_outside_test_patch: string[];
+  /**
+   * Proving ids whose file the test patch adds or changes but which did not run in R1 (base + test
+   * patch), where that file was present: a weaker proof, since the script step that runs them may
+   * come from the fix rather than from the test patch. They stay ABSENT_TO_PASS and count as proof;
+   * diagnostic only. Present only when non-empty, like `untested_files`.
+   */
+  proof_through_fix_script?: string[];
   validation_status: "validated" | "rejected";
   reason: ValidationReason;
   detail: string | null;
@@ -349,6 +367,7 @@ export async function validateTask(input: ValidateInput): Promise<ValidationResu
     .map((entry) => entry.slice(3))
     .filter((file) => testFiles.includes(file));
   let detail = neverLoaded.length ? neverLoadedDetail(neverLoaded) : null;
+  const throughFixScript = proofThroughFixScript([...comparison.failToPass, ...comparison.absentToPass], testFiles, runs.r1);
   let untested: string[] = [];
   if (comparison.validationStatus === "validated" && input.withPostFixTree) {
     try {
@@ -388,6 +407,7 @@ export async function validateTask(input: ValidateInput): Promise<ValidationResu
     ...provenance,
     ...(neverLoaded.length ? { test_files_never_loaded: neverLoaded } : {}),
     ...(untested.length ? { untested_files: untested } : {}),
+    ...(throughFixScript.length ? { proof_through_fix_script: throughFixScript } : {}),
     ...services,
     ...suites,
     runs,
