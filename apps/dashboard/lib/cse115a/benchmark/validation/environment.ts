@@ -167,27 +167,134 @@ const DEFAULT_COMMANDS: Record<"vitest" | "jest", TestStep> = {
   jest: { kind: "jest", command: "npx jest --ci --json --outputFile=$REPORT_DIR/jest-0.json --passWithNoTests" },
 };
 
+/** How many `npm run` levels a test script is followed through; a run step deeper than this stays opaque. */
+export const RUN_STEP_DEPTH = 3;
+
+/**
+ * Put in front of a preparation segment that came from inside an expanded script. `npm run` puts
+ * `node_modules/.bin` of the package and of every folder above it on PATH; a segment we lift out
+ * of the script and run ourselves (`tsc -p .`) needs the same to find its binary.
+ */
+export const NPM_BIN_PATH = `PATH="$(d=$PWD; while :; do printf '%s:' "$d/node_modules/.bin"; [ "$d" = / ] && break; d=$(dirname "$d"); done)$PATH"`;
+
+/** Options a run step may carry and still be followed: they change only what npm prints. */
+const QUIET_RUN_OPTIONS = new Set(["--silent", "-s", "--if-present"]);
+/** pnpm and yarn commands that win over a script of the same name in `pnpm x` and `yarn x`. */
+const MANAGER_COMMANDS = new Set([
+  "add", "audit", "bin", "cache", "config", "create", "dedupe", "dlx", "env", "exec", "global", "i", "import", "info", "init",
+  "install", "link", "list", "ls", "outdated", "pack", "patch", "prune", "publish", "rebuild", "remove", "rm", "run", "setup",
+  "store", "unlink", "up", "update", "upgrade", "version", "why", "workspace", "workspaces",
+]);
+/** Shell syntax that makes a segment more than one plain command; such a run step stays opaque. */
+const SHELL_SYNTAX = /[|;<>()`&$\\'"*?{}]/;
+
+/** A segment that runs another script of the same package.json, and what to pass it. */
+type RunTarget = { manager: "npm" | "pnpm" | "yarn"; name: string; args: string[] };
+
+/**
+ * `npm run x`, `npm run-script x`, `pnpm run x`, `pnpm x`, `yarn run x`, `yarn x`, when `x` is a
+ * script in `scripts`; null otherwise. npm passes the words after `--` on; a pnpm or yarn segment
+ * with words after the name, any workspace or other option (`-w`, `--workspaces`, `--filter`), or
+ * any shell syntax is null, so it runs as written, as before.
+ */
+function runTarget(segment: string, scripts: Record<string, string>): RunTarget | null {
+  const dash = segment.search(/\s--(\s|$)/);
+  const head = dash < 0 ? segment : segment.slice(0, dash);
+  const tail = dash < 0 ? "" : segment.slice(dash).replace(/^\s--/, "").trim();
+  if (SHELL_SYNTAX.test(head) || /[|;<>()`&]/.test(tail)) return null;
+  const tokens = head.trim().split(/\s+/);
+  const manager = tokens[0];
+  if (manager !== "npm" && manager !== "pnpm" && manager !== "yarn") return null;
+  let rest = tokens.slice(1);
+  if (rest[0] === "run" || (manager === "npm" && rest[0] === "run-script")) rest = rest.slice(1);
+  else if (manager === "npm" || MANAGER_COMMANDS.has(rest[0] ?? "")) return null;
+  const words = rest.filter((t) => !QUIET_RUN_OPTIONS.has(t));
+  if (words.length !== 1 || words[0].startsWith("-")) return null;
+  const name = words[0];
+  if (typeof scripts[name] !== "string") return null;
+  if (tail && manager !== "npm") return null;
+  return { manager, name, args: tail ? tail.split(/\s+/) : [] };
+}
+
+/** A segment of the test script after run steps are expanded; `inner` when it came from inside one. */
+type Segment = { text: string; inner: boolean; lifecycle?: boolean };
+
+const splitScript = (script: string) => script.split(/\s*&&\s*/).map((s) => s.trim()).filter(Boolean);
+
+/**
+ * Replaces each run step by the named script's own segments, recursively, at most RUN_STEP_DEPTH
+ * levels deep; a script already being expanded (one that calls itself) stays opaque, and so does
+ * one with no runner in it, even after expanding (a build step). Words after
+ * npm's `--` go on the end of the expanded script's last segment, as npm appends them to the
+ * script. For npm, `prex` and `postx` run around `x` as `npm run prex` and `npm run postx`.
+ */
+function expandRunSteps(segments: string[], scripts: Record<string, string>, stack: string[], depth: number): Segment[] {
+  const out: Segment[] = [];
+  for (const segment of segments) {
+    const target = runTarget(segment, scripts);
+    if (!target || depth >= RUN_STEP_DEPTH || stack.includes(target.name)) {
+      out.push({ text: segment, inner: depth > 0 });
+      continue;
+    }
+    const body = splitScript(scripts[target.name]);
+    if (target.args.length && body.length) body[body.length - 1] += ` ${target.args.join(" ")}`;
+    const inner = expandRunSteps(body, scripts, [...stack, target.name], depth + 1);
+    // A script with no runner in it (a build) gains nothing from expanding: it runs as written.
+    if (!inner.some((s) => !s.lifecycle && runsTests(s.text))) {
+      out.push({ text: segment, inner: depth > 0 });
+      continue;
+    }
+    const lifecycle = (prefix: "pre" | "post") =>
+      target.manager === "npm" && typeof scripts[prefix + target.name] === "string"
+        ? [{ text: `npm run ${prefix}${target.name}`, inner: depth > 0, lifecycle: true }]
+        : [];
+    out.push(...lifecycle("pre"), ...inner, ...lifecycle("post"));
+  }
+  return out;
+}
+
+/** `tsx --test` or `npx tsx --test`: node's test runner started through tsx, which our reporter works under. */
+const TSX_TEST = /(^|\s)(npx\s+)?tsx\s(?:[^|;]*\s)?--test(\s|$)/;
+const VITEST = (segment: string) => /\bvitest\b/.test(segment) && !/\bwatch\b/.test(segment);
+const NODE_TEST = /\bnode\b[^|;]*\s--test(\s|$)/;
+
+/** Whether stepsFromTestScript turns this segment into a runner step (one whose results we read). */
+function runsTests(segment: string): boolean {
+  return VITEST(segment) || jestCommand(segment, 0) != null || NODE_TEST.test(segment) || TSX_TEST.test(segment);
+}
+
 /**
  * Turns the package's `test` script into steps. `a && b && c` runs as three lines: a `vitest` or
- * `jest` segment becomes our JSON-reporting command, a `node --test` segment gets our reporter,
- * and anything else (a build, a typecheck) runs as written so the tests see what they expect.
- * `defaultRunner` (the package's vitest or jest dependency) runs when the script names no runner.
+ * `jest` segment becomes our JSON-reporting command, a `node --test` or `tsx --test` segment gets
+ * our reporter, and anything else (a build, a typecheck) runs as written so the tests see what they
+ * expect. With `scripts` (the package's scripts), a segment that runs another of them (`npm run
+ * test:unit`) is first replaced by that script's segments (expandRunSteps). `defaultRunner` (the
+ * package's vitest or jest dependency) runs when the script names no runner.
  */
-export function stepsFromTestScript(script: string | null, defaultRunner: "vitest" | "jest" | null): TestStep[] {
+export function stepsFromTestScript(script: string | null, defaultRunner: "vitest" | "jest" | null, scripts?: Record<string, string>): TestStep[] {
   const isDefault = !script || /no test specified/.test(script);
-  const segments = isDefault ? [] : script!.split(/\s*&&\s*/).map((s) => s.trim()).filter(Boolean);
+  const top = isDefault ? [] : splitScript(script!);
+  const segments: Segment[] = scripts ? expandRunSteps(top, scripts, ["test"], 0) : top.map((text) => ({ text, inner: false }));
   const steps: TestStep[] = [];
-  segments.forEach((segment, i) => {
+  segments.forEach(({ text: segment, inner, lifecycle }, i) => {
     const jest = jestCommand(segment, i);
-    if (/\bvitest\b/.test(segment) && !/\bwatch\b/.test(segment)) {
+    if (lifecycle) {
+      steps.push({ kind: "prep", command: segment });
+    } else if (VITEST(segment)) {
       steps.push({ kind: "vitest", command: `npx vitest run --reporter=json --outputFile=$REPORT_DIR/vitest-${i}.json --passWithNoTests` });
     } else if (jest) {
       steps.push({ kind: "jest", command: jest });
-    } else if (/\bnode\b[^|;]*\s--test(\s|$)/.test(segment)) {
+    } else if (NODE_TEST.test(segment)) {
       const command = segment.replace(/\s--test(?=\s|$)/, ` --test --test-reporter=${NODE_TEST_REPORTER_PATH}`);
       steps.push({ kind: "node-test", command: `REPORT=$REPORT_DIR/node-${i}.json ${command}` });
+    } else if (TSX_TEST.test(segment)) {
+      // tsx is in node_modules/.bin, which is on PATH only inside npm run: start it through npx.
+      const command = segment
+        .replace(/(^|\s)(?:npx\s+)?tsx(?=\s)/, "$1npx tsx")
+        .replace(/\s--test(?=\s|$)/, ` --test --test-reporter=${NODE_TEST_REPORTER_PATH}`);
+      steps.push({ kind: "node-test", command: `REPORT=$REPORT_DIR/node-${i}.json ${command}` });
     } else {
-      steps.push({ kind: "prep", command: segment });
+      steps.push({ kind: "prep", command: inner ? `${NPM_BIN_PATH} ${segment}` : segment });
     }
   });
   if (!steps.some((s) => s.kind !== "prep") && defaultRunner) steps.push({ ...DEFAULT_COMMANDS[defaultRunner] });
@@ -393,7 +500,8 @@ async function detectNodeEnvironment(probe: RepoProbe): Promise<Environment | Un
   const scripts = (pkg.scripts && typeof pkg.scripts === "object" ? pkg.scripts : {}) as Record<string, unknown>;
   const testScript = typeof scripts.test === "string" ? scripts.test : null;
   const defaultRunner = hasDependency(pkg, "vitest") ? "vitest" : hasDependency(pkg, "jest") ? "jest" : null;
-  const testSteps = loose ? loose.testSteps : stepsFromTestScript(testScript, defaultRunner);
+  const scriptTexts = Object.fromEntries(Object.entries(scripts).filter((e): e is [string, string] => typeof e[1] === "string"));
+  const testSteps = loose ? loose.testSteps : stepsFromTestScript(testScript, defaultRunner, scriptTexts);
   const runners = [...new Set(testSteps.map((s) => s.kind).filter((k): k is Runner => k !== "prep"))];
   if (runners.length === 0) {
     const where = packageDir || "the repository root";
