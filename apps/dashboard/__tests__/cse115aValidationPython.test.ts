@@ -65,6 +65,22 @@ describe("detectEnvironment: Python", () => {
     expect(env).toMatchObject({ image: "python:3.10-bookworm" });
   });
 
+  // A made-up layout: `api/` is a Python package (it has an __init__.py) and its tests import it by
+  // name (`from api.core import f`), as when pytest runs from the repository root. pytest runs from
+  // api/, so the folder above it goes on PYTHONPATH too.
+  it("puts the folder above a package directory that is itself a Python package on PYTHONPATH", async () => {
+    const files = { "api/__init__.py": "", "api/core.py": "def f():\n    return 1\n", "api/requirements.txt": "" };
+    const env = await detectEnvironment({ testFiles: ["api/tests/test_core.py"], read: repo(files) });
+    expect(env).toMatchObject({ supported: true, packageDir: "api", installDir: "api" });
+    if (!env.supported) return;
+    expect(env.testSteps).toEqual([{ kind: "pytest", command: STEP.replace("PYTHONPATH=/patches", 'PYTHONPATH=/patches:$(dirname "$PWD")') }]);
+    // Not a package, or already at the repository root: nothing changes.
+    const plain = await detectEnvironment({ testFiles: ["api/tests/test_core.py"], read: repo({ "api/core.py": "", "api/requirements.txt": "" }) });
+    if (plain.supported) expect(plain.testSteps[0].command).toBe(STEP);
+    const root = await detectEnvironment({ testFiles: ["tests/test_core.py"], read: repo({ "__init__.py": "", "requirements.txt": "" }) });
+    if (root.supported) expect(root.testSteps[0].command).toBe(STEP);
+  });
+
   it("installs nothing but pytest when there is no manifest at all", async () => {
     expect(await detectEnvironment({ testFiles: ["test_a.py"], read: repo({}) })).toMatchObject({ supported: true, packageDir: "", installCommand: "pip install pytest" });
   });
@@ -249,6 +265,14 @@ describe("runner and Harbor for pytest rows", () => {
     const row = { instance_id: "x-1", repo: "o/x", base_commit: "abc", patch: "", test_patch: "", FAIL_TO_PASS: [], PASS_TO_PASS: [] };
     expect(harborSkipReason(harborEnvFrom(env))).toBeNull();
     expect(buildHarborTask({ row, env: harborEnvFrom(env), source: { kind: "bundle", file: "repo.bundle" } }).has("tests/check.py")).toBe(true);
+  });
+
+  it("Harbor ships the plugin folder in place of /patches when the package's parent is on PYTHONPATH too", async () => {
+    const env = await detectEnvironment({ testFiles: ["api/tests/test_core.py"], read: repo({ "api/__init__.py": "", "api/requirements.txt": "" }) }) as Environment;
+    const row = { instance_id: "x-1", repo: "o/x", base_commit: "abc", patch: "", test_patch: "", FAIL_TO_PASS: [], PASS_TO_PASS: [] };
+    const testSh = buildHarborTask({ row, env: harborEnvFrom(env), source: { kind: "bundle", file: "repo.bundle" } }).get("tests/test.sh")!;
+    expect(testSh).toContain('PYTHONPATH=/tests/pytest_plugin:$(dirname "$PWD") REPORT=');
+    expect(testSh).not.toContain("/patches");
   });
 
   it("census lists a Python repo with its manager, image and whether it declares pytest", async () => {
