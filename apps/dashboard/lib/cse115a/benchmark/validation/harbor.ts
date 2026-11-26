@@ -342,7 +342,7 @@ export function buildHarborTask(input: HarborInput): Map<string, string> {
   // The validator's reporters live in /patches; the task ships them in /tests.
   const pytestDir = PYTEST_REPORTER_FILE.slice(0, PYTEST_REPORTER_FILE.lastIndexOf("/"));
   const testCommand = (command: string) => python
-    ? command.replace(`PYTHONPATH=${pytestDir} `, `PYTHONPATH=${PYTEST_PLUGIN_DIR} `)
+    ? command.replace(`PYTHONPATH=${pytestDir}`, `PYTHONPATH=${PYTEST_PLUGIN_DIR}`)
     : command.replace("/patches/reporter.mjs", "/tests/reporter.mjs");
   const check = python ? "python3 /tests/check.py" : "node /tests/check.mjs";
   files.set("tests/test.sh", [
