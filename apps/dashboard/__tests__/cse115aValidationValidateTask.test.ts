@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { RUNS_PER_STATE } from "@/lib/cse115a/benchmark/validation/compareRuns";
 import { FakeSuiteRunner } from "@/lib/cse115a/benchmark/validation/runner";
 import type { Environment, Unsupported } from "@/lib/cse115a/benchmark/validation/environment";
-import { filesInPatch, modifiedAcrossFiles, proofOutsideTestPatch, unsupportedResult, validateTask, type TaskRow } from "@/lib/cse115a/benchmark/validation/validateTask";
+import { deletedFilesInPatch, filesInPatch, modifiedAcrossFiles, proofOutsideTestPatch, unsupportedResult, validateTask, type TaskRow } from "@/lib/cse115a/benchmark/validation/validateTask";
 
 const testPatch = [
   "diff --git a/src/sum.test.ts b/src/sum.test.ts",
@@ -134,5 +134,38 @@ describe("unsupportedResult", () => {
     expect(result.detail).toBe("jest is not supported yet");
     expect(result.test_files).toEqual(["src/sum.test.ts"]);
     expect(result.FAIL_TO_PASS).toEqual([]);
+  });
+});
+
+describe("tests the test patch removed (#458)", () => {
+  it("deletedFilesInPatch lists deleted files by their old path and nothing else", () => {
+    expect(deletedFilesInPatch(testPatch)).toEqual(["src/old.test.ts"]);
+    expect(deletedFilesInPatch("diff --git a/a.ts b/b.ts\nsimilarity index 100%\nrename from a.ts\nrename to b.ts\n")).toEqual([]);
+  });
+
+  it("a base-passing test in a file the test patch deletes is in removed_by_test_patch, not a regression", async () => {
+    const runner = new FakeSuiteRunner({
+      r0: { "src/sum.test.ts::adds": "passed", "src/old.test.ts::still adds": "passed" },
+      r1: { "src/sum.test.ts::adds": "passed", "src/sum.test.ts::adds negatives": "failed" },
+      r2: { "src/sum.test.ts::adds": "passed", "src/sum.test.ts::adds negatives": "passed" },
+    });
+    const result = await validateTask({ row, repoDir: "/tmp/repo", env, modified: new Set(), runner });
+    expect(result).toMatchObject({
+      validation_status: "validated", regressions: [], removed_by_test_patch: ["src/old.test.ts::still adds"],
+    });
+  });
+
+  it("a base-passing test that vanishes from a file the test patch does not touch is still a regression", async () => {
+    const runner = new FakeSuiteRunner({
+      r0: { "src/sum.test.ts::adds": "passed", "src/mul.test.ts::multiplies": "passed" },
+      r1: { "src/sum.test.ts::adds": "passed", "src/sum.test.ts::adds negatives": "failed" },
+      r2: { "src/sum.test.ts::adds": "passed", "src/sum.test.ts::adds negatives": "passed" },
+    });
+    const result = await validateTask({ row, repoDir: "/tmp/repo", env, modified: new Set(), runner });
+    expect(result).toMatchObject({ reason: "regressions", regressions: ["src/mul.test.ts::multiplies"], removed_by_test_patch: [] });
+  });
+
+  it("the empty result carries an empty list", () => {
+    expect(unsupportedResult(row, { supported: false, reason: "env_unsupported", detail: "x" }).removed_by_test_patch).toEqual([]);
   });
 });

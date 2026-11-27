@@ -34,6 +34,14 @@ export type CompareInput = {
    * like new tests. Computed by the validator from the repo at base and at base + test_patch.
    */
   modified?: Set<string>;
+  /**
+   * Test files the test patch adds, changes or deletes, by path (renames: the new path only). A
+   * base-passing test of such a file that no later state has may have been removed by the test
+   * patch; see `removedByTestPatch`. Absent: no test counts as removed, the rule before #458.
+   */
+  testPatchFiles?: Set<string>;
+  /** Test files the test patch deletes. Their tests are removed with them. */
+  deletedTestFiles?: Set<string>;
 };
 
 export type Comparison = {
@@ -50,6 +58,12 @@ export type Comparison = {
   judgedFromBase: string[];
   /** `state file` for every test file that failed to load in a state; its tests count as failed there. */
   loadFailures: string[];
+  /**
+   * Tests the test patch removed or renamed: passed at base, reported by no R1 or R2 run, not in
+   * `modified`, and in a file the test patch touches that loaded at R2 (or that it deleted). Not
+   * regressions; kept so a reviewer can see them.
+   */
+  removedByTestPatch: string[];
   validationStatus: "validated" | "rejected";
   reason: "regressions" | "regression_skip" | "no_fail_to_pass" | null;
 };
@@ -113,9 +127,32 @@ export function compareRuns(input: CompareInput): Comparison {
   const regressionSkips: string[] = [];
   const skipped: string[] = [];
   const judgedFromBase: string[] = [];
+  const removedByTestPatch: string[] = [];
+
+  const touched = input.testPatchFiles ?? new Set<string>();
+  const deleted = input.deletedTestFiles ?? new Set<string>();
+  const fileOf = (id: string) => id.slice(0, id.indexOf("::"));
+  /** Every R2 run reported a test of the file and none reported it failing to load. */
+  const loadedInR2 = (file: string) =>
+    input.r2.length > 0 &&
+    input.r2.every((run) =>
+      run[file + LOAD_FAILURE_SUFFIX] !== "failed" &&
+      Object.keys(run).some((id) => !id.endsWith(LOAD_FAILURE_SUFFIX) && fileOf(id) === file));
+  /**
+   * Passed at base and gone from every later run, in a file the test patch touched and that loaded
+   * after the fix (or that the test patch deleted): the test patch removed or renamed it, so the fix
+   * cannot have broken it. A test R1 reported still exists in the patched file and is judged as before.
+   */
+  const removedByPatch = (id: string) => {
+    const file = fileOf(id);
+    return states.r0.get(id) === "passed" && !modified.has(id) && touched.has(file) &&
+      [...input.r1, ...input.r2].every((run) => !(id in run)) &&
+      (deleted.has(file) || loadedInR2(file));
+  };
 
   for (const id of new Set([...r0.keys(), ...r1.keys(), ...r2.keys()])) {
     if (flaky.has(id) || id.endsWith(LOAD_FAILURE_SUFFIX)) continue;
+    if (removedByPatch(id)) { removedByTestPatch.push(id); continue; }
     // Real results: what a run reported. statusIn adds what a load failure implies.
     const reportedR1 = r1.get(id);
     const reportedR0 = r0.get(id);
@@ -144,6 +181,7 @@ export function compareRuns(input: CompareInput): Comparison {
     skipped: sort(skipped),
     judgedFromBase: sort(judgedFromBase),
     loadFailures: sort(loadFailures),
+    removedByTestPatch: sort(removedByTestPatch),
   };
   const proven = result.failToPass.length + result.absentToPass.length > 0;
   const reason = result.regressions.length > 0 ? "regressions" : result.regressionSkips.length > 0 ? "regression_skip" : proven ? null : "no_fail_to_pass";

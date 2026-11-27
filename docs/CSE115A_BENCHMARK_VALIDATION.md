@@ -44,7 +44,9 @@ Each test has one of four statuses per run: `passed`, `failed`, `skipped`, or `a
 not appear in the report, because its file did not exist in that state or was not collected). A
 test file that fails to load (an import that does not resolve, a syntax error) is reported as the
 pseudo-id `file::(load)`, recorded in `load_failures`, and its tests count as `failed` in that
-state, subject to the base fallback below; the pseudo-id itself is never classified. The
+state (for `node --test`, a failed top-level hook too: node reports it as a top-level test
+named after the file, by a relative or an absolute path), subject to the base fallback below;
+the pseudo-id itself is never classified. The
 family has no single word for the absent case: Multi-SWE-bench calls it `NONE` (§3.1.4), the
 SWE-bench paper says a "missing" test counts as a failure (Appendix A.4), its harness has no name
 for it and grades a test that is not in the results as failed (`swebench/harness/grading.py`),
@@ -178,17 +180,21 @@ the evidence that exists. Details and the "three questions asked
 of R0" are in `docs/planning/BENCHMARK_VALIDATION_SURVEY.md`, section 6.
 
 Tests are matched by id (`file::describe > test`), so a renamed existing test appears as one
-removed test and one added test: the old id is passed (R0) → absent, a regression by the fallback,
-and the new id is judged from its own runs (passed→passed, `PASS_TO_PASS`, when the file loads
-at R1; failed→passed by the load rule, `FAIL_TO_PASS`, when it does not). The row is rejected with the
-regression visible for review rather than guessed to be a rename, because a deleted passing test
-looks the same in the logs and is what the rule exists to catch. Every benchmark in the family
-matches by name, but none compares against base and none flags a vanished test, so a rename
-costs them nothing: the old name silently leaves every list and the new name is labeled from
-its own run. The false regression is a cost of this validator's base comparison, accepted so
-that a deleted test is never silent. If renames prove common on real rows, the parser that
-computes `modified` can recognize one (identical body under a new name); that is a separate
-decision.
+removed test and one added test: the old id is passed (R0) → absent, and the new id is judged
+from its own runs (passed→passed, `PASS_TO_PASS`, when the file loads at R1; failed→passed by the
+load rule, `FAIL_TO_PASS`, when it does not). Every benchmark in the family matches by name, but
+none compares against base and none flags a vanished test.
+
+**Tests the test patch removes are not regressions (#458).** A test that passed at base and no
+R1 or R2 run reports is listed in `removed_by_test_patch`, not in `regressions`, when the test
+patch adds, changes or deletes its file and that file loaded after the fix (no load failure in
+any R2 run and at least one test reported in each), or the test patch deleted the file; a test in
+`modified` never counts. A test the test patch removes or renames cannot be broken by the fix, so
+it says nothing about the fix; the count is kept so a person can see what the test patch took
+away, and the batch summary's reason cell shows `removed tests: N`. A test that exists after
+the fix and fails, a test in a file the test patch did not touch, and a test in a file that does
+not load after the fix are regressions as before, and so is a test in a file the test patch only
+renames (the old path is not one it adds, changes or deletes).
 
 The row is `validated` when `FAIL_TO_PASS` or `ABSENT_TO_PASS` is non-empty and there are no
 regressions, and `rejected` otherwise, with the reason. Both conditions are the family's: SWE-bench discards
@@ -540,7 +546,8 @@ The validator prints one JSON object and writes nothing to the database:
 ```
 { instance_id, image, eval_script, log_parser, test_files,
   FAIL_TO_PASS, ABSENT_TO_PASS, PASS_TO_PASS, FAIL_TO_FAIL, regressions, flaky, skipped,
-  judged_from_base, modified_tests, unmatched_static_ids, validation_status, reason, timings,
+  judged_from_base, modified_tests, unmatched_static_ids, removed_by_test_patch,
+  validation_status, reason, timings,
   install_dirs, node_source?, test_files_never_loaded?, services?, harbor_env?, untested_files?,
   repo_source?, harbor_gold?, suites?, untested_files_source?, fix_coverage? }
 ```
@@ -1309,10 +1316,10 @@ line, an error, or a response. Each copy logs one line with how long it took:
 
 ## Known limitations
 
-- **Renames are false regressions.** A renamed old test is old name passed→absent (regression,
-  row rejected) plus new name labeled from its own runs. A deleted test looks identical in the
-  logs, and the rule exists to catch deletions, so the validator does not guess. Cost: a rejected
-  row a reviewer resolves in seconds, with both names side by side.
+- **Renamed test files are false regressions.** A test renamed or removed inside a file the test
+  patch edits is in `removed_by_test_patch` (#458). A whole test file the test patch renames is
+  not: its old ids are passed→absent regressions. Cost: a rejected row a reviewer resolves in
+  seconds, with both names side by side.
 - **Unobserved proof is weaker than observed proof.** Every new or rewritten test in a file that
   only loads with the fix counts as `FAIL_TO_PASS` by the load rule, including a trivial one that
   would pass against a stub; so does every test in `ABSENT_TO_PASS`. Neither was seen failing.
