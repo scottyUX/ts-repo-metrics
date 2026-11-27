@@ -69,6 +69,17 @@ export function changedFilesInPatch(patch: string): string[] {
   return [...new Set(files)];
 }
 
+/** Files the patch deletes (`deleted file mode`), by their old path. A rename is not a deletion. */
+export function deletedFilesInPatch(patch: string): string[] {
+  const files: string[] = [];
+  for (const block of patch.split(/^(?=diff --git )/m)) {
+    if (!/^deleted file mode /m.test(block)) continue;
+    const old = /^--- (.+)$/m.exec(block)?.[1].split("\t")[0].trim();
+    if (old && old !== "/dev/null") files.push(old.startsWith("a/") ? old.slice(2) : old);
+  }
+  return [...new Set(files)];
+}
+
 /** The file part of a test id (`file::describe > test` → `file`). */
 export function fileOfTestId(id: string): string {
   const at = id.indexOf("::");
@@ -155,6 +166,12 @@ export type ValidationResult = {
    * diagnostic only. Present only when non-empty, like `untested_files`.
    */
   proof_through_fix_script?: string[];
+  /**
+   * Tests the test patch removed or renamed (compareRuns's `removedByTestPatch`): passed at base,
+   * gone after it, in a test-patch file that still loaded after the fix or that the patch deleted.
+   * Not regressions; recorded so a reviewer can see them. Absent on results written before #458.
+   */
+  removed_by_test_patch?: string[];
   validation_status: "validated" | "rejected";
   reason: ValidationReason;
   detail: string | null;
@@ -246,7 +263,7 @@ export function unsupportedResult(row: TaskRow, env: Unsupported): ValidationRes
     test_files: filesInPatch(row.test_patch),
     FAIL_TO_PASS: [], ABSENT_TO_PASS: [], PASS_TO_PASS: [], FAIL_TO_FAIL: [],
     regressions: [], regression_skips: [], flaky: [], skipped: [], judged_from_base: [], load_failures: [],
-    modified_tests: [], unmatched_static_ids: [], proof_outside_test_patch: [],
+    modified_tests: [], unmatched_static_ids: [], proof_outside_test_patch: [], removed_by_test_patch: [],
     validation_status: "rejected", reason: env.reason, detail: env.detail, timings: {},
   };
 }
@@ -358,10 +375,15 @@ export async function validateTask(input: ValidateInput): Promise<ValidationResu
       runs: empty,
     };
   }
-  const comparison = compareRuns({ r0: runs.r0, r1: runs.r1, r2: runs.r2, modified: input.modified });
+  const testFiles = filesInPatch(row.test_patch);
+  const deletedTestFiles = deletedFilesInPatch(row.test_patch);
+  const comparison = compareRuns({
+    r0: runs.r0, r1: runs.r1, r2: runs.r2, modified: input.modified,
+    testPatchFiles: new Set([...changedFilesInPatch(row.test_patch), ...deletedTestFiles]),
+    deletedTestFiles: new Set(deletedTestFiles),
+  });
   const allRuns = [...runs.r0, ...runs.r1, ...runs.r2];
   const staticIds = [...new Set([...row.FAIL_TO_PASS, ...row.PASS_TO_PASS])];
-  const testFiles = filesInPatch(row.test_patch);
   const neverLoaded = comparison.loadFailures
     .filter((entry) => entry.startsWith("r2 "))
     .map((entry) => entry.slice(3))
@@ -400,6 +422,7 @@ export async function validateTask(input: ValidateInput): Promise<ValidationResu
     modified_tests: [...input.modified].sort(),
     unmatched_static_ids: unmatchedStaticIds(staticIds, allRuns),
     proof_outside_test_patch: proofOutsideTestPatch([...comparison.failToPass, ...comparison.absentToPass], testFiles),
+    removed_by_test_patch: comparison.removedByTestPatch,
     validation_status: comparison.validationStatus,
     reason: comparison.reason,
     detail,

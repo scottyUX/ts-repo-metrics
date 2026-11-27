@@ -29,7 +29,7 @@ export function rejectedWithoutRun(row: TaskRow, reason: ValidationReason, detai
     test_files: [],
     FAIL_TO_PASS: [], ABSENT_TO_PASS: [], PASS_TO_PASS: [], FAIL_TO_FAIL: [],
     regressions: [], regression_skips: [], flaky: [], skipped: [], judged_from_base: [], load_failures: [],
-    modified_tests: [], unmatched_static_ids: [], proof_outside_test_patch: [],
+    modified_tests: [], unmatched_static_ids: [], proof_outside_test_patch: [], removed_by_test_patch: [],
     validation_status: "rejected", reason, detail, timings: {},
   }, row);
 }
@@ -104,6 +104,16 @@ function withThroughFixScriptNote(cell: string, r: ValidationResult): string {
   return `${cell ? `${cell}; ` : ""}proof through a fix script: ${n}`;
 }
 
+/**
+ * The reason cell with `removed tests: N` added when N > 0: base-passing tests the test patch
+ * removed or renamed (see `removed_by_test_patch`), which are not regressions.
+ */
+function withRemovedNote(cell: string, r: ValidationResult): string {
+  const n = r.removed_by_test_patch?.length ?? 0;
+  if (!n) return cell;
+  return `${cell ? `${cell}; ` : ""}removed tests: ${n}`;
+}
+
 export function summarize(results: ValidationResult[]): Summary {
   const byReason: Record<string, number> = {};
   const rows = results.map((r) => {
@@ -114,14 +124,14 @@ export function summarize(results: ValidationResult[]): Summary {
       status: r.validation_status,
       // A harness problem must not read as a plain verdict: name the test files that never loaded after the fix.
       // The code came from the row's snapshot bundle because GitHub could not supply it.
-      reason: withThroughFixScriptNote(withSnapshotNote((r.reason ?? "") +
+      reason: withRemovedNote(withThroughFixScriptNote(withSnapshotNote((r.reason ?? "") +
         // Our run failed, not the student's work: say how (a clone the repository refused, a crashed container).
         (r.reason === "env_error" && r.detail?.trim() ? `: ${tableCell(r.detail)}` : "") +
         (r.test_files_never_loaded?.length ? ` (test patch file(s) never loaded after the fix: ${r.test_files_never_loaded.join(", ")})` : "") +
         // Next to a validated row: how much of the fix no proving test reaches.
         (r.validation_status === "validated" && r.untested_files?.length ? `${r.reason ? " " : ""}untested files: ${r.untested_files.length}` : "") +
         // Next to a validated row: how many test suites ran (only when more than one).
-        (r.validation_status === "validated" && (r.suites?.length ?? 0) > 1 ? `${r.untested_files?.length ? "; " : ""}${r.suites!.length} suites` : ""), r), r),
+        (r.validation_status === "validated" && (r.suites?.length ?? 0) > 1 ? `${r.untested_files?.length ? "; " : ""}${r.suites!.length} suites` : ""), r), r), r),
       f2p: r.FAIL_TO_PASS.length, a2p: r.ABSENT_TO_PASS.length, p2p: r.PASS_TO_PASS.length,
       regressions: r.regressions.length + r.regression_skips.length, flaky: r.flaky.length,
       outside: (r.proof_outside_test_patch ?? []).length, untested: (r.untested_files ?? []).length, seconds,
