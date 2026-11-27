@@ -22,8 +22,10 @@ export default async function* hecateReporter(source) {
     if (d.details && d.details.type === "suite") continue;
     const names = [...stack.slice(0, d.nesting), d.name];
     const file = String(d.file ?? "").replace(/^file:\\/\\//, "");
-    // A file that fails to load is reported by node as a top-level test named after the file.
-    const fileLevel = d.nesting === 0 && d.name && file.endsWith("/" + d.name);
+    // A file that fails to load, or whose top-level hook (after, before) fails, is reported by node
+    // as a top-level test named after the file, by a relative or an absolute path. It is not a test.
+    const name = String(d.name ?? "").replace(/^file:\\/\\//, "");
+    const fileLevel = d.nesting === 0 && name !== "" && (name === file || file.endsWith("/" + name));
     const id = fileLevel ? file + "::(load)" : file + "::" + names.join(" > ");
     const status = event.type === "test:fail" ? "failed" : (d.skip || d.todo) ? "skipped" : "passed";
     results[id] = status;
