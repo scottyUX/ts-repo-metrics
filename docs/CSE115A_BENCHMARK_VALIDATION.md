@@ -299,6 +299,48 @@ count as skipped and `focused` as passed. A file that fails to load (status `fai
 assertion results) is recorded as `file::(load)` for either runner. Any other runner is
 `env_unsupported`.
 
+**Run steps inside the test script (#459).** A `test` script often calls other scripts:
+`jest --runInBand && npm run test:unit`. A segment that is `npm run x`, `npm run-script x`,
+`pnpm run x`, `pnpm x`, `yarn run x` or `yarn x`, where `x` is a script in the same `package.json`,
+is replaced by script `x`'s own segments, which are then read like any others, so a `node --test`
+inside `x` gets our reporter. The rules:
+
+- Followed up to 3 levels deep. A script already being expanded (one that calls itself) and a step
+  past the third level stay as written.
+- A step whose script has no runner in it after expanding (`pnpm build` → `nest build`) stays as
+  written: expanding it would only change how a build runs.
+- A step whose script changes the shell (`cd`, `export`, `set`, `source`, a bare `NAME=value`) stays
+  as written: every step is a line of one shell script, so lifted out of `npm run` (its own shell)
+  it would carry over into later steps. After a `cd` in the script, no later run step is followed,
+  since it would read another folder's `package.json`.
+- npm passes the words after `--` to the script; they go on the end of its last segment, as npm
+  appends them. A pnpm or yarn step with words after the script name stays as written.
+- For npm only, `prex` and `postx` run around `x` as preparation steps (`npm run prex`,
+  `npm run postx`), as npm runs them. pnpm 7 and later and yarn 2 and later do not run them, so
+  they are not added for those.
+- A step that names no script, uses any option other than `--silent`, `-s` or `--if-present`
+  (workspace fan-outs: `--workspaces`, `-w`, `--filter`, `-r`), or has shell syntax (pipes,
+  redirects, quotes, variables) stays as written, as before.
+- `npm run` puts `node_modules/.bin` of the package and of every folder above it on PATH. A
+  preparation segment lifted out of a script (`tsc -p .`) is run with that PATH in front of it.
+- Segments are numbered after expansion, so report files (`node-<i>.json`) stay distinct. A script
+  with no run step gives exactly the steps it gave before.
+- The default runner is appended only when no step, after expansion, runs one; a script whose
+  expansion already runs `jest` does not run Jest a second time.
+- The Harbor export runs the same expanded steps (`harbor_env.test_steps`).
+
+`tsx --test` and `npx tsx --test` count as `node --test`: same reporter, same ids, `node-test-json`.
+tsx starts node's own test runner with its loader, and the reporter was checked under it in a
+`node:22` container. A bare `tsx` is started as `npx tsx`, since `node_modules/.bin` is not on
+PATH outside `npm run`.
+
+A test file can then be in R1 (the test patch adds it) but not run there, because the script step
+that runs it comes with the fix, and pass in R2. Its tests are `ABSENT_TO_PASS` as before and still
+prove the fix. The result lists them in `proof_through_fix_script`: proving ids whose file the test
+patch writes, with no R1 result and no R1 load failure for that file. The list is written only when
+non-empty, and the summary's reason cell then shows `proof through a fix script: N`. It is
+diagnostic only; what counts as validated is unchanged.
+
 **Test files outside any package.** Some repositories keep `node --test` files in a root folder
 with no `package.json` above them (jjacobhw/roomie: `tests/*.test.mjs` at the root import
 `node:test` and, through `tests/expense_test_helpers.mjs`, `../backend/expenses.ts`; the repository

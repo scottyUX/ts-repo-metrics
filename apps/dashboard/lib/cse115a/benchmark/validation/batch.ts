@@ -94,6 +94,16 @@ function withSnapshotNote(cell: string, r: ValidationResult): string {
   return cell ? `${cell}; from snapshot` : "from snapshot";
 }
 
+/**
+ * The reason cell with `proof through a fix script: N` added when N > 0: proving tests the
+ * tests-only run had but did not run (see `proof_through_fix_script`), a weaker proof.
+ */
+function withThroughFixScriptNote(cell: string, r: ValidationResult): string {
+  const n = r.proof_through_fix_script?.length ?? 0;
+  if (!n) return cell;
+  return `${cell ? `${cell}; ` : ""}proof through a fix script: ${n}`;
+}
+
 export function summarize(results: ValidationResult[]): Summary {
   const byReason: Record<string, number> = {};
   const rows = results.map((r) => {
@@ -104,14 +114,14 @@ export function summarize(results: ValidationResult[]): Summary {
       status: r.validation_status,
       // A harness problem must not read as a plain verdict: name the test files that never loaded after the fix.
       // The code came from the row's snapshot bundle because GitHub could not supply it.
-      reason: withSnapshotNote((r.reason ?? "") +
+      reason: withThroughFixScriptNote(withSnapshotNote((r.reason ?? "") +
         // Our run failed, not the student's work: say how (a clone the repository refused, a crashed container).
         (r.reason === "env_error" && r.detail?.trim() ? `: ${tableCell(r.detail)}` : "") +
         (r.test_files_never_loaded?.length ? ` (test patch file(s) never loaded after the fix: ${r.test_files_never_loaded.join(", ")})` : "") +
         // Next to a validated row: how much of the fix no proving test reaches.
         (r.validation_status === "validated" && r.untested_files?.length ? `${r.reason ? " " : ""}untested files: ${r.untested_files.length}` : "") +
         // Next to a validated row: how many test suites ran (only when more than one).
-        (r.validation_status === "validated" && (r.suites?.length ?? 0) > 1 ? `${r.untested_files?.length ? "; " : ""}${r.suites!.length} suites` : ""), r),
+        (r.validation_status === "validated" && (r.suites?.length ?? 0) > 1 ? `${r.untested_files?.length ? "; " : ""}${r.suites!.length} suites` : ""), r), r),
       f2p: r.FAIL_TO_PASS.length, a2p: r.ABSENT_TO_PASS.length, p2p: r.PASS_TO_PASS.length,
       regressions: r.regressions.length + r.regression_skips.length, flaky: r.flaky.length,
       outside: (r.proof_outside_test_patch ?? []).length, untested: (r.untested_files ?? []).length, seconds,
