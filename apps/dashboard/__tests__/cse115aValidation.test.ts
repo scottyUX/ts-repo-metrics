@@ -1,5 +1,10 @@
-import { describe, expect, it } from "vitest";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { pathToFileURL } from "node:url";
+import { describe, expect, it, vi } from "vitest";
 import { compareRuns, type RunResults, type StateRuns } from "@/lib/cse115a/benchmark/validation/compareRuns";
+import { NODE_TEST_REPORTER_SOURCE } from "@/lib/cse115a/benchmark/validation/nodeTestReporter";
 
 const T = "tests/US-1-T-1_login_email.test.ts::US-1-T-1 university email check > ";
 const SMOKE = "tests/smoke.test.ts::existing behavior > accepts a ucsc.edu email";
@@ -315,5 +320,160 @@ describe("compareRuns: the base run takes priority over the load-failure rule fo
     expect(result.failToPass).toEqual([A]);
     expect(result.judgedFromBase).toEqual([]);
     expect(result.loadFailures).toEqual([`r0 ${F}`, `r1 ${F}`]);
+  });
+});
+
+describe("compareRuns: tests the test patch removed or renamed (#458)", () => {
+  const F = "tests/shelf.test.ts";
+  const keep = `${F}::shelf > keeps the label`;
+  const old = `${F}::shelf > sorts by title`;
+  const renamed = `${F}::bookshelf > sorts by title`;
+  const touched = new Set([F]);
+
+  it("removed: passed at base, absent in R1 and R2, file touched and loaded in both: removed, not a regression", () => {
+    const result = compareRuns({
+      r0: twice({ [keep]: "passed", [old]: "passed" }),
+      r1: twice({ [keep]: "passed", [`${F}::shelf > counts books`]: "failed" }),
+      r2: twice({ [keep]: "passed", [`${F}::shelf > counts books`]: "passed" }),
+      testPatchFiles: touched,
+    });
+    expect(result.removedByTestPatch).toEqual([old]);
+    expect(result.regressions).toEqual([]);
+    expect(result.judgedFromBase).toEqual([]);
+    expect(result.validationStatus).toBe("validated");
+  });
+
+  it("renamed: the file fails to load in R1, new ids pass in R2: old ids removed, new ids prove the fix", () => {
+    const result = compareRuns({
+      r0: twice({ [old]: "passed" }),
+      r1: twice({ [`${F}::(load)`]: "failed" }),
+      r2: twice({ [renamed]: "passed" }),
+      testPatchFiles: touched,
+    });
+    expect(result.removedByTestPatch).toEqual([old]);
+    expect(result.failToPass).toEqual([renamed]);
+    expect(result.regressions).toEqual([]);
+    expect(result.validationStatus).toBe("validated");
+  });
+
+  it("a whole test file deleted by the test patch: its tests are removed, not regressions", () => {
+    const gone = "tests/legacy.test.ts::legacy > still works";
+    const result = compareRuns({
+      r0: twice({ [gone]: "passed", [keep]: "passed" }),
+      r1: twice({ [keep]: "passed", [`${F}::shelf > counts books`]: "failed" }),
+      r2: twice({ [keep]: "passed", [`${F}::shelf > counts books`]: "passed" }),
+      testPatchFiles: new Set([F, "tests/legacy.test.ts"]),
+      deletedTestFiles: new Set(["tests/legacy.test.ts"]),
+    });
+    expect(result.removedByTestPatch).toEqual([gone]);
+    expect(result.regressions).toEqual([]);
+  });
+
+  it("still a regression: passed at base, exists and fails in R2", () => {
+    const result = compareRuns({
+      r0: twice({ [old]: "passed" }),
+      r1: twice({ [old]: "passed" }),
+      r2: twice({ [old]: "failed" }),
+      testPatchFiles: touched,
+    });
+    expect(result.regressions).toEqual([old]);
+    expect(result.removedByTestPatch).toEqual([]);
+  });
+
+  it("still a regression: passed at base, absent in R2, file not touched by the test patch", () => {
+    const result = compareRuns({
+      r0: twice({ [old]: "passed", [keep]: "passed" }),
+      r1: twice({ [keep]: "passed" }),
+      r2: twice({ [keep]: "passed" }),
+      testPatchFiles: new Set(["tests/other.test.ts"]),
+    });
+    expect(result.regressions).toEqual([old]);
+    expect(result.removedByTestPatch).toEqual([]);
+  });
+
+  it("still a regression: passed at base, its file does not load in R2", () => {
+    const result = compareRuns({
+      r0: twice({ [old]: "passed" }),
+      r1: twice({ [old]: "passed" }),
+      r2: twice({ [`${F}::(load)`]: "failed" }),
+      testPatchFiles: touched,
+    });
+    expect(result.regressions).toEqual([old]);
+    expect(result.removedByTestPatch).toEqual([]);
+  });
+
+  it("still a regression: the file reported no test at all in R2, so it is not known to have loaded", () => {
+    const result = compareRuns({
+      r0: twice({ [old]: "passed", "tests/other.test.ts::x": "passed" }),
+      r1: twice({ "tests/other.test.ts::x": "passed" }),
+      r2: twice({ "tests/other.test.ts::x": "passed" }),
+      testPatchFiles: touched,
+    });
+    expect(result.regressions).toEqual([old]);
+  });
+
+  it("still a regression: R1 reported the test, so the test patch kept it and the fix made it vanish", () => {
+    const result = compareRuns({
+      r0: twice({ [old]: "passed", [keep]: "passed" }),
+      r1: twice({ [old]: "passed", [keep]: "passed" }),
+      r2: twice({ [keep]: "passed" }),
+      testPatchFiles: touched,
+    });
+    expect(result.regressions).toEqual([old]);
+    expect(result.removedByTestPatch).toEqual([]);
+  });
+});
+
+describe("node test reporter: a file-level event is not a test (#458)", () => {
+  /** Runs the reporter source on `events` and returns the {id: status} it writes. */
+  async function report(events: Array<{ type: string; data: Record<string, unknown> }>): Promise<Record<string, string>> {
+    const dir = mkdtempSync(join(tmpdir(), "hecate-reporter-"));
+    const saved = process.env.REPORT;
+    const quiet = vi.spyOn(process.stderr, "write").mockImplementation(() => true);
+    try {
+      writeFileSync(join(dir, "reporter.mjs"), NODE_TEST_REPORTER_SOURCE);
+      process.env.REPORT = join(dir, "report.json");
+      const reporter = (await import(/* @vite-ignore */ pathToFileURL(join(dir, "reporter.mjs")).href)).default as (
+        source: AsyncIterable<unknown>) => AsyncGenerator<string>;
+      async function* source() { yield* events; }
+      const output: string[] = [];
+      for await (const chunk of reporter(source())) output.push(chunk);
+      return JSON.parse(readFileSync(process.env.REPORT, "utf8")) as Record<string, string>;
+    } finally {
+      quiet.mockRestore();
+      if (saved === undefined) delete process.env.REPORT; else process.env.REPORT = saved;
+      rmSync(dir, { recursive: true, force: true });
+    }
+  }
+  const FILE = "/work/tests/pantry.test.mjs";
+  const pass = { type: "test:pass", data: { nesting: 0, name: "stores an item", file: FILE, details: { type: "test" } } };
+
+  it("a failed top-level after() hook named by the file's absolute path is file-level, not a test id", async () => {
+    const results = await report([
+      pass,
+      { type: "test:fail", data: { nesting: 0, name: FILE, file: FILE, details: { error: { message: "hook failed" } } } },
+    ]);
+    expect(results).toEqual({ [`${FILE}::stores an item`]: "passed", [`${FILE}::(load)`]: "failed" });
+  });
+
+  it("the same with the file given as a file:// URL", async () => {
+    const results = await report([
+      { type: "test:fail", data: { nesting: 0, name: FILE, file: `file://${FILE}`, details: { error: { message: "hook failed" } } } },
+    ]);
+    expect(results).toEqual({ [`${FILE}::(load)`]: "failed" });
+  });
+
+  it("a load failure named by a relative path is still file-level", async () => {
+    const results = await report([
+      { type: "test:fail", data: { nesting: 0, name: "tests/pantry.test.mjs", file: FILE, details: { error: { message: "cannot load" } } } },
+    ]);
+    expect(results).toEqual({ [`${FILE}::(load)`]: "failed" });
+  });
+
+  it("a top-level test whose name is not the file stays a test", async () => {
+    const results = await report([
+      { type: "test:fail", data: { nesting: 0, name: "pantry.test", file: FILE, details: { error: { message: "nope" } } } },
+    ]);
+    expect(results).toEqual({ [`${FILE}::pantry.test`]: "failed" });
   });
 });

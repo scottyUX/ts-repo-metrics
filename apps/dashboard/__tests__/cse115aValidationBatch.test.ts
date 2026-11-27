@@ -122,3 +122,27 @@ describe("writebackSql", () => {
     expect(writebackSql([r])).toContain("$hecatex$weird$hecate$id$hecatex$");
   });
 });
+
+describe("removed_by_test_patch in the batch (#458)", () => {
+  it("is in the empty result", () => {
+    expect(rejectedWithoutRun(row(), "no_test_patch", "x").removed_by_test_patch).toEqual([]);
+  });
+
+  it("the summary's notes show `removed tests: N` when N > 0, after the notes already there", () => {
+    const base = rejectedWithoutRun(row(), "env_error", "");
+    const validated = { ...base, validation_status: "validated", reason: null, removed_by_test_patch: ["a", "b", "c"] } as ValidationResult;
+    expect(summarize([validated]).rows[0].reason).toBe("removed tests: 3");
+    expect(summaryMarkdown(summarize([validated]))).toContain("| org__repo-T-1 | validated | removed tests: 3 |");
+    const both = { ...validated, untested_files: ["src/a.ts"], proof_through_fix_script: ["p"] } as ValidationResult;
+    expect(summarize([both]).rows[0].reason).toBe("untested files: 1; proof through a fix script: 1; removed tests: 3");
+  });
+
+  it("adds nothing when none were removed, or for a result written before the field", () => {
+    const base = rejectedWithoutRun(row(), "env_error", "");
+    const plain = { ...base, validation_status: "validated", reason: null } as ValidationResult;
+    expect(summarize([plain]).rows[0].reason).toBe("");
+    const old: Partial<ValidationResult> = { ...plain };
+    delete old.removed_by_test_patch;
+    expect(summarize([old as ValidationResult]).rows[0].reason).toBe("");
+  });
+});
