@@ -102,6 +102,8 @@ describe("diff splitting", () => {
     const tests = [
       // Named like a test: *.test.*, *.spec.*, test_*.py, *_test.py, conftest.py
       "a/b.test.ts", "c.spec.jsx", "pkg/test_x.py", "x_test.py", "conftest.py",
+      // Django's default test module: an app's tests.py
+      "backend/recipes/tests.py", "tests.py",
       // Inside a test folder: __tests__/, __mocks__/, test/, tests/, spec/
       "src/__tests__/x.ts", "src/__mocks__/axios.ts", "test/x.js", "tests/util.py", "spec/x.ts",
       // JS/TS test helpers by name or helper folder, anywhere (#333)
@@ -113,6 +115,7 @@ describe("diff splitting", () => {
     const notTests = [
       // Source code whose name only contains "test"
       "src/testing.ts", "src/contest.py", "latest/x.ts", "src/testimonials.ts", "src/contest-utils.ts",
+      "src/mytests.py", "src/tests.pyc", "src/tests.ts",
       // App code in a quiz or exam app: "test" is the app's subject, not a test helper
       "src/components/test-card.tsx", "src/components/Test-Results.tsx", "src/api/tests-api.ts",
       // Setup code that isn't a test runner's, and fixtures, which can be app data
